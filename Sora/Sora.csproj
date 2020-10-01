@@ -5,12 +5,12 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fleck" Version="1.1.0" />
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Model\" />
+    <PackageReference Include="Fleck" Version="1.1.0" />
   </ItemGroup>
 
 </Project>

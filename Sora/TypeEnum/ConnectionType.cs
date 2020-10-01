@@ -1,4 +1,4 @@
-namespace Sora.Enum
+namespace Sora.TypeEnum
 {
     public enum ConnectionType
     {

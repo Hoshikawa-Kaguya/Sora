@@ -7,19 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="4.1.0" />
-    <PackageReference Include="Fody" Version="6.2.6">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Sora\Sora.csproj" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="del $(OutDir)$(TargetName).deps.json&#xD;&#xA;del $(OutDir)$(TargetName).runtimeconfig.dev.json&#xD;&#xA;if &quot;$(ConfigurationName)&quot;==&quot;Release&quot; del $(OutDir)$(TargetName).pdb&#xD;&#xA;rd /s/q  $(OutDir)ref" />
+    <Exec Command="del $(OutDir)*.deps.json&#xD;&#xA;del $(OutDir)*.runtimeconfig.dev.json&#xD;&#xA;if &quot;$(ConfigurationName)&quot;==&quot;Release&quot; del $(OutDir)*.pdb&#xD;&#xA;rd /s/q  $(OutDir)ref" />
   </Target>
 
 </Project>
