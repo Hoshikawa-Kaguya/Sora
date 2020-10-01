@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Sora.EventArgs.WSSeverEvent;
+using Sora.Model;
+using Sora.Tool;
+using Sora.TypeEnum;
 
 namespace Sora
 {
@@ -11,24 +15,9 @@ namespace Sora
     {
         #region 属性
         /// <summary>
-        /// 反向服务器端口
+        /// 服务器配置类
         /// </summary>
-        private int Port { get; set; }
-
-        /// <summary>
-        /// 鉴权Token
-        /// </summary>
-        private string AccessToken { get; set; }
-
-        /// <summary>
-        /// API请求路径
-        /// </summary>
-        private string ApiPath { get; set; }
-
-        /// <summary>
-        /// Event请求路径
-        /// </summary>
-        private string EventPath { get; set; }
+        private ServerConfig Config { get; set; }
 
         /// <summary>
         /// WS服务器
@@ -38,7 +27,12 @@ namespace Sora
         /// <summary>
         /// 链接信息
         /// </summary>
-        private Dictionary<Guid, ConnectionEventArgs> ConnectionInfos { get; set; }
+        private readonly Dictionary<Guid, IWebSocketConnection> ConnectionInfos = new Dictionary<Guid, IWebSocketConnection>();
+
+        /// <summary>
+        /// 心跳包检查
+        /// </summary>
+        private static Dictionary<Guid,Timer> HeartBeatTimers = new Dictionary<Guid, Timer>();
 
         /// <summary>
         /// 事件回调
@@ -70,47 +64,22 @@ namespace Sora
         #endregion
 
         #region 构造函数
-        /// <summary>
-        /// 创建一个Universal反向WS客户端
-        /// </summary>
-        /// <param name="port"></param>
-        /// <param name="accessToken"></param>
-        /// <param name="universalPath"></param>
-        public OnebotWSServer(int port, string accessToken = "", string universalPath = "ws")
-        {
-            //检查参数
-            if(string.IsNullOrEmpty(universalPath)) throw new ArgumentNullException(nameof(universalPath));
-            if (port < 0 || port > 65535) throw new ArgumentOutOfRangeException(nameof(port));
-
-            this.Port            = port;
-            this.AccessToken     = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
-            this.ApiPath         = universalPath.Trim('/');
-            this.EventPath       = universalPath.Trim('/');
-            this.ConnectionInfos = new Dictionary<Guid, ConnectionEventArgs>();
-
-            this.Server = new WebSocketServer($"ws://0.0.0.0:{Port}");
-        }
 
         /// <summary>
         /// 创建一个反向WS客户端
         /// </summary>
-        /// <param name="port"></param>
-        /// <param name="accessToken"></param>
-        /// <param name="apiPath"></param>
-        /// <param name="eventPath"></param>
-        public OnebotWSServer(int port, string accessToken = "", string apiPath = "api", string eventPath = "event")
+        /// <param name="config">服务器配置</param>
+        public OnebotWSServer(ServerConfig config)
         {
             //检查参数
-            if(string.IsNullOrEmpty(apiPath) || string.IsNullOrEmpty(eventPath)) throw new NullReferenceException("apiPath or eventPath is null");
-            if (port < 0 || port > 65535) throw new ArgumentOutOfRangeException(nameof(port));
+            if(config == null) throw new ArgumentNullException(nameof(config));
+            if (config.Port < 0 || config.Port > 65535) throw new ArgumentOutOfRangeException(nameof(config.Port));
 
-            this.Port            = port;
-            this.AccessToken     = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
-            this.ApiPath         = apiPath.Trim('/');
-            this.EventPath       = eventPath.Trim('/');
-            this.ConnectionInfos = new Dictionary<Guid, ConnectionEventArgs>();
+            this.Config = config;
 
-            this.Server = new WebSocketServer($"ws://0.0.0.0:{Port}");
+            //禁用原log
+            FleckLog.Level = LogLevel.Error;
+            this.Server    = new WebSocketServer($"ws://0.0.0.0:{config.Port}");
         }
         #endregion
 
@@ -123,11 +92,42 @@ namespace Sora
         {
             Server.Start(socket =>
                          {
+                             //接收事件处理
+                             //获取请求头数据
+                             if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
+                                                                            out string selfId) ||
+                                 !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
+                                                                           out string role)){return;}
+                             //获取连接类型
+                             Enum.TryParse(role, out ConnectionType type);
+                             //请求路径检查
+                             bool isLost;
+                             switch (type)
+                             {
+                                 case ConnectionType.Universal:
+                                     isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath);
+                                     break;
+                                 case ConnectionType.Event:
+                                     isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.EventPath);
+                                     break;
+                                 case ConnectionType.Api:
+                                     isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.ApiPath);
+                                     break;
+                                 default:
+                                     isLost = false;
+                                     break;
+                             }
+                             if (isLost)
+                             {
+                                 socket.Close();
+                                 ConsoleLog.Warning("Sora",
+                                                 $"Client lost({socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort})");
+                                 return;
+                             }
                              //心跳包
                              socket.OnPong = async (echo) =>
                                              {
                                                  if (OnPongAsync == null) { return; }
-                                                 if (socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID", out string selfId) == false) { return; }
                                                  //心跳包事件处理
                                                  await Task.Run(() =>
                                                                 {
@@ -139,21 +139,17 @@ namespace Sora
                              //打开连接
                              socket.OnOpen = async () =>
                                              {
-                                                 //获取请求头数据
-                                                 if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
-                                                         out string selfId) ||
-                                                     !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
-                                                         out string type)){return;}
                                                  //获取Token
                                                  if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",out string token))
                                                  {
                                                      //验证Token
-                                                     if(!token.Equals(this.AccessToken)) return;
+                                                     if(!token.Equals(this.Config.AccessToken)) return;
                                                  }
                                                  //向客户端发送Ping
                                                  await socket.SendPing(new byte[] { 1, 2, 5 });
                                                  //事件回调
-                                                 ConnectionEventArgs connection = new ConnectionEventArgs(type,socket.ConnectionInfo);
+                                                 ConnectionEventArgs connection =
+                                                     new ConnectionEventArgs(type, socket.ConnectionInfo);
                                                  if (OnOpenConnectionAsync != null)
                                                  {
                                                      await Task.Run(() =>
@@ -161,21 +157,17 @@ namespace Sora
                                                                         OnOpenConnectionAsync(selfId, connection);
                                                                     });
                                                  }
-                                                 ConnectionInfos.Add(socket.ConnectionInfo.Id, connection);
+                                                 ConnectionInfos.Add(socket.ConnectionInfo.Id, socket);
+                                                 ConsoleLog.Info("Sora",
+                                                                 $"Client connected({socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort})");
                                              };
                              //关闭连接
                              socket.OnClose = async () =>
                                               {
-                                                  //获取请求头数据
-                                                  if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
-                                                          out string selfId) ||
-                                                      !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
-                                                          out string type)){return;}
                                                   //移除原连接信息
                                                   if (ConnectionInfos.Any(conn => conn.Key == socket.ConnectionInfo.Id))
                                                   {
-                                                      ConnectionInfos.Remove(socket.ConnectionInfo.Id,
-                                                                             out ConnectionEventArgs eventArgs);
+                                                      ConnectionInfos.Remove(socket.ConnectionInfo.Id);
                                                       if (OnCloseConnectionAsync != null)
                                                       {
                                                           await Task.Run(() =>
@@ -186,15 +178,12 @@ namespace Sora
                                                                          });
                                                       }
                                                   }
+                                                  ConsoleLog.Info("Sora",
+                                                                     $"Client closed connection({socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort})");
                                               };
                              //上报接收
                              socket.OnMessage = async (message) =>
                                                 {
-                                                    //获取请求头数据
-                                                    if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
-                                                            out string selfId) ||
-                                                        !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
-                                                            out string type)){return;}
                                                     //处理接收的数据
                                                     if (ConnectionInfos.Any(conn => conn.Key == socket.ConnectionInfo.Id))
                                                     {
@@ -216,8 +205,11 @@ namespace Sora
                                                             }
                                                         }
                                                     }
+                                                    ConsoleLog.Debug("Sora",
+                                                                     $"Client message({message})");
                                                 };
                          });
+            ConsoleLog.Info("Sora",$"Server running at 0.0.0.0:{Config.Port}");
         }
         ~OnebotWSServer()
         {

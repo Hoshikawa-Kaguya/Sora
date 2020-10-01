@@ -1,4 +1,5 @@
 using Fleck;
+using Sora.TypeEnum;
 
 namespace Sora.EventArgs.WSSeverEvent
 {
@@ -8,12 +9,12 @@ namespace Sora.EventArgs.WSSeverEvent
         /// <summary>
         /// 客户端类型
         /// </summary>
-        public string Role { get; set; }
+        public ConnectionType Role { get; set; }
         #endregion
 
         #region 构造函数
 
-        public ConnectionEventArgs(string role, IWebSocketConnectionInfo connectionInfo)
+        public ConnectionEventArgs(ConnectionType role, IWebSocketConnectionInfo connectionInfo)
         {
             
             this.Role           = role;

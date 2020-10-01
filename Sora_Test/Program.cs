@@ -2,6 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Sora;
+using Sora.Model;
+using Sora.Tool;
 
 namespace Sora_Test
 {
@@ -15,17 +17,13 @@ namespace Sora_Test
             }
             catch (Exception e) //侦测所有未处理的错误
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(e);
-                Thread.Sleep(5000);
-                Environment.Exit(-1);
+                ConsoleLog.UnhandledExceptionLog(e);
             }
         }
 
         private async Task MainAsync()
         {
-            OnebotWSServer server = new OnebotWSServer(port:8080,
-                                                       universalPath:"ws");
+            OnebotWSServer server = new OnebotWSServer(new ServerConfig());
             server.Start();
 
             server.OnOpenConnectionAsync += (id, args) =>
