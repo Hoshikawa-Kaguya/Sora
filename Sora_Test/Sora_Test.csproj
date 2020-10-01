@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,5 +17,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Sora\Sora.csproj" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="del $(OutDir)$(TargetName).deps.json&#xD;&#xA;del $(OutDir)$(TargetName).runtimeconfig.dev.json&#xD;&#xA;if &quot;$(ConfigurationName)&quot;==&quot;Release&quot; del $(OutDir)$(TargetName).pdb&#xD;&#xA;rd /s/q  $(OutDir)ref" />
+  </Target>
 
 </Project>
