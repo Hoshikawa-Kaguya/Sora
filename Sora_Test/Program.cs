@@ -34,6 +34,11 @@ namespace Sora_Test
                                                 return ValueTask.CompletedTask;
                                             };
 
+            server.OnCloseConnectionAsync += (id, args) =>
+                                             {
+                                                 Console.WriteLine($"selfId = {id}\ntype = {args.Role}\nclient path = {args.ConnectionInfo.ClientIpAddress}{args.ConnectionInfo.Path}");
+                                                 return ValueTask.CompletedTask;
+                                             };
             
             await Task.Delay(-1);
         }

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Sora.EventArgs.WSSeverEvent;
@@ -106,16 +104,18 @@ namespace Sora
             if(string.IsNullOrEmpty(apiPath) || string.IsNullOrEmpty(eventPath)) throw new NullReferenceException("apiPath or eventPath is null");
             if (port < 0 || port > 65535) throw new ArgumentOutOfRangeException(nameof(port));
 
-            this.Port        = port;
-            this.AccessToken = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
-            this.ApiPath     = apiPath.Trim('/');
-            this.EventPath   = eventPath.Trim('/');
+            this.Port            = port;
+            this.AccessToken     = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
+            this.ApiPath         = apiPath.Trim('/');
+            this.EventPath       = eventPath.Trim('/');
+            this.ConnectionInfos = new Dictionary<Guid, ConnectionEventArgs>();
 
             this.Server = new WebSocketServer($"ws://0.0.0.0:{Port}");
         }
         #endregion
 
         #region 服务端启动
+        //Todo DEBUG模式
         /// <summary>
         /// 启动WS服务端
         /// </summary>
@@ -131,7 +131,7 @@ namespace Sora
                                                  //心跳包事件处理
                                                  await Task.Run(() =>
                                                                 {
-                                                                    OnPongAsync(selfId,
+                                                                    OnPongAsync(selfId, 
                                                                                     new PongEventArgs(echo,
                                                                                         socket.ConnectionInfo));
                                                                 });
