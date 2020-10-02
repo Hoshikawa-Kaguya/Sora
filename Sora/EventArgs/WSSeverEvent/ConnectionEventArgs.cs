@@ -3,7 +3,7 @@ using Sora.TypeEnum;
 
 namespace Sora.EventArgs.WSSeverEvent
 {
-    public sealed class ConnectionEventArgs : BaseEventArgs
+    public sealed class ConnectionEventArgs : ServerBaseEventArgs
     {
         #region 属性
         /// <summary>

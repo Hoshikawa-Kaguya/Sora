@@ -1,7 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Fleck;
 using Sora;
+using Sora.EventArgs.WSSeverEvent;
 using Sora.Model;
 using Sora.Tool;
 
@@ -23,21 +25,24 @@ namespace Sora_Test
 
         private async Task MainAsync()
         {
-            OnebotWSServer server = new OnebotWSServer(new ServerConfig());
+            OnebotWSServer server = new OnebotWSServer(new ServerConfig
+            {
+                HeartBeatTimeOut = 6
+            });
+            ConsoleLog.SetLogLevel(LogLevel.Debug);
             server.Start();
 
             server.OnOpenConnectionAsync += (id, args) =>
                                             {
-                                                Console.WriteLine($"selfId = {id}\ntype = {args.Role}\nclient path = {args.ConnectionInfo.ClientIpAddress}{args.ConnectionInfo.Path}");
+                                                ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {args.Role}");
                                                 return ValueTask.CompletedTask;
                                             };
 
             server.OnCloseConnectionAsync += (id, args) =>
                                              {
-                                                 Console.WriteLine($"selfId = {id}\ntype = {args.Role}\nclient path = {args.ConnectionInfo.ClientIpAddress}{args.ConnectionInfo.Path}");
+                                                 ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {args.Role}");
                                                  return ValueTask.CompletedTask;
                                              };
-            
             await Task.Delay(-1);
         }
     }

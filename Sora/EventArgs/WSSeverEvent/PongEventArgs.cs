@@ -2,7 +2,7 @@ using Fleck;
 
 namespace Sora.EventArgs.WSSeverEvent
 {
-    public sealed class PongEventArgs : BaseEventArgs
+    public sealed class PongEventArgs : ServerBaseEventArgs
     {
         #region 属性
         /// <summary>
