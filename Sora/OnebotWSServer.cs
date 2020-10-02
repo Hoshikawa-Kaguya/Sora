@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
+using Newtonsoft.Json.Linq;
 using Sora.EventArgs.WSSeverEvent;
+using Sora.JsonAdapter;
 using Sora.Model;
 using Sora.Tool;
 using Sora.TypeEnum;
@@ -25,14 +27,14 @@ namespace Sora
         private WebSocketServer Server { get; set; }
 
         /// <summary>
+        /// 心跳包检查计时器
+        /// </summary>
+        private Timer HeartBeatTimer { get; set; }
+
+        /// <summary>
         /// 链接信息
         /// </summary>
         private readonly Dictionary<Guid, IWebSocketConnection> ConnectionInfos = new Dictionary<Guid, IWebSocketConnection>();
-
-        /// <summary>
-        /// 心跳包检查
-        /// </summary>
-        private static Dictionary<Guid,Timer> HeartBeatTimers = new Dictionary<Guid, Timer>();
 
         /// <summary>
         /// 事件回调
@@ -76,6 +78,9 @@ namespace Sora
             if (config.Port < 0 || config.Port > 65535) throw new ArgumentOutOfRangeException(nameof(config.Port));
 
             this.Config = config;
+            //心跳包超时检查计时器
+            HeartBeatTimer = new Timer(HeartBeatCheck, null, new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0),
+                                       new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0));
 
             //禁用原log
             FleckLog.Level = LogLevel.Error;
@@ -84,7 +89,6 @@ namespace Sora
         #endregion
 
         #region 服务端启动
-        //Todo DEBUG模式
         /// <summary>
         /// 启动WS服务端
         /// </summary>
@@ -179,7 +183,7 @@ namespace Sora
                                                       }
                                                   }
                                                   ConsoleLog.Info("Sora",
-                                                                     $"Client closed connection({socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort})");
+                                                                     $"Closed connection({socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort})");
                                               };
                              //上报接收
                              socket.OnMessage = async (message) =>
@@ -189,14 +193,15 @@ namespace Sora
                                                     {
                                                         try
                                                         {
-                                                            Console.WriteLine($"=================\nselfId = {selfId}\ntype = {type}\nmessage = {message.Trim()}\nclient path = {socket.ConnectionInfo.Path}");
-                                                            //TODO 数据反序列化
+                                                            //进入事件处理和分发
+                                                            EventAdapter.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
                                                         }
                                                         catch (Exception e)
                                                         {
                                                             Console.WriteLine(e);
                                                             if (OnErrorAsync != null)
                                                             {
+                                                                //错误事件回调
                                                                 await Task.Run(() =>
                                                                                {
                                                                                    OnErrorAsync(selfId,
@@ -205,8 +210,6 @@ namespace Sora
                                                             }
                                                         }
                                                     }
-                                                    ConsoleLog.Debug("Sora",
-                                                                     $"Client message({message})");
                                                 };
                          });
             ConsoleLog.Info("Sora",$"Server running at 0.0.0.0:{Config.Port}");
@@ -222,8 +225,30 @@ namespace Sora
         }
         #endregion
 
-        #region 私有方法
-        //TODO 事件分发
+        #region 服务器事件处理方法
+        /// <summary>
+        /// 心跳包超时检查
+        /// </summary>
+        private void HeartBeatCheck(object msg)
+        {
+            if(ConnectionInfos.Count == 0) return;
+            ConsoleLog.Debug("Sora","Heartbeat check");
+            foreach (KeyValuePair<Guid, long> conn in MetaEventAdapter.HeartBeatList)
+            {
+                ConsoleLog.Debug("Sora",$"Connection check | {conn.Key} | {Utils.GetNowTimeStamp() - conn.Value}");
+                //检查超时的连接
+                if (Utils.GetNowTimeStamp() - conn.Value > Config.HeartBeatTimeOut)
+                {
+                    //关闭超时的连接
+                    IWebSocketConnection lostConnection = ConnectionInfos[conn.Key];
+                    lostConnection.Close();
+                    ConsoleLog.Error("Sora",
+                                     $"Client {lostConnection.ConnectionInfo.ClientIpAddress}:{lostConnection.ConnectionInfo.ClientPort} lost (hreatbeat time out)");
+                    ConnectionInfos.Remove(conn.Key);
+                    MetaEventAdapter.HeartBeatList.Remove(conn.Key);
+                }
+            }
+        }
         #endregion
     }
 }

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Sora.Model
 {
     public class ServerConfig
@@ -29,13 +23,14 @@ namespace Sora.Model
         public string EventPath { get; set; } = "event";
 
         /// <summary>
-        /// 
+        /// Universal请求路径
         /// </summary>
         public string UniversalPath { get; set; } = "";
 
         /// <summary>
-        /// 心跳包间隔(ms)
+        /// <para>心跳包超时设置(秒)</para>
+        /// <para>此值请不要小于或等于客户端心跳包的发送间隔</para>
         /// </summary>
-        public int HeartBeat { get; set; } = 5000;
+        public int HeartBeatTimeOut { get; set; } = 10;
     }
 }

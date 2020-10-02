@@ -3,7 +3,7 @@ using Fleck;
 
 namespace Sora.EventArgs.WSSeverEvent
 {
-    public sealed class ErrorEventArgs : BaseEventArgs
+    public sealed class ErrorEventArgs : ServerBaseEventArgs
     {
         #region 属性
         /// <summary>
