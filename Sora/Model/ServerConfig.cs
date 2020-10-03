@@ -5,6 +5,11 @@ namespace Sora.Model
         /// <summary>
         /// 反向服务器端口
         /// </summary>
+        public string Location { get; set; } = "127.0.0.1";
+
+        /// <summary>
+        /// 反向服务器端口
+        /// </summary>
         public int Port { get; set; } = 8080;
 
         /// <summary>

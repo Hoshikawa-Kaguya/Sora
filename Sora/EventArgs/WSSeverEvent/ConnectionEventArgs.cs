@@ -13,7 +13,6 @@ namespace Sora.EventArgs.WSSeverEvent
         #endregion
 
         #region 构造函数
-
         public ConnectionEventArgs(ConnectionType role, IWebSocketConnectionInfo connectionInfo)
         {
             
