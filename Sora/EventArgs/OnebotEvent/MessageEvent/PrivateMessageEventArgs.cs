@@ -3,6 +3,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Sora.EventArgs.OnebotEvent.MessageEvent
 {
+    /// <summary>
+    /// 私聊消息事件
+    /// </summary>
     internal sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     {
         /// <summary>
@@ -21,9 +24,9 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
     }
 
     /// <summary>
-    /// 私聊信息发送者
+    /// 私聊消息发送者
     /// </summary>
-    internal class PrivateSender
+    internal sealed class PrivateSender
     {
         /// <summary>
         /// 发送者 QQ 号

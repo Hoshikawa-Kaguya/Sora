@@ -3,6 +3,9 @@ using Fleck;
 
 namespace Sora.EventArgs.WSSeverEvent
 {
+    /// <summary>
+    /// 服务器错误事件
+    /// </summary>
     public sealed class ErrorEventArgs : ServerBaseEventArgs
     {
         #region 属性
@@ -13,7 +16,7 @@ namespace Sora.EventArgs.WSSeverEvent
         #endregion
 
         #region 构造函数
-        public ErrorEventArgs(Exception ex, IWebSocketConnectionInfo connectionInfo)
+        internal ErrorEventArgs(Exception ex, IWebSocketConnectionInfo connectionInfo)
         {
             this.Exception      = ex;
             base.ConnectionInfo = connectionInfo;

@@ -2,6 +2,9 @@ using Fleck;
 
 namespace Sora.EventArgs.WSSeverEvent
 {
+    /// <summary>
+    /// 服务器心跳包事件
+    /// </summary>
     public sealed class PongEventArgs : ServerBaseEventArgs
     {
         #region 属性

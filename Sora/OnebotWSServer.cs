@@ -9,7 +9,6 @@ using Sora.EventArgs.WSSeverEvent;
 using Sora.JsonAdapter;
 using Sora.Model;
 using Sora.Tool;
-using Sora.TypeEnum;
 
 namespace Sora
 {
@@ -40,7 +39,7 @@ namespace Sora
         /// <summary>
         /// 链接信息
         /// </summary>
-        private readonly Dictionary<Guid, IWebSocketConnection> ConnectionInfos = new Dictionary<Guid, IWebSocketConnection>();
+        internal static readonly Dictionary<Guid, IWebSocketConnection> ConnectionInfos = new Dictionary<Guid, IWebSocketConnection>();
 
         /// <summary>
         /// 服务器事件回调
@@ -110,22 +109,21 @@ namespace Sora
                              //接收事件处理
                              //获取请求头数据
                              if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
-                                                                            out string selfId) ||
+                                                                            out string selfId) ||       //bot UID
                                  !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
-                                                                           out string role)){return;}
-                             //获取连接类型
-                             Enum.TryParse(role, out ConnectionType type);
+                                                                           out string role)){return;}   //Client Type
+
                              //请求路径检查
                              bool isLost;
-                             switch (type)
+                             switch (role)
                              {
-                                 case ConnectionType.Universal:
+                                 case "Universal":
                                      isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath);
                                      break;
-                                 case ConnectionType.Event:
+                                 case "Event":
                                      isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.EventPath);
                                      break;
-                                 case ConnectionType.API:
+                                 case "API":
                                      isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.ApiPath);
                                      break;
                                  default:
@@ -165,7 +163,7 @@ namespace Sora
                                                  await socket.SendPing(new byte[] { 1, 2, 5 });
                                                  //事件回调
                                                  ConnectionEventArgs connection =
-                                                     new ConnectionEventArgs(type, socket.ConnectionInfo);
+                                                     new ConnectionEventArgs(role, socket.ConnectionInfo);
                                                  if (OnOpenConnectionAsync != null)
                                                  {
                                                      await Task.Run(() =>
@@ -188,7 +186,7 @@ namespace Sora
                                                           await Task.Run(() =>
                                                                          {
                                                                              OnCloseConnectionAsync(selfId,
-                                                                                 new ConnectionEventArgs(type,
+                                                                                 new ConnectionEventArgs(role,
                                                                                      socket.ConnectionInfo));
                                                                          });
                                                       }
@@ -214,7 +212,7 @@ namespace Sora
                                                     }
                                                     catch (Exception e)
                                                     {
-                                                        Console.WriteLine(e);
+                                                        ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
                                                         if (OnErrorAsync != null)
                                                         {
                                                             //错误事件回调

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.EventArgs.OnebotEvent.MetaEvent;
+using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.Tool;
 
 namespace Sora.JsonAdapter
@@ -34,7 +35,6 @@ namespace Sora.JsonAdapter
         #endregion
 
         #region 事件分发
-
         /// <summary>
         /// 事件分发
         /// </summary>
@@ -50,6 +50,9 @@ namespace Sora.JsonAdapter
                     break;
                 case "message":
                     MessageAdapter(messageJson, connection);
+                    break;
+                case "request":
+                    RequestAdapter(messageJson, connection);
                     break;
                 default:
                     ConsoleLog.Debug("Sora",$"msg_r\nconnectionId = {connection}\nmessage = {messageJson}");
@@ -71,7 +74,8 @@ namespace Sora.JsonAdapter
                 //心跳包
                 case "heartbeat":
                     HeartBeatEventArgs heartBeat = messageJson.ToObject<HeartBeatEventArgs>();
-                    ConsoleLog.Debug("Sora",$"Get hreatbeat from [{connection}]");
+                    //TODO 暂时禁用心跳Log
+                    //ConsoleLog.Debug("Sora",$"Get hreatbeat from [{connection}]");
                     if (heartBeat != null)
                     {
                         //刷新心跳包记录
@@ -122,39 +126,60 @@ namespace Sora.JsonAdapter
         }
         #endregion
 
+        #region 请求事件处理和分发
+        /// <summary>
+        /// 请求事件处理和分发
+        /// </summary>
+        /// <param name="messageJson">消息</param>
+        /// <param name="connection">连接GUID</param>
+        private void RequestAdapter(JObject messageJson, Guid connection)
+        {
+            switch (GetRequestType(messageJson))
+            {
+                //好友请求事件
+                case "friend":
+                    FriendRequestEventArgs friendRequest = messageJson.ToObject<FriendRequestEventArgs>();
+                    if(friendRequest == null)  break;
+                    ConsoleLog.Debug("Sora",$"Friend request form {friendRequest.UserId} with commont:{friendRequest.Comment}");
+                    break;
+                //群组请求事件
+                case "group":
+                    GroupRequestEventArgs groupRequest = messageJson.ToObject<GroupRequestEventArgs>();
+                    if(groupRequest == null) break;
+                    ConsoleLog.Debug("Sora",$"Group request [{groupRequest.SubType}] form {groupRequest.UserId} with commont:{groupRequest.Comment} | flag:{groupRequest.Flag}");
+                    break;
+            }
+        }
+        #endregion
+
         #region 事件类型获取
         /// <summary>
         /// 获取上报事件类型
         /// </summary>
         /// <param name="messageJson">消息Json对象</param>
-        private static string GetBaseEventType(JObject messageJson)
-        {
-            messageJson.TryGetValue("post_type", out JToken typeJson);
-            if (typeJson == null) return string.Empty;
-            return typeJson.ToString();
-        }
+        private static string GetBaseEventType(JObject messageJson) =>
+            !messageJson.TryGetValue("post_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
 
         /// <summary>
         /// 获取元事件类型
         /// </summary>
         /// <param name="messageJson">消息Json对象</param>
-        private static string GetMetaEventType(JObject messageJson)
-        {
-            messageJson.TryGetValue("meta_event_type", out JToken metaTypeJson);
-            if (metaTypeJson == null) return string.Empty;
-            return metaTypeJson.ToString();
-        }
+        private static string GetMetaEventType(JObject messageJson) =>
+            !messageJson.TryGetValue("meta_event_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
 
         /// <summary>
         /// 获取消息事件类型
         /// </summary>
         /// <param name="messageJson">消息Json对象</param>
-        private static string GetMessageType(JObject messageJson)
-        {
-            messageJson.TryGetValue("message_type", out JToken typeJson);
-            if (typeJson == null) return string.Empty;
-            return typeJson.ToString();
-        }
+        private static string GetMessageType(JObject messageJson) =>
+            !messageJson.TryGetValue("message_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+
+        /// <summary>
+        /// 获取请求事件类型
+        /// </summary>
+        /// <param name="messageJson">消息Json对象</param>
+        private static string GetRequestType(JObject messageJson) =>
+            !messageJson.TryGetValue("request_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
         #endregion
     }
 }
