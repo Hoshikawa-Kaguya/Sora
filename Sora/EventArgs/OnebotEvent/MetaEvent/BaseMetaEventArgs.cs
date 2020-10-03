@@ -11,6 +11,6 @@ namespace Sora.EventArgs.OnebotEvent.MetaEvent
         /// 元事件类型
         /// </summary>
         [JsonProperty(PropertyName = "meta_event_type")]
-        public string MetaEventType { get; set; }
+        internal string MetaEventType { get; set; }
     }
 }
