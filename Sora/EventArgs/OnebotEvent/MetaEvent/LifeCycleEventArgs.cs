@@ -9,6 +9,6 @@ namespace Sora.EventArgs.OnebotEvent.MetaEvent
         /// <para>只可能为<see langword="connect"/></para>
         /// </summary>
         [JsonProperty(PropertyName = "sub_type")]
-        public string SubType { get; set; }
+        internal string SubType { get; set; }
     }
 }

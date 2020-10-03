@@ -11,12 +11,12 @@ namespace Sora.EventArgs.OnebotEvent.MetaEvent
         /// 状态信息
         /// </summary>
         [JsonProperty(PropertyName = "status")]
-        public object Status { get; set; }
+        internal object Status { get; set; }
 
         /// <summary>
         /// 到下次心跳的间隔，单位毫秒
         /// </summary>
         [JsonProperty(PropertyName = "interval")]
-        public long Interval { get; set; }
+        internal long Interval { get; set; }
     }
 }

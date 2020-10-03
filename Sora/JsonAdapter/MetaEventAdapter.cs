@@ -8,7 +8,7 @@ using Sora.TypeEnum.EventTypeEnum;
 
 namespace Sora.JsonAdapter
 {
-    internal static class MetaEventAdapter
+    internal class MetaEventAdapter : EventAdapter
     {
         /// <summary>
         /// 心跳包记录
@@ -21,7 +21,7 @@ namespace Sora.JsonAdapter
         /// <param name="messageJson">消息</param>
         /// <param name="eventType">事件类型</param>
         /// <param name="connection">客户端连接接口</param>
-        public static void Adapter(JObject messageJson, MetaEventType eventType, Guid connection)
+        internal void Adapter(JObject messageJson, MetaEventType eventType, Guid connection)
         {
             switch (eventType)
             {

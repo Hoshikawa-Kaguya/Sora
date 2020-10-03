@@ -32,6 +32,11 @@ namespace Sora
         private Timer HeartBeatTimer { get; set; }
 
         /// <summary>
+        /// 事件分发
+        /// </summary>
+        public EventAdapter Event { get; private set; }
+
+        /// <summary>
         /// 链接信息
         /// </summary>
         private readonly Dictionary<Guid, IWebSocketConnection> ConnectionInfos = new Dictionary<Guid, IWebSocketConnection>();
@@ -79,8 +84,9 @@ namespace Sora
 
             this.Config = config;
             //心跳包超时检查计时器
-            HeartBeatTimer = new Timer(HeartBeatCheck, null, new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0),
+            this.HeartBeatTimer = new Timer(HeartBeatCheck, null, new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0),
                                        new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0));
+            this.Event = new EventAdapter();
 
             //禁用原log
             FleckLog.Level = LogLevel.Error;
@@ -114,7 +120,7 @@ namespace Sora
                                  case ConnectionType.Event:
                                      isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.EventPath);
                                      break;
-                                 case ConnectionType.Api:
+                                 case ConnectionType.API:
                                      isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.ApiPath);
                                      break;
                                  default:
@@ -149,6 +155,7 @@ namespace Sora
                                                      //验证Token
                                                      if(!token.Equals(this.Config.AccessToken)) return;
                                                  }
+                                                 ConnectionInfos.Add(socket.ConnectionInfo.Id, socket);
                                                  //向客户端发送Ping
                                                  await socket.SendPing(new byte[] { 1, 2, 5 });
                                                  //事件回调
@@ -161,7 +168,6 @@ namespace Sora
                                                                         OnOpenConnectionAsync(selfId, connection);
                                                                     });
                                                  }
-                                                 ConnectionInfos.Add(socket.ConnectionInfo.Id, socket);
                                                  ConsoleLog.Info("Sora",
                                                                  $"Client connected({socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort})");
                                              };
@@ -189,25 +195,29 @@ namespace Sora
                              socket.OnMessage = async (message) =>
                                                 {
                                                     //处理接收的数据
-                                                    if (ConnectionInfos.Any(conn => conn.Key == socket.ConnectionInfo.Id))
+                                                    // ReSharper disable once SimplifyLinqExpressionUseAll
+                                                    if (!ConnectionInfos.Any(conn => conn.Key ==
+                                                                                 socket.ConnectionInfo.Id)) return;
+                                                    try
                                                     {
-                                                        try
+                                                        //进入事件处理和分发
+                                                        await Task.Run(() =>
+                                                                       {
+                                                                           this.Event.Adapter(JObject.Parse(message),
+                                                                               socket.ConnectionInfo.Id);
+                                                                       });
+                                                    }
+                                                    catch (Exception e)
+                                                    {
+                                                        Console.WriteLine(e);
+                                                        if (OnErrorAsync != null)
                                                         {
-                                                            //进入事件处理和分发
-                                                            EventAdapter.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
-                                                        }
-                                                        catch (Exception e)
-                                                        {
-                                                            Console.WriteLine(e);
-                                                            if (OnErrorAsync != null)
-                                                            {
-                                                                //错误事件回调
-                                                                await Task.Run(() =>
-                                                                               {
-                                                                                   OnErrorAsync(selfId,
-                                                                                       new ErrorEventArgs(e, socket.ConnectionInfo));
-                                                                               });
-                                                            }
+                                                            //错误事件回调
+                                                            await Task.Run(() =>
+                                                                           {
+                                                                               OnErrorAsync(selfId,
+                                                                                   new ErrorEventArgs(e, socket.ConnectionInfo));
+                                                                           });
                                                         }
                                                     }
                                                 };
