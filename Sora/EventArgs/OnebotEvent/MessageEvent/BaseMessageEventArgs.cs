@@ -2,6 +2,9 @@ using Newtonsoft.Json;
 
 namespace Sora.EventArgs.OnebotEvent.MessageEvent
 {
+    /// <summary>
+    /// 消息事件基类
+    /// </summary>
     internal class BaseMessageEventArgs
     {
         /// <summary>

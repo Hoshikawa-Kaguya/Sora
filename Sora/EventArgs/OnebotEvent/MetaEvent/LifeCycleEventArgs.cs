@@ -2,6 +2,9 @@ using Newtonsoft.Json;
 
 namespace Sora.EventArgs.OnebotEvent.MetaEvent
 {
+    /// <summary>
+    /// 生命周期事件
+    /// </summary>
     internal sealed class LifeCycleEventArgs : BaseMetaEventArgs
     {
         /// <summary>

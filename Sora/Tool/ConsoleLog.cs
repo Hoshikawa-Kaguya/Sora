@@ -5,6 +5,10 @@ using Fleck;
 
 namespace Sora.Tool
 {
+    /// <summary>
+    /// <para>控制台格式化Log类</para>
+    /// <para>用于输出格式化Log</para>
+    /// </summary>
     public static class ConsoleLog
     {
         #region Log等级设置

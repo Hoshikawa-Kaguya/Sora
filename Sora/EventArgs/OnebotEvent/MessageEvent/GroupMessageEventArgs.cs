@@ -3,7 +3,10 @@ using Newtonsoft.Json.Linq;
 
 namespace Sora.EventArgs.OnebotEvent.MessageEvent
 {
-    internal class GroupMessageEventArgs : BaseMessageEventArgs
+    /// <summary>
+    /// 群组消息事件
+    /// </summary>
+    internal sealed class GroupMessageEventArgs : BaseMessageEventArgs
     {
         /// <summary>
         /// 群号
@@ -32,7 +35,10 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
         internal GroupSender GetSender() => (GroupSender) base.Sender;
     }
 
-    internal class GroupSender
+    /// <summary>
+    /// 群组消息发送者
+    /// </summary>
+    internal sealed class GroupSender
     {
         /// <summary>
         /// 发送者 QQ 号
