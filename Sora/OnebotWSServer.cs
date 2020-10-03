@@ -29,6 +29,7 @@ namespace Sora
         /// <summary>
         /// 心跳包检查计时器
         /// </summary>
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         private Timer HeartBeatTimer { get; set; }
 
         /// <summary>
@@ -42,32 +43,32 @@ namespace Sora
         private readonly Dictionary<Guid, IWebSocketConnection> ConnectionInfos = new Dictionary<Guid, IWebSocketConnection>();
 
         /// <summary>
-        /// 事件回调
+        /// 服务器事件回调
         /// </summary>
         /// <typeparam name="TEventArgs">事件参数</typeparam>
         /// <param name="selfId">Bot Id</param>
         /// <param name="eventArgs">事件参数</param>
         /// <returns></returns>
-        public delegate ValueTask AsyncCallBackHandler<in TEventArgs>(string selfId, TEventArgs eventArgs)where TEventArgs : System.EventArgs;
+        public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(string selfId, TEventArgs eventArgs)where TEventArgs : System.EventArgs;
         #endregion
 
         #region 回调事件
         /// <summary>
         /// 心跳包处理回调
         /// </summary>
-        public event AsyncCallBackHandler<PongEventArgs> OnPongAsync;
+        public event ServerAsyncCallBackHandler<PongEventArgs> OnPongAsync;
         /// <summary>
         /// 打开连接回调
         /// </summary>
-        public event AsyncCallBackHandler<ConnectionEventArgs> OnOpenConnectionAsync;
+        public event ServerAsyncCallBackHandler<ConnectionEventArgs> OnOpenConnectionAsync;
         /// <summary>
         /// 关闭连接回调
         /// </summary>
-        public event AsyncCallBackHandler<ConnectionEventArgs> OnCloseConnectionAsync;
+        public event ServerAsyncCallBackHandler<ConnectionEventArgs> OnCloseConnectionAsync;
         /// <summary>
         /// 错误回调
         /// </summary>
-        public event AsyncCallBackHandler<ErrorEventArgs> OnErrorAsync; 
+        public event ServerAsyncCallBackHandler<ErrorEventArgs> OnErrorAsync; 
         #endregion
 
         #region 构造函数
@@ -89,8 +90,12 @@ namespace Sora
             this.Event = new EventAdapter();
 
             //禁用原log
-            FleckLog.Level = LogLevel.Error;
-            this.Server    = new WebSocketServer($"ws://0.0.0.0:{config.Port}");
+            FleckLog.Level = (LogLevel)4;
+            this.Server    = new WebSocketServer($"ws://{config.Location}:{config.Port}")
+            {
+                //出错后进行重启
+                RestartAfterListenError = true
+            };
         }
         #endregion
 
@@ -222,7 +227,7 @@ namespace Sora
                                                     }
                                                 };
                          });
-            ConsoleLog.Info("Sora",$"Server running at 0.0.0.0:{Config.Port}");
+            ConsoleLog.Info("Sora",$"WebSocket server running at {Config.Location}:{Config.Port}");
         }
         ~OnebotWSServer()
         {
@@ -242,10 +247,9 @@ namespace Sora
         private void HeartBeatCheck(object msg)
         {
             if(ConnectionInfos.Count == 0) return;
-            ConsoleLog.Debug("Sora","Heartbeat check");
-            foreach (KeyValuePair<Guid, long> conn in MetaEventAdapter.HeartBeatList)
+            foreach (KeyValuePair<Guid, long> conn in EventAdapter.HeartBeatList)
             {
-                ConsoleLog.Debug("Sora",$"Connection check | {conn.Key} | {Utils.GetNowTimeStamp() - conn.Value}");
+                //ConsoleLog.Debug("Sora",$"Connection check | {conn.Key} | {Utils.GetNowTimeStamp() - conn.Value}");
                 //检查超时的连接
                 if (Utils.GetNowTimeStamp() - conn.Value > Config.HeartBeatTimeOut)
                 {
@@ -255,7 +259,7 @@ namespace Sora
                     ConsoleLog.Error("Sora",
                                      $"Client {lostConnection.ConnectionInfo.ClientIpAddress}:{lostConnection.ConnectionInfo.ClientPort} lost (hreatbeat time out)");
                     ConnectionInfos.Remove(conn.Key);
-                    MetaEventAdapter.HeartBeatList.Remove(conn.Key);
+                    EventAdapter.HeartBeatList.Remove(conn.Key);
                 }
             }
         }

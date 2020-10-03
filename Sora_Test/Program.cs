@@ -25,10 +25,7 @@ namespace Sora_Test
 
         private async Task MainAsync()
         {
-            OnebotWSServer server = new OnebotWSServer(new ServerConfig
-            {
-                HeartBeatTimeOut = 6
-            });
+            OnebotWSServer server = new OnebotWSServer(new ServerConfig());
             ConsoleLog.SetLogLevel(LogLevel.Debug);
             server.Start();
 
