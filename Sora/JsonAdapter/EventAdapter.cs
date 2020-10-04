@@ -112,15 +112,13 @@ namespace Sora.JsonAdapter
                 case "private":
                     PrivateMessageEventArgs privateMessage = messageJson.ToObject<PrivateMessageEventArgs>();
                     if(privateMessage == null) break;
-                    privateMessage.ParseSender();
-                    ConsoleLog.Debug("Sora",$"Private msg {privateMessage.GetSender().Nick}({privateMessage.UserId}) : {privateMessage.RawMessage}");
+                    ConsoleLog.Debug("Sora",$"Private msg {privateMessage.Sender.Nick}({privateMessage.UserId}) : {privateMessage.RawMessage}");
                     break;
                 //群聊事件
                 case "group":
                     GroupMessageEventArgs groupMessage = messageJson.ToObject<GroupMessageEventArgs>();
                     if(groupMessage == null) break;
-                    groupMessage.ParseSender();
-                    ConsoleLog.Debug("Sora",$"Group msg({groupMessage.GroupId}) form {groupMessage.GetSender().Nick}({groupMessage.UserId}) : {groupMessage.RawMessage}");
+                    ConsoleLog.Debug("Sora",$"Group msg({groupMessage.GroupId}) form {groupMessage.Sender.Nick}({groupMessage.UserId}) : {groupMessage.RawMessage}");
                     break;
             }
         }
