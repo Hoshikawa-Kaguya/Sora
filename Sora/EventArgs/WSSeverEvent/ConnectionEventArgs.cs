@@ -5,7 +5,7 @@ namespace Sora.EventArgs.WSSeverEvent
     /// <summary>
     /// 服务器连接事件
     /// </summary>
-    public sealed class ConnectionEventArgs : ServerBaseEventArgs
+    public sealed class ConnectionEventArgs : BaseServerEventArgs
     {
         #region 属性
         /// <summary>

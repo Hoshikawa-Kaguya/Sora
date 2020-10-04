@@ -6,7 +6,7 @@ namespace Sora.EventArgs.WSSeverEvent
     /// <summary>
     /// 服务器错误事件
     /// </summary>
-    public sealed class ErrorEventArgs : ServerBaseEventArgs
+    public sealed class ErrorEventArgs : BaseServerEventArgs
     {
         #region 属性
         /// <summary>

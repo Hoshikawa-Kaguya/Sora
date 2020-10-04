@@ -5,7 +5,7 @@ namespace Sora.EventArgs.WSSeverEvent
     /// <summary>
     /// 服务器事件基类
     /// </summary>
-    public class ServerBaseEventArgs : System.EventArgs
+    public class BaseServerEventArgs : System.EventArgs
     {
         /// <summary>
         /// 链接信息

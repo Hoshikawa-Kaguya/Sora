@@ -10,12 +10,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fleck" Version="1.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <Compile Remove="TypeEnum\**" />
+    <EmbeddedResource Remove="TypeEnum\**" />
+    <None Remove="TypeEnum\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="TypeEnum\" />
+    <PackageReference Include="Fleck" Version="1.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
 </Project>
