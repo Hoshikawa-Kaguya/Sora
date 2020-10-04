@@ -143,8 +143,8 @@ namespace Sora.Tool
         public static void UnhandledExceptionLog(Exception e)
         {
             string errMsg = ErrorLogBuilder(e);
-            Fatal("Sora",$"UnhandledException\r\n{errMsg}");
-            Warning("Sora","Exit in 5s");
+            Fatal("Sora",$"发现未处理的错误发生\r\n{errMsg}");
+            Warning("Sora","将在5s后自动退出");
             Thread.Sleep(5000);
             Environment.Exit(0);
         }
