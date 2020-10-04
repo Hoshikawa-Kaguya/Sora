@@ -251,13 +251,23 @@ namespace Sora
                 //检查超时的连接
                 if (Utils.GetNowTimeStamp() - conn.Value > Config.HeartBeatTimeOut)
                 {
-                    //关闭超时的连接
-                    IWebSocketConnection lostConnection = ConnectionInfos[conn.Key];
-                    lostConnection.Close();
-                    ConsoleLog.Error("Sora",
-                                     $"与Onebot客户端[{lostConnection.ConnectionInfo.ClientIpAddress}:{lostConnection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
-                    ConnectionInfos.Remove(conn.Key);
-                    EventAdapter.HeartBeatList.Remove(conn.Key);
+                    try
+                    {
+                        //关闭超时的连接
+                        IWebSocketConnection lostConnection = ConnectionInfos[conn.Key];
+                        lostConnection.Close();
+                        ConsoleLog.Error("Sora",
+                                         $"与Onebot客户端[{lostConnection.ConnectionInfo.ClientIpAddress}:{lostConnection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
+                        ConnectionInfos.Remove(conn.Key);
+                        EventAdapter.HeartBeatList.Remove(conn.Key);
+                    }
+                    catch (Exception e)
+                    {
+                        ConsoleLog.Error("Sora","检查心跳包时发生错误");
+                        ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
+                        ConnectionInfos.Remove(conn.Key);
+                        EventAdapter.HeartBeatList.Remove(conn.Key);
+                    }
                 }
             }
         }
