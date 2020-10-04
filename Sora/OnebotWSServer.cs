@@ -78,6 +78,7 @@ namespace Sora
         /// <param name="config">服务器配置</param>
         public OnebotWSServer(ServerConfig config)
         {
+            ConsoleLog.Info("Sora",$"Sora WebSocket服务器初始化...");
             //检查参数
             if(config == null) throw new ArgumentNullException(nameof(config));
             if (config.Port < 0 || config.Port > 65535) throw new ArgumentOutOfRangeException(nameof(config.Port));
@@ -95,6 +96,7 @@ namespace Sora
                 //出错后进行重启
                 RestartAfterListenError = true
             };
+            Start();
         }
         #endregion
 
@@ -102,7 +104,7 @@ namespace Sora
         /// <summary>
         /// 启动WS服务端
         /// </summary>
-        public void Start()
+        private void Start()
         {
             Server.Start(socket =>
                          {
@@ -111,7 +113,7 @@ namespace Sora
                              if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
                                                                             out string selfId) ||       //bot UID
                                  !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
-                                                                           out string role)){return;}   //Client Type
+                                                                            out string role)){return;}   //Client Type
 
                              //请求路径检查
                              bool isLost;
@@ -134,7 +136,7 @@ namespace Sora
                              {
                                  socket.Close();
                                  ConsoleLog.Warning("Sora",
-                                                 $"关闭与未知客户端的连接({socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort})，请检查是否设置正确的监听地址");
+                                                    $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
                                  return;
                              }
                              //心跳包
@@ -172,7 +174,7 @@ namespace Sora
                                                                     });
                                                  }
                                                  ConsoleLog.Info("Sora",
-                                                                 $"已连接客户端({socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort})");
+                                                                 $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
                                              };
                              //关闭连接
                              socket.OnClose = async () =>
@@ -192,7 +194,7 @@ namespace Sora
                                                       }
                                                   }
                                                   ConsoleLog.Info("Sora",
-                                                                     $"客户端连接被关闭({socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort})");
+                                                                  $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
                                               };
                              //上报接收
                              socket.OnMessage = async (message) =>
@@ -254,7 +256,13 @@ namespace Sora
                     try
                     {
                         //关闭超时的连接
-                        IWebSocketConnection lostConnection = ConnectionInfos[conn.Key];
+                        ConnectionInfos.TryGetValue(conn.Key, out IWebSocketConnection lostConnection);
+                        if (lostConnection == null)
+                        {
+                            ConsoleLog.Error("Sora","检测到不存在的客户端");
+                            EventAdapter.HeartBeatList.Remove(conn.Key);
+                            return;
+                        }
                         lostConnection.Close();
                         ConsoleLog.Error("Sora",
                                          $"与Onebot客户端[{lostConnection.ConnectionInfo.ClientIpAddress}:{lostConnection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
@@ -265,8 +273,8 @@ namespace Sora
                     {
                         ConsoleLog.Error("Sora","检查心跳包时发生错误");
                         ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
-                        ConnectionInfos.Remove(conn.Key);
                         EventAdapter.HeartBeatList.Remove(conn.Key);
+                        ConnectionInfos.Remove(conn.Key);
                     }
                 }
             }

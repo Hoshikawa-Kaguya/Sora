@@ -1,9 +1,7 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Sora;
-using Sora.EventArgs.WSSeverEvent;
 using Sora.Model;
 using Sora.Tool;
 
@@ -27,7 +25,6 @@ namespace Sora_Test
         {
             OnebotWSServer server = new OnebotWSServer(new ServerConfig());
             ConsoleLog.SetLogLevel(LogLevel.Debug);
-            server.Start();
 
             server.OnOpenConnectionAsync += (id, args) =>
                                             {

@@ -5,7 +5,7 @@ namespace Sora.EventArgs.WSSeverEvent
     /// <summary>
     /// 服务器心跳包事件
     /// </summary>
-    public sealed class PongEventArgs : ServerBaseEventArgs
+    public sealed class PongEventArgs : BaseServerEventArgs
     {
         #region 属性
         /// <summary>

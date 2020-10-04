@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.EventArgs.OnebotEvent.MetaEvent;
+using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.Tool;
 
@@ -54,9 +55,14 @@ namespace Sora.JsonAdapter
                 case "request":
                     RequestAdapter(messageJson, connection);
                     break;
-                default:
-                    ConsoleLog.Debug("Sora",$"msg_r\nconnectionId = {connection}\nmessage = {messageJson}");
+                case "notice":
+                    NoticeAdapter(messageJson, connection);
                     break;
+                default:
+                    ConsoleLog.Debug("Sora",messageJson);
+                    //TODO 回调处理
+                    //ConsoleLog.Warning("Sora",$"接收到未知事件[{GetBaseEventType(messageJson)}]");
+                    return;
             }
         }
         #endregion
@@ -92,7 +98,10 @@ namespace Sora.JsonAdapter
                 //生命周期
                 case "lifecycle":
                     LifeCycleEventArgs lifeCycle = messageJson.ToObject<LifeCycleEventArgs>();
-                    if (lifeCycle != null) ConsoleLog.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] form [{connection}]");
+                    if (lifeCycle != null) ConsoleLog.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
+                    break;
+                default:
+                    ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMetaEventType(messageJson)}]");
                     break;
             }
         }
@@ -118,7 +127,10 @@ namespace Sora.JsonAdapter
                 case "group":
                     GroupMessageEventArgs groupMessage = messageJson.ToObject<GroupMessageEventArgs>();
                     if(groupMessage == null) break;
-                    ConsoleLog.Debug("Sora",$"Group msg({groupMessage.GroupId}) form {groupMessage.Sender.Nick}({groupMessage.UserId}) : {groupMessage.RawMessage}");
+                    ConsoleLog.Debug("Sora",$"Group msg[{groupMessage.GroupId}] form {groupMessage.Sender.Nick}[{groupMessage.UserId}] : {groupMessage.RawMessage}");
+                    break;
+                default:
+                    ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMessageType(messageJson)}]");
                     break;
             }
         }
@@ -138,13 +150,107 @@ namespace Sora.JsonAdapter
                 case "friend":
                     FriendRequestEventArgs friendRequest = messageJson.ToObject<FriendRequestEventArgs>();
                     if(friendRequest == null)  break;
-                    ConsoleLog.Debug("Sora",$"Friend request form {friendRequest.UserId} with commont:{friendRequest.Comment}");
+                    ConsoleLog.Debug("Sora",$"Friend request form [{friendRequest.UserId}] with commont[{friendRequest.Comment}]");
                     break;
                 //群组请求事件
                 case "group":
                     GroupRequestEventArgs groupRequest = messageJson.ToObject<GroupRequestEventArgs>();
                     if(groupRequest == null) break;
-                    ConsoleLog.Debug("Sora",$"Group request [{groupRequest.SubType}] form {groupRequest.UserId} with commont:{groupRequest.Comment} | flag:{groupRequest.Flag}");
+                    ConsoleLog.Debug("Sora",$"Group request [{groupRequest.SubType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
+                    break;
+                default:
+                    ConsoleLog.Warning("Sora",$"接收到未知事件[{GetRequestType(messageJson)}]");
+                    break;
+            }
+        }
+        #endregion
+
+        #region 通知事件处理和分发
+        /// <summary>
+        /// 通知事件处理和分发
+        /// </summary>
+        /// <param name="messageJson">消息</param>
+        /// <param name="connection">连接GUID</param>
+        private void NoticeAdapter(JObject messageJson, Guid connection)
+        {
+            switch (GetNoticeType(messageJson))
+            {
+                //群文件上传
+                case "group_upload":
+                    FileUploadEventArgs fileUpload = messageJson.ToObject<FileUploadEventArgs>();
+                    if(fileUpload == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"Group notice[Upload file] file[{fileUpload.Upload.Name}] from group[{fileUpload.GroupId}({fileUpload.UserId})]");
+                    break;
+                //群管理员变动
+                case "group_admin":
+                    AdminChangeEventArgs adminChange = messageJson.ToObject<AdminChangeEventArgs>();
+                    if(adminChange == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"Group amdin change[{adminChange.SubType}] from group[{adminChange.GroupId}] by[{adminChange.UserId}]");
+                    break;
+                //群成员变动
+                case "group_decrease":case "group_increase":
+                    GroupMemberChangeEventArgs groupMemberChange = messageJson.ToObject<GroupMemberChangeEventArgs>();
+                    if (groupMemberChange == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"{groupMemberChange.NoticeType} type[{groupMemberChange.SubType}] member {groupMemberChange.GroupId}[{groupMemberChange.UserId}]");
+                    break;
+                //群禁言
+                case "group_ban":
+                    GroupBanEventArgs groupBan = messageJson.ToObject<GroupBanEventArgs>();
+                    if (groupBan == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"Group[{groupBan.GroupId}] {groupBan.SubType} member[{groupBan.UserId}]{groupBan.Duration}");
+                    break;
+                //好友添加
+                case "friend_add":
+                    FriendAddEventArgs friendAdd = messageJson.ToObject<FriendAddEventArgs>();
+                    if(friendAdd == null) break;
+                    ConsoleLog.Debug("Sora",$"Friend add user[{friendAdd.UserId}]");
+                    break;
+                //群消息撤回
+                case "group_recall":
+                    GroupRecallEventArgs groupRecall = messageJson.ToObject<GroupRecallEventArgs>();
+                    if(groupRecall == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"Group[{groupRecall.GroupId}] recall by [{groupRecall.OperatorId}],msg id={groupRecall.MessageId} sender={groupRecall.UserId}");
+                    break;
+                //好友消息撤回
+                case "friend_recall":
+                    FriendRecallEventArgs friendRecall = messageJson.ToObject<FriendRecallEventArgs>();
+                    if(friendRecall == null) break;
+                    ConsoleLog.Debug("Sora", $"Friend[{friendRecall.UserId}] recall msg id={friendRecall.MessageId}");
+                    break;
+                //通知类事件
+                case "notify":
+                    switch (GetNotifyType(messageJson))
+                    {
+                        case "poke"://戳一戳
+                            PokeOrLuckyEventArgs pokeEvent = messageJson.ToObject<PokeOrLuckyEventArgs>();
+                            if(pokeEvent == null) break;
+                            ConsoleLog.Debug("Sora",
+                                             $"Group[{pokeEvent.GroupId}] poke from [{pokeEvent.UserId}] to [{pokeEvent.TargetId}]");
+                            break;
+                        case "lucky_king"://运气王
+                            PokeOrLuckyEventArgs luckyEvent = messageJson.ToObject<PokeOrLuckyEventArgs>();
+                            if(luckyEvent == null) break;
+                            ConsoleLog.Debug("Sora",
+                                             $"Group[{luckyEvent.GroupId}] lucky king user[{luckyEvent.TargetId}]");
+                            break;
+                        case "honor":
+                            HonorEventArgs honorEvent = messageJson.ToObject<HonorEventArgs>();
+                            if (honorEvent == null) break;
+                            ConsoleLog.Debug("Sora",
+                                             $"Group[{honorEvent.GroupId}] member honor change [{honorEvent.HonorType}]");
+                            break;
+                        default:
+                            ConsoleLog.Warning("Sora",$"未知Notify事件类型[{GetNotifyType(messageJson)}]");
+                            break;
+                    }
+                    break;
+                default:
+                    ConsoleLog.Warning("Sora",$"接收到未知事件[{GetNoticeType(messageJson)}]");
                     break;
             }
         }
@@ -178,6 +284,21 @@ namespace Sora.JsonAdapter
         /// <param name="messageJson">消息Json对象</param>
         private static string GetRequestType(JObject messageJson) =>
             !messageJson.TryGetValue("request_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+
+        /// <summary>
+        /// 获取通知事件类型
+        /// </summary>
+        /// <param name="messageJson">消息Json对象</param>
+        private static string GetNoticeType(JObject messageJson) =>
+            !messageJson.TryGetValue("notice_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+
+        /// <summary>
+        /// 获取通知事件子类型
+        /// </summary>
+        /// <param name="messageJson"></param>
+        private static string GetNotifyType(JObject messageJson) =>
+            !messageJson.TryGetValue("sub_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+
         #endregion
     }
 }
