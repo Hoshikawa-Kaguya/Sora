@@ -21,18 +21,10 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
         internal object Anonymous { get; set; }
 
         /// <summary>
-        /// 反序列化Sender
+        /// 发送人信息
         /// </summary>
-        internal void ParseSender()
-        {
-            if(base.Sender == null) return;
-            base.Sender = ((JObject) base.Sender).ToObject<GroupSender>();
-        }
-
-        /// <summary>
-        /// 获取发送者信息
-        /// </summary>
-        internal GroupSender GetSender() => (GroupSender) base.Sender;
+        [JsonProperty(PropertyName = "sender")]
+        internal GroupSender Sender { get; set; }
     }
 
     /// <summary>

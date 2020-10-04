@@ -48,11 +48,5 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
         /// </summary>
         [JsonProperty(PropertyName = "font")]
         internal int Font { get; set; }
-
-        /// <summary>
-        /// 发送人信息
-        /// </summary>
-        [JsonProperty(PropertyName = "sender")]
-        internal object Sender { get; set; }
     }
 }
