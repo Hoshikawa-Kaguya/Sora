@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
 using Sora.EventArgs.WSSeverEvent;
-using Sora.JsonAdapter;
+using Sora.OnebotAdapter;
 using Sora.Model;
 using Sora.Tool;
 
@@ -88,7 +88,8 @@ namespace Sora
             this.HeartBeatTimer = new Timer(HeartBeatCheck, null, new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0),
                                        new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0));
             this.Event = new EventAdapter();
-
+            //API超时
+            RequestApiAdapter.TimeOut = config.ApiTimeOut;
             //禁用原log
             FleckLog.Level = (LogLevel)4;
             this.Server    = new WebSocketServer($"ws://{config.Location}:{config.Port}")
@@ -228,6 +229,7 @@ namespace Sora
                                                 };
                          });
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器正在运行[{Config.Location}:{Config.Port}]");
+            ConsoleLog.Info("Sora",$"Sora 服务端框架版本:{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
         }
         ~OnebotWSServer()
         {

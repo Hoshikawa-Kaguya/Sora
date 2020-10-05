@@ -37,5 +37,11 @@ namespace Sora.Model
         /// <para>此值请不要小于或等于客户端心跳包的发送间隔</para>
         /// </summary>
         public int HeartBeatTimeOut { get; set; } = 10;
+
+        /// <summary>
+        /// <para>客户端API调用超时设置(毫秒)</para>
+        /// <para>默认为50无需修改</para>
+        /// </summary>
+        public int ApiTimeOut { get; set; } = 50;
     }
 }

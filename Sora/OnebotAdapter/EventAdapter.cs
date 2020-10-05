@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Sora.Enumeration.ApiEnum;
+using Sora.EventArgs.OnebotEvent;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
+using Sora.Model;
 using Sora.Tool;
 
-namespace Sora.JsonAdapter
+namespace Sora.OnebotAdapter
 {
     /// <summary>
     /// 基类事件分发
@@ -59,10 +62,25 @@ namespace Sora.JsonAdapter
                     NoticeAdapter(messageJson, connection);
                     break;
                 default:
-                    ConsoleLog.Debug("Sora",messageJson);
-                    //TODO 回调处理
-                    //ConsoleLog.Warning("Sora",$"接收到未知事件[{GetBaseEventType(messageJson)}]");
-                    return;
+                    //尝试从响应中获取标识符
+                    if (!messageJson.TryGetValue("echo", out JToken echoJson)||
+                        !Guid.TryParse(echoJson.ToString(),out Guid echo)) 
+                    {
+                        ConsoleLog.Warning("Sora","接收到未知请求");
+                        return;
+                    }
+                    //查找请求标识符是否存在
+                    // ReSharper disable once SimplifyLinqExpressionUseAll
+                    if (RequestApiAdapter.RequestList.Any(e => e.Equals(echo)))
+                    {
+                        //取出返回值中的数据
+                        RequestApiAdapter.GetResponse(echo, messageJson);
+                    }
+                    else
+                    {
+                        ConsoleLog.Warning("Sora","接收到无效请求");
+                    }
+                    break;
             }
         }
         #endregion
@@ -73,7 +91,7 @@ namespace Sora.JsonAdapter
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private static void MetaAdapter(JObject messageJson, Guid connection)
+        private static async void MetaAdapter(JObject messageJson, Guid connection)
         {
             switch (GetMetaEventType(messageJson))
             {
@@ -99,6 +117,10 @@ namespace Sora.JsonAdapter
                 case "lifecycle":
                     LifeCycleEventArgs lifeCycle = messageJson.ToObject<LifeCycleEventArgs>();
                     if (lifeCycle != null) ConsoleLog.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
+                    //未知原因会丢失第一次调用的返回值，直接丢弃第一次调用
+                    await RequestApiAdapter.GetOnebotVersion(connection);
+                    ApiResponseCollection verInfo = await RequestApiAdapter.GetOnebotVersion(connection);
+                    ConsoleLog.Info("Sora",$"已连接到{Enum.GetName(verInfo.Client)}客户端,版本:{verInfo.ClientVer}");
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMetaEventType(messageJson)}]");
@@ -113,7 +135,7 @@ namespace Sora.JsonAdapter
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private void MessageAdapter(JObject messageJson, Guid connection)
+        private async void MessageAdapter(JObject messageJson, Guid connection)
         {
             switch (GetMessageType(messageJson))
             {
@@ -122,6 +144,8 @@ namespace Sora.JsonAdapter
                     PrivateMessageEventArgs privateMessage = messageJson.ToObject<PrivateMessageEventArgs>();
                     if(privateMessage == null) break;
                     ConsoleLog.Debug("Sora",$"Private msg {privateMessage.Sender.Nick}({privateMessage.UserId}) : {privateMessage.RawMessage}");
+                    ApiResponseCollection ret = await RequestApiAdapter.GetLoginInfo(connection);
+                    ConsoleLog.Debug("Sora",$"LOGIN id = {ret.Uid}|{ret.Nick}");
                     break;
                 //群聊事件
                 case "group":
