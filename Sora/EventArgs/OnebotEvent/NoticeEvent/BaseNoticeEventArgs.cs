@@ -5,7 +5,7 @@ namespace Sora.EventArgs.OnebotEvent.NoticeEvent
     /// <summary>
     /// 消息事件基类
     /// </summary>
-    internal class BaseNoticeEventArgs : OnebotBaseEventArgs
+    internal abstract class BaseNoticeEventArgs : OnebotBaseEventArgs
     {
         /// <summary>
         /// 消息类型

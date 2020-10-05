@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Sora.Model;
 
 namespace Sora.EventArgs.OnebotEvent.MessageEvent
 {
     /// <summary>
     /// 消息事件基类
     /// </summary>
-    internal class BaseMessageEventArgs
+    internal abstract class BaseMessageEventArgs
     {
         /// <summary>
         /// 消息类型
@@ -37,7 +37,7 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
         /// 消息内容
         /// </summary>
         [JsonProperty(PropertyName = "message")]
-        internal List<MessageElement> Message { get; set; }
+        internal List<OnebotMessage> Message { get; set; }
 
         /// <summary>
         /// 原始消息内容
@@ -50,14 +50,5 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
         /// </summary>
         [JsonProperty(PropertyName = "font")]
         internal int Font { get; set; }
-    }
-
-    internal sealed class MessageElement
-    {
-        [JsonProperty(PropertyName = "type")]
-        internal string Type { get; set; }
-
-        [JsonProperty(PropertyName = "data")]
-        internal JObject MsgData { get; set; }
     }
 }

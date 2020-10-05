@@ -23,15 +23,15 @@ namespace Sora_Test
 
         private async Task MainAsync()
         {
-            OnebotWSServer server = new OnebotWSServer(new ServerConfig());
             ConsoleLog.SetLogLevel(LogLevel.Debug);
-
+            OnebotWSServer server = new OnebotWSServer(new ServerConfig());
+            
             server.OnOpenConnectionAsync += (id, args) =>
                                             {
                                                 ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {args.Role}");
                                                 return ValueTask.CompletedTask;
                                             };
-
+        
             server.OnCloseConnectionAsync += (id, args) =>
                                              {
                                                  ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {args.Role}");

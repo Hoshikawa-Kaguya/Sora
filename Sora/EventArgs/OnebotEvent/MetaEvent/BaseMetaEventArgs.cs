@@ -5,7 +5,7 @@ namespace Sora.EventArgs.OnebotEvent.MetaEvent
     /// <summary>
     /// 元事件基类
     /// </summary>
-    internal class BaseMetaEventArgs : OnebotBaseEventArgs
+    internal abstract class BaseMetaEventArgs : OnebotBaseEventArgs
     {
         /// <summary>
         /// 元事件类型
