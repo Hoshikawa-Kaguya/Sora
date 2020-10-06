@@ -1,17 +1,17 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using Sora.Enumeration;
 
-namespace Sora.Enumeration
+namespace Sora.Converter
 {
-    internal class EnumToDescriptionConverter : JsonConverter
+    /// <summary>
+    /// 用于Enum和Description特性互相转换的Json转换器
+    /// </summary>
+    internal class EnumDescriptionConverter : JsonConverter
     {
-        //反序列化时不执行
-        public override bool CanRead => false;
-        //序列化时执行
-        public override bool CanWrite => true;
-
         //控制执行条件（当属性的值为枚举类型时才使用转换器）
         public override bool CanConvert(Type objectType)
         {
@@ -22,9 +22,6 @@ namespace Sora.Enumeration
         /// 序列化时执行的转换
         /// 获取枚举的描述值
         /// </summary>
-        /// <param name="writer">可以用来重写值</param>
-        /// <param name="value">属性的原值</param>
-        /// <param name="serializer">serializer对象</param>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             if (string.IsNullOrEmpty(value.ToString()))
@@ -43,9 +40,24 @@ namespace Sora.Enumeration
             writer.WriteValue(attributes.Length > 0 ? attributes[0].Description : "");
         }
 
+        /// <summary>
+        /// 序列化时执行的转换
+        /// 通过Description获取枚举值
+        /// </summary>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            FieldInfo[] fields    = objectType.GetFields();
+            string      readValue = reader.Value?.ToString() ?? string.Empty;
+            foreach (FieldInfo field in fields)
+            {
+                object[] objects = field.GetCustomAttributes(typeof(DescriptionAttribute), false);
+                if (objects.Any(item => (item as DescriptionAttribute)?.Description ==
+                                        readValue))
+                {
+                    return Convert.ChangeType(field.GetValue(-1),objectType);
+                }
+            }
+            return CQFunction.Unknown;
         }
     }
 }
