@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Sora.Converter;
 using Sora.Enumeration;
-using Sora.Enumeration.ApiEnum;
-using Sora.Model;
+using Sora.Model.Message;
 
 namespace Sora.EventArgs.OnebotEvent.ApiEvent
 {
@@ -14,9 +14,9 @@ namespace Sora.EventArgs.OnebotEvent.ApiEvent
 
     internal class MsgData
     {
-        [JsonConverter(typeof(EnumToDescriptionConverter))]
+        [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "message_type")]
-        internal ApiMessageType MessageType { get; set; }
+        internal MessageType MessageType { get; set; }
 
         [JsonProperty(PropertyName = "user_id", NullValueHandling = NullValueHandling.Ignore)]
         internal long? UserId { get; set; } = null;

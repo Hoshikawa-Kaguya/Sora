@@ -5,7 +5,7 @@ namespace Sora.EventArgs.OnebotEvent
     /// <summary>
     /// OneBot事件基类
     /// </summary>
-    internal abstract class OnebotBaseEventArgs
+    internal abstract class BaseOnebotEventArgs
     {
         /// <summary>
         /// 事件发生的时间戳

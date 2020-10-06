@@ -1,6 +1,6 @@
 using Sora.Enumeration.ApiEnum;
 
-namespace Sora.EventArgs.OnebotEvent
+namespace Sora.Model
 {
     /// <summary>
     /// API返回集

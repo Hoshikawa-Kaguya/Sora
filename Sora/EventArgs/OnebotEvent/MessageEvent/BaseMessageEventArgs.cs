@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.Model;
+using Sora.Model.Message;
 
 namespace Sora.EventArgs.OnebotEvent.MessageEvent
 {
@@ -37,7 +37,7 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
         /// 消息内容
         /// </summary>
         [JsonProperty(PropertyName = "message")]
-        internal List<OnebotMessage> Message { get; set; }
+        internal List<OnebotMessage> MessageList { get; set; }
 
         /// <summary>
         /// 原始消息内容

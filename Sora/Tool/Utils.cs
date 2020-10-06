@@ -5,7 +5,7 @@ namespace Sora.Tool
     /// <summary>
     /// 工具类
     /// </summary>
-    public class Utils
+    public static class Utils
     {
         /// <summary>
         /// 获取当前时间戳

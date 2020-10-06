@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
 using Sora.EventArgs.WSSeverEvent;
-using Sora.OnebotAdapter;
 using Sora.Model;
+using Sora.OnebotInterface;
 using Sora.Tool;
 
 namespace Sora
@@ -30,11 +30,6 @@ namespace Sora
         /// </summary>
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
         private Timer HeartBeatTimer { get; set; }
-
-        /// <summary>
-        /// 事件分发
-        /// </summary>
-        public EventAdapter Event { get; private set; }
 
         /// <summary>
         /// 链接信息
@@ -87,9 +82,8 @@ namespace Sora
             //心跳包超时检查计时器
             this.HeartBeatTimer = new Timer(HeartBeatCheck, null, new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0),
                                        new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0));
-            this.Event = new EventAdapter();
             //API超时
-            RequestApiAdapter.TimeOut = config.ApiTimeOut;
+            RequestApiInterface.TimeOut = config.ApiTimeOut;
             //禁用原log
             FleckLog.Level = (LogLevel)4;
             this.Server    = new WebSocketServer($"ws://{config.Location}:{config.Port}")
@@ -147,7 +141,7 @@ namespace Sora
                                                  //心跳包事件处理
                                                  await Task.Run(() =>
                                                                 {
-                                                                    OnPongAsync(selfId, 
+                                                                    OnPongAsync(selfId,
                                                                                     new PongEventArgs(echo,
                                                                                         socket.ConnectionInfo));
                                                                 });
@@ -167,13 +161,11 @@ namespace Sora
                                                  //事件回调
                                                  ConnectionEventArgs connection =
                                                      new ConnectionEventArgs(role, socket.ConnectionInfo);
-                                                 if (OnOpenConnectionAsync != null)
-                                                 {
-                                                     await Task.Run(() =>
-                                                                    {
-                                                                        OnOpenConnectionAsync(selfId, connection);
-                                                                    });
-                                                 }
+                                                 if (OnOpenConnectionAsync == null) return;
+                                                 await Task.Run(() =>
+                                                                {
+                                                                    OnOpenConnectionAsync(selfId, connection);
+                                                                });
                                                  ConsoleLog.Info("Sora",
                                                                  $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
                                              };
@@ -184,15 +176,13 @@ namespace Sora
                                                   if (ConnectionInfos.Any(conn => conn.Key == socket.ConnectionInfo.Id))
                                                   {
                                                       ConnectionInfos.Remove(socket.ConnectionInfo.Id);
-                                                      if (OnCloseConnectionAsync != null)
-                                                      {
-                                                          await Task.Run(() =>
-                                                                         {
-                                                                             OnCloseConnectionAsync(selfId,
-                                                                                 new ConnectionEventArgs(role,
-                                                                                     socket.ConnectionInfo));
-                                                                         });
-                                                      }
+                                                      if (OnCloseConnectionAsync == null) return;
+                                                      await Task.Run(() =>
+                                                                     {
+                                                                         OnCloseConnectionAsync(selfId,
+                                                                             new ConnectionEventArgs(role,
+                                                                                 socket.ConnectionInfo));
+                                                                     });
                                                   }
                                                   ConsoleLog.Info("Sora",
                                                                   $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
@@ -209,22 +199,21 @@ namespace Sora
                                                         //进入事件处理和分发
                                                         await Task.Run(() =>
                                                                        {
-                                                                           this.Event.Adapter(JObject.Parse(message),
-                                                                               socket.ConnectionInfo.Id);
+                                                                           EventInterface
+                                                                               .Adapter(JObject.Parse(message),
+                                                                                   socket.ConnectionInfo.Id);
                                                                        });
                                                     }
                                                     catch (Exception e)
                                                     {
                                                         ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
-                                                        if (OnErrorAsync != null)
-                                                        {
-                                                            //错误事件回调
-                                                            await Task.Run(() =>
-                                                                           {
-                                                                               OnErrorAsync(selfId,
-                                                                                   new ErrorEventArgs(e, socket.ConnectionInfo));
-                                                                           });
-                                                        }
+                                                        if (OnErrorAsync == null) return;
+                                                        //错误事件回调
+                                                        await Task.Run(() =>
+                                                                       {
+                                                                           OnErrorAsync(selfId,
+                                                                               new ErrorEventArgs(e, socket.ConnectionInfo));
+                                                                       });
                                                     }
                                                 };
                          });
@@ -249,7 +238,7 @@ namespace Sora
         private void HeartBeatCheck(object msg)
         {
             if(ConnectionInfos.Count == 0) return;
-            foreach (KeyValuePair<Guid, long> conn in EventAdapter.HeartBeatList)
+            foreach (KeyValuePair<Guid, long> conn in EventInterface.HeartBeatList)
             {
                 //ConsoleLog.Debug("Sora",$"Connection check | {conn.Key} | {Utils.GetNowTimeStamp() - conn.Value}");
                 //检查超时的连接
@@ -262,20 +251,20 @@ namespace Sora
                         if (lostConnection == null)
                         {
                             ConsoleLog.Error("Sora","检测到不存在的客户端");
-                            EventAdapter.HeartBeatList.Remove(conn.Key);
+                            EventInterface.HeartBeatList.Remove(conn.Key);
                             return;
                         }
                         lostConnection.Close();
                         ConsoleLog.Error("Sora",
                                          $"与Onebot客户端[{lostConnection.ConnectionInfo.ClientIpAddress}:{lostConnection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
                         ConnectionInfos.Remove(conn.Key);
-                        EventAdapter.HeartBeatList.Remove(conn.Key);
+                        EventInterface.HeartBeatList.Remove(conn.Key);
                     }
                     catch (Exception e)
                     {
                         ConsoleLog.Error("Sora","检查心跳包时发生错误");
                         ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
-                        EventAdapter.HeartBeatList.Remove(conn.Key);
+                        EventInterface.HeartBeatList.Remove(conn.Key);
                         ConnectionInfos.Remove(conn.Key);
                     }
                 }

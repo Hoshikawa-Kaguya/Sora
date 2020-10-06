@@ -1,19 +1,19 @@
 using System.ComponentModel;
 
-namespace Sora.Enumeration.ApiEnum
+namespace Sora.Enumeration
 {
-    internal enum ApiMessageType
+    public enum MessageType
     {
         /// <summary>
         /// 私聊消息
         /// </summary>
         [Description("private")]
-        Private = 1,
+        Private,
 
         /// <summary>
         /// 群消息
         /// </summary>
         [Description("group")]
-        Group = 2
+        Group
     }
 }

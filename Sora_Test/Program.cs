@@ -25,7 +25,6 @@ namespace Sora_Test
         {
             ConsoleLog.SetLogLevel(LogLevel.Debug);
             OnebotWSServer server = new OnebotWSServer(new ServerConfig());
-            
             server.OnOpenConnectionAsync += (id, args) =>
                                             {
                                                 ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {args.Role}");
@@ -39,5 +38,7 @@ namespace Sora_Test
                                              };
             await Task.Delay(-1);
         }
+
+
     }
 }

@@ -1,6 +1,6 @@
 using System;
 using Newtonsoft.Json;
-using Sora.Enumeration;
+using Sora.Converter;
 using Sora.Enumeration.ApiEnum;
 
 namespace Sora.EventArgs.OnebotEvent.ApiEvent
@@ -15,7 +15,7 @@ namespace Sora.EventArgs.OnebotEvent.ApiEvent
         /// 会自动生成初始值不需要设置
         /// </summary>
         [JsonProperty(PropertyName = "action")]
-        [JsonConverter(typeof(EnumToDescriptionConverter))]
+        [JsonConverter(typeof(EnumDescriptionConverter))]
         internal APIType ApiType { get; set; }
 
         /// <summary>

@@ -40,8 +40,8 @@ namespace Sora.Model
 
         /// <summary>
         /// <para>客户端API调用超时设置(毫秒)</para>
-        /// <para>默认为50无需修改</para>
+        /// <para>默认为1000无需修改</para>
         /// </summary>
-        public int ApiTimeOut { get; set; } = 50;
+        public int ApiTimeOut { get; set; } = 1000;
     }
 }

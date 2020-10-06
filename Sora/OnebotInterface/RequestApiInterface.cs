@@ -7,15 +7,16 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Sora.Enumeration;
 using Sora.Enumeration.ApiEnum;
-using Sora.EventArgs.OnebotEvent;
 using Sora.EventArgs.OnebotEvent.ApiEvent;
 using Sora.Model;
+using Sora.Model.Message;
 using Sora.Tool;
 
-namespace Sora.OnebotAdapter
+namespace Sora.OnebotInterface
 {
-    internal static class RequestApiAdapter
+    internal static class RequestApiInterface
     {
         #region 静态属性
         internal static int TimeOut { get; set; }
@@ -44,17 +45,56 @@ namespace Sora.OnebotAdapter
         /// <returns>
         /// message id
         /// </returns>
-        internal static async ValueTask<ApiResponseCollection> SendPrivateMessage(Guid connection, long target, List<OnebotMessage> messages)
+        internal static async ValueTask<ApiResponseCollection> SendPrivateMessage(Guid connection, long target, List<CQCode> messages)
         {
+            
             if(messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
+            //转换消息段列表
+            List<OnebotMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
+            //发送信息
             JObject ret = await SendApiRequest(new SendMsgEventArgs
             {
                 ApiType = APIType.SendMsg,
                 MessageData = new MsgData
                 {
-                    MessageType = ApiMessageType.Private,
+                    MessageType = MessageType.Private,
                     UserId      = target,
-                    Message     = messages
+                    Message     = messagesList
+                }
+            }, connection);
+            //处理API返回信息
+            ApiResponseCollection response = GetBaseRetCode(ret);
+            if (response.RetCode != 0) return response;
+            response.MessageId = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode)
+                ? messageCode
+                : -1;
+            return response;
+        }
+
+        /// <summary>
+        /// 发送群聊消息
+        /// </summary>
+        /// <param name="connection">服务器连接</param>
+        /// <param name="target">发送目标gid</param>
+        /// <param name="messages">发送的信息</param>
+        /// <returns>
+        /// message id
+        /// </returns>
+        internal static async ValueTask<ApiResponseCollection> SendGroupMessage(Guid connection, long target, List<CQCode> messages)
+        {
+            
+            if(messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
+            //转换消息段列表
+            List<OnebotMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
+            //发送信息
+            JObject ret = await SendApiRequest(new SendMsgEventArgs
+            {
+                ApiType = APIType.SendMsg,
+                MessageData = new MsgData
+                {
+                    MessageType = MessageType.Group,
+                    GroupId     = target,
+                    Message     = messagesList
                 }
             }, connection);
             //处理API返回信息
@@ -139,19 +179,24 @@ namespace Sora.OnebotAdapter
             //添加新的请求记录
             RequestList.Add(echo);
             //向客户端发送请求数据
+            DateTime st;
+            DateTime ed;
             await Task.Run(() =>
                            {
                                OnebotWSServer.ConnectionInfos[connection].Send(JsonConvert.SerializeObject(message));
                            });
+            st = DateTime.Now;
             try
             {
                 //等待客户端返回调用结果
-                return await OnebotSubject
+                JObject w = await OnebotSubject
                              .Where(ret => ret.Item1 == echo)
                              .Select(ret => ret.Item2)
                              .Take(1).Timeout(TimeSpan.FromMilliseconds(TimeOut))
                              .Catch(Observable.Return<JObject>(null)).ToTask();
-
+                ed = DateTime.Now;
+                ConsoleLog.Debug("API_Time",$"{(ed -st).TotalMilliseconds}ms");
+                return w;
             }
             catch (TimeoutException e)
             {

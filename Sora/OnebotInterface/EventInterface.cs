@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Sora.Enumeration.ApiEnum;
-using Sora.EventArgs.OnebotEvent;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
@@ -12,13 +10,13 @@ using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.Model;
 using Sora.Tool;
 
-namespace Sora.OnebotAdapter
+namespace Sora.OnebotInterface
 {
     /// <summary>
-    /// 基类事件分发
+    /// Onebot事件接口
     /// 判断和分发基类事件
     /// </summary>
-    public class EventAdapter
+    public static class EventInterface
     {
         #region 静态记录表
         /// <summary>
@@ -44,7 +42,7 @@ namespace Sora.OnebotAdapter
         /// </summary>
         /// <param name="messageJson">消息json对象</param>
         /// <param name="connection">客户端链接接口</param>
-        internal void Adapter(JObject messageJson, Guid connection)
+        internal static void Adapter(JObject messageJson, Guid connection)
         {
             switch (GetBaseEventType(messageJson))
             {
@@ -71,10 +69,10 @@ namespace Sora.OnebotAdapter
                     }
                     //查找请求标识符是否存在
                     // ReSharper disable once SimplifyLinqExpressionUseAll
-                    if (RequestApiAdapter.RequestList.Any(e => e.Equals(echo)))
+                    if (RequestApiInterface.RequestList.Any(e => e.Equals(echo)))
                     {
                         //取出返回值中的数据
-                        RequestApiAdapter.GetResponse(echo, messageJson);
+                        RequestApiInterface.GetResponse(echo, messageJson);
                     }
                     else
                     {
@@ -118,8 +116,8 @@ namespace Sora.OnebotAdapter
                     LifeCycleEventArgs lifeCycle = messageJson.ToObject<LifeCycleEventArgs>();
                     if (lifeCycle != null) ConsoleLog.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
                     //未知原因会丢失第一次调用的返回值，直接丢弃第一次调用
-                    await RequestApiAdapter.GetOnebotVersion(connection);
-                    ApiResponseCollection verInfo = await RequestApiAdapter.GetOnebotVersion(connection);
+                    await RequestApiInterface.GetOnebotVersion(connection);
+                    ApiResponseCollection verInfo = await RequestApiInterface.GetOnebotVersion(connection);
                     ConsoleLog.Info("Sora",$"已连接到{Enum.GetName(verInfo.Client)}客户端,版本:{verInfo.ClientVer}");
                     break;
                 default:
@@ -135,7 +133,7 @@ namespace Sora.OnebotAdapter
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private async void MessageAdapter(JObject messageJson, Guid connection)
+        private static async void MessageAdapter(JObject messageJson, Guid connection)
         {
             switch (GetMessageType(messageJson))
             {
@@ -144,14 +142,19 @@ namespace Sora.OnebotAdapter
                     PrivateMessageEventArgs privateMessage = messageJson.ToObject<PrivateMessageEventArgs>();
                     if(privateMessage == null) break;
                     ConsoleLog.Debug("Sora",$"Private msg {privateMessage.Sender.Nick}({privateMessage.UserId}) : {privateMessage.RawMessage}");
-                    ApiResponseCollection ret = await RequestApiAdapter.GetLoginInfo(connection);
-                    ConsoleLog.Debug("Sora",$"LOGIN id = {ret.Uid}|{ret.Nick}");
                     break;
                 //群聊事件
                 case "group":
                     GroupMessageEventArgs groupMessage = messageJson.ToObject<GroupMessageEventArgs>();
                     if(groupMessage == null) break;
                     ConsoleLog.Debug("Sora",$"Group msg[{groupMessage.GroupId}] form {groupMessage.Sender.Nick}[{groupMessage.UserId}] : {groupMessage.RawMessage}");
+
+                    #region 暂时的测试区域
+                    List<CQCode> msg = new List<CQCode>();
+                    msg.Add(CQCode.CQRecord(@"D:\FFOutput\A.amr"));
+                    await RequestApiInterface.SendGroupMessage(connection, 883740678, msg);
+                    #endregion
+
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMessageType(messageJson)}]");
@@ -166,7 +169,7 @@ namespace Sora.OnebotAdapter
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private void RequestAdapter(JObject messageJson, Guid connection)
+        private static void RequestAdapter(JObject messageJson, Guid connection)
         {
             switch (GetRequestType(messageJson))
             {
@@ -195,7 +198,7 @@ namespace Sora.OnebotAdapter
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private void NoticeAdapter(JObject messageJson, Guid connection)
+        private static void NoticeAdapter(JObject messageJson, Guid connection)
         {
             switch (GetNoticeType(messageJson))
             {
