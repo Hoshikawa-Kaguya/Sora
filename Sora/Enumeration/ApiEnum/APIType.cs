@@ -19,5 +19,10 @@ namespace Sora.Enumeration.ApiEnum
         /// </summary>
         [Description("get_version_info")]
         GetVersion,
+        /// <summary>
+        /// 获取合并转发消息
+        /// </summary>
+        [Description("get_forward_msg")]
+        GetForwardMessage 
     }
 }

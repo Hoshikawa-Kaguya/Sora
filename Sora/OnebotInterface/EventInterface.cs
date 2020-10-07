@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Sora.Enumeration;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.Model;
+using Sora.Model.CQCodeModel;
+using Sora.Model.Message;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
@@ -107,7 +110,7 @@ namespace Sora.OnebotInterface
                         }
                         else
                         {
-                            HeartBeatList.Add(connection,heartBeat.Time);
+                            HeartBeatList.TryAdd(connection,heartBeat.Time);
                         }
                     }
                     break;
@@ -150,10 +153,10 @@ namespace Sora.OnebotInterface
                     ConsoleLog.Debug("Sora",$"Group msg[{groupMessage.GroupId}] form {groupMessage.Sender.Nick}[{groupMessage.UserId}] : {groupMessage.RawMessage}");
 
                     #region 暂时的测试区域
-                    List<CQCode> msg = new List<CQCode>();
-                    msg.Add(CQCode.CQImage(null));
-                    msg.Add(CQCode.CQText("哇哦"));
-                    await RequestApiInterface.SendGroupMessage(connection, 883740678, msg);
+                    CQCode       cqCode_g = MessageParse.ParseMessageElement(groupMessage.MessageList[0]);
+                    List<CQCode> msg_g    = new List<CQCode>();
+                    msg_g.Add(CQCode.CQJson("{\"app\":\"com.tencent.structmsg\",\"desc\":\"音乐\",\"view\":\"music\",\"ver\":\"0.0.0.1\",\"prompt\":\"[分享]フェアリーテイル (ゲーム「フェアリーテイル?レクイエム..…\",\"meta\":{\"music\":{\"action\":\"\",\"android_pkg_name\":\"\",\"app_type\":1,\"appid\":100495085,\"desc\":\"Rita\",\"jumpUrl\":\"https:\\/\\/y.music.163.com\\/m\\/song\\/425295844\\/?userid=95316186\",\"musicUrl\":\"http:\\/\\/music.163.com\\/song\\/media\\/outer\\/url?id=425295844&userid=95316186\",\"preview\":\"http:\\/\\/p2.music.126.net\\/0DBR4p8RqmWQ6icPDkVqmg==\\/3441471403705437.jpg\",\"sourceMsgId\":\"0\",\"source_icon\":\"\",\"source_url\":\"\",\"tag\":\"网易云音乐\",\"title\":\"フェアリーテイル (ゲーム「フェアリーテイル?レクイエム..…\"}},\"config\":{\"autosize\":true,\"ctime\":1602098897,\"forward\":true,\"token\":\"a505fb7c55987b125be4d252a9c5863e\",\"type\":\"normal\"}}"));
+                    await RequestApiInterface.SendGroupMessage(connection, 883740678, msg_g);
                     #endregion
 
                     break;
