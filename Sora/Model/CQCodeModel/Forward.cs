@@ -3,20 +3,20 @@ using Newtonsoft.Json;
 namespace Sora.Model.CQCodeModel
 {
     /// <summary>
-    /// 纯文本
+    /// 合并转发/合并转发节点
     /// </summary>
-    public class Text
+    internal class Forward
     {
         #region 属性
         /// <summary>
-        /// 纯文本内容
+        /// 转发消息ID
         /// </summary>
-        [JsonProperty(PropertyName = "text")]
-        internal string Content { get; set; }
+        [JsonProperty(PropertyName = "id")]
+        internal string MessageId { get; set; }
         #endregion
 
         #region 构造函数(仅用于JSON消息段构建)
-        internal Text(){}
+        internal Forward() {}
         #endregion
     }
 }

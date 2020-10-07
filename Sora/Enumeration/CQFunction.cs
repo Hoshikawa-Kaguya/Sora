@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 
 namespace Sora.Enumeration
@@ -33,6 +34,7 @@ namespace Sora.Enumeration
         /// <summary>
         /// 短视频
         /// </summary>
+        [Obsolete]
         [Description("video")]
         Video,
         /// <summary>
@@ -41,52 +43,10 @@ namespace Sora.Enumeration
         [Description("at")]
         At,
         /// <summary>
-        /// 猜拳魔法表情
-        /// </summary>
-        [Description("rps")]
-        Rps,
-        /// <summary>
-        /// 掷骰子魔法表情
-        /// </summary>
-        [Description("dice")]
-        Dice,
-        /// <summary>
-        /// 窗口抖动（戳一戳）
-        /// </summary>
-        [Description("Shake")]
-        Shake,
-        /// <summary>
-        /// 戳一戳
-        /// </summary>
-        [Description("poke")]
-        Poke,
-        /// <summary>
-        /// <para>匿名消息</para>
-        /// <para>只能发送</para>
-        /// </summary>
-        [Description("anonymous")]
-        Anonymous,
-        /// <summary>
         /// 链接分享
         /// </summary>
         [Description("share")]
         Share,
-        /// <summary>
-        /// 推荐好友/群
-        /// </summary>
-        [Description("contact")]
-        Contact,
-        /// <summary>
-        /// 位置
-        /// </summary>
-        [Description("location")]
-        Location,
-        /// <summary>
-        /// <para>音乐分享</para>
-        /// <para>只能发送</para>
-        /// </summary>
-        [Description("music")]
-        Music,
         /// <summary>
         /// 回复
         /// </summary>
@@ -98,6 +58,13 @@ namespace Sora.Enumeration
         /// </summary>
         [Description("forward")]
         Forward,
+        #endregion
+        #region Go扩展消息段
+        /// <summary>
+        /// 群戳一戳
+        /// </summary>
+        [Description("poke")]
+        Poke,
         /// <summary>
         /// <para>合并转发节点</para>
         /// <para>也可能是自定义节点</para>
@@ -113,12 +80,7 @@ namespace Sora.Enumeration
         /// JSON 消息
         /// </summary>
         [Description("json")]
-        Json
-        #endregion
-        #region Go扩展消息段
-
-        
-
+        Json,
         #endregion
     }
 }

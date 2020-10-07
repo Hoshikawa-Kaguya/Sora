@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Sora.Enumeration.ApiEnum;
+using Sora.Model.CQCodeModel;
 
 namespace Sora.Model
 {
@@ -42,5 +44,10 @@ namespace Sora.Model
         /// 消息id
         /// </summary>
         internal int MessageId { get; set; } = -1;
+
+        /// <summary>
+        /// 消息列表
+        /// </summary>
+        internal NodeArray NodeMessages { get; set; } = new NodeArray();
     }
 }

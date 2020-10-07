@@ -5,21 +5,15 @@ using Newtonsoft.Json.Linq;
 using Sora.Enumeration;
 using Sora.Model.CQCodeModel;
 using Sora.Model.Message;
+using Sora.Tool;
 
 namespace Sora.Model
 {
+    /// <summary>
+    /// CQ码类
+    /// </summary>
     public class CQCode
     {
-        #region 字段
-        private static readonly List<Regex> FileRegices = new List<Regex>
-        {
-            new Regex(@"^[a-zA-Z]:(((\\(?! )[^/:*?<>\""|\\]+)+\\?)|(\\)?)\s*\.[\w]+$", RegexOptions.Compiled), //绝对路径
-            new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$", RegexOptions.Compiled),//base64
-            new Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$", RegexOptions.Compiled),//网络图片链接
-            new Regex(@"^[\w,\s-]+\.[\w]+$", RegexOptions.Compiled)
-        };
-        #endregion
-
         #region 属性
         /// <summary>
         /// CQ码类型
@@ -53,7 +47,7 @@ namespace Sora.Model
         public static CQCode CQText(string msg)
         {
             return new CQCode(CQFunction.Text,
-                              new Text {Context = msg});
+                              new Text {Content = msg});
         }
 
         /// <summary>
@@ -62,7 +56,11 @@ namespace Sora.Model
         /// <param name="uid">用户uid</param>
         public static CQCode CQAt(long uid)
         {
-            //TODO 账号最小值判断
+            if (uid < 100000)
+            {
+                ConsoleLog.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
+                return CQIlleage();
+            }
             return new CQCode(CQFunction.At,
                               new At {Traget = uid.ToString()});
         }
@@ -82,12 +80,14 @@ namespace Sora.Model
         /// <param name="id">表情 ID</param>
         public static CQCode CQFace(int id)
         {
-            if (id is >= 0 and <= 244)
+            //检查ID合法性
+            if (id is < 0 or > 244)
             {
-                return new CQCode(CQFunction.Face,
-                                  new Face {Id = id});
+                ConsoleLog.Error("CQCode|CQFace", $"非法参数，已忽略CQ码[id超出范围限制({id})]");
+                return CQIlleage();
             }
-            return CQIlleage();
+            return new CQCode(CQFunction.Face,
+                              new Face {Id = id});
         }
 
         /// <summary>
@@ -102,7 +102,16 @@ namespace Sora.Model
                                       int? timeout = null)
         {
             (string dataStr, bool isDataStr) = ParseDataStr(data);
-            if (!isDataStr) return CQIlleage();
+            if (!dataStr.EndsWith("amr") || !dataStr.EndsWith("AMR"))
+            {
+                ConsoleLog.Error("CQCode|CQRecord", "不支持的格式，只支持AMR格式音频文件");
+                return CQIlleage();
+            }
+            if (!isDataStr)
+            {
+                ConsoleLog.Error("CQCode|CQRecord", $"非法参数({data})，已忽略此CQ码");
+                return CQIlleage();
+            }
             return new CQCode(CQFunction.Record,
                               new Record
                               {
@@ -126,7 +135,11 @@ namespace Sora.Model
                                      int? timeout = null)
         {
             (string dataStr, bool isDataStr) = ParseDataStr(data);
-            if (!isDataStr) return CQIlleage();
+            if (!isDataStr)
+            {
+                ConsoleLog.Error("CQCode|CQRecord", $"非法参数({data})，已忽略CQ码");
+                return CQIlleage();
+            }
             return new CQCode(CQFunction.Image,
                               new Image
                               {
@@ -139,11 +152,132 @@ namespace Sora.Model
         }
 
         /// <summary>
+        /// 视频CQ码
+        /// </summary>
+        /// <param name="data">视频名/绝对路径/URL/base64</param>
+        /// <param name="useCache">是否使用已缓存的文件</param>
+        /// <param name="useProxy">是否通过代理下载文件</param>
+        /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
+        [Obsolete]
+        public static CQCode CQVideo(string data, bool useCache = true, bool useProxy = true, int? timeout = null)
+        {
+            (string dataStr, bool isDataStr) = ParseDataStr(data);
+            if (!isDataStr)
+            {
+                ConsoleLog.Error("CQCode|CQVideo", $"非法参数({data})，已忽略CQ码");
+                return CQIlleage();
+            }
+            return new CQCode(CQFunction.Video,
+                              new Video
+                              {
+                                  VideoFile = dataStr,
+                                  Cache     = useCache ? 1 : 0,
+                                  Proxy     = useProxy ? 1 : 0,
+                                  Timeout   = timeout
+                              });
+        }
+
+        /// <summary>
+        /// 群成员戳一戳
+        /// </summary>
+        /// <param name="uid">ID</param>
+        public static CQCode CQPoke(long uid)
+        {
+            if (uid < 100000)
+            {
+                ConsoleLog.Error("CQCode|CQPoke", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
+                return CQIlleage();
+            }
+            return new CQCode(CQFunction.Poke,
+                              new Poke
+                              {
+                                  Uid = uid
+                              });
+        }
+
+        /// <summary>
+        /// 链接分享
+        /// </summary>
+        /// <param name="url">URL</param>
+        /// <param name="title">标题</param>
+        /// <param name="content">可选，内容描述</param>
+        /// <param name="imageUrl">可选，图片 URL</param>
+
+        public static CQCode CQShare(string url,
+                                     string title,
+                                     string content = null,
+                                     string imageUrl = null)
+        {
+            return new CQCode(CQFunction.Share,
+                              new Share
+                              {
+                                  Url      = url,
+                                  Title    = title,
+                                  Content  = content,
+                                  ImageUrl = imageUrl
+                              });
+        }
+
+        /// <summary>
+        /// 回复
+        /// </summary>
+        /// <param name="id"></param>
+        public static CQCode CQReply(int id)
+        {
+            return new CQCode(CQFunction.Reply,
+                              new Reply
+                              {
+                                  Traget = id
+                              });
+        }
+
+        /// <summary>
+        /// 合并转发
+        /// </summary>
+        /// <param name="forwardId"></param>
+        //TODO 不能使用CQ码形式发送，需要使用/send_group_forward_msg
+        [Obsolete]
+        public static CQCode CQForward(string forwardId)
+        {
+            return new CQCode(CQFunction.Node,
+                              new Forward
+                              {
+                                  MessageId = forwardId
+                              });
+        }
+
+        /// <summary>
+        /// XML
+        /// </summary>
+        /// <param name="content"></param>
+        public static CQCode CQXml(string content)
+        {
+            return new CQCode(CQFunction.Xml,
+                              new Code
+                              {
+                                  Content = content
+                              });
+        }
+
+        /// <summary>
+        /// JSON
+        /// </summary>
+        /// <param name="content"></param>
+        public static CQCode CQJson(string content)
+        {
+            return new CQCode(CQFunction.Json,
+                              new Code
+                              {
+                                  Content = content
+                              });
+        }
+
+        /// <summary>
         /// 空CQ码构造
         /// 当存在非法参数时CQ码置空
         /// </summary>
         private static CQCode CQIlleage() =>
-            new CQCode(CQFunction.Text, new Text{Context = null});
+            new CQCode(CQFunction.Text, new Text{Content = null});
         #endregion
 
         #region 获取CQ码内容(仅用于序列化)
@@ -151,6 +285,16 @@ namespace Sora.Model
         {
             MsgType = this.Function,
             RawData = JObject.FromObject(this.CQData)
+        };
+        #endregion
+
+        #region 正则匹配字段
+        private static readonly List<Regex> FileRegices = new List<Regex>
+        {
+            new Regex(@"^[a-zA-Z]:(((\\(?! )[^/:*?<>\""|\\]+)+\\?)|(\\)?)\s*\.[a-zA-Z]+$", RegexOptions.Compiled), //绝对路径
+            new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$", RegexOptions.Compiled),//base64
+            new Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$", RegexOptions.Compiled),//网络图片链接
+            new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled)//文件名
         };
         #endregion
 
