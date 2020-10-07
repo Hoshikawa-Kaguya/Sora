@@ -16,7 +16,7 @@ namespace Sora.Model
             new Regex(@"^[a-zA-Z]:(((\\(?! )[^/:*?<>\""|\\]+)+\\?)|(\\)?)\s*\.[\w]+$", RegexOptions.Compiled), //绝对路径
             new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$", RegexOptions.Compiled),//base64
             new Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$", RegexOptions.Compiled),//网络图片链接
-            new Regex(@"^[\w,\s-]+\.(jpg|png)$", RegexOptions.Compiled)
+            new Regex(@"^[\w,\s-]+\.[\w]+$", RegexOptions.Compiled)
         };
         #endregion
 
@@ -57,6 +57,26 @@ namespace Sora.Model
         }
 
         /// <summary>
+        /// At CQ码
+        /// </summary>
+        /// <param name="uid">用户uid</param>
+        public static CQCode CQAt(long uid)
+        {
+            //TODO 账号最小值判断
+            return new CQCode(CQFunction.At,
+                              new At {Traget = uid.ToString()});
+        }
+
+        /// <summary>
+        /// At全体 CQ码
+        /// </summary>
+        public static CQCode CQAtAll()
+        {
+            return new CQCode(CQFunction.At,
+                              new At {Traget = "all"});
+        }
+
+        /// <summary>
         /// 表情CQ码
         /// </summary>
         /// <param name="id">表情 ID</param>
@@ -66,6 +86,14 @@ namespace Sora.Model
                               new Face {Id = id});
         }
 
+        /// <summary>
+        /// 语音CQ码
+        /// </summary>
+        /// <param name="data">文件名/绝对路径/URL/base64</param>
+        /// <param name="isMagic">是否为变声</param>
+        /// <param name="useCache">是否使用已缓存的文件</param>
+        /// <param name="useProxy">是否通过代理下载文件</param>
+        /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
         public static CQCode CQRecord(string data, bool isMagic = false, bool useCache = true, bool useProxy = true,
                                       int? timeout = null)
         {
@@ -88,7 +116,6 @@ namespace Sora.Model
         /// <param name="useCache">是否使用已缓存的文件</param>
         /// <param name="useProxy">是否通过代理下载文件</param>
         /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
-        /// <returns></returns>
         public static CQCode CQImage(string data, bool isFlash = false, bool useCache = true, bool useProxy = true,
                                      int? timeout = null)
         {
