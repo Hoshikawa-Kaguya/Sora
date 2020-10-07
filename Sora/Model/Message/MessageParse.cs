@@ -24,6 +24,8 @@ namespace Sora.Model.Message
                     return new CQCode(CQFunction.Image,message.RawData.ToObject<Image>());
                 case CQFunction.Record:
                     return new CQCode(CQFunction.Record,message.RawData.ToObject<Record>());
+                case CQFunction.At:
+                    return new CQCode(CQFunction.At, message.RawData.ToObject<At>());
                 default:
                     ConsoleLog.Error("我叼你妈的","");
                     return new CQCode(CQFunction.Unknown, message.RawData);
