@@ -151,7 +151,8 @@ namespace Sora.OnebotInterface
 
                     #region 暂时的测试区域
                     List<CQCode> msg = new List<CQCode>();
-                    msg.Add(CQCode.CQRecord(@"D:\FFOutput\A.amr"));
+                    msg.Add(CQCode.CQImage(null));
+                    msg.Add(CQCode.CQText("哇哦"));
                     await RequestApiInterface.SendGroupMessage(connection, 883740678, msg);
                     #endregion
 
