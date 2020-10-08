@@ -4,7 +4,7 @@ using Sora.Converter;
 using Sora.Enumeration;
 using Sora.Model.Message;
 
-namespace Sora.Model.OnebotApi.Request
+namespace Sora.Model.OnebotApi
 {
     internal class SendMessageParams
     {

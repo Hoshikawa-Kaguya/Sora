@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration.ApiEnum;
 
-namespace Sora.Model.OnebotApi.Request
+namespace Sora.Model.OnebotApi
 {
     /// <summary>
     /// API请求类
