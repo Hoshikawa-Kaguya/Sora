@@ -10,8 +10,8 @@ using Newtonsoft.Json.Linq;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiEnum;
 using Sora.Model.OnebotApi.Request;
-using Sora.Model.CQCode;
-using Sora.Model.CQCode.CQCodeModel;
+using Sora.Model.CQCodes;
+using Sora.Model.CQCodes.CQCodeModel;
 using Sora.Model.Message;
 using Sora.Model.OnebotApi;
 using Sora.Tool;
@@ -223,7 +223,7 @@ namespace Sora.OnebotInterface
             //向客户端发送请求数据
             await Task.Run(() =>
                            {
-                               OnebotWSServer.ConnectionInfos[connection].Send(JsonConvert.SerializeObject(message));
+                               OnebotWSServer.ConnectionInfos[connection].Send(JsonConvert.SerializeObject(message,Formatting.Indented));
                            });
             try
             {

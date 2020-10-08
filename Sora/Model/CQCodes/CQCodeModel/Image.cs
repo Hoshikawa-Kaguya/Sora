@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Model.CQCode.CQCodeModel
+namespace Sora.Model.CQCodes.CQCodeModel
 {
     public class Image
     {

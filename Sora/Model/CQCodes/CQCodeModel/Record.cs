@@ -1,24 +1,26 @@
-using System;
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Model.CQCode.CQCodeModel
+namespace Sora.Model.CQCodes.CQCodeModel
 {
-    /// <summary>
-    /// 短视频
-    /// </summary>
-    [Obsolete]
-    internal class Video
+    public class Record
     {
         #region 属性
         /// <summary>
-        /// 视频文件名
+        /// 语音文件名
         /// </summary>
         [JsonProperty(PropertyName = "file")]
-        internal string VideoFile { get; set; }
+        internal string RecordFile { get; set; }
 
         /// <summary>
-        /// 视频 URL
+        /// 表示变声
+        /// </summary>
+        [JsonConverter(typeof(StringConverter))]
+        [JsonProperty(PropertyName = "magic")]
+        internal int? Magic { get; set; }
+
+        /// <summary>
+        /// 语音 URL
         /// </summary>
         [JsonProperty(PropertyName = "url", NullValueHandling = NullValueHandling.Ignore)]
         internal string Url { get; set; }
@@ -43,10 +45,6 @@ namespace Sora.Model.CQCode.CQCodeModel
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "timeout", NullValueHandling = NullValueHandling.Ignore)]
         internal int? Timeout { get; set; }
-        #endregion
-
-        #region 构造函数(仅用于JSON消息段构建)
-        internal Video(){}
         #endregion
     }
 }

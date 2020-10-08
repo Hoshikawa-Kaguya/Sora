@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Enumeration;
-using Sora.Model.CQCode.CQCodeModel;
+using Sora.Model.CQCodes.CQCodeModel;
 using Sora.Model.Message;
 using Sora.Tool;
 
-namespace Sora.Model.CQCode
+namespace Sora.Model.CQCodes
 {
     /// <summary>
     /// CQ码类
@@ -269,6 +270,19 @@ namespace Sora.Model.CQCode
                               new Code
                               {
                                   Content = content
+                              });
+        }
+
+        /// <summary>
+        /// JSON
+        /// </summary>
+        /// <param name="content"></param>
+        public static CQCode CQJson(JObject content)
+        {
+            return new CQCode(CQFunction.Json,
+                              new Code
+                              {
+                                  Content = JsonConvert.SerializeObject(content,Formatting.Indented)
                               });
         }
 

@@ -1,25 +1,25 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Model.CQCode.CQCodeModel
+namespace Sora.Model.CQCodes.CQCodeModel
 {
     /// <summary>
-    /// <para>群成员戳一戳</para>
-    /// <para>仅发送</para>
+    /// At某人
     /// </summary>
-    internal class Poke
+    public class At
     {
         #region 属性
         /// <summary>
-        /// 需要戳的成员
+        /// At目标UID
+        /// 为<see langword="null"/>时为At全体
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "qq")]
-        internal long Uid { get; set; }
+        internal string Traget { get; set; }
         #endregion
 
         #region 构造函数(仅用于JSON消息段构建)
-        internal Poke(){}
+        internal At(){}
         #endregion
     }
 }

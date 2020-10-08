@@ -1,5 +1,5 @@
 using Sora.Enumeration.ApiEnum;
-using Sora.Model.CQCode.CQCodeModel;
+using Sora.Model.CQCodes.CQCodeModel;
 
 namespace Sora.Model.OnebotApi
 {

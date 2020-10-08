@@ -20,7 +20,7 @@ namespace Sora_Test
                                                     ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
                                                     return ValueTask.CompletedTask;
                                                 };
-        
+            
                 server.OnCloseConnectionAsync += (id, eventArgs) =>
                                                  {
                                                      ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
