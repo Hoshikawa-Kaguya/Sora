@@ -1,25 +1,24 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Model.CQCode.CQCodeModel
+namespace Sora.Model.CQCodes.CQCodeModel
 {
     /// <summary>
-    /// 回复
+    /// QQ 表情
     /// </summary>
-    internal class Reply
+    public class Face
     {
         #region 属性
         /// <summary>
-        /// At目标UID
-        /// 为<see langword="null"/>时为At全体
+        /// 纯文本内容
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "id")]
-        internal int Traget { get; set; }
+        internal int Id { get; set; }
         #endregion
 
         #region 构造函数(仅用于JSON消息段构建)
-        internal Reply(){}
+        internal Face() {}
         #endregion
     }
 }

@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Model.CQCode.CQCodeModel
+namespace Sora.Model.CQCodes.CQCodeModel
 {
     /// <summary>
-    /// At某人
+    /// 回复
     /// </summary>
-    public class At
+    internal class Reply
     {
         #region 属性
         /// <summary>
@@ -14,12 +14,12 @@ namespace Sora.Model.CQCode.CQCodeModel
         /// 为<see langword="null"/>时为At全体
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
-        [JsonProperty(PropertyName = "qq")]
-        internal string Traget { get; set; }
+        [JsonProperty(PropertyName = "id")]
+        internal int Traget { get; set; }
         #endregion
 
         #region 构造函数(仅用于JSON消息段构建)
-        internal At(){}
+        internal Reply(){}
         #endregion
     }
 }

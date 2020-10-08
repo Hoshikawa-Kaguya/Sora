@@ -1,24 +1,25 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Model.CQCode.CQCodeModel
+namespace Sora.Model.CQCodes.CQCodeModel
 {
     /// <summary>
-    /// QQ 表情
+    /// <para>群成员戳一戳</para>
+    /// <para>仅发送</para>
     /// </summary>
-    public class Face
+    internal class Poke
     {
         #region 属性
         /// <summary>
-        /// 纯文本内容
+        /// 需要戳的成员
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
-        [JsonProperty(PropertyName = "id")]
-        internal int Id { get; set; }
+        [JsonProperty(PropertyName = "qq")]
+        internal long Uid { get; set; }
         #endregion
 
         #region 构造函数(仅用于JSON消息段构建)
-        internal Face() {}
+        internal Poke(){}
         #endregion
     }
 }
