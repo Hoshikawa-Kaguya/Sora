@@ -1,34 +1,27 @@
-using Newtonsoft.Json;
-
 namespace Sora.Model.SoraModel
 {
     /// <summary>
     /// 群组类
     /// </summary>
-    public class Group
+    public class GroupInfo
     {
-        /// <summary>
-        /// 群号
-        /// </summary>
-        [JsonProperty(PropertyName = "group_id")]
-        public long Id { get; set; }
-
         /// <summary>
         /// 群名称
         /// </summary>
-        [JsonProperty(PropertyName = "group_name")]
-        public string GroupName { get; set; }
+        public string GroupName { get; internal set; }
 
         /// <summary>
         /// 成员数
         /// </summary>
-        [JsonProperty(PropertyName = "member_count")]
-        public int MemberCount { get; set; }
+        public int MemberCount { get; internal set; }
 
         /// <summary>
         /// 最大成员数（群容量）
         /// </summary>
-        [JsonProperty(PropertyName = "max_member_count")]
-        public int MaxMemberCount { get; set; }
+        public int MaxMemberCount { get; internal set; }
+        /// <summary>
+        /// 群组实例
+        /// </summary>
+        public Group Group { get; internal set; }
     }
 }

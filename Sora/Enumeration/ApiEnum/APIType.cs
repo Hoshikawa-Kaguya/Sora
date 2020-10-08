@@ -39,5 +39,20 @@ namespace Sora.Enumeration.ApiEnum
         /// </summary>
         [Description("get_group_list")]
         GetGroupList,
+        /// <summary>
+        /// 获取群成员信息
+        /// </summary>
+        [Description("get_group_info")]
+        GetGroupInfo,
+        /// <summary>
+        /// 获取群成员信息
+        /// </summary>
+        [Description("get_group_member_info")]
+        GetGroupMemberInfo,
+        /// <summary>
+        /// 获取群成员列表
+        /// </summary>
+        [Description("get_group_member_list")]
+        GetGroupMemberList
     }
 }

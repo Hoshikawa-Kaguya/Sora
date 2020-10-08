@@ -9,9 +9,6 @@ using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.Model.CQCodes;
-using Sora.Model.Message;
-using Sora.Model.OnebotApi;
-using Sora.Model.SoraModel;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
@@ -147,8 +144,8 @@ namespace Sora.OnebotInterface
                     #region 暂时的测试区域
                     List<CQCode> msg_g    = new List<CQCode>();
                     msg_g.Add(CQCode.CQText("哇哦"));
-                    var test = await ApiInterface.SendGroupMessage(connection, 883740678, msg_g);
-                    List<FriendInfo> friendList = await ApiInterface.GetFriendList(connection);
+                    var test      = await ApiInterface.SendGroupMessage(connection, 883740678, msg_g);
+                    var groupMemberListList = await ApiInterface.GetGroupMemberList(connection, 883740678);
                     #endregion
 
                     break;

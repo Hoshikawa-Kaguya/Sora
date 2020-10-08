@@ -6,22 +6,40 @@ using Sora.Model.Message;
 
 namespace Sora.Model.OnebotApi
 {
-    internal class SendMessageParams
+    /// <summary>
+    /// 发送消息调用参数
+    /// </summary>
+    internal struct SendMessageParams
     {
+        /// <summary>
+        /// 消息类型 群/私聊
+        /// </summary>
         [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "message_type")]
         internal MessageType MessageType { get; set; }
 
+        /// <summary>
+        /// 用户id
+        /// </summary>
         [JsonProperty(PropertyName = "user_id", NullValueHandling = NullValueHandling.Ignore)]
-        internal long? UserId { get; set; } = null;
+        internal long? UserId { get; set; }
 
+        /// <summary>
+        /// 群号
+        /// </summary>
         [JsonProperty(PropertyName = "group_id", NullValueHandling = NullValueHandling.Ignore)]
-        internal long? GroupId { get; set; } = null;
+        internal long? GroupId { get; set; }
 
+        /// <summary>
+        /// 消息段数组
+        /// </summary>
         [JsonProperty(PropertyName = "message")]
-        internal List<OnebotMessage> Message { get; set; } = new List<OnebotMessage>();
+        internal List<OnebotMessage> Message { get; set; }
 
+        /// <summary>
+        /// 是否忽略CQ码
+        /// </summary>
         [JsonProperty(PropertyName = "auto_escape")]
-        internal bool AutoEscape { get; set; } = false;
+        internal bool AutoEscape { get; set; }
     }
 }

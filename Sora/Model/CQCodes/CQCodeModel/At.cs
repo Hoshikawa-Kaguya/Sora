@@ -6,7 +6,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// <summary>
     /// At某人
     /// </summary>
-    public class At
+    internal class At
     {
         #region 属性
         /// <summary>

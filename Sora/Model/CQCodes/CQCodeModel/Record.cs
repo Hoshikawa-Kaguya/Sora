@@ -3,7 +3,7 @@ using Sora.Converter;
 
 namespace Sora.Model.CQCodes.CQCodeModel
 {
-    public class Record
+    internal class Record
     {
         #region 属性
         /// <summary>
