@@ -6,7 +6,7 @@ namespace Sora.Model.OnebotApi
     /// <summary>
     /// 撤回消息
     /// </summary>
-    internal class DeletMsgParams
+    internal struct DeletMsgParams
     {
         /// <summary>
         /// 消息ID

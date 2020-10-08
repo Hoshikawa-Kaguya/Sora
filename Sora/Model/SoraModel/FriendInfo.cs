@@ -12,9 +12,14 @@ namespace Sora.Model.SoraModel
         public string Remark { get; internal set; }
 
         /// <summary>
+        /// 用户名
+        /// </summary>
+        public string Nick { get; internal set; }
+
+        /// <summary>
         /// 好友用户实例
         /// </summary>
-        public UserInfo User { get; internal set; }
+        public User User { get; internal set; }
         #endregion
     }
 }

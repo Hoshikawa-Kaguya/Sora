@@ -1,22 +1,20 @@
-using Newtonsoft.Json;
+using System;
 
 namespace Sora.Model.SoraModel
 {
-    /// <summary>
-    /// 用户类
-    /// </summary>
-    public class UserInfo
+    public class Group
     {
         #region 属性
         /// <summary>
-        /// 当前实例的QQ号
+        /// 群号
         /// </summary>
         public long Id { get; internal set; }
 
         /// <summary>
-        /// 用户名
+        /// 当前实例对应的链接GUID
+        /// 用于调用API
         /// </summary>
-        public string Nick { get; internal set; }
+        internal Guid ConnectionGuid { get; set; }
         #endregion
     }
 }

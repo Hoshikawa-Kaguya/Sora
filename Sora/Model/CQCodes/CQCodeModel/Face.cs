@@ -6,7 +6,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// <summary>
     /// QQ 表情
     /// </summary>
-    public class Face
+    internal class Face
     {
         #region 属性
         /// <summary>

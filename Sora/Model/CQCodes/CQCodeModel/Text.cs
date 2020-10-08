@@ -5,7 +5,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// <summary>
     /// 纯文本
     /// </summary>
-    public class Text
+    internal class Text
     {
         #region 属性
         /// <summary>

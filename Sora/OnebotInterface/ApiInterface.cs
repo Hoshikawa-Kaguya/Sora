@@ -120,7 +120,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         /// <param name="msgId">合并转发 ID</param>
         /// <returns>ApiResponseCollection</returns>
-        internal static async ValueTask<NodeArray> GetForwardMessage(Guid connection, string msgId)
+        internal static async ValueTask<(int retCode, NodeArray nodeArray)> GetForwardMessage(Guid connection, string msgId)
         {
             if(string.IsNullOrEmpty(msgId)) throw new NullReferenceException(nameof(msgId));
             ConsoleLog.Debug("Sora", "Sending get_forward_msg request");
@@ -134,13 +134,14 @@ namespace Sora.OnebotInterface
                 }
             }, connection);
             //处理API返回信息
+            int code = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", ret?["data"]);
-            if (GetBaseRetCode(ret).retCode != 0) return new NodeArray();
+            if (GetBaseRetCode(ret).retCode != 0) return (code, null);
             //转换消息类型
             NodeArray messageList =
                 ret?["data"]?.ToObject<NodeArray>() ?? new NodeArray();
             messageList.ParseNode();
-            return messageList;
+            return (code, messageList);
         }
 
         /// <summary>
@@ -181,7 +182,7 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             int code = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_version_info response retcode={code}");
-            if (code != 0 || ret["data"] == null) return (code, ClientType.Other, "unknown");
+            if (code != 0 || ret["data"] == null) return (code, ClientType.Other, null);
             //判断是否为MiraiGo
             JObject.FromObject(ret["data"]).TryGetValue("go-cqhttp", out JToken clientJson);
             bool.TryParse(clientJson?.ToString()                ?? "false", out bool isGo);
@@ -195,9 +196,9 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 获取好友列表
         /// </summary>
-        /// <param name="connection"></param>
+        /// <param name="connection">服务器连接标识</param>
         /// <returns>好友信息列表</returns>
-        internal static async ValueTask<List<FriendInfo>> GetFriendList(Guid connection)
+        internal static async ValueTask<(int retCode, List<FriendInfo> friendList)> GetFriendList(Guid connection)
         {
             ConsoleLog.Debug("Sora","Sending get_friend_list request");
             JObject ret = await SendApiRequest(new ApiRequest
@@ -207,25 +208,31 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_friend_list response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return new List<FriendInfo>();
+            if (retCode != 0 || ret["data"] == null) return (retCode, null);
             List<FriendInfo> friendList = new List<FriendInfo>();
             //处理返回的好友信息
             foreach (JToken token in ret["data"]?.ToArray())
             {
                 friendList.Add(new FriendInfo
                 {
-                    User = new UserInfo
+                    User = new User
                     {
-                        Id   = Convert.ToInt64(token["user_id"] ?? -1),
-                        Nick = token["nickname"]?.ToString() ?? string.Empty
+                        Id             = Convert.ToInt64(token["user_id"] ?? -1),
+                        ConnectionGuid = connection
                     },
-                    Remark = token["remark"]?.ToString() ?? string.Empty
+                    Remark = token["remark"]?.ToString()   ?? string.Empty,
+                    Nick   = token["nickname"]?.ToString() ?? string.Empty
                 });
             }
-            return friendList;
+            return (retCode, friendList);
         }
 
-        internal static async ValueTask<List<Group>> GetGroupList(Guid connection)
+        /// <summary>
+        /// 获取群组列表
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <returns>群组信息列表</returns>
+        internal static async ValueTask<(int retCode, List<GroupInfo> groupList)> GetGroupList(Guid connection)
         {
             ConsoleLog.Debug("Sora","Sending get_friend_list request");
             JObject ret = await SendApiRequest(new ApiRequest
@@ -235,9 +242,117 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_friend_list response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return new List<Group>();
+            if (retCode != 0 || ret["data"] == null) return (retCode, null);
             //处理返回群组列表
-            return ret["data"].ToObject<List<Group>>();
+            List<GroupInfo> groupList = new List<GroupInfo>();
+            foreach (JToken token in ret["data"]?.ToArray())
+            {
+                groupList.Add(new GroupInfo
+                {
+                    Group = new Group
+                    {
+                        Id = Convert.ToInt64(token["group_id"] ?? -1),
+                        ConnectionGuid = connection
+                    },
+                    GroupName      = token["group_name"]?.ToString() ?? string.Empty,
+                    MemberCount    = Convert.ToInt32(token["member_count"] ?? -1),
+                    MaxMemberCount = Convert.ToInt32(token["max_member_count"] ?? -1)
+                });
+            }
+            return (retCode, groupList);
+        }
+
+        /// <summary>
+        /// 获取群成员列表
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        internal static async ValueTask<(int retCode, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
+            Guid connection, long gid)
+        {
+            ConsoleLog.Debug("Sora","Sending get_group_member_list request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetGroupMemberList,
+                ApiParams = new GetGroupMemberListParams
+                {
+                    Gid = gid
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_member_list response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            //处理返回群成员列表
+            return (retCode,
+                    ret["data"]?.ToObject<List<GroupMemberInfo>>());
+        }
+
+        /// <summary>
+        /// 获取群信息
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="noCache">是否不使用缓存</param>
+        internal static async ValueTask<(int retCode, GroupInfo memberInfo)> GetGroupInfo(
+            Guid connection, long gid, bool noCache)
+        {
+            ConsoleLog.Debug("Sora", "Sending get_group_info request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetGroupInfo,
+                ApiParams = new GetGroupInfoParams
+                {
+                    Gid     = gid,
+                    NoCache = noCache
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_info response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            return (retCode,
+                    new GroupInfo
+                    {
+                        Group = new Group
+                        {
+                            Id             = Convert.ToInt64(ret["data"]["group_id"] ?? -1),
+                            ConnectionGuid = connection
+                        },
+                        GroupName      = ret["data"]["group_name"]?.ToString() ?? string.Empty,
+                        MemberCount    = Convert.ToInt32(ret["data"]["member_count"]     ?? -1),
+                        MaxMemberCount = Convert.ToInt32(ret["data"]["max_member_count"] ?? -1)
+                    }
+                );
+        }
+
+        /// <summary>
+        /// 获取群成员信息
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="uid">用户ID</param>
+        /// <param name="noCache">是否不使用缓存</param>
+        internal static async ValueTask<(int retCode, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
+            Guid connection, long gid, long uid, bool noCache)
+        {
+            ConsoleLog.Debug("Sora","Sending get_group_member_info request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetGroupMemberInfo,
+                ApiParams = new GetGroupMemberInfoParams
+                {
+                    Gid     = gid,
+                    Uid     = uid,
+                    NoCache = noCache
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_member_info response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            return (retCode,
+                    ret["data"]?.ToObject<GroupMemberInfo>());
         }
         #endregion
 
@@ -294,17 +409,17 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 向API客户端发送请求数据
         /// </summary>
-        /// <param name="message">信息</param>
+        /// <param name="apiRequest">信息</param>
         /// <param name="connectionGuid">服务器连接标识符</param>
         /// <returns>API返回</returns>
-        private static async ValueTask<JObject> SendApiRequest(object message,Guid connectionGuid)
+        private static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest,Guid connectionGuid)
         {
-            Guid echo = ((ApiRequest) message).Echo;
+            Guid echo = apiRequest.Echo;
             //添加新的请求记录
             RequestList.Add(echo);
             //向客户端发送请求数据
             if(!OnebotWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return null;
-            await clientConnection.Send(JsonConvert.SerializeObject(message,Formatting.None));
+            await clientConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
             try
             {
                 //等待客户端返回调用结果
