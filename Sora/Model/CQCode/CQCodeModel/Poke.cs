@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Model.CQCodeModel
+namespace Sora.Model.CQCode.CQCodeModel
 {
     /// <summary>
     /// <para>群成员戳一戳</para>

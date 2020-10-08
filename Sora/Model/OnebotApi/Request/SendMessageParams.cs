@@ -4,15 +4,9 @@ using Sora.Converter;
 using Sora.Enumeration;
 using Sora.Model.Message;
 
-namespace Sora.EventArgs.OnebotEvent.ApiEvent
+namespace Sora.Model.OnebotApi.Request
 {
-    internal class SendMsgEventArgs : BaseApiMsgEventArgs
-    {
-        [JsonProperty(PropertyName = "params")]
-        internal MsgData MessageData { get; set; }
-    }
-
-    internal class MsgData
+    internal class SendMessageParams
     {
         [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "message_type")]

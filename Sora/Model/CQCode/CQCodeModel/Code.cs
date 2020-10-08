@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Sora.Enumeration;
 
-namespace Sora.Model.CQCodeModel
+namespace Sora.Model.CQCode.CQCodeModel
 {
     /// <summary>
     /// <para>Xml与Json集合</para>

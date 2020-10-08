@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Sora.Model.Message;
 
-namespace Sora.Model.CQCodeModel
+namespace Sora.Model.CQCode.CQCodeModel
 {
     /// <summary>
     /// 转发消息的列表

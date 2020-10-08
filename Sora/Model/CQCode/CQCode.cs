@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Sora.Enumeration;
-using Sora.Model.CQCodeModel;
+using Sora.Model.CQCode.CQCodeModel;
 using Sora.Model.Message;
 using Sora.Tool;
 
-namespace Sora.Model
+namespace Sora.Model.CQCode
 {
     /// <summary>
     /// CQ码类

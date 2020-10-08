@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Sora.Model.CQCodeModel
+namespace Sora.Model.CQCode.CQCodeModel
 {
     /// <summary>
     /// 链接分享
