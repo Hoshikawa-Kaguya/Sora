@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Sora.Enumeration.ApiEnum;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
@@ -10,6 +11,7 @@ using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.Model.CQCodes;
 using Sora.Model.Message;
 using Sora.Model.OnebotApi;
+using Sora.Model.SoraModel;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
@@ -64,22 +66,13 @@ namespace Sora.OnebotInterface
                 default:
                     //尝试从响应中获取标识符
                     if (!messageJson.TryGetValue("echo", out JToken echoJson)||
-                        !Guid.TryParse(echoJson.ToString(),out Guid echo)) 
-                    {
-                        ConsoleLog.Warning("Sora","接收到未知请求");
+                        !Guid.TryParse(echoJson.ToString(),out Guid echo)||
+                        //查找请求标识符是否存在
+                        !ApiInterface.RequestList.Any(e => e.Equals(echo))) 
                         return;
-                    }
-                    //查找请求标识符是否存在
-                    // ReSharper disable once SimplifyLinqExpressionUseAll
-                    if (RequestApiInterface.RequestList.Any(e => e.Equals(echo)))
-                    {
-                        //取出返回值中的数据
-                        RequestApiInterface.GetResponse(echo, messageJson);
-                    }
-                    else
-                    {
-                        ConsoleLog.Warning("Sora","接收到无效请求");
-                    }
+
+                    //取出返回值中的数据
+                    ApiInterface.GetResponse(echo, messageJson);
                     break;
             }
         }
@@ -118,9 +111,9 @@ namespace Sora.OnebotInterface
                     LifeCycleEventArgs lifeCycle = messageJson.ToObject<LifeCycleEventArgs>();
                     if (lifeCycle != null) ConsoleLog.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
                     //未知原因会丢失第一次调用的返回值，直接丢弃第一次调用
-                    await RequestApiInterface.GetOnebotVersion(connection);
-                    ApiResponseCollection verInfo = await RequestApiInterface.GetOnebotVersion(connection);
-                    ConsoleLog.Info("Sora",$"已连接到{Enum.GetName(verInfo.Client)}客户端,版本:{verInfo.ClientVer}");
+                    await ApiInterface.GetOnebotVersion(connection);
+                    (_, ClientType clientType, string clientVer) = await ApiInterface.GetOnebotVersion(connection);
+                    ConsoleLog.Info("Sora",$"已连接到{Enum.GetName(clientType)}客户端,版本:{clientVer}");
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMetaEventType(messageJson)}]");
@@ -152,10 +145,10 @@ namespace Sora.OnebotInterface
                     ConsoleLog.Debug("Sora",$"Group msg[{groupMessage.GroupId}] form {groupMessage.Sender.Nick}[{groupMessage.UserId}] : {groupMessage.RawMessage}");
 
                     #region 暂时的测试区域
-                    CQCode       cqCode_g = MessageParse.ParseMessageElement(groupMessage.MessageList[0]);
                     List<CQCode> msg_g    = new List<CQCode>();
                     msg_g.Add(CQCode.CQText("哇哦"));
-                    await RequestApiInterface.SendGroupMessage(connection, 883740678, msg_g);
+                    var test = await ApiInterface.SendGroupMessage(connection, 883740678, msg_g);
+                    List<FriendInfo> friendList = await ApiInterface.GetFriendList(connection);
                     #endregion
 
                     break;

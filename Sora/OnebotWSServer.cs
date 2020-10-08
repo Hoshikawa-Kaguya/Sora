@@ -83,7 +83,7 @@ namespace Sora
             this.HeartBeatTimer = new Timer(HeartBeatCheck, null, new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0),
                                        new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0));
             //API超时
-            RequestApiInterface.TimeOut = config.ApiTimeOut;
+            ApiInterface.TimeOut = config.ApiTimeOut;
             //禁用原log
             FleckLog.Level = (LogLevel)4;
             this.Server    = new WebSocketServer($"ws://{config.Location}:{config.Port}")
@@ -135,19 +135,19 @@ namespace Sora
                                  return;
                              }
                              //心跳包
-                             socket.OnPong = async (echo) =>
+                             socket.OnPong = (echo) =>
                                              {
                                                  if (OnPongAsync == null) { return; }
                                                  //心跳包事件处理
-                                                 await Task.Run(() =>
-                                                                {
-                                                                    OnPongAsync(selfId,
-                                                                                    new PongEventArgs(echo,
-                                                                                        socket.ConnectionInfo));
-                                                                });
+                                                 Task.Run( async () =>
+                                                          {
+                                                              await OnPongAsync(selfId,
+                                                                          new PongEventArgs(echo,
+                                                                              socket.ConnectionInfo));
+                                                          });
                                              };
                              //打开连接
-                             socket.OnOpen = async () =>
+                             socket.OnOpen = () =>
                                              {
                                                  //获取Token
                                                  if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",out string token))
@@ -157,38 +157,38 @@ namespace Sora
                                                  }
                                                  ConnectionInfos.Add(socket.ConnectionInfo.Id, socket);
                                                  //向客户端发送Ping
-                                                 await socket.SendPing(new byte[] { 1, 2, 5 });
+                                                 socket.SendPing(new byte[] { 1, 2, 5 });
                                                  //事件回调
                                                  ConnectionEventArgs connection =
                                                      new ConnectionEventArgs(role, socket.ConnectionInfo);
                                                  if (OnOpenConnectionAsync == null) return;
-                                                 await Task.Run(() =>
-                                                                {
-                                                                    OnOpenConnectionAsync(selfId, connection);
-                                                                });
+                                                 Task.Run( async () =>
+                                                           {
+                                                               await OnOpenConnectionAsync(selfId, connection);
+                                                           });
                                                  ConsoleLog.Info("Sora",
                                                                  $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
                                              };
                              //关闭连接
-                             socket.OnClose = async () =>
+                             socket.OnClose = () =>
                                               {
                                                   //移除原连接信息
                                                   if (ConnectionInfos.Any(conn => conn.Key == socket.ConnectionInfo.Id))
                                                   {
                                                       ConnectionInfos.Remove(socket.ConnectionInfo.Id);
                                                       if (OnCloseConnectionAsync == null) return;
-                                                      await Task.Run(() =>
-                                                                     {
-                                                                         OnCloseConnectionAsync(selfId,
-                                                                             new ConnectionEventArgs(role,
-                                                                                 socket.ConnectionInfo));
-                                                                     });
+                                                      Task.Run( async () =>
+                                                                {
+                                                                    await OnCloseConnectionAsync(selfId,
+                                                                        new ConnectionEventArgs(role,
+                                                                            socket.ConnectionInfo));
+                                                                });
                                                   }
                                                   ConsoleLog.Info("Sora",
                                                                   $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
                                               };
                              //上报接收
-                             socket.OnMessage = async (message) =>
+                             socket.OnMessage = (message) =>
                                                 {
                                                     //处理接收的数据
                                                     // ReSharper disable once SimplifyLinqExpressionUseAll
@@ -197,23 +197,23 @@ namespace Sora
                                                     try
                                                     {
                                                         //进入事件处理和分发
-                                                        await Task.Run(() =>
-                                                                       {
-                                                                           EventInterface
-                                                                               .Adapter(JObject.Parse(message),
-                                                                                   socket.ConnectionInfo.Id);
-                                                                       });
+                                                        Task.Run(() =>
+                                                                  {
+                                                                      EventInterface
+                                                                          .Adapter(JObject.Parse(message),
+                                                                              socket.ConnectionInfo.Id);
+                                                                  });
                                                     }
                                                     catch (Exception e)
                                                     {
                                                         ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
                                                         if (OnErrorAsync == null) return;
                                                         //错误事件回调
-                                                        await Task.Run(() =>
-                                                                       {
-                                                                           OnErrorAsync(selfId,
-                                                                               new ErrorEventArgs(e, socket.ConnectionInfo));
-                                                                       });
+                                                        Task.Run( async () =>
+                                                                  {
+                                                                      await OnErrorAsync(selfId,
+                                                                          new ErrorEventArgs(e, socket.ConnectionInfo));
+                                                                  });
                                                     }
                                                 };
                          });

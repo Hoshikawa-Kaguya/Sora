@@ -13,7 +13,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
         /// 消息节点列表
         /// </summary>
         [JsonProperty(PropertyName = "messages")]
-        internal List<Node> NodeMsgList { get; set; }
+        internal List<Node> NodeMsgList { get; set; } = new List<Node>();
 
         #region Node处理
         /// <summary>

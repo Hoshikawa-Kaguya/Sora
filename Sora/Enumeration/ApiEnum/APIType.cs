@@ -23,6 +23,21 @@ namespace Sora.Enumeration.ApiEnum
         /// 获取合并转发消息
         /// </summary>
         [Description("get_forward_msg")]
-        GetForwardMessage 
+        GetForwardMessage,
+        /// <summary>
+        /// 撤回消息
+        /// </summary>
+        [Description("delete_msg")]
+        DeleteMsg,
+        /// <summary>
+        /// 获取好友列表
+        /// </summary>
+        [Description("get_friend_list")]
+        GetFriendList,
+        /// <summary>
+        /// 获取群列表
+        /// </summary>
+        [Description("get_group_list")]
+        GetGroupList,
     }
 }

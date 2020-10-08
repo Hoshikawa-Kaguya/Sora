@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Sora.Model.OnebotApi.Request
+namespace Sora.Model.OnebotApi
 {
     internal class GetForwardParams
     {

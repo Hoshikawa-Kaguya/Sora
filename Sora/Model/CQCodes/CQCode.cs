@@ -57,7 +57,7 @@ namespace Sora.Model.CQCodes
         /// <param name="uid">用户uid</param>
         public static CQCode CQAt(long uid)
         {
-            if (uid < 100000)
+            if (uid < 10000)
             {
                 ConsoleLog.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
                 return CQIlleage();
@@ -184,7 +184,7 @@ namespace Sora.Model.CQCodes
         /// <param name="uid">ID</param>
         public static CQCode CQPoke(long uid)
         {
-            if (uid < 100000)
+            if (uid < 10000)
             {
                 ConsoleLog.Error("CQCode|CQPoke", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
                 return CQIlleage();
@@ -222,7 +222,7 @@ namespace Sora.Model.CQCodes
         /// <summary>
         /// 回复
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">消息id</param>
         public static CQCode CQReply(int id)
         {
             return new CQCode(CQFunction.Reply,
@@ -235,7 +235,7 @@ namespace Sora.Model.CQCodes
         /// <summary>
         /// 合并转发
         /// </summary>
-        /// <param name="forwardId"></param>
+        /// <param name="forwardId">转发id</param>
         //TODO 不能使用CQ码形式发送，需要使用/send_group_forward_msg
         [Obsolete]
         public static CQCode CQForward(string forwardId)
@@ -250,39 +250,42 @@ namespace Sora.Model.CQCodes
         /// <summary>
         /// XML
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="content">xml文本</param>
         public static CQCode CQXml(string content)
         {
             return new CQCode(CQFunction.Xml,
                               new Code
                               {
-                                  Content = content
+                                  Content = content,
+                                  Resid   = null
                               });
         }
 
         /// <summary>
         /// JSON
         /// </summary>
-        /// <param name="content"></param>
-        public static CQCode CQJson(string content)
+        /// <param name="content">json文本</param>
+        /// <param name="richText">富文本通道</param>
+        public static CQCode CQJson(string content,bool richText = false)
         {
             return new CQCode(CQFunction.Json,
                               new Code
                               {
-                                  Content = content
+                                  Content = content,
+                                  Resid   = richText ? (int?) 1 : null
                               });
         }
 
         /// <summary>
         /// JSON
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="content">JObject实例</param>
         public static CQCode CQJson(JObject content)
         {
             return new CQCode(CQFunction.Json,
                               new Code
                               {
-                                  Content = JsonConvert.SerializeObject(content,Formatting.Indented)
+                                  Content = JsonConvert.SerializeObject(content,Formatting.None)
                               });
         }
 

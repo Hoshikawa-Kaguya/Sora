@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Sora.Converter;
 using Sora.Enumeration;
 
 namespace Sora.Model.CQCodes.CQCodeModel
@@ -15,6 +16,13 @@ namespace Sora.Model.CQCodes.CQCodeModel
         /// </summary>
         [JsonProperty(PropertyName = "data")]
         internal string Content { get; set; }
+
+        /// <summary>
+        /// 是否走富文本通道
+        /// </summary>
+        [JsonConverter(typeof(StringConverter))]
+        [JsonProperty(PropertyName = "resid",NullValueHandling = NullValueHandling.Ignore)]
+        internal int? Resid { get; set; }
         #endregion
 
         #region 构造函数(仅用于JSON消息段构建)
