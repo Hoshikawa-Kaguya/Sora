@@ -1,8 +1,7 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Sora.Converter;
-using System;
 
-namespace Sora.Model.CQCodeModel
+namespace Sora.Model.CQCode.CQCodeModel
 {
     /// <summary>
     /// At某人

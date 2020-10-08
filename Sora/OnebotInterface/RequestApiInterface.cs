@@ -9,10 +9,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiEnum;
-using Sora.EventArgs.OnebotEvent.ApiEvent;
-using Sora.Model;
-using Sora.Model.CQCodeModel;
+using Sora.Model.OnebotApi.Request;
+using Sora.Model.CQCode;
+using Sora.Model.CQCode.CQCodeModel;
 using Sora.Model.Message;
+using Sora.Model.OnebotApi;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
@@ -20,6 +21,9 @@ namespace Sora.OnebotInterface
     internal static class RequestApiInterface
     {
         #region 静态属性
+        /// <summary>
+        /// API超时时间
+        /// </summary>
         internal static int TimeOut { get; set; }
         #endregion
 
@@ -53,10 +57,10 @@ namespace Sora.OnebotInterface
             //转换消息段列表
             List<OnebotMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
-            JObject ret = await SendApiRequest(new SendMsgEventArgs
+            JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.SendMsg,
-                MessageData = new MsgData
+                ApiParams = new SendMessageParams
                 {
                     MessageType = MessageType.Private,
                     UserId      = target,
@@ -89,10 +93,10 @@ namespace Sora.OnebotInterface
             //转换消息段列表
             List<OnebotMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
-            JObject ret = await SendApiRequest(new SendMsgEventArgs
+            JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.SendMsg,
-                MessageData = new MsgData
+                ApiParams = new SendMessageParams
                 {
                     MessageType = MessageType.Group,
                     GroupId     = target,
@@ -120,10 +124,10 @@ namespace Sora.OnebotInterface
             if(string.IsNullOrEmpty(msgId)) throw new NullReferenceException(nameof(msgId));
             ConsoleLog.Debug("Sora", "Sending GetForwardMessage request");
             //发送信息
-            JObject ret = await SendApiRequest(new GetForwardMessageArgs
+            JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.GetForwardMessage,
-                Forward = new ForwardData
+                ApiParams = new GetForwardParams
                 {
                     MessageId = msgId
                 }
@@ -144,11 +148,11 @@ namespace Sora.OnebotInterface
         /// 获取登陆账号信息
         /// </summary>
         /// <param name="connection">服务器连接</param>
-        /// <returns></returns>
+        /// <returns>ApiResponseCollection</returns>
         internal static async ValueTask<ApiResponseCollection> GetLoginInfo(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending GetLoginInfo request");
-            JObject ret = await SendApiRequest(new ParamsLessEventArgs
+            JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.GetLoginInfo
             }, connection);
@@ -168,7 +172,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiResponseCollection> GetOnebotVersion(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending GetOnebotVersion request");
-            JObject ret = await SendApiRequest(new ParamsLessEventArgs
+            JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.GetVersion
             }, connection);
@@ -213,7 +217,7 @@ namespace Sora.OnebotInterface
         /// <returns>API返回</returns>
         private static async Task<JObject> SendApiRequest(object message,Guid connection)
         {
-            Guid echo = ((BaseApiMsgEventArgs) message).Echo;
+            Guid echo = ((ApiRequest) message).Echo;
             //添加新的请求记录
             RequestList.Add(echo);
             //向客户端发送请求数据

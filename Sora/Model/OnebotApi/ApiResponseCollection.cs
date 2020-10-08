@@ -1,8 +1,7 @@
-using System.Collections.Generic;
 using Sora.Enumeration.ApiEnum;
-using Sora.Model.CQCodeModel;
+using Sora.Model.CQCode.CQCodeModel;
 
-namespace Sora.Model
+namespace Sora.Model.OnebotApi
 {
     /// <summary>
     /// API返回集
