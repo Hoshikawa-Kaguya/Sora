@@ -2,7 +2,7 @@ using System;
 
 namespace Sora.Model.SoraModel
 {
-    public class Group
+    public sealed class Group
     {
         #region 属性
         /// <summary>

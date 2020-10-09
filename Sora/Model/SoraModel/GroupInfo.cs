@@ -3,7 +3,7 @@ namespace Sora.Model.SoraModel
     /// <summary>
     /// 群组类
     /// </summary>
-    public class GroupInfo
+    public sealed class GroupInfo
     {
         /// <summary>
         /// 群名称

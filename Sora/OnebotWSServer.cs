@@ -12,7 +12,7 @@ using Sora.Tool;
 
 namespace Sora
 {
-    public class OnebotWSServer : IDisposable
+    public sealed class OnebotWSServer : IDisposable
     {
         #region 属性
         /// <summary>

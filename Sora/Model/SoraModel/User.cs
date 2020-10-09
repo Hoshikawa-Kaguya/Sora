@@ -5,7 +5,7 @@ namespace Sora.Model.SoraModel
     /// <summary>
     /// 用户类
     /// </summary>
-    public class User
+    public sealed class User
     {
         #region 属性
         /// <summary>

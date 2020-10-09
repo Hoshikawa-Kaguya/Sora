@@ -144,8 +144,8 @@ namespace Sora.OnebotInterface
                     #region 暂时的测试区域
                     List<CQCode> msg_g    = new List<CQCode>();
                     msg_g.Add(CQCode.CQText("哇哦"));
-                    var test      = await ApiInterface.SendGroupMessage(connection, 883740678, msg_g);
-                    var groupMemberListList = await ApiInterface.GetGroupMemberList(connection, 883740678);
+                    var t1 = await ApiInterface.SendGroupMessage(connection, 883740678, msg_g);
+                    await ApiInterface.SetGroupName(connection,883740678 ,"哇哦测试群");
                     #endregion
 
                     break;
@@ -162,7 +162,7 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private static void RequestAdapter(JObject messageJson, Guid connection)
+        private static async void RequestAdapter(JObject messageJson, Guid connection)
         {
             switch (GetRequestType(messageJson))
             {
@@ -170,13 +170,13 @@ namespace Sora.OnebotInterface
                 case "friend":
                     FriendRequestEventArgs friendRequest = messageJson.ToObject<FriendRequestEventArgs>();
                     if(friendRequest == null)  break;
-                    ConsoleLog.Debug("Sora",$"Friend request form [{friendRequest.UserId}] with commont[{friendRequest.Comment}]");
+                    ConsoleLog.Debug("Sora",$"Friend request form [{friendRequest.UserId}] with commont[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
                     break;
                 //群组请求事件
                 case "group":
                     GroupRequestEventArgs groupRequest = messageJson.ToObject<GroupRequestEventArgs>();
                     if(groupRequest == null) break;
-                    ConsoleLog.Debug("Sora",$"Group request [{groupRequest.SubType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
+                    ConsoleLog.Debug("Sora",$"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetRequestType(messageJson)}]");

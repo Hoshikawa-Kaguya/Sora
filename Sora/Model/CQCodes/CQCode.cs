@@ -13,7 +13,7 @@ namespace Sora.Model.CQCodes
     /// <summary>
     /// CQ码类
     /// </summary>
-    public class CQCode
+    public sealed class CQCode
     {
         #region 属性
         /// <summary>

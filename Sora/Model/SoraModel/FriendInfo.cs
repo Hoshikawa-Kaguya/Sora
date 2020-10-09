@@ -3,7 +3,7 @@ namespace Sora.Model.SoraModel
     /// <summary>
     /// 好友类
     /// </summary>
-    public class FriendInfo
+    public sealed class FriendInfo
     {
         #region 属性
         /// <summary>
