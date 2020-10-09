@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -55,7 +54,7 @@ namespace Sora.OnebotInterface
         /// </returns>
         internal static async ValueTask<(int retCode,int messageId)> SendPrivateMessage(Guid connection, long target, List<CQCode> messages)
         {
-            ConsoleLog.Debug("Sora", "Sending send_msg request");
+            ConsoleLog.Debug("Sora", "Sending send_msg(Private) request");
             if(messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //转换消息段列表
             List<OnebotMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
@@ -76,7 +75,7 @@ namespace Sora.OnebotInterface
             int msgCode = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode)
                 ? messageCode
                 : -1;
-            ConsoleLog.Debug("Sora", $"Get send_msg response retcode={code}|msg_id={msgCode}");
+            ConsoleLog.Debug("Sora", $"Get send_msg(Private) response retcode={code}|msg_id={msgCode}");
             return (code, msgCode);
         }
 
@@ -91,7 +90,7 @@ namespace Sora.OnebotInterface
         /// </returns>
         internal static async ValueTask<(int retCode,int messageId)> SendGroupMessage(Guid connection, long target, List<CQCode> messages)
         {
-            ConsoleLog.Debug("Sora", "Sending send_msg request");
+            ConsoleLog.Debug("Sora", "Sending send_msg(Group) request");
             if(messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //转换消息段列表
             List<OnebotMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
@@ -112,7 +111,7 @@ namespace Sora.OnebotInterface
             int msgCode = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode)
                 ? messageCode
                 : -1;
-            ConsoleLog.Debug("Sora", $"Get send_msg response retcode={code}|msg_id={msgCode}");
+            ConsoleLog.Debug("Sora", $"Get send_msg(Group) response retcode={code}|msg_id={msgCode}");
             return (code, msgCode);
         }
 
@@ -136,14 +135,14 @@ namespace Sora.OnebotInterface
                 }
             }, connection);
             //处理API返回信息
-            int code = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", ret?["data"]);
-            if (GetBaseRetCode(ret).retCode != 0) return (code, null);
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_forward_msg response retcode={retCode}");
+            if (GetBaseRetCode(ret).retCode != 0) return (retCode, null);
             //转换消息类型
             NodeArray messageList =
                 ret?["data"]?.ToObject<NodeArray>() ?? new NodeArray();
             messageList.ParseNode();
-            return (code, messageList);
+            return (retCode, messageList);
         }
 
         /// <summary>
@@ -159,12 +158,12 @@ namespace Sora.OnebotInterface
                 ApiType = APIType.GetLoginInfo
             }, connection);
             //处理API返回信息
-            int code = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get get_login_info response retcode={code}");
-            if (code != 0) return (code, -1, null);
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_login_info response retcode={retCode}");
+            if (retCode != 0) return (retCode, -1, null);
             return
             (
-                retCode:code,
+                retCode,
                 uid:int.TryParse(ret["data"]?["user_id"]?.ToString(), out int uid) ? uid : -1,
                 nick:ret["data"]?["nickname"]?.ToString() ?? string.Empty
             );
@@ -182,17 +181,17 @@ namespace Sora.OnebotInterface
                 ApiType = APIType.GetVersion
             }, connection);
             //处理API返回信息
-            int code = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get get_version_info response retcode={code}");
-            if (code != 0 || ret["data"] == null) return (code, ClientType.Other, null);
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_version_info response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, ClientType.Other, null);
             //判断是否为MiraiGo
             JObject.FromObject(ret["data"]).TryGetValue("go-cqhttp", out JToken clientJson);
             bool.TryParse(clientJson?.ToString()                ?? "false", out bool isGo);
             string verStr = ret["data"]?["version"]?.ToString() ?? string.Empty;
             //Go客户端
-            if (isGo) return (code, ClientType.GoCqhttp,verStr);
+            if (isGo) return (retCode, ClientType.GoCqhttp,verStr);
             //其他客户端
-            return (code, ClientType.Other,verStr);
+            return (retCode, ClientType.Other,verStr);
         }
 
         /// <summary>
@@ -236,14 +235,14 @@ namespace Sora.OnebotInterface
         /// <returns>群组信息列表</returns>
         internal static async ValueTask<(int retCode, List<GroupInfo> groupList)> GetGroupList(Guid connection)
         {
-            ConsoleLog.Debug("Sora","Sending get_friend_list request");
+            ConsoleLog.Debug("Sora","Sending get_group_list request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.GetGroupList
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get get_friend_list response retcode={retCode}");
+            ConsoleLog.Debug("Sora", $"Get get_group_list response retcode={retCode}");
             if (retCode != 0 || ret["data"] == null) return (retCode, null);
             //处理返回群组列表
             List<GroupInfo> groupList = new List<GroupInfo>();
@@ -382,14 +381,14 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         internal static async ValueTask<(int retCode, bool canSend)> CanSendRecord(Guid connection)
         {
-            ConsoleLog.Debug("Sora","Sending can_send_image request");
+            ConsoleLog.Debug("Sora","Sending can_send_record request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.CanSendRecord
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get can_send_image response retcode={retCode}");
+            ConsoleLog.Debug("Sora", $"Get can_send_record response retcode={retCode}");
             if (retCode != 0 || ret["data"] == null) return (retCode, false);
             return (retCode,
                     Convert.ToBoolean(ret["data"]?["yes"]?.ToString() ?? "false"));
@@ -401,14 +400,14 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         internal static async ValueTask<(int retCode, bool online, bool good, JObject other)> GetStatus(Guid connection)
         {
-            ConsoleLog.Debug("Sora","Sending can_send_image request");
+            ConsoleLog.Debug("Sora","Sending get_status request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.GetStatus
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get can_send_image response retcode={retCode}");
+            ConsoleLog.Debug("Sora", $"Get get_status response retcode={retCode}");
             if (retCode != 0 || ret["data"] == null) return (retCode, false, false, null);
             return (retCode,
                     Convert.ToBoolean(ret["data"]?["online"]?.ToString() ?? "false"),
@@ -463,7 +462,7 @@ namespace Sora.OnebotInterface
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get get_image response retcode={retCode}");
+            ConsoleLog.Debug("Sora", $"Get get_group_msg response retcode={retCode}");
             if (retCode != 0 || ret["data"] == null) return (retCode, null);
             ConsoleLog.Debug("Sora",ret["data"]);
             return (retCode,
@@ -663,7 +662,7 @@ namespace Sora.OnebotInterface
 
         #region Go API
         /// <summary>
-        /// 修改群名
+        /// 设置群名
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="gid">群号</param>
@@ -708,7 +707,6 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="message">信息</param>
         /// <param name="connectionGuid">服务器连接标识符</param>
-        /// <returns></returns>
         private static async ValueTask SendApiMessage(ApiRequest message, Guid connectionGuid)
         {
             //向客户端发送请求数据
@@ -755,8 +753,7 @@ namespace Sora.OnebotInterface
         /// 获取API状态返回值
         /// 所有API回调请求都会返回状态值
         /// </summary>
-        /// <param name="msg"></param>
-        /// <returns></returns>
+        /// <param name="msg">消息JSON</param>
         private static (int retCode,string status) GetBaseRetCode(JObject msg)
         {
             if (msg == null) return (retCode: -1, status: "failed");
