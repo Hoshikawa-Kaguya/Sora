@@ -1,4 +1,6 @@
 using Newtonsoft.Json;
+using Sora.Converter;
+using Sora.Enumeration.ApiEnum;
 
 namespace Sora.EventArgs.OnebotEvent.RequestEvent
 {
@@ -10,8 +12,9 @@ namespace Sora.EventArgs.OnebotEvent.RequestEvent
         /// <summary>
         /// 请求子类型
         /// </summary>
+        [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "sub_type")]
-        internal string SubType { get; set; }
+        internal GroupRequestType GroupRequestType { get; set; }
 
         /// <summary>
         /// 群号

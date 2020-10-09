@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -12,6 +13,7 @@ using Sora.Enumeration;
 using Sora.Enumeration.ApiEnum;
 using Sora.Model.CQCodes;
 using Sora.Model.CQCodes.CQCodeModel;
+using Sora.Model.GoApi;
 using Sora.Model.Message;
 using Sora.Model.OnebotApi;
 using Sora.Model.SoraModel;
@@ -354,6 +356,129 @@ namespace Sora.OnebotInterface
             return (retCode,
                     ret["data"]?.ToObject<GroupMemberInfo>());
         }
+
+        /// <summary>
+        /// 检查是否可以发送图片
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        internal static async ValueTask<(int retCode, bool canSend)> CanSendImage(Guid connection)
+        {
+            ConsoleLog.Debug("Sora","Sending can_send_image request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.CanSendImage
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get can_send_image response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, false);
+            return (retCode,
+                    Convert.ToBoolean(ret["data"]?["yes"]?.ToString() ?? "false"));
+        }
+
+        /// <summary>
+        /// 检查是否可以发送语音
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        internal static async ValueTask<(int retCode, bool canSend)> CanSendRecord(Guid connection)
+        {
+            ConsoleLog.Debug("Sora","Sending can_send_image request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.CanSendRecord
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get can_send_image response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, false);
+            return (retCode,
+                    Convert.ToBoolean(ret["data"]?["yes"]?.ToString() ?? "false"));
+        }
+
+        /// <summary>
+        /// 检查是否可以发送语音
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        internal static async ValueTask<(int retCode, bool online, bool good, JObject other)> GetStatus(Guid connection)
+        {
+            ConsoleLog.Debug("Sora","Sending can_send_image request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetStatus
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get can_send_image response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, false, false, null);
+            return (retCode,
+                    Convert.ToBoolean(ret["data"]?["online"]?.ToString() ?? "false"),
+                    Convert.ToBoolean(ret["data"]?["good"]?.ToString()   ?? "false"),
+                    JObject.FromObject(ret["data"]));
+        }
+
+        #region Go API
+        /// <summary>
+        /// 获取图片信息
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="cacheFileName">缓存文件名</param>
+        internal static async ValueTask<(int retCode, int size, string fileName, string url)> GetImage(
+            Guid connection, string cacheFileName)
+        {
+            ConsoleLog.Debug("Sora","Sending get_image request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetImage,
+                ApiParams = new GetImageParams
+                {
+                    FileName = cacheFileName
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_image response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, -1, null, null);
+            return (retCode,
+                    Convert.ToInt32(ret["data"]?["size"] ?? 1),
+                    ret["data"]?["filename"]?.ToString(),
+                    ret["data"]?["url"]?.ToString());
+        }
+
+        /// <summary>
+        /// 获取群消息
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="msgId">消息ID</param>
+        internal static async ValueTask<(int retCode, GroupMessageInfo messageInfo)> GetGroupMessage(
+            Guid connection, int msgId)
+        {
+            ConsoleLog.Debug("Sora","Sending get_group_msg request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetGroupMessage,
+                ApiParams = new MsgParams
+                {
+                    MessageId = msgId
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_image response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            ConsoleLog.Debug("Sora",ret["data"]);
+            return (retCode,
+                    new GroupMessageInfo
+                    {
+                        ConnectionGuid = connection,
+                        MessageId      = msgId,
+                        Content        = ret["data"]?["content"]?.ToString(),
+                        RealId         = Convert.ToInt32(ret["data"]?["real_id"]            ?? -1),
+                        SenderId       = Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1),
+                        SenderName     = ret["data"]?["sender"]?["nickname"]?.ToString(),
+                        Time           = Convert.ToInt64(ret["data"]?["time"] ?? -1)
+                    });
+        }
+        #endregion
         #endregion
 
         #region 无回调API请求
@@ -368,12 +493,197 @@ namespace Sora.OnebotInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiType = APIType.DeleteMsg,
-                ApiParams = new DeletMsgParams
+                ApiParams = new MsgParams
                 {
                     MessageId = msgId
                 }
             }, connection);
         }
+
+        /// <summary>
+        /// 处理加好友请求
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="flag">请求flag</param>
+        /// <param name="approve">是否同意</param>
+        /// <param name="remark">好友备注</param>
+        internal static async ValueTask SetFriendAddRequest(Guid connection, string flag, bool approve,
+                                                            string remark = null)
+        {
+            if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
+            ConsoleLog.Debug("Sora","Sending set_friend_add_request request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetFriendAddRequest,
+                ApiParams = new SetFriendAddRequestParams
+                {
+                    Flag    = flag,
+                    Approve = approve,
+                    Remark  = remark
+                }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 处理加群请求/邀请
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="flag">请求flag</param>
+        /// <param name="requestType">请求类型</param>
+        /// <param name="approve">是否同意</param>
+        /// <param name="reason">好友备注</param>
+        internal static async ValueTask SetGroupAddRequest(Guid connection,
+                                                           string flag,
+                                                           GroupRequestType requestType,
+                                                           bool approve,
+                                                           string reason = null)
+        {
+            ConsoleLog.Debug("Sora","Sending set_group_add_request request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetGroupAddRequest,
+                ApiParams = new SetGroupAddRequestParams
+                {
+                    Flag = flag,
+                    GroupRequestType = requestType,
+                    Approve = approve,
+                    Reason = reason
+                }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 设置群名片
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="uid">用户id</param>
+        /// <param name="card">新名片</param>
+        internal static async ValueTask SetGroupCard(Guid connection, long gid, long uid, string card = null)
+        {
+            ConsoleLog.Debug("Sora","Sending set_group_card request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetGroupCard,
+                ApiParams = new SetGroupCardParams
+                {
+                    Gid  = gid,
+                    Uid  = uid,
+                    Card = card
+                }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 设置群组专属头衔
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="uid">用户id</param>
+        /// <param name="title">头衔</param>
+        internal static async ValueTask SetGroupSpecialTitle(Guid connection, long gid, long uid, string title)
+        {
+            ConsoleLog.Debug("Sora","Sending set_group_special_title request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetGroupSpecialTitle,
+                ApiParams = new SetGroupSpecialTitleParams
+                {
+                    Gid      = gid,
+                    Uid      = uid,
+                    Title    = title,
+                    Duration = -1
+                }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 群组T人
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="uid">用户id</param>
+        /// <param name="rejectRequest">拒绝此人的加群请求</param>
+        internal static async ValueTask SetGroupKick(Guid connection, long gid, long uid, bool rejectRequest)
+        {
+            ConsoleLog.Debug("Sora","Sending set_group_kick request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetGroupKick,
+                ApiParams = new SetGroupKickParams
+                {
+                    Gid              = gid,
+                    Uid              = uid,
+                    RejectAddRequest = rejectRequest
+                }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 群组单人禁言
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="uid">用户id</param>
+        /// <param name="duration">禁言时长(s)</param>
+        internal static async ValueTask SetGroupBan(Guid connection, long gid, long uid, long duration)
+        {
+            ConsoleLog.Debug("Sora","Sending set_group_ban request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetGroupBan,
+                ApiParams = new SetGroupBanParams
+                {
+                    Gid      = gid,
+                    Uid      = uid,
+                    Duration = duration
+                }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 群组全员禁言
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="enable">是否禁言</param>
+        internal static async ValueTask SetGroupWholeBan(Guid connection, long gid, bool enable)
+        {
+            ConsoleLog.Debug("Sora", "Sending set_group_whole_ban request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetGroupWholeBan,
+                ApiParams = new SetGroupWholeBanParams
+                {
+                    Gid    = gid,
+                    Enable = enable
+                }
+            }, connection);
+        }
+
+        #region Go API
+        /// <summary>
+        /// 修改群名
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="name">新群名</param>
+        internal static async ValueTask SetGroupName(Guid connection, long gid, string name)
+        {
+            if(string.IsNullOrEmpty(name)) throw new NullReferenceException(nameof(name));
+            ConsoleLog.Debug("Sora","Sending set_group_name request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetGroupName,
+                ApiParams = new SetGroupNameParams
+                {
+                    Gid       = gid,
+                    GroupName = name
+                }
+            }, connection);
+        }
+        #endregion
+
         #endregion
 
         #region API请求回调
@@ -399,7 +709,7 @@ namespace Sora.OnebotInterface
         /// <param name="message">信息</param>
         /// <param name="connectionGuid">服务器连接标识符</param>
         /// <returns></returns>
-        private static async ValueTask SendApiMessage(object message, Guid connectionGuid)
+        private static async ValueTask SendApiMessage(ApiRequest message, Guid connectionGuid)
         {
             //向客户端发送请求数据
             if(!OnebotWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return;

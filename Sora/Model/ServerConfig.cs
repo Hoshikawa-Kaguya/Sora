@@ -1,6 +1,6 @@
 namespace Sora.Model
 {
-    public class ServerConfig
+    public sealed class ServerConfig
     {
         /// <summary>
         /// 反向服务器端口

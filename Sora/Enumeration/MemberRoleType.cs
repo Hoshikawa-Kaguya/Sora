@@ -5,6 +5,7 @@ namespace Sora.Enumeration
     /// <summary>
     /// 成员权限等级
     /// </summary>
+    [DefaultValue(Member)]
     public enum MemberRoleType
     {
         /// <summary>

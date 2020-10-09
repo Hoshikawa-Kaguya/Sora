@@ -4,6 +4,7 @@ namespace Sora.Enumeration.ApiEnum
 {
     internal enum APIType
     {
+        #region OnebotAPI
         /// <summary>
         /// 发送消息
         /// </summary>
@@ -53,6 +54,80 @@ namespace Sora.Enumeration.ApiEnum
         /// 获取群成员列表
         /// </summary>
         [Description("get_group_member_list")]
-        GetGroupMemberList
+        GetGroupMemberList,
+        /// <summary>
+        /// 处理加好友请求
+        /// </summary>
+        [Description("set_friend_add_request")]
+        SetFriendAddRequest,
+        /// <summary>
+        /// 处理加群请求/邀请
+        /// </summary>
+        [Description("set_group_add_request")]
+        SetGroupAddRequest,
+        /// <summary>
+        /// 设置群名片
+        /// </summary>
+        [Description("set_group_card")]
+        SetGroupCard,
+        /// <summary>
+        /// 设置群组专属头衔
+        /// </summary>
+        [Description("set_group_special_title")]
+        SetGroupSpecialTitle,
+        /// <summary>
+        /// 群组T人
+        /// </summary>
+        [Description("set_group_kick")]
+        SetGroupKick,
+        /// <summary>
+        /// 群组单人禁言
+        /// </summary>
+        [Description("set_group_ban")]
+        SetGroupBan,
+        /// <summary>
+        /// 群全体禁言
+        /// </summary>
+        [Description("set_group_whole_ban")]
+        SetGroupWholeBan,
+        /// <summary>
+        /// 群退出
+        /// </summary>
+        [Description("set_group_leave")]
+        SetGroupLeave,
+        /// <summary>
+        /// 是否可以发送图片
+        /// </summary>
+        [Description("can_send_image")]
+        CanSendImage,
+        /// <summary>
+        /// 是否可以发送语音
+        /// </summary>
+        [Description("can_send_record")]
+        CanSendRecord,
+        /// <summary>
+        /// 获取插件运行状态
+        /// </summary>
+        [Description("get_status")]
+        GetStatus,
+        #endregion
+
+        #region GoAPI
+        /// <summary>
+        /// 获取图片信息
+        /// </summary>
+        [Description("get_image")]
+        GetImage,
+        /// <summary>
+        /// 获取群消息
+        /// </summary>
+        [Description("get_group_msg")]
+        GetGroupMessage,
+        /// <summary>
+        /// 设置群名
+        /// </summary>
+        [Description("set_group_name")]
+        SetGroupName
+        #endregion
     }
 }

@@ -8,7 +8,7 @@ namespace Sora.Model.OnebotApi
     /// <summary>
     /// API请求类
     /// </summary>
-    internal class ApiRequest
+    internal sealed class ApiRequest
     {
         /// <summary>
         /// API请求类型

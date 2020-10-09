@@ -8,7 +8,7 @@ namespace Sora.Model.Message
     /// <summary>
     /// Onebot消息段
     /// </summary>
-    public class OnebotMessage
+    public sealed class OnebotMessage
     {
         /// <summary>
         /// 消息段类型

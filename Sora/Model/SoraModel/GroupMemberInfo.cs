@@ -7,7 +7,7 @@ namespace Sora.Model.SoraModel
     /// <summary>
     /// 群成员
     /// </summary>
-    public class GroupMemberInfo
+    public sealed class GroupMemberInfo
     {
         /// <summary>
         /// 群号
