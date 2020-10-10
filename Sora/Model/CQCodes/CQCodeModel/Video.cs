@@ -8,7 +8,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// 短视频
     /// </summary>
     [Obsolete]
-    internal class Video
+    internal struct Video
     {
         #region 属性
         /// <summary>
@@ -43,10 +43,6 @@ namespace Sora.Model.CQCodes.CQCodeModel
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "timeout", NullValueHandling = NullValueHandling.Ignore)]
         internal int? Timeout { get; set; }
-        #endregion
-
-        #region 构造函数(仅用于JSON消息段构建)
-        internal Video(){}
         #endregion
     }
 }

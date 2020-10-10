@@ -7,7 +7,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// <summary>
     /// 自定义合并转发节点
     /// </summary>
-    internal class Node
+    internal struct Node
     {
         #region 属性
         /// <summary>
@@ -35,11 +35,11 @@ namespace Sora.Model.CQCodes.CQCodeModel
         internal List<CQCode> CQCodeMsgList { get; set; }
         #endregion
 
-        #region 发送者类
+        #region 发送者结构体
         /// <summary>
         /// 节点消息发送者
         /// </summary>
-        internal class NodeSender
+        internal struct NodeSender
         {
             /// <summary>
             /// 发送者昵称
@@ -53,10 +53,6 @@ namespace Sora.Model.CQCodes.CQCodeModel
             [JsonProperty(PropertyName = "user_id")]
             internal long Uid { get; set; }
         }
-        #endregion
-
-        #region 构造函数(仅用于JSON消息段构建)
-        internal Node() {}
         #endregion
     }
 }

@@ -21,11 +21,6 @@ namespace Sora.Enumeration.ApiEnum
         [Description("get_version_info")]
         GetVersion,
         /// <summary>
-        /// 获取合并转发消息
-        /// </summary>
-        [Description("get_forward_msg")]
-        GetForwardMessage,
-        /// <summary>
         /// 撤回消息
         /// </summary>
         [Description("delete_msg")]
@@ -127,7 +122,27 @@ namespace Sora.Enumeration.ApiEnum
         /// 设置群名
         /// </summary>
         [Description("set_group_name")]
-        SetGroupName
+        SetGroupName,
+        /// <summary>
+        /// 获取合并转发消息
+        /// </summary>
+        [Description("get_forward_msg")]
+        GetForwardMessage,
+        /// <summary>
+        /// 发送合并转发(群)
+        /// </summary>
+        [Description("send_group_forward_msg ")]
+        SendGroupForwardMsg,
+        /// <summary>
+        /// 设置群头像
+        /// </summary>
+        [Description("set_group_portrait")]
+        SetGroupPortrait,
+        /// <summary>
+        /// 获取中文分词
+        /// </summary>
+        [Description(".get_word_slices")] 
+        GetWordSlices
         #endregion
     }
 }

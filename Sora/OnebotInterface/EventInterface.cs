@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Sora.Enumeration;
 using Sora.Enumeration.ApiEnum;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.Model.CQCodes;
+using Sora.Model.CQCodes.CQCodeModel;
+using Sora.Model.Message;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
@@ -62,14 +65,16 @@ namespace Sora.OnebotInterface
                     break;
                 default:
                     //尝试从响应中获取标识符
-                    if (!messageJson.TryGetValue("echo", out JToken echoJson)||
-                        !Guid.TryParse(echoJson.ToString(),out Guid echo)||
+                    if (messageJson.TryGetValue("echo", out JToken echoJson) &&
+                        Guid.TryParse(echoJson.ToString(), out Guid echo)    &&
                         //查找请求标识符是否存在
-                        !ApiInterface.RequestList.Any(e => e.Equals(echo))) 
-                        return;
-
-                    //取出返回值中的数据
-                    ApiInterface.GetResponse(echo, messageJson);
+                        ApiInterface.RequestList.Any(e => e.Equals(echo)))
+                    {
+                        //取出返回值中的数据
+                        ApiInterface.GetResponse(echo, messageJson);
+                        break;
+                    }
+                    ConsoleLog.Debug("Sora",$"Unknown message :\r{messageJson}");
                     break;
             }
         }
@@ -140,14 +145,6 @@ namespace Sora.OnebotInterface
                     GroupMessageEventArgs groupMessage = messageJson.ToObject<GroupMessageEventArgs>();
                     if(groupMessage == null) break;
                     ConsoleLog.Debug("Sora",$"Group msg[{groupMessage.GroupId}] form {groupMessage.Sender.Nick}[{groupMessage.UserId}] : {groupMessage.RawMessage}");
-
-                    #region 暂时的测试区域
-                    List<CQCode> msg_g    = new List<CQCode>();
-                    msg_g.Add(CQCode.CQText("哇哦"));
-                    var t1 = await ApiInterface.SendGroupMessage(connection, 883740678, msg_g);
-                    await ApiInterface.SetGroupName(connection,883740678 ,"哇哦测试群");
-                    #endregion
-
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMessageType(messageJson)}]");
@@ -242,6 +239,14 @@ namespace Sora.OnebotInterface
                     if(friendRecall == null) break;
                     ConsoleLog.Debug("Sora", $"Friend[{friendRecall.UserId}] recall msg id={friendRecall.MessageId}");
                     break;
+                //群名片变更
+                //此事件仅在Go上存在
+                case "group_card":
+                    GroupCardUpdateEventArgs groupCardUpdate = messageJson.ToObject<GroupCardUpdateEventArgs>();
+                    if(groupCardUpdate == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"Group[{groupCardUpdate.GroupId}] member[{groupCardUpdate.UserId}] card update [{groupCardUpdate.OldCard} => {groupCardUpdate.NewCard}]");
+                    break;
                 //通知类事件
                 case "notify":
                     switch (GetNotifyType(messageJson))
@@ -270,6 +275,7 @@ namespace Sora.OnebotInterface
                     }
                     break;
                 default:
+                    ConsoleLog.Debug("Sora",$"unknown notice \n{messageJson}");
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetNoticeType(messageJson)}]");
                     break;
             }

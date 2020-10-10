@@ -3,7 +3,10 @@ using Sora.Converter;
 
 namespace Sora.Model.CQCodes.CQCodeModel
 {
-    internal class Image
+    /// <summary>
+    /// 图片
+    /// </summary>
+    internal struct Image
     {
         #region 属性
         /// <summary>
@@ -29,14 +32,14 @@ namespace Sora.Model.CQCodes.CQCodeModel
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "cache", NullValueHandling = NullValueHandling.Ignore)]
-        internal int? Cache { get; set; }
+        internal int? UseCache { get; set; }
 
         /// <summary>
         /// 只在通过网络 URL 发送时有效，表示是否通过代理下载文件
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "proxy", NullValueHandling = NullValueHandling.Ignore)]
-        internal int? Proxy { get; set; } 
+        internal int? UseProxy { get; set; } 
 
         /// <summary>
         /// 只在通过网络 URL 发送时有效（s）
@@ -44,10 +47,6 @@ namespace Sora.Model.CQCodes.CQCodeModel
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "timeout", NullValueHandling = NullValueHandling.Ignore)]
         internal int? Timeout { get; set; }
-        #endregion
-
-        #region 构造函数(仅用于JSON消息段构建)
-        internal Image(){}
         #endregion
     }
 }

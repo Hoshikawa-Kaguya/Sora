@@ -37,8 +37,6 @@ namespace Sora.Model.Message
                         return new CQCode(CQFunction.Reply,message.RawData.ToObject<Reply>());
                     case CQFunction.Forward:
                         return new CQCode(CQFunction.Forward,message.RawData.ToObject<Forward>());
-                    case CQFunction.Node:
-                        return new CQCode(CQFunction.Node,message.RawData.ToObject<Node>());
                     case CQFunction.Xml:
                         return new CQCode(CQFunction.Xml,message.RawData.ToObject<Code>());
                     case CQFunction.Json:

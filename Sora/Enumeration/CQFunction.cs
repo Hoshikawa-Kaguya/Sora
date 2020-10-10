@@ -37,6 +37,12 @@ namespace Sora.Enumeration
         [Obsolete]
         [Description("video")]
         Video,
+        /// <summary>	
+        /// <para>音乐分享</para>	
+        /// <para>只能发送</para>	
+        /// </summary>	
+        [Description("music")]	
+        Music,
         /// <summary>
         /// @某人
         /// </summary>
@@ -68,6 +74,7 @@ namespace Sora.Enumeration
         /// <summary>
         /// <para>合并转发节点</para>
         /// <para>也可能是自定义节点</para>
+        /// <para>只能发送</para>
         /// </summary>
         [Description("node")]
         Node,
@@ -81,6 +88,26 @@ namespace Sora.Enumeration
         /// </summary>
         [Description("json")]
         Json,
+        /// <summary>
+        /// 接收红包
+        /// </summary>
+        [Description("redbag")]
+        RedBag,
+        /// <summary>
+        /// 免费礼物发送
+        /// </summary>
+        [Description("gift")]
+        Gift,
+        /// <summary>
+        /// 装逼大图
+        /// </summary>
+        [Description("cardimage")]
+        CardImage,
+        /// <summary>
+        /// 文本转语音
+        /// </summary>
+        [Description("tts")]
+        TTS
         #endregion
     }
 }

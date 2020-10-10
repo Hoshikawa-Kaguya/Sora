@@ -5,7 +5,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// <summary>
     /// 链接分享
     /// </summary>
-    internal class Share
+    internal struct Share
     {
         #region 属性
         /// <summary>
@@ -31,10 +31,6 @@ namespace Sora.Model.CQCodes.CQCodeModel
         /// </summary>
         [JsonProperty(PropertyName = "image",NullValueHandling = NullValueHandling.Ignore)]
         internal string ImageUrl { get; set; }
-        #endregion
-
-        #region 构造函数(仅用于JSON消息段构建)
-        internal Share(){}
         #endregion
     }
 }
