@@ -6,7 +6,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// <summary>
     /// At某人
     /// </summary>
-    internal class At
+    internal struct At
     {
         #region 属性
         /// <summary>
@@ -16,10 +16,6 @@ namespace Sora.Model.CQCodes.CQCodeModel
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "qq")]
         internal string Traget { get; set; }
-        #endregion
-
-        #region 构造函数(仅用于JSON消息段构建)
-        internal At(){}
         #endregion
     }
 }

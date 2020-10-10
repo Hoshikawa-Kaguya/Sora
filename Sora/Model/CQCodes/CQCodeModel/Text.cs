@@ -5,7 +5,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// <summary>
     /// 纯文本
     /// </summary>
-    internal class Text
+    internal struct Text
     {
         #region 属性
         /// <summary>
@@ -13,10 +13,6 @@ namespace Sora.Model.CQCodes.CQCodeModel
         /// </summary>
         [JsonProperty(PropertyName = "text")]
         internal string Content { get; set; }
-        #endregion
-
-        #region 构造函数(仅用于JSON消息段构建)
-        internal Text(){}
         #endregion
     }
 }

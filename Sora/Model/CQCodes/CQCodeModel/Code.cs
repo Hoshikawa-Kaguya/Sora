@@ -8,7 +8,7 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// <para>Xml与Json集合</para>
     /// <para>可能为<see cref="CQFunction"/>.<see langword="Json"/>或<see cref="CQFunction"/>.<see langword="Xml"/></para>
     /// </summary>
-    internal class Code
+    internal struct Code
     {
         #region 属性
         /// <summary>
@@ -23,10 +23,6 @@ namespace Sora.Model.CQCodes.CQCodeModel
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "resid",NullValueHandling = NullValueHandling.Ignore)]
         internal int? Resid { get; set; }
-        #endregion
-
-        #region 构造函数(仅用于JSON消息段构建)
-        internal Code() {}
         #endregion
     }
 }

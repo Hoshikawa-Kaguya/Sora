@@ -6,8 +6,9 @@ namespace Sora.Model.CQCodes.CQCodeModel
     /// <summary>
     /// <para>群成员戳一戳</para>
     /// <para>仅发送</para>
+    /// <para>仅支持Go</para>
     /// </summary>
-    internal class Poke
+    internal struct Poke
     {
         #region 属性
         /// <summary>
@@ -16,10 +17,6 @@ namespace Sora.Model.CQCodes.CQCodeModel
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "qq")]
         internal long Uid { get; set; }
-        #endregion
-
-        #region 构造函数(仅用于JSON消息段构建)
-        internal Poke(){}
         #endregion
     }
 }

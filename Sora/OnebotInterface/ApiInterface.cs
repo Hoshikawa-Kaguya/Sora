@@ -464,7 +464,6 @@ namespace Sora.OnebotInterface
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_msg response retcode={retCode}");
             if (retCode != 0 || ret["data"] == null) return (retCode, null);
-            ConsoleLog.Debug("Sora",ret["data"]);
             return (retCode,
                     new GroupMessageInfo
                     {
@@ -476,6 +475,34 @@ namespace Sora.OnebotInterface
                         SenderName     = ret["data"]?["sender"]?["nickname"]?.ToString(),
                         Time           = Convert.ToInt64(ret["data"]?["time"] ?? -1)
                     });
+        }
+
+        /// <summary>
+        /// 获取中文分词
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="text">内容</param>
+        /// <returns>词组列表</returns>
+        internal static async ValueTask<(int retCode, List<string> slicesList)> GetWordSlices(
+            Guid connection, string text)
+        {
+            if(string.IsNullOrEmpty(text)) throw new NullReferenceException(nameof(text));
+            ConsoleLog.Debug("Sora","Sending .get_word_slices request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetWordSlices,
+                ApiParams = new
+                {
+                    content = text
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_msg response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            ConsoleLog.Debug("Sora",ret);
+            return (retCode,
+                    ret["data"]?["slices"]?.ToObject<List<string>>());
         }
         #endregion
         #endregion
@@ -660,6 +687,42 @@ namespace Sora.OnebotInterface
             }, connection);
         }
 
+        /// <summary>
+        /// 发送合并转发(群)
+        /// 但好像不能用的样子
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="msgList">消息段数组</param>
+        internal static async ValueTask SendGroupForwardMsg(Guid connection, long gid, List<Node> msgList)
+        {
+            ConsoleLog.Debug("Sora","Sending send_group_forward_msg request");
+            List<object> sendObj = new List<object>();
+            //处理消息节点
+            foreach (Node node in msgList)
+            {
+                sendObj.Add(new
+                {
+                    type = "node",
+                    data = new
+                    {
+                        name = node.Sender.Nick,
+                        uin = node.Sender.Uid.ToString(),
+                        content = node.MessageList
+                    }
+                });
+            }
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SendGroupForwardMsg,
+                ApiParams = new SendGroupForwardMsgParams
+                {
+                    GroupId     = gid,
+                    NodeMsgList = sendObj
+                }
+            }, connection);
+        }
+
         #region Go API
         /// <summary>
         /// 设置群名
@@ -678,6 +741,29 @@ namespace Sora.OnebotInterface
                 {
                     Gid       = gid,
                     GroupName = name
+                }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 设置群头像
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="file">图片文件</param>
+        /// <param name="useCache">是否使用缓存</param>
+        internal static async ValueTask SetGroupPortrait(Guid connection, long gid, string file, bool useCache)
+        {
+            if(string.IsNullOrEmpty(file)) throw new NullReferenceException(nameof(file));
+            ConsoleLog.Debug("Sora","Sending set_group_portrait request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetGroupPortrait,
+                ApiParams = new SetGroupPortraitParams
+                {
+                    Gid       = gid,
+                    ImageFile = file,
+                    UseCache  = useCache ? 1 : 0
                 }
             }, connection);
         }
@@ -705,26 +791,27 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 向API客户端发送请求数据
         /// </summary>
-        /// <param name="message">信息</param>
+        /// <param name="apiRequest">请求信息</param>
         /// <param name="connectionGuid">服务器连接标识符</param>
-        private static async ValueTask SendApiMessage(ApiRequest message, Guid connectionGuid)
+        private static async ValueTask SendApiMessage(ApiRequest apiRequest, Guid connectionGuid)
         {
+            //添加新的请求记录
+            RequestList.Add(apiRequest.Echo);
             //向客户端发送请求数据
             if(!OnebotWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return;
-            await clientConnection.Send(JsonConvert.SerializeObject(message,Formatting.None));
+            await clientConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
         }
 
         /// <summary>
         /// 向API客户端发送请求数据
         /// </summary>
-        /// <param name="apiRequest">信息</param>
+        /// <param name="apiRequest">请求信息</param>
         /// <param name="connectionGuid">服务器连接标识符</param>
         /// <returns>API返回</returns>
         private static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest,Guid connectionGuid)
         {
-            Guid echo = apiRequest.Echo;
             //添加新的请求记录
-            RequestList.Add(echo);
+            RequestList.Add(apiRequest.Echo);
             //向客户端发送请求数据
             if(!OnebotWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return null;
             await clientConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
@@ -732,7 +819,7 @@ namespace Sora.OnebotInterface
             {
                 //等待客户端返回调用结果
                 JObject response = await OnebotSubject
-                                         .Where(ret => ret.Item1 == echo)
+                                         .Where(ret => ret.Item1 == apiRequest.Echo)
                                          .Select(ret => ret.Item2)
                                          .Take(1).Timeout(TimeSpan.FromMilliseconds(TimeOut))
                                          .Catch(Observable.Return<JObject>(null)).ToTask();
