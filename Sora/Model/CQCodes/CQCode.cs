@@ -221,22 +221,6 @@ namespace Sora.Model.CQCodes
         }
 
         #region GoCQ扩展码
-
-        /// <summary>
-        /// 合并转发
-        /// </summary>
-        /// <param name="forwardId">转发id</param>
-        //TODO 不能使用CQ码形式发送，需要使用/send_group_forward_msg
-        [Obsolete]
-        public static CQCode CQForward(string forwardId)
-        {
-            return new CQCode(CQFunction.Node,
-                              new Forward
-                              {
-                                  MessageId = forwardId
-                              });
-        }
-
         /// <summary>
         /// 群成员戳一戳
         /// 只支持Go-cqhttp

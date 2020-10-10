@@ -17,7 +17,8 @@ namespace Sora.Converter
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            //此方法不可能调用，不做实现
+            return null;
         }
     }
 }
