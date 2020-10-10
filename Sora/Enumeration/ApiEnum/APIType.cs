@@ -105,6 +105,11 @@ namespace Sora.Enumeration.ApiEnum
         /// </summary>
         [Description("get_status")]
         GetStatus,
+        /// <summary>
+        /// 重启客户端
+        /// </summary>
+        [Description("set_restart")]
+        Restart,
         #endregion
 
         #region GoAPI

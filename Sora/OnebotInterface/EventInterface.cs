@@ -8,6 +8,8 @@ using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
+using Sora.EventArgs.SoraEvent;
+using Sora.Model.SoraModel;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
@@ -16,7 +18,7 @@ namespace Sora.OnebotInterface
     /// Onebot事件接口
     /// 判断和分发基类事件
     /// </summary>
-    public static class EventInterface
+    public class EventInterface
     {
         #region 静态记录表
         /// <summary>
@@ -26,6 +28,7 @@ namespace Sora.OnebotInterface
         #endregion
 
         #region 事件委托
+
         /// <summary>
         /// Onebot事件回调
         /// </summary>
@@ -33,7 +36,15 @@ namespace Sora.OnebotInterface
         /// <param name="sender">产生事件的客户端</param>
         /// <param name="eventArgs">事件参数</param>
         /// <returns></returns>
-        public delegate ValueTask OnebotAsyncCallBackHandler<in TEventArgs>(Guid sender, TEventArgs eventArgs)where TEventArgs : System.EventArgs;
+        public delegate ValueTask OnebotAsyncCallBackHandler<in TEventArgs>(object sender, TEventArgs eventArgs)
+            where TEventArgs : System.EventArgs;
+        #endregion
+
+        #region 事件回调
+        /// <summary>
+        /// 客户端链接完成事件
+        /// </summary>
+        public event OnebotAsyncCallBackHandler<ConnectEventArgs> OnClientConnect;
         #endregion
 
         #region 事件分发
@@ -42,7 +53,7 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="messageJson">消息json对象</param>
         /// <param name="connection">客户端链接接口</param>
-        internal static void Adapter(JObject messageJson, Guid connection)
+        internal void Adapter(JObject messageJson, Guid connection)
         {
             switch (GetBaseEventType(messageJson))
             {
@@ -82,7 +93,7 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private static async void MetaAdapter(JObject messageJson, Guid connection)
+        private async void MetaAdapter(JObject messageJson, Guid connection)
         {
             switch (GetMetaEventType(messageJson))
             {
@@ -109,9 +120,23 @@ namespace Sora.OnebotInterface
                     LifeCycleEventArgs lifeCycle = messageJson.ToObject<LifeCycleEventArgs>();
                     if (lifeCycle != null) ConsoleLog.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
                     //未知原因会丢失第一次调用的返回值，直接丢弃第一次调用
-                    await ApiInterface.GetOnebotVersion(connection);
-                    (_, ClientType clientType, string clientVer) = await ApiInterface.GetOnebotVersion(connection);
+                    await ApiInterface.GetClientInfo(connection);
+                    (int retCode, ClientType clientType, string clientVer) = await ApiInterface.GetClientInfo(connection);
+                    if (retCode != 0)//检查返回值
+                    {
+                        SoraWSServer.ConnectionInfos[connection].Close();
+                        ConsoleLog.Info("Sora",$"检查客户端版本时发生错误，已断开与客户端的连接(retcode={retCode})");
+                        break;
+                    }
                     ConsoleLog.Info("Sora",$"已连接到{Enum.GetName(clientType)}客户端,版本:{clientVer}");
+                    if(OnClientConnect == null) break;
+                    await Task.Run(async () =>
+                                   {
+                                       ConnectEventArgs connectEventArgs =
+                                           new ConnectEventArgs(new SoraApi(connection), "lifecycle",
+                                                                lifeCycle?.SelfID ?? -1);
+                                       await OnClientConnect(typeof(EventInterface), connectEventArgs);
+                                   });
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMetaEventType(messageJson)}]");
@@ -126,7 +151,7 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private static async void MessageAdapter(JObject messageJson, Guid connection)
+        private async void MessageAdapter(JObject messageJson, Guid connection)
         {
             switch (GetMessageType(messageJson))
             {
@@ -155,7 +180,7 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private static async void RequestAdapter(JObject messageJson, Guid connection)
+        private async void RequestAdapter(JObject messageJson, Guid connection)
         {
             switch (GetRequestType(messageJson))
             {
@@ -184,7 +209,7 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private static void NoticeAdapter(JObject messageJson, Guid connection)
+        private void NoticeAdapter(JObject messageJson, Guid connection)
         {
             switch (GetNoticeType(messageJson))
             {

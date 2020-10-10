@@ -173,7 +173,7 @@ namespace Sora.OnebotInterface
         /// 获取版本信息
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
-        internal static async ValueTask<(int retCode, ClientType clientType, string clientVer)> GetOnebotVersion(Guid connection)
+        internal static async ValueTask<(int retCode, ClientType clientType, string clientVer)> GetClientInfo(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending get_version_info request");
             JObject ret = await SendApiRequest(new ApiRequest
@@ -294,9 +294,9 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="gid">群号</param>
-        /// <param name="noCache">是否不使用缓存</param>
-        internal static async ValueTask<(int retCode, GroupInfo memberInfo)> GetGroupInfo(
-            Guid connection, long gid, bool noCache)
+        /// <param name="useCache">是否使用缓存</param>
+        internal static async ValueTask<(int retCode, GroupInfo groupInfo)> GetGroupInfo(
+            Guid connection, long gid, bool useCache)
         {
             ConsoleLog.Debug("Sora", "Sending get_group_info request");
             JObject ret = await SendApiRequest(new ApiRequest
@@ -305,7 +305,7 @@ namespace Sora.OnebotInterface
                 ApiParams = new GetGroupInfoParams
                 {
                     Gid     = gid,
-                    NoCache = noCache
+                    NoCache = !useCache
                 }
             }, connection);
             //处理API返回信息
@@ -333,9 +333,9 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         /// <param name="gid">群号</param>
         /// <param name="uid">用户ID</param>
-        /// <param name="noCache">是否不使用缓存</param>
+        /// <param name="useCache">是否不使用缓存</param>
         internal static async ValueTask<(int retCode, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
-            Guid connection, long gid, long uid, bool noCache)
+            Guid connection, long gid, long uid, bool useCache)
         {
             ConsoleLog.Debug("Sora","Sending get_group_member_info request");
             JObject ret = await SendApiRequest(new ApiRequest
@@ -345,7 +345,7 @@ namespace Sora.OnebotInterface
                 {
                     Gid     = gid,
                     Uid     = uid,
-                    NoCache = noCache
+                    NoCache = !useCache
                 }
             }, connection);
             //处理API返回信息
@@ -395,7 +395,7 @@ namespace Sora.OnebotInterface
         }
 
         /// <summary>
-        /// 检查是否可以发送语音
+        /// 获取客户端状态
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         internal static async ValueTask<(int retCode, bool online, bool good, JObject other)> GetStatus(Guid connection)
@@ -723,6 +723,24 @@ namespace Sora.OnebotInterface
             }, connection);
         }
 
+        /// <summary>
+        /// 重启客户端
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="delay">延迟(ms)</param>
+        internal static async ValueTask Restart(Guid connection, int delay)
+        {
+            ConsoleLog.Debug("Sora","Sending restart client requset");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.Restart,
+                ApiParams = new
+                {
+                    delay
+                }
+            }, connection);
+        }
+
         #region Go API
         /// <summary>
         /// 设置群名
@@ -798,7 +816,7 @@ namespace Sora.OnebotInterface
             //添加新的请求记录
             RequestList.Add(apiRequest.Echo);
             //向客户端发送请求数据
-            if(!OnebotWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return;
+            if(!SoraWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return;
             await clientConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
         }
 
@@ -813,7 +831,7 @@ namespace Sora.OnebotInterface
             //添加新的请求记录
             RequestList.Add(apiRequest.Echo);
             //向客户端发送请求数据
-            if(!OnebotWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return null;
+            if(!SoraWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return null;
             await clientConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
             try
             {
