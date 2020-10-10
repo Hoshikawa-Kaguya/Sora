@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Sora.Model.OnebotApi
+namespace Sora.Model.GoApi
 {
     /// <summary>
     /// 获取合并转发消息

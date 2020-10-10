@@ -3,15 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Sora.Enumeration;
 using Sora.Enumeration.ApiEnum;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
-using Sora.Model.CQCodes;
-using Sora.Model.CQCodes.CQCodeModel;
-using Sora.Model.Message;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
