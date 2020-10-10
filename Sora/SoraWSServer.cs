@@ -12,7 +12,7 @@ using Sora.Tool;
 
 namespace Sora
 {
-    public sealed class OnebotWSServer : IDisposable
+    public sealed class SoraWSServer : IDisposable
     {
         #region 属性
         /// <summary>
@@ -30,6 +30,11 @@ namespace Sora
         /// </summary>
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
         private Timer HeartBeatTimer { get; set; }
+
+        /// <summary>
+        /// 事件接口
+        /// </summary>
+        public EventInterface Event { get; set; }
 
         /// <summary>
         /// 链接信息
@@ -71,7 +76,7 @@ namespace Sora
         /// 创建一个反向WS客户端
         /// </summary>
         /// <param name="config">服务器配置</param>
-        public OnebotWSServer(ServerConfig config)
+        public SoraWSServer(ServerConfig config)
         {
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器初始化...");
             //检查参数
@@ -84,6 +89,8 @@ namespace Sora
                                        new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0));
             //API超时
             ApiInterface.TimeOut = config.ApiTimeOut;
+            //实例化事件接口
+            this.Event = new EventInterface();
             //禁用原log
             FleckLog.Level = (LogLevel)4;
             this.Server    = new WebSocketServer($"ws://{config.Location}:{config.Port}")
@@ -199,7 +206,7 @@ namespace Sora
                                                         //进入事件处理和分发
                                                         Task.Run(() =>
                                                                   {
-                                                                      EventInterface
+                                                                      this.Event
                                                                           .Adapter(JObject.Parse(message),
                                                                               socket.ConnectionInfo.Id);
                                                                   });
@@ -220,7 +227,7 @@ namespace Sora
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器正在运行[{Config.Location}:{Config.Port}]");
             ConsoleLog.Info("Sora",$"Sora 服务端框架版本:{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
         }
-        ~OnebotWSServer()
+        ~SoraWSServer()
         {
             Dispose();
         }

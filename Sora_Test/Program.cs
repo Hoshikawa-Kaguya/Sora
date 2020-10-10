@@ -14,7 +14,7 @@ namespace Sora_Test
             try
             {
                 ConsoleLog.SetLogLevel(LogLevel.Debug);
-                OnebotWSServer server = new OnebotWSServer(new ServerConfig());
+                SoraWSServer server = new SoraWSServer(new ServerConfig());
                 server.OnOpenConnectionAsync += (id, eventArgs) =>
                                                 {
                                                     ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
@@ -26,6 +26,10 @@ namespace Sora_Test
                                                      ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
                                                      return ValueTask.CompletedTask;
                                                  };
+                server.Event.OnClientConnect += async (sender, eventArgs) =>
+                                                {
+                                                    await eventArgs.SoraApi.SendGroupMessage(883740678, "好耶");
+                                                };
                 await Task.Delay(-1);
             }
             catch (Exception e) //侦测所有未处理的错误
