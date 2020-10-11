@@ -1,4 +1,6 @@
-using Sora.Model.SoraModel;
+using System;
+using Sora.Module.SoraModel.Base;
+using Sora.Tool;
 
 namespace Sora.EventArgs.SoraEvent
 {
@@ -19,18 +21,37 @@ namespace Sora.EventArgs.SoraEvent
         public string EventName { get; private set; }
 
         /// <summary>
+        /// 事件产生时间
+        /// </summary>
+        public DateTime Time { get; private set; }
+
+        /// <summary>
         /// 接收当前事件的机器人UID
         /// </summary>
-        public long SelfId { get; private set; }
+        internal long SelfId { get; private set; }
+
+        /// <summary>
+        /// 事件产生时间戳
+        /// </summary>
+        internal long TimeStamp { get; private set; }
         #endregion
 
         #region 构造函数
-        internal BaseSoraEventArgs(SoraApi api, string eventName, long selfId)
+        internal BaseSoraEventArgs(Guid connectionGuid, string eventName, long selfId, long time)
         {
-            this.SoraApi   = api;
+            this.SoraApi   = new SoraApi(connectionGuid);
             this.EventName = eventName;
             this.SelfId    = selfId;
+            this.TimeStamp = time;
+            this.Time      = Utils.TimeStampToDateTime(time);
         }
+        #endregion
+
+        #region 基类方法
+        /// <summary>
+        /// 获取当前登陆账号的ID
+        /// </summary>
+        public long GetLoginUserId() => this.SelfId;
         #endregion
     }
 }

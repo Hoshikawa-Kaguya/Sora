@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
 using Sora.EventArgs.WSSeverEvent;
-using Sora.Model;
+using Sora.Module;
 using Sora.OnebotInterface;
 using Sora.Tool;
 

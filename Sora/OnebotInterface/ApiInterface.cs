@@ -10,12 +10,12 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiEnum;
-using Sora.Model.CQCodes;
-using Sora.Model.CQCodes.CQCodeModel;
-using Sora.Model.GoApi;
-using Sora.Model.Message;
-using Sora.Model.OnebotApi;
-using Sora.Model.SoraModel;
+using Sora.Module.CQCodes;
+using Sora.Module.CQCodes.CQCodeModel;
+using Sora.Module.GoApiParams;
+using Sora.Module.ApiMessageModel;
+using Sora.Module.ApiParams;
+using Sora.Module.SoraModel;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
@@ -57,7 +57,7 @@ namespace Sora.OnebotInterface
             ConsoleLog.Debug("Sora", "Sending send_msg(Private) request");
             if(messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //转换消息段列表
-            List<OnebotMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
+            List<ApiMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
@@ -93,7 +93,7 @@ namespace Sora.OnebotInterface
             ConsoleLog.Debug("Sora", "Sending send_msg(Group) request");
             if(messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //转换消息段列表
-            List<OnebotMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
+            List<ApiMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
@@ -216,11 +216,7 @@ namespace Sora.OnebotInterface
             {
                 friendList.Add(new FriendInfo
                 {
-                    User = new User
-                    {
-                        Id             = Convert.ToInt64(token["user_id"] ?? -1),
-                        ConnectionGuid = connection
-                    },
+                    UserId = Convert.ToInt64(token["user_id"] ?? -1),
                     Remark = token["remark"]?.ToString()   ?? string.Empty,
                     Nick   = token["nickname"]?.ToString() ?? string.Empty
                 });
@@ -250,13 +246,9 @@ namespace Sora.OnebotInterface
             {
                 groupList.Add(new GroupInfo
                 {
-                    Group = new Group
-                    {
-                        Id = Convert.ToInt64(token["group_id"] ?? -1),
-                        ConnectionGuid = connection
-                    },
+                    GroupId        = Convert.ToInt64(token["group_id"] ?? -1),
                     GroupName      = token["group_name"]?.ToString() ?? string.Empty,
-                    MemberCount    = Convert.ToInt32(token["member_count"] ?? -1),
+                    MemberCount    = Convert.ToInt32(token["member_count"]     ?? -1),
                     MaxMemberCount = Convert.ToInt32(token["max_member_count"] ?? -1)
                 });
             }
@@ -315,11 +307,7 @@ namespace Sora.OnebotInterface
             return (retCode,
                     new GroupInfo
                     {
-                        Group = new Group
-                        {
-                            Id             = Convert.ToInt64(ret["data"]["group_id"] ?? -1),
-                            ConnectionGuid = connection
-                        },
+                        GroupId        = Convert.ToInt64(ret["data"]["group_id"] ?? -1),
                         GroupName      = ret["data"]["group_name"]?.ToString() ?? string.Empty,
                         MemberCount    = Convert.ToInt32(ret["data"]["member_count"]     ?? -1),
                         MaxMemberCount = Convert.ToInt32(ret["data"]["max_member_count"] ?? -1)
@@ -448,7 +436,7 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="msgId">消息ID</param>
-        internal static async ValueTask<(int retCode, GroupMessageInfo messageInfo)> GetGroupMessage(
+        internal static async ValueTask<(int retCode, Message message, User sender)> GetGroupMessage(
             Guid connection, int msgId)
         {
             ConsoleLog.Debug("Sora","Sending get_group_msg request");
@@ -463,18 +451,17 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_msg response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            if (retCode != 0 || ret["data"] == null) return (retCode, null, null);
+            ConsoleLog.Debug("FUCK",ret);
             return (retCode,
-                    new GroupMessageInfo
-                    {
-                        ConnectionGuid = connection,
-                        MessageId      = msgId,
-                        Content        = ret["data"]?["content"]?.ToString(),
-                        RealId         = Convert.ToInt32(ret["data"]?["real_id"]            ?? -1),
-                        SenderId       = Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1),
-                        SenderName     = ret["data"]?["sender"]?["nickname"]?.ToString(),
-                        Time           = Convert.ToInt64(ret["data"]?["time"] ?? -1)
-                    });
+                    new Message(connection,
+                                msgId,
+                                ret["data"]?["content"]?.ToString(),
+                                new List<CQCode>(),
+                                Convert.ToInt64(ret["data"]?["time"] ?? -1),
+                                0),
+                    new User(connection,
+                             Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)));
         }
 
         /// <summary>

@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Fleck;
 using Sora;
-using Sora.Model;
+using Sora.Module;
 using Sora.Tool;
 
 namespace Sora_Test

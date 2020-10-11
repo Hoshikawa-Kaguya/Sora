@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.Model.Message;
+using Sora.Module.ApiMessageModel;
 
 namespace Sora.EventArgs.OnebotEvent.MessageEvent
 {
     /// <summary>
     /// 消息事件基类
     /// </summary>
-    internal abstract class BaseMessageEventArgs
+    internal abstract class BaseMessageEventArgs : BaseApiEventArgs
     {
         /// <summary>
         /// 消息类型
@@ -37,7 +37,7 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
         /// 消息内容
         /// </summary>
         [JsonProperty(PropertyName = "message")]
-        internal List<OnebotMessage> MessageList { get; set; }
+        internal List<ApiMessage> MessageList { get; set; }
 
         /// <summary>
         /// 原始消息内容
