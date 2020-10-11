@@ -387,7 +387,7 @@ namespace Sora.Module.CQCodes
         };
         #endregion
 
-        #region 私有方法
+        #region 程序集方法
         /// <summary>
         /// 处理传入数据
         /// </summary>
@@ -396,7 +396,7 @@ namespace Sora.Module.CQCodes
         /// <para><see langword="retStr"/>处理后数据字符串</para>
         /// <para><see langword="isMatch"/>是否为合法数据字符串</para>
         /// </returns>
-        private static (string retStr,bool isMatch) ParseDataStr(string dataStr)
+        internal static (string retStr,bool isMatch) ParseDataStr(string dataStr)
         {
             if (string.IsNullOrEmpty(dataStr)) return (null, false);
             bool isMatch = false;

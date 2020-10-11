@@ -116,36 +116,6 @@ namespace Sora.OnebotInterface
         }
 
         /// <summary>
-        /// 获取合并转发消息
-        /// </summary>
-        /// <param name="connection">服务器连接标识</param>
-        /// <param name="msgId">合并转发 ID</param>
-        /// <returns>ApiResponseCollection</returns>
-        internal static async ValueTask<(int retCode, NodeArray nodeArray)> GetForwardMessage(Guid connection, string msgId)
-        {
-            if(string.IsNullOrEmpty(msgId)) throw new NullReferenceException(nameof(msgId));
-            ConsoleLog.Debug("Sora", "Sending get_forward_msg request");
-            //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
-            {
-                ApiType = APIType.GetForwardMessage,
-                ApiParams = new GetForwardParams
-                {
-                    MessageId = msgId
-                }
-            }, connection);
-            //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get get_forward_msg response retcode={retCode}");
-            if (GetBaseRetCode(ret).retCode != 0) return (retCode, null);
-            //转换消息类型
-            NodeArray messageList =
-                ret?["data"]?.ToObject<NodeArray>() ?? new NodeArray();
-            messageList.ParseNode();
-            return (retCode, messageList);
-        }
-
-        /// <summary>
         /// 获取登陆账号信息
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
@@ -491,6 +461,36 @@ namespace Sora.OnebotInterface
             return (retCode,
                     ret["data"]?["slices"]?.ToObject<List<string>>());
         }
+
+        /// <summary>
+        /// 获取合并转发消息
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="msgId">合并转发 ID</param>
+        /// <returns>ApiResponseCollection</returns>
+        internal static async ValueTask<(int retCode, NodeArray nodeArray)> GetForwardMessage(Guid connection, string msgId)
+        {
+            if(string.IsNullOrEmpty(msgId)) throw new NullReferenceException(nameof(msgId));
+            ConsoleLog.Debug("Sora", "Sending get_forward_msg request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetForwardMessage,
+                ApiParams = new GetForwardParams
+                {
+                    MessageId = msgId
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_forward_msg response retcode={retCode}");
+            if (GetBaseRetCode(ret).retCode != 0) return (retCode, null);
+            //转换消息类型
+            NodeArray messageList =
+                ret?["data"]?.ToObject<NodeArray>() ?? new NodeArray();
+            messageList.ParseNode();
+            return (retCode, messageList);
+        }
         #endregion
         #endregion
 
@@ -572,7 +572,7 @@ namespace Sora.OnebotInterface
         /// <param name="gid">群号</param>
         /// <param name="uid">用户id</param>
         /// <param name="card">新名片</param>
-        internal static async ValueTask SetGroupCard(Guid connection, long gid, long uid, string card = null)
+        internal static async ValueTask SetGroupCard(Guid connection, long gid, long uid, string card)
         {
             ConsoleLog.Debug("Sora","Sending set_group_card request");
             await SendApiMessage(new ApiRequest
@@ -611,7 +611,7 @@ namespace Sora.OnebotInterface
         }
 
         /// <summary>
-        /// 群组T人
+        /// 群组踢人
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="gid">群号</param>
@@ -675,37 +675,21 @@ namespace Sora.OnebotInterface
         }
 
         /// <summary>
-        /// 发送合并转发(群)
-        /// 但好像不能用的样子
+        /// 
         /// </summary>
-        /// <param name="connection">服务器连接标识</param>
-        /// <param name="gid">群号</param>
-        /// <param name="msgList">消息段数组</param>
-        internal static async ValueTask SendGroupForwardMsg(Guid connection, long gid, List<Node> msgList)
+        /// <param name="connection"></param>
+        /// <param name="gid"></param>
+        /// <param name="dismiss"></param>
+        internal static async ValueTask SetGroupLeave(Guid connection, long gid, bool dismiss)
         {
-            ConsoleLog.Debug("Sora","Sending send_group_forward_msg request");
-            List<object> sendObj = new List<object>();
-            //处理消息节点
-            foreach (Node node in msgList)
-            {
-                sendObj.Add(new
-                {
-                    type = "node",
-                    data = new
-                    {
-                        name = node.Sender.Nick,
-                        uin = node.Sender.Uid.ToString(),
-                        content = node.MessageList
-                    }
-                });
-            }
+            ConsoleLog.Debug("Sora","Sending set_group_leave request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SendGroupForwardMsg,
-                ApiParams = new SendGroupForwardMsgParams
+                ApiType = APIType.SetGroupLeave,
+                ApiParams = new SetGroupLeaveParams
                 {
-                    GroupId     = gid,
-                    NodeMsgList = sendObj
+                    Gid = gid,
+                    Dismiss = dismiss
                 }
             }, connection);
         }
@@ -729,6 +713,42 @@ namespace Sora.OnebotInterface
         }
 
         #region Go API
+        /// <summary>
+        /// 发送合并转发(群)
+        /// 但好像不能用的样子
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="msgList">消息段数组</param>
+        internal static async ValueTask SendGroupForwardMsg(Guid connection, long gid, List<Node> msgList)
+        {
+            ConsoleLog.Debug("Sora","Sending send_group_forward_msg request");
+            List<object> sendObj = new List<object>();
+            //处理消息节点
+            foreach (Node node in msgList)
+            {
+                sendObj.Add(new
+                {
+                    type = "node",
+                    data = new
+                    {
+                        name    = node.Sender.Nick,
+                        uin     = node.Sender.Uid.ToString(),
+                        content = node.MessageList
+                    }
+                });
+            }
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SendGroupForwardMsg,
+                ApiParams = new SendGroupForwardMsgParams
+                {
+                    GroupId     = gid,
+                    NodeMsgList = sendObj
+                }
+            }, connection);
+        }
+
         /// <summary>
         /// 设置群名
         /// </summary>

@@ -73,6 +73,7 @@ namespace Sora.Module.SoraModel.Base
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> SendGroupMessage(long groupId, params object[] message)
         {
+            if(groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if(message.Length == 0) throw new NullReferenceException(nameof(message));
             //消息段列表
             List<CQCode> msgList = new List<CQCode>();
@@ -100,6 +101,7 @@ namespace Sora.Module.SoraModel.Base
             await ApiInterface.DeleteMsg(this.ConnectionGuid, messageId);
         }
 
+        #region GoAPI
         /// <summary>
         /// 获取合并转发消息
         /// </summary>
@@ -110,9 +112,178 @@ namespace Sora.Module.SoraModel.Base
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, List<Node> nodeArray)> GetForwardMessage(string forwardId)
         {
+            if(string.IsNullOrEmpty(forwardId)) throw new NullReferenceException(nameof(forwardId));
             var apiResult = await ApiInterface.GetForwardMessage(this.ConnectionGuid, forwardId);
             return ((APIStatusType) apiResult.retCode, apiResult.nodeArray.NodeMsgList);
         }
+
+        /// <summary>
+        /// 发送合并转发(群)
+        /// 但好像不能用的样子
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="nodeList">
+        /// 节点(<see cref="Node"/>)消息段列表
+        /// </param>
+        public async ValueTask SendGroupForwardMsg(long groupId, List<Node> nodeList)
+        {
+            if(groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
+            if(nodeList == null || nodeList.Count == 0) throw new NullReferenceException(nameof(nodeList));
+            await ApiInterface.SendGroupForwardMsg(this.ConnectionGuid, groupId, nodeList);
+        }
+
+        /// <summary>
+        /// 获取图片信息
+        /// </summary>
+        /// <param name="cacheFileName">缓存文件名</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="size"/> 文件大小(Byte)</para>
+        /// <para><see langword="fileName"/> 文件名</para>
+        /// <para><see langword="url"/> 文件链接</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, int size, string fileName, string url)> GetImage(
+            string cacheFileName)
+        {
+            if(string.IsNullOrEmpty(cacheFileName)) throw new ArgumentOutOfRangeException(nameof(cacheFileName));
+            return ((APIStatusType apiStatus, int size, string fileName, string url))
+                await ApiInterface.GetImage(this.ConnectionGuid, cacheFileName);
+        }
+
+        /// <summary>
+        /// <para>获取群消息</para>
+        /// <para>只能获取纯文本信息</para>
+        /// </summary>
+        /// <param name="messageId"></param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="Message"/> 消息内容</para>
+        /// <para><see cref="User"/> 发送者</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, Message message, User sender)> GetGroupMessages(int messageId)
+        {
+            return ((APIStatusType apiStatus, Message message, User sender))
+                await ApiInterface.GetGroupMessage(this.ConnectionGuid, messageId);
+        }
+        #endregion
+
+        #endregion
+
+        #region 群管理方法
+        /// <summary>
+        /// 设置群名片
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="userId">用户id</param>
+        /// <param name="card">
+        /// <para>新名片</para>
+        /// <para>当值为 <see langword="null"/> 或 <see cref="string"/>.<see langword="Empty"/> 时为清空名片</para>
+        /// </param>
+        public async ValueTask SetGroupCard(long groupId, long userId, string card)
+        {
+            if (groupId is < 100000 || userId is < 10000)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
+            await ApiInterface.SetGroupCard(this.ConnectionGuid, groupId, userId, card);
+        }
+
+        /// <summary>
+        /// 设置群组专属头衔
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="userId">用户id</param>
+        /// <param name="specialTitle">专属头衔(为空时清空)</param>
+        public async ValueTask SetGroupSpecialTitle(long groupId, long userId, string specialTitle)
+        {
+            if (groupId is < 100000 || userId is < 10000)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
+            await ApiInterface.SetGroupSpecialTitle(this.ConnectionGuid, groupId, userId, specialTitle);
+        }
+
+        /// <summary>
+        /// 群组踢人
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="userId">用户id</param>
+        /// <param name="rejectRequest">拒绝此人的加群请求</param>
+        public async ValueTask KickGroupMember(long groupId, long userId, bool rejectRequest)
+        {
+            if (groupId is < 100000 || userId is < 10000)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
+            await ApiInterface.SetGroupKick(this.ConnectionGuid, groupId, userId, rejectRequest);
+        }
+
+        /// <summary>
+        /// 设置群组单人禁言
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="userId">用户id</param>
+        /// <param name="duration">
+        /// <para>禁言时长(s)</para>
+        /// <para>至少60s</para>
+        /// </param>
+        public async ValueTask BanGroupMember(long groupId, long userId, long duration)
+        {
+            if (groupId is < 100000 || userId is < 10000 || duration <= 60)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
+            await ApiInterface.SetGroupBan(this.ConnectionGuid, groupId, userId, duration);
+        }
+
+        /// <summary>
+        /// 群组全员禁言
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="enable">禁言的启用/关闭</param>
+        public async ValueTask SetGroupWholeBan(long groupId, bool enable)
+        {
+            if(groupId < 100000)
+                throw new ArgumentOutOfRangeException(nameof(groupId));
+            await ApiInterface.SetGroupWholeBan(this.ConnectionGuid, groupId, enable);
+        }
+
+        /// <summary>
+        /// 退出群
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="dismiss">
+        /// <para>是否解散群</para>
+        /// <para>仅在bot为群主时有效</para>
+        /// <para>默认值为<see langword="false"/>不需要设置</para>
+        /// </param>
+        public async ValueTask LeaveGroup(long groupId, bool dismiss = false)
+        {
+            if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
+            await ApiInterface.SetGroupLeave(this.ConnectionGuid, groupId, dismiss);
+        }
+
+        #region GoAPI
+        /// <summary>
+        /// 设置群名
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="newName">新群名</param>
+        public async ValueTask SetGroupName(long groupId, string newName)
+        {
+            if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
+            if (string.IsNullOrEmpty(newName)) throw new NullReferenceException(nameof(newName));
+            await ApiInterface.SetGroupName(this.ConnectionGuid, groupId, newName);
+        }
+
+        /// <summary>
+        /// 设置群头像
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="imageFile">图片名/绝对路径/URL/base64</param>
+        /// <param name="useCache">是否使用缓存</param>
+        public async ValueTask SetGroupPortrait(long groupId, string imageFile, bool useCache = true)
+        {
+            if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
+            if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
+            (string retFileStr, bool isMatch) = CQCode.ParseDataStr(imageFile);
+            if (!isMatch) throw new NotSupportedException($"not supported file type({imageFile})");
+            await ApiInterface.SetGroupPortrait(this.ConnectionGuid, groupId, retFileStr, useCache);
+        }
+        #endregion
+
         #endregion
 
         #region 账号信息API
@@ -165,6 +336,8 @@ namespace Sora.Module.SoraModel.Base
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(long groupId)
         {
+            if (groupId < 100000)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} out of range");
             return ((APIStatusType apiStatus, List<GroupMemberInfo> groupMemberList)) 
                 await ApiInterface.GetGroupMemberList(this.ConnectionGuid, groupId);
         }
@@ -180,6 +353,8 @@ namespace Sora.Module.SoraModel.Base
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, GroupInfo groupInfo)> GetGroupInfo(long groupId, bool useCache = true)
         {
+            if (groupId is < 100000)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} out of range");
             return ((APIStatusType apiStatus, GroupInfo groupInfo)) 
                 await ApiInterface.GetGroupInfo(this.ConnectionGuid, groupId, useCache);
         }
@@ -197,6 +372,8 @@ namespace Sora.Module.SoraModel.Base
         public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
             long groupId, long userId, bool useCache = true)
         {
+            if (groupId is < 100000 && userId is < 10000)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
             return ((APIStatusType apiStatus, GroupMemberInfo memberInfo)) 
                 await ApiInterface.GetGroupMemberInfo(this.ConnectionGuid, groupId, userId, useCache);
         }
@@ -263,6 +440,7 @@ namespace Sora.Module.SoraModel.Base
         /// <param name="delay">延迟(ms)</param>
         public async ValueTask RebootClient(int delay = 0)
         {
+            if(delay < 0) throw new ArgumentOutOfRangeException(nameof(delay));
             await ApiInterface.Restart(this.ConnectionGuid, delay);
         }
 
@@ -285,6 +463,7 @@ namespace Sora.Module.SoraModel.Base
         public async ValueTask SetFriendAddRequest(string flag, bool approve,
                                                    string remark = null)
         {
+            if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
             await ApiInterface.SetFriendAddRequest(this.ConnectionGuid, flag, approve, remark);
         }
 
@@ -300,11 +479,14 @@ namespace Sora.Module.SoraModel.Base
                                                   bool approve,
                                                   string reason = null)
         {
+            if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
             await ApiInterface.SetGroupAddRequest(this.ConnectionGuid, flag, requestType, approve, reason);
         }
         #endregion
 
         #region 辅助API
+
+        #region GoAPI
         /// <summary>
         /// 获取中文分词
         /// </summary>
@@ -315,8 +497,12 @@ namespace Sora.Module.SoraModel.Base
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, List<string> wordList)> GetWordSlices(string text)
         {
+            if (string.IsNullOrEmpty(text)) throw new NullReferenceException(nameof(text));
             return ((APIStatusType apiStatus, List<string> wordList)) await ApiInterface.GetWordSlices(this.ConnectionGuid, text);
         }
+
+        #endregion
+
         #endregion
     }
 }
