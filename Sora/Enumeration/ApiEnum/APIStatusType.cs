@@ -13,6 +13,8 @@ namespace Sora.Enumeration.ApiEnum
         NotFound = 404,
         Error    = 502,
 
-        Faild_   = 102
+        Faild_   = 102,
+
+        NoResult = -1
     }
 }

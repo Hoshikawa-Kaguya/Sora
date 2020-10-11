@@ -9,7 +9,8 @@ using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.EventArgs.SoraEvent;
-using Sora.Model.SoraModel;
+using Sora.Module.ApiMessageModel;
+using Sora.Module.SoraModel.Base;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
@@ -36,7 +37,7 @@ namespace Sora.OnebotInterface
         /// <param name="sender">产生事件的客户端</param>
         /// <param name="eventArgs">事件参数</param>
         /// <returns></returns>
-        public delegate ValueTask OnebotAsyncCallBackHandler<in TEventArgs>(object sender, TEventArgs eventArgs)
+        public delegate ValueTask EventAsyncCallBackHandler<in TEventArgs>(object sender, TEventArgs eventArgs)
             where TEventArgs : System.EventArgs;
         #endregion
 
@@ -44,7 +45,9 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 客户端链接完成事件
         /// </summary>
-        public event OnebotAsyncCallBackHandler<ConnectEventArgs> OnClientConnect;
+        public event EventAsyncCallBackHandler<ConnectEventArgs> OnClientConnect;
+
+        public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnGroupMessage;
         #endregion
 
         #region 事件分发
@@ -130,12 +133,13 @@ namespace Sora.OnebotInterface
                     }
                     ConsoleLog.Info("Sora",$"已连接到{Enum.GetName(clientType)}客户端,版本:{clientVer}");
                     if(OnClientConnect == null) break;
+                    //执行回调函数
                     await Task.Run(async () =>
                                    {
-                                       ConnectEventArgs connectEventArgs =
-                                           new ConnectEventArgs(new SoraApi(connection), "lifecycle",
-                                                                lifeCycle?.SelfID ?? -1);
-                                       await OnClientConnect(typeof(EventInterface), connectEventArgs);
+                                       await OnClientConnect(typeof(EventInterface),
+                                                             new ConnectEventArgs(connection, "lifecycle",
+                                                                 lifeCycle?.SelfID ?? -1, clientType, clientVer,
+                                                                 lifeCycle?.Time   ?? 0));
                                    });
                     break;
                 default:
@@ -157,15 +161,22 @@ namespace Sora.OnebotInterface
             {
                 //私聊事件
                 case "private":
-                    PrivateMessageEventArgs privateMessage = messageJson.ToObject<PrivateMessageEventArgs>();
-                    if(privateMessage == null) break;
-                    ConsoleLog.Debug("Sora",$"Private msg {privateMessage.Sender.Nick}({privateMessage.UserId}) : {privateMessage.RawMessage}");
+                    ServerPrivateMsgEventArgs privateMsg = messageJson.ToObject<ServerPrivateMsgEventArgs>();
+                    if(privateMsg == null) break;
+                    ConsoleLog.Debug("Sora",$"Private msg {privateMsg.Sender.Nick}({privateMsg.UserId}) : {privateMsg.RawMessage}");
                     break;
                 //群聊事件
                 case "group":
-                    GroupMessageEventArgs groupMessage = messageJson.ToObject<GroupMessageEventArgs>();
-                    if(groupMessage == null) break;
-                    ConsoleLog.Debug("Sora",$"Group msg[{groupMessage.GroupId}] form {groupMessage.Sender.Nick}[{groupMessage.UserId}] : {groupMessage.RawMessage}");
+                    ServerGroupMsgEventArgs groupMsg = messageJson.ToObject<ServerGroupMsgEventArgs>();
+                    if(groupMsg == null) break;
+                    ConsoleLog.Debug("Sora",$"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] : {groupMsg.RawMessage}");
+                    //执行回调函数
+                    if(OnGroupMessage == null) break;
+                    await Task.Run(async () =>
+                                   {
+                                       await OnGroupMessage(typeof(EventInterface),
+                                                            new GroupMessageEventArgs(connection, "group", groupMsg));
+                                   });
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMessageType(messageJson)}]");
@@ -192,6 +203,11 @@ namespace Sora.OnebotInterface
                     break;
                 //群组请求事件
                 case "group":
+                    if (messageJson.TryGetValue("sub_type",out JToken sub) && sub.ToString().Equals("notice"))
+                    {
+                        ConsoleLog.Warning("Sora","收到notice消息类型，不解析此类型消息");
+                        break;
+                    }
                     GroupRequestEventArgs groupRequest = messageJson.ToObject<GroupRequestEventArgs>();
                     if(groupRequest == null) break;
                     ConsoleLog.Debug("Sora",$"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
