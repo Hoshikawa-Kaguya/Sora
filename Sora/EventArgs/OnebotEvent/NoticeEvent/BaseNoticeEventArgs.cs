@@ -12,6 +12,7 @@ namespace Sora.EventArgs.OnebotEvent.NoticeEvent
         /// </summary>
         [JsonProperty(PropertyName = "notice_type")]
         internal string NoticeType { get; set; }
+
         /// <summary>
         /// 操作对象UID
         /// </summary>
