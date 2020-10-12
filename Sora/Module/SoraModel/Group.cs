@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Enumeration.ApiEnum;
+using Sora.Module.CQCodes.CQCodeModel;
 using Sora.Module.SoraModel.Base;
 using Sora.Module.SoraModel.Info;
 using Sora.OnebotInterface;
@@ -84,6 +85,21 @@ namespace Sora.Module.SoraModel
         {
             return await base.SoraApi.GetGroupMemberInfo(this.Id, userId, useCache);
         }
+
+        #region Go扩展
+        /// <summary>
+        /// 发送合并转发(群)
+        /// 但好像不能用的样子
+        /// </summary>
+        /// <param name="nodeList">
+        /// 节点(<see cref="Node"/>)消息段列表
+        /// </param>
+        public async ValueTask SendGroupForwardMsg(List<Node> nodeList)
+        {
+            await base.SoraApi.SendGroupForwardMsg(this.Id, nodeList);
+        }
+        #endregion
+
         #endregion
 
         #region 群管理方法
@@ -170,12 +186,52 @@ namespace Sora.Module.SoraModel
         }
 
         /// <summary>
+        /// 退出群
+        /// </summary>
+        public async ValueTask LeaveGroup()
+        {
+            await base.SoraApi.LeaveGroup(this.Id);
+        }
+
+        /// <summary>
         /// 解散群
         /// </summary>
         public async ValueTask DismissGroup()
         {
             await base.SoraApi.DismissGroup(this.Id);
         }
+
+        /// <summary>
+        /// 群组踢人
+        /// </summary>
+        /// <param name="userId">用户id</param>
+        /// <param name="rejectRequest">拒绝此人的加群请求</param>
+        public async ValueTask KickGroupMember(long userId, bool rejectRequest = false)
+        {
+            await base.SoraApi.KickGroupMember(this.Id, userId, rejectRequest);
+        }
+
+        #region Go扩展
+        /// <summary>
+        /// 设置群名
+        /// </summary>
+        /// <param name="newName">新群名</param>
+        public async ValueTask SetGroupName(string newName)
+        {
+            await base.SoraApi.SetGroupName(this.Id, newName);
+        }
+
+        /// <summary>
+        /// 设置群头像
+        /// </summary>
+        /// <param name="imageFile">图片名/绝对路径/URL/base64</param>
+        /// <param name="useCache">是否使用缓存</param>
+        public async ValueTask SetGroupPortrait(string imageFile, bool useCache = true)
+        {
+            await base.SoraApi.SetGroupPortrait(this.Id, imageFile, useCache);
+        }
+        #endregion
+
         #endregion
 
         #region 转换方法
