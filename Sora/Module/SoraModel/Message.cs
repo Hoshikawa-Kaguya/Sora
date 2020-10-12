@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Sora.Enumeration;
 using Sora.Module.CQCodes;
+using Sora.Module.CQCodes.CQCodeModel;
 using Sora.Module.SoraModel.Base;
 
 namespace Sora.Module.SoraModel
@@ -37,7 +41,69 @@ namespace Sora.Module.SoraModel
         #region 构造函数
         public Message(Guid connectionGuid, int msgId, string text, List<CQCode> cqCodeList, long time, int font) : base(connectionGuid)
         {
+            this.MessageId   = msgId;
+            this.RawText     = text;
+            this.MessageList = cqCodeList;
+            this.Time        = time;
+            this.Font        = font;
+        }
+        #endregion
 
+        #region 消息管理方法
+        /// <summary>
+        /// 撤回本条消息
+        /// </summary>
+        public async ValueTask DeleteMessage()
+        {
+            await base.SoraApi.DeleteMessage(this.MessageId);
+        }
+        #endregion
+
+        #region CQ码快捷方法
+        /// <summary>
+        /// 获取所有At的UID
+        /// </summary>
+        /// <returns>
+        /// <para>At的uid列表</para>
+        /// <para><see cref="List{T}"/>(T=<see cref="long"/>)</para>
+        /// </returns>
+        public List<long> GetAllAtList()
+        {
+            return MessageList.Where(cq => cq.Function == CQFunction.At)
+                              .Select(cq => Convert.ToInt64(((At) cq.CQData).Traget))
+                              .ToList();
+        }
+
+        /// <summary>
+        /// 获取语音URL
+        /// 仅在消息为语音时有效
+        /// </summary>
+        /// <returns>语音文件url</returns>
+        public string GetRecordUrl()
+        {
+            if (this.MessageList.Count != 1 || MessageList.First().Function != CQFunction.Record) return null;
+            return ((Record)MessageList.First().CQData).Url;
+        }
+
+        /// <summary>
+        /// 获取所有图片信息
+        /// </summary>
+        /// <returns>
+        /// <para>图片信息结构体列表</para>
+        /// <para><see cref="List{T}"/>(T=<see cref="Image"/>)</para>
+        /// </returns>
+        public List<Image> GetAllImage()
+        {
+            return MessageList.Where(cq => cq.Function == CQFunction.Image)
+                              .Select(cq => (Image) cq.CQData)
+                              .ToList();
+        }
+        #endregion
+
+        #region 转换方法
+        public override string ToString()
+        {
+            return RawText;
         }
         #endregion
     }

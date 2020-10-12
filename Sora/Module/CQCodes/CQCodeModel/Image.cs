@@ -10,7 +10,7 @@ namespace Sora.Module.CQCodes.CQCodeModel
     {
         #region 属性
         /// <summary>
-        /// 纯文本内容
+        /// 文件名/绝对路径/URL/base64
         /// </summary>
         [JsonProperty(PropertyName = "file")]
         public string ImgFile { get; internal set; }

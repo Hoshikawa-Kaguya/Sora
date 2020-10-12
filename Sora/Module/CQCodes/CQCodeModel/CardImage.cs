@@ -9,7 +9,7 @@ namespace Sora.Module.CQCodes.CQCodeModel
     public struct CardImage
     {
         /// <summary>
-        /// 和image相同
+        /// 文件名/绝对路径/URL/base64
         /// </summary>
         [JsonProperty(PropertyName = "file")]
         public string ImageFile { get; internal set; }

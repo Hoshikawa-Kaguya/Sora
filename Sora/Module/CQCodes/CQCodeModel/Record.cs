@@ -7,7 +7,7 @@ namespace Sora.Module.CQCodes.CQCodeModel
     {
         #region 属性
         /// <summary>
-        /// 语音文件名
+        /// 文件名/绝对路径/URL/base64
         /// </summary>
         [JsonProperty(PropertyName = "file")]
         public string RecordFile { get; internal set; }
@@ -33,7 +33,7 @@ namespace Sora.Module.CQCodes.CQCodeModel
         public int? Cache { get; internal set; }
 
         /// <summary>
-        /// 是否使用已缓存的文件
+        /// 是否使用代理
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "proxy", NullValueHandling = NullValueHandling.Ignore)]

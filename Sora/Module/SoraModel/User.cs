@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Enumeration.ApiEnum;
 using Sora.Module.CQCodes;
@@ -35,7 +36,11 @@ namespace Sora.Module.SoraModel
         /// <summary>
         /// 发送私聊消息
         /// </summary>
-        /// <param name="message">消息内容</param>
+        /// <param name="message">
+        /// <para>消息</para>
+        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        /// </param>
         public async ValueTask<(APIStatusType apiStatus,int message)> SendPrivateMessage(params object[] message)
         {
             return await base.SoraApi.SendPrivateMessage(this.Id, message);
