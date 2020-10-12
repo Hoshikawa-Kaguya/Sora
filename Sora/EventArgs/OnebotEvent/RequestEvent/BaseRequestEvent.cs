@@ -1,4 +1,6 @@
 using Newtonsoft.Json;
+using Sora.Converter;
+using Sora.Enumeration.ApiEnum;
 
 namespace Sora.EventArgs.OnebotEvent.RequestEvent
 {
@@ -11,7 +13,8 @@ namespace Sora.EventArgs.OnebotEvent.RequestEvent
         /// 请求类型
         /// </summary>
         [JsonProperty(PropertyName = "request_type")]
-        internal string RequestType { get; set; }
+        [JsonConverter(typeof(EnumDescriptionConverter))]
+        internal RequestType RequestType { get; set; }
 
         /// <summary>
         /// 发送请求的 QQ 号

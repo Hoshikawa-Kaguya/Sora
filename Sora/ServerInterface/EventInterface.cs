@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.Enumeration.ApiEnum;
@@ -44,8 +45,22 @@ namespace Sora.ServerInterface
         /// 客户端链接完成事件
         /// </summary>
         public event EventAsyncCallBackHandler<ConnectEventArgs> OnClientConnect;
-
+        /// <summary>
+        /// 群聊事件
+        /// </summary>
         public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnGroupMessage;
+        /// <summary>
+        /// 私聊事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<PrivateMessageEventArgs> OnPrivateMessage;
+        /// <summary>
+        /// 群申请事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<GroupRequestEventArgs> OnGroupRequest;
+        /// <summary>
+        /// 好友申请事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<FriendRequestEventArgs> OnFriendRequest; 
         #endregion
 
         #region 事件分发
@@ -132,13 +147,10 @@ namespace Sora.ServerInterface
                     ConsoleLog.Info("Sora",$"已连接到{Enum.GetName(clientType)}客户端,版本:{clientVer}");
                     if(OnClientConnect == null) break;
                     //执行回调函数
-                    await Task.Run(async () =>
-                                   {
-                                       await OnClientConnect(typeof(EventInterface),
-                                                             new ConnectEventArgs(connection, "lifecycle",
-                                                                 lifeCycle?.SelfID ?? -1, clientType, clientVer,
-                                                                 lifeCycle?.Time   ?? 0));
-                                   });
+                    await OnClientConnect(typeof(EventInterface),
+                                          new ConnectEventArgs(connection, "lifecycle",
+                                                               lifeCycle?.SelfID ?? -1, clientType, clientVer,
+                                                               lifeCycle?.Time   ?? 0));
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMetaEventType(messageJson)}]");
@@ -162,19 +174,22 @@ namespace Sora.ServerInterface
                     ServerPrivateMsgEventArgs privateMsg = messageJson.ToObject<ServerPrivateMsgEventArgs>();
                     if(privateMsg == null) break;
                     ConsoleLog.Debug("Sora",$"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) : {privateMsg.RawMessage}");
+                    //执行回调函数
+                    if(OnPrivateMessage == null) break;
+                    await OnPrivateMessage(typeof(EventInterface),
+                                           new PrivateMessageEventArgs(connection, "private", privateMsg));
                     break;
                 //群聊事件
                 case "group":
                     ServerGroupMsgEventArgs groupMsg = messageJson.ToObject<ServerGroupMsgEventArgs>();
                     if(groupMsg == null) break;
-                    ConsoleLog.Debug("Sora",$"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] : {groupMsg.RawMessage}");
+                    ConsoleLog.Debug("Sora",
+                                     $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] : {groupMsg.RawMessage}");
                     //执行回调函数
+                    ConsoleLog.Debug("Sora",$"Thread id{Thread.CurrentThread.ManagedThreadId}");
                     if(OnGroupMessage == null) break;
-                    await Task.Run(async () =>
-                                   {
-                                       await OnGroupMessage(typeof(EventInterface),
-                                                            new GroupMessageEventArgs(connection, "group", groupMsg));
-                                   });
+                    await OnGroupMessage(typeof(EventInterface),
+                                         new GroupMessageEventArgs(connection, "group", groupMsg));
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetMessageType(messageJson)}]");
@@ -195,9 +210,14 @@ namespace Sora.ServerInterface
             {
                 //好友请求事件
                 case "friend":
-                    FriendRequestEventArgs friendRequest = messageJson.ToObject<FriendRequestEventArgs>();
+                    ServerFriendRequestEventArgs friendRequest = messageJson.ToObject<ServerFriendRequestEventArgs>();
                     if(friendRequest == null)  break;
                     ConsoleLog.Debug("Sora",$"Friend request form [{friendRequest.UserId}] with commont[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
+                    //执行回调函数
+                    if(OnFriendRequest == null) break;
+                    await OnFriendRequest(typeof(EventInterface),
+                                          new FriendRequestEventArgs(connection, "request|friend",
+                                                                     friendRequest));
                     break;
                 //群组请求事件
                 case "group":
@@ -206,9 +226,14 @@ namespace Sora.ServerInterface
                         ConsoleLog.Warning("Sora","收到notice消息类型，不解析此类型消息");
                         break;
                     }
-                    GroupRequestEventArgs groupRequest = messageJson.ToObject<GroupRequestEventArgs>();
+                    ServerGroupRequestEventArgs groupRequest = messageJson.ToObject<ServerGroupRequestEventArgs>();
                     if(groupRequest == null) break;
                     ConsoleLog.Debug("Sora",$"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
+                    //执行回调函数
+                    if(OnGroupRequest == null) break;
+                    await OnGroupRequest(typeof(EventInterface),
+                                         new GroupRequestEventArgs(connection, "request|group",
+                                                                   groupRequest));
                     break;
                 default:
                     ConsoleLog.Warning("Sora",$"接收到未知事件[{GetRequestType(messageJson)}]");
