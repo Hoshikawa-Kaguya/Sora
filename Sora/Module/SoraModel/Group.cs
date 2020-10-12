@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Enumeration.ApiEnum;
+using Sora.Module.CQCodes;
 using Sora.Module.CQCodes.CQCodeModel;
 using Sora.Module.SoraModel.Base;
 using Sora.Module.SoraModel.Info;
@@ -33,7 +34,11 @@ namespace Sora.Module.SoraModel
         /// <summary>
         /// 发送群消息
         /// </summary>
-        /// <param name="message">消息内容</param>
+        /// <param name="message">
+        /// <para>消息</para>
+        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        /// </param>
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>

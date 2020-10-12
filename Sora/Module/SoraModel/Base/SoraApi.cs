@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Sora.Enumeration.ApiEnum;
 using Sora.Module.CQCodes;
@@ -68,7 +69,11 @@ namespace Sora.Module.SoraModel.Info
         /// 发送群聊消息
         /// </summary>
         /// <param name="groupId">发送目标群id</param>
-        /// <param name="message">消息</param>
+        /// <param name="message">
+        /// <para>消息</para>
+        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        /// </param>
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
@@ -81,7 +86,11 @@ namespace Sora.Module.SoraModel.Info
             List<CQCode> msgList = new List<CQCode>();
             foreach (object msgObj in message)
             {
-                if(msgObj is CQCode cqCode)
+                if (msgObj is List<CQCode> cqCodeList)
+                {
+                    msgList.AddRange(cqCodeList);
+                }
+                else if(msgObj is CQCode cqCode)
                 {
                     msgList.Add(cqCode);
                 }

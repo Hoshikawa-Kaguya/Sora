@@ -26,10 +26,11 @@ namespace Sora_Test
                                                      ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
                                                      return ValueTask.CompletedTask;
                                                  };
-                server.Event.OnClientConnect += async (sender, eventArgs) =>
-                                                {
-                                                    await eventArgs.SoraApi.SendGroupMessage(883740678, "好耶");
-                                                };
+                server.Event.OnGroupMessage += async (sender, eventArgs) =>
+                                               {
+                                                   //最简单的复读（x
+                                                   await eventArgs.Repeat();
+                                               };
                 await Task.Delay(-1);
             }
             catch (Exception e) //侦测所有未处理的错误

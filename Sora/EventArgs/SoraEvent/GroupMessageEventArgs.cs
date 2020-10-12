@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Enumeration.ApiEnum;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.Module.ApiMessageModel;
+using Sora.Module.CQCodes;
 using Sora.Module.SoraModel;
 using Sora.Module.SoraModel.Info;
 
@@ -65,10 +67,30 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 快速回复
         /// </summary>
-        /// <param name="message">消息内容</param>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> QuickReply(params object[] message)
+        /// <param name="message">
+        /// <para>消息</para>
+        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        /// </param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="messageId"/> 发送消息的id</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, int messageId)> Reply(params object[] message)
         {
             return await base.SoraApi.SendGroupMessage(SourceGroup.Id, message);
+        }
+
+        /// <summary>
+        /// 没什么用的复读功能
+        /// </summary>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="messageId"/> 发送消息的id</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, int messageId)> Repeat()
+        {
+            return await base.SoraApi.SendGroupMessage(SourceGroup.Id, this.Message.MessageList);
         }
 
         /// <summary>
