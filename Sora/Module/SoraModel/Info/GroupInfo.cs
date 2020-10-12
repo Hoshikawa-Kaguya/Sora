@@ -1,19 +1,11 @@
-using System;
-
-namespace Sora.Module.SoraModel
+namespace Sora.Module.SoraModel.Info
 {
     /// <summary>
-    /// 群组类
+    /// 群信息
     /// </summary>
-    public sealed class GroupInfo
+    public struct GroupInfo
     {
         #region 属性
-        /// <summary>
-        /// 服务器链接GUID
-        /// 用于构建群组实例
-        /// </summary>
-        internal Guid ConnectionGuid { get; set; }
-
         /// <summary>
         /// 群名称
         /// </summary>
@@ -33,16 +25,6 @@ namespace Sora.Module.SoraModel
         /// 群组ID
         /// </summary>
         public long GroupId { get; internal set; }
-        #endregion
-
-        #region 公有方法
-        /// <summary>
-        /// 获取群组实例
-        /// </summary>
-        public Group GetGroup()
-        {
-            return new Group(this.ConnectionGuid, GroupId);
-        }
         #endregion
     }
 }

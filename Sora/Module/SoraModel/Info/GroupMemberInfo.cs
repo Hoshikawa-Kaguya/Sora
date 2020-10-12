@@ -1,23 +1,15 @@
-using System;
 using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration;
 
-namespace Sora.Module.SoraModel
+namespace Sora.Module.SoraModel.Info
 {
     /// <summary>
-    /// 群成员
+    /// 群成员信息
     /// </summary>
-    public sealed class GroupMemberInfo
+    public struct GroupMemberInfo
     {
         #region 属性
-        /// <summary>
-        /// 服务器链接GUID
-        /// 用于构建用户/群组实例
-        /// </summary>
-        [JsonIgnore]
-        internal Guid ConnectionGuid { get; set; }
-
         /// <summary>
         /// 群号
         /// </summary>
@@ -108,24 +100,6 @@ namespace Sora.Module.SoraModel
         /// </summary>
         [JsonProperty(PropertyName = "card_changeable")]
         public bool CardChangeable { get; internal set; }
-        #endregion
-
-        #region 公有方法
-        /// <summary>
-        /// 获取用户实例
-        /// </summary>
-        public User GetUser()
-        {
-            return new User(this.ConnectionGuid, UserId);
-        }
-
-        /// <summary>
-        /// 获取群组实例
-        /// </summary>
-        public Group GetGroup()
-        {
-            return new Group(this.ConnectionGuid, GroupId);
-        }
         #endregion
     }
 }

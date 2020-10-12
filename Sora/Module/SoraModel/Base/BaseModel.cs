@@ -1,4 +1,5 @@
 using System;
+using Sora.Module.SoraModel.Info;
 
 namespace Sora.Module.SoraModel.Base
 {

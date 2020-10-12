@@ -9,8 +9,6 @@ using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.EventArgs.SoraEvent;
-using Sora.Module.ApiMessageModel;
-using Sora.Module.SoraModel.Base;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface

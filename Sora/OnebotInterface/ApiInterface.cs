@@ -16,6 +16,7 @@ using Sora.Module.GoApiParams;
 using Sora.Module.ApiMessageModel;
 using Sora.Module.ApiParams;
 using Sora.Module.SoraModel;
+using Sora.Module.SoraModel.Info;
 using Sora.Tool;
 
 namespace Sora.OnebotInterface
@@ -273,7 +274,7 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_info response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            if (retCode != 0 || ret["data"] == null) return (retCode, new GroupInfo());
             return (retCode,
                     new GroupInfo
                     {
@@ -291,7 +292,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         /// <param name="gid">群号</param>
         /// <param name="uid">用户ID</param>
-        /// <param name="useCache">是否不使用缓存</param>
+        /// <param name="useCache">是否使用缓存</param>
         internal static async ValueTask<(int retCode, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
             Guid connection, long gid, long uid, bool useCache)
         {
@@ -309,9 +310,45 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_member_info response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            if (retCode != 0 || ret["data"] == null) return (retCode, new GroupMemberInfo());
             return (retCode,
-                    ret["data"]?.ToObject<GroupMemberInfo>());
+                    ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo());
+        }
+
+        /// <summary>
+        /// 获取用户信息
+        /// 可以为好友或陌生人
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="uid">用户ID</param>
+        /// <param name="useCache"></param>
+        /// <returns></returns>
+        internal static async ValueTask<(int retCode, UserInfo userInfo)> GetUserInfo(
+            Guid connection, long uid, bool useCache)
+        {
+            ConsoleLog.Debug("Sora","Sending get_stranger_info request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetStrangerInfo,
+                ApiParams = new GetStrangerInfoParams
+                {
+                    Uid     = uid,
+                    NoCache = !useCache
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_stranger_info response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, new UserInfo());
+            return (retCode, new UserInfo
+            {
+                UserId    = Convert.ToInt64(ret["data"]?["user_id"] ?? -1),
+                Nick      = ret["data"]?["nickname"]?.ToString(),
+                Age       = Convert.ToInt32(ret["data"]?["age"] ?? -1),
+                Sex       = ret["data"]?["sex"]?.ToString(),
+                Level     = Convert.ToInt32(ret["data"]?["level"]      ?? -1),
+                LoginDays = Convert.ToInt32(ret["data"]?["login_days"] ?? -1)
+            });
         }
 
         /// <summary>
@@ -669,6 +706,28 @@ namespace Sora.OnebotInterface
                 ApiParams = new SetGroupWholeBanParams
                 {
                     Gid    = gid,
+                    Enable = enable
+                }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 设置群管理员
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="uid">成员id</param>
+        /// <param name="gid">群号</param>
+        /// <param name="enable">设置或取消</param>
+        internal static async ValueTask SetGroupAdmin(Guid connection, long uid, long gid, bool enable)
+        {
+            ConsoleLog.Debug("Sora", "Sending set_group_admin request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiType = APIType.SetGroupAdmin,
+                ApiParams = new SetGroupAdminParams
+                {
+                    Gid    = gid,
+                    Uid    = uid,
                     Enable = enable
                 }
             }, connection);
