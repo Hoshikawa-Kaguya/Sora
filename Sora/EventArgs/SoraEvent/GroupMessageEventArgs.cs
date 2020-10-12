@@ -43,13 +43,12 @@ namespace Sora.EventArgs.SoraEvent
         #endregion
 
         #region 构造函数
-
         /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="serverGroupMsg">服务器消息事件</param>
+        /// <param name="serverGroupMsg">服务器消息事件参数</param>
         internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ServerGroupMsgEventArgs serverGroupMsg
         ) : base(connectionGuid, eventName, serverGroupMsg.SelfID, serverGroupMsg.Time)
         {
@@ -78,7 +77,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> Reply(params object[] message)
         {
-            return await base.SoraApi.SendGroupMessage(SourceGroup.Id, message);
+            return await base.SoraApi.SendGroupMessage(this.SourceGroup.Id, message);
         }
 
         /// <summary>
@@ -90,11 +89,12 @@ namespace Sora.EventArgs.SoraEvent
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> Repeat()
         {
-            return await base.SoraApi.SendGroupMessage(SourceGroup.Id, this.Message.MessageList);
+            return await base.SoraApi.SendGroupMessage(this.SourceGroup.Id, this.Message.MessageList);
         }
 
         /// <summary>
         /// 撤回发送者消息
+        /// 只有在管理员以上权限才有效
         /// </summary>
         public async ValueTask DeleteSourceMessage()
         {

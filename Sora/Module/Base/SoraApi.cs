@@ -551,7 +551,7 @@ namespace Sora.Module.Base
         /// <param name="flag">请求flag</param>
         /// <param name="requestType">请求类型</param>
         /// <param name="approve">是否同意</param>
-        /// <param name="reason">好友备注</param>
+        /// <param name="reason">拒绝理由</param>
         public async ValueTask SetGroupAddRequest(string flag,
                                                   GroupRequestType requestType,
                                                   bool approve,
