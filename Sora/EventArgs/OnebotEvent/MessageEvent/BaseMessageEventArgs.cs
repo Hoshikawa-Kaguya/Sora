@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.Module.ApiMessageModel;
+using Sora.ApiMessageParse;
 
 namespace Sora.EventArgs.OnebotEvent.MessageEvent
 {

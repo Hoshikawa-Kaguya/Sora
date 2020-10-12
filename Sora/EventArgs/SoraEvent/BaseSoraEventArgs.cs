@@ -1,5 +1,5 @@
 using System;
-using Sora.Module.SoraModel.Info;
+using Sora.Module.Base;
 using Sora.Tool;
 
 namespace Sora.EventArgs.SoraEvent

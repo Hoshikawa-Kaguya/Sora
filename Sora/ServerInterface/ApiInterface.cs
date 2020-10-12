@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Sora.ApiMessageParse;
+using Sora.CQCodes;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiEnum;
-using Sora.Module.CQCodes;
-using Sora.Module.CQCodes.CQCodeModel;
-using Sora.Module.GoApiParams;
-using Sora.Module.ApiMessageModel;
-using Sora.Module.ApiParams;
-using Sora.Module.SoraModel;
-using Sora.Module.SoraModel.Info;
+using Sora.CQCodes.CQCodeModel;
+using Sora.Params.GoApiParams;
+using Sora.Params.ApiParams;
+using Sora.Module;
+using Sora.Module.Info;
 using Sora.Tool;
 
 namespace Sora.ServerInterface

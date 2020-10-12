@@ -161,7 +161,7 @@ namespace Sora.ServerInterface
                 case "private":
                     ServerPrivateMsgEventArgs privateMsg = messageJson.ToObject<ServerPrivateMsgEventArgs>();
                     if(privateMsg == null) break;
-                    ConsoleLog.Debug("Sora",$"Private msg {privateMsg.Sender.Nick}({privateMsg.UserId}) : {privateMsg.RawMessage}");
+                    ConsoleLog.Debug("Sora",$"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) : {privateMsg.RawMessage}");
                     break;
                 //群聊事件
                 case "group":

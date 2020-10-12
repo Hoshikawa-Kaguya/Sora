@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using Sora.Module.ApiMessageModel;
+using Sora.Module.Info;
 
 namespace Sora.EventArgs.OnebotEvent.MessageEvent
 {

@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using Sora.Module.ApiMessageModel;
+using Sora.Module.Info;
 
 namespace Sora.EventArgs.OnebotEvent.MessageEvent
 {
@@ -12,6 +12,6 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
         /// 发送人信息
         /// </summary>
         [JsonProperty(PropertyName = "sender")]
-        internal PrivateSender Sender { get; set; }
+        internal PrivateSenderInfo SenderInfo { get; set; }
     }
 }
