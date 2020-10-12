@@ -1,17 +1,20 @@
 using Newtonsoft.Json;
+using Sora.Converter;
+using Sora.Enumeration.ApiEnum;
 
 namespace Sora.EventArgs.OnebotEvent.NoticeEvent
 {
     /// <summary>
     /// 群管理员变动事件
     /// </summary>
-    internal sealed class AdminChangeEventArgs : BaseNoticeEventArgs
+    internal sealed class ServerAdminChangeEventArgs : BaseNoticeEventArgs
     {
         /// <summary>
         /// 事件子类型
         /// </summary>
+        [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "sub_type")]
-        internal string SubType { get; set; }
+        internal AdminChangeType SubType { get; set; }
 
         /// <summary>
         /// 群号

@@ -60,7 +60,23 @@ namespace Sora.ServerInterface
         /// <summary>
         /// 好友申请事件
         /// </summary>
-        public event EventAsyncCallBackHandler<FriendRequestEventArgs> OnFriendRequest; 
+        public event EventAsyncCallBackHandler<FriendRequestEventArgs> OnFriendRequest;
+        /// <summary>
+        /// 群文件上传事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<FileUploadEventArgs> OnFileUpload;
+        /// <summary>
+        /// 管理员变动事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<AdminChangeEventArgs> OnAdminChange;
+        /// <summary>
+        /// 群成员变动事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<GroupMemberChangeEventArgs> OnGroupMemberChange;
+        /// <summary>
+        /// 群成员禁言事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<GroupMuteEventArgs> OnGroupMemberMute;
         #endregion
 
         #region 事件分发
@@ -248,37 +264,53 @@ namespace Sora.ServerInterface
         /// </summary>
         /// <param name="messageJson">消息</param>
         /// <param name="connection">连接GUID</param>
-        private void NoticeAdapter(JObject messageJson, Guid connection)
+        private async void NoticeAdapter(JObject messageJson, Guid connection)
         {
             switch (GetNoticeType(messageJson))
             {
                 //群文件上传
                 case "group_upload":
-                    FileUploadEventArgs fileUpload = messageJson.ToObject<FileUploadEventArgs>();
+                    ServerFileUploadEventArgs fileUpload = messageJson.ToObject<ServerFileUploadEventArgs>();
                     if(fileUpload == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"Group notice[Upload file] file[{fileUpload.Upload.Name}] from group[{fileUpload.GroupId}({fileUpload.UserId})]");
+                    //执行回调函数
+                    if(OnFileUpload == null) break;
+                    await OnFileUpload(typeof(EventInterface),
+                                       new FileUploadEventArgs(connection, "group_upload", fileUpload));
                     break;
                 //群管理员变动
                 case "group_admin":
-                    AdminChangeEventArgs adminChange = messageJson.ToObject<AdminChangeEventArgs>();
+                    ServerAdminChangeEventArgs adminChange = messageJson.ToObject<ServerAdminChangeEventArgs>();
                     if(adminChange == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"Group amdin change[{adminChange.SubType}] from group[{adminChange.GroupId}] by[{adminChange.UserId}]");
+                    //执行回调函数
+                    if(OnAdminChange == null) break;
+                    await OnAdminChange(typeof(EventInterface),
+                                        new AdminChangeEventArgs(connection, "group_upload", adminChange));
                     break;
                 //群成员变动
                 case "group_decrease":case "group_increase":
-                    GroupMemberChangeEventArgs groupMemberChange = messageJson.ToObject<GroupMemberChangeEventArgs>();
+                    ServerGroupMemberChangeEventArgs groupMemberChange = messageJson.ToObject<ServerGroupMemberChangeEventArgs>();
                     if (groupMemberChange == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"{groupMemberChange.NoticeType} type[{groupMemberChange.SubType}] member {groupMemberChange.GroupId}[{groupMemberChange.UserId}]");
+                    //执行回调函数
+                    if(OnGroupMemberChange == null) break;
+                    await OnGroupMemberChange(typeof(EventInterface),
+                                              new GroupMemberChangeEventArgs(connection, "group_upload", groupMemberChange));
                     break;
                 //群禁言
                 case "group_ban":
-                    GroupBanEventArgs groupBan = messageJson.ToObject<GroupBanEventArgs>();
-                    if (groupBan == null) break;
+                    ServerGroupMuteEventArgs groupMute = messageJson.ToObject<ServerGroupMuteEventArgs>();
+                    if (groupMute == null) break;
                     ConsoleLog.Debug("Sora",
-                                     $"Group[{groupBan.GroupId}] {groupBan.SubType} member[{groupBan.UserId}]{groupBan.Duration}");
+                                     $"Group[{groupMute.GroupId}] {groupMute.ActionType} member[{groupMute.UserId}]{groupMute.Duration}");
+                    //执行回调函数
+                    if(OnGroupMemberMute == null) break;
+                    await OnGroupMemberMute(typeof(EventInterface),
+                                            new GroupMuteEventArgs(connection, "group_upload", groupMute));
                     break;
                 //好友添加
                 case "friend_add":
