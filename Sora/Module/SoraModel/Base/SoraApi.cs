@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Sora.Enumeration.ApiEnum;
 using Sora.Module.CQCodes;
 using Sora.Module.CQCodes.CQCodeModel;
-using Sora.OnebotInterface;
+using Sora.ServerInterface;
 
 namespace Sora.Module.SoraModel.Info
 {

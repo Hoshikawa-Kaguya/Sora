@@ -11,7 +11,7 @@ using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 
-namespace Sora.OnebotInterface
+namespace Sora.ServerInterface
 {
     /// <summary>
     /// Onebot事件接口

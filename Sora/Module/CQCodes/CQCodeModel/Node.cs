@@ -14,25 +14,25 @@ namespace Sora.Module.CQCodes.CQCodeModel
         /// 发送者昵称
         /// </summary>
         [JsonProperty(PropertyName = "sender")]
-        public NodeSender Sender { get; set; }
+        public NodeSender Sender { get; internal set; }
 
         /// <summary>
         /// 发送事件戳
         /// </summary>
         [JsonProperty(PropertyName = "time")]
-        public long Time { get; set; }
+        public long Time { get; internal set; }
 
         /// <summary>
         /// 消息内容
         /// </summary>
         [JsonProperty(PropertyName = "content")]
-        internal List<ApiMessage> MessageList { get; set; }
+        public List<ApiMessage> MessageList { get; internal set; }
 
         /// <summary>
         /// CQList
         /// </summary>
         [JsonIgnore]
-        public List<CQCode> CQCodeMsgList { get; set; }
+        public List<CQCode> CQCodeMsgList { get; internal set; }
         #endregion
 
         #region 发送者结构体
@@ -45,13 +45,13 @@ namespace Sora.Module.CQCodes.CQCodeModel
             /// 发送者昵称
             /// </summary>
             [JsonProperty(PropertyName = "nickname")]
-            internal string Nick { get; set; }
+            public string Nick { get; internal set; }
 
             /// <summary>
             /// UID
             /// </summary>
             [JsonProperty(PropertyName = "user_id")]
-            internal long Uid { get; set; }
+            public long Uid { get; internal set; }
         }
         #endregion
     }

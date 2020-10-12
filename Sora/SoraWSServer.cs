@@ -7,7 +7,7 @@ using Fleck;
 using Newtonsoft.Json.Linq;
 using Sora.EventArgs.WSSeverEvent;
 using Sora.Module;
-using Sora.OnebotInterface;
+using Sora.ServerInterface;
 using Sora.Tool;
 
 namespace Sora

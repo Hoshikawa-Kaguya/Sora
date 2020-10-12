@@ -5,7 +5,6 @@ using Sora.Enumeration.ApiEnum;
 using Sora.Module.CQCodes.CQCodeModel;
 using Sora.Module.SoraModel.Base;
 using Sora.Module.SoraModel.Info;
-using Sora.OnebotInterface;
 
 namespace Sora.Module.SoraModel
 {
