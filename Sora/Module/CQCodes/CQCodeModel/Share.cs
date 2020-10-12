@@ -5,32 +5,32 @@ namespace Sora.Module.CQCodes.CQCodeModel
     /// <summary>
     /// 链接分享
     /// </summary>
-    internal struct Share
+    public struct Share
     {
         #region 属性
         /// <summary>
         /// URL
         /// </summary>
         [JsonProperty(PropertyName = "url")]
-        internal string Url { get; set; }
+        public string Url { get; internal set; }
 
         /// <summary>
         /// 标题
         /// </summary>
         [JsonProperty(PropertyName = "title")]
-        internal string Title { get; set; }
+        public string Title { get; internal set; }
 
         /// <summary>
         /// 可选，内容描述
         /// </summary>
         [JsonProperty(PropertyName = "content",NullValueHandling = NullValueHandling.Ignore)]
-        internal string Content { get; set; }
+        public string Content { get; internal set; }
 
         /// <summary>
         /// 可选，图片 URL
         /// </summary>
         [JsonProperty(PropertyName = "image",NullValueHandling = NullValueHandling.Ignore)]
-        internal string ImageUrl { get; set; }
+        public string ImageUrl { get; internal set; }
         #endregion
     }
 }

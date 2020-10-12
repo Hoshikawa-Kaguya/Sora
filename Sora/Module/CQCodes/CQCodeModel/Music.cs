@@ -8,20 +8,20 @@ namespace Sora.Module.CQCodes.CQCodeModel
     /// 音乐分享
     /// 仅发送
     /// </summary>
-    internal struct Music
+    public struct Music
     {
         /// <summary>
         /// 音乐分享类型
         /// </summary>
         [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "type")]
-        internal MusicShareType MusicType { get; set; }
+        public MusicShareType MusicType { get; internal set; }
 
         /// <summary>
         /// 歌曲 ID
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "id")]
-        internal long MusicId { get; set; }
+        public long MusicId { get; internal set; }
     }
 }

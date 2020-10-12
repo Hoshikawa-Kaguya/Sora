@@ -6,7 +6,7 @@ namespace Sora.Module.CQCodes.CQCodeModel
     /// <summary>
     /// QQ 表情
     /// </summary>
-    internal struct Face
+    public struct Face
     {
         #region 属性
         /// <summary>
@@ -14,7 +14,7 @@ namespace Sora.Module.CQCodes.CQCodeModel
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "id")]
-        internal int Id { get; set; }
+        public int Id { get; internal set; }
         #endregion
     }
 }

@@ -6,12 +6,12 @@ namespace Sora.Module.CQCodes.CQCodeModel
     /// 接收红包
     /// 仅支持Go
     /// </summary>
-    internal struct Redbag
+    public struct Redbag
     {
         /// <summary>
         /// 祝福语/口令
         /// </summary>
         [JsonProperty(PropertyName = "title")]
-        internal string Title { get; set; }
+        public string Title { get; internal set; }
     }
 }

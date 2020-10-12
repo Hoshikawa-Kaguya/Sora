@@ -19,7 +19,7 @@ using Sora.Module.SoraModel;
 using Sora.Module.SoraModel.Info;
 using Sora.Tool;
 
-namespace Sora.OnebotInterface
+namespace Sora.ServerInterface
 {
     internal static class ApiInterface
     {

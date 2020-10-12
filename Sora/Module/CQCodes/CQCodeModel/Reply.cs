@@ -6,7 +6,7 @@ namespace Sora.Module.CQCodes.CQCodeModel
     /// <summary>
     /// 回复
     /// </summary>
-    internal struct Reply
+    public struct Reply
     {
         #region 属性
         /// <summary>
@@ -15,7 +15,7 @@ namespace Sora.Module.CQCodes.CQCodeModel
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "id")]
-        internal int Traget { get; set; }
+        public int Traget { get; internal set; }
         #endregion
     }
 }

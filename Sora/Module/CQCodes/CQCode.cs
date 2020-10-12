@@ -24,7 +24,7 @@ namespace Sora.Module.CQCodes
         /// <summary>
         /// CQ码数据实例
         /// </summary>
-        internal object CQData { get; private set; }
+        public object CQData { get; private set; }
         #endregion
 
         #region 构造函数
@@ -367,6 +367,21 @@ namespace Sora.Module.CQCodes
         /// </summary>
         private static CQCode CQIlleage() =>
             new CQCode(CQFunction.Text, new Text{Content = null});
+        #endregion
+
+        #region 辅助函数
+        /// <summary>
+        /// 获取CQ码数据格式类型
+        /// 用于将object转换为可读结构体
+        /// </summary>
+        /// <param name="cqCode"></param>
+        /// <returns>
+        /// 数据结构体类型
+        /// </returns>
+        public static Type GetCqCodeDataType(CQCode cqCode)
+        {
+            return cqCode.CQData.GetType();
+        }
         #endregion
 
         #region 获取CQ码内容(仅用于序列化)
