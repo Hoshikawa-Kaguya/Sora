@@ -46,6 +46,11 @@ namespace Sora.Enumeration.ApiEnum
         [Description("get_group_member_info")]
         GetGroupMemberInfo,
         /// <summary>
+        /// 获取陌生人信息
+        /// </summary>
+        [Description("get_stranger_info")]
+        GetStrangerInfo,
+        /// <summary>
         /// 获取群成员列表
         /// </summary>
         [Description("get_group_member_list")]
@@ -85,6 +90,11 @@ namespace Sora.Enumeration.ApiEnum
         /// </summary>
         [Description("set_group_whole_ban")]
         SetGroupWholeBan,
+        /// <summary>
+        /// 设置群管理员
+        /// </summary>
+        [Description("set_group_admin")]
+        SetGroupAdmin,
         /// <summary>
         /// 群退出
         /// </summary>

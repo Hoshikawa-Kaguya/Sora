@@ -29,9 +29,9 @@ namespace Sora.Module.SoraModel
         public long Time { get; private set; }
 
         /// <summary>
-        /// 消息字体
+        /// 消息字体id
         /// </summary>
-        internal int Font { get; set; }
+        public int Font { get; private set; }
         #endregion
 
         #region 构造函数

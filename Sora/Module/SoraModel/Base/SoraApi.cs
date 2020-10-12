@@ -6,7 +6,7 @@ using Sora.Module.CQCodes;
 using Sora.Module.CQCodes.CQCodeModel;
 using Sora.OnebotInterface;
 
-namespace Sora.Module.SoraModel.Base
+namespace Sora.Module.SoraModel.Info
 {
     /// <summary>
     /// Sora API执行实例
@@ -32,6 +32,8 @@ namespace Sora.Module.SoraModel.Base
         }
         #endregion
 
+        #region 通讯类API
+
         #region 消息API
         /// <summary>
         /// 发送私聊消息
@@ -44,7 +46,7 @@ namespace Sora.Module.SoraModel.Base
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> SendPrivateMessage(long userId, params object[] message)
         {
-            if(userId < 10000) throw new ArgumentOutOfRangeException($"{nameof(userId)} too small");
+            if(userId         < 10000) throw new ArgumentOutOfRangeException($"{nameof(userId)} too small");
             if(message.Length == 0) throw new NullReferenceException(nameof(message));
             //消息段列表
             List<CQCode> msgList = new List<CQCode>();
@@ -187,12 +189,12 @@ namespace Sora.Module.SoraModel.Base
         }
 
         /// <summary>
-        /// 设置群组专属头衔
+        /// 设置群成员专属头衔
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="userId">用户id</param>
         /// <param name="specialTitle">专属头衔(为空时清空)</param>
-        public async ValueTask SetGroupSpecialTitle(long groupId, long userId, string specialTitle)
+        public async ValueTask SetGroupMemberSpecialTitle(long groupId, long userId, string specialTitle)
         {
             if (groupId is < 100000 || userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
@@ -213,7 +215,7 @@ namespace Sora.Module.SoraModel.Base
         }
 
         /// <summary>
-        /// 设置群组单人禁言
+        /// 设置群组成员禁言
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="userId">用户id</param>
@@ -221,38 +223,89 @@ namespace Sora.Module.SoraModel.Base
         /// <para>禁言时长(s)</para>
         /// <para>至少60s</para>
         /// </param>
-        public async ValueTask BanGroupMember(long groupId, long userId, long duration)
+        public async ValueTask EnableGroupMemberMute(long groupId, long userId, long duration)
         {
             if (groupId is < 100000 || userId is < 10000 || duration <= 60)
-                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} or {nameof(duration)} out of range");
             await ApiInterface.SetGroupBan(this.ConnectionGuid, groupId, userId, duration);
+        }
+
+        /// <summary>
+        /// 解除群组成员禁言
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="userId">用户id</param>
+        public async ValueTask DisableGroupMemberMute(long groupId, long userId)
+        {
+            if (groupId is < 100000 || userId is < 10000)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
+            await ApiInterface.SetGroupBan(this.ConnectionGuid, groupId, userId, 0);
         }
 
         /// <summary>
         /// 群组全员禁言
         /// </summary>
         /// <param name="groupId">群号</param>
-        /// <param name="enable">禁言的启用/关闭</param>
-        public async ValueTask SetGroupWholeBan(long groupId, bool enable)
+        public async ValueTask EnableGroupMute(long groupId)
         {
             if(groupId < 100000)
                 throw new ArgumentOutOfRangeException(nameof(groupId));
-            await ApiInterface.SetGroupWholeBan(this.ConnectionGuid, groupId, enable);
+            await ApiInterface.SetGroupWholeBan(this.ConnectionGuid, groupId, true);
+        }
+
+        /// <summary>
+        /// 解除群组全员禁言
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        public async ValueTask DisableGroupMute(long groupId)
+        {
+            if(groupId < 100000)
+                throw new ArgumentOutOfRangeException(nameof(groupId));
+            await ApiInterface.SetGroupWholeBan(this.ConnectionGuid, groupId, false);
+        }
+
+        /// <summary>
+        /// 设置群管理员
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="userId">成员id</param>
+        public async ValueTask EnableGroupAdmin(long groupId, long userId)
+        {
+            if (groupId is < 100000 || userId is < 10000)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
+            await ApiInterface.SetGroupAdmin(this.ConnectionGuid, userId, groupId, true);
+        }
+
+        /// <summary>
+        /// 取消群管理员
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="userId">成员id</param>
+        public async ValueTask DisableGroupAdmin(long groupId, long userId)
+        {
+            if (groupId is < 100000 || userId is < 10000)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
+            await ApiInterface.SetGroupAdmin(this.ConnectionGuid, userId, groupId, false);
         }
 
         /// <summary>
         /// 退出群
         /// </summary>
         /// <param name="groupId">群号</param>
-        /// <param name="dismiss">
-        /// <para>是否解散群</para>
-        /// <para>仅在bot为群主时有效</para>
-        /// <para>默认值为<see langword="false"/>不需要设置</para>
-        /// </param>
-        public async ValueTask LeaveGroup(long groupId, bool dismiss = false)
+        public async ValueTask LeaveGroup(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            await ApiInterface.SetGroupLeave(this.ConnectionGuid, groupId, dismiss);
+            await ApiInterface.SetGroupLeave(this.ConnectionGuid, groupId, false);
+        }
+
+        /// <summary>
+        /// 解散群
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        public async ValueTask DismissGroup(long groupId)
+        {
+            if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
+            await ApiInterface.SetGroupLeave(this.ConnectionGuid, groupId, true);
         }
 
         #region GoAPI
@@ -332,7 +385,7 @@ namespace Sora.Module.SoraModel.Base
         /// <param name="groupId"></param>
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
-        /// <para><see langword="groupMemberList"/> 群成员列表</para>
+        /// <para><see cref="List{T}"/> 群成员列表</para>
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(long groupId)
         {
@@ -349,7 +402,7 @@ namespace Sora.Module.SoraModel.Base
         /// <param name="useCache">是否使用缓存</param>
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
-        /// <para><see langword="groupInfo"/> 群信息列表</para>
+        /// <para><see cref="GroupInfo"/> 群信息列表</para>
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, GroupInfo groupInfo)> GetGroupInfo(long groupId, bool useCache = true)
         {
@@ -367,7 +420,7 @@ namespace Sora.Module.SoraModel.Base
         /// <param name="useCache">是否使用缓存</param>
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
-        /// <para><see langword="memberInfo"/> 群成员信息</para>
+        /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
             long groupId, long userId, bool useCache = true)
@@ -376,6 +429,22 @@ namespace Sora.Module.SoraModel.Base
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
             return ((APIStatusType apiStatus, GroupMemberInfo memberInfo)) 
                 await ApiInterface.GetGroupMemberInfo(this.ConnectionGuid, groupId, userId, useCache);
+        }
+
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="useCache"></param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="UserInfo"/> 群成员信息</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, UserInfo userInfo)> GetUserInfo(
+            long userId, bool useCache = true)
+        {
+            if(userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
+            return ((APIStatusType apiStatus, UserInfo userInfo)) await ApiInterface.GetUserInfo(this.ConnectionGuid, userId, useCache);
         }
         #endregion
 
@@ -503,6 +572,30 @@ namespace Sora.Module.SoraModel.Base
 
         #endregion
 
+        #endregion
+
+        #endregion
+
+        #region 框架API
+        /// <summary>
+        /// 获取用户实例
+        /// </summary>
+        /// <param name="userId">用户id</param>
+        public User GetUser(long userId)
+        {
+            if(userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
+            return new User(this.ConnectionGuid, userId);
+        }
+
+        /// <summary>
+        /// 获取群实例
+        /// </summary>
+        /// <param name="groupId">群id</param>
+        public Group GetGroup(long groupId)
+        {
+            if(groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
+            return new Group(this.ConnectionGuid, groupId);
+        }
         #endregion
     }
 }

@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Enumeration.ApiEnum;
 using Sora.EventArgs.OnebotEvent.MessageEvent;
 using Sora.Module.ApiMessageModel;
-using Sora.Module.CQCodes;
 using Sora.Module.SoraModel;
+using Sora.Module.SoraModel.Info;
 
 namespace Sora.EventArgs.SoraEvent
 {
@@ -78,6 +77,19 @@ namespace Sora.EventArgs.SoraEvent
         public async ValueTask DeleteSourceMessage()
         {
             await base.SoraApi.DeleteMessage(this.Message.MessageId);
+        }
+
+        /// <summary>
+        /// 获取发送者群成员信息
+        /// </summary>
+        /// <param name="useCache">是否使用缓存</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(bool useCache = true)
+        {
+            return await base.SoraApi.GetGroupMemberInfo(this.SourceGroup.Id, this.Sender.Id, useCache);
         }
         #endregion
     }
