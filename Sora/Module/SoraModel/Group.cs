@@ -141,7 +141,6 @@ namespace Sora.Module.SoraModel
         /// <summary>
         /// 设置群名片
         /// </summary>
-        /// <param name="groupId">群号</param>
         /// <param name="userId">用户id</param>
         /// <param name="card">
         /// <para>新名片</para>
@@ -155,24 +154,39 @@ namespace Sora.Module.SoraModel
         /// <summary>
         /// 设置群管理员
         /// </summary>
-        /// <param name="groupId">群号</param>
         /// <param name="userId">成员id</param>
-        public async ValueTask EnableGroupAdmin(long groupId, long userId)
+        public async ValueTask EnableGroupAdmin(long userId)
         {
-            await base.SoraApi.EnableGroupAdmin(groupId, userId);
+            await base.SoraApi.EnableGroupAdmin(this.Id, userId);
         }
 
         /// <summary>
         /// 取消群管理员
         /// </summary>
-        /// <param name="groupId">群号</param>
         /// <param name="userId">成员id</param>
-        public async ValueTask DisableGroupAdmin(long groupId, long userId)
+        public async ValueTask DisableGroupAdmin(long userId)
         {
-            await base.SoraApi.DisableGroupAdmin(groupId, userId);
+            await base.SoraApi.DisableGroupAdmin(this.Id, userId);
         }
 
+        /// <summary>
+        /// 解散群
+        /// </summary>
+        public async ValueTask DismissGroup()
+        {
+            await base.SoraApi.DismissGroup(this.Id);
+        }
+        #endregion
 
+        #region 转换方法
+        /// <summary>
+        /// 定义将 <see cref="Group"/> 对象转换为 <see cref="long"/>
+        /// </summary>
+        /// <param name="value">转换的 <see cref="Group"/> 对象</param>
+        public static implicit operator long (Group value)
+        {
+            return value.Id;
+        }
         #endregion
     }
 }
