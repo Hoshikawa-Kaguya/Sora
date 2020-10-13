@@ -35,7 +35,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="friendRequest">服务器请求事件参数</param>
         internal FriendRequestEventArgs(Guid connectionGuid, string eventName,
-                                        ServerFriendRequestEventArgs friendRequest) :
+                                        ApiFriendRequestEventArgs friendRequest) :
             base(connectionGuid, eventName, friendRequest.SelfID, friendRequest.Time)
         {
             this.Sender      = new User(connectionGuid, friendRequest.UserId);

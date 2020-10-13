@@ -21,6 +21,16 @@ namespace Sora.Enumeration.ApiEnum
         /// 登录号被踢
         /// </summary>
         [Description("kick_me")]
-        KickMe
+        KickMe,
+        /// <summary>
+        /// 管理员同意入群
+        /// </summary>
+        [Description("approve")]
+        Approve,
+        /// <summary>
+        /// 管理员邀请入群
+        /// </summary>
+        [Description("invite")]
+        Invite
     }
 }

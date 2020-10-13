@@ -42,7 +42,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupRequest">服务器请求事件参数</param>
-        internal GroupRequestEventArgs(Guid connectionGuid, string eventName, ServerGroupRequestEventArgs groupRequest) :
+        internal GroupRequestEventArgs(Guid connectionGuid, string eventName, ApiGroupRequestEventArgs groupRequest) :
             base(connectionGuid, eventName, groupRequest.SelfID, groupRequest.Time)
         {
             this.Sender      = new User(connectionGuid, groupRequest.UserId);

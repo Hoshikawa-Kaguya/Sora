@@ -6,7 +6,7 @@ namespace Sora.EventArgs.OnebotEvent.MessageEvent
     /// <summary>
     /// 群组消息事件
     /// </summary>
-    internal sealed class ServerGroupMsgEventArgs : BaseMessageEventArgs
+    internal sealed class ApiGroupMsgEventArgs : BaseMessageEventArgs
     {
         /// <summary>
         /// 群号

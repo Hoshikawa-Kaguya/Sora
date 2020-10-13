@@ -49,7 +49,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="serverGroupMsg">服务器消息事件参数</param>
-        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ServerGroupMsgEventArgs serverGroupMsg
+        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs serverGroupMsg
         ) : base(connectionGuid, eventName, serverGroupMsg.SelfID, serverGroupMsg.Time)
         {
             this.IsAnonymousMessage = serverGroupMsg.Anonymous == null;

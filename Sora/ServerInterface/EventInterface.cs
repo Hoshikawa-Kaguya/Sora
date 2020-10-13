@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.Enumeration.ApiEnum;
@@ -68,7 +67,7 @@ namespace Sora.ServerInterface
         /// <summary>
         /// 管理员变动事件
         /// </summary>
-        public event EventAsyncCallBackHandler<AdminChangeEventArgs> OnAdminChange;
+        public event EventAsyncCallBackHandler<GroupAdminChangeEventArgs> OnGroupAdminChange;
         /// <summary>
         /// 群成员变动事件
         /// </summary>
@@ -77,6 +76,34 @@ namespace Sora.ServerInterface
         /// 群成员禁言事件
         /// </summary>
         public event EventAsyncCallBackHandler<GroupMuteEventArgs> OnGroupMemberMute;
+        /// <summary>
+        /// 好友添加事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<FriendAddEventArgs> OnFriendAdd;
+        /// <summary>
+        /// 群聊撤回事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<GroupRecallEventArgs> OnGroupRecall;
+        /// <summary>
+        /// 好友撤回事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<FriendRecallEventArgs> OnFriendRecall;
+        /// <summary>
+        /// 群名片变更事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<GroupCardUpdateEventArgs> OnGroupCardUpdate;
+        /// <summary>
+        /// 群内戳一戳事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<GroupPokeEventArgs> OnGroupPoke;
+        /// <summary>
+        /// 运气王事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<LuckyKingEventArgs> OnLuckyKingEvent;
+        /// <summary>
+        /// 群成员荣誉变更事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<HonorEventArgs> OnHonorEvent;  
         #endregion
 
         #region 事件分发
@@ -131,7 +158,7 @@ namespace Sora.ServerInterface
             {
                 //心跳包
                 case "heartbeat":
-                    HeartBeatEventArgs heartBeat = messageJson.ToObject<HeartBeatEventArgs>();
+                    ApiHeartBeatEventArgs heartBeat = messageJson.ToObject<ApiHeartBeatEventArgs>();
                     //TODO 暂时禁用心跳Log
                     //ConsoleLog.Debug("Sora",$"Get hreatbeat from [{connection}]");
                     if (heartBeat != null)
@@ -149,7 +176,7 @@ namespace Sora.ServerInterface
                     break;
                 //生命周期
                 case "lifecycle":
-                    LifeCycleEventArgs lifeCycle = messageJson.ToObject<LifeCycleEventArgs>();
+                    ApiLifeCycleEventArgs lifeCycle = messageJson.ToObject<ApiLifeCycleEventArgs>();
                     if (lifeCycle != null) ConsoleLog.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
                     //未知原因会丢失第一次调用的返回值，直接丢弃第一次调用
                     await ApiInterface.GetClientInfo(connection);
@@ -187,7 +214,7 @@ namespace Sora.ServerInterface
             {
                 //私聊事件
                 case "private":
-                    ServerPrivateMsgEventArgs privateMsg = messageJson.ToObject<ServerPrivateMsgEventArgs>();
+                    ApiPrivateMsgEventArgs privateMsg = messageJson.ToObject<ApiPrivateMsgEventArgs>();
                     if(privateMsg == null) break;
                     ConsoleLog.Debug("Sora",$"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) : {privateMsg.RawMessage}");
                     //执行回调函数
@@ -197,12 +224,11 @@ namespace Sora.ServerInterface
                     break;
                 //群聊事件
                 case "group":
-                    ServerGroupMsgEventArgs groupMsg = messageJson.ToObject<ServerGroupMsgEventArgs>();
+                    ApiGroupMsgEventArgs groupMsg = messageJson.ToObject<ApiGroupMsgEventArgs>();
                     if(groupMsg == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] : {groupMsg.RawMessage}");
                     //执行回调函数
-                    ConsoleLog.Debug("Sora",$"Thread id{Thread.CurrentThread.ManagedThreadId}");
                     if(OnGroupMessage == null) break;
                     await OnGroupMessage(typeof(EventInterface),
                                          new GroupMessageEventArgs(connection, "group", groupMsg));
@@ -226,7 +252,7 @@ namespace Sora.ServerInterface
             {
                 //好友请求事件
                 case "friend":
-                    ServerFriendRequestEventArgs friendRequest = messageJson.ToObject<ServerFriendRequestEventArgs>();
+                    ApiFriendRequestEventArgs friendRequest = messageJson.ToObject<ApiFriendRequestEventArgs>();
                     if(friendRequest == null)  break;
                     ConsoleLog.Debug("Sora",$"Friend request form [{friendRequest.UserId}] with commont[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
                     //执行回调函数
@@ -242,7 +268,7 @@ namespace Sora.ServerInterface
                         ConsoleLog.Warning("Sora","收到notice消息类型，不解析此类型消息");
                         break;
                     }
-                    ServerGroupRequestEventArgs groupRequest = messageJson.ToObject<ServerGroupRequestEventArgs>();
+                    ApiGroupRequestEventArgs groupRequest = messageJson.ToObject<ApiGroupRequestEventArgs>();
                     if(groupRequest == null) break;
                     ConsoleLog.Debug("Sora",$"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
                     //执行回调函数
@@ -270,7 +296,7 @@ namespace Sora.ServerInterface
             {
                 //群文件上传
                 case "group_upload":
-                    ServerFileUploadEventArgs fileUpload = messageJson.ToObject<ServerFileUploadEventArgs>();
+                    ApiFileUploadEventArgs fileUpload = messageJson.ToObject<ApiFileUploadEventArgs>();
                     if(fileUpload == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"Group notice[Upload file] file[{fileUpload.Upload.Name}] from group[{fileUpload.GroupId}({fileUpload.UserId})]");
@@ -281,85 +307,109 @@ namespace Sora.ServerInterface
                     break;
                 //群管理员变动
                 case "group_admin":
-                    ServerAdminChangeEventArgs adminChange = messageJson.ToObject<ServerAdminChangeEventArgs>();
+                    ApiAdminChangeEventArgs adminChange = messageJson.ToObject<ApiAdminChangeEventArgs>();
                     if(adminChange == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"Group amdin change[{adminChange.SubType}] from group[{adminChange.GroupId}] by[{adminChange.UserId}]");
                     //执行回调函数
-                    if(OnAdminChange == null) break;
-                    await OnAdminChange(typeof(EventInterface),
-                                        new AdminChangeEventArgs(connection, "group_upload", adminChange));
+                    if(OnGroupAdminChange == null) break;
+                    await OnGroupAdminChange(typeof(EventInterface),
+                                        new GroupAdminChangeEventArgs(connection, "group_upload", adminChange));
                     break;
                 //群成员变动
                 case "group_decrease":case "group_increase":
-                    ServerGroupMemberChangeEventArgs groupMemberChange = messageJson.ToObject<ServerGroupMemberChangeEventArgs>();
+                    ApiGroupMemberChangeEventArgs groupMemberChange = messageJson.ToObject<ApiGroupMemberChangeEventArgs>();
                     if (groupMemberChange == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"{groupMemberChange.NoticeType} type[{groupMemberChange.SubType}] member {groupMemberChange.GroupId}[{groupMemberChange.UserId}]");
                     //执行回调函数
                     if(OnGroupMemberChange == null) break;
                     await OnGroupMemberChange(typeof(EventInterface),
-                                              new GroupMemberChangeEventArgs(connection, "group_upload", groupMemberChange));
+                                              new GroupMemberChangeEventArgs(connection, "group_member_change", groupMemberChange));
                     break;
                 //群禁言
                 case "group_ban":
-                    ServerGroupMuteEventArgs groupMute = messageJson.ToObject<ServerGroupMuteEventArgs>();
+                    ApiGroupMuteEventArgs groupMute = messageJson.ToObject<ApiGroupMuteEventArgs>();
                     if (groupMute == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"Group[{groupMute.GroupId}] {groupMute.ActionType} member[{groupMute.UserId}]{groupMute.Duration}");
                     //执行回调函数
                     if(OnGroupMemberMute == null) break;
                     await OnGroupMemberMute(typeof(EventInterface),
-                                            new GroupMuteEventArgs(connection, "group_upload", groupMute));
+                                            new GroupMuteEventArgs(connection, "group_ban", groupMute));
                     break;
                 //好友添加
                 case "friend_add":
-                    FriendAddEventArgs friendAdd = messageJson.ToObject<FriendAddEventArgs>();
+                    ApiFriendAddEventArgs friendAdd = messageJson.ToObject<ApiFriendAddEventArgs>();
                     if(friendAdd == null) break;
                     ConsoleLog.Debug("Sora",$"Friend add user[{friendAdd.UserId}]");
+                    //执行回调函数
+                    if(OnFriendAdd == null) break;
+                    await OnFriendAdd(typeof(EventInterface),
+                                      new FriendAddEventArgs(connection, "friend_add", friendAdd));
                     break;
                 //群消息撤回
                 case "group_recall":
-                    GroupRecallEventArgs groupRecall = messageJson.ToObject<GroupRecallEventArgs>();
+                    ApiGroupRecallEventArgs groupRecall = messageJson.ToObject<ApiGroupRecallEventArgs>();
                     if(groupRecall == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"Group[{groupRecall.GroupId}] recall by [{groupRecall.OperatorId}],msg id={groupRecall.MessageId} sender={groupRecall.UserId}");
+                    //执行回调函数
+                    if(OnGroupRecall == null) break;
+                    await OnGroupRecall(typeof(EventInterface),
+                                        new GroupRecallEventArgs(connection, "group_recall", groupRecall));
                     break;
                 //好友消息撤回
                 case "friend_recall":
-                    FriendRecallEventArgs friendRecall = messageJson.ToObject<FriendRecallEventArgs>();
+                    ApiFriendRecallEventArgs friendRecall = messageJson.ToObject<ApiFriendRecallEventArgs>();
                     if(friendRecall == null) break;
                     ConsoleLog.Debug("Sora", $"Friend[{friendRecall.UserId}] recall msg id={friendRecall.MessageId}");
+                    //执行回调函数
+                    if(OnFriendRecall == null) break;
+                    await OnFriendRecall(typeof(EventInterface),
+                                         new FriendRecallEventArgs(connection, "friend_recall", friendRecall));
                     break;
                 //群名片变更
                 //此事件仅在Go上存在
                 case "group_card":
-                    GroupCardUpdateEventArgs groupCardUpdate = messageJson.ToObject<GroupCardUpdateEventArgs>();
+                    ApiGroupCardUpdateEventArgs groupCardUpdate = messageJson.ToObject<ApiGroupCardUpdateEventArgs>();
                     if(groupCardUpdate == null) break;
                     ConsoleLog.Debug("Sora",
                                      $"Group[{groupCardUpdate.GroupId}] member[{groupCardUpdate.UserId}] card update [{groupCardUpdate.OldCard} => {groupCardUpdate.NewCard}]");
+                    if (OnGroupCardUpdate == null) break;
+                    await OnGroupCardUpdate(typeof(EventInterface),
+                                            new GroupCardUpdateEventArgs(connection, "group_card", groupCardUpdate));
                     break;
                 //通知类事件
                 case "notify":
                     switch (GetNotifyType(messageJson))
                     {
                         case "poke"://戳一戳
-                            PokeOrLuckyEventArgs pokeEvent = messageJson.ToObject<PokeOrLuckyEventArgs>();
+                            ApiPokeOrLuckyEventArgs pokeEvent = messageJson.ToObject<ApiPokeOrLuckyEventArgs>();
                             if(pokeEvent == null) break;
                             ConsoleLog.Debug("Sora",
                                              $"Group[{pokeEvent.GroupId}] poke from [{pokeEvent.UserId}] to [{pokeEvent.TargetId}]");
+                            if(OnGroupPoke == null) break;
+                            await OnGroupPoke(typeof(EventInterface),
+                                              new GroupPokeEventArgs(connection, "poke", pokeEvent));
                             break;
                         case "lucky_king"://运气王
-                            PokeOrLuckyEventArgs luckyEvent = messageJson.ToObject<PokeOrLuckyEventArgs>();
+                            ApiPokeOrLuckyEventArgs luckyEvent = messageJson.ToObject<ApiPokeOrLuckyEventArgs>();
                             if(luckyEvent == null) break;
                             ConsoleLog.Debug("Sora",
                                              $"Group[{luckyEvent.GroupId}] lucky king user[{luckyEvent.TargetId}]");
+                            if(OnLuckyKingEvent == null) break;
+                            await OnLuckyKingEvent(typeof(EventInterface),
+                                                   new LuckyKingEventArgs(connection, "lucky_king", luckyEvent));
                             break;
                         case "honor":
-                            HonorEventArgs honorEvent = messageJson.ToObject<HonorEventArgs>();
+                            ApiHonorEventArgs honorEvent = messageJson.ToObject<ApiHonorEventArgs>();
                             if (honorEvent == null) break;
                             ConsoleLog.Debug("Sora",
                                              $"Group[{honorEvent.GroupId}] member honor change [{honorEvent.HonorType}]");
+                            if(OnHonorEvent == null) break;
+                            await OnHonorEvent(typeof(EventInterface),
+                                               new HonorEventArgs(connection, "honor", honorEvent));
                             break;
                         default:
                             ConsoleLog.Warning("Sora",$"未知Notify事件类型[{GetNotifyType(messageJson)}]");
