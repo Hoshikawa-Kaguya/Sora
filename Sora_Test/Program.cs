@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Sora;
@@ -28,7 +27,6 @@ namespace Sora_Test
                                                  };
                 server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                                {
-                                                   ConsoleLog.Debug("Sora",$"Thread id{Thread.CurrentThread.ManagedThreadId}");
                                                    //最简单的复读（x
                                                    await eventArgs.Repeat();
                                                };

@@ -585,7 +585,7 @@ namespace Sora.Module.Base
 
         #endregion
 
-        #region 框架API
+        #region 框架类API
         /// <summary>
         /// 获取用户实例
         /// </summary>

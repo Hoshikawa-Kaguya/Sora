@@ -5,13 +5,13 @@ using Sora.Module;
 
 namespace Sora.EventArgs.SoraEvent
 {
-    public class GroupMemberChangeEventArgs : BaseSoraEventArgs
+    public sealed class GroupMemberChangeEventArgs : BaseSoraEventArgs
     {
         #region 属性
         /// <summary>
-        /// 退群成员
+        /// 变更成员
         /// </summary>
-        public User LeaveUser { get; private set; }
+        public User ChangedUser { get; private set; }
 
         /// <summary>
         /// 执行者
@@ -35,12 +35,15 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="groupMemberChange">服务端上传文件通知参数</param>
-        internal GroupMemberChangeEventArgs(Guid connectionGuid, string eventName, ServerGroupMemberChangeEventArgs groupMemberChange) :
+        /// <param name="groupMemberChange">API上传文件通知参数</param>
+        internal GroupMemberChangeEventArgs(Guid connectionGuid, string eventName, ApiGroupMemberChangeEventArgs groupMemberChange) :
             base(connectionGuid, eventName, groupMemberChange.SelfID, groupMemberChange.Time)
         {
-            this.LeaveUser   = new User(connectionGuid, groupMemberChange.UserId);
-            this.Operator    = new User(connectionGuid, groupMemberChange.OperatorId);
+            this.ChangedUser   = new User(connectionGuid, groupMemberChange.UserId);
+            //执行者和变动成员可能为同一人
+            this.Operator = groupMemberChange.UserId == groupMemberChange.OperatorId
+                ? this.ChangedUser
+                : new User(connectionGuid, groupMemberChange.OperatorId);
             this.SourceGroup = new Group(connectionGuid, groupMemberChange.GroupId);
             this.SubType     = groupMemberChange.SubType;
         }

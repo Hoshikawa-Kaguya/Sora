@@ -1,12 +1,21 @@
 using Newtonsoft.Json;
+using Sora.Converter;
+using Sora.Enumeration.ApiEnum;
 
 namespace Sora.EventArgs.OnebotEvent.NoticeEvent
 {
     /// <summary>
-    /// 群消息撤回事件
+    /// 群成员变动事件
     /// </summary>
-    internal sealed class GroupRecallEventArgs : BaseNoticeEventArgs
+    internal sealed class ApiGroupMemberChangeEventArgs : BaseNoticeEventArgs
     {
+        /// <summary>
+        /// 事件子类型
+        /// </summary>
+        [JsonConverter(typeof(EnumDescriptionConverter))]
+        [JsonProperty(PropertyName = "sub_type")]
+        internal MemberChangeType SubType { get; set; }
+
         /// <summary>
         /// 群号
         /// </summary>
@@ -18,11 +27,5 @@ namespace Sora.EventArgs.OnebotEvent.NoticeEvent
         /// </summary>
         [JsonProperty(PropertyName = "operator_id")]
         internal long OperatorId { get; set; }
-
-        /// <summary>
-        /// 被撤回的消息 ID
-        /// </summary>
-        [JsonProperty(PropertyName = "message_id")]
-        internal long MessageId { get; set; }
     }
 }

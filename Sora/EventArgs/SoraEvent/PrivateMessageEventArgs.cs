@@ -39,7 +39,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="serverPrivateMsg">服务器消息事件参数</param>
-        internal PrivateMessageEventArgs(Guid connectionGuid, string eventName, ServerPrivateMsgEventArgs serverPrivateMsg)
+        internal PrivateMessageEventArgs(Guid connectionGuid, string eventName, ApiPrivateMsgEventArgs serverPrivateMsg)
             : base(connectionGuid, eventName, serverPrivateMsg.SelfID, serverPrivateMsg.Time)
         {
             this.Message = new Message(connectionGuid, serverPrivateMsg.MessageId, serverPrivateMsg.RawMessage,

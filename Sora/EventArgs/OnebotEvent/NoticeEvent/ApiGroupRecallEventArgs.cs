@@ -3,10 +3,9 @@ using Newtonsoft.Json;
 namespace Sora.EventArgs.OnebotEvent.NoticeEvent
 {
     /// <summary>
-    /// Go扩展事件
-    /// 群成员名片变更事件
+    /// 群消息撤回事件
     /// </summary>
-    internal sealed class GroupCardUpdateEventArgs : BaseNoticeEventArgs
+    internal sealed class ApiGroupRecallEventArgs : BaseNoticeEventArgs
     {
         /// <summary>
         /// 群号
@@ -15,15 +14,15 @@ namespace Sora.EventArgs.OnebotEvent.NoticeEvent
         internal long GroupId { get; set; }
 
         /// <summary>
-        /// 新名片
+        /// 操作者 QQ 号
         /// </summary>
-        [JsonProperty(PropertyName = "card_new")]
-        internal string NewCard { get; set; }
+        [JsonProperty(PropertyName = "operator_id")]
+        internal long OperatorId { get; set; }
 
         /// <summary>
-        /// 旧名片
+        /// 被撤回的消息 ID
         /// </summary>
-        [JsonProperty(PropertyName = "card_old")]
-        internal string OldCard { get; set; }
+        [JsonProperty(PropertyName = "message_id")]
+        internal int MessageId { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace Sora.EventArgs.SoraEvent
     /// <summary>
     /// 管理员变动事件参数
     /// </summary>
-    public class AdminChangeEventArgs : BaseSoraEventArgs
+    public sealed class GroupAdminChangeEventArgs : BaseSoraEventArgs
     {
         #region 属性
         /// <summary>
@@ -35,7 +35,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="adminChange">服务端管理员变动事件参数</param>
-        internal AdminChangeEventArgs(Guid connectionGuid, string eventName, ServerAdminChangeEventArgs adminChange) :
+        internal GroupAdminChangeEventArgs(Guid connectionGuid, string eventName, ApiAdminChangeEventArgs adminChange) :
             base(connectionGuid, eventName, adminChange.SelfID, adminChange.Time)
         {
             this.SourceGroup = new Group(connectionGuid, adminChange.GroupId);

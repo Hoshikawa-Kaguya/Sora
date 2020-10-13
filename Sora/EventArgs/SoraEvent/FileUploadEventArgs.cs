@@ -8,7 +8,7 @@ namespace Sora.EventArgs.SoraEvent
     /// <summary>
     /// 群文件上传事件参数
     /// </summary>
-    public class FileUploadEventArgs : BaseSoraEventArgs
+    public sealed class FileUploadEventArgs : BaseSoraEventArgs
     {
         #region 属性
         /// <summary>
@@ -34,7 +34,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="fileUpload">服务端上传文件通知参数</param>
-        internal FileUploadEventArgs(Guid connectionGuid, string eventName, ServerFileUploadEventArgs fileUpload) :
+        internal FileUploadEventArgs(Guid connectionGuid, string eventName, ApiFileUploadEventArgs fileUpload) :
             base(connectionGuid, eventName, fileUpload.SelfID, fileUpload.Time)
         {
             this.SourceGroup = new Group(connectionGuid, fileUpload.GroupId);

@@ -124,9 +124,9 @@ namespace Sora.CQCodes
         /// </summary>
         /// <param name="data">图片名/绝对路径/URL/base64</param>
         /// <param name="isFlash">是否为闪照，默认为<see langword="false"/></param>
-        /// <param name="useCache">是否使用已缓存的文件</param>
-        /// <param name="useProxy">是否通过代理下载文件</param>
-        /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
+        /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
+        /// <param name="useProxy">通过URL发送时有效,是否通过代理下载文件</param>
+        /// <param name="timeout">通过URL发送时有效,超时时间，默认为<see langword="null"/>(不超时)</param>
         public static CQCode CQImage(string data, bool isFlash = false, bool useCache = true, bool useProxy = true,
                                      int? timeout = null)
         {
@@ -134,17 +134,45 @@ namespace Sora.CQCodes
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQRecord", $"非法参数({data})，已忽略CQ码");
+                ConsoleLog.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
             return new CQCode(CQFunction.Image,
                               new Image
                               {
-                                  ImgFile = dataStr,
-                                  ImgType = isFlash ? "flash" : string.Empty,
-                                  UseCache   = useCache ? 1 : 0,
-                                  UseProxy   = useProxy ? 1 : 0,
-                                  Timeout = timeout
+                                  ImgFile  = dataStr,
+                                  ImgType  = isFlash ? "flash" : string.Empty,
+                                  UseCache = useCache ? 1 : 0,
+                                  UseProxy = useProxy ? 1 : 0,
+                                  Timeout  = timeout
+                              });
+        }
+
+        /// <summary>
+        /// 秀图CQ码
+        /// </summary>
+        /// <param name="data">图片名/绝对路径/URL/base64</param>
+        /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
+        /// <param name="useProxy">通过URL发送时有效,是否通过代理下载文件</param>
+        /// <param name="timeout">通过URL发送时有效,超时时间，默认为<see langword="null"/>(不超时)</param>
+        public static CQCode CQShowImage(string data, bool useCache = true, bool useProxy = true,
+                                         int? timeout = null)
+        {
+            if(string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
+            (string dataStr, bool isDataStr) = ParseDataStr(data);
+            if (!isDataStr)
+            {
+                ConsoleLog.Error("CQCode|CQShowImage", $"非法参数({data})，已忽略CQ码");
+                return CQIlleage();
+            }
+            return new CQCode(CQFunction.Image,
+                              new Image
+                              {
+                                  ImgFile  = dataStr,
+                                  ImgType  = "show",
+                                  UseCache = useCache ? 1 : 0,
+                                  UseProxy = useProxy ? 1 : 0,
+                                  Timeout  = timeout
                               });
         }
 
