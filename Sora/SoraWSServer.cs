@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
@@ -78,20 +79,12 @@ namespace Sora
             //全局异常事件
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
                                                           {
-                                                              StringBuilder errorLogBuilder = new StringBuilder();
-                                                              errorLogBuilder.Append("检测到未处理的异常");
-                                                              if (args.IsTerminating)
-                                                                  errorLogBuilder.Append("，服务器将停止运行");
-                                                              errorLogBuilder.Append("，错误信息:");
-                                                              errorLogBuilder
-                                                                  .Append(ConsoleLog.ErrorLogBuilder(args.ExceptionObject as Exception));
-                                                              ConsoleLog.Fatal("Sora",
-                                                                               errorLogBuilder);
+                                                              ConsoleLog.UnhandledExceptionLog(args);
                                                           };
         }
 
         /// <summary>
-        /// 创建一个反向WS客户端
+        /// 创建一个反向WS服务端
         /// </summary>
         /// <param name="config">服务器配置</param>
         public SoraWSServer(ServerConfig config)
@@ -116,7 +109,15 @@ namespace Sora
                 //出错后进行重启
                 RestartAfterListenError = true
             };
-            Start();
+            if (PortInUse(config.Port))
+            {
+                ConsoleLog.Fatal("Sora", $"端口{config.Port}已被占用，请更换其他端口");
+                ConsoleLog.Warning("Sora","将在5s后自动退出");
+                Thread.Sleep(5000);
+                Environment.Exit(0);
+            }
+            else 
+                Start();
         }
         #endregion
 
@@ -281,6 +282,14 @@ namespace Sora
                 }
             }
         }
+
+        /// <summary>
+        /// 检查端口占用
+        /// </summary>
+        /// <param name="port">端口号</param>
+        private static bool PortInUse(int port) =>
+            IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
+                              .Any(ipEndPoint => ipEndPoint.Port == port);
         #endregion
     }
 }

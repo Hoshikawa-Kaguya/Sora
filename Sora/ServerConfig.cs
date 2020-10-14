@@ -3,7 +3,7 @@ namespace Sora
     public sealed class ServerConfig
     {
         /// <summary>
-        /// 反向服务器端口
+        /// 反向服务器地址
         /// </summary>
         public string Location { get; set; } = "127.0.0.1";
 

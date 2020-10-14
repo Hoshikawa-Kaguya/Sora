@@ -56,7 +56,7 @@ namespace Sora.Module
         /// <param name="useCache">是否使用缓存</param>
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
-        /// <para><see cref="GroupInfo"/> 群信息列表</para>
+        /// <para><see cref="GroupInfo"/> 群信息</para>
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, GroupInfo groupInfo)> GetGroupInfo(bool useCache = true)
         {

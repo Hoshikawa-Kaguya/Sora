@@ -39,7 +39,7 @@ namespace Sora.Module
         #endregion
 
         #region 构造函数
-        public Message(Guid connectionGuid, int msgId, string text, List<CQCode> cqCodeList, long time, int font) : base(connectionGuid)
+        internal Message(Guid connectionGuid, int msgId, string text, List<CQCode> cqCodeList, long time, int font) : base(connectionGuid)
         {
             this.MessageId   = msgId;
             this.RawText     = text;
@@ -70,7 +70,7 @@ namespace Sora.Module
         public List<long> GetAllAtList()
         {
             return MessageList.Where(cq => cq.Function == CQFunction.At)
-                              .Select(cq => Convert.ToInt64(((At) cq.CQData).Traget))
+                              .Select(cq => Convert.ToInt64(((At) cq.CQData).Traget ?? "-1"))
                               .ToList();
         }
 
