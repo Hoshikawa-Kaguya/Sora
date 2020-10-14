@@ -139,14 +139,20 @@ namespace Sora.Tool
         /// <summary>
         /// 全局错误Log
         /// </summary>
-        /// <param name="e"></param>
-        public static void UnhandledExceptionLog(Exception e)
+        /// <param name="args">UnhandledExceptionEventArgs</param>
+        internal static void UnhandledExceptionLog(UnhandledExceptionEventArgs args)
         {
-            string errMsg = ErrorLogBuilder(e);
-            Fatal("Sora",$"发现未处理的错误发生\r\n{errMsg}");
+            StringBuilder errorLogBuilder = new StringBuilder();
+            errorLogBuilder.Append("检测到未处理的异常");
+            if (args.IsTerminating)
+                errorLogBuilder.Append("，服务器将停止运行");
+            errorLogBuilder.Append("，错误信息:");
+            errorLogBuilder
+                .Append(ConsoleLog.ErrorLogBuilder(args.ExceptionObject as Exception));
+            Fatal("Sora",errorLogBuilder);
             Warning("Sora","将在5s后自动退出");
             Thread.Sleep(5000);
-            Environment.Exit(0);
+            Environment.Exit(-1);
         }
         #endregion
     }

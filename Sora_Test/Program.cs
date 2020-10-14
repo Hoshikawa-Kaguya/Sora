@@ -34,7 +34,7 @@ namespace Sora_Test
             }
             catch (Exception e) //侦测所有未处理的错误
             {
-                ConsoleLog.UnhandledExceptionLog(e);
+                ConsoleLog.Fatal("unknown error",ConsoleLog.ErrorLogBuilder(e));
             }
         }
     }
