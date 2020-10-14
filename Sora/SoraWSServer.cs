@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
@@ -77,8 +78,15 @@ namespace Sora
             //全局异常事件
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
                                                           {
+                                                              StringBuilder errorLogBuilder = new StringBuilder();
+                                                              errorLogBuilder.Append("检测到未处理的异常");
+                                                              if (args.IsTerminating)
+                                                                  errorLogBuilder.Append("，服务器将停止运行");
+                                                              errorLogBuilder.Append("，错误信息:");
+                                                              errorLogBuilder
+                                                                  .Append(ConsoleLog.ErrorLogBuilder(args.ExceptionObject as Exception));
                                                               ConsoleLog.Fatal("Sora",
-                                                                               $"检测到未处理的异常，服务器将停止运行\n{ConsoleLog.ErrorLogBuilder(args.ExceptionObject as Exception)}");
+                                                                               errorLogBuilder);
                                                           };
         }
 
