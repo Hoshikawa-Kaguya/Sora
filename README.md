@@ -1,6 +1,6 @@
 <h1 align="center">
 	<br>
-	<img width="400" src="https://i.loli.net/2020/10/14/Q3NPTLuC4no16ye.png" alt="LOGO">
+	<img width="200" src="https://i.loli.net/2020/10/14/Q3NPTLuC4no16ye.png" alt="LOGO">
 	<br>
 	Sora
 	<h4 align="center">
