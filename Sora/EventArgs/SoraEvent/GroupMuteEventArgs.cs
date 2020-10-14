@@ -37,14 +37,14 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="groupMute">服务端群禁言事件参数</param>
-        internal GroupMuteEventArgs(Guid connectionGuid, string eventName, ApiGroupMuteEventArgs groupMute) :
-            base(connectionGuid, eventName, groupMute.SelfID, groupMute.Time)
+        /// <param name="groupMuteArgs">群禁言事件参数</param>
+        internal GroupMuteEventArgs(Guid connectionGuid, string eventName, ApiGroupMuteEventArgs groupMuteArgs) :
+            base(connectionGuid, eventName, groupMuteArgs.SelfID, groupMuteArgs.Time)
         {
-            this.User        = new User(connectionGuid, groupMute.UserId);
-            this.Operator    = new User(connectionGuid, groupMute.OperatorId);
-            this.SourceGroup = new Group(connectionGuid, groupMute.GroupId);
-            this.Duration    = groupMute.Duration;
+            this.User        = new User(connectionGuid, groupMuteArgs.UserId);
+            this.Operator    = new User(connectionGuid, groupMuteArgs.OperatorId);
+            this.SourceGroup = new Group(connectionGuid, groupMuteArgs.GroupId);
+            this.Duration    = groupMuteArgs.Duration;
         }
         #endregion
     }

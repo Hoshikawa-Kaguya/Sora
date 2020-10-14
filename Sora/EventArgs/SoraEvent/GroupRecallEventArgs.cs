@@ -34,17 +34,17 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="groupRecall">群聊撤回事件参数</param>
-        internal GroupRecallEventArgs(Guid connectionGuid, string eventName, ApiGroupRecallEventArgs groupRecall) :
-            base(connectionGuid, eventName, groupRecall.SelfID, groupRecall.Time)
+        /// <param name="groupRecallArgs">群聊撤回事件参数</param>
+        internal GroupRecallEventArgs(Guid connectionGuid, string eventName, ApiGroupRecallEventArgs groupRecallArgs) :
+            base(connectionGuid, eventName, groupRecallArgs.SelfID, groupRecallArgs.Time)
         {
-            this.MessageSender = new User(connectionGuid, groupRecall.UserId);
+            this.MessageSender = new User(connectionGuid, groupRecallArgs.UserId);
             //执行者和发送者可能是同一人
-            this.Operator = groupRecall.UserId == groupRecall.OperatorId
+            this.Operator = groupRecallArgs.UserId == groupRecallArgs.OperatorId
                 ? this.MessageSender
-                : new User(connectionGuid, groupRecall.OperatorId);
-            this.SourceGroup = new Group(connectionGuid, groupRecall.GroupId);
-            this.MessageId   = groupRecall.MessageId;
+                : new User(connectionGuid, groupRecallArgs.OperatorId);
+            this.SourceGroup = new Group(connectionGuid, groupRecallArgs.GroupId);
+            this.MessageId   = groupRecallArgs.MessageId;
         }
         #endregion
     }

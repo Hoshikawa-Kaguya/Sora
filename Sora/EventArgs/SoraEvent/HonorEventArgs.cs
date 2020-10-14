@@ -5,6 +5,9 @@ using Sora.Module;
 
 namespace Sora.EventArgs.SoraEvent
 {
+    /// <summary>
+    /// 授予荣誉事件参数
+    /// </summary>
     public sealed class HonorEventArgs : BaseSoraEventArgs
     {
         #region 属性
@@ -30,13 +33,13 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="honorEvent">荣誉类型</param>
-        internal HonorEventArgs(Guid connectionGuid, string eventName, ApiHonorEventArgs honorEvent) :
-            base(connectionGuid, eventName, honorEvent.SelfID, honorEvent.Time)
+        /// <param name="honorEventArgs">荣誉变更事件参数</param>
+        internal HonorEventArgs(Guid connectionGuid, string eventName, ApiHonorEventArgs honorEventArgs) :
+            base(connectionGuid, eventName, honorEventArgs.SelfID, honorEventArgs.Time)
         {
-            this.TargetUser  = new User(connectionGuid, honorEvent.UserId);
-            this.SourceGroup = new Group(connectionGuid, honorEvent.GroupId);
-            this.Honor       = honorEvent.HonorType;
+            this.TargetUser  = new User(connectionGuid, honorEventArgs.UserId);
+            this.SourceGroup = new Group(connectionGuid, honorEventArgs.GroupId);
+            this.Honor       = honorEventArgs.HonorType;
         }
         #endregion
     }

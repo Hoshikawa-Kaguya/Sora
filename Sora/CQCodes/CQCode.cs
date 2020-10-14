@@ -202,6 +202,12 @@ namespace Sora.CQCodes
                               });
         }
 
+        /// <summary>
+        /// 音乐CQ码
+        /// </summary>
+        /// <param name="musicType">音乐分享类型</param>
+        /// <param name="musicId">音乐Id</param>
+        /// <returns></returns>
         public static CQCode CQMusic(MusicShareType musicType, long musicId)
         {
             return new CQCode(CQFunction.Music,
@@ -251,7 +257,7 @@ namespace Sora.CQCodes
         #region GoCQ扩展码
         /// <summary>
         /// 群成员戳一戳
-        /// 只支持Go-cqhttp
+        /// 只支持Go-CQHttp
         /// </summary>
         /// <param name="uid">ID</param>
         public static CQCode CQPoke(long uid)
@@ -299,7 +305,7 @@ namespace Sora.CQCodes
         }
 
         /// <summary>
-        /// XML
+        /// XML 特殊消息
         /// </summary>
         /// <param name="content">xml文本</param>
         public static CQCode CQXml(string content)
@@ -313,10 +319,10 @@ namespace Sora.CQCodes
         }
 
         /// <summary>
-        /// JSON
+        /// JSON 特殊消息
         /// </summary>
-        /// <param name="content">json文本</param>
-        /// <param name="richText">富文本通道</param>
+        /// <param name="content">JSON 文本</param>
+        /// <param name="richText">富文本内容</param>
         public static CQCode CQJson(string content,bool richText = false)
         {
             return new CQCode(CQFunction.Json,
@@ -328,7 +334,7 @@ namespace Sora.CQCodes
         }
 
         /// <summary>
-        /// JSON
+        /// JSON 特殊消息
         /// </summary>
         /// <param name="content">JObject实例</param>
         public static CQCode CQJson(JObject content)
@@ -345,11 +351,11 @@ namespace Sora.CQCodes
         /// </summary>
         /// <param name="imageFile">图片名/绝对路径/URL/base64</param>
         /// <param name="source">来源名称</param>
-        /// <param name="iconUrl">来源图标url</param>
-        /// <param name="minWidth">最小width</param>
-        /// <param name="minHeight">最小height</param>
-        /// <param name="maxWidth">最大width</param>
-        /// <param name="maxHeight">最大height</param>
+        /// <param name="iconUrl">来源图标 URL</param>
+        /// <param name="minWidth">最小 Width</param>
+        /// <param name="minHeight">最小 Height</param>
+        /// <param name="maxWidth">最大 Width</param>
+        /// <param name="maxHeight">最大 Height</param>
         public static CQCode CQCardImage(string imageFile,
                                          string source = null,
                                          string iconUrl = null,
@@ -378,6 +384,11 @@ namespace Sora.CQCodes
                               });
         }
 
+        /// <summary>
+        /// 语音转文字（TTS）CQ码
+        /// </summary>
+        /// <param name="messageStr">要转换的文本信息</param>
+        /// <returns></returns>
         public static CQCode CQTTS(string messageStr)
         {
             if(string.IsNullOrEmpty(messageStr)) throw new NullReferenceException(nameof(messageStr));
@@ -390,8 +401,8 @@ namespace Sora.CQCodes
         #endregion
 
         /// <summary>
-        /// 空CQ码构造
-        /// 当存在非法参数时CQ码置空
+        /// 空CQ码
+        /// <para>当存在非法参数时CQ码将被本函数重置</para>
         /// </summary>
         private static CQCode CQIlleage() =>
             new CQCode(CQFunction.Text, new Text{Content = null});

@@ -37,14 +37,14 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="groupCardUpdate">群名片更新事件参数</param>
-        internal GroupCardUpdateEventArgs(Guid connectionGuid, string eventName, ApiGroupCardUpdateEventArgs groupCardUpdate) :
-            base(connectionGuid, eventName, groupCardUpdate.SelfID, groupCardUpdate.Time)
+        /// <param name="groupCardUpdateArgs">群名片更新事件参数</param>
+        internal GroupCardUpdateEventArgs(Guid connectionGuid, string eventName, ApiGroupCardUpdateEventArgs groupCardUpdateArgs) :
+            base(connectionGuid, eventName, groupCardUpdateArgs.SelfID, groupCardUpdateArgs.Time)
         {
-            this.User        = new User(connectionGuid,groupCardUpdate.UserId);
-            this.SourceGroup = new Group(connectionGuid, groupCardUpdate.GroupId);
-            this.NewCard     = groupCardUpdate.NewCard;
-            this.OldCard     = groupCardUpdate.OldCard;
+            this.User        = new User(connectionGuid,groupCardUpdateArgs.UserId);
+            this.SourceGroup = new Group(connectionGuid, groupCardUpdateArgs.GroupId);
+            this.NewCard     = groupCardUpdateArgs.NewCard;
+            this.OldCard     = groupCardUpdateArgs.OldCard;
         }
         #endregion
     }

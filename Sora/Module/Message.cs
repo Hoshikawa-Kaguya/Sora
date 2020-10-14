@@ -53,9 +53,9 @@ namespace Sora.Module
         /// <summary>
         /// 撤回本条消息
         /// </summary>
-        public async ValueTask DeleteMessage()
+        public async ValueTask RecallMessage()
         {
-            await base.SoraApi.DeleteMessage(this.MessageId);
+            await base.SoraApi.RecallMessage(this.MessageId);
         }
         #endregion
 

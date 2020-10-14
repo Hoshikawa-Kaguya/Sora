@@ -33,14 +33,14 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="friendRequest">服务器请求事件参数</param>
+        /// <param name="friendRequestArgs">好友申请事件参数</param>
         internal FriendRequestEventArgs(Guid connectionGuid, string eventName,
-                                        ApiFriendRequestEventArgs friendRequest) :
-            base(connectionGuid, eventName, friendRequest.SelfID, friendRequest.Time)
+                                        ApiFriendRequestEventArgs friendRequestArgs) :
+            base(connectionGuid, eventName, friendRequestArgs.SelfID, friendRequestArgs.Time)
         {
-            this.Sender      = new User(connectionGuid, friendRequest.UserId);
-            this.Comment     = friendRequest.Comment;
-            this.RequsetFlag = friendRequest.Flag;
+            this.Sender      = new User(connectionGuid, friendRequestArgs.UserId);
+            this.Comment     = friendRequestArgs.Comment;
+            this.RequsetFlag = friendRequestArgs.Flag;
         }
         #endregion
 

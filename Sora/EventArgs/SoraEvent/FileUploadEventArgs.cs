@@ -33,13 +33,13 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="fileUpload">服务端上传文件通知参数</param>
-        internal FileUploadEventArgs(Guid connectionGuid, string eventName, ApiFileUploadEventArgs fileUpload) :
-            base(connectionGuid, eventName, fileUpload.SelfID, fileUpload.Time)
+        /// <param name="fileUploadArgs">文件上传事件参数</param>
+        internal FileUploadEventArgs(Guid connectionGuid, string eventName, ApiFileUploadEventArgs fileUploadArgs) :
+            base(connectionGuid, eventName, fileUploadArgs.SelfID, fileUploadArgs.Time)
         {
-            this.SourceGroup = new Group(connectionGuid, fileUpload.GroupId);
-            this.Sender      = new User(connectionGuid, fileUpload.UserId);
-            this.FileInfo    = fileUpload.Upload;
+            this.SourceGroup = new Group(connectionGuid, fileUploadArgs.GroupId);
+            this.Sender      = new User(connectionGuid, fileUploadArgs.UserId);
+            this.FileInfo    = fileUploadArgs.Upload;
         }
         #endregion
     }

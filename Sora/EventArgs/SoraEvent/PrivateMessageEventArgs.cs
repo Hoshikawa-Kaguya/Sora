@@ -38,15 +38,15 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="serverPrivateMsg">服务器消息事件参数</param>
-        internal PrivateMessageEventArgs(Guid connectionGuid, string eventName, ApiPrivateMsgEventArgs serverPrivateMsg)
-            : base(connectionGuid, eventName, serverPrivateMsg.SelfID, serverPrivateMsg.Time)
+        /// <param name="privateMsgArgs">私聊消息事件参数</param>
+        internal PrivateMessageEventArgs(Guid connectionGuid, string eventName, ApiPrivateMsgEventArgs privateMsgArgs)
+            : base(connectionGuid, eventName, privateMsgArgs.SelfID, privateMsgArgs.Time)
         {
-            this.Message = new Message(connectionGuid, serverPrivateMsg.MessageId, serverPrivateMsg.RawMessage,
-                                       MessageParse.ParseMessageList(serverPrivateMsg.MessageList),
-                                       serverPrivateMsg.Time, serverPrivateMsg.Font);
-            this.Sender     = new User(connectionGuid, serverPrivateMsg.UserId);
-            this.SenderInfo = serverPrivateMsg.SenderInfo;
+            this.Message = new Message(connectionGuid, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
+                                       MessageParse.ParseMessageList(privateMsgArgs.MessageList),
+                                       privateMsgArgs.Time, privateMsgArgs.Font);
+            this.Sender     = new User(connectionGuid, privateMsgArgs.UserId);
+            this.SenderInfo = privateMsgArgs.SenderInfo;
         }
         #endregion
 

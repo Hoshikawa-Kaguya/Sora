@@ -29,13 +29,13 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="pokeEvent">戳一戳事件参数</param>
-        internal GroupPokeEventArgs(Guid connectionGuid, string eventName, ApiPokeOrLuckyEventArgs pokeEvent) :
-            base(connectionGuid, eventName, pokeEvent.SelfID, pokeEvent.Time)
+        /// <param name="pokeEventArgs">戳一戳事件参数</param>
+        internal GroupPokeEventArgs(Guid connectionGuid, string eventName, ApiPokeOrLuckyEventArgs pokeEventArgs) :
+            base(connectionGuid, eventName, pokeEventArgs.SelfID, pokeEventArgs.Time)
         {
-            this.SendUser    = new User(connectionGuid, pokeEvent.UserId);
-            this.TargetUser  = new User(connectionGuid, pokeEvent.TargetId);
-            this.SourceGroup = new Group(connectionGuid, pokeEvent.GroupId);
+            this.SendUser    = new User(connectionGuid, pokeEventArgs.UserId);
+            this.TargetUser  = new User(connectionGuid, pokeEventArgs.TargetId);
+            this.SourceGroup = new Group(connectionGuid, pokeEventArgs.GroupId);
         }
         #endregion
     }

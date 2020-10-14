@@ -4,6 +4,9 @@ using Sora.Module;
 
 namespace Sora.EventArgs.SoraEvent
 {
+    /// <summary>
+    /// 红包运气王事件参数
+    /// </summary>
     public sealed class LuckyKingEventArgs : BaseSoraEventArgs
     {
         #region 属性
@@ -29,13 +32,13 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="luckyEvent">运气王事件参数</param>
-        internal LuckyKingEventArgs(Guid connectionGuid, string eventName, ApiPokeOrLuckyEventArgs luckyEvent) :
-            base(connectionGuid, eventName, luckyEvent.SelfID, luckyEvent.Time)
+        /// <param name="luckyKingEventArgs">运气王事件参数</param>
+        internal LuckyKingEventArgs(Guid connectionGuid, string eventName, ApiPokeOrLuckyEventArgs luckyKingEventArgs) :
+            base(connectionGuid, eventName, luckyKingEventArgs.SelfID, luckyKingEventArgs.Time)
         {
-            this.SendUser    = new User(connectionGuid, luckyEvent.UserId);
-            this.TargetUser  = new User(connectionGuid, luckyEvent.TargetId);
-            this.SourceGroup = new Group(connectionGuid, luckyEvent.GroupId);
+            this.SendUser    = new User(connectionGuid, luckyKingEventArgs.UserId);
+            this.TargetUser  = new User(connectionGuid, luckyKingEventArgs.TargetId);
+            this.SourceGroup = new Group(connectionGuid, luckyKingEventArgs.GroupId);
         }
         #endregion
     }
