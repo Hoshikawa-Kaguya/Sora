@@ -38,7 +38,7 @@ namespace Sora
         /// <summary>
         /// 链接信息
         /// </summary>
-        internal static readonly Dictionary<Guid, IWebSocketConnection> ConnectionInfos = new Dictionary<Guid, IWebSocketConnection>();
+        internal static readonly Dictionary<Guid, IWebSocketConnection> ConnectionInfos;
 
         /// <summary>
         /// 服务器事件回调
@@ -63,13 +63,24 @@ namespace Sora
         /// 关闭连接回调
         /// </summary>
         public event ServerAsyncCallBackHandler<ConnectionEventArgs> OnCloseConnectionAsync;
-        /// <summary>
-        /// 错误回调
-        /// </summary>
-        public event ServerAsyncCallBackHandler<ErrorEventArgs> OnErrorAsync; 
         #endregion
 
         #region 构造函数
+        /// <summary>
+        /// 静态构造函数
+        /// 用于初始化静态处理资源
+        /// </summary>
+        static SoraWSServer()
+        {
+            //初始化连接表
+            ConnectionInfos = new Dictionary<Guid, IWebSocketConnection>();
+            //全局异常事件
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+                                                          {
+                                                              ConsoleLog.Fatal("Sora",
+                                                                               $"检测到未处理的异常，服务器将停止运行\n{ConsoleLog.ErrorLogBuilder(args.ExceptionObject as Exception)}");
+                                                          };
+        }
 
         /// <summary>
         /// 创建一个反向WS客户端
@@ -200,27 +211,13 @@ namespace Sora
                                                     // ReSharper disable once SimplifyLinqExpressionUseAll
                                                     if (!ConnectionInfos.Any(conn => conn.Key ==
                                                                                  socket.ConnectionInfo.Id)) return;
-                                                    try
-                                                    {
-                                                        //进入事件处理和分发
-                                                        Task.Run(() =>
-                                                                  {
-                                                                      this.Event
-                                                                          .Adapter(JObject.Parse(message),
+                                                    //进入事件处理和分发
+                                                    Task.Run(() =>
+                                                             {
+                                                                 this.Event
+                                                                     .Adapter(JObject.Parse(message),
                                                                               socket.ConnectionInfo.Id);
-                                                                  });
-                                                    }
-                                                    catch (Exception e)
-                                                    {
-                                                        ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
-                                                        if (OnErrorAsync == null) return;
-                                                        //错误事件回调
-                                                        Task.Run( async () =>
-                                                                  {
-                                                                      await OnErrorAsync(selfId,
-                                                                          new ErrorEventArgs(e, socket.ConnectionInfo));
-                                                                  });
-                                                    }
+                                                             });
                                                 };
                          });
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器正在运行[{Config.Location}:{Config.Port}]");
