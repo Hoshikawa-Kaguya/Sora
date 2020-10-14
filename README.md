@@ -1,5 +1,7 @@
 <h1 align="center">
 	<br>
+	<img width="400" src="https://i.loli.net/2020/10/14/Q3NPTLuC4no16ye.png" alt="LOGO">
+	<br>
 	Sora
 	<h4 align="center">
         一个基于<a href="https://github.com/howmanybots/onebot">OneBot</a>协议的 <a href="https://dotnet.microsoft.com/download/dotnet/5.0">C#/.Net 5</a> 异步机器人开发框架
@@ -8,51 +10,13 @@
 
 ----
 
-框架现在已经做好了
+## 文档
 
-不过还没写文档(在做了在做了)
+查看框架的说明文档 [Docs](https://sora-docs.yukari.one/)
 
-## 我要怎么用
+文档目前只有简单的向导和自动生成API文档
 
-在nuget包管理器中搜索`Sora`然后安装就可以了
-
-## 一个非常简陋的示例
-
-先将就着看看吧.jpg
-
-```c#
-using System.Threading.Tasks;
-using Sora;
-using Sora.Tool;
-
-namespace SoraExamples
-{
-    static class Program
-    {
-        static async Task Main(string[] args)
-        {
-            SoraWSServer server = new SoraWSServer(new ServerConfig());
-            server.OnOpenConnectionAsync += (id, eventArgs) =>
-                                            {
-                                                ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
-                                                return ValueTask.CompletedTask;
-                                            };
-            
-            server.OnCloseConnectionAsync += (id, eventArgs) =>
-                                             {
-                                                 ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
-                                                 return ValueTask.CompletedTask;
-                                             };
-            server.Event.OnGroupMessage += async (sender, eventArgs) =>
-                                           {
-                                               //最简单的复读（x
-                                               await eventArgs.Repeat();
-                                           };
-            await Task.Delay(-1);
-        }
-    }
-}
-```
+详细的介绍文档还在编写
 
 ## 开源协议
 
