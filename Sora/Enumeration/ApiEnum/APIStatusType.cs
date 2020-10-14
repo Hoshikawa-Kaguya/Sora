@@ -8,12 +8,16 @@ namespace Sora.Enumeration.ApiEnum
     [DefaultValue(OK)]
     public enum APIStatusType
     {
+
         OK       = 0,
-        Faild    = 100,
+
+        Failed    = 100,
+
         NotFound = 404,
+
         Error    = 502,
 
-        Faild_   = 102,
+        Failed_   = 102,
 
         NoResult = -1
     }

@@ -24,7 +24,7 @@ namespace Sora.Enumeration.ApiEnum
         /// 撤回消息
         /// </summary>
         [Description("delete_msg")]
-        DeleteMsg,
+        RecallMsg,
         /// <summary>
         /// 获取好友列表
         /// </summary>

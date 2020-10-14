@@ -9,7 +9,7 @@ namespace Sora.EventArgs.OnebotEvent.MetaEvent
     {
         /// <summary>
         /// <para>事件子类型</para>
-        /// <para>只可能为<see langword="connect"/></para>
+        /// <para>当前版本只可能为<see langword="connect"/></para>
         /// </summary>
         [JsonProperty(PropertyName = "sub_type")]
         internal string SubType { get; set; }

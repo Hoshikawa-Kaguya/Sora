@@ -537,12 +537,12 @@ namespace Sora.ServerInterface
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="msgId">消息id</param>
-        internal static async ValueTask DeleteMsg(Guid connection, int msgId)
+        internal static async ValueTask RecallMsg(Guid connection, int msgId)
         {
             ConsoleLog.Debug("Sora","Sending delete_msg request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.DeleteMsg,
+                ApiType = APIType.RecallMsg,
                 ApiParams = new MsgParams
                 {
                     MessageId = msgId

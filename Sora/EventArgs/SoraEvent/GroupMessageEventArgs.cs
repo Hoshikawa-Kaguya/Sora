@@ -48,17 +48,17 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="serverGroupMsg">服务器消息事件参数</param>
-        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs serverGroupMsg
-        ) : base(connectionGuid, eventName, serverGroupMsg.SelfID, serverGroupMsg.Time)
+        /// <param name="groupMsgArgs">群消息事件参数</param>
+        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs
+        ) : base(connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
         {
-            this.IsAnonymousMessage = serverGroupMsg.Anonymous == null;
-            this.Message = new Message(connectionGuid, serverGroupMsg.MessageId, serverGroupMsg.RawMessage,
-                                       MessageParse.ParseMessageList(serverGroupMsg.MessageList), serverGroupMsg.Time,
-                                       serverGroupMsg.Font);
-            this.Sender             = new User(connectionGuid, serverGroupMsg.UserId);
-            this.SourceGroup        = new Group(connectionGuid, serverGroupMsg.GroupId);
-            this.SenderInfo         = serverGroupMsg.SenderInfo;
+            this.IsAnonymousMessage = groupMsgArgs.Anonymous == null;
+            this.Message = new Message(connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
+                                       MessageParse.ParseMessageList(groupMsgArgs.MessageList), groupMsgArgs.Time,
+                                       groupMsgArgs.Font);
+            this.Sender             = new User(connectionGuid, groupMsgArgs.UserId);
+            this.SourceGroup        = new Group(connectionGuid, groupMsgArgs.GroupId);
+            this.SenderInfo         = groupMsgArgs.SenderInfo;
         }
         #endregion
 
@@ -96,9 +96,9 @@ namespace Sora.EventArgs.SoraEvent
         /// 撤回发送者消息
         /// 只有在管理员以上权限才有效
         /// </summary>
-        public async ValueTask DeleteSourceMessage()
+        public async ValueTask RecallSourceMessage()
         {
-            await base.SoraApi.DeleteMessage(this.Message.MessageId);
+            await base.SoraApi.RecallMessage(this.Message.MessageId);
         }
 
         /// <summary>

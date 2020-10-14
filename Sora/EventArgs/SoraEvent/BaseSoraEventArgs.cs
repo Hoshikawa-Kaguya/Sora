@@ -37,6 +37,13 @@ namespace Sora.EventArgs.SoraEvent
         #endregion
 
         #region 构造函数
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="connectionGuid">服务器链接标识</param>
+        /// <param name="eventName">事件名</param>
+        /// <param name="selfId">当前使用的QQ号</param>
+        /// <param name="time">连接时间</param>
         internal BaseSoraEventArgs(Guid connectionGuid, string eventName, long selfId, long time)
         {
             this.SoraApi   = new SoraApi(connectionGuid);

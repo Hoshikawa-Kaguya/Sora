@@ -9,6 +9,9 @@ namespace Sora.Enumeration
     [DefaultValue (Unknown)]
     public enum CQFunction
     {
+        /// <summary>
+        /// 未知
+        /// </summary>
         Unknown,
         #region 基础消息段
         /// <summary>

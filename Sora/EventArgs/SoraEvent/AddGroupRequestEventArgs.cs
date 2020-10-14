@@ -6,7 +6,10 @@ using Sora.Module;
 
 namespace Sora.EventArgs.SoraEvent
 {
-    public sealed class GroupRequestEventArgs : BaseSoraEventArgs
+    /// <summary>
+    /// 入群申请
+    /// </summary>
+    public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
     {
         #region 属性
         /// <summary>
@@ -15,7 +18,7 @@ namespace Sora.EventArgs.SoraEvent
         public User Sender { get; private set; }
 
         /// <summary>
-        /// 请求来源群组实例
+        /// 请求发送到的群组实例
         /// </summary>
         public Group SourceGroup { get; private set; }
 
@@ -25,7 +28,7 @@ namespace Sora.EventArgs.SoraEvent
         public string Comment { get; private set; }
 
         /// <summary>
-        /// 当前请求的flag标识
+        /// 当前请求的 flag 标识
         /// </summary>
         public string RequsetFlag { get; private set; }
 
@@ -41,15 +44,15 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="groupRequest">服务器请求事件参数</param>
-        internal GroupRequestEventArgs(Guid connectionGuid, string eventName, ApiGroupRequestEventArgs groupRequest) :
-            base(connectionGuid, eventName, groupRequest.SelfID, groupRequest.Time)
+        /// <param name="groupRequestArgs">加群申请事件参数</param>
+        internal AddGroupRequestEventArgs(Guid connectionGuid, string eventName, ApiGroupRequestEventArgs groupRequestArgs) :
+            base(connectionGuid, eventName, groupRequestArgs.SelfID, groupRequestArgs.Time)
         {
-            this.Sender      = new User(connectionGuid, groupRequest.UserId);
-            this.SourceGroup = new Group(connectionGuid, groupRequest.GroupId);
-            this.Comment     = groupRequest.Comment;
-            this.RequsetFlag = groupRequest.Flag;
-            this.SubType     = groupRequest.GroupRequestType;
+            this.Sender      = new User(connectionGuid, groupRequestArgs.UserId);
+            this.SourceGroup = new Group(connectionGuid, groupRequestArgs.GroupId);
+            this.Comment     = groupRequestArgs.Comment;
+            this.RequsetFlag = groupRequestArgs.Flag;
+            this.SubType     = groupRequestArgs.GroupRequestType;
         }
         #endregion
 

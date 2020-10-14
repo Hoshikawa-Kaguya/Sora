@@ -19,11 +19,11 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="friendAdd">API好友添加事件参数</param>
-        internal FriendAddEventArgs(Guid connectionGuid, string eventName, ApiFriendAddEventArgs friendAdd) :
-            base(connectionGuid, eventName, friendAdd.SelfID, friendAdd.Time)
+        /// <param name="friendAddArgs">好友添加事件参数</param>
+        internal FriendAddEventArgs(Guid connectionGuid, string eventName, ApiFriendAddEventArgs friendAddArgs) :
+            base(connectionGuid, eventName, friendAddArgs.SelfID, friendAddArgs.Time)
         {
-            this.NewFriend = new User(connectionGuid, friendAdd.UserId);
+            this.NewFriend = new User(connectionGuid, friendAddArgs.UserId);
         }
         #endregion
     }

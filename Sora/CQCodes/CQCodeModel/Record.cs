@@ -3,6 +3,9 @@ using Sora.Converter;
 
 namespace Sora.CQCodes.CQCodeModel
 {
+    /// <summary>
+    /// 语音消息
+    /// </summary>
     public struct Record
     {
         #region 属性

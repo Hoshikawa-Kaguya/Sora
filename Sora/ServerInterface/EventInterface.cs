@@ -55,7 +55,7 @@ namespace Sora.ServerInterface
         /// <summary>
         /// 群申请事件
         /// </summary>
-        public event EventAsyncCallBackHandler<GroupRequestEventArgs> OnGroupRequest;
+        public event EventAsyncCallBackHandler<AddGroupRequestEventArgs> OnGroupRequest;
         /// <summary>
         /// 好友申请事件
         /// </summary>
@@ -274,7 +274,7 @@ namespace Sora.ServerInterface
                     //执行回调函数
                     if(OnGroupRequest == null) break;
                     await OnGroupRequest(typeof(EventInterface),
-                                         new GroupRequestEventArgs(connection, "request|group",
+                                         new AddGroupRequestEventArgs(connection, "request|group",
                                                                    groupRequest));
                     break;
                 default:

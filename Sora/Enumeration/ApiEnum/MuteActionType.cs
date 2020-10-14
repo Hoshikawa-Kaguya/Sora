@@ -8,7 +8,7 @@ namespace Sora.Enumeration.ApiEnum
     public enum MuteActionType
     {
         /// <summary>
-        /// 启用
+        /// 开启
         /// </summary>
         [Description("ban")]
         Enable,

@@ -107,9 +107,9 @@ namespace Sora.Module.Base
         /// 撤回消息
         /// </summary>
         /// <param name="messageId">消息ID</param>
-        public async ValueTask DeleteMessage(int messageId)
+        public async ValueTask RecallMessage(int messageId)
         {
-            await ApiInterface.DeleteMsg(this.ConnectionGuid, messageId);
+            await ApiInterface.RecallMsg(this.ConnectionGuid, messageId);
         }
 
         #region GoAPI
