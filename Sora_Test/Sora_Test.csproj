@@ -10,8 +10,4 @@
     <ProjectReference Include="..\Sora\Sora.csproj" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="del $(OutDir)*.deps.json&#xD;&#xA;del $(OutDir)*.runtimeconfig.dev.json&#xD;&#xA;if &quot;$(ConfigurationName)&quot;==&quot;Release&quot; del $(OutDir)*.pdb&#xD;&#xA;rd /s/q  $(OutDir)ref" />
-  </Target>
-
 </Project>
