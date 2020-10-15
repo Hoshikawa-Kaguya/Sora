@@ -4,6 +4,9 @@ using Sora.Module;
 
 namespace Sora.EventArgs.SoraEvent
 {
+    /// <summary>
+    /// 好友添加事件参数
+    /// </summary>
     public sealed class FriendAddEventArgs : BaseSoraEventArgs
     {
         #region 属性

@@ -15,7 +15,7 @@ namespace Sora.EventArgs.WSSeverEvent
         #endregion
 
         #region 构造函数
-        public PongEventArgs(byte[] echo, IWebSocketConnectionInfo connectionInfo)
+        internal PongEventArgs(byte[] echo, IWebSocketConnectionInfo connectionInfo)
         {
             this.Echo           = echo;
             base.ConnectionInfo = connectionInfo;

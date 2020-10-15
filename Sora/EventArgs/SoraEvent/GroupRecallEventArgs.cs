@@ -4,6 +4,9 @@ using Sora.Module;
 
 namespace Sora.EventArgs.SoraEvent
 {
+    /// <summary>
+    /// 群消息撤回事件参数
+    /// </summary>
     public sealed class GroupRecallEventArgs : BaseSoraEventArgs
     {
         #region 属性

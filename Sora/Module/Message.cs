@@ -9,6 +9,9 @@ using Sora.Module.Base;
 
 namespace Sora.Module
 {
+    /// <summary>
+    /// 消息实例
+    /// </summary>
     public sealed class Message : BaseModel
     {
         #region 属性
@@ -101,6 +104,10 @@ namespace Sora.Module
         #endregion
 
         #region 转换方法
+        /// <summary>
+        /// <para>转纯文本信息</para>
+        /// <para>注意：CQ码会被转换为onebot的string消息段格式</para>
+        /// </summary>
         public override string ToString()
         {
             return RawText;

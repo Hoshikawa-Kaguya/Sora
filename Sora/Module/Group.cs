@@ -9,6 +9,9 @@ using Sora.Module.Info;
 
 namespace Sora.Module
 {
+    /// <summary>
+    /// 群组实例
+    /// </summary>
     public sealed class Group : BaseModel
     {
         #region 属性
