@@ -37,6 +37,8 @@ namespace Sora
         /// </summary>
         public EventInterface Event { get; set; }
 
+        private readonly bool ready_flag = false;
+
         /// <summary>
         /// 链接信息
         /// </summary>
@@ -84,6 +86,25 @@ namespace Sora
         }
 
         /// <summary>
+        /// 使用端口配置创建一个反向WS服务端
+        /// </summary>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public static SoraWSServer CreateDefault(int port = 9200)
+        {
+            return new SoraWSServer(port);
+        }
+
+        /// <summary>
+        /// 使用默认配置创建一个反向WS服务端
+        /// </summary>
+        /// <param name="port">服务端端口</param>
+        public SoraWSServer(int port = 9200) : this(new ServerConfig { Port = port })
+        {
+
+        }
+
+        /// <summary>
         /// 创建一个反向WS服务端
         /// </summary>
         /// <param name="config">服务器配置</param>
@@ -112,12 +133,12 @@ namespace Sora
             if (PortInUse(config.Port))
             {
                 ConsoleLog.Fatal("Sora", $"端口{config.Port}已被占用，请更换其他端口");
-                ConsoleLog.Warning("Sora","将在5s后自动退出");
+                ConsoleLog.Warning("Sora", "将在5s后自动退出");
                 Thread.Sleep(5000);
                 Environment.Exit(0);
             }
-            else 
-                Start();
+            else
+                ready_flag = true;
         }
         #endregion
 
@@ -125,8 +146,9 @@ namespace Sora
         /// <summary>
         /// 启动WS服务端
         /// </summary>
-        private void Start()
+        public async Task StartAsync()
         {
+            if (!ready_flag) await Task.CompletedTask;
             Server.Start(socket =>
                          {
                              //接收事件处理
@@ -231,6 +253,7 @@ namespace Sora
                          });
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器正在运行[{Config.Location}:{Config.Port}]");
             ConsoleLog.Info("Sora",$"Sora 服务端框架版本:{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
+            await Task.Delay(-1);
         }
         ~SoraWSServer()
         {
