@@ -54,6 +54,13 @@ namespace Sora
         public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(string selfId, TEventArgs eventArgs)where TEventArgs : System.EventArgs;
         #endregion
 
+        #region 私有字段
+        /// <summary>
+        /// 服务器已准备启动标识
+        /// </summary>
+        private bool serverReady = false;
+        #endregion
+
         #region 回调事件
         /// <summary>
         /// 心跳包处理回调
@@ -114,12 +121,12 @@ namespace Sora
             if (PortInUse(config.Port))
             {
                 ConsoleLog.Fatal("Sora", $"端口{config.Port}已被占用，请更换其他端口");
-                ConsoleLog.Warning("Sora","将在5s后自动退出");
+                ConsoleLog.Warning("Sora", "将在5s后自动退出");
                 Thread.Sleep(5000);
                 Environment.Exit(0);
             }
-            else 
-                Start();
+            else
+                serverReady = true;
         }
         #endregion
 
@@ -127,8 +134,9 @@ namespace Sora
         /// <summary>
         /// 启动WS服务端
         /// </summary>
-        private void Start()
+        public async ValueTask StartServerAsync()
         {
+            if(!serverReady) return;
             Server.Start(socket =>
                          {
                              //接收事件处理
@@ -233,6 +241,8 @@ namespace Sora
                          });
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器正在运行[{Config.Location}:{Config.Port}]");
             ConsoleLog.Info("Sora",$"Sora 服务端框架版本:{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
+
+            await Task.Delay(-1);
         }
         /// <summary>
         /// GC析构函数

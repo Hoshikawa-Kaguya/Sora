@@ -30,7 +30,7 @@ namespace Sora_Test
                                                    //最简单的复读（x
                                                    await eventArgs.Repeat();
                                                };
-                await Task.Delay(-1);
+                await server.StartServerAsync();
             }
             catch (Exception e) //侦测所有未处理的错误
             {
