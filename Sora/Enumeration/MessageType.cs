@@ -2,6 +2,9 @@ using System.ComponentModel;
 
 namespace Sora.Enumeration
 {
+    /// <summary>
+    /// 消息类型
+    /// </summary>
     public enum MessageType
     {
         /// <summary>

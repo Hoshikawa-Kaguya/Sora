@@ -22,6 +22,11 @@ namespace Sora.Tool
         #endregion
 
         #region 格式化错误Log
+        /// <summary>
+        /// 生成格式化的错误Log文本
+        /// </summary>
+        /// <param name="e">错误</param>
+        /// <returns>格式化Log</returns>
         public static string ErrorLogBuilder(Exception e)
         {
             StringBuilder errorMessageBuilder = new StringBuilder();

@@ -4,6 +4,9 @@ using Sora.Module;
 
 namespace Sora.EventArgs.SoraEvent
 {
+    /// <summary>
+    /// 群戳一戳事件参数
+    /// </summary>
     public sealed class GroupPokeEventArgs : BaseSoraEventArgs
     {
         #region 属性

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +12,9 @@ using Sora.Tool;
 
 namespace Sora
 {
+    /// <summary>
+    /// Sora服务器实例
+    /// </summary>
     public sealed class SoraWSServer : IDisposable
     {
         #region 属性
@@ -232,14 +234,22 @@ namespace Sora
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器正在运行[{Config.Location}:{Config.Port}]");
             ConsoleLog.Info("Sora",$"Sora 服务端框架版本:{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
         }
+        /// <summary>
+        /// GC析构函数
+        /// </summary>
         ~SoraWSServer()
         {
             Dispose();
         }
+        /// <summary>
+        /// 释放资源
+        /// </summary>
         public void Dispose()
         {
             Server?.Dispose();
             ConnectionInfos.Clear();
+            EventInterface.HeartBeatList.Clear();
+            ApiInterface.RequestList.Clear();
         }
         #endregion
 
