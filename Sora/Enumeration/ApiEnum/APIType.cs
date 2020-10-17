@@ -129,10 +129,10 @@ namespace Sora.Enumeration.ApiEnum
         [Description("get_image")]
         GetImage,
         /// <summary>
-        /// 获取群消息
+        /// 获取消息
         /// </summary>
-        [Description("get_group_msg")]
-        GetGroupMessage,
+        [Description("get_msg")]
+        GetMessage,
         /// <summary>
         /// 设置群名
         /// </summary>

@@ -58,7 +58,7 @@ namespace Sora
         /// <summary>
         /// 服务器已准备启动标识
         /// </summary>
-        private bool serverReady = false;
+        private readonly bool serverReady;
         #endregion
 
         #region 回调事件
@@ -98,15 +98,16 @@ namespace Sora
         /// <param name="config">服务器配置</param>
         public SoraWSServer(ServerConfig config)
         {
+            serverReady = false;
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器初始化...");
             //检查参数
             if(config == null) throw new ArgumentNullException(nameof(config));
-            if (config.Port < 0 || config.Port > 65535) throw new ArgumentOutOfRangeException(nameof(config.Port));
+            if (config.Port == 0 || config.Port > 65535) throw new ArgumentOutOfRangeException(nameof(config.Port));
 
             this.Config = config;
             //心跳包超时检查计时器
-            this.HeartBeatTimer = new Timer(HeartBeatCheck, null, new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0),
-                                       new TimeSpan(0, 0, 0, config.HeartBeatTimeOut, 0));
+            this.HeartBeatTimer = new Timer(HeartBeatCheck, null, new TimeSpan(0, 0, 0, (int)config.HeartBeatTimeOut, 0),
+                                       new TimeSpan(0, 0, 0, (int)config.HeartBeatTimeOut, 0));
             //API超时
             ApiInterface.TimeOut = config.ApiTimeOut;
             //实例化事件接口
@@ -272,7 +273,6 @@ namespace Sora
             if(ConnectionInfos.Count == 0) return;
             foreach (KeyValuePair<Guid, long> conn in EventInterface.HeartBeatList)
             {
-                //ConsoleLog.Debug("Sora",$"Connection check | {conn.Key} | {Utils.GetNowTimeStamp() - conn.Value}");
                 //检查超时的连接
                 if (Utils.GetNowTimeStamp() - conn.Value > Config.HeartBeatTimeOut)
                 {
@@ -307,7 +307,7 @@ namespace Sora
         /// 检查端口占用
         /// </summary>
         /// <param name="port">端口号</param>
-        private static bool PortInUse(int port) =>
+        private static bool PortInUse(uint port) =>
             IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
                               .Any(ipEndPoint => ipEndPoint.Port == port);
         #endregion
