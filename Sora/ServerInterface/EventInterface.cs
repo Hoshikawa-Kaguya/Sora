@@ -159,8 +159,7 @@ namespace Sora.ServerInterface
                 //心跳包
                 case "heartbeat":
                     ApiHeartBeatEventArgs heartBeat = messageJson.ToObject<ApiHeartBeatEventArgs>();
-                    //TODO 暂时禁用心跳Log
-                    //ConsoleLog.Debug("Sora",$"Get hreatbeat from [{connection}]");
+                    ConsoleLog.Debug("Sora",$"Get hreatbeat from [{connection}]");
                     if (heartBeat != null)
                     {
                         //刷新心跳包记录

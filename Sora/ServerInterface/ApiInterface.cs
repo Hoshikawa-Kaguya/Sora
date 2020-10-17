@@ -27,7 +27,7 @@ namespace Sora.ServerInterface
         /// <summary>
         /// API超时时间
         /// </summary>
-        internal static int TimeOut { get; set; }
+        internal static uint TimeOut { get; set; }
         #endregion
 
         #region 请求表
@@ -439,17 +439,17 @@ namespace Sora.ServerInterface
         }
 
         /// <summary>
-        /// 获取群消息
+        /// 获取消息
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="msgId">消息ID</param>
-        internal static async ValueTask<(int retCode, Message message, User sender)> GetGroupMessage(
+        internal static async ValueTask<(int retCode, Message message, User sender, int realId, bool isGroupMsg)> GetMessage(
             Guid connection, int msgId)
         {
-            ConsoleLog.Debug("Sora","Sending get_group_msg request");
+            ConsoleLog.Debug("Sora","Sending get_msg request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupMessage,
+                ApiType = APIType.GetMessage,
                 ApiParams = new MsgParams
                 {
                     MessageId = msgId
@@ -457,9 +457,8 @@ namespace Sora.ServerInterface
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get get_group_msg response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null, null);
-            ConsoleLog.Debug("FUCK",ret);
+            ConsoleLog.Debug("Sora", $"Get get_msg response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, null, null, 0, false);
             return (retCode,
                     new Message(connection,
                                 msgId,
@@ -468,7 +467,9 @@ namespace Sora.ServerInterface
                                 Convert.ToInt64(ret["data"]?["time"] ?? -1),
                                 0),
                     new User(connection,
-                             Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)));
+                             Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)),
+                    Convert.ToInt32(ret["data"]?["real_id"] ?? 0),
+                    Convert.ToBoolean(ret["data"]?["group"] ?? false));
         }
 
         /// <summary>
@@ -492,9 +493,8 @@ namespace Sora.ServerInterface
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get get_group_msg response retcode={retCode}");
+            ConsoleLog.Debug("Sora", $"Get .get_word_slices response retcode={retCode}");
             if (retCode != 0 || ret["data"] == null) return (retCode, null);
-            ConsoleLog.Debug("Sora",ret);
             return (retCode,
                     ret["data"]?["slices"]?.ToObject<List<string>>());
         }

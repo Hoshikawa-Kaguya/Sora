@@ -14,7 +14,7 @@ namespace Sora
         /// <summary>
         /// 反向服务器端口
         /// </summary>
-        public int Port { get; set; } = 8080;
+        public uint Port { get; set; } = 8080;
 
         /// <summary>
         /// 鉴权Token
@@ -40,12 +40,12 @@ namespace Sora
         /// <para>心跳包超时设置(秒)</para>
         /// <para>此值请不要小于或等于客户端心跳包的发送间隔</para>
         /// </summary>
-        public int HeartBeatTimeOut { get; set; } = 10;
+        public uint HeartBeatTimeOut { get; set; } = 10;
 
         /// <summary>
         /// <para>客户端API调用超时设置(毫秒)</para>
         /// <para>默认为1000无需修改</para>
         /// </summary>
-        public int ApiTimeOut { get; set; } = 1000;
+        public uint ApiTimeOut { get; set; } = 1000;
     }
 }

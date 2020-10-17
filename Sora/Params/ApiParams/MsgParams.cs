@@ -11,7 +11,6 @@ namespace Sora.Params.ApiParams
         /// <summary>
         /// 消息ID
         /// </summary>
-        [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "message_id")]
         internal int MessageId { get; set; }
     }

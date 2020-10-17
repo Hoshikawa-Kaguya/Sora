@@ -171,10 +171,10 @@ namespace Sora.Module.Base
         /// <para><see cref="Message"/> 消息内容</para>
         /// <para><see cref="User"/> 发送者</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, Message message, User sender)> GetGroupMessages(int messageId)
+        public async ValueTask<(APIStatusType apiStatus, Message message, User sender, int realId, bool isGroupMsg)> GetMessages(int messageId)
         {
-            return ((APIStatusType apiStatus, Message message, User sender))
-                await ApiInterface.GetGroupMessage(this.ConnectionGuid, messageId);
+            return ((APIStatusType apiStatus, Message message, User sender, int realId, bool isGroupMsg))
+                await ApiInterface.GetMessage(this.ConnectionGuid, messageId);
         }
         #endregion
 
