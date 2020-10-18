@@ -882,8 +882,8 @@ namespace Sora.ServerInterface
             //添加新的请求记录
             RequestList.Add(apiRequest.Echo);
             //向客户端发送请求数据
-            if(!SoraWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return;
-            await clientConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
+            if(!SoraWSServer.ConnectionInfos.TryGetValue(connectionGuid, out ConnectionInfo clientConnection)) return;
+            await clientConnection.ServerConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
         }
 
         /// <summary>
@@ -897,8 +897,8 @@ namespace Sora.ServerInterface
             //添加新的请求记录
             RequestList.Add(apiRequest.Echo);
             //向客户端发送请求数据
-            if(!SoraWSServer.ConnectionInfos.TryGetValue(connectionGuid, out IWebSocketConnection clientConnection)) return null;
-            await clientConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
+            if(!SoraWSServer.ConnectionInfos.TryGetValue(connectionGuid, out ConnectionInfo clientConnection)) return null;
+            await clientConnection.ServerConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
             try
             {
                 //等待客户端返回调用结果

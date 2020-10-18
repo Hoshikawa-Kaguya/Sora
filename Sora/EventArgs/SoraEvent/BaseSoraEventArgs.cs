@@ -28,7 +28,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 接收当前事件的机器人UID
         /// </summary>
-        internal long SelfId { get; private set; }
+        public long LoginUid { get; private set; }
 
         /// <summary>
         /// 事件产生时间戳
@@ -42,23 +42,16 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
-        /// <param name="selfId">当前使用的QQ号</param>
+        /// <param name="loginUid">当前使用的QQ号</param>
         /// <param name="time">连接时间</param>
-        internal BaseSoraEventArgs(Guid connectionGuid, string eventName, long selfId, long time)
+        internal BaseSoraEventArgs(Guid connectionGuid, string eventName, long loginUid, long time)
         {
             this.SoraApi   = new SoraApi(connectionGuid);
             this.EventName = eventName;
-            this.SelfId    = selfId;
+            this.LoginUid  = loginUid;
             this.TimeStamp = time;
             this.Time      = Utils.TimeStampToDateTime(time);
         }
-        #endregion
-
-        #region 基类方法
-        /// <summary>
-        /// 获取当前登陆账号的ID
-        /// </summary>
-        public long GetLoginUserId() => this.SelfId;
         #endregion
     }
 }
