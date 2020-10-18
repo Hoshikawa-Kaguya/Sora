@@ -527,7 +527,7 @@ namespace Sora.Module.Base
         /// </summary>
         public void CloseConnection()
         {
-            SoraWSServer.ConnectionInfos[this.ConnectionGuid].Close();
+            SoraWSServer.ConnectionInfos[this.ConnectionGuid].ServerConnection.Close();
         }
         #endregion
 

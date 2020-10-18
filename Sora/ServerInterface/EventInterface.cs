@@ -9,6 +9,7 @@ using Sora.EventArgs.OnebotEvent.MetaEvent;
 using Sora.EventArgs.OnebotEvent.NoticeEvent;
 using Sora.EventArgs.OnebotEvent.RequestEvent;
 using Sora.EventArgs.SoraEvent;
+using Sora.Module.Info;
 using Sora.Tool;
 
 namespace Sora.ServerInterface
@@ -170,6 +171,10 @@ namespace Sora.ServerInterface
                         else
                         {
                             HeartBeatList.TryAdd(connection,heartBeat.Time);
+                            ConnectionInfo connectionInfo =  SoraWSServer.ConnectionInfos[connection];
+                            //修改连接表中的信息
+                            connectionInfo.SelfId                    = heartBeat.SelfID;
+                            SoraWSServer.ConnectionInfos[connection] = connectionInfo;
                         }
                     }
                     break;
@@ -182,7 +187,7 @@ namespace Sora.ServerInterface
                     (int retCode, ClientType clientType, string clientVer) = await ApiInterface.GetClientInfo(connection);
                     if (retCode != 0)//检查返回值
                     {
-                        SoraWSServer.ConnectionInfos[connection].Close();
+                        SoraWSServer.ConnectionInfos[connection].ServerConnection.Close();
                         ConsoleLog.Info("Sora",$"检查客户端版本时发生错误，已断开与客户端的连接(retcode={retCode})");
                         break;
                     }

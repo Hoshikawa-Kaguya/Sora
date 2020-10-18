@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
 using Sora.EventArgs.WSSeverEvent;
+using Sora.Module.Info;
 using Sora.ServerInterface;
 using Sora.Tool;
 
@@ -42,16 +43,16 @@ namespace Sora
         /// <summary>
         /// 链接信息
         /// </summary>
-        internal static readonly Dictionary<Guid, IWebSocketConnection> ConnectionInfos;
+        internal static readonly Dictionary<Guid, ConnectionInfo> ConnectionInfos;
 
         /// <summary>
         /// 服务器事件回调
         /// </summary>
         /// <typeparam name="TEventArgs">事件参数</typeparam>
-        /// <param name="selfId">Bot Id</param>
+        /// <param name="sender">Bot Id</param>
         /// <param name="eventArgs">事件参数</param>
         /// <returns></returns>
-        public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(string selfId, TEventArgs eventArgs)where TEventArgs : System.EventArgs;
+        public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(string sender, TEventArgs eventArgs)where TEventArgs : System.EventArgs;
         #endregion
 
         #region 私有字段
@@ -84,7 +85,7 @@ namespace Sora
         static SoraWSServer()
         {
             //初始化连接表
-            ConnectionInfos = new Dictionary<Guid, IWebSocketConnection>();
+            ConnectionInfos = new Dictionary<Guid, ConnectionInfo>();
             //全局异常事件
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
                                                           {
@@ -192,7 +193,12 @@ namespace Sora
                                                      //验证Token
                                                      if(!token.Equals(this.Config.AccessToken)) return;
                                                  }
-                                                 ConnectionInfos.Add(socket.ConnectionInfo.Id, socket);
+                                                 ConnectionInfos.Add(socket.ConnectionInfo.Id,
+                                                                     new ConnectionInfo
+                                                                     {
+                                                                         SelfId           = 0,
+                                                                         ServerConnection = socket
+                                                                     });
                                                  //向客户端发送Ping
                                                  socket.SendPing(new byte[] { 1, 2, 5 });
                                                  //事件回调
@@ -279,18 +285,24 @@ namespace Sora
                     try
                     {
                         //关闭超时的连接
-                        ConnectionInfos.TryGetValue(conn.Key, out IWebSocketConnection lostConnection);
-                        if (lostConnection == null)
+                        if (!ConnectionInfos.TryGetValue(conn.Key, out ConnectionInfo lostConnection))
                         {
                             ConsoleLog.Error("Sora","检测到不存在的客户端");
                             EventInterface.HeartBeatList.Remove(conn.Key);
                             return;
                         }
-                        lostConnection.Close();
+                        lostConnection.ServerConnection.Close();
                         ConsoleLog.Error("Sora",
-                                         $"与Onebot客户端[{lostConnection.ConnectionInfo.ClientIpAddress}:{lostConnection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
+                                         $"与Onebot客户端[{lostConnection.ServerConnection.ConnectionInfo.ClientIpAddress}:{lostConnection.ServerConnection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
                         ConnectionInfos.Remove(conn.Key);
                         EventInterface.HeartBeatList.Remove(conn.Key);
+                        if (OnCloseConnectionAsync == null) return;
+                        Task.Run( async () =>
+                                  {
+                                      await OnCloseConnectionAsync(lostConnection.SelfId.ToString(),
+                                                                   new ConnectionEventArgs("",
+                                                                       lostConnection.ServerConnection.ConnectionInfo));
+                                  });
                     }
                     catch (Exception e)
                     {
