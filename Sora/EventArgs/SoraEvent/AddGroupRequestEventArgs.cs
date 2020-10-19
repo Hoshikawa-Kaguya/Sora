@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using Sora.Enumeration.ApiEnum;
-using Sora.EventArgs.OnebotEvent.RequestEvent;
-using Sora.Module;
+using Sora.Server.OnebotEvent.RequestEvent;
+using Sora.Entities;
+using Sora.Enumeration.EventParamsType;
 
 namespace Sora.EventArgs.SoraEvent
 {
