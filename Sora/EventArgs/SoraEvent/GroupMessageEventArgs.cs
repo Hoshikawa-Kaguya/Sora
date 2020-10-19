@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Sora.ApiMessageParse;
-using Sora.CQCodes;
+using Sora.Server.ApiMessageParse;
+using Sora.Entities.CQCodes;
+using Sora.Server.OnebotEvent.MessageEvent;
+using Sora.Entities;
+using Sora.Entities.Info;
 using Sora.Enumeration.ApiEnum;
-using Sora.EventArgs.OnebotEvent.MessageEvent;
-using Sora.Module;
-using Sora.Module.Info;
 
 namespace Sora.EventArgs.SoraEvent
 {

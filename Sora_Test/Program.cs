@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Fleck;
-using Sora;
+using Sora.Server;
 using Sora.Tool;
 
 namespace Sora_Test

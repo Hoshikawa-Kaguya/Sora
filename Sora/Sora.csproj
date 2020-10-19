@@ -3,9 +3,9 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>0.1.8.0</AssemblyVersion>
-    <FileVersion>0.1.8.0</FileVersion>
-    <Version>0.1.8</Version>
+    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    <FileVersion>0.2.0.0</FileVersion>
+    <Version>0.2.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>.Net 5异步机器人框架</Description>
@@ -18,15 +18,15 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE</DefineConstants>
-    <DocumentationFile>H:\Projects\Sora\Sora\Sora.xml</DocumentationFile>
+    <DocumentationFile>.\Sora.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="EventArgs\OnebotEvent\ApiEvent\**" />
+    <Compile Remove="Server\OnebotEvent\ApiEvent\**" />
     <Compile Remove="TypeEnum\**" />
-    <EmbeddedResource Remove="EventArgs\OnebotEvent\ApiEvent\**" />
+    <EmbeddedResource Remove="Server\OnebotEvent\ApiEvent\**" />
     <EmbeddedResource Remove="TypeEnum\**" />
-    <None Remove="EventArgs\OnebotEvent\ApiEvent\**" />
+    <None Remove="Server\OnebotEvent\ApiEvent\**" />
     <None Remove="TypeEnum\**" />
     <None Include="..\LICENSE">
       <Pack>True</Pack>

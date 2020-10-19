@@ -1,7 +1,7 @@
 using System;
-using Sora.Enumeration.ApiEnum;
-using Sora.EventArgs.OnebotEvent.NoticeEvent;
-using Sora.Module;
+using Sora.Server.OnebotEvent.NoticeEvent;
+using Sora.Entities;
+using Sora.Enumeration.EventParamsType;
 
 namespace Sora.EventArgs.SoraEvent
 {
