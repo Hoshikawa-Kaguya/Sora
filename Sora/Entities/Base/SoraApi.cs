@@ -70,10 +70,31 @@ namespace Sora.Entities.Base
         /// <summary>
         /// 发送群聊消息
         /// </summary>
+        /// <param name="userId">发送目标群id</param>
+        /// <param name="message">
+        /// <para>消息</para>
+        /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        /// </param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="messageId"/> 消息ID</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendPrivateMessage(long userId, List<CQCode> message)
+        {
+            if(userId        < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
+            if(message.Count == 0) throw new NullReferenceException(nameof(message));
+            return ((APIStatusType apiStatus, int messageId))
+                await ApiInterface.SendPrivateMessage(this.ConnectionGuid, userId, message);
+        }
+
+        /// <summary>
+        /// 发送群聊消息
+        /// </summary>
         /// <param name="groupId">发送目标群id</param>
         /// <param name="message">
         /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>)</para>
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
@@ -103,6 +124,27 @@ namespace Sora.Entities.Base
             }
             return ((APIStatusType apiStatus, int messageId))
                 await ApiInterface.SendGroupMessage(this.ConnectionGuid, groupId, msgList);
+        }
+
+        /// <summary>
+        /// 发送群聊消息
+        /// </summary>
+        /// <param name="groupId">发送目标群id</param>
+        /// <param name="message">
+        /// <para>消息</para>
+        /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        /// </param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="messageId"/> 消息ID</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendGroupMessage(long groupId, List<CQCode> message)
+        {
+            if(groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
+            if(message.Count == 0) throw new NullReferenceException(nameof(message));
+            return ((APIStatusType apiStatus, int messageId))
+                await ApiInterface.SendGroupMessage(this.ConnectionGuid, groupId, message);
         }
 
         /// <summary>

@@ -39,7 +39,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="message">
         /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/></para>
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
@@ -47,6 +47,23 @@ namespace Sora.Entities
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> SendGroupMessage(params object[] message)
+        {
+            return await base.SoraApi.SendGroupMessage(this.Id, message);
+        }
+
+        /// <summary>
+        /// 发送群消息
+        /// </summary>
+        /// <param name="message">
+        /// <para>消息</para>
+        /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        /// </param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="messageId"/> 消息ID</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendGroupMessage(List<CQCode> message)
         {
             return await base.SoraApi.SendGroupMessage(this.Id, message);
         }

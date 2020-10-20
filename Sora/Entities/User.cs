@@ -47,6 +47,23 @@ namespace Sora.Entities
         }
 
         /// <summary>
+        /// 发送群消息
+        /// </summary>
+        /// <param name="message">
+        /// <para>消息</para>
+        /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        /// </param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="messageId"/> 消息ID</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendPrivateMessage(List<CQCode> message)
+        {
+            return await base.SoraApi.SendPrivateMessage(this.Id, message);
+        }
+
+        /// <summary>
         /// 获取用户信息
         /// </summary>
         /// <param name="useCache"></param>
