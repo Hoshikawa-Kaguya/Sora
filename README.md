@@ -12,6 +12,8 @@
 
 ## 关于框架开发
 
+> 注意事项：本框架是在[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[go-cqhttp-v0.9.29-fix2](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.29-fix2))下进行调试的，如使用其他平台可能会出现兼容性的问题
+
 由于框架才刚刚开发完成
 
 目前还在快速的迭代中，框架在近期可能会频繁更新

@@ -527,6 +527,36 @@ namespace Sora.Server.ServerInterface
             messageList.ParseNode();
             return (retCode, messageList);
         }
+
+        /// <summary>
+        /// 获取群系统消息
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <returns>消息列表</returns>
+        internal static async
+            ValueTask<(int retCode, List<GroupRequestInfo> joinList, List<GroupRequestInfo> invitedList)>
+            GetGroupSystemMsg(Guid connection)
+        {
+            ConsoleLog.Debug("Sora", "Sending get_group_system_msg request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetGroupSystemMsg
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_system_msg response retcode={retCode}");
+            if (GetBaseRetCode(ret).retCode != 0)
+                return (retCode, new List<GroupRequestInfo>(), new List<GroupRequestInfo>());
+            //解析消息
+            List<GroupRequestInfo> joinList =
+                ret?["data"]?["join_requests"]?.ToObject<List<GroupRequestInfo>>() ??
+                new List<GroupRequestInfo>();
+            List<GroupRequestInfo> invitedList =
+                ret?["data"]?["invited_requests"]?.ToObject<List<GroupRequestInfo>>() ??
+                new List<GroupRequestInfo>();
+            return (retCode, joinList, invitedList);
+        }
         #endregion
         #endregion
 
