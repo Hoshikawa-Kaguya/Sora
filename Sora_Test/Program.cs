@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Fleck;
+using Sora.Entities.CQCodes;
 using Sora.Server;
 using Sora.Tool;
 
@@ -13,7 +15,10 @@ namespace Sora_Test
             try
             {
                 ConsoleLog.SetLogLevel(LogLevel.Debug);
-                SoraWSServer server = new SoraWSServer(new ServerConfig());
+                SoraWSServer server = new SoraWSServer(new ServerConfig
+                {
+                    Location = "127.0.0.2"
+                });
                 server.OnOpenConnectionAsync += (id, eventArgs) =>
                                                 {
                                                     ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
@@ -27,9 +32,24 @@ namespace Sora_Test
                                                  };
                 server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                                {
-                                                   //最简单的复读（x
-                                                   await eventArgs.Repeat();
+                                                   if (eventArgs.Message.RawText.Equals("test"))
+                                                   {
+                                                       var test = await eventArgs.SoraApi.GetGroupSystemMsg();
+                                                       await eventArgs.SourceGroup
+                                                                      .SendGroupMessage($"api = {test.apiStatus}\r\n",
+                                                                          $"join list count = {test.joinList.Count}\r\n",
+                                                                          $"invited list count = {test.invitedList.Count}");
+                                                   }
+                                                   List<CQCode> msg = new List<CQCode>();
+                                                   msg.Add(CQCode.CQText("哇哦"));
+                                                   msg.Add(CQCode.CQImage("https://i.loli.net/2020/10/20/zWPyocxFEVp2tDT.jpg"));
+                                                   await eventArgs.SourceGroup.SendGroupMessage(msg);
                                                };
+                server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>
+                                                   {
+                                                       await eventArgs.Sender
+                                                                      .SendPrivateMessage($"file url = {eventArgs.OfflineFileInfo.Url}");
+                                                   };
                 await server.StartServerAsync();
             }
             catch (Exception e) //侦测所有未处理的错误

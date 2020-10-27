@@ -388,6 +388,21 @@ namespace Sora.Entities.Base
             if (!isMatch) throw new NotSupportedException($"not supported file type({imageFile})");
             await ApiInterface.SetGroupPortrait(this.ConnectionGuid, groupId, retFileStr, useCache);
         }
+
+        /// <summary>
+        /// 获取群组系统消息
+        /// </summary>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="joinList"/> 进群消息列表</para>
+        /// <para><see langword="invitedList"/> 邀请消息列表</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, List<GroupRequestInfo> joinList, List<GroupRequestInfo> invitedList)>
+            GetGroupSystemMsg()
+        {
+            return ((APIStatusType apiStatus, List<GroupRequestInfo> joinList, List<GroupRequestInfo> invitedList))
+                await ApiInterface.GetGroupSystemMsg(this.ConnectionGuid);
+        }
         #endregion
 
         #endregion

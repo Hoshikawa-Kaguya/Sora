@@ -154,6 +154,11 @@ namespace Sora.Enumeration.ApiEnum
         [Description("set_group_portrait")]
         SetGroupPortrait,
         /// <summary>
+        /// 获取群系统消息
+        /// </summary>
+        [Description("get_group_system_msg")]
+        GetGroupSystemMsg,
+        /// <summary>
         /// 获取中文分词
         /// </summary>
         [Description(".get_word_slices")] 

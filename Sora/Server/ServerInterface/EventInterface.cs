@@ -104,7 +104,11 @@ namespace Sora.Server.ServerInterface
         /// <summary>
         /// 群成员荣誉变更事件
         /// </summary>
-        public event EventAsyncCallBackHandler<HonorEventArgs> OnHonorEvent;  
+        public event EventAsyncCallBackHandler<HonorEventArgs> OnHonorEvent;
+        /// <summary>
+        /// 离线文件事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<OfflineFileEventArgs> OnOfflineFileEvent;  
         #endregion
 
         #region 事件分发
@@ -383,6 +387,15 @@ namespace Sora.Server.ServerInterface
                     if (OnGroupCardUpdate == null) break;
                     await OnGroupCardUpdate(typeof(EventInterface),
                                             new GroupCardUpdateEventArgs(connection, "group_card", groupCardUpdate));
+                    break;
+                case "offline_file":
+                    ApiOfflineFileEventArgs offlineFile = messageJson.ToObject<ApiOfflineFileEventArgs>();
+                    if (offlineFile == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"Get offline file from[{offlineFile.UserId}] file name = {offlineFile.Info.Name}");
+                    if (OnOfflineFileEvent == null) break;
+                    await OnOfflineFileEvent(typeof(EventInterface),
+                                             new OfflineFileEventArgs(connection, "offline_file", offlineFile));
                     break;
                 //通知类事件
                 case "notify":

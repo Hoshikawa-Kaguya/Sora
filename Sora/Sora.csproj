@@ -3,9 +3,9 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>0.2.1.0</AssemblyVersion>
-    <FileVersion>0.2.1.0</FileVersion>
-    <Version>0.2.1</Version>
+    <AssemblyVersion>0.2.3.0</AssemblyVersion>
+    <FileVersion>0.2.3.0</FileVersion>
+    <Version>0.2.3</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>.Net 5异步机器人框架</Description>
@@ -14,11 +14,17 @@
     <PackageProjectUrl>https://github.com/Yukari316/Sora</PackageProjectUrl>
     <Authors>Yukari316</Authors>
     <Company>Yukari316</Company>
+	<PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE</DefineConstants>
     <DocumentationFile>.\Sora.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>.\Sora.xml</DocumentationFile>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +34,13 @@
     <EmbeddedResource Remove="TypeEnum\**" />
     <None Remove="Server\OnebotEvent\ApiEvent\**" />
     <None Remove="TypeEnum\**" />
+    <None Remove="Sora.xml" />
+    <EmbeddedResource Include="Sora.xml" />
     <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="Icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
