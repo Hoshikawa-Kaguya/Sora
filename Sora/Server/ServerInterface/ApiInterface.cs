@@ -237,9 +237,9 @@ namespace Sora.Server.ServerInterface
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.GetGroupMemberList,
-                ApiParams = new GetGroupMemberListParams
+                ApiParams = new
                 {
-                    Gid = gid
+                    group_id = gid
                 }
             }, connection);
             //处理API返回信息
@@ -449,9 +449,9 @@ namespace Sora.Server.ServerInterface
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.GetMessage,
-                ApiParams = new MsgParams
+                ApiParams = new
                 {
-                    MessageId = msgId
+                    message_id = msgId
                 }
             }, connection);
             //处理API返回信息
@@ -557,6 +557,8 @@ namespace Sora.Server.ServerInterface
                 new List<GroupRequestInfo>();
             return (retCode, joinList, invitedList);
         }
+
+
         #endregion
         #endregion
 
@@ -572,9 +574,9 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiType = APIType.RecallMsg,
-                ApiParams = new MsgParams
+                ApiParams = new
                 {
-                    MessageId = msgId
+                    message_id = msgId
                 }
             }, connection);
         }

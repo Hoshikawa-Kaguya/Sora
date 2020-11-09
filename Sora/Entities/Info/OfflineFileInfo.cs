@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities
+namespace Sora.Entities.Info
 {
     /// <summary>
     /// 离线文件信息

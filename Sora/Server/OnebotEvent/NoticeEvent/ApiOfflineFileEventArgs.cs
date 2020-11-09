@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using Sora.Entities;
+using Sora.Entities.Info;
 
 namespace Sora.Server.OnebotEvent.NoticeEvent
 {
