@@ -122,6 +122,61 @@ namespace Sora.Entities
         {
             await base.SoraApi.SendGroupForwardMsg(this.Id, nodeList);
         }
+
+        /// <summary>
+        /// 获取群文件系统信息
+        /// </summary>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="GroupFileSysInfo"/> 文件系统信息</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, GroupFileSysInfo groupFileSysInfo)> GetGroupFileSysInfo()
+        {
+            return await SoraApi.GetGroupFileSysInfo(Id);
+        }
+
+        /// <summary>
+        /// 获取群根目录文件列表
+        /// </summary>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="groupFiles"/> 文件列表</para>
+        /// <para><see langword="groupFolders"/> 文件夹列表</para>
+        /// </returns>
+        public async
+            ValueTask<(APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            GetGroupRootFiles()
+        {
+            return await SoraApi.GetGroupRootFiles(Id);
+        }
+
+        /// <summary>
+        /// 获取群根目录文件列表
+        /// </summary>
+        /// <param name="foldId">文件夹ID</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="groupFiles"/> 文件列表</para>
+        /// <para><see langword="groupFolders"/> 文件夹列表</para>
+        /// </returns>
+        public async
+            ValueTask<(APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            GetGroupFilesByFolder(string foldId)
+        {
+            return await SoraApi.GetGroupFilesByFolder(Id, foldId);
+        }
+
+        /// <summary>
+        /// 获取群文件资源链接
+        /// </summary>
+        /// <param name="fileId">文件ID</param>
+        /// <param name="busid">文件类型</param>
+        /// <returns>文件链接</returns>
+        public async ValueTask<(APIStatusType apiStatus, string fileUrl)> GetGroupFileUrl(
+            string fileId, int busid)
+        {
+            return await SoraApi.GetGroupFileUrl(Id, fileId, busid);
+        }
         #endregion
 
         #endregion

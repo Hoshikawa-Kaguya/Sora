@@ -15,10 +15,7 @@ namespace Sora_Test
             try
             {
                 ConsoleLog.SetLogLevel(LogLevel.Debug);
-                SoraWSServer server = new SoraWSServer(new ServerConfig
-                {
-                    Location = "127.0.0.2"
-                });
+                SoraWSServer server = new SoraWSServer(new ServerConfig{Port = 9200});
                 server.OnOpenConnectionAsync += (id, eventArgs) =>
                                                 {
                                                     ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
@@ -34,16 +31,17 @@ namespace Sora_Test
                                                {
                                                    if (eventArgs.Message.RawText.Equals("test"))
                                                    {
-                                                       var test = await eventArgs.SoraApi.GetGroupSystemMsg();
+                                                       var test = await eventArgs.SoraApi.GetGroupRootFiles(eventArgs.SourceGroup);;
                                                        await eventArgs.SourceGroup
-                                                                      .SendGroupMessage($"api = {test.apiStatus}\r\n",
-                                                                          $"join list count = {test.joinList.Count}\r\n",
-                                                                          $"invited list count = {test.invitedList.Count}");
+                                                                      .SendGroupMessage($"api = {test.apiStatus}\r\n");
                                                    }
-                                                   List<CQCode> msg = new List<CQCode>();
-                                                   msg.Add(CQCode.CQText("哇哦"));
-                                                   msg.Add(CQCode.CQImage("https://i.loli.net/2020/10/20/zWPyocxFEVp2tDT.jpg"));
-                                                   await eventArgs.SourceGroup.SendGroupMessage(msg);
+                                                   else
+                                                   {
+                                                       List<CQCode> msg = new List<CQCode>();
+                                                       msg.Add(CQCode.CQText("哇哦"));
+                                                       msg.Add(CQCode.CQImage("https://i.loli.net/2020/10/20/zWPyocxFEVp2tDT.jpg"));
+                                                       await eventArgs.SourceGroup.SendGroupMessage(msg);
+                                                   }
                                                };
                 server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>
                                                    {

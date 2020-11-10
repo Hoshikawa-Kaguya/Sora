@@ -162,7 +162,27 @@ namespace Sora.Enumeration.ApiEnum
         /// 获取中文分词
         /// </summary>
         [Description(".get_word_slices")] 
-        GetWordSlices
+        GetWordSlices,
+        /// <summary>
+        /// 获取群文件系统信息
+        /// </summary>
+        [Description("get_group_file_system_info")]
+        GetGroupFileSystemInfo,
+        /// <summary>
+        /// 获取群根目录文件列表
+        /// </summary>
+        [Description("get_group_root_files")]
+        GetGroupRootFiles,
+        /// <summary>
+        /// 获取群子目录文件列表
+        /// </summary>
+        [Description("get_group_files_by_folder")]
+        GetGroupFilesByFolder,
+        /// <summary>
+        /// 获取群文件资源链接
+        /// </summary>
+        [Description("get_group_file_url")]
+        GetGroupFileUrl
         #endregion
     }
 }
