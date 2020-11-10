@@ -520,7 +520,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_forward_msg response retcode={retCode}");
-            if (GetBaseRetCode(ret).retCode != 0) return (retCode, null);
+            if (retCode != 0) return (retCode, null);
             //转换消息类型
             NodeArray messageList =
                 ret?["data"]?.ToObject<NodeArray>() ?? new NodeArray();
@@ -546,7 +546,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_system_msg response retcode={retCode}");
-            if (GetBaseRetCode(ret).retCode != 0)
+            if (retCode != 0)
                 return (retCode, new List<GroupRequestInfo>(), new List<GroupRequestInfo>());
             //解析消息
             List<GroupRequestInfo> joinList =
@@ -558,7 +558,126 @@ namespace Sora.Server.ServerInterface
             return (retCode, joinList, invitedList);
         }
 
+        /// <summary>
+        /// 获取群文件系统信息
+        /// </summary>
+        /// <param name="gid">群号</param>
+        /// <param name="connection">连接标识</param>
+        /// <returns>文件系统信息</returns>
+        internal static async
+            ValueTask<(int retCode, GroupFileSysInfo fileSysInfo)> GetGroupFileSysInfo(long gid, Guid connection)
+        {
+            ConsoleLog.Debug("Sora", "Sending get_group_file_system_info request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetGroupFileSystemInfo,
+                ApiParams = new
+                {
+                    group_id = gid
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_file_system_info response retcode={retCode}");
+            return retCode != 0
+                ? (retCode, new GroupFileSysInfo())
+                : (retCode, ret["data"]?.ToObject<GroupFileSysInfo>() ?? new GroupFileSysInfo());
+            //解析消息
+        }
 
+        /// <summary>
+        /// 获取群根目录文件列表
+        /// </summary>
+        /// <param name="gid">群号</param>
+        /// <param name="connection">连接标识</param>
+        /// <returns>文件列表/文件夹列表</returns>
+        internal static async
+            ValueTask<(int retCode, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            GetGroupRootFiles(long gid, Guid connection)
+        {
+            ConsoleLog.Debug("Sora", "Sending get_group_root_files request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetGroupRootFiles,
+                ApiParams = new
+                {
+                    group_id = gid
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_root_files response retcode={retCode}");
+            if (retCode != 0)
+                return (retCode, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
+            return (retCode,
+                    ret["data"]?["files"]?.ToObject<List<GroupFileInfo>>()   ?? new List<GroupFileInfo>(),
+                    ret["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>());
+        }
+
+        /// <summary>
+        /// 获取群子目录文件列表
+        /// </summary>
+        /// <param name="gid">群号</param>
+        /// <param name="folderID">文件夹ID</param>
+        /// <param name="connection">连接标识</param>
+        /// <returns>文件列表/文件夹列表</returns>
+        internal static async
+            ValueTask<(int retCode, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            GetGroupFilesByFolder(long gid, string folderID, Guid connection)
+        {
+            ConsoleLog.Debug("Sora", "Sending get_group_files_by_folder request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetGroupFilesByFolder,
+                ApiParams = new
+                {
+                    group_id  = gid,
+                    folder_id = folderID
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_files_by_folder response retcode={retCode}");
+            if (retCode != 0)
+                return (retCode, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
+            return (retCode,
+                    ret["data"]?["files"]?.ToObject<List<GroupFileInfo>>()     ?? new List<GroupFileInfo>(),
+                    ret["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>()); 
+        }
+
+        /// <summary>
+        /// 获取群文件资源链接
+        /// </summary>
+        /// <param name="gid">群号</param>
+        /// <param name="fileId">文件ID</param>
+        /// <param name="busId">文件类型</param>
+        /// <param name="connection">连接标识</param>
+        /// <returns>资源链接</returns>
+        internal static async ValueTask<(int retCode, string fileUrl)> GetGroupFileUrl(
+            long gid, string fileId, int busId, Guid connection)
+        {
+            ConsoleLog.Debug("Sora", "Sending get_group_file_url request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiType = APIType.GetGroupFileUrl,
+                ApiParams = new
+                {
+                    group_id = gid,
+                    file_id  = fileId,
+                    busid    = busId
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_file_url response retcode={retCode}");
+            return retCode != 0
+                ? (retCode, null)
+                : (retCode, ret["data"]?["url"]?.ToString());
+        }
         #endregion
         #endregion
 
@@ -936,15 +1055,17 @@ namespace Sora.Server.ServerInterface
                 JObject response = await OnebotSubject
                                          .Where(ret => ret.Item1 == apiRequest.Echo)
                                          .Select(ret => ret.Item2)
-                                         .Take(1).Timeout(TimeSpan.FromMilliseconds(TimeOut))
-                                         .Catch(Observable.Return<JObject>(null)).ToTask();
+                                         .Take(1)
+                                         .Timeout(TimeSpan.FromMilliseconds(TimeOut))
+                                         .Catch(Observable.Return<JObject>(null))
+                                         .ToTask();
                 if(response == null) ConsoleLog.Debug("Sora","API Time Out");
                 return response;
             }
-            catch (TimeoutException e)
+            catch (Exception e)
             {
-                //超时错误
-                ConsoleLog.Error("Sora",$"API客户端请求超时({e.Message})");
+                //错误
+                ConsoleLog.Error("Sora",$"API客户端请求错误\r\n{ConsoleLog.ErrorLogBuilder(e)}");
                 return null;
             }
         }

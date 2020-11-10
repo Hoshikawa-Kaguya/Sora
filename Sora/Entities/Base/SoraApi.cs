@@ -168,8 +168,8 @@ namespace Sora.Entities.Base
         public async ValueTask<(APIStatusType apiStatus, List<Node> nodeArray)> GetForwardMessage(string forwardId)
         {
             if(string.IsNullOrEmpty(forwardId)) throw new NullReferenceException(nameof(forwardId));
-            var apiResult = await ApiInterface.GetForwardMessage(this.ConnectionGuid, forwardId);
-            return ((APIStatusType) apiResult.retCode, apiResult.nodeArray.NodeMsgList);
+            var (retCode, nodeArray) = await ApiInterface.GetForwardMessage(this.ConnectionGuid, forwardId);
+            return ((APIStatusType) retCode, nodeArray.NodeMsgList);
         }
 
         /// <summary>
@@ -402,6 +402,70 @@ namespace Sora.Entities.Base
         {
             return ((APIStatusType apiStatus, List<GroupRequestInfo> joinList, List<GroupRequestInfo> invitedList))
                 await ApiInterface.GetGroupSystemMsg(this.ConnectionGuid);
+        }
+
+        /// <summary>
+        /// 获取群文件系统信息
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="GroupFileSysInfo"/> 文件系统信息</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, GroupFileSysInfo groupFileSysInfo)> GetGroupFileSysInfo(
+            long groupId)
+        {
+            return ((APIStatusType apiStatus, GroupFileSysInfo groupFileSysInfo))
+                await ApiInterface.GetGroupFileSysInfo(groupId, this.ConnectionGuid);
+        }
+
+        /// <summary>
+        /// 获取群根目录文件列表
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="groupFiles"/> 文件列表</para>
+        /// <para><see langword="groupFolders"/> 文件夹列表</para>
+        /// </returns>
+        public async
+            ValueTask<(APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            GetGroupRootFiles(long groupId)
+        {
+            return ((APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders))
+                await ApiInterface.GetGroupRootFiles(groupId, this.ConnectionGuid);
+        }
+
+        /// <summary>
+        /// 获取群根目录文件列表
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="foldId">文件夹ID</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="groupFiles"/> 文件列表</para>
+        /// <para><see langword="groupFolders"/> 文件夹列表</para>
+        /// </returns>
+        public async
+            ValueTask<(APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            GetGroupFilesByFolder(long groupId, string foldId)
+        {
+            return ((APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders))
+                await ApiInterface.GetGroupFilesByFolder(groupId, foldId, this.ConnectionGuid);
+        }
+
+        /// <summary>
+        /// 获取群文件资源链接
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="fileId">文件ID</param>
+        /// <param name="busid">文件类型</param>
+        /// <returns>文件链接</returns>
+        public async ValueTask<(APIStatusType apiStatus, string fileUrl)> GetGroupFileUrl(
+            long groupId, string fileId, int busid)
+        {
+            return ((APIStatusType apiStatus, string fileUrl))
+                await ApiInterface.GetGroupFileUrl(groupId, fileId, busid, this.ConnectionGuid);
         }
         #endregion
 
