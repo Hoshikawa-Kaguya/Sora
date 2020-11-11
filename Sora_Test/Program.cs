@@ -12,9 +12,11 @@ namespace Sora_Test
     {
         static async Task Main(string[] args)
         {
+            ConsoleLog.SetLogLevel(LogLevel.Debug);
+            ConsoleLog.Debug("dotnet version",Environment.Version);
             try
             {
-                ConsoleLog.SetLogLevel(LogLevel.Debug);
+                
                 SoraWSServer server = new SoraWSServer(new ServerConfig{Port = 9200});
                 server.OnOpenConnectionAsync += (id, eventArgs) =>
                                                 {
