@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
-using Sora.EventArgs.WSSeverEvent;
 using Sora.Server.ServerInterface;
 using Sora.Tool;
 
@@ -118,8 +117,9 @@ namespace Sora.Server
                          {
                              //接收事件处理
                              //获取请求头数据
+                             //TODO 服务器事件参数加入Self ID字段
                              if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
-                                                                            out string selfId) ||       //bot UID
+                                                                            out _) ||       //bot UID
                                  !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
                                                                             out string role)){return;}   //Client Type
 
@@ -162,7 +162,7 @@ namespace Sora.Server
                                                      socket.Close();
                                                      ConsoleLog.Error("Sora",$"处理连接请求时发生问题 无法记录该连接[{socket.ConnectionInfo.Id}]");
                                                      return;
-                                                 };
+                                                 }
                                                  //向客户端发送Ping
                                                  socket.SendPing(new byte[] { 1, 2, 5 });
                                                  //事件回调
