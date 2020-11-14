@@ -117,9 +117,8 @@ namespace Sora.Server
                          {
                              //接收事件处理
                              //获取请求头数据
-                             //TODO 服务器事件参数加入Self ID字段
                              if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
-                                                                            out _) ||       //bot UID
+                                                                            out string selfId) ||       //bot UID
                                  !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
                                                                             out string role)){return;}   //Client Type
 
@@ -157,7 +156,7 @@ namespace Sora.Server
                                                      if(!token.Equals(this.Config.AccessToken)) return;
                                                  }
                                                  //添加服务器记录
-                                                 if (!ConnManager.AddConnection(socket.ConnectionInfo.Id, socket))
+                                                 if (!ConnManager.AddConnection(socket.ConnectionInfo.Id, socket, selfId))
                                                  {
                                                      socket.Close();
                                                      ConsoleLog.Error("Sora",$"处理连接请求时发生问题 无法记录该连接[{socket.ConnectionInfo.Id}]");
@@ -166,7 +165,7 @@ namespace Sora.Server
                                                  //向客户端发送Ping
                                                  socket.SendPing(new byte[] { 1, 2, 5 });
                                                  //事件回调
-                                                 ConnManager.OpenConnectionEvent(role, socket.ConnectionInfo);
+                                                 ConnManager.OpenConnectionEvent(role, selfId, socket.ConnectionInfo);
                                                  ConsoleLog.Info("Sora",
                                                                  $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
                                              };
@@ -184,7 +183,7 @@ namespace Sora.Server
                                                           Environment.Exit(-1);
                                                       }
                                                       //事件回调
-                                                      ConnManager.CloseConnectionEvent(role, socket.ConnectionInfo);
+                                                      ConnManager.CloseConnectionEvent(role, selfId, socket.ConnectionInfo);
                                                   }
                                                   ConsoleLog.Info("Sora",
                                                                   $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");

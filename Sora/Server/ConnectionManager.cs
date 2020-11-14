@@ -23,6 +23,7 @@ namespace Sora.Server
             internal Guid                 ConnectionGuid;
             internal IWebSocketConnection Connection;
             internal long                 LastHeartBeatTime;
+            internal long                 SelfId;
         }
         #endregion
 
@@ -69,13 +70,16 @@ namespace Sora.Server
         #endregion
 
         #region 服务器连接管理
+
         /// <summary>
         /// 添加服务器连接记录
         /// </summary>
         /// <param name="connectionGuid">连接标识</param>
         /// <param name="connectionInfo">连接信息</param>
-        internal bool AddConnection(Guid connectionGuid, IWebSocketConnection connectionInfo)
+        /// <param name="selfId">机器人UID</param>
+        internal bool AddConnection(Guid connectionGuid, IWebSocketConnection connectionInfo, string selfId)
         {
+            long.TryParse(selfId, out long uid);
             //检查是否已存在值
             if (ConnectionList.All(connection => connection.ConnectionGuid != connectionGuid))
             {
@@ -83,7 +87,8 @@ namespace Sora.Server
                 {
                     ConnectionGuid    = connectionGuid,
                     Connection        = connectionInfo,
-                    LastHeartBeatTime = Utils.GetNowTimeStamp()
+                    LastHeartBeatTime = Utils.GetNowTimeStamp(),
+                    SelfId            = uid
                 });
                 return true;
             }
@@ -147,7 +152,7 @@ namespace Sora.Server
                     connection.Connection.Close();
                     ConsoleLog.Error("Sora",
                                      $"与Onebot客户端[{connection.Connection.ConnectionInfo.ClientIpAddress}:{connection.Connection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
-                    HeartBeatTimeOutEvent(connection.Connection.ConnectionInfo);
+                    HeartBeatTimeOutEvent(connection.SelfId, connection.Connection.ConnectionInfo);
                 }
                 catch (Exception e)
                 {
@@ -179,18 +184,21 @@ namespace Sora.Server
         #endregion
 
         #region 服务器事件
+
         /// <summary>
         /// 服务器链接开启事件
         /// </summary>
         /// <param name="role">通道标识</param>
-        /// <param name="sender">事件源</param>
-        internal void OpenConnectionEvent(string role, IWebSocketConnectionInfo sender)
+        /// <param name="selfId">事件源</param>
+        /// <param name="sender">连接信息</param>
+        internal void OpenConnectionEvent(string role, string selfId, IWebSocketConnectionInfo sender)
         {
             if(OnOpenConnectionAsync == null) return;
+            long.TryParse(selfId, out long uid);
             Task.Run(async () =>
                      {
                          await OnOpenConnectionAsync(sender,
-                                                     new ConnectionEventArgs(role, sender));
+                                                     new ConnectionEventArgs(role, uid));
                      });
         }
 
@@ -198,28 +206,31 @@ namespace Sora.Server
         /// 服务器链接关闭事件
         /// </summary>
         /// <param name="role">通道标识</param>
-        /// <param name="sender">事件源</param>
-        internal void CloseConnectionEvent(string role, IWebSocketConnectionInfo sender)
+        /// <param name="selfId">事件源</param>
+        /// <param name="sender">连接信息</param>
+        internal void CloseConnectionEvent(string role, string selfId, IWebSocketConnectionInfo sender)
         {
             if(OnCloseConnectionAsync == null) return;
+            long.TryParse(selfId, out long uid);
             Task.Run(async () =>
                      {
                          await OnCloseConnectionAsync(sender,
-                                                      new ConnectionEventArgs(role, sender));
+                                                      new ConnectionEventArgs(role, uid));
                      });
         }
 
         /// <summary>
         /// 心跳包超时事件
         /// </summary>
-        /// <param name="sender">事件源</param>
-        internal void HeartBeatTimeOutEvent(IWebSocketConnectionInfo sender)
+        /// <param name="sender">连接信息</param>
+        /// <param name="selfId">事件源</param>
+        internal void HeartBeatTimeOutEvent(long selfId, IWebSocketConnectionInfo sender)
         {
             if(OnHeartBeatTimeOut == null) return;
             Task.Run(async () =>
                      {
                          await OnHeartBeatTimeOut(sender,
-                                                  new ConnectionEventArgs("unknown", sender));
+                                                  new ConnectionEventArgs("unknown", selfId));
                      });
         }
         #endregion
