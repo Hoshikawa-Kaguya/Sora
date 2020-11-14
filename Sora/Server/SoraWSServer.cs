@@ -39,7 +39,7 @@ namespace Sora.Server
         public EventInterface Event { get; set; }
 
         /// <summary>
-        /// 连接时间管理器
+        /// 服务器连接管理器
         /// </summary>
         public ConnectionManager ConnManager { get; set; }
         #endregion
