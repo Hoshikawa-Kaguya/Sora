@@ -30,7 +30,7 @@ namespace Sora_Test
                                                  };
                 server.ConnManager.OnHeartBeatTimeOut += (connectionInfo, eventArgs) =>
                                                          {
-                                                             ConsoleLog.Debug("Sora_Test",$"Get heart beat time out from[{connectionInfo.Id}]");
+                                                             ConsoleLog.Debug("Sora_Test",$"Get heart beat time out from[{connectionInfo.Id}] uid[{eventArgs.SelfId}]");
                                                              return ValueTask.CompletedTask;
                                                          };
                 server.Event.OnGroupMessage += async (sender, eventArgs) =>
