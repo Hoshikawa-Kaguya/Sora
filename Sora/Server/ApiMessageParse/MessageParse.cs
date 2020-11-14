@@ -22,25 +22,25 @@ namespace Sora.Server.ApiMessageParse
                 switch (message.MsgType)
                 {
                     case CQFunction.Text:
-                        return new CQCode(CQFunction.Text,message.RawData.ToObject<Text>());
+                        return new CQCode(CQFunction.Text, message.RawData.ToObject<Text>());
                     case CQFunction.Face:
-                        return new CQCode(CQFunction.Face,message.RawData.ToObject<Face>());
+                        return new CQCode(CQFunction.Face, message.RawData.ToObject<Face>());
                     case CQFunction.Image:
-                        return new CQCode(CQFunction.Image,message.RawData.ToObject<Image>());
+                        return new CQCode(CQFunction.Image, message.RawData.ToObject<Image>());
                     case CQFunction.Record:
-                        return new CQCode(CQFunction.Record,message.RawData.ToObject<Record>());
+                        return new CQCode(CQFunction.Record, message.RawData.ToObject<Record>());
                     case CQFunction.At:
                         return new CQCode(CQFunction.At, message.RawData.ToObject<At>());
                     case CQFunction.Share:
-                        return new CQCode(CQFunction.Share,message.RawData.ToObject<Share>());
+                        return new CQCode(CQFunction.Share, message.RawData.ToObject<Share>());
                     case CQFunction.Reply:
-                        return new CQCode(CQFunction.Reply,message.RawData.ToObject<Reply>());
+                        return new CQCode(CQFunction.Reply, message.RawData.ToObject<Reply>());
                     case CQFunction.Forward:
-                        return new CQCode(CQFunction.Forward,message.RawData.ToObject<Forward>());
+                        return new CQCode(CQFunction.Forward, message.RawData.ToObject<Forward>());
                     case CQFunction.Xml:
-                        return new CQCode(CQFunction.Xml,message.RawData.ToObject<Code>());
+                        return new CQCode(CQFunction.Xml, message.RawData.ToObject<Code>());
                     case CQFunction.Json:
-                        return new CQCode(CQFunction.Json,message.RawData.ToObject<Code>());
+                        return new CQCode(CQFunction.Json, message.RawData.ToObject<Code>());
                     default:
                         return new CQCode(CQFunction.Unknown, message.RawData);
                 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,13 +21,6 @@ namespace Sora.Server.ServerInterface
     /// </summary>
     public class EventInterface
     {
-        #region 静态记录表
-        /// <summary>
-        /// 心跳包记录
-        /// </summary>
-        internal static readonly Dictionary<Guid,long> HeartBeatList = new Dictionary<Guid, long>();
-        #endregion
-
         #region 事件委托
 
         /// <summary>
@@ -165,22 +159,9 @@ namespace Sora.Server.ServerInterface
                 case "heartbeat":
                     ApiHeartBeatEventArgs heartBeat = messageJson.ToObject<ApiHeartBeatEventArgs>();
                     ConsoleLog.Debug("Sora",$"Get hreatbeat from [{connection}]");
+                    //刷新心跳包记录
                     if (heartBeat != null)
-                    {
-                        //刷新心跳包记录
-                        if (HeartBeatList.Any(conn => conn.Key == connection))
-                        {
-                            HeartBeatList[connection] = heartBeat.Time;
-                        }
-                        else
-                        {
-                            HeartBeatList.TryAdd(connection,heartBeat.Time);
-                            ConnectionInfo connectionInfo =  SoraWSServer.ConnectionInfos[connection];
-                            //修改连接表中的信息
-                            connectionInfo.SelfId                    = heartBeat.SelfID;
-                            SoraWSServer.ConnectionInfos[connection] = connectionInfo;
-                        }
-                    }
+                        ConnectionManager.HeartBeatUpdate(connection);
                     break;
                 //生命周期
                 case "lifecycle":
@@ -191,8 +172,7 @@ namespace Sora.Server.ServerInterface
                     (int retCode, ClientType clientType, string clientVer) = await ApiInterface.GetClientInfo(connection);
                     if (retCode != 0)//检查返回值
                     {
-                        SoraWSServer.ConnectionInfos[connection].ServerConnection.Close();
-                        ConsoleLog.Info("Sora",$"检查客户端版本时发生错误，已断开与客户端的连接(retcode={retCode})");
+                        ConsoleLog.Error("Sora",$"获取客户端版本失败(retcode={retCode})");
                         break;
                     }
                     ConsoleLog.Info("Sora",$"已连接到{Enum.GetName(clientType)}客户端,版本:{clientVer}");

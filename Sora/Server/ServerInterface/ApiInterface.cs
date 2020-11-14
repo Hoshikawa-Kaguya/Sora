@@ -1027,13 +1027,13 @@ namespace Sora.Server.ServerInterface
         /// </summary>
         /// <param name="apiRequest">请求信息</param>
         /// <param name="connectionGuid">服务器连接标识符</param>
-        private static async ValueTask SendApiMessage(ApiRequest apiRequest, Guid connectionGuid)
+        private static ValueTask SendApiMessage(ApiRequest apiRequest, Guid connectionGuid)
         {
             //添加新的请求记录
             RequestList.Add(apiRequest.Echo);
             //向客户端发送请求数据
-            if(!SoraWSServer.ConnectionInfos.TryGetValue(connectionGuid, out ConnectionInfo clientConnection)) return;
-            await clientConnection.ServerConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
+            ConnectionManager.SendMessage(connectionGuid,JsonConvert.SerializeObject(apiRequest,Formatting.None));
+            return ValueTask.CompletedTask;
         }
 
         /// <summary>
@@ -1047,8 +1047,7 @@ namespace Sora.Server.ServerInterface
             //添加新的请求记录
             RequestList.Add(apiRequest.Echo);
             //向客户端发送请求数据
-            if(!SoraWSServer.ConnectionInfos.TryGetValue(connectionGuid, out ConnectionInfo clientConnection)) return null;
-            await clientConnection.ServerConnection.Send(JsonConvert.SerializeObject(apiRequest,Formatting.None));
+            if(!ConnectionManager.SendMessage(connectionGuid,JsonConvert.SerializeObject(apiRequest,Formatting.None))) return null;
             try
             {
                 //等待客户端返回调用结果
