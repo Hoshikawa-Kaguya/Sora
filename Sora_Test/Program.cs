@@ -17,23 +17,28 @@ namespace Sora_Test
             {
                 
                 SoraWSServer server = new SoraWSServer(new ServerConfig{Port = 9200});
-                server.OnOpenConnectionAsync += (id, eventArgs) =>
+                server.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
                                                 {
-                                                    ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
+                                                    ConsoleLog.Debug("Sora_Test",$"connectionId = {connectionInfo.Id} type = {eventArgs.Role}");
                                                     return ValueTask.CompletedTask;
                                                 };
             
-                server.OnCloseConnectionAsync += (id, eventArgs) =>
+                server.ConnManager.OnCloseConnectionAsync += (connectionInfo, eventArgs) =>
                                                  {
-                                                     ConsoleLog.Debug("Sora_Test",$"selfId = {id} type = {eventArgs.Role}");
+                                                     ConsoleLog.Debug("Sora_Test",$"connectionId = {connectionInfo.Id} type = {eventArgs.Role}");
                                                      return ValueTask.CompletedTask;
                                                  };
+                server.ConnManager.OnHeartBeatTimeOut += (connectionInfo, eventArgs) =>
+                                                         {
+                                                             ConsoleLog.Debug("Sora_Test",$"Get heart beat time out from[{connectionInfo.Id}]");
+                                                             return ValueTask.CompletedTask;
+                                                         };
                 server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                                {
                                                    //新特性测试区域
                                                    await eventArgs.SourceGroup
                                                                   .SendGroupMessage(CQCode
-                                                                      .CQImage("H:\\Desktop\\bot\\AntiRainDebug\\data\\image\\hso\\3956118_p0.jpg"));
+                                                                      .CQImage("https://i.loli.net/2020/11/02/2OgZ1M6YNV5kntS.gif"));
                                                };
                 server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>
                                                    {

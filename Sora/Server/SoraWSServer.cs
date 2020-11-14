@@ -39,15 +39,9 @@ namespace Sora.Server
         public EventInterface Event { get; set; }
 
         /// <summary>
-        /// 服务器事件回调
+        /// 连接时间管理器
         /// </summary>
-        /// <typeparam name="TEventArgs">事件参数</typeparam>
-        /// <param name="sender">Bot Id</param>
-        /// <param name="eventArgs">事件参数</param>
-        /// <returns></returns>
-        public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(string sender, TEventArgs eventArgs)where TEventArgs : System.EventArgs;
-
-        private ConnectionManager ConnManager { get; set; }
+        public ConnectionManager ConnManager { get; set; }
         #endregion
 
         #region 私有字段
@@ -55,21 +49,6 @@ namespace Sora.Server
         /// 服务器已准备启动标识
         /// </summary>
         private readonly bool serverReady;
-        #endregion
-
-        #region 回调事件
-        /// <summary>
-        /// 心跳包处理回调
-        /// </summary>
-        public event ServerAsyncCallBackHandler<PongEventArgs> OnPongAsync;
-        /// <summary>
-        /// 打开连接回调
-        /// </summary>
-        public event ServerAsyncCallBackHandler<ConnectionEventArgs> OnOpenConnectionAsync;
-        /// <summary>
-        /// 关闭连接回调
-        /// </summary>
-        public event ServerAsyncCallBackHandler<ConnectionEventArgs> OnCloseConnectionAsync;
         #endregion
 
         #region 构造函数
@@ -168,18 +147,6 @@ namespace Sora.Server
                                                     $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
                                  return;
                              }
-                             //心跳包
-                             socket.OnPong = (echo) =>
-                                             {
-                                                 if (OnPongAsync == null) { return; }
-                                                 //心跳包事件处理
-                                                 Task.Run( async () =>
-                                                          {
-                                                              await OnPongAsync(selfId,
-                                                                          new PongEventArgs(echo,
-                                                                              socket.ConnectionInfo));
-                                                          });
-                                             };
                              //打开连接
                              socket.OnOpen = () =>
                                              {
@@ -189,18 +156,17 @@ namespace Sora.Server
                                                      //验证Token
                                                      if(!token.Equals(this.Config.AccessToken)) return;
                                                  }
-
-                                                 ConnManager.AddConnection(socket.ConnectionInfo.Id, socket);
+                                                 //添加服务器记录
+                                                 if (!ConnManager.AddConnection(socket.ConnectionInfo.Id, socket))
+                                                 {
+                                                     socket.Close();
+                                                     ConsoleLog.Error("Sora",$"处理连接请求时发生问题 无法记录该连接[{socket.ConnectionInfo.Id}]");
+                                                     return;
+                                                 };
                                                  //向客户端发送Ping
                                                  socket.SendPing(new byte[] { 1, 2, 5 });
                                                  //事件回调
-                                                 ConnectionEventArgs connection =
-                                                     new ConnectionEventArgs(role, socket.ConnectionInfo);
-                                                 if (OnOpenConnectionAsync == null) return;
-                                                 Task.Run( async () =>
-                                                           {
-                                                               await OnOpenConnectionAsync(selfId, connection);
-                                                           });
+                                                 ConnManager.OpenConnectionEvent(role, socket.ConnectionInfo);
                                                  ConsoleLog.Info("Sora",
                                                                  $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
                                              };
@@ -217,13 +183,8 @@ namespace Sora.Server
                                                           Thread.Sleep(5000);
                                                           Environment.Exit(-1);
                                                       }
-                                                      if (OnCloseConnectionAsync == null) return;
-                                                      Task.Run( async () =>
-                                                                {
-                                                                    await OnCloseConnectionAsync(selfId,
-                                                                        new ConnectionEventArgs(role,
-                                                                            socket.ConnectionInfo));
-                                                                });
+                                                      //事件回调
+                                                      ConnManager.CloseConnectionEvent(role, socket.ConnectionInfo);
                                                   }
                                                   ConsoleLog.Info("Sora",
                                                                   $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
