@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Fleck;
 using Sora.Entities.CQCodes;
@@ -32,9 +31,9 @@ namespace Sora_Test
                 server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                                {
                                                    //新特性测试区域
-                                                   // await eventArgs.SourceGroup
-                                                   //                .SendGroupMessage(CQCode
-                                                   //                    .CQImage("H:\\Desktop\\bot\\AntiRainDebug\\data\\image\\hso\\3956118_p0.jpg"));
+                                                   await eventArgs.SourceGroup
+                                                                  .SendGroupMessage(CQCode
+                                                                      .CQImage("H:\\Desktop\\bot\\AntiRainDebug\\data\\image\\hso\\3956118_p0.jpg"));
                                                };
                 server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>
                                                    {

@@ -16,7 +16,7 @@ namespace Sora.Server.ApiMessageParse
         /// <returns>消息段列表</returns>
         internal static CQCode ParseMessageElement(ApiMessage message)
         {
-            if (message == null || message.RawData.Count == 0) return null;
+            if (message?.RawData == null || message.RawData.Count == 0) return null;
             try
             {
                 switch (message.MsgType)
@@ -60,6 +60,7 @@ namespace Sora.Server.ApiMessageParse
         internal static List<CQCode> ParseMessageList(List<ApiMessage> messages)
         {
             ConsoleLog.Debug("Sora","Parsing msg list");
+            if (messages == null || messages.Count == 0) return new List<CQCode>();
             List<CQCode> retMsg = new List<CQCode>();
             foreach (ApiMessage message in messages)
             {

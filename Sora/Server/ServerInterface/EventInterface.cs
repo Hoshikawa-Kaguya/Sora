@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -9,7 +7,6 @@ using Sora.Server.OnebotEvent.MetaEvent;
 using Sora.Server.OnebotEvent.NoticeEvent;
 using Sora.Server.OnebotEvent.RequestEvent;
 using Sora.EventArgs.SoraEvent;
-using Sora.Entities.Info;
 using Sora.Enumeration.ApiEnum;
 using Sora.Tool;
 
