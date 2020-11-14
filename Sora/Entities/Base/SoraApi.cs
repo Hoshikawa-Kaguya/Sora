@@ -6,7 +6,6 @@ using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiEnum;
 using Sora.Enumeration.EventParamsType;
-using Sora.Server;
 using Sora.Server.ServerInterface;
 
 namespace Sora.Entities.Base
