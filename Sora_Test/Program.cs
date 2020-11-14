@@ -31,19 +31,10 @@ namespace Sora_Test
                                                  };
                 server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                                {
-                                                   if (eventArgs.Message.RawText.Equals("test"))
-                                                   {
-                                                       var test = await eventArgs.SoraApi.GetGroupRootFiles(eventArgs.SourceGroup);;
-                                                       await eventArgs.SourceGroup
-                                                                      .SendGroupMessage($"api = {test.apiStatus}\r\n");
-                                                   }
-                                                   else
-                                                   {
-                                                       List<CQCode> msg = new List<CQCode>();
-                                                       msg.Add(CQCode.CQText("哇哦"));
-                                                       msg.Add(CQCode.CQImage("https://i.loli.net/2020/10/20/zWPyocxFEVp2tDT.jpg"));
-                                                       await eventArgs.SourceGroup.SendGroupMessage(msg);
-                                                   }
+                                                   //新特性测试区域
+                                                   // await eventArgs.SourceGroup
+                                                   //                .SendGroupMessage(CQCode
+                                                   //                    .CQImage("H:\\Desktop\\bot\\AntiRainDebug\\data\\image\\hso\\3956118_p0.jpg"));
                                                };
                 server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>
                                                    {

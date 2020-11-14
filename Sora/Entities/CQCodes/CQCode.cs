@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -208,7 +209,6 @@ namespace Sora.Entities.CQCodes
         /// </summary>
         /// <param name="musicType">音乐分享类型</param>
         /// <param name="musicId">音乐Id</param>
-        /// <returns></returns>
         public static CQCode CQMusic(MusicShareType musicType, long musicId)
         {
             return new CQCode(CQFunction.Music,
@@ -216,6 +216,29 @@ namespace Sora.Entities.CQCodes
                               {
                                   MusicType = musicType,
                                   MusicId   = musicId
+                              });
+        }
+
+        /// <summary>
+        /// 自定义音乐分享CQ码
+        /// </summary>
+        /// <param name="url">跳转URL</param>
+        /// <param name="musicUrl">音乐URL</param>
+        /// <param name="title">标题</param>
+        /// <param name="content">内容描述[可选]</param>
+        /// <param name="coverImageUrl">分享内容图片[可选]</param>
+        public static CQCode CQCustomMusic(string url, string musicUrl, string title, string content = null,
+                                           string coverImageUrl = null)
+        {
+            return new CQCode(CQFunction.Music,
+                              new CustomMusic
+                              {
+                                  ShareType     = "custom",
+                                  Url           = url,
+                                  MusicUrl      = musicUrl,
+                                  Title         = title,
+                                  Content       = content,
+                                  CoverImageUrl = coverImageUrl
                               });
         }
 
@@ -435,7 +458,8 @@ namespace Sora.Entities.CQCodes
         #region 正则匹配字段
         private static readonly List<Regex> FileRegices = new List<Regex>
         {
-            new Regex(@"^[a-zA-Z]:(((\\(?! )[^/:*?<>\""|\\]+)+\\?)|(\\)?)\s*\.[a-zA-Z0-9]+$", RegexOptions.Compiled), //绝对路径
+            new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled),//绝对路径-linux/osx
+            new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled), //绝对路径-win
             new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$", RegexOptions.Compiled),//base64
             new Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$", RegexOptions.Compiled),//网络图片链接
             new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled)//文件名
@@ -454,19 +478,33 @@ namespace Sora.Entities.CQCodes
         internal static (string retStr,bool isMatch) ParseDataStr(string dataStr)
         {
             if (string.IsNullOrEmpty(dataStr)) return (null, false);
-            bool isMatch = false;
-            foreach (Regex regex in FileRegices)
+            var isMatch = false;
+            dataStr = dataStr.Replace('\\', '/');
+            for (var i = 0; i < 5; i++)
             {
-                isMatch |= regex.IsMatch(dataStr);
+                isMatch |= FileRegices[i].IsMatch(dataStr);
+                if (isMatch)
+                {
+                    switch (i)
+                    {
+                        case 0://linux/osx
+                            if (Environment.OSVersion.Platform != PlatformID.Unix &&
+                                Environment.OSVersion.Platform != PlatformID.MacOSX &&
+                                !File.Exists(dataStr)) 
+                                return (dataStr, false);
+                            else
+                                return ($"file:///{dataStr}",true);
+                        case 1://win
+                            if (Environment.OSVersion.Platform == PlatformID.Win32NT && File.Exists(dataStr))
+                                return ($"file:///{dataStr}", true);
+                            else
+                                return (dataStr, false);
+                        default:
+                            return (dataStr, true);
+                    }
+                }
             }
-            //判断是否是文件名
-            if (FileRegices[0].IsMatch(dataStr))
-            {
-                return ($"file:///{dataStr}",true);
-            }
-
-            if (!isMatch) return (dataStr, false);
-            return (dataStr, true);
+            return (dataStr, false);
         }
         #endregion
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -41,11 +42,6 @@ namespace Sora.Server
         public EventInterface Event { get; set; }
 
         /// <summary>
-        /// 链接信息
-        /// </summary>
-        internal static readonly Dictionary<Guid, ConnectionInfo> ConnectionInfos;
-
-        /// <summary>
         /// 服务器事件回调
         /// </summary>
         /// <typeparam name="TEventArgs">事件参数</typeparam>
@@ -53,6 +49,8 @@ namespace Sora.Server
         /// <param name="eventArgs">事件参数</param>
         /// <returns></returns>
         public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(string sender, TEventArgs eventArgs)where TEventArgs : System.EventArgs;
+
+        private ConnectionManager ConnManager { get; set; }
         #endregion
 
         #region 私有字段
@@ -84,8 +82,6 @@ namespace Sora.Server
         /// </summary>
         static SoraWSServer()
         {
-            //初始化连接表
-            ConnectionInfos = new Dictionary<Guid, ConnectionInfo>();
             //全局异常事件
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
                                                           {
@@ -101,13 +97,16 @@ namespace Sora.Server
         {
             serverReady = false;
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器初始化...");
+            ConsoleLog.Debug("System",Environment.OSVersion);
+            //初始化连接管理器
+            ConnManager = new ConnectionManager(config);
             //检查参数
             if(config == null) throw new ArgumentNullException(nameof(config));
             if (config.Port == 0 || config.Port > 65535) throw new ArgumentOutOfRangeException(nameof(config.Port));
 
             this.Config = config;
             //心跳包超时检查计时器
-            this.HeartBeatTimer = new Timer(HeartBeatCheck, null, new TimeSpan(0, 0, 0, (int)config.HeartBeatTimeOut, 0),
+            this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null, new TimeSpan(0, 0, 0, (int)config.HeartBeatTimeOut, 0),
                                        new TimeSpan(0, 0, 0, (int)config.HeartBeatTimeOut, 0));
             //API超时
             ApiInterface.TimeOut = config.ApiTimeOut;
@@ -193,12 +192,8 @@ namespace Sora.Server
                                                      //验证Token
                                                      if(!token.Equals(this.Config.AccessToken)) return;
                                                  }
-                                                 ConnectionInfos.Add(socket.ConnectionInfo.Id,
-                                                                     new ConnectionInfo
-                                                                     {
-                                                                         SelfId           = 0,
-                                                                         ServerConnection = socket
-                                                                     });
+
+                                                 ConnManager.AddConnection(socket.ConnectionInfo.Id, socket);
                                                  //向客户端发送Ping
                                                  socket.SendPing(new byte[] { 1, 2, 5 });
                                                  //事件回调
@@ -216,9 +211,15 @@ namespace Sora.Server
                              socket.OnClose = () =>
                                               {
                                                   //移除原连接信息
-                                                  if (ConnectionInfos.Any(conn => conn.Key == socket.ConnectionInfo.Id))
+                                                  if (ConnManager.ConnectionExitis(socket.ConnectionInfo.Id))
                                                   {
-                                                      ConnectionInfos.Remove(socket.ConnectionInfo.Id);
+                                                      if (!ConnManager.RemoveConnection(socket.ConnectionInfo.Id))
+                                                      {
+                                                          ConsoleLog.Fatal("Sora","客户端连接被关闭失败");
+                                                          ConsoleLog.Warning("Sora","将在5s后自动退出");
+                                                          Thread.Sleep(5000);
+                                                          Environment.Exit(-1);
+                                                      }
                                                       if (OnCloseConnectionAsync == null) return;
                                                       Task.Run( async () =>
                                                                 {
@@ -235,8 +236,7 @@ namespace Sora.Server
                                                 {
                                                     //处理接收的数据
                                                     // ReSharper disable once SimplifyLinqExpressionUseAll
-                                                    if (!ConnectionInfos.Any(conn => conn.Key ==
-                                                                                 socket.ConnectionInfo.Id)) return;
+                                                    if (!ConnManager.ConnectionExitis(socket.ConnectionInfo.Id)) return;
                                                     //进入事件处理和分发
                                                     Task.Run(() =>
                                                              {
@@ -264,56 +264,11 @@ namespace Sora.Server
         public void Dispose()
         {
             Server?.Dispose();
-            ConnectionInfos.Clear();
-            EventInterface.HeartBeatList.Clear();
             ApiInterface.RequestList.Clear();
         }
         #endregion
 
         #region 服务器事件处理方法
-        /// <summary>
-        /// 心跳包超时检查
-        /// </summary>
-        private void HeartBeatCheck(object msg)
-        {
-            if(ConnectionInfos.Count == 0) return;
-            foreach (KeyValuePair<Guid, long> conn in EventInterface.HeartBeatList)
-            {
-                //检查超时的连接
-                if (Utils.GetNowTimeStamp() - conn.Value > Config.HeartBeatTimeOut)
-                {
-                    try
-                    {
-                        //关闭超时的连接
-                        if (!ConnectionInfos.TryGetValue(conn.Key, out ConnectionInfo lostConnection))
-                        {
-                            ConsoleLog.Error("Sora","检测到不存在的客户端");
-                            EventInterface.HeartBeatList.Remove(conn.Key);
-                            return;
-                        }
-                        lostConnection.ServerConnection.Close();
-                        ConsoleLog.Error("Sora",
-                                         $"与Onebot客户端[{lostConnection.ServerConnection.ConnectionInfo.ClientIpAddress}:{lostConnection.ServerConnection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
-                        ConnectionInfos.Remove(conn.Key);
-                        EventInterface.HeartBeatList.Remove(conn.Key);
-                        if (OnCloseConnectionAsync == null) return;
-                        Task.Run( async () =>
-                                  {
-                                      await OnCloseConnectionAsync(lostConnection.SelfId.ToString(),
-                                                                   new ConnectionEventArgs("",
-                                                                       lostConnection.ServerConnection.ConnectionInfo));
-                                  });
-                    }
-                    catch (Exception e)
-                    {
-                        ConsoleLog.Error("Sora","检查心跳包时发生错误");
-                        ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
-                        EventInterface.HeartBeatList.Remove(conn.Key);
-                        ConnectionInfos.Remove(conn.Key);
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// 检查端口占用

@@ -644,14 +644,6 @@ namespace Sora.Entities.Base
             if(delay < 0) throw new ArgumentOutOfRangeException(nameof(delay));
             await ApiInterface.Restart(this.ConnectionGuid, delay);
         }
-
-        /// <summary>
-        /// 关闭服务端链接
-        /// </summary>
-        public void CloseConnection()
-        {
-            SoraWSServer.ConnectionInfos[this.ConnectionGuid].ServerConnection.Close();
-        }
         #endregion
 
         #region 请求处理API

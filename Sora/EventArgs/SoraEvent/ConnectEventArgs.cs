@@ -37,15 +37,5 @@ namespace Sora.EventArgs.SoraEvent
             this.ClientVersionCode = clientVersion;
         }
         #endregion
-
-        #region 公有方法
-        /// <summary>
-        /// 关闭客户端连接
-        /// </summary>
-        public void CloseConnection()
-        {
-            base.SoraApi.CloseConnection();
-        }
-        #endregion
     }
 }
