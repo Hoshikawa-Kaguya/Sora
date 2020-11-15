@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
+using Sora.Exceptions;
 using Sora.Server.ServerInterface;
 using Sora.Tool;
 
@@ -48,6 +49,10 @@ namespace Sora.Server
         /// 服务器已准备启动标识
         /// </summary>
         private readonly bool serverReady;
+        /// <summary>
+        /// 当前进程服务器已存在的标识
+        /// </summary>
+        private static bool serverExitis;
         #endregion
 
         #region 构造函数
@@ -70,6 +75,14 @@ namespace Sora.Server
         /// <param name="config">服务器配置</param>
         public SoraWSServer(ServerConfig config)
         {
+            //检查端口占用
+            if (PortInUse(config.Port))
+            {
+                ConsoleLog.Fatal("Sora", $"端口{config.Port}已被占用，请更换其他端口");
+                ConsoleLog.Warning("Sora", "将在5s后自动退出");
+                Thread.Sleep(5000);
+                Environment.Exit(0);
+            }
             serverReady = false;
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器初始化...");
             ConsoleLog.Debug("System",Environment.OSVersion);
@@ -78,31 +91,19 @@ namespace Sora.Server
             //检查参数
             if(config == null) throw new ArgumentNullException(nameof(config));
             if (config.Port == 0 || config.Port > 65535) throw new ArgumentOutOfRangeException(nameof(config.Port));
-
             this.Config = config;
-            //心跳包超时检查计时器
-            this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null, new TimeSpan(0, 0, 0, (int)config.HeartBeatTimeOut, 0),
-                                       new TimeSpan(0, 0, 0, (int)config.HeartBeatTimeOut, 0));
             //API超时
             ApiInterface.TimeOut = config.ApiTimeOut;
             //实例化事件接口
             this.Event = new EventInterface();
             //禁用原log
-            FleckLog.Level = (LogLevel)4;
+            FleckLog.Level = LogLevel.Debug;//(LogLevel)4;
             this.Server    = new WebSocketServer($"ws://{config.Location}:{config.Port}")
             {
                 //出错后进行重启
                 RestartAfterListenError = true
             };
-            if (PortInUse(config.Port))
-            {
-                ConsoleLog.Fatal("Sora", $"端口{config.Port}已被占用，请更换其他端口");
-                ConsoleLog.Warning("Sora", "将在5s后自动退出");
-                Thread.Sleep(5000);
-                Environment.Exit(0);
-            }
-            else
-                serverReady = true;
+            serverReady = true;
         }
         #endregion
 
@@ -110,9 +111,14 @@ namespace Sora.Server
         /// <summary>
         /// 启动WS服务端
         /// </summary>
-        public async ValueTask StartServerAsync()
+        public async ValueTask StartServer()
         {
             if(!serverReady) return;
+            //检查是否已有服务器被启动
+            if(serverExitis) throw new SoraServerIsRuningException();
+            //心跳包超时检查计时器
+            this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null, new TimeSpan(0, 0, 0, (int)Config.HeartBeatTimeOut, 0),
+                                            new TimeSpan(0, 0, 0, (int)Config.HeartBeatTimeOut, 0));
             Server.Start(socket =>
                          {
                              //接收事件处理
@@ -120,7 +126,8 @@ namespace Sora.Server
                              if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
                                                                             out string selfId) ||       //bot UID
                                  !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
-                                                                            out string role)){return;}   //Client Type
+                                                                            out string role))           //Client Type
+                             {return;}   
 
                              //请求路径检查
                              bool isLost;
@@ -206,6 +213,7 @@ namespace Sora.Server
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器正在运行[{Config.Location}:{Config.Port}]");
             ConsoleLog.Info("Sora",$"Sora 服务端框架版本:{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
 
+            serverExitis = true;
             await Task.Delay(-1);
         }
         /// <summary>
@@ -226,7 +234,6 @@ namespace Sora.Server
         #endregion
 
         #region 服务器事件处理方法
-
         /// <summary>
         /// 检查端口占用
         /// </summary>
