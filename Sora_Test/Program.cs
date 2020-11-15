@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Fleck;
-using Sora.Entities.CQCodes;
 using Sora.Server;
 using Sora.Tool;
 
@@ -17,35 +16,35 @@ namespace Sora_Test
             {
                 
                 SoraWSServer server = new SoraWSServer(new ServerConfig{Port = 9200});
+                //服务器连接事件
                 server.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
                                                 {
                                                     ConsoleLog.Debug("Sora_Test",$"connectionId = {connectionInfo.Id} type = {eventArgs.Role}");
                                                     return ValueTask.CompletedTask;
                                                 };
-            
+                //服务器连接关闭事件
                 server.ConnManager.OnCloseConnectionAsync += (connectionInfo, eventArgs) =>
                                                  {
                                                      ConsoleLog.Debug("Sora_Test",$"connectionId = {connectionInfo.Id} type = {eventArgs.Role}");
                                                      return ValueTask.CompletedTask;
                                                  };
+                //服务器心跳包超时事件
                 server.ConnManager.OnHeartBeatTimeOut += (connectionInfo, eventArgs) =>
                                                          {
                                                              ConsoleLog.Debug("Sora_Test",$"Get heart beat time out from[{connectionInfo.Id}] uid[{eventArgs.SelfId}]");
                                                              return ValueTask.CompletedTask;
                                                          };
+                //群聊消息事件
                 server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                                {
-                                                   //新特性测试区域
-                                                   await eventArgs.SourceGroup
-                                                                  .SendGroupMessage(CQCode
-                                                                      .CQImage("https://i.loli.net/2020/11/02/2OgZ1M6YNV5kntS.gif"));
+                                                   await eventArgs.SourceGroup.SendGroupMessage("好耶");
                                                };
+                //私聊消息事件
                 server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>
                                                    {
-                                                       await eventArgs.Sender
-                                                                      .SendPrivateMessage($"file url = {eventArgs.OfflineFileInfo.Url}");
+                                                       await eventArgs.Sender.SendPrivateMessage("好耶");
                                                    };
-                await server.StartServerAsync();
+                await server.StartServer();
             }
             catch (Exception e) //侦测所有未处理的错误
             {

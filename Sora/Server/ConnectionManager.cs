@@ -70,7 +70,6 @@ namespace Sora.Server
         #endregion
 
         #region 服务器连接管理
-
         /// <summary>
         /// 添加服务器连接记录
         /// </summary>
@@ -79,22 +78,26 @@ namespace Sora.Server
         /// <param name="selfId">机器人UID</param>
         internal bool AddConnection(Guid connectionGuid, IWebSocketConnection connectionInfo, string selfId)
         {
-            long.TryParse(selfId, out long uid);
-            //检查是否已存在值
-            if (ConnectionList.All(connection => connection.ConnectionGuid != connectionGuid))
+            //锁定记录表
+            lock (ConnectionList)
             {
-                ConnectionList.Add(new SoraConnectionInfo
+                //检查是否已存在值
+                if (ConnectionList.All(connection => connection.ConnectionGuid != connectionGuid))
                 {
-                    ConnectionGuid    = connectionGuid,
-                    Connection        = connectionInfo,
-                    LastHeartBeatTime = Utils.GetNowTimeStamp(),
-                    SelfId            = uid
-                });
-                return true;
-            }
-            else
-            {
-                return false;
+                    long.TryParse(selfId, out long uid);
+                    ConnectionList.Add(new SoraConnectionInfo
+                    {
+                        ConnectionGuid    = connectionGuid,
+                        Connection        = connectionInfo,
+                        LastHeartBeatTime = Utils.GetNowTimeStamp(),
+                        SelfId            = uid
+                    });
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
@@ -106,7 +109,11 @@ namespace Sora.Server
         {
             if (ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid))
             {
-                return ConnectionList.RemoveAll(connection => connection.ConnectionGuid == connectionGuid) > 0;
+                //锁定记录表
+                lock (ConnectionList)
+                {
+                    return ConnectionList.RemoveAll(connection => connection.ConnectionGuid == connectionGuid) > 0;
+                }
             }
             else return false;
         }
@@ -138,6 +145,7 @@ namespace Sora.Server
         internal void HeartBeatCheck(object msg)
         {
             if(ConnectionList.Count == 0) return;
+            ConsoleLog.Debug("HeartBeatCheck",$"Connection count={ConnectionList.Count}");
             List<Guid> lostConnections = new List<Guid>();
             //遍历超时的连接
             foreach (var connection in ConnectionList
