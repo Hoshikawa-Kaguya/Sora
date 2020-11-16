@@ -97,7 +97,7 @@ namespace Sora.Server
             //实例化事件接口
             this.Event = new EventInterface();
             //禁用原log
-            FleckLog.Level = LogLevel.Debug;//(LogLevel)4;
+            FleckLog.Level = (LogLevel)4;
             this.Server    = new WebSocketServer($"ws://{config.Location}:{config.Port}")
             {
                 //出错后进行重启
