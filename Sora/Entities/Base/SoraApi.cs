@@ -584,12 +584,12 @@ namespace Sora.Entities.Base
         /// 获取连接客户端版本信息
         /// </summary>
         /// <returns>
-        /// <para><see cref="ClientType"/>客户端类型</para>
+        /// <para>客户端类型</para>
         /// <para><see langword="ver"/>客户端版本号</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, ClientType clientType, string ver)> GetClientInfo()
+        public async ValueTask<(APIStatusType apiStatus, string clientType, string ver)> GetClientInfo()
         {
-            return ((APIStatusType apiStatus, ClientType clientType, string ver))
+            return ((APIStatusType apiStatus, string clientType, string ver))
                 await ApiInterface.GetClientInfo(this.ConnectionGuid);
         }
 

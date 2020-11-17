@@ -1,5 +1,4 @@
 using System;
-using Sora.Enumeration.ApiEnum;
 
 namespace Sora.EventArgs.SoraEvent
 {
@@ -12,7 +11,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 连接客户端类型
         /// </summary>
-        public ClientType CqHttpClientType { get; private set; }
+        public string ClientType { get; private set; }
 
         /// <summary>
         /// 连接客户端版本号
@@ -30,10 +29,10 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="clientType">当前客户端类型</param>
         /// <param name="clientVersion">当前客户端版本</param>
         /// <param name="time">连接时间</param>
-        internal ConnectEventArgs(Guid connectionGuid, string eventName, long loginUid, ClientType clientType,
+        internal ConnectEventArgs(Guid connectionGuid, string eventName, long loginUid, string clientType,
                                 string clientVersion, long time) : base(connectionGuid, eventName, loginUid, time)
         {
-            this.CqHttpClientType  = clientType;
+            this.ClientType        = clientType;
             this.ClientVersionCode = clientVersion;
         }
         #endregion

@@ -166,13 +166,13 @@ namespace Sora.Server.ServerInterface
                     if (lifeCycle != null) ConsoleLog.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
                     //未知原因会丢失第一次调用的返回值，直接丢弃第一次调用
                     await ApiInterface.GetClientInfo(connection);
-                    (int retCode, ClientType clientType, string clientVer) = await ApiInterface.GetClientInfo(connection);
+                    (int retCode, string clientType, string clientVer) = await ApiInterface.GetClientInfo(connection);
                     if (retCode != 0)//检查返回值
                     {
                         ConsoleLog.Error("Sora",$"获取客户端版本失败(retcode={retCode})");
                         break;
                     }
-                    ConsoleLog.Info("Sora",$"已连接到{Enum.GetName(clientType)}客户端,版本:{clientVer}");
+                    ConsoleLog.Info("Sora",$"已连接到{clientType}客户端,版本:{clientVer}");
                     if(OnClientConnect == null) break;
                     //执行回调函数
                     await OnClientConnect(typeof(EventInterface),
