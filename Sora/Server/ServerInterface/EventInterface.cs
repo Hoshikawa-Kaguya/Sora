@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Server.OnebotEvent.MessageEvent;
 using Sora.Server.OnebotEvent.MetaEvent;
@@ -130,7 +131,7 @@ namespace Sora.Server.ServerInterface
                     if (messageJson.TryGetValue("echo", out JToken echoJson) &&
                         Guid.TryParse(echoJson.ToString(), out Guid echo)    &&
                         //查找请求标识符是否存在
-                        ApiInterface.RequestList.Any(e => e.Equals(echo)))
+                        ApiInterface.RequestList.Any(e => e.Echo.Equals(echo)))
                     {
                         //取出返回值中的数据
                         ApiInterface.GetResponse(echo, messageJson);
@@ -164,8 +165,7 @@ namespace Sora.Server.ServerInterface
                 case "lifecycle":
                     ApiLifeCycleEventArgs lifeCycle = messageJson.ToObject<ApiLifeCycleEventArgs>();
                     if (lifeCycle != null) ConsoleLog.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
-                    //未知原因会丢失第一次调用的返回值，直接丢弃第一次调用
-                    await ApiInterface.GetClientInfo(connection);
+
                     (int retCode, string clientType, string clientVer) = await ApiInterface.GetClientInfo(connection);
                     if (retCode != 0)//检查返回值
                     {
