@@ -143,7 +143,7 @@ namespace Sora.Server.ServerInterface
         /// 获取版本信息
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
-        internal static async ValueTask<(int retCode, ClientType clientType, string clientVer)> GetClientInfo(Guid connection)
+        internal static async ValueTask<(int retCode, string clientType, string clientVer)> GetClientInfo(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending get_version_info request");
             JObject ret = await SendApiRequest(new ApiRequest
@@ -153,15 +153,17 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_version_info response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, ClientType.Other, null);
+            if (retCode != 0 || ret["data"] == null) return (retCode, "unknown", null);
             //判断是否为MiraiGo
             JObject.FromObject(ret["data"]).TryGetValue("go-cqhttp", out JToken clientJson);
-            bool.TryParse(clientJson?.ToString()                ?? "false", out bool isGo);
-            string verStr = ret["data"]?["version"]?.ToString() ?? string.Empty;
-            //Go客户端
-            if (isGo) return (retCode, ClientType.GoCqhttp,verStr);
-            //其他客户端
-            return (retCode, ClientType.Other,verStr);
+            bool.TryParse(clientJson?.ToString() ?? "false", out bool isGo);
+            string verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
+
+            ConsoleLog.Debug("Sora Ver", ret);
+
+            return isGo 
+                ? (retCode, "go-cqhttp", verStr) //Go客户端
+                : (retCode, ret["data"]?["app_name"]?.ToString() ?? "other", verStr);//其他客户端
         }
 
         /// <summary>
