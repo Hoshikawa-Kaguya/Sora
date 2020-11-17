@@ -31,15 +31,25 @@ namespace Sora.Server.ServerInterface
 
         #region 请求表
         /// <summary>
-        /// API请求等待列表
+        /// 暂存数据结构定义
         /// </summary>
-        internal static readonly List<Guid> RequestList = new List<Guid>();
+        internal struct ApiResponse
+        {
+            internal Guid Echo;
+
+            internal JObject Response;
+        }
+
+        /// <summary>
+        /// API请求暂存表
+        /// </summary>
+        internal static readonly List<ApiResponse> RequestList = new List<ApiResponse>();
 
         /// <summary>
         /// API响应被观察者
         /// </summary>
-        private static readonly ISubject<Tuple<Guid, JObject>, Tuple<Guid, JObject>> OnebotSubject =
-            new Subject<Tuple<Guid, JObject>>();
+        internal static readonly ISubject<Guid> ApiSubject =
+            new Subject<Guid>();
         #endregion
 
         #region API请求
@@ -159,8 +169,6 @@ namespace Sora.Server.ServerInterface
             bool.TryParse(clientJson?.ToString() ?? "false", out bool isGo);
             string verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
 
-            ConsoleLog.Debug("Sora Ver", ret);
-
             return isGo 
                 ? (retCode, "go-cqhttp", verStr) //Go客户端
                 : (retCode, ret["data"]?["app_name"]?.ToString() ?? "other", verStr);//其他客户端
@@ -235,7 +243,6 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
             Guid connection, long gid)
         {
-            ConsoleLog.Debug("Sora","Sending get_group_member_list request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiType = APIType.GetGroupMemberList,
@@ -1015,10 +1022,17 @@ namespace Sora.Server.ServerInterface
         /// <param name="response">响应json</param>
         internal static void GetResponse(Guid echo, JObject response)
         {
-            if (RequestList.Any(guid => guid == echo))
+            lock (ApiSubject)
             {
-                OnebotSubject.OnNext(Tuple.Create(echo, response));
-                RequestList.Remove(echo);
+                if (RequestList.Any(guid => guid.Echo == echo))
+                {
+                    ConsoleLog.Debug("Sora",$"Get api response {response.ToString(Formatting.None)}");
+                    int connectionIndex = RequestList.FindIndex(conn => conn.Echo == echo);
+                    var connection      = RequestList[connectionIndex];
+                    connection.Response          = response;
+                    RequestList[connectionIndex] = connection;
+                    ApiSubject.OnNext(echo);
+                }
             }
         }
         #endregion
@@ -1031,8 +1045,6 @@ namespace Sora.Server.ServerInterface
         /// <param name="connectionGuid">服务器连接标识符</param>
         private static ValueTask SendApiMessage(ApiRequest apiRequest, Guid connectionGuid)
         {
-            //添加新的请求记录
-            RequestList.Add(apiRequest.Echo);
             //向客户端发送请求数据
             ConnectionManager.SendMessage(connectionGuid,JsonConvert.SerializeObject(apiRequest,Formatting.None));
             return ValueTask.CompletedTask;
@@ -1047,21 +1059,34 @@ namespace Sora.Server.ServerInterface
         private static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest,Guid connectionGuid)
         {
             //添加新的请求记录
-            RequestList.Add(apiRequest.Echo);
+            RequestList.Add(new ApiResponse
+            {
+                Echo     = apiRequest.Echo,
+                Response = null
+            });
             //向客户端发送请求数据
             if(!ConnectionManager.SendMessage(connectionGuid,JsonConvert.SerializeObject(apiRequest,Formatting.None))) return null;
             try
             {
                 //等待客户端返回调用结果
-                JObject response = await OnebotSubject
-                                         .Where(ret => ret.Item1 == apiRequest.Echo)
-                                         .Select(ret => ret.Item2)
+                Guid responseGuid = await ApiSubject
+                                         .Where(guid => guid == apiRequest.Echo)
+                                         .Select(guid => guid)
                                          .Take(1)
                                          .Timeout(TimeSpan.FromMilliseconds(TimeOut))
-                                         .Catch(Observable.Return<JObject>(null))
+                                         .Catch(Observable.Return(new Guid("00000000-0000-0000-0000-000000000000")))
                                          .ToTask();
-                if(response == null) ConsoleLog.Debug("Sora","API Time Out");
-                return response;
+                if(responseGuid.Equals(new Guid("00000000-0000-0000-0000-000000000000"))) ConsoleLog.Debug("Sora","observer time out");
+                //查找返回值
+                int reqIndex = RequestList.FindIndex(apiResponse => apiResponse.Echo == apiRequest.Echo);
+                if (reqIndex == -1)
+                {
+                    ConsoleLog.Debug("Sora","api time out");
+                    return null;
+                }
+                JObject ret = RequestList[reqIndex].Response;
+                RequestList.RemoveAt(reqIndex);
+                return ret;
             }
             catch (Exception e)
             {
