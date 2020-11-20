@@ -10,6 +10,8 @@
 
 ----
 
+![Nuget](https://img.shields.io/nuget/v/Sora?style=for-the-badge&color=ff69b4)![AGPL](https://img.shields.io/github/license/CBGan/Sora?style=for-the-badge&color=blueviolet)
+
 ## 关于框架开发
 
 > 注意事项：本框架是在[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.31](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.31))下进行调试的，如使用其他平台可能会出现兼容性的问题
@@ -28,6 +30,10 @@
 
 详细的介绍文档还在编写
 
-## 开源协议
+## 构建
 
-![AGPL](https://img.shields.io/github/license/CBGan/Sora?style=for-the-badge)
+| master                                                       | dev                                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=for-the-badge) | ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/dev?style=for-the-badge) |
+
+
