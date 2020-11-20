@@ -58,6 +58,10 @@ namespace Sora.Entities.Base
                 {
                     msgList.Add(cqCode);
                 }
+                else if (msgObj is List<CQCode> cqCodes)
+                {
+                    msgList.AddRange(cqCodes);
+                }
                 else
                 {
                     msgList.Add(CQCode.CQText(msgObj.ToString()));
