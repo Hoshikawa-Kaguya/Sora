@@ -58,7 +58,7 @@ namespace Sora.Entities.Base
                 {
                     msgList.Add(cqCode);
                 }
-                else if (msgObj is List<CQCode> cqCodes)
+                else if (msgObj is IEnumerable<CQCode> cqCodes)
                 {
                     msgList.AddRange(cqCodes);
                 }
@@ -112,7 +112,7 @@ namespace Sora.Entities.Base
             List<CQCode> msgList = new List<CQCode>();
             foreach (object msgObj in message)
             {
-                if (msgObj is List<CQCode> cqCodeList)
+                if (msgObj is IEnumerable<CQCode> cqCodeList)
                 {
                     msgList.AddRange(cqCodeList);
                 }

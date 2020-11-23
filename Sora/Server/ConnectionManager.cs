@@ -147,27 +147,31 @@ namespace Sora.Server
             if(ConnectionList.Count == 0) return;
             ConsoleLog.Debug("HeartBeatCheck",$"Connection count={ConnectionList.Count}");
             List<Guid> lostConnections = new List<Guid>();
-            //遍历超时的连接
-            foreach (var connection in ConnectionList
-                .Where(connection => Utils.GetNowTimeStamp() - connection.LastHeartBeatTime > Config.HeartBeatTimeOut))
+            // 防止遍历时集合被改变引发异常
+            lock (ConnectionList)
             {
-                try
+                //遍历超时的连接
+                foreach (var connection in ConnectionList
+                    .Where(connection => Utils.GetNowTimeStamp() - connection.LastHeartBeatTime > Config.HeartBeatTimeOut))
                 {
-                    //添加需要删除的连接
-                    lostConnections.Add(connection.ConnectionGuid);
+                    try
+                    {
+                        //添加需要删除的连接
+                        lostConnections.Add(connection.ConnectionGuid);
 
-                    //关闭超时的连接
-                    connection.Connection.Close();
-                    ConsoleLog.Error("Sora",
-                                     $"与Onebot客户端[{connection.Connection.ConnectionInfo.ClientIpAddress}:{connection.Connection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
-                    HeartBeatTimeOutEvent(connection.SelfId, connection.Connection.ConnectionInfo);
-                }
-                catch (Exception e)
-                {
-                    ConsoleLog.Error("Sora","检查心跳包时发生错误 code -2");
-                    ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
-                    //添加需要删除的连接
-                    lostConnections.Add(connection.ConnectionGuid);
+                        //关闭超时的连接
+                        connection.Connection.Close();
+                        ConsoleLog.Error("Sora",
+                            $"与Onebot客户端[{connection.Connection.ConnectionInfo.ClientIpAddress}:{connection.Connection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
+                        HeartBeatTimeOutEvent(connection.SelfId, connection.Connection.ConnectionInfo);
+                    }
+                    catch (Exception e)
+                    {
+                        ConsoleLog.Error("Sora","检查心跳包时发生错误 code -2");
+                        ConsoleLog.Error("Sora",ConsoleLog.ErrorLogBuilder(e));
+                        //添加需要删除的连接
+                        lostConnections.Add(connection.ConnectionGuid);
+                    }
                 }
             }
             //删除超时的连接
