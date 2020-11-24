@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Sora.EventArgs.WSSeverEvent;
@@ -38,6 +39,7 @@ namespace Sora.Server
         private ServerConfig Config { get; set; }
         #endregion
 
+        #region 回调事件
         /// <summary>
         /// 服务器事件回调
         /// </summary>
@@ -46,8 +48,6 @@ namespace Sora.Server
         /// <param name="eventArgs">事件参数</param>
         /// <returns></returns>
         public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(IWebSocketConnectionInfo sender, TEventArgs eventArgs)where TEventArgs : System.EventArgs;
-
-        #region 回调事件
         /// <summary>
         /// 打开连接回调
         /// </summary>
@@ -76,7 +76,7 @@ namespace Sora.Server
         /// <param name="connectionGuid">连接标识</param>
         /// <param name="connectionInfo">连接信息</param>
         /// <param name="selfId">机器人UID</param>
-        internal bool AddConnection(Guid connectionGuid, IWebSocketConnection connectionInfo, string selfId)
+        private bool AddConnection(Guid connectionGuid, IWebSocketConnection connectionInfo, string selfId)
         {
             //锁定记录表
             lock (ConnectionList)
@@ -105,17 +105,17 @@ namespace Sora.Server
         /// 移除服务器连接记录
         /// </summary>
         /// <param name="connectionGuid">连接标识</param>
-        internal bool RemoveConnection(Guid connectionGuid)
+        private bool RemoveConnection(Guid connectionGuid)
         {
-            if (ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid))
+            //锁定记录表
+            lock (ConnectionList)
             {
-                //锁定记录表
-                lock (ConnectionList)
+                if (ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid))
                 {
                     return ConnectionList.RemoveAll(connection => connection.ConnectionGuid == connectionGuid) > 0;
                 }
+                return false;
             }
-            else return false;
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Sora.Server
             if(ConnectionList.Count == 0) return;
             ConsoleLog.Debug("HeartBeatCheck",$"Connection count={ConnectionList.Count}");
             List<Guid> lostConnections = new List<Guid>();
-            // 防止遍历时集合被改变引发异常
+            //锁定列表
             lock (ConnectionList)
             {
                 //遍历超时的连接
@@ -162,7 +162,7 @@ namespace Sora.Server
                         //关闭超时的连接
                         connection.Connection.Close();
                         ConsoleLog.Error("Sora",
-                            $"与Onebot客户端[{connection.Connection.ConnectionInfo.ClientIpAddress}:{connection.Connection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
+                                         $"与Onebot客户端[{connection.Connection.ConnectionInfo.ClientIpAddress}:{connection.Connection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
                         HeartBeatTimeOutEvent(connection.SelfId, connection.Connection.ConnectionInfo);
                     }
                     catch (Exception e)
@@ -196,20 +196,26 @@ namespace Sora.Server
         #endregion
 
         #region 服务器事件
-
         /// <summary>
         /// 服务器链接开启事件
         /// </summary>
         /// <param name="role">通道标识</param>
         /// <param name="selfId">事件源</param>
-        /// <param name="sender">连接信息</param>
-        internal void OpenConnectionEvent(string role, string selfId, IWebSocketConnectionInfo sender)
+        /// <param name="socket">连接</param>
+        internal void OpenConnection(string role, string selfId, IWebSocketConnection socket)
         {
+            //添加服务器记录
+            if (!AddConnection(socket.ConnectionInfo.Id, socket, selfId))
+            {
+                socket.Close();
+                ConsoleLog.Error("Sora",$"处理连接请求时发生问题 无法记录该连接[{socket.ConnectionInfo.Id}]");
+                return;
+            }
             if(OnOpenConnectionAsync == null) return;
             long.TryParse(selfId, out long uid);
             Task.Run(async () =>
                      {
-                         await OnOpenConnectionAsync(sender,
+                         await OnOpenConnectionAsync(socket.ConnectionInfo,
                                                      new ConnectionEventArgs(role, uid));
                      });
         }
@@ -219,14 +225,21 @@ namespace Sora.Server
         /// </summary>
         /// <param name="role">通道标识</param>
         /// <param name="selfId">事件源</param>
-        /// <param name="sender">连接信息</param>
-        internal void CloseConnectionEvent(string role, string selfId, IWebSocketConnectionInfo sender)
+        /// <param name="socket">连接信息</param>
+        internal void CloseConnection(string role, string selfId, IWebSocketConnection socket)
         {
+            if (!RemoveConnection(socket.ConnectionInfo.Id))
+            {
+                ConsoleLog.Fatal("Sora","客户端连接被关闭失败");
+                ConsoleLog.Warning("Sora","将在5s后自动退出");
+                Thread.Sleep(5000);
+                Environment.Exit(-1);
+            }
             if(OnCloseConnectionAsync == null) return;
             long.TryParse(selfId, out long uid);
             Task.Run(async () =>
                      {
-                         await OnCloseConnectionAsync(sender,
+                         await OnCloseConnectionAsync(socket.ConnectionInfo,
                                                       new ConnectionEventArgs(role, uid));
                      });
         }
@@ -236,7 +249,7 @@ namespace Sora.Server
         /// </summary>
         /// <param name="sender">连接信息</param>
         /// <param name="selfId">事件源</param>
-        internal void HeartBeatTimeOutEvent(long selfId, IWebSocketConnectionInfo sender)
+        private void HeartBeatTimeOutEvent(long selfId, IWebSocketConnectionInfo sender)
         {
             if(OnHeartBeatTimeOut == null) return;
             Task.Run(async () =>

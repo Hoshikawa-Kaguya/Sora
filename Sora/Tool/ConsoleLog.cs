@@ -19,6 +19,11 @@ namespace Sora.Tool
         /// </summary>
         /// <param name="level">LogLevel</param>
         public static void SetLogLevel(LogLevel level) => Level = level;
+
+        /// <summary>
+        /// 禁用log
+        /// </summary>
+        public static void SetNoLog() => Level = (LogLevel) 5;
         #endregion
 
         #region 格式化错误Log
@@ -89,15 +94,18 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Error(object type, object message)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"[{DateTime.Now}][");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("ERROR");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"][{type}]");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(message);
-            Console.ForegroundColor = ConsoleColor.White;
+            if (Level <= LogLevel.Error)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"[{DateTime.Now}][");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("ERROR");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"][{type}]");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(message);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
         /// <summary>
@@ -107,15 +115,18 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Fatal(object type, object message)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"[{DateTime.Now}][");
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.Write("FATAL");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"][{type}]");
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine(message);
-            Console.ForegroundColor = ConsoleColor.White;
+            if (Level <= LogLevel.Error)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"[{DateTime.Now}][");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.Write("FATAL");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"][{type}]");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine(message);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
         /// <summary>
