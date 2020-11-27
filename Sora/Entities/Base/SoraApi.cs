@@ -282,7 +282,7 @@ namespace Sora.Entities.Base
         /// </param>
         public async ValueTask EnableGroupMemberMute(long groupId, long userId, long duration)
         {
-            if (groupId is < 100000 || userId is < 10000 || duration <= 60)
+            if (groupId is < 100000 || userId is < 10000 || duration < 60)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} or {nameof(duration)} out of range");
             await ApiInterface.SetGroupBan(this.ConnectionGuid, groupId, userId, duration);
         }
