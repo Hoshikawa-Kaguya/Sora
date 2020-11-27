@@ -259,5 +259,23 @@ namespace Sora.Server
                      });
         }
         #endregion
+
+        #region API
+        internal static bool GetLoginUid(Guid connectionGuid, out long userId)
+        {
+            if (ConnectionList.Any(conn => conn.ConnectionGuid == connectionGuid))
+            {
+                userId = ConnectionList.Where(conn => conn.ConnectionGuid == connectionGuid)
+                                       .Select(conn => conn.SelfId)
+                                       .First();
+                return true;
+            }
+            else
+            {
+                userId = -1;
+                return false;
+            }
+        }
+        #endregion
     }
 }

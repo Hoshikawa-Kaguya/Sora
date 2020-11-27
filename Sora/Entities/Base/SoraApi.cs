@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Entities.Info;
-using Sora.Enumeration.ApiEnum;
+using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
+using Sora.Server;
 using Sora.Server.ServerInterface;
 
 namespace Sora.Entities.Base
@@ -722,6 +723,18 @@ namespace Sora.Entities.Base
         {
             if(groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             return new Group(this.ConnectionGuid, groupId);
+        }
+
+        /// <summary>
+        /// 获取登录账号的id
+        /// </summary>
+        public long GetLoginUserId()
+        {
+            if (ConnectionManager.GetLoginUid(this.ConnectionGuid, out long uid))
+            {
+                return uid;
+            }
+            return -1;
         }
         #endregion
     }

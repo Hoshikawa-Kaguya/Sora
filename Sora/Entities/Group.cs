@@ -5,7 +5,7 @@ using Sora.Entities.Base;
 using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Entities.Info;
-using Sora.Enumeration.ApiEnum;
+using Sora.Enumeration.ApiType;
 
 namespace Sora.Entities
 {

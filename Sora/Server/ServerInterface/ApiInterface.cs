@@ -15,7 +15,7 @@ using Sora.Server.Params.GoApiParams;
 using Sora.Server.Params.ApiParams;
 using Sora.Entities;
 using Sora.Entities.Info;
-using Sora.Enumeration.ApiEnum;
+using Sora.Enumeration.ApiType;
 using Sora.Tool;
 
 namespace Sora.Server.ServerInterface
@@ -71,7 +71,7 @@ namespace Sora.Server.ServerInterface
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.SendMsg,
+                ApiRequestType = ApiRequestType.SendMsg,
                 ApiParams = new SendMessageParams
                 {
                     MessageType = MessageType.Private,
@@ -107,7 +107,7 @@ namespace Sora.Server.ServerInterface
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.SendMsg,
+                ApiRequestType = ApiRequestType.SendMsg,
                 ApiParams = new SendMessageParams
                 {
                     MessageType = MessageType.Group,
@@ -135,7 +135,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", "Sending get_login_info request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetLoginInfo
+                ApiRequestType = ApiRequestType.GetLoginInfo
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
@@ -158,7 +158,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", "Sending get_version_info request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetVersion
+                ApiRequestType = ApiRequestType.GetVersion
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
@@ -184,7 +184,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending get_friend_list request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetFriendList
+                ApiRequestType = ApiRequestType.GetFriendList
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
@@ -214,7 +214,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending get_group_list request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupList
+                ApiRequestType = ApiRequestType.GetGroupList
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
@@ -245,7 +245,7 @@ namespace Sora.Server.ServerInterface
         {
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupMemberList,
+                ApiRequestType = ApiRequestType.GetGroupMemberList,
                 ApiParams = new
                 {
                     group_id = gid
@@ -272,7 +272,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", "Sending get_group_info request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupInfo,
+                ApiRequestType = ApiRequestType.GetGroupInfo,
                 ApiParams = new GetGroupInfoParams
                 {
                     Gid     = gid,
@@ -307,7 +307,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending get_group_member_info request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupMemberInfo,
+                ApiRequestType = ApiRequestType.GetGroupMemberInfo,
                 ApiParams = new GetGroupMemberInfoParams
                 {
                     Gid     = gid,
@@ -337,7 +337,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending get_stranger_info request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetStrangerInfo,
+                ApiRequestType = ApiRequestType.GetStrangerInfo,
                 ApiParams = new GetStrangerInfoParams
                 {
                     Uid     = uid,
@@ -368,7 +368,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending can_send_image request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.CanSendImage
+                ApiRequestType = ApiRequestType.CanSendImage
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
@@ -387,7 +387,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending can_send_record request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.CanSendRecord
+                ApiRequestType = ApiRequestType.CanSendRecord
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
@@ -406,7 +406,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending get_status request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetStatus
+                ApiRequestType = ApiRequestType.GetStatus
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
@@ -430,7 +430,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending get_image request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetImage,
+                ApiRequestType = ApiRequestType.GetImage,
                 ApiParams = new GetImageParams
                 {
                     FileName = cacheFileName
@@ -457,7 +457,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending get_msg request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetMessage,
+                ApiRequestType = ApiRequestType.GetMessage,
                 ApiParams = new
                 {
                     message_id = msgId
@@ -493,7 +493,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending .get_word_slices request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetWordSlices,
+                ApiRequestType = ApiRequestType.GetWordSlices,
                 ApiParams = new
                 {
                     content = text
@@ -520,7 +520,7 @@ namespace Sora.Server.ServerInterface
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetForwardMessage,
+                ApiRequestType = ApiRequestType.GetForwardMessage,
                 ApiParams = new GetForwardParams
                 {
                     MessageId = msgId
@@ -550,7 +550,7 @@ namespace Sora.Server.ServerInterface
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupSystemMsg
+                ApiRequestType = ApiRequestType.GetGroupSystemMsg
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
@@ -580,7 +580,7 @@ namespace Sora.Server.ServerInterface
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupFileSystemInfo,
+                ApiRequestType = ApiRequestType.GetGroupFileSystemInfo,
                 ApiParams = new
                 {
                     group_id = gid
@@ -609,7 +609,7 @@ namespace Sora.Server.ServerInterface
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupRootFiles,
+                ApiRequestType = ApiRequestType.GetGroupRootFiles,
                 ApiParams = new
                 {
                     group_id = gid
@@ -640,7 +640,7 @@ namespace Sora.Server.ServerInterface
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupFilesByFolder,
+                ApiRequestType = ApiRequestType.GetGroupFilesByFolder,
                 ApiParams = new
                 {
                     group_id  = gid,
@@ -672,7 +672,7 @@ namespace Sora.Server.ServerInterface
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiType = APIType.GetGroupFileUrl,
+                ApiRequestType = ApiRequestType.GetGroupFileUrl,
                 ApiParams = new
                 {
                     group_id = gid,
@@ -701,7 +701,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending delete_msg request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.RecallMsg,
+                ApiRequestType = ApiRequestType.RecallMsg,
                 ApiParams = new
                 {
                     message_id = msgId
@@ -723,7 +723,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending set_friend_add_request request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetFriendAddRequest,
+                ApiRequestType = ApiRequestType.SetFriendAddRequest,
                 ApiParams = new SetFriendAddRequestParams
                 {
                     Flag    = flag,
@@ -750,7 +750,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending set_group_add_request request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupAddRequest,
+                ApiRequestType = ApiRequestType.SetGroupAddRequest,
                 ApiParams = new SetGroupAddRequestParams
                 {
                     Flag = flag,
@@ -773,7 +773,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending set_group_card request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupCard,
+                ApiRequestType = ApiRequestType.SetGroupCard,
                 ApiParams = new SetGroupCardParams
                 {
                     Gid  = gid,
@@ -795,7 +795,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending set_group_special_title request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupSpecialTitle,
+                ApiRequestType = ApiRequestType.SetGroupSpecialTitle,
                 ApiParams = new SetGroupSpecialTitleParams
                 {
                     Gid      = gid,
@@ -818,7 +818,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending set_group_kick request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupKick,
+                ApiRequestType = ApiRequestType.SetGroupKick,
                 ApiParams = new SetGroupKickParams
                 {
                     Gid              = gid,
@@ -840,7 +840,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending set_group_ban request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupBan,
+                ApiRequestType = ApiRequestType.SetGroupBan,
                 ApiParams = new SetGroupBanParams
                 {
                     Gid      = gid,
@@ -861,7 +861,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", "Sending set_group_whole_ban request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupWholeBan,
+                ApiRequestType = ApiRequestType.SetGroupWholeBan,
                 ApiParams = new SetGroupWholeBanParams
                 {
                     Gid    = gid,
@@ -882,7 +882,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", "Sending set_group_admin request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupAdmin,
+                ApiRequestType = ApiRequestType.SetGroupAdmin,
                 ApiParams = new SetGroupAdminParams
                 {
                     Gid    = gid,
@@ -903,7 +903,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending set_group_leave request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupLeave,
+                ApiRequestType = ApiRequestType.SetGroupLeave,
                 ApiParams = new SetGroupLeaveParams
                 {
                     Gid = gid,
@@ -922,7 +922,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending restart client requset");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.Restart,
+                ApiRequestType = ApiRequestType.Restart,
                 ApiParams = new
                 {
                     delay
@@ -958,7 +958,7 @@ namespace Sora.Server.ServerInterface
             }
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SendGroupForwardMsg,
+                ApiRequestType = ApiRequestType.SendGroupForwardMsg,
                 ApiParams = new SendGroupForwardMsgParams
                 {
                     GroupId     = gid,
@@ -979,7 +979,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending set_group_name request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupName,
+                ApiRequestType = ApiRequestType.SetGroupName,
                 ApiParams = new SetGroupNameParams
                 {
                     Gid       = gid,
@@ -1001,7 +1001,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora","Sending set_group_portrait request");
             await SendApiMessage(new ApiRequest
             {
-                ApiType = APIType.SetGroupPortrait,
+                ApiRequestType = ApiRequestType.SetGroupPortrait,
                 ApiParams = new SetGroupPortraitParams
                 {
                     Gid       = gid,

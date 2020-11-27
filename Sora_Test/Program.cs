@@ -39,6 +39,7 @@ namespace Sora_Test
             server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                            {
                                                await eventArgs.SourceGroup.SendGroupMessage("好耶");
+                                               ConsoleLog.Debug("Login uid", eventArgs.SoraApi.GetLoginUserId());
                                            };
             //私聊消息事件
             server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>

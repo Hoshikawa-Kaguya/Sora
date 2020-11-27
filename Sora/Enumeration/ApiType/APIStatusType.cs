@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Sora.Enumeration.ApiEnum
+namespace Sora.Enumeration.ApiType
 {
     /// <summary>
     /// API返回值
