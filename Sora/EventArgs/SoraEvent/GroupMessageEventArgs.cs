@@ -6,7 +6,7 @@ using Sora.Entities.CQCodes;
 using Sora.Server.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
-using Sora.Enumeration.ApiEnum;
+using Sora.Enumeration.ApiType;
 
 namespace Sora.EventArgs.SoraEvent
 {

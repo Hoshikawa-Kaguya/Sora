@@ -130,22 +130,13 @@ namespace Sora.Server
                              {return;}   
 
                              //请求路径检查
-                             bool isLost;
-                             switch (role)
+                             bool isLost = role switch
                              {
-                                 case "Universal":
-                                     isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath);
-                                     break;
-                                 case "Event":
-                                     isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.EventPath);
-                                     break;
-                                 case "API":
-                                     isLost = !socket.ConnectionInfo.Path.Trim('/').Equals(Config.ApiPath);
-                                     break;
-                                 default:
-                                     isLost = false;
-                                     break;
-                             }
+                                 "Universal" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath),
+                                 "Event" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.EventPath),
+                                 "API" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.ApiPath),
+                                 _ => false
+                             };
                              if (isLost)
                              {
                                  socket.Close();

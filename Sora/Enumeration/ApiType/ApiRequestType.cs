@@ -1,8 +1,8 @@
 using System.ComponentModel;
 
-namespace Sora.Enumeration.ApiEnum
+namespace Sora.Enumeration.ApiType
 {
-    internal enum APIType
+    internal enum ApiRequestType
     {
         #region OnebotAPI
         /// <summary>

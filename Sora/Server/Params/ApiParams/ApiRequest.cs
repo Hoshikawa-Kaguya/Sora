@@ -1,6 +1,6 @@
 using System;
 using Newtonsoft.Json;
-using Sora.Enumeration.ApiEnum;
+using Sora.Enumeration.ApiType;
 using Sora.Server.Converter;
 
 namespace Sora.Server.Params.ApiParams
@@ -15,7 +15,7 @@ namespace Sora.Server.Params.ApiParams
         /// </summary>
         [JsonProperty(PropertyName = "action")]
         [JsonConverter(typeof(EnumDescriptionConverter))]
-        internal APIType ApiType { get; set; }
+        internal ApiRequestType ApiRequestType { get; set; }
 
         /// <summary>
         /// 请求标识符
