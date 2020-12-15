@@ -133,9 +133,7 @@ namespace Sora.Server
                              bool isLost = role switch
                              {
                                  "Universal" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath),
-                                 "Event" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.EventPath),
-                                 "API" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.ApiPath),
-                                 _ => false
+                                 _ => true
                              };
                              if (isLost)
                              {
