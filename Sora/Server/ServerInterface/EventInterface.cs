@@ -127,15 +127,11 @@ namespace Sora.Server.ServerInterface
                 default:
                     //尝试从响应中获取标识符
                     if (messageJson.TryGetValue("echo", out JToken echoJson) &&
-                        Guid.TryParse(echoJson.ToString(), out Guid echo)    &&
-                        //查找请求标识符是否存在
-                        ApiInterface.RequestList.Any(e => e.Echo.Equals(echo)))
+                        Guid.TryParse(echoJson.ToString(), out Guid echo))
                     {
                         //取出返回值中的数据
                         ApiInterface.GetResponse(echo, messageJson);
-                        break;
-                    }
-                    ConsoleLog.Debug("Sora",$"Unknown message :\r{messageJson}");
+                    }else ConsoleLog.Debug("Sora",$"Unknown message :\r{messageJson}");
                     break;
             }
         }
