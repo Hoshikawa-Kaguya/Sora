@@ -459,6 +459,23 @@ namespace Sora.Entities.Base
         }
 
         /// <summary>
+        /// 获取群@全体成员剩余次数
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="canAt"/> 是否可以@全体成员</para>
+        /// <para><see langword="groupRemain"/> 群内所有管理当天剩余@全体成员次数</para>
+        /// <para><see langword="botRemain"/> BOT当天剩余@全体成员次数</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, bool canAt, short groupRemain, short botRemain)>
+            GetGroupAtAllRemain(long groupId)
+        {
+            return ((APIStatusType apiStatus, bool canAt, short groupRemain, short botRemain)) await ApiInterface
+                .GetGroupAtAllRemain(groupId, this.ConnectionGuid);
+        }
+
+        /// <summary>
         /// 获取群文件资源链接
         /// </summary>
         /// <param name="groupId">群号</param>

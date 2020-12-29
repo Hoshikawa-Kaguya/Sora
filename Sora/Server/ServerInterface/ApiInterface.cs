@@ -14,6 +14,7 @@ using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Server.Params.GoApiParams;
 using Sora.Server.Params.ApiParams;
 using Sora.Entities;
+using Sora.Entities.Base;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Tool;
@@ -686,6 +687,36 @@ namespace Sora.Server.ServerInterface
             return retCode != 0
                 ? (retCode, null)
                 : (retCode, ret["data"]?["url"]?.ToString());
+        }
+
+        /// <summary>
+        /// 获取群@全体成员剩余次数
+        /// </summary>
+        /// <param name="gid">群号</param>
+        /// <param name="connection">连接标识</param>
+        /// <returns>配额信息</returns>
+        internal static async ValueTask<(int retCode, bool canAt, short groupRemain, short botRemain)>
+            GetGroupAtAllRemain(long gid, Guid connection)
+        {
+            ConsoleLog.Debug("Sora","Sending get_group_at_all_remain request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.GetGroupAtAllRemain,
+                ApiParams = new
+                {
+                    group_id = gid
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_at_all_remain response retcode={retCode}");
+            if (retCode != 0)
+                return (retCode, false, -1, -1);
+            else
+                return (retCode, Convert.ToBoolean(ret["data"]?["can_at_all"]),
+                        Convert.ToInt16(ret["data"]?["remain_at_all_count_for_group"]),
+                        Convert.ToInt16(ret["data"]?["remain_at_all_count_for_uin"]));
         }
         #endregion
         #endregion
