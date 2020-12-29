@@ -182,7 +182,12 @@ namespace Sora.Enumeration.ApiType
         /// 获取群文件资源链接
         /// </summary>
         [Description("get_group_file_url")]
-        GetGroupFileUrl
+        GetGroupFileUrl,
+        /// <summary>
+        /// 获取群@全体成员剩余次数
+        /// </summary>
+        [Description("get_group_at_all_remain")]
+        GetGroupAtAllRemain
         #endregion
     }
 }
