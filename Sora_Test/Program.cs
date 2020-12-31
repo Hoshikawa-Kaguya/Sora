@@ -38,12 +38,8 @@ namespace Sora_Test
             //群聊消息事件
             server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                            {
-                                               var atRemain =
-                                                   await eventArgs.SoraApi.GetGroupAtAllRemain(eventArgs.SourceGroup);
-                                               await eventArgs.SourceGroup
-                                                              .SendGroupMessage($"at:{atRemain.canAt}\n" +
-                                                                                    $"group remain:{atRemain.groupRemain}\n" +
-                                                                                    $"bot ramain:{atRemain.botRemain}");
+                                               int msgId = eventArgs.Message.MessageId;
+                                               var msg   = eventArgs.SoraApi.GetMessages(msgId);
                                                ConsoleLog.Debug("Login uid", eventArgs.SoraApi.GetLoginUserId());
                                            };
             //私聊消息事件
