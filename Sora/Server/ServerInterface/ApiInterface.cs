@@ -14,7 +14,6 @@ using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Server.Params.GoApiParams;
 using Sora.Server.Params.ApiParams;
 using Sora.Entities;
-using Sora.Entities.Base;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Tool;
@@ -274,10 +273,10 @@ namespace Sora.Server.ServerInterface
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupInfo,
-                ApiParams = new GetGroupInfoParams
+                ApiParams = new
                 {
-                    Gid     = gid,
-                    NoCache = !useCache
+                    group_id = gid,
+                    no_cache = !useCache
                 }
             }, connection);
             //处理API返回信息
@@ -309,11 +308,11 @@ namespace Sora.Server.ServerInterface
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMemberInfo,
-                ApiParams = new GetGroupMemberInfoParams
+                ApiParams = new
                 {
-                    Gid     = gid,
-                    Uid     = uid,
-                    NoCache = !useCache
+                    group_id = gid,
+                    user_id  = uid,
+                    no_cache = !useCache
                 }
             }, connection);
             //处理API返回信息
@@ -339,10 +338,10 @@ namespace Sora.Server.ServerInterface
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetStrangerInfo,
-                ApiParams = new GetStrangerInfoParams
+                ApiParams = new
                 {
-                    Uid     = uid,
-                    NoCache = !useCache
+                    user_id  = uid,
+                    no_cache = !useCache
                 }
             }, connection);
             //处理API返回信息
@@ -402,7 +401,7 @@ namespace Sora.Server.ServerInterface
         /// 获取客户端状态
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
-        internal static async ValueTask<(int retCode, bool online, bool good, JObject other)> GetStatus(Guid connection)
+        internal static async ValueTask<(int retCode, bool online, bool good, JObject statData)> GetStatus(Guid connection)
         {
             ConsoleLog.Debug("Sora","Sending get_status request");
             JObject ret = await SendApiRequest(new ApiRequest
@@ -416,7 +415,7 @@ namespace Sora.Server.ServerInterface
             return (retCode,
                     Convert.ToBoolean(ret["data"]?["online"]?.ToString() ?? "false"),
                     Convert.ToBoolean(ret["data"]?["good"]?.ToString()   ?? "false"),
-                    JObject.FromObject(ret["data"]));
+                    JObject.FromObject(ret["data"]?["stat"] ?? ret["data"]));
         }
 
         #region Go API
@@ -432,9 +431,9 @@ namespace Sora.Server.ServerInterface
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetImage,
-                ApiParams = new GetImageParams
+                ApiParams = new
                 {
-                    FileName = cacheFileName
+                    file = cacheFileName
                 }
             }, connection);
             //处理API返回信息
@@ -522,9 +521,9 @@ namespace Sora.Server.ServerInterface
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetForwardMessage,
-                ApiParams = new GetForwardParams
+                ApiParams = new
                 {
-                    MessageId = msgId
+                    message_id = msgId
                 }
             }, connection);
             //处理API返回信息
@@ -755,11 +754,11 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetFriendAddRequest,
-                ApiParams = new SetFriendAddRequestParams
+                ApiParams = new
                 {
-                    Flag    = flag,
-                    Approve = approve,
-                    Remark  = remark
+                    flag,
+                    approve,
+                    remark
                 }
             }, connection);
         }
@@ -805,11 +804,11 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupCard,
-                ApiParams = new SetGroupCardParams
+                ApiParams = new
                 {
-                    Gid  = gid,
-                    Uid  = uid,
-                    Card = card
+                    group_id = gid,
+                    user_id  = uid,
+                    card
                 }
             }, connection);
         }
@@ -827,12 +826,12 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupSpecialTitle,
-                ApiParams = new SetGroupSpecialTitleParams
+                ApiParams = new
                 {
-                    Gid      = gid,
-                    Uid      = uid,
-                    Title    = title,
-                    Duration = -1
+                    group_id      = gid,
+                    user_id       = uid,
+                    special_title = title,
+                    duration      = -1
                 }
             }, connection);
         }
@@ -850,11 +849,11 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupKick,
-                ApiParams = new SetGroupKickParams
+                ApiParams = new
                 {
-                    Gid              = gid,
-                    Uid              = uid,
-                    RejectAddRequest = rejectRequest
+                    group_id           = gid,
+                    user_id            = uid,
+                    reject_add_request = rejectRequest
                 }
             }, connection);
         }
@@ -872,11 +871,11 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupBan,
-                ApiParams = new SetGroupBanParams
+                ApiParams = new
                 {
-                    Gid      = gid,
-                    Uid      = uid,
-                    Duration = duration
+                    group_id = gid,
+                    user_id  = uid,
+                    duration
                 }
             }, connection);
         }
@@ -893,10 +892,10 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupWholeBan,
-                ApiParams = new SetGroupWholeBanParams
+                ApiParams = new
                 {
-                    Gid    = gid,
-                    Enable = enable
+                    group_id = gid,
+                    enable
                 }
             }, connection);
         }
@@ -914,11 +913,11 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAdmin,
-                ApiParams = new SetGroupAdminParams
+                ApiParams = new
                 {
-                    Gid    = gid,
-                    Uid    = uid,
-                    Enable = enable
+                    group_id = gid,
+                    user_id  = uid,
+                    enable
                 }
             }, connection);
         }
@@ -935,10 +934,10 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupLeave,
-                ApiParams = new SetGroupLeaveParams
+                ApiParams = new
                 {
-                    Gid = gid,
-                    Dismiss = dismiss
+                    group_id   = gid,
+                    is_dismiss = dismiss
                 }
             }, connection);
         }
@@ -990,10 +989,10 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendGroupForwardMsg,
-                ApiParams = new SendGroupForwardMsgParams
+                ApiParams = new
                 {
-                    GroupId     = gid,
-                    NodeMsgList = sendObj
+                    group_id = gid,
+                    messages = sendObj
                 }
             }, connection);
         }
@@ -1011,10 +1010,10 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupName,
-                ApiParams = new SetGroupNameParams
+                ApiParams = new
                 {
-                    Gid       = gid,
-                    GroupName = name
+                    group_id   = gid,
+                    group_name = name
                 }
             }, connection);
         }
@@ -1033,11 +1032,11 @@ namespace Sora.Server.ServerInterface
             await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupPortrait,
-                ApiParams = new SetGroupPortraitParams
+                ApiParams = new
                 {
-                    Gid       = gid,
-                    ImageFile = file,
-                    UseCache  = useCache ? 1 : 0
+                    group_id = gid,
+                    file,
+                    cache    = useCache ? 1 : 0
                 }
             }, connection);
         }
