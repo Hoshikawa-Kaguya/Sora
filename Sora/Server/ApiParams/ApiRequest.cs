@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Sora.Enumeration.ApiType;
 using Sora.Server.Converter;
 
-namespace Sora.Server.Params.ApiParams
+namespace Sora.Server.ApiParams
 {
     /// <summary>
     /// API请求类

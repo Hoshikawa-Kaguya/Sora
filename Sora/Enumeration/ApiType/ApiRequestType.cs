@@ -187,7 +187,12 @@ namespace Sora.Enumeration.ApiType
         /// 获取群@全体成员剩余次数
         /// </summary>
         [Description("get_group_at_all_remain")]
-        GetGroupAtAllRemain
+        GetGroupAtAllRemain,
+        /// <summary>
+        /// 调用腾讯的OCR接口
+        /// </summary>
+        [Description("ocr_image")]
+        Ocr
         #endregion
     }
 }

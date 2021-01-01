@@ -4,7 +4,7 @@ using Sora.Server.ApiMessageParse;
 using Sora.Server.Converter;
 using Sora.Enumeration.EventParamsType;
 
-namespace Sora.Server.Params.ApiParams
+namespace Sora.Server.ApiParams
 {
     /// <summary>
     /// 发送消息调用参数

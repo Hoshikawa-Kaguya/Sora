@@ -11,8 +11,7 @@ using Sora.Server.ApiMessageParse;
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
 using Sora.Entities.CQCodes.CQCodeModel;
-using Sora.Server.Params.GoApiParams;
-using Sora.Server.Params.ApiParams;
+using Sora.Server.ApiParams;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
@@ -716,6 +715,36 @@ namespace Sora.Server.ServerInterface
                 return (retCode, Convert.ToBoolean(ret["data"]?["can_at_all"]),
                         Convert.ToInt16(ret["data"]?["remain_at_all_count_for_group"]),
                         Convert.ToInt16(ret["data"]?["remain_at_all_count_for_uin"]));
+        }
+
+        /// <summary>
+        /// 图片 OCR
+        /// </summary>
+        /// <param name="imgId">图片ID</param>
+        /// <param name="connection">连接标识</param>
+        /// <returns>文字识别信息</returns>
+        internal static async ValueTask<(int retCode, List<TextDetection> texts, string lang)> OcrImage(
+            string imgId, Guid connection)
+        {
+            ConsoleLog.Debug("Sora","Sending ocr_image request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.Ocr,
+                ApiParams = new
+                {
+                    image = imgId
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get ocr_image response retcode={retCode}");
+            
+            if (retCode != 0)
+                return (retCode, new List<TextDetection>(), string.Empty);
+            else
+                return (retCode, ret["data"]?["texts"]?.ToObject<List<TextDetection>>(),
+                        ret["data"]?["language"]?.ToString());
         }
         #endregion
         #endregion
