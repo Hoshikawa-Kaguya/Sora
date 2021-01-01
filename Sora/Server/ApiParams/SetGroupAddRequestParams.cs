@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using Sora.Enumeration.EventParamsType;
 using Sora.Server.Converter;
 
-namespace Sora.Server.Params.ApiParams
+namespace Sora.Server.ApiParams
 {
     /// <summary>
     /// 处理加群请求/邀请参数

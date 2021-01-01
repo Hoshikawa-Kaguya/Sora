@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.Server;
+using Sora.Server.ApiParams;
 using Sora.Server.ServerInterface;
 
 namespace Sora.Entities.Base
@@ -488,6 +490,21 @@ namespace Sora.Entities.Base
             return ((APIStatusType apiStatus, string fileUrl))
                 await ApiInterface.GetGroupFileUrl(groupId, fileId, busid, this.ConnectionGuid);
         }
+
+        /// <summary>
+        /// OCR图片
+        /// </summary>
+        /// <param name="imageId">图片ID</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="texts"/> 识别结果</para>
+        /// <para><see langword="language"/> 识别语言</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType retCode, List<TextDetection> texts, string lang)> OcrImage(string imageId)
+        {
+            return ((APIStatusType retCode, List<TextDetection> texts, string lang))
+                await ApiInterface.OcrImage(imageId, this.ConnectionGuid);
+        }
         #endregion
 
         #endregion
@@ -648,16 +665,16 @@ namespace Sora.Entities.Base
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see langword="online"/> 客户端是否在线</para>
         /// <para><see langword="good"/> 客户端是否正常运行</para>
+        /// <para><see langword="statData"/> 统计信息，如为go-cqhttp详细内容参照文档：https://ishkong.github.io/go-cqhttp-docs/api/#%E8%8E%B7%E5%8F%96%E7%8A%B6%E6%80%81</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, bool online, bool good)> GetStatus()
+        public async ValueTask<(APIStatusType apiStatus, bool online, bool good, JObject )> GetStatus()
         {
-            (int retCode, bool online, bool good, _) = await ApiInterface.GetStatus(this.ConnectionGuid);
-            return ((APIStatusType) retCode, online, good);
+            return ((APIStatusType apiStatus, bool online, bool good, JObject statData))
+                await ApiInterface.GetStatus(this.ConnectionGuid);
         }
 
         /// <summary>
         /// 重启客户端
-        /// 对go无效
         /// </summary>
         /// <param name="delay">延迟(ms)</param>
         public async ValueTask RebootClient(int delay = 0)
