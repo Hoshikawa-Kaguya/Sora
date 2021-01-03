@@ -118,7 +118,7 @@ namespace Sora.Entities
         /// <param name="nodeList">
         /// 节点(<see cref="Node"/>)消息段列表
         /// </param>
-        public async ValueTask SendGroupForwardMsg(List<Node> nodeList)
+        public async ValueTask SendGroupForwardMsg(List<CustomNode> nodeList)
         {
             await base.SoraApi.SendGroupForwardMsg(this.Id, nodeList);
         }

@@ -42,6 +42,7 @@ namespace Sora.EventArgs.SoraEvent
         internal PrivateMessageEventArgs(Guid connectionGuid, string eventName, ApiPrivateMsgEventArgs privateMsgArgs)
             : base(connectionGuid, eventName, privateMsgArgs.SelfID, privateMsgArgs.Time)
         {
+            //将api消息段转换为CQ码
             this.Message = new Message(connectionGuid, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
                                        MessageParse.ParseMessageList(privateMsgArgs.MessageList),
                                        privateMsgArgs.Time, privateMsgArgs.Font);

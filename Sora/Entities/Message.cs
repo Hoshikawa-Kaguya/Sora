@@ -101,6 +101,22 @@ namespace Sora.Entities
                               .Select(cq => (Image) cq.CQData)
                               .ToList();
         }
+
+        /// <summary>
+        /// 是否是转发消息
+        /// </summary>
+        public bool IsForwardMessage()
+        {
+            return MessageList.Count == 1 && MessageList.First().Function == CQFunction.Forward;
+        }
+
+        /// <summary>
+        /// 获取合并转发的ID
+        /// </summary>
+        public string GetForwardMsgId()
+        {
+            return IsForwardMessage() ? ((Forward) MessageList.First().CQData).MessageId : null;
+        }
         #endregion
 
         #region 转换方法

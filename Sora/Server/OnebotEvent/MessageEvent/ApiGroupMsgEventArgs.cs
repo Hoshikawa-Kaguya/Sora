@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Sora.Entities;
 using Sora.Entities.Info;
 
 namespace Sora.Server.OnebotEvent.MessageEvent
@@ -17,8 +18,8 @@ namespace Sora.Server.OnebotEvent.MessageEvent
         /// <summary>
         /// 匿名信息
         /// </summary>
-        [JsonProperty(PropertyName = "anonymous")]
-        internal object Anonymous { get; set; }
+        [JsonProperty(PropertyName = "anonymous", NullValueHandling = NullValueHandling.Ignore)]
+        internal Anonymous Anonymous { get; set; }
 
         /// <summary>
         /// 发送人信息

@@ -91,6 +91,11 @@ namespace Sora.Enumeration.ApiType
         [Description("set_group_whole_ban")]
         SetGroupWholeBan,
         /// <summary>
+        /// 群组匿名用户禁言
+        /// </summary>
+        [Description("set_group_anonymous_ban")]
+        SetGroupAnonymousBan,
+        /// <summary>
         /// 设置群管理员
         /// </summary>
         [Description("set_group_admin")]
@@ -146,7 +151,7 @@ namespace Sora.Enumeration.ApiType
         /// <summary>
         /// 发送合并转发(群)
         /// </summary>
-        [Description("send_group_forward_msg ")]
+        [Description("send_group_forward_msg")]
         SendGroupForwardMsg,
         /// <summary>
         /// 设置群头像
