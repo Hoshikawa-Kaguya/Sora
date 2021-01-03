@@ -187,6 +187,9 @@ namespace Sora.Server
             ConsoleLog.Info("Sora",$"Sora 服务端框架版本:{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
 
             serverExitis = true;
+
+            ConsoleLog.Debug("好耶","这是一个奇奇怪怪的开发者交流群：1081190562");
+
             await Task.Delay(-1);
         }
         /// <summary>
