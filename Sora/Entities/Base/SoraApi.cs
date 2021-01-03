@@ -186,7 +186,7 @@ namespace Sora.Entities.Base
         /// <param name="nodeList">
         /// 节点(<see cref="Node"/>)消息段列表
         /// </param>
-        public async ValueTask SendGroupForwardMsg(long groupId, List<Node> nodeList)
+        public async ValueTask SendGroupForwardMsg(long groupId, List<CustomNode> nodeList)
         {
             if(groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if(nodeList == null || nodeList.Count == 0) throw new NullReferenceException(nameof(nodeList));
@@ -299,6 +299,36 @@ namespace Sora.Entities.Base
             if (groupId is < 100000 || userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
             await ApiInterface.SetGroupBan(this.ConnectionGuid, groupId, userId, 0);
+        }
+
+        /// <summary>
+        /// 群组匿名用户禁言
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="anonymous">匿名用户对象</param>
+        /// <param name="duration">禁言时长, 单位秒</param>
+        public async ValueTask EnableGroupAnonymousMute(long groupId, Anonymous anonymous, long duration)
+        {
+            if (groupId is < 100000 || duration < 60)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(duration)} out of range");
+            if(anonymous == null) 
+                throw new NullReferenceException("anonymous is null");
+            await ApiInterface.SetAnonymousBan(this.ConnectionGuid, groupId, anonymous, duration);
+        }
+
+        /// <summary>
+        /// 群组匿名用户禁言
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="anonymousFlag">匿名用户Flag</param>
+        /// <param name="duration">禁言时长, 单位秒</param>
+        public async ValueTask EnableGroupAnonymousMute(long groupId, string anonymousFlag, long duration)
+        {
+            if (groupId is < 100000 || duration < 60)
+                throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(duration)} out of range");
+            if(anonymousFlag == null) 
+                throw new NullReferenceException("anonymousFlag is null");
+            await ApiInterface.SetAnonymousBan(this.ConnectionGuid, groupId, anonymousFlag, duration);
         }
 
         /// <summary>

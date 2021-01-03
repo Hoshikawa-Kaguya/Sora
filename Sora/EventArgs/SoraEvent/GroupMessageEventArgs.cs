@@ -40,6 +40,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 消息来源群组实例
         /// </summary>
         public Group SourceGroup { get; private set; }
+
+        /// <summary>
+        /// 匿名用户实例
+        /// </summary>
+        public Anonymous Anonymous { get; private set; }
         #endregion
 
         #region 构造函数
@@ -52,13 +57,15 @@ namespace Sora.EventArgs.SoraEvent
         internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs
         ) : base(connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
         {
-            this.IsAnonymousMessage = groupMsgArgs.Anonymous == null;
+            this.IsAnonymousMessage = groupMsgArgs.Anonymous != null;
+            //将api消息段转换为CQ码
             this.Message = new Message(connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
                                        MessageParse.ParseMessageList(groupMsgArgs.MessageList), groupMsgArgs.Time,
                                        groupMsgArgs.Font);
-            this.Sender             = new User(connectionGuid, groupMsgArgs.UserId);
-            this.SourceGroup        = new Group(connectionGuid, groupMsgArgs.GroupId);
-            this.SenderInfo         = groupMsgArgs.SenderInfo;
+            this.Sender      = new User(connectionGuid, groupMsgArgs.UserId);
+            this.SourceGroup = new Group(connectionGuid, groupMsgArgs.GroupId);
+            this.SenderInfo  = groupMsgArgs.SenderInfo;
+            this.Anonymous   = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
         }
         #endregion
 

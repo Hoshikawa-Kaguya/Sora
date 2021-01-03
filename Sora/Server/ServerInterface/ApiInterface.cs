@@ -746,6 +746,42 @@ namespace Sora.Server.ServerInterface
                 return (retCode, ret["data"]?["texts"]?.ToObject<List<TextDetection>>(),
                         ret["data"]?["language"]?.ToString());
         }
+
+        /// <summary>
+        /// 发送合并转发(群)
+        /// 但好像不能用的样子
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="msgList">消息段数组</param>
+        internal static async ValueTask SendGroupForwardMsg(Guid connection, long gid, List<CustomNode> msgList)
+        {
+            ConsoleLog.Debug("Sora","Sending send_group_forward_msg request");
+            //处理发送消息段
+            List<object> dataObj = new List<object>();
+            foreach (CustomNode node in msgList)
+            {
+                dataObj.Add(new
+                {
+                    type = "node",
+                    data = node
+                });
+            }
+            //发送消息
+            var ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.SendGroupForwardMsg,
+                ApiParams = new
+                {
+                    group_id = gid.ToString(),
+                    messages = dataObj
+                }
+            }, connection);
+
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get send_group_forward_msg response retcode={retCode}");
+        }
         #endregion
         #endregion
 
@@ -930,6 +966,50 @@ namespace Sora.Server.ServerInterface
         }
 
         /// <summary>
+        /// 群组匿名用户禁言
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="anonymous">匿名用户对象</param>
+        /// <param name="duration">禁言时长, 单位秒</param>
+        internal static async ValueTask SetAnonymousBan(Guid connection, long gid, Anonymous anonymous, long duration)
+        {
+            ConsoleLog.Debug("Sora", "Sending set_group_anonymous_ban request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
+                ApiParams = new
+                {
+                    group_id = gid,
+                    anonymous,
+                    duration
+                }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 群组匿名用户禁言
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="anonymousFlag">匿名用户flag</param>
+        /// <param name="duration">禁言时长, 单位秒</param>
+        internal static async ValueTask SetAnonymousBan(Guid connection, long gid, string anonymousFlag, long duration)
+        {
+            ConsoleLog.Debug("Sora", "Sending set_group_anonymous_ban request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
+                ApiParams = new
+                {
+                    group_id = gid,
+                    flag = anonymousFlag,
+                    duration
+                }
+            }, connection);
+        }
+
+        /// <summary>
         /// 设置群管理员
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
@@ -990,42 +1070,6 @@ namespace Sora.Server.ServerInterface
         }
 
         #region Go API
-        /// <summary>
-        /// 发送合并转发(群)
-        /// 但好像不能用的样子
-        /// </summary>
-        /// <param name="connection">服务器连接标识</param>
-        /// <param name="gid">群号</param>
-        /// <param name="msgList">消息段数组</param>
-        internal static async ValueTask SendGroupForwardMsg(Guid connection, long gid, List<Node> msgList)
-        {
-            ConsoleLog.Debug("Sora","Sending send_group_forward_msg request");
-            List<object> sendObj = new List<object>();
-            //处理消息节点
-            foreach (Node node in msgList)
-            {
-                sendObj.Add(new
-                {
-                    type = "node",
-                    data = new
-                    {
-                        name    = node.Sender.Nick,
-                        uin     = node.Sender.Uid.ToString(),
-                        content = node.MessageList
-                    }
-                });
-            }
-            await SendApiMessage(new ApiRequest
-            {
-                ApiRequestType = ApiRequestType.SendGroupForwardMsg,
-                ApiParams = new
-                {
-                    group_id = gid,
-                    messages = sendObj
-                }
-            }, connection);
-        }
-
         /// <summary>
         /// 设置群名
         /// </summary>
