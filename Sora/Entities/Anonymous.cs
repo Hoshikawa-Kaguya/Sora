@@ -7,6 +7,7 @@ namespace Sora.Entities
     /// </summary>
     public class Anonymous
     {
+        #region 属性
         /// <summary>
         /// 匿名用户 flag
         /// </summary>
@@ -24,5 +25,13 @@ namespace Sora.Entities
         /// </summary>
         [JsonProperty(PropertyName = "name")]
         public string Name { get; internal set; }
+        #endregion
+
+        #region 构造函数
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        internal Anonymous() {}
+        #endregion
     }
 }
