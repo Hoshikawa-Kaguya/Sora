@@ -12,13 +12,20 @@ namespace Sora.Entities
         /// X
         /// </summary>
         [JsonProperty(PropertyName = "x")]
-        public int X { get; set; }
+        public int X { get; internal set; }
 
         /// <summary>
         /// Y
         /// </summary>
         [JsonProperty(PropertyName = "y")]
-        public int Y { get; set; }
+        public int Y { get; internal set; }
+        #endregion
+
+        #region 构造函数
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        internal Vector2() {}
         #endregion
     }
 }

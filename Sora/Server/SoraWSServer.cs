@@ -36,12 +36,12 @@ namespace Sora.Server
         /// <summary>
         /// 事件接口
         /// </summary>
-        public EventInterface Event { get; set; }
+        public EventInterface Event { get; private set; }
 
         /// <summary>
         /// 服务器连接管理器
         /// </summary>
-        public ConnectionManager ConnManager { get; set; }
+        public ConnectionManager ConnManager { get; private set; }
         #endregion
 
         #region 私有字段
