@@ -480,6 +480,8 @@ namespace Sora.Entities.CQCodes
             if (string.IsNullOrEmpty(dataStr)) return (null, false);
             var isMatch = false;
             dataStr = dataStr.Replace('\\', '/');
+            //当字符串太长时跳过正则检查
+            if (dataStr.Length > 1000) return (dataStr, true);
             for (var i = 0; i < 5; i++)
             {
                 isMatch |= FileRegices[i].IsMatch(dataStr);
