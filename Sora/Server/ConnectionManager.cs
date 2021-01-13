@@ -189,6 +189,7 @@ namespace Sora.Server
         internal static void HeartBeatUpdate(Guid connectionGuid)
         {
            int connectionIndex = ConnectionList.FindIndex(conn => conn.ConnectionGuid == connectionGuid);
+           if(connectionIndex == -1) return;
            var connection      = ConnectionList[connectionIndex];
            connection.LastHeartBeatTime    = Utils.GetNowTimeStamp();
            ConnectionList[connectionIndex] = connection;

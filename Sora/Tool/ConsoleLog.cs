@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Text;
 using System.Threading;
 using Sora.Enumeration;
@@ -28,7 +27,7 @@ namespace Sora.Tool
         #endregion
 
         #region 控制台锁
-        private static object ConsoleWriterLock = new();
+        private static readonly object ConsoleWriterLock = new();
         #endregion
 
         #region 格式化错误Log
@@ -64,9 +63,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Info(object type, object message)
         {
+            if (Level > LogLevel.Info) return;
             lock (ConsoleWriterLock)
             {
-                if (Level > LogLevel.Info) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"[{DateTime.Now}][INFO][{type}]{message}");
             }
@@ -79,9 +78,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Warning(object type, object message)
         {
+            if (Level > LogLevel.Warn) return;
             lock (ConsoleWriterLock)
             {
-                if (Level > LogLevel.Warn) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write($"[{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -101,9 +100,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Error(object type, object message)
         {
+            if (Level > LogLevel.Error) return;
             lock (ConsoleWriterLock)
             {
-                if (Level > LogLevel.Error) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write($"[{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -123,9 +122,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Fatal(object type, object message)
         {
+            if (Level > LogLevel.Fatal) return;
             lock (ConsoleWriterLock)
             {
-                if (Level > LogLevel.Fatal) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write($"[{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -145,9 +144,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Debug(object type, object message)
         {
+            if (Level != LogLevel.Debug) return;
             lock (ConsoleWriterLock)
             {
-                if (Level != LogLevel.Debug) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write($"[{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -174,7 +173,7 @@ namespace Sora.Tool
                 errorLogBuilder.Append("，服务器将停止运行");
             errorLogBuilder.Append("，错误信息:");
             errorLogBuilder
-                .Append(ConsoleLog.ErrorLogBuilder(args.ExceptionObject as Exception));
+                .Append(ErrorLogBuilder(args.ExceptionObject as Exception));
             Fatal("Sora",errorLogBuilder);
             Warning("Sora","将在5s后自动退出");
             Thread.Sleep(5000);

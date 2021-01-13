@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Sora.Server.Converter;
 
 namespace Sora.Entities.CQCodes.CQCodeModel
 {
