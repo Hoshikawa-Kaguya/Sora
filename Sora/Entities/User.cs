@@ -70,8 +70,9 @@ namespace Sora.Entities
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see cref="UserInfo"/> 群成员信息</para>
+        /// <para><see cref="string"/> qid</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, UserInfo userInfo)> GetUserInfo(bool useCache = true)
+        public async Task<(APIStatusType apiStatus, UserInfo userInfo, string qid)> GetUserInfo(bool useCache = true)
         {
             return await base.SoraApi.GetUserInfo(this.Id, useCache);
         }
