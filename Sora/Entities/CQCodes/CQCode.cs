@@ -185,7 +185,6 @@ namespace Sora.Entities.CQCodes
         /// <param name="useCache">是否使用已缓存的文件</param>
         /// <param name="useProxy">是否通过代理下载文件</param>
         /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
-        [Obsolete]
         public static CQCode CQVideo(string data, bool useCache = true, bool useProxy = true, int? timeout = null)
         {
             (string dataStr, bool isDataStr) = ParseDataStr(data);

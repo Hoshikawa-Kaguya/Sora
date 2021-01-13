@@ -37,7 +37,6 @@ namespace Sora.Enumeration
         /// <summary>
         /// 短视频
         /// </summary>
-        [Obsolete]
         [Description("video")]
         Video,
         /// <summary>	
@@ -74,13 +73,6 @@ namespace Sora.Enumeration
         /// </summary>
         [Description("poke")]
         Poke,
-        /// <summary>
-        /// <para>合并转发节点</para>
-        /// <para>也可能是自定义节点</para>
-        /// <para>只能发送</para>
-        /// </summary>
-        [Description("node")]
-        Node,
         /// <summary>
         /// XML 消息
         /// </summary>
