@@ -1,7 +1,8 @@
 using System;
+using System.IO;
 using System.Text;
 using System.Threading;
-using Fleck;
+using Sora.Enumeration;
 
 namespace Sora.Tool
 {
@@ -24,6 +25,10 @@ namespace Sora.Tool
         /// 禁用log
         /// </summary>
         public static void SetNoLog() => Level = (LogLevel) 5;
+        #endregion
+
+        #region 控制台锁
+        private static object ConsoleWriterLock = new();
         #endregion
 
         #region 格式化错误Log
@@ -59,8 +64,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Info(object type, object message)
         {
-            if (Level <= LogLevel.Info)
+            lock (ConsoleWriterLock)
             {
+                if (Level > LogLevel.Info) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"[{DateTime.Now}][INFO][{type}]{message}");
             }
@@ -73,8 +79,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Warning(object type, object message)
         {
-            if (Level <= LogLevel.Warn)
+            lock (ConsoleWriterLock)
             {
+                if (Level > LogLevel.Warn) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write($"[{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -94,8 +101,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Error(object type, object message)
         {
-            if (Level <= LogLevel.Error)
+            lock (ConsoleWriterLock)
             {
+                if (Level > LogLevel.Error) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write($"[{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -115,8 +123,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Fatal(object type, object message)
         {
-            if (Level <= LogLevel.Error)
+            lock (ConsoleWriterLock)
             {
+                if (Level > LogLevel.Fatal) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write($"[{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -136,8 +145,9 @@ namespace Sora.Tool
         /// <param name="message">信息内容</param>
         public static void Debug(object type, object message)
         {
-            if (Level == LogLevel.Debug)
+            lock (ConsoleWriterLock)
             {
+                if (Level != LogLevel.Debug) return;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write($"[{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.Cyan;
