@@ -1,4 +1,3 @@
-using System;
 using Newtonsoft.Json;
 using Sora.Server.Converter;
 
@@ -7,7 +6,6 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     /// <summary>
     /// 短视频
     /// </summary>
-    [Obsolete]
     public struct Video
     {
         #region 属性
