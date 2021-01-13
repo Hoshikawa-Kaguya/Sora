@@ -30,23 +30,22 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// <summary>
         /// 只在通过网络 URL 发送时有效，表示是否使用已缓存的文件
         /// </summary>
-        [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "cache", NullValueHandling = NullValueHandling.Ignore)]
         public int? UseCache { get; internal set; }
 
         /// <summary>
-        /// 只在通过网络 URL 发送时有效，表示是否通过代理下载文件
+        /// 通过网络下载图片时的线程数，默认单线程。
         /// </summary>
-        [JsonConverter(typeof(StringConverter))]
-        [JsonProperty(PropertyName = "proxy", NullValueHandling = NullValueHandling.Ignore)]
-        public int? UseProxy { get; internal set; } 
+        [JsonProperty(PropertyName = "c", NullValueHandling = NullValueHandling.Ignore)]
+        public int? ThreadCount { get; internal set; } 
 
         /// <summary>
-        /// 只在通过网络 URL 发送时有效（s）
+        /// 发送秀图时的特效id，默认为40000
         /// </summary>
-        [JsonConverter(typeof(StringConverter))]
-        [JsonProperty(PropertyName = "timeout", NullValueHandling = NullValueHandling.Ignore)]
-        public int? Timeout { get; internal set; }
+        [JsonProperty(PropertyName = "id", NullValueHandling = NullValueHandling.Ignore)]
+        public int? Id { get; internal set; }
+
+
         #endregion
     }
 }
