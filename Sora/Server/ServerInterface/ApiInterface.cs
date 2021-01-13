@@ -469,7 +469,7 @@ namespace Sora.Server.ServerInterface
             return (retCode,
                     new Message(connection,
                                 msgId,
-                                ret["data"]?["content"]?.ToString(),
+                                ret["data"]?["raw_message"]?.ToString(),
                                 new List<CQCode>(),
                                 Convert.ToInt64(ret["data"]?["time"] ?? -1),
                                 0),
