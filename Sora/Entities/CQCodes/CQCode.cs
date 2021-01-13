@@ -125,12 +125,9 @@ namespace Sora.Entities.CQCodes
         /// 图片CQ码
         /// </summary>
         /// <param name="data">图片名/绝对路径/URL/base64</param>
-        /// <param name="isFlash">是否为闪照，默认为<see langword="false"/></param>
         /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
-        /// <param name="useProxy">通过URL发送时有效,是否通过代理下载文件</param>
-        /// <param name="timeout">通过URL发送时有效,超时时间，默认为<see langword="null"/>(不超时)</param>
-        public static CQCode CQImage(string data, bool isFlash = false, bool useCache = true, bool useProxy = true,
-                                     int? timeout = null)
+        /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
+        public static CQCode CQImage(string data, bool useCache = true, int? threadCount = null)
         {
             if(string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             (string dataStr, bool isDataStr) = ParseDataStr(data);
@@ -139,14 +136,40 @@ namespace Sora.Entities.CQCodes
                 ConsoleLog.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
+
             return new CQCode(CQFunction.Image,
                               new Image
                               {
-                                  ImgFile  = dataStr,
-                                  ImgType  = isFlash ? "flash" : string.Empty,
-                                  UseCache = useCache ? 1 : 0,
-                                  UseProxy = useProxy ? 1 : 0,
-                                  Timeout  = timeout
+                                  ImgFile     = dataStr,
+                                  ImgType     = string.Empty,
+                                  UseCache    = useCache ? 1 : 0,
+                                  ThreadCount = threadCount
+                              });
+        }
+
+        /// <summary>
+        /// 闪照CQ码
+        /// </summary>
+        /// <param name="data">图片名/绝对路径/URL/base64</param>
+        /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
+        /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
+        public static CQCode CQFlashImage(string data, bool useCache = true, int? threadCount = null)
+        {
+            if(string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
+            (string dataStr, bool isDataStr) = ParseDataStr(data);
+            if (!isDataStr)
+            {
+                ConsoleLog.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
+                return CQIlleage();
+            }
+
+            return new CQCode(CQFunction.Image,
+                              new Image
+                              {
+                                  ImgFile     = dataStr,
+                                  ImgType     = "flash",
+                                  UseCache    = useCache ? 1 : 0,
+                                  ThreadCount = threadCount
                               });
         }
 
@@ -155,10 +178,9 @@ namespace Sora.Entities.CQCodes
         /// </summary>
         /// <param name="data">图片名/绝对路径/URL/base64</param>
         /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
-        /// <param name="useProxy">通过URL发送时有效,是否通过代理下载文件</param>
-        /// <param name="timeout">通过URL发送时有效,超时时间，默认为<see langword="null"/>(不超时)</param>
-        public static CQCode CQShowImage(string data, bool useCache = true, bool useProxy = true,
-                                         int? timeout = null)
+        /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
+        /// <param name="id">秀图特效id，默认为40000</param>
+        public static CQCode CQShowImage(string data, int id = 40000, bool useCache = true, int? threadCount = null)
         {
             if(string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             (string dataStr, bool isDataStr) = ParseDataStr(data);
@@ -167,14 +189,15 @@ namespace Sora.Entities.CQCodes
                 ConsoleLog.Error("CQCode|CQShowImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
+
             return new CQCode(CQFunction.Image,
                               new Image
                               {
-                                  ImgFile  = dataStr,
-                                  ImgType  = "show",
-                                  UseCache = useCache ? 1 : 0,
-                                  UseProxy = useProxy ? 1 : 0,
-                                  Timeout  = timeout
+                                  ImgFile     = dataStr,
+                                  ImgType     = "show",
+                                  UseCache    = useCache ? 1 : 0,
+                                  Id          = id,
+                                  ThreadCount = threadCount
                               });
         }
 
