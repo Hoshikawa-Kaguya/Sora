@@ -220,10 +220,13 @@ namespace Sora.Entities.Base
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see cref="Message"/> 消息内容</para>
         /// <para><see cref="User"/> 发送者</para>
+        /// <para><see cref="Group"/> 消息来源群，如果不是群消息则为空</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, Message message, User sender, int realId, bool isGroupMsg)> GetMessages(int messageId)
+        public async
+            ValueTask<(APIStatusType apiStatus, Message message, User sender, Group sourceGroup,
+                int realId, bool isGroupMsg)> GetMessages(int messageId)
         {
-            return ((APIStatusType apiStatus, Message message, User sender, int realId, bool isGroupMsg))
+            return ((APIStatusType apiStatus, Message message, User sender, Group sourceGroup, int realId, bool isGroupMsg)) 
                 await ApiInterface.GetMessage(this.ConnectionGuid, messageId);
         }
         #endregion

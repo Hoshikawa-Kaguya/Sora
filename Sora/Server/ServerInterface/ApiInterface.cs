@@ -450,7 +450,7 @@ namespace Sora.Server.ServerInterface
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="msgId">消息ID</param>
-        internal static async ValueTask<(int retCode, Message message, User sender, int realId, bool isGroupMsg)> GetMessage(
+        internal static async ValueTask<(int retCode, Message message, User sender, Group sourceGroup, int realId, bool isGroupMsg)> GetMessage(
             Guid connection, int msgId)
         {
             ConsoleLog.Debug("Sora","Sending get_msg request");
@@ -465,16 +465,20 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_msg response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null, null, 0, false);
+            if (retCode != 0 || ret["data"] == null) return (retCode, null, null, null, 0, false);
             return (retCode,
                     new Message(connection,
                                 msgId,
                                 ret["data"]?["content"]?.ToString(),
-                                new List<CQCode>(),
+                                MessageParse.ParseMessageList(ret["data"]?["message"]?.ToObject<List<ApiMessage>>()),
                                 Convert.ToInt64(ret["data"]?["time"] ?? -1),
                                 0),
                     new User(connection,
                              Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)),
+                    //判断响应数据中是否有群组信息
+                    (ret["data"]?["message_type"]?.ToString() ?? string.Empty).Equals("group")
+                        ? new Group(connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
+                        : null,
                     Convert.ToInt32(ret["data"]?["real_id"] ?? 0),
                     Convert.ToBoolean(ret["data"]?["group"] ?? false));
         }
