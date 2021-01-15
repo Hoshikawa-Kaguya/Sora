@@ -6,8 +6,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Sora.Server.ApiMessageParse;
+using Newtonsoft.Json.Linq
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
 using Sora.Entities.CQCodes.CQCodeModel;
@@ -66,7 +65,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", "Sending send_msg(Private) request");
             if(messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //转换消息段列表
-            List<ApiMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
+            List<MessageElement> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
@@ -102,7 +101,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", "Sending send_msg(Group) request");
             if(messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //转换消息段列表
-            List<ApiMessage> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
+            List<MessageElement> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
