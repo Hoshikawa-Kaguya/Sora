@@ -387,7 +387,7 @@ namespace Sora.Entities.CQCodes
         /// <param name="content">JObject实例</param>
         public static CQCode CQJson(JObject content)
         {
-            if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
+            if (content == null) throw new NullReferenceException(nameof(content));
             return new CQCode(CQFunction.Json,
                               new Code
                               {

@@ -6,7 +6,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq
+using Newtonsoft.Json.Linq;
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
 using Sora.Entities.CQCodes.CQCodeModel;
