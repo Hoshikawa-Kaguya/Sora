@@ -330,7 +330,7 @@ namespace Sora.Server.ServerInterface
         /// <param name="uid">用户ID</param>
         /// <param name="useCache"></param>
         /// <returns></returns>
-        internal static async ValueTask<(int retCode, UserInfo userInfo)> GetUserInfo(
+        internal static async ValueTask<(int retCode, UserInfo userInfo, string qid)> GetUserInfo(
             Guid connection, long uid, bool useCache)
         {
             ConsoleLog.Debug("Sora","Sending get_stranger_info request");
@@ -346,7 +346,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_stranger_info response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, new UserInfo());
+            if (retCode != 0 || ret["data"] == null) return (retCode, new UserInfo(), string.Empty);
             return (retCode, new UserInfo
             {
                 UserId    = Convert.ToInt64(ret["data"]?["user_id"] ?? -1),
@@ -355,7 +355,7 @@ namespace Sora.Server.ServerInterface
                 Sex       = ret["data"]?["sex"]?.ToString(),
                 Level     = Convert.ToInt32(ret["data"]?["level"]      ?? -1),
                 LoginDays = Convert.ToInt32(ret["data"]?["login_days"] ?? -1)
-            });
+            }, ret["data"]?["qid"]?.ToString());
         }
 
         /// <summary>
@@ -469,8 +469,8 @@ namespace Sora.Server.ServerInterface
             return (retCode,
                     new Message(connection,
                                 msgId,
-                                ret["data"]?["content"]?.ToString(),
-                                MessageParse.ParseMessageList(ret["data"]?["message"]?.ToObject<List<ApiMessage>>()),
+                                ret["data"]?["raw_message"]?.ToString(),
+                                new List<CQCode>(),
                                 Convert.ToInt64(ret["data"]?["time"] ?? -1),
                                 0),
                     new User(connection,
@@ -480,7 +480,7 @@ namespace Sora.Server.ServerInterface
                         ? new Group(connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
                         : null,
                     Convert.ToInt32(ret["data"]?["real_id"] ?? 0),
-                    Convert.ToBoolean(ret["data"]?["group"] ?? false));
+                    Convert.ToBoolean(ret["data"]?["message_type"]?.ToString().Equals("group") ?? false));
         }
 
         /// <summary>
@@ -752,39 +752,44 @@ namespace Sora.Server.ServerInterface
         }
 
         /// <summary>
-        /// 发送合并转发(群)
-        /// 但好像不能用的样子
+        /// <para>下载文件到缓存目录</para>
+        /// <para>注意：此API的调用超时时间是独立于其他API的</para>
         /// </summary>
-        /// <param name="connection">服务器连接标识</param>
-        /// <param name="gid">群号</param>
-        /// <param name="msgList">消息段数组</param>
-        internal static async ValueTask SendGroupForwardMsg(Guid connection, long gid, List<CustomNode> msgList)
+        /// <param name="url">链接地址</param>
+        /// <param name="threadCount">下载线程数</param>
+        /// <param name="connection">连接标识</param>
+        /// <param name="customHeader">自定义请求头</param>
+        /// <param name="timeout">超时(ms)</param>
+        /// <returns>文件绝对路径</returns>
+        internal static async ValueTask<(int retCode, string filePath)> DownloadFile(
+            string url, int threadCount, Guid connection, Dictionary<string, string> customHeader = null,
+            int timeout = 10000)
         {
-            ConsoleLog.Debug("Sora","Sending send_group_forward_msg request");
-            //处理发送消息段
-            List<object> dataObj = new List<object>();
-            foreach (CustomNode node in msgList)
+            //处理自定义请求头
+            List<string> customHeaderStr = new();
+            if (customHeader != null)
             {
-                dataObj.Add(new
-                {
-                    type = "node",
-                    data = node
-                });
+                customHeaderStr.AddRange(customHeader.Select(header => $"{header.Key}={header.Value}"));
             }
-            //发送消息
-            var ret = await SendApiRequest(new ApiRequest
+
+            ConsoleLog.Debug("Sora","Sending download_file request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
             {
-                ApiRequestType = ApiRequestType.SendGroupForwardMsg,
+                ApiRequestType = ApiRequestType.DownloadFile,
                 ApiParams = new
                 {
-                    group_id = gid.ToString(),
-                    messages = dataObj
+                    url,
+                    thread_count = threadCount,
+                    headers = customHeaderStr
                 }
-            }, connection);
+            }, connection, timeout);
 
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get send_group_forward_msg response retcode={retCode}");
+            ConsoleLog.Debug("Sora", $"Get download_file response retcode={retCode}");
+            ConsoleLog.Debug("Sora", $"get file path = {ret["data"]?["file"] ?? ""}");
+            return retCode != 0 ? (retCode, string.Empty) : (retCode, ret["data"]?["file"]?.ToString());
         }
         #endregion
         #endregion
@@ -1117,8 +1122,38 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
         }
-        #endregion
 
+        /// <summary>
+        /// 发送合并转发(群)
+        /// </summary>
+        /// <param name="connection">服务器连接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="msgList">消息段数组</param>
+        internal static async ValueTask SendGroupForwardMsg(Guid connection, long gid, List<CustomNode> msgList)
+        {
+            ConsoleLog.Debug("Sora","Sending send_group_forward_msg request");
+            //处理发送消息段
+            List<object> dataObj = new List<object>();
+            foreach (CustomNode node in msgList)
+            {
+                dataObj.Add(new
+                {
+                    type = "node",
+                    data = node
+                });
+            }
+            //发送消息
+            await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.SendGroupForwardMsg,
+                ApiParams = new
+                {
+                    group_id = gid.ToString(),
+                    messages = dataObj
+                }
+            }, connection);
+        }
+        #endregion
         #endregion
 
         #region API请求回调
@@ -1162,8 +1197,9 @@ namespace Sora.Server.ServerInterface
         /// </summary>
         /// <param name="apiRequest">请求信息</param>
         /// <param name="connectionGuid">服务器连接标识符</param>
+        /// <param name="timeOut">覆盖原有超时,在不为空时有效</param>
         /// <returns>API返回</returns>
-        private static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest,Guid connectionGuid)
+        private static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid, int? timeOut = null)
         {
             //添加新的请求记录
             RequestList.Add(new ApiResponse
@@ -1180,7 +1216,7 @@ namespace Sora.Server.ServerInterface
                                          .Where(guid => guid == apiRequest.Echo)
                                          .Select(guid => guid)
                                          .Take(1)
-                                         .Timeout(TimeSpan.FromMilliseconds(TimeOut))
+                                         .Timeout(TimeSpan.FromMilliseconds(timeOut ?? (int)TimeOut))
                                          .Catch(Observable.Return(new Guid("00000000-0000-0000-0000-000000000000")))
                                          .ToTask();
                 if(responseGuid.Equals(new Guid("00000000-0000-0000-0000-000000000000"))) ConsoleLog.Debug("Sora","observer time out");

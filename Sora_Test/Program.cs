@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using Fleck;
+using Sora.Enumeration;
+using Sora.Extensions;
 using Sora.Server;
 using Sora.Tool;
 
@@ -40,26 +41,17 @@ namespace Sora_Test
             server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                            {
                                                if (eventArgs.SourceGroup != 732774614) return;
-                                               if (eventArgs.IsAnonymousMessage)
-                                               {
-                                                   await eventArgs.SoraApi
-                                                                  .EnableGroupAnonymousMute(eventArgs.SourceGroup,
-                                                                      eventArgs.Anonymous.Flag, 120);
-                                               }
+                                               var msg = await eventArgs.SoraApi
+                                                                        .GetUserInfo(eventArgs.Sender);
+                                               ConsoleLog.Info("qid",msg.qid);
                                            };
             //私聊消息事件
             server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>
                                                {
                                                    await eventArgs.Sender.SendPrivateMessage("好耶");
                                                };
-            try
-            {
-                await server.StartServer();
-            }
-            catch (Exception e) //侦测所有未处理的错误
-            {
-                ConsoleLog.Fatal("unknown error",ConsoleLog.ErrorLogBuilder(e));
-            }
+
+            await server.StartServer().RunCatch();
         }
     }
 }
