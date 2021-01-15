@@ -57,23 +57,11 @@ namespace Sora.Server
 
         #region 构造函数
         /// <summary>
-        /// 静态构造函数
-        /// 用于初始化静态处理资源
-        /// </summary>
-        static SoraWSServer()
-        {
-            //全局异常事件
-            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
-                                                          {
-                                                              ConsoleLog.UnhandledExceptionLog(args);
-                                                          };
-        }
-
-        /// <summary>
         /// 创建一个反向WS服务端
         /// </summary>
         /// <param name="config">服务器配置</param>
-        public SoraWSServer(ServerConfig config)
+        /// <param name="crashAction">发生未处理异常时的回调</param>
+        public SoraWSServer(ServerConfig config, Action<Exception> crashAction = null)
         {
             //检查端口占用
             if (PortInUse(config.Port))
@@ -103,6 +91,14 @@ namespace Sora.Server
                 //出错后进行重启
                 RestartAfterListenError = true
             };
+            //全局异常事件
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+                                                          {
+                                                              if(crashAction == null) 
+                                                                  ConsoleLog.UnhandledExceptionLog(args);
+                                                              else
+                                                                  crashAction(args.ExceptionObject as Exception);
+                                                          };
             serverReady = true;
         }
         #endregion
