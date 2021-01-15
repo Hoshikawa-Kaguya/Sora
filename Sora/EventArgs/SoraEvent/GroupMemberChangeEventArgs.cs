@@ -29,7 +29,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 事件子类型
         /// </summary>
-        internal MemberChangeType SubType { get; set; }
+        public MemberChangeType SubType { get; private set; }
         #endregion
 
         #region 构造函数

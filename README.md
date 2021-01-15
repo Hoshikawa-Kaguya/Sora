@@ -27,13 +27,21 @@
 
 ## 开发注意事项
 
-> 本框架是在[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.36-fix3](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.36-fix3))下进行调试的，如使用其他平台可能会出现兼容性的问题
+> 本框架是在[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.38](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.38))下进行调试的，如使用其他平台可能会出现兼容性的问题
+
+> 请注意, 开发者并没有义务回复您的问题. 您应该具备基本的提问技巧。
+>
+> 如果issue被直接关闭了
+>
+> 那么请在提问前阅读 [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md) 和 [正确的提问姿势](https://github.com/tangx/Stop-Ask-Questions-The-Stupid-Ways/blob/master/README.md)
 
 由于框架才刚刚开发完成
 
-目前还在快速的迭代中，框架在近期可能会频繁更新
+目前还在快速的迭代中，框架在近期可能会频繁更新，任何API和事件均有可能发生改动
 
-任何API都可能发生变动，详细内容请关注文档的更新
+详细内容请关注文档的更新
+
+**目前框架并没有发布LTS版本**
 
 ## 关于本框架
 

@@ -197,7 +197,12 @@ namespace Sora.Enumeration.ApiType
         /// 调用腾讯的OCR接口
         /// </summary>
         [Description("ocr_image")]
-        Ocr
+        Ocr,
+        /// <summary>
+        /// 下载文件到缓存目录
+        /// </summary>
+        [Description("download_file")]
+        DownloadFile
         #endregion
     }
 }

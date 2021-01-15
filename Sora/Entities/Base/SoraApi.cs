@@ -642,12 +642,14 @@ namespace Sora.Entities.Base
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see cref="UserInfo"/> 群成员信息</para>
+        /// <para><see cref="string"/> qid</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, UserInfo userInfo)> GetUserInfo(
+        public async ValueTask<(APIStatusType apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
             long userId, bool useCache = true)
         {
             if(userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            return ((APIStatusType apiStatus, UserInfo userInfo)) await ApiInterface.GetUserInfo(this.ConnectionGuid, userId, useCache);
+            return ((APIStatusType apiStatus, UserInfo userInfo, string qid))
+                await ApiInterface.GetUserInfo(this.ConnectionGuid, userId, useCache);
         }
         #endregion
 
@@ -765,6 +767,27 @@ namespace Sora.Entities.Base
             return ((APIStatusType apiStatus, List<string> wordList)) await ApiInterface.GetWordSlices(this.ConnectionGuid, text);
         }
 
+        /// <summary>
+        /// <para>下载文件到缓存目录</para>
+        /// <para>注意：此API的调用超时时间是独立于其他API的</para>
+        /// </summary>
+        /// <param name="url">链接地址</param>
+        /// <param name="threadCount">下载线程数</param>
+        /// <param name="customHeader">自定义请求头</param>
+        /// <param name="timeout">超时(ms)</param>
+        /// <returns>文件绝对路径</returns>
+        public async ValueTask<(APIStatusType retCode, string filePath)> DownloadFile(
+            string url, int threadCount, Dictionary<string, string> customHeader = null,
+            int timeout = 10000)
+        {
+            if (string.IsNullOrEmpty(url)) throw new NullReferenceException(nameof(url));
+            if (threadCount < 1)
+                throw new ArgumentOutOfRangeException(nameof(threadCount), "threadCount is less than 1");
+            if (timeout < 1000)
+                throw new ArgumentOutOfRangeException(nameof(timeout), "timeout is less than 1000");
+            return ((APIStatusType retCode, string filePath))
+                await ApiInterface.DownloadFile(url, threadCount, this.ConnectionGuid, customHeader, timeout);
+        }
         #endregion
 
         #endregion
