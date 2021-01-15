@@ -2,6 +2,9 @@ using System.ComponentModel;
 
 namespace Sora.Enumeration.ApiType
 {
+    /// <summary>
+    /// API集合
+    /// </summary>
     internal enum ApiRequestType
     {
         #region OnebotAPI

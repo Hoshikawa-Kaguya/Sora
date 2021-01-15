@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 namespace Sora.Entities
 {
     /// <summary>
-    /// 匿名用户实例
+    /// 匿名用户类
     /// </summary>
     public class Anonymous
     {

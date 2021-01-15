@@ -14,7 +14,7 @@ using Sora.Server.ServerInterface;
 namespace Sora.Entities.Base
 {
     /// <summary>
-    /// Sora API执行实例
+    /// Sora API类
     /// </summary>
     public sealed class SoraApi
     {
@@ -220,7 +220,7 @@ namespace Sora.Entities.Base
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see cref="Message"/> 消息内容</para>
         /// <para><see cref="User"/> 发送者</para>
-        /// <para><see cref="Group"/> 消息来源群，如果不是群消息则为空</para>
+        /// <para><see cref="Group"/> 消息来源群，如果不是群消息则为<see langword="null"/></para>
         /// </returns>
         public async
             ValueTask<(APIStatusType apiStatus, Message message, User sender, Group sourceGroup,

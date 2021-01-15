@@ -10,7 +10,7 @@ using Sora.Enumeration;
 namespace Sora.Entities
 {
     /// <summary>
-    /// 消息实例
+    /// 消息类
     /// </summary>
     public sealed class Message : BaseModel
     {

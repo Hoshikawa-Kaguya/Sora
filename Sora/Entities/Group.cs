@@ -10,7 +10,7 @@ using Sora.Enumeration.ApiType;
 namespace Sora.Entities
 {
     /// <summary>
-    /// 群组实例
+    /// 群组类
     /// </summary>
     public sealed class Group : BaseModel
     {
