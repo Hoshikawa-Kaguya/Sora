@@ -14,6 +14,7 @@ using Sora.Server.ApiParams;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
+using Sora.Extensions;
 using Sora.Tool;
 
 namespace Sora.Server.ServerInterface
@@ -1208,34 +1209,26 @@ namespace Sora.Server.ServerInterface
             });
             //向客户端发送请求数据
             if(!ConnectionManager.SendMessage(connectionGuid,JsonConvert.SerializeObject(apiRequest,Formatting.None))) return null;
-            try
+            //等待客户端返回调用结果
+            Guid responseGuid = await ApiSubject
+                                      .Where(guid => guid == apiRequest.Echo)
+                                      .Select(guid => guid)
+                                      .Take(1)
+                                      .Timeout(TimeSpan.FromMilliseconds(timeOut ?? (int)TimeOut))
+                                      .Catch(Observable.Return(new Guid("00000000-0000-0000-0000-000000000000")))
+                                      .ToTask()
+                                      .RunCatch();
+            if(responseGuid.Equals(new Guid("00000000-0000-0000-0000-000000000000"))) ConsoleLog.Debug("Sora","observer time out");
+            //查找返回值
+            int reqIndex = RequestList.FindIndex(apiResponse => apiResponse.Echo == apiRequest.Echo);
+            if (reqIndex == -1)
             {
-                //等待客户端返回调用结果
-                Guid responseGuid = await ApiSubject
-                                         .Where(guid => guid == apiRequest.Echo)
-                                         .Select(guid => guid)
-                                         .Take(1)
-                                         .Timeout(TimeSpan.FromMilliseconds(timeOut ?? (int)TimeOut))
-                                         .Catch(Observable.Return(new Guid("00000000-0000-0000-0000-000000000000")))
-                                         .ToTask();
-                if(responseGuid.Equals(new Guid("00000000-0000-0000-0000-000000000000"))) ConsoleLog.Debug("Sora","observer time out");
-                //查找返回值
-                int reqIndex = RequestList.FindIndex(apiResponse => apiResponse.Echo == apiRequest.Echo);
-                if (reqIndex == -1)
-                {
-                    ConsoleLog.Debug("Sora","api time out");
-                    return null;
-                }
-                JObject ret = RequestList[reqIndex].Response;
-                RequestList.RemoveAt(reqIndex);
-                return ret;
-            }
-            catch (Exception e)
-            {
-                //错误
-                ConsoleLog.Error("Sora",$"API客户端请求错误\r\n{ConsoleLog.ErrorLogBuilder(e)}");
+                ConsoleLog.Debug("Sora","api time out");
                 return null;
             }
+            JObject ret = RequestList[reqIndex].Response;
+            RequestList.RemoveAt(reqIndex);
+            return ret;
         }
         #endregion
 

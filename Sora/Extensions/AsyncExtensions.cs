@@ -27,7 +27,7 @@ namespace Sora.Extensions
                 if (block != null)
                     block(ex);
                 else
-                    ConsoleLog.Fatal("unknown error",ConsoleLog.ErrorLogBuilder(ex));
+                    ConsoleLog.Fatal("Sora",ConsoleLog.ErrorLogBuilder(ex));
                 return default;
             }
         }
@@ -46,7 +46,7 @@ namespace Sora.Extensions
             catch (Exception ex)
             {
                 if (block == null)
-                    ConsoleLog.Fatal("unknown error", ConsoleLog.ErrorLogBuilder(ex));
+                    ConsoleLog.Fatal("Sora", ConsoleLog.ErrorLogBuilder(ex));
                 else
                     block.Invoke(ex);
             }
@@ -70,7 +70,7 @@ namespace Sora.Extensions
                 if (block != null)
                     block(ex);
                 else
-                    ConsoleLog.Fatal("unknown error",ConsoleLog.ErrorLogBuilder(ex));
+                    ConsoleLog.Fatal("Sora",ConsoleLog.ErrorLogBuilder(ex));
                 return default;
             }
         }
@@ -89,7 +89,7 @@ namespace Sora.Extensions
             catch (Exception ex)
             {
                 if (block == null)
-                    ConsoleLog.Fatal("unknown error", ConsoleLog.ErrorLogBuilder(ex));
+                    ConsoleLog.Fatal("Sora", ConsoleLog.ErrorLogBuilder(ex));
                 else
                     block.Invoke(ex);
             }
