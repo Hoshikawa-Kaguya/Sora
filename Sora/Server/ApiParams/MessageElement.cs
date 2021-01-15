@@ -3,12 +3,12 @@ using Newtonsoft.Json.Linq;
 using Sora.Enumeration;
 using Sora.Server.Converter;
 
-namespace Sora.Server.ApiMessageParse
+namespace Sora.Server.ApiParams
 {
     /// <summary>
     /// Onebot消息段
     /// </summary>
-    internal sealed class ApiMessage
+    internal sealed class MessageElement
     {
         /// <summary>
         /// 消息段类型

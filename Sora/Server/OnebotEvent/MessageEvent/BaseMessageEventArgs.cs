@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.Server.ApiMessageParse;
+using Sora.Server.ApiParams;
 
 namespace Sora.Server.OnebotEvent.MessageEvent
 {
@@ -37,7 +37,7 @@ namespace Sora.Server.OnebotEvent.MessageEvent
         /// 消息内容
         /// </summary>
         [JsonProperty(PropertyName = "message")]
-        internal List<ApiMessage> MessageList { get; set; }
+        internal List<MessageElement> MessageList { get; set; }
 
         /// <summary>
         /// 原始消息内容

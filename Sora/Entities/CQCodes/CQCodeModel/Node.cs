@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.Server.ApiMessageParse;
+using Sora.Server.ApiParams;
 
 namespace Sora.Entities.CQCodes.CQCodeModel
 {
@@ -26,7 +26,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// 原始消息内容
         /// </summary>
         [JsonProperty(PropertyName = "content")]
-        internal List<ApiMessage> MessageList { get; set; }
+        internal List<MessageElement> MessageList { get; set; }
 
         /// <summary>
         /// 消息内容

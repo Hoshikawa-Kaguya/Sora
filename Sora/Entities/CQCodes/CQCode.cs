@@ -4,10 +4,10 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Sora.Server.ApiMessageParse;
 using Sora.Enumeration.EventParamsType;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Enumeration;
+using Sora.Server.ApiParams;
 using Sora.Tool;
 
 namespace Sora.Entities.CQCodes
@@ -356,6 +356,7 @@ namespace Sora.Entities.CQCodes
         /// <param name="content">xml文本</param>
         public static CQCode CQXml(string content)
         {
+            if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
             return new CQCode(CQFunction.Xml,
                               new Code
                               {
@@ -371,6 +372,7 @@ namespace Sora.Entities.CQCodes
         /// <param name="richText">富文本内容</param>
         public static CQCode CQJson(string content,bool richText = false)
         {
+            if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
             return new CQCode(CQFunction.Json,
                               new Code
                               {
@@ -385,6 +387,7 @@ namespace Sora.Entities.CQCodes
         /// <param name="content">JObject实例</param>
         public static CQCode CQJson(JObject content)
         {
+            if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
             return new CQCode(CQFunction.Json,
                               new Code
                               {
@@ -451,7 +454,7 @@ namespace Sora.Entities.CQCodes
         /// <para>当存在非法参数时CQ码将被本函数重置</para>
         /// </summary>
         private static CQCode CQIlleage() =>
-            new CQCode(CQFunction.Text, new Text{Content = null});
+            new (CQFunction.Text, new Text{Content = null});
         #endregion
 
         #region 辅助函数
@@ -470,7 +473,7 @@ namespace Sora.Entities.CQCodes
         #endregion
 
         #region 获取CQ码内容(仅用于序列化)
-        internal ApiMessage ToOnebotMessage() => new ApiMessage
+        internal MessageElement ToOnebotMessage() => new()
         {
             MsgType = this.Function,
             RawData = JObject.FromObject(this.CQData)

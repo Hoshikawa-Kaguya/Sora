@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.Server.ApiMessageParse;
 using Sora.Server.Converter;
 using Sora.Enumeration.EventParamsType;
 
@@ -34,7 +33,7 @@ namespace Sora.Server.ApiParams
         /// 消息段数组
         /// </summary>
         [JsonProperty(PropertyName = "message")]
-        internal List<ApiMessage> Message { get; set; }
+        internal List<MessageElement> Message { get; set; }
 
         /// <summary>
         /// 是否忽略CQ码
