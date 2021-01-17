@@ -9,7 +9,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>.Net 5异步机器人框架</Description>
-    <Copyright>Copyright © 2020 Yukari316</Copyright>
+    <Copyright>Copyright © 2020-2021 Yukari316</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/Yukari316/Sora</PackageProjectUrl>
     <Authors>Yukari316</Authors>
