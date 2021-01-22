@@ -14,7 +14,7 @@ namespace Sora_Test
             ConsoleLog.SetLogLevel(LogLevel.Debug);
             ConsoleLog.Debug("dotnet version",Environment.Version);
 
-            SoraWSServer server = new SoraWSServer(new ServerConfig{Port = 8080,ApiTimeOut = 5000});
+            SoraWSServer server = new SoraWSServer(new ServerConfig{Port = 9200});
 
             //服务器连接事件
             server.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>

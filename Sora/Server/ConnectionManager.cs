@@ -130,8 +130,15 @@ namespace Sora.Server
         internal static bool SendMessage(Guid connectionGuid, string message)
         {
             if (ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid))
-            { 
-                ConnectionList.Single(connection => connection.ConnectionGuid == connectionGuid).Connection.Send(message);
+            {
+                try
+                {
+                    ConnectionList.Single(connection => connection.ConnectionGuid == connectionGuid).Connection.Send(message);
+                }
+                catch (Exception e)
+                {
+                    ConsoleLog.Error("Sora", $"Send message to client error\r\n{ConsoleLog.ErrorLogBuilder(e)}");
+                }
                 return true;
             }
             return false;
@@ -268,7 +275,7 @@ namespace Sora.Server
             {
                 userId = ConnectionList.Where(conn => conn.ConnectionGuid == connectionGuid)
                                        .Select(conn => conn.SelfId)
-                                       .First();
+                                       .FirstOrDefault();
                 return true;
             }
             else
