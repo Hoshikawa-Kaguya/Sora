@@ -21,7 +21,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// </summary>
         public void ParseNode()
         {
-            this.NodeMsgList.ForEach(node => node.CQCodeMsgList = MessageParse.ParseMessageList(node.MessageList));
+            this.NodeMsgList.ForEach(node => node.CQCodeMsgList = MessageParse.Parse(node.MessageList));
         }
         #endregion
     }

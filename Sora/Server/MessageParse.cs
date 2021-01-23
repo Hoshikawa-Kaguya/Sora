@@ -58,7 +58,7 @@ namespace Sora.Server
         /// 处理消息段数组
         /// </summary>
         /// <param name="messages">消息段数组</param>
-        internal static List<CQCode> ParseMessageList(List<MessageElement> messages)
+        internal static List<CQCode> Parse(List<MessageElement> messages)
         {
             ConsoleLog.Debug("Sora","Parsing msg list");
             if (messages == null || messages.Count == 0) return new List<CQCode>();
