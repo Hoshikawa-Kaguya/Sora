@@ -60,7 +60,7 @@ namespace Sora.EventArgs.SoraEvent
             this.IsAnonymousMessage = groupMsgArgs.Anonymous != null;
             //将api消息段转换为CQ码
             this.Message = new Message(connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
-                                       MessageParse.ParseMessageList(groupMsgArgs.MessageList), groupMsgArgs.Time,
+                                       MessageParse.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
                                        groupMsgArgs.Font);
             this.Sender      = new User(connectionGuid, groupMsgArgs.UserId);
             this.SourceGroup = new Group(connectionGuid, groupMsgArgs.GroupId);

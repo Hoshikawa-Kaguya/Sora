@@ -466,11 +466,13 @@ namespace Sora.Server.ServerInterface
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_msg response retcode={retCode}");
             if (retCode != 0 || ret["data"] == null) return (retCode, null, null, null, 0, false);
+            //处理消息段
+            List<MessageElement> rawMessage = ret["data"]?["message"]?.ToObject<List<MessageElement>>();
             return (retCode,
                     new Message(connection,
                                 msgId,
                                 ret["data"]?["raw_message"]?.ToString(),
-                                new List<CQCode>(),
+                                MessageParse.Parse(rawMessage        ?? new List<MessageElement>()),
                                 Convert.ToInt64(ret["data"]?["time"] ?? -1),
                                 0),
                     new User(connection,
@@ -479,7 +481,7 @@ namespace Sora.Server.ServerInterface
                     (ret["data"]?["message_type"]?.ToString() ?? string.Empty).Equals("group")
                         ? new Group(connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
                         : null,
-                    Convert.ToInt32(ret["data"]?["real_id"] ?? 0),
+                    Convert.ToInt32(ret["data"]?["real_id"]                                    ?? 0),
                     Convert.ToBoolean(ret["data"]?["message_type"]?.ToString().Equals("group") ?? false));
         }
 

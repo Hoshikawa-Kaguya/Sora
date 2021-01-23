@@ -14,7 +14,7 @@ namespace Sora_Test
             ConsoleLog.SetLogLevel(LogLevel.Debug);
             ConsoleLog.Debug("dotnet version",Environment.Version);
 
-            SoraWSServer server = new SoraWSServer(new ServerConfig{Port = 9200});
+            SoraWSServer server = new SoraWSServer(new ServerConfig{Port = 8080});
 
             //服务器连接事件
             server.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
@@ -40,10 +40,7 @@ namespace Sora_Test
             //群聊消息事件
             server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                            {
-                                               if (eventArgs.SourceGroup != 732774614) return;
-                                               var msg = await eventArgs.SoraApi
-                                                                        .GetUserInfo(eventArgs.Sender);
-                                               ConsoleLog.Info("qid",msg.qid);
+                                               await eventArgs.SourceGroup.SendGroupMessage("好耶");
                                            };
             //私聊消息事件
             server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>
