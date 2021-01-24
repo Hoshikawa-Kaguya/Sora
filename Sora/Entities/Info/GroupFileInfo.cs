@@ -1,6 +1,6 @@
 using System;
 using Newtonsoft.Json;
-using Sora.Tool;
+using YukariToolBox.Time;
 
 namespace Sora.Entities.Info
 {
@@ -42,8 +42,8 @@ namespace Sora.Entities.Info
         [JsonProperty(PropertyName = "upload_time")]
         private long UploadTime_
         {
-            get => Utils.DateTimeToTimeStamp(UploadTime);
-            set => UploadTime = Utils.TimeStampToDateTime(value);
+            get => UploadTime.ToTimeStamp();
+            set => UploadTime = value.ToDateTime();
         }
 
         /// <summary>
@@ -56,8 +56,8 @@ namespace Sora.Entities.Info
         [JsonProperty(PropertyName = "dead_time")]
         private long DeadTime_
         {
-            get => Utils.DateTimeToTimeStamp(DeadTime);
-            set => DeadTime = Utils.TimeStampToDateTime(value);
+            get => DeadTime.ToTimeStamp();
+            set => DeadTime = value.ToDateTime();
         }
 
         /// <summary>
@@ -69,8 +69,8 @@ namespace Sora.Entities.Info
         [JsonProperty(PropertyName = "modify_time")]
         private long ModifyTime_
         {
-            get => Utils.DateTimeToTimeStamp(ModifyTime);
-            set => ModifyTime = Utils.TimeStampToDateTime(value);
+            get => ModifyTime.ToTimeStamp();
+            set => ModifyTime = value.ToDateTime();
         }
 
         /// <summary>

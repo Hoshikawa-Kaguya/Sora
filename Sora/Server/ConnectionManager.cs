@@ -5,7 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Sora.EventArgs.WSSeverEvent;
-using Sora.Tool;
+using YukariToolBox.Console;
+using YukariToolBox.Time;
 
 namespace Sora.Server
 {
@@ -89,7 +90,7 @@ namespace Sora.Server
                     {
                         ConnectionGuid    = connectionGuid,
                         Connection        = connectionInfo,
-                        LastHeartBeatTime = Utils.GetNowTimeStamp(),
+                        LastHeartBeatTime = TimeStamp.GetNowTimeStamp(),
                         SelfId            = uid
                     });
                     return true;
@@ -159,7 +160,7 @@ namespace Sora.Server
             {
                 //遍历超时的连接
                 foreach (var connection in ConnectionList
-                    .Where(connection => Utils.GetNowTimeStamp() - connection.LastHeartBeatTime > Config.HeartBeatTimeOut))
+                    .Where(connection => TimeStamp.GetNowTimeStamp() - connection.LastHeartBeatTime > Config.HeartBeatTimeOut))
                 {
                     try
                     {
@@ -198,7 +199,7 @@ namespace Sora.Server
            int connectionIndex = ConnectionList.FindIndex(conn => conn.ConnectionGuid == connectionGuid);
            if(connectionIndex == -1) return;
            var connection      = ConnectionList[connectionIndex];
-           connection.LastHeartBeatTime    = Utils.GetNowTimeStamp();
+           connection.LastHeartBeatTime    = TimeStamp.GetNowTimeStamp();
            ConnectionList[connectionIndex] = connection;
         }
         #endregion

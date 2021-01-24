@@ -7,7 +7,8 @@ using Fleck;
 using Newtonsoft.Json.Linq;
 using Sora.Exceptions;
 using Sora.Server.ServerInterface;
-using Sora.Tool;
+using YukariToolBox.Console;
+using LogLevel = Fleck.LogLevel;
 
 namespace Sora.Server
 {

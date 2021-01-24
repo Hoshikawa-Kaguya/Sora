@@ -1,6 +1,6 @@
 using System;
 using Newtonsoft.Json;
-using Sora.Tool;
+using YukariToolBox.Time;
 
 namespace Sora.Entities.Info
 {
@@ -30,8 +30,8 @@ namespace Sora.Entities.Info
         [JsonProperty(PropertyName = "create_time")]
         private long CreateTime_
         {
-            get => Utils.DateTimeToTimeStamp(CreateTime);
-            set => CreateTime = Utils.TimeStampToDateTime(value);
+            get => CreateTime.ToTimeStamp();
+            set => CreateTime = value.ToDateTime();
         }
 
         /// <summary>

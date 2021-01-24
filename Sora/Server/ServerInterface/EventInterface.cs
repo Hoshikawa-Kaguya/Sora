@@ -6,7 +6,7 @@ using Sora.Server.OnebotEvent.MetaEvent;
 using Sora.Server.OnebotEvent.NoticeEvent;
 using Sora.Server.OnebotEvent.RequestEvent;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace Sora.Server.ServerInterface
 {

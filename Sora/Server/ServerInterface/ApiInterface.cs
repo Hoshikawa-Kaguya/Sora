@@ -15,7 +15,7 @@ using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Extensions;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace Sora.Server.ServerInterface
 {
@@ -467,7 +467,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", $"Get get_msg response retcode={retCode}");
             if (retCode != 0 || ret["data"] == null) return (retCode, null, null, null, 0, false);
             //处理消息段
-            List<MessageElement> rawMessage = ret["data"]?["message"]?.ToObject<List<MessageElement>>();
+            var rawMessage = ret["data"]?["message"]?.ToObject<List<MessageElement>>();
             return (retCode,
                     new Message(connection,
                                 msgId,
