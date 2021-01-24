@@ -1,6 +1,6 @@
 using System;
 using Sora.Entities.Base;
-using Sora.Tool;
+using YukariToolBox.Time;
 
 namespace Sora.EventArgs.SoraEvent
 {
@@ -50,7 +50,7 @@ namespace Sora.EventArgs.SoraEvent
             this.EventName = eventName;
             this.LoginUid  = loginUid;
             this.TimeStamp = time;
-            this.Time      = Utils.TimeStampToDateTime(time);
+            this.Time      = time.ToDateTime();
         }
         #endregion
     }

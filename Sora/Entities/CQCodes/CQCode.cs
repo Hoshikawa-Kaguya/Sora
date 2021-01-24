@@ -8,7 +8,7 @@ using Sora.Enumeration.EventParamsType;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Enumeration;
 using Sora.Server.ApiParams;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace Sora.Entities.CQCodes
 {

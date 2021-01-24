@@ -1,9 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using Sora.Enumeration;
 using Sora.Extensions;
 using Sora.Server;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace Sora_Test
 {
@@ -40,13 +39,22 @@ namespace Sora_Test
             //群聊消息事件
             server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                            {
-                                               await eventArgs.SourceGroup.SendGroupMessage("好耶");
+                                               await eventArgs.Repeat();
                                            };
             //私聊消息事件
-            server.Event.OnOfflineFileEvent += async (sender, eventArgs) =>
+            server.Event.OnPrivateMessage += async (sender, eventArgs) =>
                                                {
                                                    await eventArgs.Sender.SendPrivateMessage("好耶");
                                                };
+
+            server.Event.OnGroupRecall += async (sender, eventArgs) =>
+                                           {
+                                               if (eventArgs.MessageSender == eventArgs.SoraApi.GetLoginUserId())
+                                               {
+                                                   await eventArgs.SourceGroup.SendGroupMessage((await eventArgs.SoraApi
+                                                       .GetMessages(eventArgs.MessageId)).message.MessageList);
+                                               }
+                                           };
 
             await server.StartServer().RunCatch();
         }
