@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Security;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,7 +15,9 @@ using Sora.Server.ApiParams;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
+using Sora.EventArgs.SoraEvent;
 using Sora.Extensions;
+using Sora.Server.OnebotEvent.MessageEvent;
 using YukariToolBox.Console;
 
 namespace Sora.Server.ServerInterface
@@ -474,11 +477,14 @@ namespace Sora.Server.ServerInterface
                                 ret["data"]?["raw_message"]?.ToString(),
                                 MessageParse.Parse(rawMessage        ?? new List<MessageElement>()),
                                 Convert.ToInt64(ret["data"]?["time"] ?? -1),
-                                0),
+                                0,
+                                Convert.ToBoolean(ret["data"]?["group"]           ?? false)
+                                    ? Convert.ToInt32(ret["data"]?["message_seq"] ?? 0)
+                                    : null),
                     new User(connection,
                              Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)),
                     //判断响应数据中是否有群组信息
-                    (ret["data"]?["message_type"]?.ToString() ?? string.Empty).Equals("group")
+                    Convert.ToBoolean(ret["data"]?["group"] ?? false)
                         ? new Group(connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
                         : null,
                     Convert.ToInt32(ret["data"]?["real_id"]                                    ?? 0),
@@ -792,6 +798,42 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", $"Get download_file response retcode={retCode}");
             ConsoleLog.Debug("Sora", $"get file path = {ret["data"]?["file"] ?? ""}");
             return retCode != 0 ? (retCode, string.Empty) : (retCode, ret["data"]?["file"]?.ToString());
+        }
+
+        /// <summary>
+        /// 获取群消息历史记录
+        /// </summary>
+        /// <param name="msgSeq">消息序号*</param>
+        /// <param name="gid">群号</param>
+        /// <param name="connection">连接标识</param>
+        /// <returns>消息</returns>
+        internal static async ValueTask<(int retCode, List<GroupMessageEventArgs> msgList)> GetGroupMessageHistory(
+            int? msgSeq, long gid, Guid connection)
+        {
+            ConsoleLog.Debug("Sora","Sending get_group_msg_history request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.GetGroupMsgHistory,
+                ApiParams = msgSeq == null
+                    ? new
+                    {
+                        group_id = gid
+                    }
+                    : new
+                    {
+                        message_seq = msgSeq,
+                        group_id    = gid
+                    }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_group_msg_history response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            //处理消息段
+            return (0, ret["data"]?["messages"]?.ToObject<List<ApiGroupMsgEventArgs>>()
+                                               ?.Select(messageArg =>
+                                                            new GroupMessageEventArgs(connection, "group",
+                                                                messageArg)).ToList());
         }
         #endregion
         #endregion
