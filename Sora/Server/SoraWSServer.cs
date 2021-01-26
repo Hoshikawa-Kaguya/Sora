@@ -185,7 +185,7 @@ namespace Sora.Server
 
             serverExitis = true;
 
-            ConsoleLog.Debug("好耶","这是一个奇奇怪怪的开发者交流群：1081190562");
+            ConsoleLog.Debug("Sora","开发交流群：1081190562");
 
             await Task.Delay(-1);
         }
