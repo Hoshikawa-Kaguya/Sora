@@ -239,12 +239,26 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
-        /// <para><see cref="List{Message}"/> 消息记录</para>
+        /// <para><see cref="List{T}"/> 消息记录</para>
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(long groupId, int? messageSequence = null)
         {
             return ((APIStatusType apiStatus, List<GroupMessageEventArgs> messages))
                 await ApiInterface.GetGroupMessageHistory(messageSequence, groupId, this.ConnectionGuid);
+        }
+
+        /// <summary>
+        /// 获取当前账号在线客户端列表
+        /// </summary>
+        /// <param name="useCache">是否使用缓存</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="List{T}"/> 在线客户端信息列表</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, List<ClientInfo> clients)> GetOnlineClients(bool useCache)
+        {
+            return ((APIStatusType apiStatus, List<ClientInfo> clients))
+                await ApiInterface.GetOnlineClients(useCache, this.ConnectionGuid);
         }
         #endregion
 

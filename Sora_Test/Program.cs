@@ -39,7 +39,7 @@ namespace Sora_Test
             //群聊消息事件
             server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                            {
-                                               var msg = await eventArgs.SoraApi.GetGroupMessageHistory(eventArgs.SourceGroup, eventArgs.Message.MessageSequence);
+                                               var msg = await eventArgs.SoraApi.GetOnlineClients(false);
                                            };
             //私聊消息事件
             server.Event.OnPrivateMessage += async (sender, eventArgs) =>

@@ -210,7 +210,17 @@ namespace Sora.Enumeration.ApiType
         /// 获取群消息历史记录
         /// </summary>
         [Description("get_group_msg_history")]
-        GetGroupMsgHistory
+        GetGroupMsgHistory,
+        /// <summary>
+        /// 获取当前账号在线客户端列表
+        /// </summary>
+        [Description("get_online_clients")]
+        GetOnlineClients,
+        /// <summary>
+        /// 重载事件过滤器
+        /// </summary>
+        [Description("reload_event_filter")]
+        ReloadEventFilter
         #endregion
     }
 }
