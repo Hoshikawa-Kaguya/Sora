@@ -40,6 +40,7 @@ namespace Sora_Test
             server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                            {
                                                var msg = await eventArgs.SoraApi.GetOnlineClients(false);
+                                               ConsoleLog.Debug("device",$"id = {msg.clients[0].AppId}");
                                            };
             //私聊消息事件
             server.Event.OnPrivateMessage += async (sender, eventArgs) =>

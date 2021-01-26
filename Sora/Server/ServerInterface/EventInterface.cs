@@ -97,7 +97,11 @@ namespace Sora.Server.ServerInterface
         /// <summary>
         /// 离线文件事件
         /// </summary>
-        public event EventAsyncCallBackHandler<OfflineFileEventArgs> OnOfflineFileEvent;  
+        public event EventAsyncCallBackHandler<OfflineFileEventArgs> OnOfflineFileEvent;
+        /// <summary>
+        /// 其他客户端在线状态变更事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<ClientStatusChangeEventArgs> OnClientStatusChangeEvent;
         #endregion
 
         #region 事件分发
@@ -366,6 +370,15 @@ namespace Sora.Server.ServerInterface
                     if (OnOfflineFileEvent == null) break;
                     await OnOfflineFileEvent(typeof(EventInterface),
                                              new OfflineFileEventArgs(connection, "offline_file", offlineFile));
+                    break;
+                case "client_status":
+                    ApiClientStatusEventArgs clientStatus = messageJson.ToObject<ApiClientStatusEventArgs>();
+                    if(clientStatus == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"Get client status change from[{clientStatus.UserId}] client id = {clientStatus.ClientInfo.AppId}");
+                    if(OnClientStatusChangeEvent == null) break;
+                    await OnClientStatusChangeEvent(typeof(EventInterface),
+                                                    new ClientStatusChangeEventArgs(connection, "client_status", clientStatus));
                     break;
                 //通知类事件
                 case "notify":
