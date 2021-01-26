@@ -7,9 +7,15 @@
         一个基于<a href="https://github.com/howmanybots/onebot">OneBot</a>协议的 <a href="https://dotnet.microsoft.com/download/dotnet/5.0">C#/.Net 5</a> 异步机器人开发框架
 	</h4>
 	<h4 align="center">
-	<img src="https://img.shields.io/nuget/v/Sora?style=for-the-badge&color=ff69b4">
-	<img src="https://img.shields.io/badge/OneBot-v11-black?style=for-the-badge">
-	<img src="https://img.shields.io/github/license/Yukari316/Sora?style=for-the-badge&color=blueviolet">
+	<a href="https://www.nuget.org/packages/Sora/">
+		<img src="https://img.shields.io/nuget/v/Sora?style=for-the-badge&color=ff69b4">
+	</a>
+	<a href="https://github.com/howmanybots/onebot">
+		<img src="https://img.shields.io/badge/OneBot-v11-black?style=for-the-badge">
+	</a>
+	<a href="https://opensource.org/licenses/AGPL-3.0">
+		<img src="https://img.shields.io/github/license/Yukari316/Sora?style=for-the-badge&color=blueviolet">
+	</a>
 	<img src="https://img.shields.io/github/stars/Yukari316/Sora?style=for-the-badge">
 	<img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=for-the-badge">
 	</h4>
@@ -42,7 +48,7 @@
 
 详细内容请关注文档的更新
 
-> 本框架是在[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.38](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.38))下进行调试的，如使用其他平台可能会出现兼容性的问题
+> 本框架是在[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.39](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.39))下进行调试的，如使用其他平台可能会出现兼容性的问题
 
 > 请注意, 开发者并没有**义务**回复您的问题. 您应该具备基本的提问技巧。
 >
