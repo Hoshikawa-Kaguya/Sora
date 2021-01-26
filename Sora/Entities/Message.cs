@@ -39,16 +39,23 @@ namespace Sora.Entities
         /// 消息字体id
         /// </summary>
         public int Font { get; private set; }
+
+        /// <summary>
+        /// <para>消息序号</para>
+        /// <para>仅用于群聊消息</para>
+        /// </summary>
+        public int? MessageSequence { get; private set; }
         #endregion
 
         #region 构造函数
-        internal Message(Guid connectionGuid, int msgId, string text, List<CQCode> cqCodeList, long time, int font) : base(connectionGuid)
+        internal Message(Guid connectionGuid, int msgId, string text, List<CQCode> cqCodeList, long time, int font, int? messageSequence) : base(connectionGuid)
         {
-            this.MessageId   = msgId;
-            this.RawText     = text;
-            this.MessageList = cqCodeList;
-            this.Time        = time;
-            this.Font        = font;
+            this.MessageId       = msgId;
+            this.RawText         = text;
+            this.MessageList     = cqCodeList;
+            this.Time            = time;
+            this.Font            = font;
+            this.MessageSequence = messageSequence;
         }
         #endregion
 

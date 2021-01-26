@@ -39,22 +39,13 @@ namespace Sora_Test
             //群聊消息事件
             server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                            {
-                                               await eventArgs.Repeat();
+                                               var msg = await eventArgs.SoraApi.GetGroupMessageHistory(eventArgs.SourceGroup, eventArgs.Message.MessageSequence);
                                            };
             //私聊消息事件
             server.Event.OnPrivateMessage += async (sender, eventArgs) =>
                                                {
                                                    await eventArgs.Sender.SendPrivateMessage("好耶");
                                                };
-
-            server.Event.OnGroupRecall += async (sender, eventArgs) =>
-                                           {
-                                               if (eventArgs.MessageSender == eventArgs.SoraApi.GetLoginUserId())
-                                               {
-                                                   await eventArgs.SourceGroup.SendGroupMessage((await eventArgs.SoraApi
-                                                       .GetMessages(eventArgs.MessageId)).message.MessageList);
-                                               }
-                                           };
 
             await server.StartServer().RunCatch();
         }

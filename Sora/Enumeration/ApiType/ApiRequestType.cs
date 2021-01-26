@@ -205,7 +205,12 @@ namespace Sora.Enumeration.ApiType
         /// 下载文件到缓存目录
         /// </summary>
         [Description("download_file")]
-        DownloadFile
+        DownloadFile,
+        /// <summary>
+        /// 获取群消息历史记录
+        /// </summary>
+        [Description("get_group_msg_history")]
+        GetGroupMsgHistory
         #endregion
     }
 }

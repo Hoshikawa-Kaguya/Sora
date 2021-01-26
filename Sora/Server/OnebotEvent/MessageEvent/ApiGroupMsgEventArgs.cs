@@ -26,5 +26,11 @@ namespace Sora.Server.OnebotEvent.MessageEvent
         /// </summary>
         [JsonProperty(PropertyName = "sender")]
         internal GroupSenderInfo SenderInfo { get; set; }
+
+        /// <summary>
+        /// 消息序号
+        /// </summary>
+        [JsonProperty(PropertyName = "message_seq")]
+        internal int MessageSequence { get; set; }
     }
 }

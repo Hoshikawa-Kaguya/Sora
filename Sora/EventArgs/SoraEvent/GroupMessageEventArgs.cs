@@ -61,7 +61,7 @@ namespace Sora.EventArgs.SoraEvent
             //将api消息段转换为CQ码
             this.Message = new Message(connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
                                        MessageParse.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
-                                       groupMsgArgs.Font);
+                                       groupMsgArgs.Font, groupMsgArgs.MessageSequence);
             this.Sender      = new User(connectionGuid, groupMsgArgs.UserId);
             this.SourceGroup = new Group(connectionGuid, groupMsgArgs.GroupId);
             this.SenderInfo  = groupMsgArgs.SenderInfo;

@@ -7,6 +7,7 @@ using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
+using Sora.EventArgs.SoraEvent;
 using Sora.Server;
 using Sora.Server.ApiParams;
 using Sora.Server.ServerInterface;
@@ -228,6 +229,22 @@ namespace Sora.Entities.Base
         {
             return ((APIStatusType apiStatus, Message message, User sender, Group sourceGroup, int realId, bool isGroupMsg)) 
                 await ApiInterface.GetMessage(this.ConnectionGuid, messageId);
+        }
+
+        /// <summary>
+        /// <para>获取群消息历史记录</para>
+        /// <para>能获取起始消息的前19条消息</para>
+        /// </summary>
+        /// <param name="messageSequence">起始消息序号，为<see langword="null"/>时默认从最新消息拉取</param>
+        /// <param name="groupId">群号</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="List{Message}"/> 消息记录</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(long groupId, int? messageSequence = null)
+        {
+            return ((APIStatusType apiStatus, List<GroupMessageEventArgs> messages))
+                await ApiInterface.GetGroupMessageHistory(messageSequence, groupId, this.ConnectionGuid);
         }
         #endregion
 
