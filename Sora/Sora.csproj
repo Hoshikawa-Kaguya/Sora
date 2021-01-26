@@ -3,19 +3,18 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>0.5.0.0</AssemblyVersion>
-    <FileVersion>0.5.0.0</FileVersion>
-    <Version>0.5.0</Version>
+	  <Version>0.5.1</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>.Net 5异步机器人框架</Description>
     <Copyright>Copyright © 2020-2021 Yukari316</Copyright>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseFile></PackageLicenseFile>
     <PackageProjectUrl>https://github.com/Yukari316/Sora</PackageProjectUrl>
     <Authors>Yukari316</Authors>
     <Company>Yukari316</Company>
 	<PackageIcon>icon.png</PackageIcon>
 	<LangVersion>preview</LangVersion>
+	<PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -37,10 +36,6 @@
     <None Remove="TypeEnum\**" />
     <None Remove="Sora.xml" />
     <EmbeddedResource Include="Sora.xml" />
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
     <None Include="icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
