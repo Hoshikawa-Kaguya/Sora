@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Security;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -45,7 +44,7 @@ namespace Sora.Server.ServerInterface
         /// <summary>
         /// API请求暂存表
         /// </summary>
-        internal static readonly List<ApiResponse> RequestList = new List<ApiResponse>();
+        internal static readonly List<ApiResponse> RequestList = new();
 
         /// <summary>
         /// API响应被观察者
@@ -779,8 +778,8 @@ namespace Sora.Server.ServerInterface
             {
                 customHeaderStr.AddRange(customHeader.Select(header => $"{header.Key}={header.Value}"));
             }
-
             ConsoleLog.Debug("Sora","Sending download_file request");
+
             //发送信息
             JObject ret = await SendApiRequest(new ApiRequest
             {
@@ -834,6 +833,32 @@ namespace Sora.Server.ServerInterface
                                                ?.Select(messageArg =>
                                                             new GroupMessageEventArgs(connection, "group",
                                                                 messageArg)).ToList());
+        }
+
+        /// <summary>
+        /// 获取当前账号在线客户端列表
+        /// </summary>
+        /// <param name="useCache">是否使用缓存</param>
+        /// <param name="connection">连接标识</param>
+        /// <returns>在线客户端信息</returns>
+        internal static async ValueTask<(int retCode, List<ClientInfo> clients)> GetOnlineClients(bool useCache, Guid connection)
+        {
+            ConsoleLog.Debug("Sora","Sending get_online_clients request");
+            //发送信息
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.GetOnlineClients,
+                ApiParams = new
+                {
+                    no_cache = !useCache
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_online_clients response retcode={retCode}");
+            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            //处理客户端信息
+            return (retCode, ret["data"]?["clients"]?.ToObject<List<ClientInfo>>() ?? new List<ClientInfo>());
         }
         #endregion
         #endregion
@@ -1175,7 +1200,6 @@ namespace Sora.Server.ServerInterface
         /// <param name="msgList">消息段数组</param>
         internal static async ValueTask SendGroupForwardMsg(Guid connection, long gid, List<CustomNode> msgList)
         {
-            ConsoleLog.Debug("Sora","Sending send_group_forward_msg request");
             //处理发送消息段
             List<object> dataObj = new List<object>();
             foreach (CustomNode node in msgList)
@@ -1186,8 +1210,9 @@ namespace Sora.Server.ServerInterface
                     data = node
                 });
             }
+            ConsoleLog.Debug("Sora","Sending send_group_forward_msg request");
             //发送消息
-            await SendApiRequest(new ApiRequest
+            await SendApiMessage(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendGroupForwardMsg,
                 ApiParams = new
@@ -1195,6 +1220,19 @@ namespace Sora.Server.ServerInterface
                     group_id = gid.ToString(),
                     messages = dataObj
                 }
+            }, connection);
+        }
+
+        /// <summary>
+        /// 重载事件过滤器
+        /// </summary>
+        /// <param name="connection">连接标识</param>
+        internal static async ValueTask ReloadEventFilter(Guid connection)
+        {
+            ConsoleLog.Debug("Sora","Sending reload_event_filter request");
+            await SendApiMessage(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.ReloadEventFilter
             }, connection);
         }
         #endregion
