@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Sora.Entities.CQCodes;
 using Sora.Extensions;
 using Sora.Server;
 using YukariToolBox.Console;
@@ -45,7 +46,7 @@ namespace Sora_Test
             //私聊消息事件
             server.Event.OnPrivateMessage += async (sender, eventArgs) =>
                                                {
-                                                   await eventArgs.Sender.SendPrivateMessage("好耶");
+                                                   await eventArgs.Sender.SendPrivateMessage(CQCode.CQImage("E:\\P\\83128088_p0.png"));
                                                };
 
             await server.StartServer().RunCatch();
