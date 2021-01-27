@@ -114,9 +114,9 @@ namespace Sora.Entities.CQCodes
                               new Record
                               {
                                   RecordFile = dataStr,
-                                  Magic      = isMagic ? 1 : 0,
-                                  Cache      = useCache ? 1 : 0,
-                                  Proxy      = useProxy ? 1 : 0,
+                                  Magic      = isMagic ? 1 : null,
+                                  Cache      = useCache ? 1 : null,
+                                  Proxy      = useProxy ? 1 : null,
                                   Timeout    = timeout
                               });
         }
@@ -141,8 +141,8 @@ namespace Sora.Entities.CQCodes
                               new Image
                               {
                                   ImgFile     = dataStr,
-                                  ImgType     = string.Empty,
-                                  UseCache    = useCache ? 1 : 0,
+                                  ImgType     = null,
+                                  UseCache    = useCache ? 1 : null,
                                   ThreadCount = threadCount
                               });
         }
@@ -168,7 +168,7 @@ namespace Sora.Entities.CQCodes
                               {
                                   ImgFile     = dataStr,
                                   ImgType     = "flash",
-                                  UseCache    = useCache ? 1 : 0,
+                                  UseCache    = useCache ? 1 : null,
                                   ThreadCount = threadCount
                               });
         }
@@ -195,7 +195,7 @@ namespace Sora.Entities.CQCodes
                               {
                                   ImgFile     = dataStr,
                                   ImgType     = "show",
-                                  UseCache    = useCache ? 1 : 0,
+                                  UseCache    = useCache ? 1 : null,
                                   Id          = id,
                                   ThreadCount = threadCount
                               });
@@ -220,8 +220,8 @@ namespace Sora.Entities.CQCodes
                               new Video
                               {
                                   VideoFile = dataStr,
-                                  Cache     = useCache ? 1 : 0,
-                                  Proxy     = useProxy ? 1 : 0,
+                                  Cache     = useCache ? 1 : null,
+                                  Proxy     = useProxy ? 1 : null,
                                   Timeout   = timeout
                               });
         }
