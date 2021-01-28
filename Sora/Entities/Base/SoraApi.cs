@@ -9,7 +9,6 @@ using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Server;
-using Sora.Server.ApiParams;
 using Sora.Server.ServerInterface;
 
 namespace Sora.Entities.Base
