@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
@@ -113,9 +114,7 @@ namespace Sora.Server
             if(!serverReady) return;
             //检查是否已有服务器被启动
             if(serverExitis) throw new SoraServerIsRuningException();
-            //心跳包超时检查计时器
-            this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null, new TimeSpan(0, 0, 0, (int)Config.HeartBeatTimeOut, 0),
-                                            new TimeSpan(0, 0, 0, (int)Config.HeartBeatTimeOut, 0));
+            //启动服务器
             Server.Start(socket =>
                          {
                              //接收事件处理
@@ -181,8 +180,10 @@ namespace Sora.Server
                                                 };
                          });
             ConsoleLog.Info("Sora",$"Sora WebSocket服务器正在运行[{Config.Location}:{Config.Port}]");
-            ConsoleLog.Info("Sora",$"Sora 服务端框架版本:{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
-
+            ConsoleLog.Info("Sora",$"Sora 服务端框架版本:{Assembly.GetExecutingAssembly().GetName().Version}");
+            //启动心跳包超时检查计时器
+            this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null, new TimeSpan(0, 0, 0, (int)Config.HeartBeatTimeOut, 0),
+                                            new TimeSpan(0, 0, 0, (int)Config.HeartBeatTimeOut, 0));
             serverExitis = true;
 
             ConsoleLog.Debug("Sora","开发交流群：1081190562");

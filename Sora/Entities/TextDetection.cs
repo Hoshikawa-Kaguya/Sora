@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.Entities;
 
-namespace Sora.Server.ApiParams
+namespace Sora.Entities
 {
     /// <summary>
     /// OCR识别结果
