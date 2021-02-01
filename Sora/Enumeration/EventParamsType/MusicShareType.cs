@@ -16,11 +16,6 @@ namespace Sora.Enumeration.EventParamsType
         /// QQ 音乐
         /// </summary>
         [Description("qq")]
-        QQMusic,
-        /// <summary>
-        /// 虾米音乐
-        /// </summary>
-        [Description("xm")]
-        Xiami
+        QQMusic
     }
 }
