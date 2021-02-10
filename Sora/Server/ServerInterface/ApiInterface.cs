@@ -860,6 +860,36 @@ namespace Sora.Server.ServerInterface
             //处理客户端信息
             return (retCode, ret["data"]?["clients"]?.ToObject<List<ClientInfo>>() ?? new List<ClientInfo>());
         }
+
+        /// <summary>
+        /// 上传群文件
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="localFilePath">本地文件路径</param>
+        /// <param name="fileName">上传文件名</param>
+        /// <param name="floderId">父目录ID 为<see langword="null"/>时则上传到根目录</param>
+        /// <param name="timeout">超时</param>
+        internal static async ValueTask<int> UploadGroupFile(Guid connection, long gid, string localFilePath, string fileName,
+                                                             string floderId = null, int timeout = 10000)
+        {
+            ConsoleLog.Debug("Sora","Sending upload_group_file request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.UploadGroupFile,
+                ApiParams = new
+                {
+                    group_id = gid,
+                    file     = localFilePath ?? throw new NullReferenceException("localFilePath is null"),
+                    name     = fileName      ?? throw new NullReferenceException("fileName is null"),
+                    folder   = floderId      ?? string.Empty
+                }
+            }, connection, timeout);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get upload_group_file response retcode={retCode}");
+            return retCode;
+        }
         #endregion
         #endregion
 
@@ -1279,9 +1309,9 @@ namespace Sora.Server.ServerInterface
         /// </summary>
         /// <param name="apiRequest">请求信息</param>
         /// <param name="connectionGuid">服务器连接标识符</param>
-        /// <param name="timeOut">覆盖原有超时,在不为空时有效</param>
+        /// <param name="timeout">覆盖原有超时,在不为空时有效</param>
         /// <returns>API返回</returns>
-        private static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid, int? timeOut = null)
+        private static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid, int? timeout = null)
         {
             //添加新的请求记录
             RequestList.Add(new ApiResponse
@@ -1296,7 +1326,7 @@ namespace Sora.Server.ServerInterface
                                       .Where(guid => guid == apiRequest.Echo)
                                       .Select(guid => guid)
                                       .Take(1)
-                                      .Timeout(TimeSpan.FromMilliseconds(timeOut ?? (int)TimeOut))
+                                      .Timeout(TimeSpan.FromMilliseconds(timeout ?? (int)TimeOut))
                                       .Catch(Observable.Return(new Guid("00000000-0000-0000-0000-000000000000")))
                                       .ToTask()
                                       .RunCatch();
