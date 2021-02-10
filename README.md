@@ -31,6 +31,8 @@
 
 详细的介绍文档还在编写
 
+如需要查看最新自动生成的文档请前往 [![Sora on fuget.org](https://www.fuget.org/packages/Sora/badge.svg)](https://www.fuget.org/packages/Sora)
+
 ## 开发注意事项
 
 ### **目前框架并没有发布LTS版本**
@@ -48,7 +50,7 @@
 
 详细内容请关注文档的更新
 
-> 本框架是在[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.39](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.39))下进行调试的，如使用其他平台可能会出现兼容性的问题
+> 本框架是通过和[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.40](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.40))通讯进行调试的，如使用其他平台可能会出现兼容性的问题
 
 > 请注意, 开发者并没有**义务**回复您的问题. 您应该具备基本的提问技巧。
 >
