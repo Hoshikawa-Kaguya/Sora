@@ -225,7 +225,27 @@ namespace Sora.Enumeration.ApiType
         /// 上传群文件
         /// </summary>
         [Description("upload_group_file")]
-        UploadGroupFile
+        UploadGroupFile,
+        /// <summary>
+        /// 设置精华消息
+        /// </summary>
+        [Description("set_essence_msg")]
+        SetEssenceMsg,
+        /// <summary>
+        /// 移出精华消息
+        /// </summary>
+        [Description("delete_essence_msg")]
+        DeleteEssenceMsg,
+        /// <summary>
+        /// 获取精华消息列表
+        /// </summary>
+        [Description("get_essence_msg_list")]
+        GetEssenceMsgList,
+        /// <summary>
+        /// 检查链接安全性
+        /// </summary>
+        [Description("check_url_safely")]
+        CheckUrlSafely
         #endregion
     }
 }

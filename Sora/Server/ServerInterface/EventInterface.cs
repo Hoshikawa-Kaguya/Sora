@@ -102,6 +102,10 @@ namespace Sora.Server.ServerInterface
         /// 其他客户端在线状态变更事件
         /// </summary>
         public event EventAsyncCallBackHandler<ClientStatusChangeEventArgs> OnClientStatusChangeEvent;
+        /// <summary>
+        /// 精华消息变动事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<EssenceChangeEventArgs> OnEssenceChange;
         #endregion
 
         #region 事件分发
@@ -379,6 +383,15 @@ namespace Sora.Server.ServerInterface
                     if(OnClientStatusChangeEvent == null) break;
                     await OnClientStatusChangeEvent(typeof(EventInterface),
                                                     new ClientStatusChangeEventArgs(connection, "client_status", clientStatus));
+                    break;
+                case "essence":
+                    ApiEssenceChangeEventArgs essenceChange = messageJson.ToObject<ApiEssenceChangeEventArgs>();
+                    if(essenceChange == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"Get essence change msg_id = {essenceChange.MessageId} type = {essenceChange.EssenceChangeType}");
+                    if(OnEssenceChange == null) break;
+                    await OnEssenceChange(typeof(EventInterface),
+                                          new EssenceChangeEventArgs(connection, "essence", essenceChange));
                     break;
                 //通知类事件
                 case "notify":

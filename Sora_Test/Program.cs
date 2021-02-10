@@ -40,8 +40,7 @@ namespace Sora_Test
             //群聊消息事件
             server.Event.OnGroupMessage += async (sender, eventArgs) =>
                                            {
-                                               await eventArgs.SoraApi.UploadGroupFile(eventArgs.SourceGroup,
-                                                   "E:/P/cache/0DQPGT5TV$R]E~ZKK2DZM]2.jpg", "嗨呀.jpg");
+                                               await eventArgs.SourceGroup.SendGroupMessage("好耶");
                                            };
             //私聊消息事件
             server.Event.OnPrivateMessage += async (sender, eventArgs) =>

@@ -562,10 +562,53 @@ namespace Sora.Entities.Base
         /// <param name="fileName">上传文件名</param>
         /// <param name="floderId">父目录ID</param>
         /// <returns>API状态</returns>
-        public async ValueTask<int> UploadGroupFile(long groupId, string localFilePath, string fileName,
-                                               string floderId = null)
+        public async ValueTask<APIStatusType> UploadGroupFile(long groupId, string localFilePath, string fileName,
+                                                              string floderId = null)
         {
-            return await ApiInterface.UploadGroupFile(this.ConnectionGuid, groupId, localFilePath, fileName, floderId);
+            return (APIStatusType) await ApiInterface.UploadGroupFile(this.ConnectionGuid, groupId, localFilePath, fileName, floderId);
+        }
+
+        /// <summary>
+        /// 设置精华消息
+        /// </summary>
+        /// <param name="messageId">消息ID</param>
+        /// <returns>API状态</returns>
+        public async ValueTask<APIStatusType> SetEssenceMessage(long messageId)
+        {
+            return (APIStatusType) await ApiInterface.SetEssenceMsg(this.ConnectionGuid, messageId);
+        }
+
+        /// <summary>
+        /// 删除精华消息
+        /// </summary>
+        /// <param name="messageId">消息ID</param>
+        /// <returns>API状态</returns>
+        public async ValueTask<APIStatusType> DelEssenceMessage(long messageId)
+        {
+            return (APIStatusType) await ApiInterface.DelEssenceMsg(this.ConnectionGuid, messageId);
+        }
+
+        /// <summary>
+        /// 获取群精华消息列表
+        /// </summary>
+        /// <param name="gid">群号</param>
+        /// <returns>精华消息列表</returns>
+        public async ValueTask<(APIStatusType apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList(long gid)
+        {
+            return ((APIStatusType apiStatus, List<EssenceInfo> essenceInfos))
+                await ApiInterface.GetEssenceMsgList(this.ConnectionGuid, gid);
+        }
+
+        /// <summary>
+        /// <para>使用腾讯API检查链接安全性</para>
+        /// <para>腾讯的这东西感觉不靠谱（</para>
+        /// </summary>
+        /// <param name="url">需要检查的链接</param>
+        /// <returns>安全性</returns>
+        public async ValueTask<(APIStatusType apiStatus, SecurityLevelType securityLevel)> GetEssenceMsgList(string url)
+        {
+            return ((APIStatusType apiStatus, SecurityLevelType securityLevel))
+                await ApiInterface.CheckUrlSafely(this.ConnectionGuid, url);
         }
         #endregion
         #endregion
@@ -744,6 +787,14 @@ namespace Sora.Entities.Base
         {
             if(delay < 0) throw new ArgumentOutOfRangeException(nameof(delay));
             await ApiInterface.Restart(this.ConnectionGuid, delay);
+        }
+
+        /// <summary>
+        /// 重载事件过滤器
+        /// </summary>
+        public async ValueTask ReloadEventFilter()
+        {
+            await ApiInterface.ReloadEventFilter(this.ConnectionGuid);
         }
         #endregion
 
