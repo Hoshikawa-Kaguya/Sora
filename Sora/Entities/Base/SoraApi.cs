@@ -555,21 +555,19 @@ namespace Sora.Entities.Base
         }
 
         /// <summary>
-        /// OCR图片
+        /// 上传群文件
         /// </summary>
-        /// <param name="imageId">图片ID</param>
-        /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
-        /// <para><see langword="texts"/> 识别结果</para>
-        /// <para><see langword="language"/> 识别语言</para>
-        /// </returns>
-        public async ValueTask<(APIStatusType retCode, List<TextDetection> texts, string lang)> OcrImage(string imageId)
+        /// <param name="groupId">群号</param>
+        /// <param name="localFilePath">本地文件路径</param>
+        /// <param name="fileName">上传文件名</param>
+        /// <param name="floderId">父目录ID</param>
+        /// <returns>API状态</returns>
+        public async ValueTask<int> UploadGroupFile(long groupId, string localFilePath, string fileName,
+                                               string floderId = null)
         {
-            return ((APIStatusType retCode, List<TextDetection> texts, string lang))
-                await ApiInterface.OcrImage(imageId, this.ConnectionGuid);
+            return await ApiInterface.UploadGroupFile(this.ConnectionGuid, groupId, localFilePath, fileName, floderId);
         }
         #endregion
-
         #endregion
 
         #region 账号信息API
@@ -817,6 +815,21 @@ namespace Sora.Entities.Base
                 throw new ArgumentOutOfRangeException(nameof(timeout), "timeout is less than 1000");
             return ((APIStatusType retCode, string filePath))
                 await ApiInterface.DownloadFile(url, threadCount, this.ConnectionGuid, customHeader, timeout);
+        }
+
+        /// <summary>
+        /// OCR图片
+        /// </summary>
+        /// <param name="imageId">图片ID</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="texts"/> 识别结果</para>
+        /// <para><see langword="language"/> 识别语言</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType retCode, List<TextDetection> texts, string lang)> OcrImage(string imageId)
+        {
+            return ((APIStatusType retCode, List<TextDetection> texts, string lang))
+                await ApiInterface.OcrImage(imageId, this.ConnectionGuid);
         }
         #endregion
 
