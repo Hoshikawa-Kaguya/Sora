@@ -168,7 +168,7 @@ namespace Sora.Server.ServerInterface
             //判断是否为MiraiGo
             JObject.FromObject(ret["data"]).TryGetValue("go-cqhttp", out JToken clientJson);
             bool.TryParse(clientJson?.ToString() ?? "false", out bool isGo);
-            string verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
+            var verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
 
             return isGo 
                 ? (retCode, "go-cqhttp", verStr) //Go客户端
@@ -889,6 +889,96 @@ namespace Sora.Server.ServerInterface
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get upload_group_file response retcode={retCode}");
             return retCode;
+        }
+
+        /// <summary>
+        /// 设置精华消息
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="msgId">消息ID</param>
+        internal static async ValueTask<int> SetEssenceMsg(Guid connection, long msgId)
+        {
+            ConsoleLog.Debug("Sora","Sending set_essence_msg request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.SetEssenceMsg,
+                ApiParams = new
+                {
+                    message_id = msgId
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get set_essence_msg response retcode={retCode}");
+            return retCode;
+        }
+
+        /// <summary>
+        /// 删除精华消息
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="msgId">消息ID</param>
+        internal static async ValueTask<int> DelEssenceMsg(Guid connection, long msgId)
+        {
+            ConsoleLog.Debug("Sora","Sending delete_essence_msg request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.DeleteEssenceMsg,
+                ApiParams = new
+                {
+                    message_id = msgId
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
+            return retCode;
+        }
+
+        /// <summary>
+        /// 获取群精华消息列表
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="gid">群号</param>
+        internal static async ValueTask<(int retCode, List<EssenceInfo> essenceInfos)> GetEssenceMsgList(
+            Guid connection, long gid)
+        {
+            ConsoleLog.Debug("Sora","Sending get_essence_msg_list request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.GetEssenceMsgList,
+                ApiParams = new
+                {
+                    group_id = gid
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get get_essence_msg_list response retcode={retCode}");
+            return (retCode, (ret["data"] ?? new JArray())
+                             .Select(element => new EssenceInfo(element, connection)).ToList());
+        }
+
+        /// <summary>
+        /// 检查链接安全性
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="url">需要检查的链接</param>
+        internal static async ValueTask<(int retCode, SecurityLevelType securityLevel)> CheckUrlSafely(Guid connection, string url)
+        {
+            ConsoleLog.Debug("Sora","Sending delete_essence_msg request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.CheckUrlSafely,
+                ApiParams = new
+                {
+                    url
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
+            return (retCode, (SecurityLevelType)Convert.ToInt32(ret["data"]?["level"] ?? 1));
         }
         #endregion
         #endregion
