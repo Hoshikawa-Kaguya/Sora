@@ -605,7 +605,7 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="url">需要检查的链接</param>
         /// <returns>安全性</returns>
-        public async ValueTask<(APIStatusType apiStatus, SecurityLevelType securityLevel)> GetEssenceMsgList(string url)
+        public async ValueTask<(APIStatusType apiStatus, SecurityLevelType securityLevel)> CheckUrlSafely(string url)
         {
             return ((APIStatusType apiStatus, SecurityLevelType securityLevel))
                 await ApiInterface.CheckUrlSafely(this.ConnectionGuid, url);
