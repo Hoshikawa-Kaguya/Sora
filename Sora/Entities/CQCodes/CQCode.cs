@@ -49,8 +49,7 @@ namespace Sora.Entities.CQCodes
         /// <param name="msg">文本消息</param>
         public static CQCode CQText(string msg)
         {
-            return new CQCode(CQFunction.Text,
-                              new Text {Content = msg});
+            return new(CQFunction.Text, new Text {Content = msg});
         }
 
         /// <summary>

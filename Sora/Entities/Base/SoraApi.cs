@@ -23,7 +23,7 @@ namespace Sora.Entities.Base
         /// 当前实例对应的链接GUID
         /// 用于调用API
         /// </summary>
-        private Guid ConnectionGuid { get; set; }
+        private Guid ConnectionGuid { get; }
         #endregion
 
         #region 构造函数
@@ -919,6 +919,47 @@ namespace Sora.Entities.Base
                 return uid;
             }
             return -1;
+        }
+        #endregion
+
+        #region 运算符重载
+        /// <summary>
+        /// 等于重载
+        /// </summary>
+        public static bool operator ==(SoraApi apiL, SoraApi apiR)
+        { 
+            if (apiL == null || apiR == null) throw new NullReferenceException("null SoraApi");
+            return apiL.ConnectionGuid == apiR.ConnectionGuid;
+        }
+
+        /// <summary>
+        /// 不等于重载
+        /// </summary>
+        public static bool operator !=(SoraApi apiL, SoraApi apiR)
+        {
+            return !(apiL == apiR);
+        }
+        #endregion
+
+        #region 常用重载
+        /// <summary>
+        /// 比较重载
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            if (obj is SoraApi api)
+            {
+                return this == api;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// GetHashCode
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return ConnectionGuid.GetHashCode();
         }
         #endregion
     }
