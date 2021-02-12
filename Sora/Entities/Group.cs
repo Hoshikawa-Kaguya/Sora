@@ -329,9 +329,8 @@ namespace Sora.Entities
         /// 等于重载
         /// </summary>
         public static bool operator ==(Group groupL, Group groupR)
-        { 
-            if (groupL == null || groupR == null) throw new NullReferenceException("null Group");
-            return groupL.Id == groupR.Id && groupL.SoraApi == groupR.SoraApi;
+        {
+            return groupL is not null && groupR is not null && groupL.Id == groupR.Id && groupL.SoraApi == groupR.SoraApi;
         }
 
         /// <summary>

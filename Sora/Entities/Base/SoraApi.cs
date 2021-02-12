@@ -927,9 +927,8 @@ namespace Sora.Entities.Base
         /// 等于重载
         /// </summary>
         public static bool operator ==(SoraApi apiL, SoraApi apiR)
-        { 
-            if (apiL == null || apiR == null) throw new NullReferenceException("null SoraApi");
-            return apiL.ConnectionGuid == apiR.ConnectionGuid;
+        {
+            return apiL is not null && apiR is not null && apiL.ConnectionGuid == apiR.ConnectionGuid;
         }
 
         /// <summary>
