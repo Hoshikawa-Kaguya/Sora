@@ -323,5 +323,46 @@ namespace Sora.Entities
             return value.Id;
         }
         #endregion
+
+        #region 运算符重载
+        /// <summary>
+        /// 等于重载
+        /// </summary>
+        public static bool operator ==(Group groupL, Group groupR)
+        { 
+            if (groupL == null || groupR == null) throw new NullReferenceException("null Group");
+            return groupL.Id == groupR.Id && groupL.SoraApi == groupR.SoraApi;
+        }
+
+        /// <summary>
+        /// 不等于重载
+        /// </summary>
+        public static bool operator !=(Group groupL, Group groupR)
+        {
+            return !(groupL == groupR);
+        }
+        #endregion
+
+        #region 常用重载
+        /// <summary>
+        /// 比较重载
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            if (obj is Group api)
+            {
+                return this == api;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// GetHashCode
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return this.SoraApi.GetHashCode();
+        }
+        #endregion
     }
 }
