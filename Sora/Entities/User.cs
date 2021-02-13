@@ -17,7 +17,7 @@ namespace Sora.Entities
         /// <summary>
         /// 当前实例的用户ID
         /// </summary>
-        public long Id { get; private set; }
+        public long Id { get; }
         #endregion
 
         #region 构造函数
@@ -108,6 +108,48 @@ namespace Sora.Entities
         public static implicit operator string (User value)
         {
             return value.ToString ();
+        }
+        #endregion
+
+        #region 运算符重载
+        /// <summary>
+        /// 等于重载
+        /// </summary>
+        public static bool operator ==(User userL, User userR)
+        {
+            if (userL is null && userR is null) return true;
+
+            return userL is not null && userR is not null && userL.Id == userR.Id && userL.SoraApi == userR.SoraApi;
+        }
+
+        /// <summary>
+        /// 不等于重载
+        /// </summary>
+        public static bool operator !=(User userL, User userR)
+        {
+            return !(userL == userR);
+        }
+        #endregion
+
+        #region 常用重载
+        /// <summary>
+        /// 比较重载
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            if (obj is User user)
+            {
+                return this == user;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// GetHashCode
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, SoraApi);
         }
         #endregion
     }

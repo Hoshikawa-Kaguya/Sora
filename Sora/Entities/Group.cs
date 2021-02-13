@@ -18,7 +18,7 @@ namespace Sora.Entities
         /// <summary>
         /// 群号
         /// </summary>
-        public long Id { get; private set; }
+        public long Id { get; }
         #endregion
 
         #region 构造函数
@@ -330,6 +330,8 @@ namespace Sora.Entities
         /// </summary>
         public static bool operator ==(Group groupL, Group groupR)
         {
+            if (groupL is null && groupR is null) return true;
+
             return groupL is not null && groupR is not null && groupL.Id == groupR.Id && groupL.SoraApi == groupR.SoraApi;
         }
 
@@ -360,7 +362,7 @@ namespace Sora.Entities
         /// </summary>
         public override int GetHashCode()
         {
-            return this.SoraApi.GetHashCode();
+            return HashCode.Combine(Id, SoraApi);
         }
         #endregion
     }
