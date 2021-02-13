@@ -21,12 +21,12 @@ namespace Sora.Entities.CQCodes
         /// <summary>
         /// CQ码类型
         /// </summary>
-        public CQFunction Function { get; private set; }
+        public CQFunction Function { get; }
 
         /// <summary>
         /// CQ码数据实例
         /// </summary>
-        public object CQData { get; private set; }
+        public object CQData { get; }
         #endregion
 
         #region 构造函数
@@ -531,6 +531,50 @@ namespace Sora.Entities.CQCodes
                 }
             }
             return (dataStr, false);
+        }
+        #endregion
+
+        #region 运算符重载
+        /// <summary>
+        /// 等于重载
+        /// </summary>
+        public static bool operator ==(CQCode cqCodeL, CQCode cqCodeR)
+        {
+            if (cqCodeL is null && cqCodeR is null) return true;
+
+            return cqCodeL is not null                  && cqCodeR is not null &&
+                   cqCodeL.Function == cqCodeR.Function &&
+                   JToken.DeepEquals(JToken.FromObject(cqCodeL.CQData), JToken.FromObject(cqCodeR.CQData));
+        }
+
+        /// <summary>
+        /// 不等于重载
+        /// </summary>
+        public static bool operator !=(CQCode cqCodeL, CQCode cqCodeR)
+        {
+            return !(cqCodeL == cqCodeR);
+        }
+        #endregion
+
+        #region 常用重载
+        /// <summary>
+        /// 比较重载
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            if (obj is CQCode cqCode)
+            {
+                return this == cqCode;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// GetHashCode
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Function, CQData);
         }
         #endregion
     }

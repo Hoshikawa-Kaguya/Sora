@@ -928,6 +928,8 @@ namespace Sora.Entities.Base
         /// </summary>
         public static bool operator ==(SoraApi apiL, SoraApi apiR)
         {
+            if (apiL is null        && apiR is null) return true;
+
             return apiL is not null && apiR is not null && apiL.ConnectionGuid == apiR.ConnectionGuid;
         }
 
