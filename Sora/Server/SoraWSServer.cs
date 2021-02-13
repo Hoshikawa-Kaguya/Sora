@@ -1,13 +1,14 @@
+using Fleck;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Sora.Exceptions;
+using Sora.Server.ServerInterface;
 using System;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Fleck;
-using Newtonsoft.Json.Linq;
-using Sora.Exceptions;
-using Sora.Server.ServerInterface;
 using YukariToolBox.Console;
 using LogLevel = Fleck.LogLevel;
 
@@ -66,7 +67,7 @@ namespace Sora.Server
         public SoraWSServer(ServerConfig config, Action<Exception> crashAction = null)
         {
             //检查端口占用
-            if (PortInUse(config.Port))
+            if (IsPortInUse(config.Port))
             {
                 ConsoleLog.Fatal("Sora", $"端口{config.Port}已被占用，请更换其他端口");
                 ConsoleLog.Warning("Sora", "将在5s后自动退出");
@@ -96,8 +97,8 @@ namespace Sora.Server
             //全局异常事件
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
                                                           {
-                                                              if(crashAction == null) 
-                                                                  ConsoleLog.UnhandledExceptionLog(args);
+                                                              if (crashAction == null)
+                                                                  FriendlyException(args);
                                                               else
                                                                   crashAction(args.ExceptionObject as Exception);
                                                           };
@@ -212,9 +213,19 @@ namespace Sora.Server
         /// 检查端口占用
         /// </summary>
         /// <param name="port">端口号</param>
-        private static bool PortInUse(uint port) =>
+        private static bool IsPortInUse(uint port) =>
             IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
                               .Any(ipEndPoint => ipEndPoint.Port == port);
+
+        private static void FriendlyException(UnhandledExceptionEventArgs args)
+        {
+            var e = args.ExceptionObject as Exception;
+            if (e is JsonSerializationException)
+            {
+                ConsoleLog.Error("Sora", "出现错误，可能是go-cqhttp配置出现问题。请把go-cqhttp配置中的post_message_format从String改为Array。");
+            }
+            ConsoleLog.UnhandledExceptionLog(args);
+        }
         #endregion
     }
 }
