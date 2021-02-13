@@ -10,11 +10,11 @@ namespace Sora.Extensions
     public static class AsyncExtensions
     {
         /// <summary>
-        /// 运行并检查错误
+        /// 运行并捕捉错误
         /// </summary>
-        /// <typeparam name="T">out type</typeparam>
-        /// <param name="this">run method</param>
-        /// <param name="block">error info out method</param>
+        /// <typeparam name="T">返回类型</typeparam>
+        /// <param name="this">需要被捕捉错误的方法</param>
+        /// <param name="block">错误处理动作</param>
         /// <returns>T</returns>
         public static async ValueTask<T> RunCatch<T>(this ValueTask<T> @this, Func<Exception, T> block = null)
         {
@@ -33,10 +33,10 @@ namespace Sora.Extensions
         }
 
         /// <summary>
-        /// 运行并检查错误
+        /// 运行并捕捉错误
         /// </summary>
-        /// <param name="this">run method</param>
-        /// <param name="block">error info out method</param>
+        /// <param name="this">需要被捕捉错误的方法</param>
+        /// <param name="block">错误处理动作</param>
         public static async ValueTask RunCatch(this ValueTask @this, Action<Exception> block = null)
         {
             try
@@ -53,11 +53,11 @@ namespace Sora.Extensions
         }
 
         /// <summary>
-        /// 运行并检查错误
+        /// 运行并捕捉错误
         /// </summary>
-        /// <typeparam name="T">out type</typeparam>
-        /// <param name="this">run method</param>
-        /// <param name="block">error info out method</param>
+        /// <typeparam name="T">返回类型</typeparam>
+        /// <param name="this">需要被捕捉错误的方法</param>
+        /// <param name="block">错误处理动作</param>
         /// <returns>T</returns>
         public static async Task<T> RunCatch<T>(this Task<T> @this, Func<Exception, T> block = null)
         {
@@ -76,10 +76,10 @@ namespace Sora.Extensions
         }
 
         /// <summary>
-        /// 运行并检查错误
+        /// 运行并捕捉错误
         /// </summary>
-        /// <param name="this">run method</param>
-        /// <param name="block">error info out method</param>
+        /// <param name="this">需要被捕捉错误的方法</param>
+        /// <param name="block">错误处理动作</param>
         public static async Task RunCatch(this Task @this, Action<Exception> block = null)
         {
             try
