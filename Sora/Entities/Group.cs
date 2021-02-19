@@ -88,7 +88,7 @@ namespace Sora.Entities
         /// </summary>
         /// <returns>
         /// <para><see cref="APIStatusType"/> API执行状态</para>
-        /// <para><see cref="List{T}"/> 群成员列表</para>
+        /// <para><see cref="List{GroupMemberInfo}"/> 群成员列表</para>
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList()
         {

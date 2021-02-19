@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.Entities.Base;
 
 namespace Sora.Entities
 {
