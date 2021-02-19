@@ -15,9 +15,9 @@ using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Extensions;
 using Sora.Server.OnebotEvent.MessageEvent;
 using YukariToolBox.Console;
+using YukariToolBox.Extensions;
 
 namespace Sora.Server.ServerInterface
 {
@@ -1416,11 +1416,15 @@ namespace Sora.Server.ServerInterface
                                       .Where(guid => guid == apiRequest.Echo)
                                       .Select(guid => guid)
                                       .Take(1)
-                                      .Timeout(TimeSpan.FromMilliseconds(timeout ?? (int)TimeOut))
-                                      .Catch(Observable.Return(new Guid("00000000-0000-0000-0000-000000000000")))
+                                      .Timeout(TimeSpan.FromMilliseconds(timeout ?? (int) TimeOut))
+                                      .Catch(Observable.Return(Guid.Empty))
                                       .ToTask()
-                                      .RunCatch();
-            if(responseGuid.Equals(new Guid("00000000-0000-0000-0000-000000000000"))) ConsoleLog.Debug("Sora","observer time out");
+                                      .RunCatch(e =>
+                                                {
+                                                    ConsoleLog.Error("ApiSubject Error", ConsoleLog.ErrorLogBuilder(e));
+                                                    return Guid.Empty;
+                                                });
+            if(responseGuid.Equals(Guid.Empty)) ConsoleLog.Debug("Sora","observer time out");
             //查找返回值
             int reqIndex = RequestList.FindIndex(apiResponse => apiResponse.Echo == apiRequest.Echo);
             if (reqIndex == -1)
