@@ -19,32 +19,38 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 消息内容
         /// </summary>
-        public Message Message { get; private set; }
+        public Message Message { get; }
 
         /// <summary>
         /// 是否来源于匿名群成员
         /// </summary>
-        public bool IsAnonymousMessage { get; private set; }
+        public bool IsAnonymousMessage { get; }
+
+        //TODO 自身群消息可能会被修改
+        /// <summary>
+        /// 是否为Bot账号所发送的消息
+        /// </summary>
+        public bool IsSelfMessage { get; }
 
         /// <summary>
         /// 消息发送者实例
         /// </summary>
-        public User Sender { get; private set; }
+        public User Sender { get; }
 
         /// <summary>
         /// 发送者信息
         /// </summary>
-        public GroupSenderInfo SenderInfo { get; private set; }
+        public GroupSenderInfo SenderInfo { get; }
 
         /// <summary>
         /// 消息来源群组实例
         /// </summary>
-        public Group SourceGroup { get; private set; }
+        public Group SourceGroup { get; }
 
         /// <summary>
         /// 匿名用户实例
         /// </summary>
-        public Anonymous Anonymous { get; private set; }
+        public Anonymous Anonymous { get; }
         #endregion
 
         #region 构造函数
@@ -57,7 +63,8 @@ namespace Sora.EventArgs.SoraEvent
         internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs
         ) : base(connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
         {
-            this.IsAnonymousMessage = groupMsgArgs.Anonymous != null;
+            this.IsAnonymousMessage = groupMsgArgs.Anonymous   != null;
+            this.IsSelfMessage      = groupMsgArgs.MessageType == "group_self";
             //将api消息段转换为CQ码
             this.Message = new Message(connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
                                        MessageParse.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
