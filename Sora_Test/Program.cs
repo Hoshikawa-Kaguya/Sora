@@ -1,9 +1,7 @@
-using System;
 using System.Threading.Tasks;
-using Sora.Entities.CQCodes;
-using Sora.Extensions;
 using Sora.Server;
 using YukariToolBox.Console;
+using YukariToolBox.Extensions;
 
 namespace Sora_Test
 {
@@ -11,10 +9,13 @@ namespace Sora_Test
     {
         static async Task Main(string[] args)
         {
+            //设置log等级
             ConsoleLog.SetLogLevel(LogLevel.Debug);
-            ConsoleLog.Debug("dotnet version",Environment.Version);
 
-            SoraWSServer server = new SoraWSServer(new ServerConfig{Port = 8080});
+            //实例化服务器
+            SoraWSServer server = new SoraWSServer(new ServerConfig {Port = 8080});
+
+            #region 服务器事件处理
 
             //服务器连接事件
             server.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
@@ -44,11 +45,14 @@ namespace Sora_Test
                                            };
             //私聊消息事件
             server.Event.OnPrivateMessage += async (sender, eventArgs) =>
-                                               {
-                                                   await eventArgs.Sender.SendPrivateMessage(CQCode.CQImage("E:\\P\\83128088_p0.png"));
-                                               };
+                                             {
+                                                 await eventArgs.Sender.SendPrivateMessage("好耶");
+                                             };
 
-            await server.StartServer().RunCatch();
+            #endregion
+
+            //启动服务器并捕捉错误
+            await server.StartServer().RunCatch(e => ConsoleLog.Error("Server Error", ConsoleLog.ErrorLogBuilder(e)));
         }
     }
 }
