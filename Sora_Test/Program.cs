@@ -39,16 +39,17 @@ namespace Sora_Test
                                                          return ValueTask.CompletedTask;
                                                      };
             //群聊消息事件
-            server.Event.OnGroupMessage += async (sender, eventArgs) =>
+            server.Event.OnGroupMessage += async (msgType, eventArgs) =>
                                            {
+                                               ConsoleLog.Info("test", $"self msg = {eventArgs.IsSelfMessage}");
+                                               if(eventArgs.IsSelfMessage) return;
                                                await eventArgs.SourceGroup.SendGroupMessage("好耶");
                                            };
             //私聊消息事件
-            server.Event.OnPrivateMessage += async (sender, eventArgs) =>
+            server.Event.OnPrivateMessage += async (msgType, eventArgs) =>
                                              {
                                                  await eventArgs.Sender.SendPrivateMessage("好耶");
                                              };
-
             #endregion
 
             //启动服务器并捕捉错误
