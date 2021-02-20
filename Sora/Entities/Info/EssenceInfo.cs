@@ -7,42 +7,42 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 精华消息信息
     /// </summary>
-    public struct EssenceInfo
+    public readonly struct EssenceInfo
     {
         /// <summary>
         /// 消息ID
         /// </summary>
-        public long MessageId { get; internal set; }
+        public long MessageId { get; }
 
         /// <summary>
         /// 精华设置者
         /// </summary>
-        public User Operator { get; internal set; }
+        public User Operator { get; }
 
         /// <summary>
         /// 精华设置者用户名
         /// </summary>
-        public string OperatorName { get; internal set; }
+        public string OperatorName { get; }
 
         /// <summary>
         /// 精华设置时间
         /// </summary>
-        public DateTime Time { get; internal set; }
+        public DateTime Time { get; }
 
         /// <summary>
         /// 消息发送者
         /// </summary>
-        public User Sender { get; internal set; }
+        public User Sender { get; }
 
         /// <summary>
         /// 消息发送者名
         /// </summary>
-        public string SenderName { get; internal set; }
+        public string SenderName { get; }
 
         /// <summary>
         /// 消息发送时间
         /// </summary>
-        public DateTime MessageSendTime { get; internal set; }
+        public DateTime MessageSendTime { get; }
 
         internal EssenceInfo(JToken dataJson, Guid connection)
         {

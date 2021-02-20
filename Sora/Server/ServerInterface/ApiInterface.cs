@@ -165,9 +165,6 @@ namespace Sora.Server.ServerInterface
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_version_info response retcode={retCode}");
             if (retCode != 0 || ret["data"] == null) return (retCode, "unknown", null);
-            //判断是否为MiraiGo
-            JObject.FromObject(ret["data"]).TryGetValue("go-cqhttp", out JToken clientJson);
-            bool.TryParse(clientJson?.ToString() ?? "false", out bool isGo);
             var verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
 
             return (retCode, ret["data"]?["app_name"]?.ToString() ?? "unknow", verStr);

@@ -9,7 +9,6 @@ namespace Sora_Test
     {
         static async Task Main(string[] args)
         {
-            //TODO .handle_quick_operation
             //TODO _get_vip_info
             //TODO _send_group_notice
             //设置log等级
@@ -45,7 +44,7 @@ namespace Sora_Test
             server.Event.OnGroupMessage += async (msgType, eventArgs) =>
                                            {
                                                if(eventArgs.IsSelfMessage) return;
-                                               var ver = eventArgs.SoraApi.GetClientInfo();
+                                               var info = await eventArgs.SourceGroup.GetGroupInfo();
                                                await eventArgs.SourceGroup.SendGroupMessage("好耶");
                                            };
             server.Event.OnSelfMessage += (type, eventArgs) =>
