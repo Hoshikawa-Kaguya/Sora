@@ -246,8 +246,8 @@ namespace Sora.Server.ServerInterface
                     break;
                 }
                 //群聊事件
-                //TODO 自身群消息可能会被修改
-                case "group_self":
+                //TODO 自身群消息可能会被修改，暂时不进行支持
+                //case "group_self":
                 case "group":
                 {
                     ConsoleLog.Debug("sora",messageJson);

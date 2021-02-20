@@ -26,7 +26,6 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         public bool IsAnonymousMessage { get; }
 
-        //TODO 自身群消息可能会被修改
         /// <summary>
         /// 是否为Bot账号所发送的消息
         /// </summary>
