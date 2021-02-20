@@ -170,9 +170,7 @@ namespace Sora.Server.ServerInterface
             bool.TryParse(clientJson?.ToString() ?? "false", out bool isGo);
             var verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
 
-            return isGo 
-                ? (retCode, "go-cqhttp", verStr) //Go客户端
-                : (retCode, ret["data"]?["app_name"]?.ToString() ?? "other", verStr);//其他客户端
+            return (retCode, ret["data"]?["app_name"]?.ToString() ?? "unknow", verStr);
         }
 
         /// <summary>

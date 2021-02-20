@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Sora.Entities.CQCodes;
 using Sora.Server.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Server;
+using Sora.Server.Converter;
 
 namespace Sora.EventArgs.SoraEvent
 {
@@ -53,14 +56,15 @@ namespace Sora.EventArgs.SoraEvent
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupMsgArgs">群消息事件参数</param>
-        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs
-        ) : base(connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
+        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs) 
+            : base(connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
         {
             this.IsAnonymousMessage = groupMsgArgs.Anonymous   != null;
             this.IsSelfMessage      = groupMsgArgs.MessageType == "group_self";

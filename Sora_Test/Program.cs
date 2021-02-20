@@ -45,6 +45,7 @@ namespace Sora_Test
             server.Event.OnGroupMessage += async (msgType, eventArgs) =>
                                            {
                                                if(eventArgs.IsSelfMessage) return;
+                                               var ver = eventArgs.SoraApi.GetClientInfo();
                                                await eventArgs.SourceGroup.SendGroupMessage("好耶");
                                            };
             server.Event.OnSelfMessage += (type, eventArgs) =>
