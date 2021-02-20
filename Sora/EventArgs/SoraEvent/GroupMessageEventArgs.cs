@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using Sora.Entities.CQCodes;
 using Sora.Server.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Server;
-using Sora.Server.Converter;
 
 namespace Sora.EventArgs.SoraEvent
 {
