@@ -43,6 +43,11 @@ namespace Sora.Server.ServerInterface
         public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnGroupMessage;
 
         /// <summary>
+        /// 登录账号发送消息事件
+        /// </summary>
+        public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnSelfMessage; 
+
+        /// <summary>
         /// 私聊事件
         /// </summary>
         public event EventAsyncCallBackHandler<PrivateMessageEventArgs> OnPrivateMessage;
@@ -153,15 +158,18 @@ namespace Sora.Server.ServerInterface
                 case "notice":
                     NoticeAdapter(messageJson, connection);
                     break;
+                case "message_sent":
+                    SelfMessageAdapter(messageJson, connection);
+                    break;
                 default:
                     //尝试从响应中获取标识符
-                    if (messageJson.TryGetValue("echo", out JToken echoJson) &&
-                        Guid.TryParse(echoJson.ToString(), out Guid echo))
+                    if (messageJson.TryGetValue("echo", out var echoJson) &&
+                        Guid.TryParse(echoJson.ToString(), out var echo))
                     {
                         //取出返回值中的数据
                         ApiInterface.GetResponse(echo, messageJson);
                     }
-                    else ConsoleLog.Debug("Sora", $"Unknown message :\r{messageJson}");
+                    else ConsoleLog.Warning("Sora", $"Unknown message type:{GetBaseEventType(messageJson)}");
 
                     break;
             }
@@ -238,7 +246,7 @@ namespace Sora.Server.ServerInterface
                     ApiPrivateMsgEventArgs privateMsg = messageJson.ToObject<ApiPrivateMsgEventArgs>();
                     if (privateMsg == null) break;
                     ConsoleLog.Debug("Sora",
-                                     $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) : {privateMsg.RawMessage}");
+                                     $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                     //执行回调函数
                     if (OnPrivateMessage == null) break;
                     await OnPrivateMessage("Message",
@@ -246,19 +254,47 @@ namespace Sora.Server.ServerInterface
                     break;
                 }
                 //群聊事件
-                //TODO 自身群消息可能会被修改，暂时不进行支持
-                //case "group_self":
                 case "group":
                 {
-                    ConsoleLog.Debug("sora",messageJson);
                     ApiGroupMsgEventArgs groupMsg = messageJson.ToObject<ApiGroupMsgEventArgs>();
                     if (groupMsg == null) break;
                     ConsoleLog.Debug("Sora",
-                                     $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] : {groupMsg.RawMessage}");
+                                     $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     //执行回调函数
                     if (OnGroupMessage == null) break;
                     await OnGroupMessage("Message",
                                          new GroupMessageEventArgs(connection, "group", groupMsg));
+                    break;
+                }
+                default:
+                    ConsoleLog.Warning("Sora|Message", $"接收到未知事件[{GetMessageType(messageJson)}]");
+                    break;
+            }
+        }
+
+        #endregion
+
+        #region 自身消息事件处理和分发
+
+        /// <summary>
+        /// 自身事件处理和分发
+        /// </summary>
+        /// <param name="messageJson">消息</param>
+        /// <param name="connection">连接GUID</param>
+        private async void SelfMessageAdapter(JObject messageJson, Guid connection)
+        {
+            switch (GetMessageType(messageJson))
+            {
+                case "group":
+                {
+                    ApiGroupMsgEventArgs groupMsg = messageJson.ToObject<ApiGroupMsgEventArgs>();
+                    if (groupMsg == null) break;
+                    ConsoleLog.Debug("Sora",
+                                     $"Group self msg[{groupMsg.GroupId}] -> {groupMsg.RawMessage}");
+                    //执行回调函数
+                    if (OnSelfMessage == null) break;
+                    await OnSelfMessage("Message",
+                                        new GroupMessageEventArgs(connection, "group", groupMsg));
                     break;
                 }
                 default:
