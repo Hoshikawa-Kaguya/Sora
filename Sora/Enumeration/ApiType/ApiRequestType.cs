@@ -246,6 +246,11 @@ namespace Sora.Enumeration.ApiType
         /// </summary>
         [Description("check_url_safely")]
         CheckUrlSafely,
+        /// <summary>
+        /// 获取VIP信息
+        /// </summary>
+        [Description("_get_vip_info")]
+        _GetVipInfo
         #endregion
     }
 }

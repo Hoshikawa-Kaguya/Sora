@@ -83,7 +83,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int code = GetBaseRetCode(ret).retCode;
             if (code != 0) return (code, -1);
-            int msgCode = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode)
+            int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
                 ? messageCode
                 : -1;
             ConsoleLog.Debug("Sora", $"Get send_msg(Private) response retcode={code}|msg_id={msgCode}");
@@ -119,7 +119,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int code = GetBaseRetCode(ret).retCode;
             if (code != 0) return (code, -1);
-            int msgCode = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode)
+            int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
                 ? messageCode
                 : -1;
             ConsoleLog.Debug("Sora", $"Get send_msg(Group) response retcode={code}|msg_id={msgCode}");
@@ -145,8 +145,8 @@ namespace Sora.Server.ServerInterface
             return
             (
                 retCode,
-                uid:int.TryParse(ret["data"]?["user_id"]?.ToString(), out int uid) ? uid : -1,
-                nick:ret["data"]?["nickname"]?.ToString() ?? string.Empty
+                uid:int.TryParse(ret?["data"]?["user_id"]?.ToString(), out int uid) ? uid : -1,
+                nick:ret?["data"]?["nickname"]?.ToString() ?? string.Empty
             );
         }
 
@@ -164,7 +164,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_version_info response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, "unknown", null);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, "unknown", null);
             var verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
 
             return (retCode, ret["data"]?["app_name"]?.ToString() ?? "unknow", verStr);
@@ -185,7 +185,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_friend_list response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             List<FriendInfo> friendList = new List<FriendInfo>();
             //处理返回的好友信息
             foreach (JToken token in ret["data"]?.ToArray())
@@ -215,7 +215,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_list response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             //处理返回群组列表
             List<GroupInfo> groupList = new List<GroupInfo>();
             foreach (JToken token in ret["data"]?.ToArray())
@@ -250,7 +250,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_member_list response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             //处理返回群成员列表
             return (retCode,
                     ret["data"]?.ToObject<List<GroupMemberInfo>>());
@@ -278,7 +278,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_info response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, new GroupInfo());
+            if (retCode != 0 || ret?["data"] == null) return (retCode, new GroupInfo());
             return (retCode,
                     new GroupInfo
                     {
@@ -314,7 +314,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_member_info response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, new GroupMemberInfo());
+            if (retCode != 0 || ret?["data"] == null) return (retCode, new GroupMemberInfo());
             return (retCode,
                     ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo());
         }
@@ -343,7 +343,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_stranger_info response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, new UserInfo(), string.Empty);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, new UserInfo(), string.Empty);
             return (retCode, new UserInfo
             {
                 UserId    = Convert.ToInt64(ret["data"]?["user_id"] ?? -1),
@@ -369,7 +369,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get can_send_image response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, false);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, false);
             return (retCode,
                     Convert.ToBoolean(ret["data"]?["yes"]?.ToString() ?? "false"));
         }
@@ -388,7 +388,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get can_send_record response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, false);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, false);
             return (retCode,
                     Convert.ToBoolean(ret["data"]?["yes"]?.ToString() ?? "false"));
         }
@@ -407,7 +407,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_status response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, false, false, null);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, false, false, null);
             return (retCode,
                     Convert.ToBoolean(ret["data"]?["online"]?.ToString() ?? "false"),
                     Convert.ToBoolean(ret["data"]?["good"]?.ToString()   ?? "false"),
@@ -435,7 +435,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_image response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, -1, null, null);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, -1, null, null);
             return (retCode,
                     Convert.ToInt32(ret["data"]?["size"] ?? 1),
                     ret["data"]?["filename"]?.ToString(),
@@ -462,7 +462,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_msg response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null, null, null, 0, false);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, null, null, null, 0, false);
             //处理消息段
             var rawMessage = ret["data"]?["message"]?.ToObject<List<MessageElement>>();
             return (retCode,
@@ -507,7 +507,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get .get_word_slices response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             return (retCode,
                     ret["data"]?["slices"]?.ToObject<List<string>>());
         }
@@ -596,7 +596,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", $"Get get_group_file_system_info response retcode={retCode}");
             return retCode != 0
                 ? (retCode, new GroupFileSysInfo())
-                : (retCode, ret["data"]?.ToObject<GroupFileSysInfo>() ?? new GroupFileSysInfo());
+                : (retCode, ret?["data"]?.ToObject<GroupFileSysInfo>() ?? new GroupFileSysInfo());
             //解析消息
         }
 
@@ -626,8 +626,8 @@ namespace Sora.Server.ServerInterface
             if (retCode != 0)
                 return (retCode, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
             return (retCode,
-                    ret["data"]?["files"]?.ToObject<List<GroupFileInfo>>()   ?? new List<GroupFileInfo>(),
-                    ret["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>());
+                    ret?["data"]?["files"]?.ToObject<List<GroupFileInfo>>()   ?? new List<GroupFileInfo>(),
+                    ret?["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>());
         }
 
         /// <summary>
@@ -658,8 +658,8 @@ namespace Sora.Server.ServerInterface
             if (retCode != 0)
                 return (retCode, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
             return (retCode,
-                    ret["data"]?["files"]?.ToObject<List<GroupFileInfo>>()     ?? new List<GroupFileInfo>(),
-                    ret["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>()); 
+                    ret?["data"]?["files"]?.ToObject<List<GroupFileInfo>>()     ?? new List<GroupFileInfo>(),
+                    ret?["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>()); 
         }
 
         /// <summary>
@@ -690,7 +690,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", $"Get get_group_file_url response retcode={retCode}");
             return retCode != 0
                 ? (retCode, null)
-                : (retCode, ret["data"]?["url"]?.ToString());
+                : (retCode, ret?["data"]?["url"]?.ToString());
         }
 
         /// <summary>
@@ -718,9 +718,9 @@ namespace Sora.Server.ServerInterface
             if (retCode != 0)
                 return (retCode, false, -1, -1);
             else
-                return (retCode, Convert.ToBoolean(ret["data"]?["can_at_all"]),
-                        Convert.ToInt16(ret["data"]?["remain_at_all_count_for_group"]),
-                        Convert.ToInt16(ret["data"]?["remain_at_all_count_for_uin"]));
+                return (retCode, Convert.ToBoolean(ret?["data"]?["can_at_all"]),
+                        Convert.ToInt16(ret?["data"]?["remain_at_all_count_for_group"]),
+                        Convert.ToInt16(ret?["data"]?["remain_at_all_count_for_uin"]));
         }
 
         /// <summary>
@@ -749,8 +749,8 @@ namespace Sora.Server.ServerInterface
             if (retCode != 0)
                 return (retCode, new List<TextDetection>(), string.Empty);
             else
-                return (retCode, ret["data"]?["texts"]?.ToObject<List<TextDetection>>(),
-                        ret["data"]?["language"]?.ToString());
+                return (retCode, ret?["data"]?["texts"]?.ToObject<List<TextDetection>>(),
+                        ret?["data"]?["language"]?.ToString());
         }
 
         /// <summary>
@@ -790,8 +790,8 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get download_file response retcode={retCode}");
-            ConsoleLog.Debug("Sora", $"get file path = {ret["data"]?["file"] ?? ""}");
-            return retCode != 0 ? (retCode, string.Empty) : (retCode, ret["data"]?["file"]?.ToString());
+            ConsoleLog.Debug("Sora", $"get file path = {ret?["data"]?["file"] ?? ""}");
+            return retCode != 0 ? (retCode, string.Empty) : (retCode, ret?["data"]?["file"]?.ToString());
         }
 
         /// <summary>
@@ -822,7 +822,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_group_msg_history response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             //处理消息段
             return (0, ret["data"]?["messages"]?.ToObject<List<ApiGroupMsgEventArgs>>()
                                                ?.Select(messageArg =>
@@ -851,7 +851,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_online_clients response retcode={retCode}");
-            if (retCode != 0 || ret["data"] == null) return (retCode, null);
+            if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             //处理客户端信息
             return (retCode, ret["data"]?["clients"]?.ToObject<List<ClientInfo>>() ?? new List<ClientInfo>());
         }
@@ -950,7 +950,7 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get get_essence_msg_list response retcode={retCode}");
-            return (retCode, (ret["data"] ?? new JArray())
+            return (retCode, (ret?["data"] ?? new JArray())
                              .Select(element => new EssenceInfo(element, connection)).ToList());
         }
 
@@ -973,7 +973,29 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
-            return (retCode, (SecurityLevelType)Convert.ToInt32(ret["data"]?["level"] ?? 1));
+            return (retCode, (SecurityLevelType)Convert.ToInt32(ret?["data"]?["level"] ?? 1));
+        }
+
+        /// <summary>
+        /// 获取vip信息
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="uid">需要检查的链接</param>
+        internal static async ValueTask<(int retCode, VipInfo securityLevel)> GetVipInfo(Guid connection, long uid)
+        {
+            ConsoleLog.Debug("Sora","Sending delete_essence_msg request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType._GetVipInfo,
+                ApiParams = new
+                {
+                    user_id = uid
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
+            return (retCode, ret?["data"]?.ToObject<VipInfo>() ?? new VipInfo());
         }
         #endregion
         #endregion

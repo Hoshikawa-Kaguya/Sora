@@ -689,6 +689,18 @@ namespace Sora.Entities.Base
             return ((APIStatusType apiStatus, UserInfo userInfo, string qid))
                 await ApiInterface.GetUserInfo(this.ConnectionGuid, userId, useCache);
         }
+
+        /// <summary>
+        /// <para>获取vip信息[不能获取非好友]</para>
+        /// <para>注意:此为不稳定API</para>
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        public async ValueTask<(APIStatusType apiStatus, VipInfo vipInfo)> GetVipInfo(long userId)
+        {
+            if(userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
+            return ((APIStatusType apiStatus, VipInfo vipInfo)) 
+                await ApiInterface.GetVipInfo(this.ConnectionGuid, userId);
+        }
         #endregion
 
         #region 服务端API
