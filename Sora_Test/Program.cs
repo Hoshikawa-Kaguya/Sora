@@ -44,10 +44,14 @@ namespace Sora_Test
             //群聊消息事件
             server.Event.OnGroupMessage += async (msgType, eventArgs) =>
                                            {
-                                               ConsoleLog.Info("test", $"self msg = {eventArgs.IsSelfMessage}");
                                                if(eventArgs.IsSelfMessage) return;
                                                await eventArgs.SourceGroup.SendGroupMessage("好耶");
                                            };
+            server.Event.OnSelfMessage += (type, eventArgs) =>
+                                          {
+                                              ConsoleLog.Info("test", $"self msg {eventArgs.Message.MessageId}");
+                                              return ValueTask.CompletedTask;
+                                          };
             //私聊消息事件
             server.Event.OnPrivateMessage += async (msgType, eventArgs) =>
                                              {
