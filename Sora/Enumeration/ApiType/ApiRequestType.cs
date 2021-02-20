@@ -245,7 +245,7 @@ namespace Sora.Enumeration.ApiType
         /// 检查链接安全性
         /// </summary>
         [Description("check_url_safely")]
-        CheckUrlSafely
+        CheckUrlSafely,
         #endregion
     }
 }

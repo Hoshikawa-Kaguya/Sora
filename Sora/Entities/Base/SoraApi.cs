@@ -9,6 +9,7 @@ using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Server;
+using Sora.Server.Converter;
 using Sora.Server.ServerInterface;
 
 namespace Sora.Entities.Base
@@ -51,26 +52,9 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> SendPrivateMessage(long userId, params object[] message)
         {
-            if(userId         < 10000) throw new ArgumentOutOfRangeException($"{nameof(userId)} too small");
-            if(message.Length == 0) throw new NullReferenceException(nameof(message));
-            //消息段列表
-            List<CQCode> msgList = new List<CQCode>();
-            foreach (object msgObj in message)
-            {
-                if(msgObj is CQCode cqCode)
-                {
-                    msgList.Add(cqCode);
-                }
-                else if (msgObj is IEnumerable<CQCode> cqCodes)
-                {
-                    msgList.AddRange(cqCodes);
-                }
-                else
-                {
-                    msgList.Add(CQCode.CQText(msgObj.ToString()));
-                }
-            }
-            return ((APIStatusType apiStatus, int messageId)) await ApiInterface.SendPrivateMessage(this.ConnectionGuid, userId, msgList);
+            if (userId         < 10000) throw new ArgumentOutOfRangeException($"{nameof(userId)} too small");
+            if (message.Length == 0) throw new NullReferenceException(nameof(message));
+            return ((APIStatusType apiStatus, int messageId)) await ApiInterface.SendPrivateMessage(this.ConnectionGuid, userId, message.ToCQCodeList());
         }
 
         /// <summary>
@@ -111,25 +95,8 @@ namespace Sora.Entities.Base
         {
             if(groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if(message.Length == 0) throw new NullReferenceException(nameof(message));
-            //消息段列表
-            List<CQCode> msgList = new List<CQCode>();
-            foreach (object msgObj in message)
-            {
-                if (msgObj is IEnumerable<CQCode> cqCodeList)
-                {
-                    msgList.AddRange(cqCodeList);
-                }
-                else if(msgObj is CQCode cqCode)
-                {
-                    msgList.Add(cqCode);
-                }
-                else
-                {
-                    msgList.Add(CQCode.CQText(msgObj.ToString()));
-                }
-            }
             return ((APIStatusType apiStatus, int messageId))
-                await ApiInterface.SendGroupMessage(this.ConnectionGuid, groupId, msgList);
+                await ApiInterface.SendGroupMessage(this.ConnectionGuid, groupId, message.ToCQCodeList());
         }
 
         /// <summary>
@@ -147,7 +114,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> SendGroupMessage(long groupId, List<CQCode> message)
         {
-            if(groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
+            if(groupId       < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if(message.Count == 0) throw new NullReferenceException(nameof(message));
             return ((APIStatusType apiStatus, int messageId))
                 await ApiInterface.SendGroupMessage(this.ConnectionGuid, groupId, message);
