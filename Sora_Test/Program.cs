@@ -9,6 +9,9 @@ namespace Sora_Test
     {
         static async Task Main(string[] args)
         {
+            //TODO .handle_quick_operation
+            //TODO _get_vip_info
+            //TODO _send_group_notice
             //设置log等级
             ConsoleLog.SetLogLevel(LogLevel.Debug);
 
