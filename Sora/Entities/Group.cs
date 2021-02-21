@@ -6,6 +6,7 @@ using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
+using Sora.EventArgs.SoraEvent;
 
 namespace Sora.Entities
 {
@@ -186,6 +187,53 @@ namespace Sora.Entities
             return await SoraApi.GetGroupFileUrl(Id, fileId, busid);
         }
 
+        /// <summary>
+        /// <para>获取群消息历史记录</para>
+        /// <para>能获取起始消息的前19条消息</para>
+        /// </summary>
+        /// <param name="messageSequence">起始消息序号，为<see langword="null"/>时默认从最新消息拉取</param>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="List{T}"/> 消息记录</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(
+            int? messageSequence = null)
+        {
+            return await base.SoraApi.GetGroupMessageHistory(this.Id, messageSequence);
+        }
+
+        /// <summary>
+        /// 发送群公告
+        /// </summary>
+        /// <param name="content">公告内容</param>
+        public async ValueTask<APIStatusType> SendGroupNotice(string content)
+        {
+            return await base.SoraApi.SendGroupNotice(this.Id, content);
+        }
+
+        /// <summary>
+        /// 获取群精华消息列表
+        /// </summary>
+        /// <returns>精华消息列表</returns>
+        public async ValueTask<(APIStatusType apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList()
+        {
+            return await base.SoraApi.GetEssenceMsgList(this.Id);
+        }
+
+        /// <summary>
+        /// 上传群文件
+        /// </summary>
+        /// <param name="localFilePath">本地文件路径</param>
+        /// <param name="fileName">上传文件名</param>
+        /// <param name="floderId">父目录ID</param>
+        /// <returns>API状态</returns>
+        public async ValueTask<APIStatusType> UploadGroupFile(string localFilePath, string fileName,
+                                                              string floderId = null)
+        {
+            return await base.SoraApi.UploadGroupFile(this.Id, localFilePath,
+                                                      fileName, floderId);
+        }
+
         #endregion
 
         #endregion
@@ -319,6 +367,21 @@ namespace Sora.Entities
         public async ValueTask<APIStatusType> SetGroupPortrait(string imageFile, bool useCache = true)
         {
             return await base.SoraApi.SetGroupPortrait(this.Id, imageFile, useCache);
+        }
+
+        /// <summary>
+        /// 获取群@全体成员剩余次数
+        /// </summary>
+        /// <returns>
+        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see langword="canAt"/> 是否可以@全体成员</para>
+        /// <para><see langword="groupRemain"/> 群内所有管理当天剩余@全体成员次数</para>
+        /// <para><see langword="botRemain"/> BOT当天剩余@全体成员次数</para>
+        /// </returns>
+        public async ValueTask<(APIStatusType apiStatus, bool canAt, short groupRemain, short botRemain)>
+            GetGroupAtAllRemain()
+        {
+            return await base.SoraApi.GetGroupAtAllRemain(this.Id);
         }
 
         #endregion

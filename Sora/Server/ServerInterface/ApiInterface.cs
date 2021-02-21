@@ -873,81 +873,6 @@ namespace Sora.Server.ServerInterface
         }
 
         /// <summary>
-        /// 上传群文件
-        /// </summary>
-        /// <param name="connection">链接标识</param>
-        /// <param name="gid">群号</param>
-        /// <param name="localFilePath">本地文件路径</param>
-        /// <param name="fileName">上传文件名</param>
-        /// <param name="floderId">父目录ID 为<see langword="null"/>时则上传到根目录</param>
-        /// <param name="timeout">超时</param>
-        internal static async ValueTask<int> UploadGroupFile(Guid connection, long gid, string localFilePath,
-                                                             string fileName,
-                                                             string floderId = null, int timeout = 10000)
-        {
-            ConsoleLog.Debug("Sora", "Sending upload_group_file request");
-            JObject ret = await SendApiRequest(new ApiRequest
-            {
-                ApiRequestType = ApiRequestType.UploadGroupFile,
-                ApiParams = new
-                {
-                    group_id = gid,
-                    file     = localFilePath ?? throw new NullReferenceException("localFilePath is null"),
-                    name     = fileName      ?? throw new NullReferenceException("fileName is null"),
-                    folder   = floderId      ?? string.Empty
-                }
-            }, connection, timeout);
-            //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get upload_group_file response retcode={retCode}");
-            return retCode;
-        }
-
-        /// <summary>
-        /// 设置精华消息
-        /// </summary>
-        /// <param name="connection">链接标识</param>
-        /// <param name="msgId">消息ID</param>
-        internal static async ValueTask<int> SetEssenceMsg(Guid connection, long msgId)
-        {
-            ConsoleLog.Debug("Sora", "Sending set_essence_msg request");
-            JObject ret = await SendApiRequest(new ApiRequest
-            {
-                ApiRequestType = ApiRequestType.SetEssenceMsg,
-                ApiParams = new
-                {
-                    message_id = msgId
-                }
-            }, connection);
-            //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get set_essence_msg response retcode={retCode}");
-            return retCode;
-        }
-
-        /// <summary>
-        /// 删除精华消息
-        /// </summary>
-        /// <param name="connection">链接标识</param>
-        /// <param name="msgId">消息ID</param>
-        internal static async ValueTask<int> DelEssenceMsg(Guid connection, long msgId)
-        {
-            ConsoleLog.Debug("Sora", "Sending delete_essence_msg request");
-            JObject ret = await SendApiRequest(new ApiRequest
-            {
-                ApiRequestType = ApiRequestType.DeleteEssenceMsg,
-                ApiParams = new
-                {
-                    message_id = msgId
-                }
-            }, connection);
-            //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
-            return retCode;
-        }
-
-        /// <summary>
         /// 获取群精华消息列表
         /// </summary>
         /// <param name="connection">链接标识</param>
@@ -979,7 +904,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, SecurityLevelType securityLevel)> CheckUrlSafely(
             Guid connection, string url)
         {
-            ConsoleLog.Debug("Sora", "Sending delete_essence_msg request");
+            ConsoleLog.Debug("Sora", "Sending check_url_safely request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CheckUrlSafely,
@@ -990,26 +915,9 @@ namespace Sora.Server.ServerInterface
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
+            ConsoleLog.Debug("Sora", $"Get check_url_safely response retcode={retCode}");
             return (retCode, (SecurityLevelType) Convert.ToInt32(ret?["data"]?["level"] ?? 1));
         }
-
-        // internal static async ValueTask<(int retCode, VipInfo securityLevel)> SendGroupNotice(Guid connection, long uid)
-        // {
-        //     ConsoleLog.Debug("Sora", "Sending delete_essence_msg request");
-        //     JObject ret = await SendApiRequest(new ApiRequest
-        //     {
-        //         ApiRequestType = ApiRequestType._GetVipInfo,
-        //         ApiParams = new
-        //         {
-        //             user_id = uid
-        //         }
-        //     }, connection);
-        //     //处理API返回信息
-        //     int retCode = GetBaseRetCode(ret).retCode;
-        //     ConsoleLog.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
-        //     return (retCode, ret?["data"]?.ToObject<VipInfo>() ?? new VipInfo());
-        // }
 
         /// <summary>
         /// 获取vip信息
@@ -1019,7 +927,7 @@ namespace Sora.Server.ServerInterface
         [Obsolete]
         internal static async ValueTask<(int retCode, VipInfo securityLevel)> GetVipInfo(Guid connection, long uid)
         {
-            ConsoleLog.Debug("Sora", "Sending delete_essence_msg request");
+            ConsoleLog.Debug("Sora", "Sending _get_vip_info request");
             JObject ret = await SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType._GetVipInfo,
@@ -1030,7 +938,7 @@ namespace Sora.Server.ServerInterface
             }, connection);
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
-            ConsoleLog.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
+            ConsoleLog.Debug("Sora", $"Get _get_vip_info response retcode={retCode}");
             return (retCode, ret?["data"]?.ToObject<VipInfo>() ?? new VipInfo());
         }
 
@@ -1481,6 +1389,105 @@ namespace Sora.Server.ServerInterface
             //处理API返回信息
             int retCode = GetBaseRetCode(ret).retCode;
             ConsoleLog.Debug("Sora", $"Get reload_event_filter response retcode={retCode}");
+            return retCode;
+        }
+
+        /// <summary>
+        /// 上传群文件
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="localFilePath">本地文件路径</param>
+        /// <param name="fileName">上传文件名</param>
+        /// <param name="floderId">父目录ID 为<see langword="null"/>时则上传到根目录</param>
+        /// <param name="timeout">超时</param>
+        internal static async ValueTask<int> UploadGroupFile(Guid connection, long gid, string localFilePath,
+                                                             string fileName,
+                                                             string floderId = null, int timeout = 10000)
+        {
+            ConsoleLog.Debug("Sora", "Sending upload_group_file request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.UploadGroupFile,
+                ApiParams = new
+                {
+                    group_id = gid,
+                    file     = localFilePath ?? throw new NullReferenceException("localFilePath is null"),
+                    name     = fileName      ?? throw new NullReferenceException("fileName is null"),
+                    folder   = floderId      ?? string.Empty
+                }
+            }, connection, timeout);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get upload_group_file response retcode={retCode}");
+            return retCode;
+        }
+
+        /// <summary>
+        /// 设置精华消息
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="msgId">消息ID</param>
+        internal static async ValueTask<int> SetEssenceMsg(Guid connection, long msgId)
+        {
+            ConsoleLog.Debug("Sora", "Sending set_essence_msg request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.SetEssenceMsg,
+                ApiParams = new
+                {
+                    message_id = msgId
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get set_essence_msg response retcode={retCode}");
+            return retCode;
+        }
+
+        /// <summary>
+        /// 删除精华消息
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="msgId">消息ID</param>
+        internal static async ValueTask<int> DelEssenceMsg(Guid connection, long msgId)
+        {
+            ConsoleLog.Debug("Sora", "Sending delete_essence_msg request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.DeleteEssenceMsg,
+                ApiParams = new
+                {
+                    message_id = msgId
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
+            return retCode;
+        }
+
+        /// <summary>
+        /// 发送群公告
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="content">公告内容</param>
+        internal static async ValueTask<int> SendGroupNotice(Guid connection, long gid, string content)
+        {
+            ConsoleLog.Debug("Sora", "Sending _send_group_notice request");
+            JObject ret = await SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType._SendGroupNotice,
+                ApiParams = new
+                {
+                    group_id = gid,
+                    content
+                }
+            }, connection);
+            //处理API返回信息
+            int retCode = GetBaseRetCode(ret).retCode;
+            ConsoleLog.Debug("Sora", $"Get _send_group_notice response retcode={retCode}");
             return retCode;
         }
 

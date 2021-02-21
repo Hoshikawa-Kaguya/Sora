@@ -603,6 +603,16 @@ namespace Sora.Entities.Base
                 await ApiInterface.CheckUrlSafely(this.ConnectionGuid, url);
         }
 
+        /// <summary>
+        /// 发送群公告
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="content">公告内容</param>
+        public async ValueTask<APIStatusType> SendGroupNotice(long groupId, string content)
+        {
+            return (APIStatusType) await ApiInterface.SendGroupNotice(this.ConnectionGuid, groupId, content);
+        }
+
         #endregion
 
         #endregion
