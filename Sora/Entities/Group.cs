@@ -15,13 +15,16 @@ namespace Sora.Entities
     public sealed class Group : BaseModel
     {
         #region 属性
+
         /// <summary>
         /// 群号
         /// </summary>
         public long Id { get; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -31,9 +34,11 @@ namespace Sora.Entities
         {
             this.Id = gid;
         }
+
         #endregion
 
         #region 群消息类方法
+
         /// <summary>
         /// 发送群消息
         /// </summary>
@@ -67,9 +72,11 @@ namespace Sora.Entities
         {
             return await base.SoraApi.SendGroupMessage(this.Id, message);
         }
+
         #endregion
 
         #region 群信息类方法
+
         /// <summary>
         /// 获取群信息
         /// </summary>
@@ -111,6 +118,7 @@ namespace Sora.Entities
         }
 
         #region Go扩展
+
         /// <summary>
         /// 发送合并转发(群)
         /// 但好像不能用的样子
@@ -118,9 +126,9 @@ namespace Sora.Entities
         /// <param name="nodeList">
         /// 节点(<see cref="Node"/>)消息段列表
         /// </param>
-        public async ValueTask SendGroupForwardMsg(List<CustomNode> nodeList)
+        public async ValueTask<APIStatusType> SendGroupForwardMsg(List<CustomNode> nodeList)
         {
-            await base.SoraApi.SendGroupForwardMsg(this.Id, nodeList);
+            return await base.SoraApi.SendGroupForwardMsg(this.Id, nodeList);
         }
 
         /// <summary>
@@ -177,11 +185,13 @@ namespace Sora.Entities
         {
             return await SoraApi.GetGroupFileUrl(Id, fileId, busid);
         }
+
         #endregion
 
         #endregion
 
         #region 群管理方法
+
         /// <summary>
         /// 设置群组成员禁言
         /// </summary>
@@ -190,34 +200,34 @@ namespace Sora.Entities
         /// <para>禁言时长(s)</para>
         /// <para>至少60s</para>
         /// </param>
-        public async ValueTask EnableGroupMemberMute(long userId, long duration)
+        public async ValueTask<APIStatusType> EnableGroupMemberMute(long userId, long duration)
         {
-            await base.SoraApi.EnableGroupMemberMute(this.Id, userId, duration);
+            return await base.SoraApi.EnableGroupMemberMute(this.Id, userId, duration);
         }
 
         /// <summary>
         /// 解除群组成员禁言
         /// </summary>
         /// <param name="userId">用户id</param>
-        public async ValueTask DisableGroupMemberMute(long userId)
+        public async ValueTask<APIStatusType> DisableGroupMemberMute(long userId)
         {
-            await base.SoraApi.DisableGroupMemberMute(this.Id, userId);
+            return await base.SoraApi.DisableGroupMemberMute(this.Id, userId);
         }
 
         /// <summary>
         /// 群组全员禁言
         /// </summary>
-        public async ValueTask EnableGroupMute()
+        public async ValueTask<APIStatusType> EnableGroupMute()
         {
-            await base.SoraApi.EnableGroupMute(this.Id);
+            return await base.SoraApi.EnableGroupMute(this.Id);
         }
 
         /// <summary>
         /// 解除群组全员禁言
         /// </summary>s
-        public async ValueTask DisableGroupMute()
+        public async ValueTask<APIStatusType> DisableGroupMute()
         {
-            await base.SoraApi.DisableGroupMute(this.Id);
+            return await base.SoraApi.DisableGroupMute(this.Id);
         }
 
         /// <summary>
@@ -228,9 +238,9 @@ namespace Sora.Entities
         /// <para>专属头衔</para>
         /// <para>当值为 <see langword="null"/> 或 <see cref="string"/>.<see langword="Empty"/> 时为清空名片</para>
         /// </param>
-        public async ValueTask SetGroupMemberSpecialTitle(long userId, string specialTitle)
+        public async ValueTask<APIStatusType> SetGroupMemberSpecialTitle(long userId, string specialTitle)
         {
-            await base.SoraApi.SetGroupMemberSpecialTitle(this.Id, userId, specialTitle);
+            return await base.SoraApi.SetGroupMemberSpecialTitle(this.Id, userId, specialTitle);
         }
 
         /// <summary>
@@ -241,43 +251,43 @@ namespace Sora.Entities
         /// <para>新名片</para>
         /// <para>当值为 <see langword="null"/> 或 <see cref="string"/>.<see langword="Empty"/> 时为清空名片</para>
         /// </param>
-        public async ValueTask SetGroupCard(long userId, string card)
+        public async ValueTask<APIStatusType> SetGroupCard(long userId, string card)
         {
-            await base.SoraApi.SetGroupCard(this.Id, userId, card);
+            return await base.SoraApi.SetGroupCard(this.Id, userId, card);
         }
 
         /// <summary>
         /// 设置群管理员
         /// </summary>
         /// <param name="userId">成员id</param>
-        public async ValueTask EnableGroupAdmin(long userId)
+        public async ValueTask<APIStatusType> EnableGroupAdmin(long userId)
         {
-            await base.SoraApi.EnableGroupAdmin(this.Id, userId);
+            return await base.SoraApi.EnableGroupAdmin(this.Id, userId);
         }
 
         /// <summary>
         /// 取消群管理员
         /// </summary>
         /// <param name="userId">成员id</param>
-        public async ValueTask DisableGroupAdmin(long userId)
+        public async ValueTask<APIStatusType> DisableGroupAdmin(long userId)
         {
-            await base.SoraApi.DisableGroupAdmin(this.Id, userId);
+            return await base.SoraApi.DisableGroupAdmin(this.Id, userId);
         }
 
         /// <summary>
         /// 退出群
         /// </summary>
-        public async ValueTask LeaveGroup()
+        public async ValueTask<APIStatusType> LeaveGroup()
         {
-            await base.SoraApi.LeaveGroup(this.Id);
+            return await base.SoraApi.LeaveGroup(this.Id);
         }
 
         /// <summary>
         /// 解散群
         /// </summary>
-        public async ValueTask DismissGroup()
+        public async ValueTask<APIStatusType> DismissGroup()
         {
-            await base.SoraApi.DismissGroup(this.Id);
+            return await base.SoraApi.DismissGroup(this.Id);
         }
 
         /// <summary>
@@ -285,19 +295,20 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="userId">用户id</param>
         /// <param name="rejectRequest">拒绝此人的加群请求</param>
-        public async ValueTask KickGroupMember(long userId, bool rejectRequest = false)
+        public async ValueTask<APIStatusType> KickGroupMember(long userId, bool rejectRequest = false)
         {
-            await base.SoraApi.KickGroupMember(this.Id, userId, rejectRequest);
+            return await base.SoraApi.KickGroupMember(this.Id, userId, rejectRequest);
         }
 
         #region Go扩展
+
         /// <summary>
         /// 设置群名
         /// </summary>
         /// <param name="newName">新群名</param>
-        public async ValueTask SetGroupName(string newName)
+        public async ValueTask<APIStatusType> SetGroupName(string newName)
         {
-            await base.SoraApi.SetGroupName(this.Id, newName);
+            return await base.SoraApi.SetGroupName(this.Id, newName);
         }
 
         /// <summary>
@@ -305,26 +316,30 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="imageFile">图片名/绝对路径/URL/base64</param>
         /// <param name="useCache">是否使用缓存</param>
-        public async ValueTask SetGroupPortrait(string imageFile, bool useCache = true)
+        public async ValueTask<APIStatusType> SetGroupPortrait(string imageFile, bool useCache = true)
         {
-            await base.SoraApi.SetGroupPortrait(this.Id, imageFile, useCache);
+            return await base.SoraApi.SetGroupPortrait(this.Id, imageFile, useCache);
         }
+
         #endregion
 
         #endregion
 
         #region 转换方法
+
         /// <summary>
         /// 定义将 <see cref="Group"/> 对象转换为 <see cref="long"/>
         /// </summary>
         /// <param name="value">转换的 <see cref="Group"/> 对象</param>
-        public static implicit operator long (Group value)
+        public static implicit operator long(Group value)
         {
             return value.Id;
         }
+
         #endregion
 
         #region 运算符重载
+
         /// <summary>
         /// 等于重载
         /// </summary>
@@ -332,7 +347,8 @@ namespace Sora.Entities
         {
             if (groupL is null && groupR is null) return true;
 
-            return groupL is not null && groupR is not null && groupL.Id == groupR.Id && groupL.SoraApi == groupR.SoraApi;
+            return groupL is not null && groupR is not null && groupL.Id == groupR.Id &&
+                   groupL.SoraApi                                        == groupR.SoraApi;
         }
 
         /// <summary>
@@ -342,9 +358,11 @@ namespace Sora.Entities
         {
             return !(groupL == groupR);
         }
+
         #endregion
 
         #region 常用重载
+
         /// <summary>
         /// 比较重载
         /// </summary>
@@ -354,6 +372,7 @@ namespace Sora.Entities
             {
                 return this == api;
             }
+
             return false;
         }
 
@@ -364,6 +383,7 @@ namespace Sora.Entities
         {
             return HashCode.Combine(Id, SoraApi);
         }
+
         #endregion
     }
 }

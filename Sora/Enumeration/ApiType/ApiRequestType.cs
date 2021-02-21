@@ -250,7 +250,12 @@ namespace Sora.Enumeration.ApiType
         /// 获取VIP信息
         /// </summary>
         [Description("_get_vip_info")]
-        _GetVipInfo
+        _GetVipInfo,
+        /// <summary>
+        /// 发送群公告
+        /// </summary>
+        [Description("_send_group_notice")]
+        _SendGroupNotice
         #endregion
     }
 }
