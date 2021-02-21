@@ -16,6 +16,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 消息内容
         /// </summary>
@@ -50,6 +51,7 @@ namespace Sora.EventArgs.SoraEvent
         /// 匿名用户实例
         /// </summary>
         public Anonymous Anonymous { get; }
+
         #endregion
 
         #region 构造函数
@@ -60,11 +62,11 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupMsgArgs">群消息事件参数</param>
-        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs) 
+        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs)
             : base(connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
         {
-            this.IsAnonymousMessage = groupMsgArgs.Anonymous   != null;
-            this.IsSelfMessage      = groupMsgArgs.MessageType == "group_self";
+            this.IsAnonymousMessage = groupMsgArgs.Anonymous != null;
+            this.IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
             //将api消息段转换为CQ码
             this.Message = new Message(connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
                                        MessageParse.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
@@ -74,9 +76,11 @@ namespace Sora.EventArgs.SoraEvent
             this.SenderInfo  = groupMsgArgs.SenderInfo;
             this.Anonymous   = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
         }
+
         #endregion
 
         #region 快捷方法
+
         /// <summary>
         /// 快速回复
         /// </summary>
@@ -123,10 +127,12 @@ namespace Sora.EventArgs.SoraEvent
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(bool useCache = true)
+        public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(
+            bool useCache = true)
         {
             return await base.SoraApi.GetGroupMemberInfo(this.SourceGroup.Id, this.Sender.Id, useCache);
         }
+
         #endregion
     }
 }
