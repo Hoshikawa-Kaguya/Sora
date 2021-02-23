@@ -204,7 +204,7 @@ namespace Sora.Server
         public void Dispose()
         {
             Server?.Dispose();
-            ApiInterface.RequestList.Clear();
+            ApiInterface.ClearApiReqList();
         }
         #endregion
 
