@@ -37,23 +37,24 @@ namespace Sora.Server.ServerInterface
         /// <summary>
         /// 暂存数据结构定义
         /// </summary>
-        internal struct ApiResponse
+        private struct ApiData
         {
             internal Guid Echo;
 
             internal JObject Response;
+
+            internal DateTime CreateTime;
         }
 
         /// <summary>
-        /// API请求暂存表
+        /// API请求表
         /// </summary>
-        internal static readonly List<ApiResponse> RequestList = new();
+        private static readonly List<ApiData> RequestList = new();
 
         /// <summary>
         /// API响应被观察者
         /// </summary>
-        internal static readonly ISubject<Guid> ApiSubject =
-            new Subject<Guid>();
+        private static readonly Subject<Guid> ApiSubject = new();
 
         #endregion
 
@@ -1495,7 +1496,7 @@ namespace Sora.Server.ServerInterface
 
         #endregion
 
-        #region API请求回调
+        #region API通信
 
         /// <summary>
         /// 获取到API响应
@@ -1504,23 +1505,25 @@ namespace Sora.Server.ServerInterface
         /// <param name="response">响应json</param>
         internal static void GetResponse(Guid echo, JObject response)
         {
-            lock (ApiSubject)
+            lock (RequestList)
             {
-                if (RequestList.Any(guid => guid.Echo == echo))
-                {
-                    ConsoleLog.Debug("Sora", $"Get api response {response.ToString(Formatting.None)}");
-                    int connectionIndex = RequestList.FindIndex(conn => conn.Echo == echo);
-                    var connection      = RequestList[connectionIndex];
-                    connection.Response          = response;
-                    RequestList[connectionIndex] = connection;
-                    ApiSubject.OnNext(echo);
-                }
+                if (RequestList.All(guid => guid.Echo != echo)) return;
+                ConsoleLog.Debug("Sora", $"Get api response {response.ToString(Formatting.None)}");
+                var connectionIndex = RequestList.FindIndex(conn => conn.Echo == echo);
+                var connection      = RequestList[connectionIndex];
+                connection.Response          = response;
+                RequestList[connectionIndex] = connection;
+                ApiSubject.OnNext(echo);
             }
         }
 
-        #endregion
-
-        #region 发送API请求
+        /// <summary>
+        /// 清空API请求记录
+        /// </summary>
+        internal static void ClearApiReqList()
+        {
+            RequestList.Clear();
+        }
 
         /// <summary>
         /// 向API客户端发送请求数据
@@ -1533,44 +1536,42 @@ namespace Sora.Server.ServerInterface
                                                                int? timeout = null)
         {
             //添加新的请求记录
-            RequestList.Add(new ApiResponse
+            RequestList.Add(new ApiData
             {
-                Echo     = apiRequest.Echo,
-                Response = null
+                Echo       = apiRequest.Echo,
+                Response   = null,
+                CreateTime = DateTime.Now
             });
             //向客户端发送请求数据
             if (!ConnectionManager.SendMessage(connectionGuid, JsonConvert.SerializeObject(apiRequest, Formatting.None))
             ) return null;
             //等待客户端返回调用结果
-            Guid responseGuid = await ApiSubject
-                                      .Where(guid => guid == apiRequest.Echo)
-                                      .Select(guid => guid)
-                                      .Take(1)
-                                      .Timeout(TimeSpan.FromMilliseconds(timeout ?? (int) TimeOut))
-                                      .Catch(Observable.Return(Guid.Empty))
-                                      .ToTask()
-                                      .RunCatch(e =>
-                                                {
-                                                    ConsoleLog.Error("ApiSubject Error", ConsoleLog.ErrorLogBuilder(e));
-                                                    return Guid.Empty;
-                                                });
+            var responseGuid = await ApiSubject
+                                     .Where(guid => guid == apiRequest.Echo)
+                                     .Select(guid => guid)
+                                     .Take(1)
+                                     .Timeout(TimeSpan.FromMilliseconds(timeout ?? (int) TimeOut))
+                                     .Catch(Observable.Return(Guid.Empty))
+                                     .ToTask()
+                                     .RunCatch(e =>
+                                               {
+                                                   ConsoleLog.Error("ApiSubject Error", ConsoleLog.ErrorLogBuilder(e));
+                                                   return Guid.Empty;
+                                               });
             if (responseGuid.Equals(Guid.Empty)) ConsoleLog.Debug("Sora", "observer time out");
             //查找返回值
-            int reqIndex = RequestList.FindIndex(apiResponse => apiResponse.Echo == apiRequest.Echo);
+            var reqIndex = RequestList.FindIndex(apiResponse => apiResponse.Echo == apiRequest.Echo);
+            ConsoleLog.Debug("Sora", $"Get {apiRequest.Echo} index {reqIndex}");
             if (reqIndex == -1)
             {
-                ConsoleLog.Debug("Sora", "api time out");
+                ConsoleLog.Warning("Sora", "api time out");
                 return null;
             }
 
-            JObject ret = RequestList[reqIndex].Response;
+            var ret = RequestList[reqIndex].Response;
             RequestList.RemoveAt(reqIndex);
             return ret;
         }
-
-        #endregion
-
-        #region 获取API返回的状态值
 
         /// <summary>
         /// 获取API状态返回值
@@ -1582,7 +1583,7 @@ namespace Sora.Server.ServerInterface
             if (msg == null) return (retCode: -1, status: "failed");
             return
             (
-                retCode: int.TryParse(msg["retcode"]?.ToString(), out int messageCode) ? messageCode : -1,
+                retCode: int.TryParse(msg["retcode"]?.ToString(), out var messageCode) ? messageCode : -1,
                 status: msg["status"]?.ToString() ?? "failed"
             );
         }
