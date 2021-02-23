@@ -188,6 +188,8 @@ namespace Sora.Server
             {
                 ConsoleLog.Error("Sora",$"检查心跳包时发生错误 code -1, 连接[{lostConnection}]无法被关闭");
             }
+            //清理无效API请求
+            ReactiveApiManager.CleanApiReqList();
         }
 
         /// <summary>

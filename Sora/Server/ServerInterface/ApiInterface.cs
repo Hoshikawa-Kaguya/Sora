@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
@@ -17,47 +13,11 @@ using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Server.OnebotEvent.MessageEvent;
 using YukariToolBox.Console;
-using YukariToolBox.Extensions;
 
 namespace Sora.Server.ServerInterface
 {
     internal static class ApiInterface
     {
-        #region 静态属性
-
-        /// <summary>
-        /// API超时时间
-        /// </summary>
-        internal static uint TimeOut { get; set; }
-
-        #endregion
-
-        #region 请求表
-
-        /// <summary>
-        /// 暂存数据结构定义
-        /// </summary>
-        private struct ApiData
-        {
-            internal Guid Echo;
-
-            internal JObject Response;
-
-            internal DateTime CreateTime;
-        }
-
-        /// <summary>
-        /// API请求表
-        /// </summary>
-        private static readonly List<ApiData> RequestList = new();
-
-        /// <summary>
-        /// API响应被观察者
-        /// </summary>
-        private static readonly Subject<Guid> ApiSubject = new();
-
-        #endregion
-
         #region API请求
 
         /// <summary>
@@ -77,7 +37,7 @@ namespace Sora.Server.ServerInterface
             //转换消息段列表
             List<MessageElement> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendMsg,
                 ApiParams = new SendMessageParams
@@ -114,7 +74,7 @@ namespace Sora.Server.ServerInterface
             //转换消息段列表
             List<MessageElement> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendMsg,
                 ApiParams = new SendMessageParams
@@ -142,7 +102,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, long uid, string nick)> GetLoginInfo(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending get_login_info request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetLoginInfo
             }, connection);
@@ -166,7 +126,7 @@ namespace Sora.Server.ServerInterface
             Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending get_version_info request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetVersion
             }, connection);
@@ -187,7 +147,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, List<FriendInfo> friendList)> GetFriendList(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending get_friend_list request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetFriendList
             }, connection);
@@ -218,7 +178,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, List<GroupInfo> groupList)> GetGroupList(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending get_group_list request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupList
             }, connection);
@@ -250,7 +210,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
             Guid connection, long gid)
         {
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMemberList,
                 ApiParams = new
@@ -277,7 +237,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, long gid, bool useCache)
         {
             ConsoleLog.Debug("Sora", "Sending get_group_info request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupInfo,
                 ApiParams = new
@@ -312,7 +272,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, long gid, long uid, bool useCache)
         {
             ConsoleLog.Debug("Sora", "Sending get_group_member_info request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMemberInfo,
                 ApiParams = new
@@ -342,7 +302,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, long uid, bool useCache)
         {
             ConsoleLog.Debug("Sora", "Sending get_stranger_info request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetStrangerInfo,
                 ApiParams = new
@@ -373,7 +333,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, bool canSend)> CanSendImage(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending can_send_image request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CanSendImage
             }, connection);
@@ -392,7 +352,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, bool canSend)> CanSendRecord(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending can_send_record request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CanSendRecord
             }, connection);
@@ -412,7 +372,7 @@ namespace Sora.Server.ServerInterface
             Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending get_status request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetStatus
             }, connection);
@@ -437,7 +397,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, string cacheFileName)
         {
             ConsoleLog.Debug("Sora", "Sending get_image request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetImage,
                 ApiParams = new
@@ -465,7 +425,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, int msgId)
         {
             ConsoleLog.Debug("Sora", "Sending get_msg request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetMessage,
                 ApiParams = new
@@ -510,7 +470,7 @@ namespace Sora.Server.ServerInterface
         {
             if (string.IsNullOrEmpty(text)) throw new NullReferenceException(nameof(text));
             ConsoleLog.Debug("Sora", "Sending .get_word_slices request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetWordSlices,
                 ApiParams = new
@@ -538,7 +498,7 @@ namespace Sora.Server.ServerInterface
             if (string.IsNullOrEmpty(msgId)) throw new NullReferenceException(nameof(msgId));
             ConsoleLog.Debug("Sora", "Sending get_forward_msg request");
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetForwardMessage,
                 ApiParams = new
@@ -568,7 +528,7 @@ namespace Sora.Server.ServerInterface
         {
             ConsoleLog.Debug("Sora", "Sending get_group_system_msg request");
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupSystemMsg
             }, connection);
@@ -598,7 +558,7 @@ namespace Sora.Server.ServerInterface
         {
             ConsoleLog.Debug("Sora", "Sending get_group_file_system_info request");
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupFileSystemInfo,
                 ApiParams = new
@@ -627,7 +587,7 @@ namespace Sora.Server.ServerInterface
         {
             ConsoleLog.Debug("Sora", "Sending get_group_root_files request");
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupRootFiles,
                 ApiParams = new
@@ -658,7 +618,7 @@ namespace Sora.Server.ServerInterface
         {
             ConsoleLog.Debug("Sora", "Sending get_group_files_by_folder request");
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupFilesByFolder,
                 ApiParams = new
@@ -690,7 +650,7 @@ namespace Sora.Server.ServerInterface
         {
             ConsoleLog.Debug("Sora", "Sending get_group_file_url request");
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupFileUrl,
                 ApiParams = new
@@ -719,7 +679,7 @@ namespace Sora.Server.ServerInterface
         {
             ConsoleLog.Debug("Sora", "Sending get_group_at_all_remain request");
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupAtAllRemain,
                 ApiParams = new
@@ -749,7 +709,7 @@ namespace Sora.Server.ServerInterface
         {
             ConsoleLog.Debug("Sora", "Sending ocr_image request");
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.Ocr,
                 ApiParams = new
@@ -792,7 +752,7 @@ namespace Sora.Server.ServerInterface
             ConsoleLog.Debug("Sora", "Sending download_file request");
 
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.DownloadFile,
                 ApiParams = new
@@ -821,7 +781,7 @@ namespace Sora.Server.ServerInterface
             int? msgSeq, long gid, Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending get_group_msg_history request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMsgHistory,
                 ApiParams = msgSeq == null
@@ -857,7 +817,7 @@ namespace Sora.Server.ServerInterface
         {
             ConsoleLog.Debug("Sora", "Sending get_online_clients request");
             //发送信息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetOnlineClients,
                 ApiParams = new
@@ -882,7 +842,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, long gid)
         {
             ConsoleLog.Debug("Sora", "Sending get_essence_msg_list request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetEssenceMsgList,
                 ApiParams = new
@@ -906,7 +866,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, string url)
         {
             ConsoleLog.Debug("Sora", "Sending check_url_safely request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CheckUrlSafely,
                 ApiParams = new
@@ -929,7 +889,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, VipInfo securityLevel)> GetVipInfo(Guid connection, long uid)
         {
             ConsoleLog.Debug("Sora", "Sending _get_vip_info request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType._GetVipInfo,
                 ApiParams = new
@@ -957,7 +917,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> RecallMsg(Guid connection, int msgId)
         {
             ConsoleLog.Debug("Sora", "Sending delete_msg request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.RecallMsg,
                 ApiParams = new
@@ -983,7 +943,7 @@ namespace Sora.Server.ServerInterface
         {
             if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
             ConsoleLog.Debug("Sora", "Sending set_friend_add_request request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetFriendAddRequest,
                 ApiParams = new
@@ -1014,7 +974,7 @@ namespace Sora.Server.ServerInterface
                                                                 string reason = null)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_add_request request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAddRequest,
                 ApiParams = new SetGroupAddRequestParams
@@ -1041,7 +1001,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupCard(Guid connection, long gid, long uid, string card)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_card request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupCard,
                 ApiParams = new
@@ -1067,7 +1027,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupSpecialTitle(Guid connection, long gid, long uid, string title)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_special_title request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupSpecialTitle,
                 ApiParams = new
@@ -1094,7 +1054,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> KickGroupMember(Guid connection, long gid, long uid, bool rejectRequest)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_kick request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupKick,
                 ApiParams = new
@@ -1120,7 +1080,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupBan(Guid connection, long gid, long uid, long duration)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_ban request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupBan,
                 ApiParams = new
@@ -1145,7 +1105,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupWholeBan(Guid connection, long gid, bool enable)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_whole_ban request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupWholeBan,
                 ApiParams = new
@@ -1171,7 +1131,7 @@ namespace Sora.Server.ServerInterface
                                                              long duration)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_anonymous_ban request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
                 ApiParams = new
@@ -1198,7 +1158,7 @@ namespace Sora.Server.ServerInterface
                                                              long duration)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_anonymous_ban request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
                 ApiParams = new
@@ -1224,7 +1184,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupAdmin(Guid connection, long uid, long gid, bool enable)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_admin request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAdmin,
                 ApiParams = new
@@ -1249,7 +1209,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupLeave(Guid connection, long gid, bool dismiss)
         {
             ConsoleLog.Debug("Sora", "Sending set_group_leave request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupLeave,
                 ApiParams = new
@@ -1272,7 +1232,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> Restart(Guid connection, int delay)
         {
             ConsoleLog.Debug("Sora", "Sending restart client requset");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.Restart,
                 ApiParams = new
@@ -1298,7 +1258,7 @@ namespace Sora.Server.ServerInterface
         {
             if (string.IsNullOrEmpty(name)) throw new NullReferenceException(nameof(name));
             ConsoleLog.Debug("Sora", "Sending set_group_name request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupName,
                 ApiParams = new
@@ -1324,7 +1284,7 @@ namespace Sora.Server.ServerInterface
         {
             if (string.IsNullOrEmpty(file)) throw new NullReferenceException(nameof(file));
             ConsoleLog.Debug("Sora", "Sending set_group_portrait request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupPortrait,
                 ApiParams = new
@@ -1361,7 +1321,7 @@ namespace Sora.Server.ServerInterface
 
             ConsoleLog.Debug("Sora", "Sending send_group_forward_msg request");
             //发送消息
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendGroupForwardMsg,
                 ApiParams = new
@@ -1383,7 +1343,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> ReloadEventFilter(Guid connection)
         {
             ConsoleLog.Debug("Sora", "Sending reload_event_filter request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.ReloadEventFilter
             }, connection);
@@ -1407,7 +1367,7 @@ namespace Sora.Server.ServerInterface
                                                              string floderId = null, int timeout = 10000)
         {
             ConsoleLog.Debug("Sora", "Sending upload_group_file request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.UploadGroupFile,
                 ApiParams = new
@@ -1432,7 +1392,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetEssenceMsg(Guid connection, long msgId)
         {
             ConsoleLog.Debug("Sora", "Sending set_essence_msg request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetEssenceMsg,
                 ApiParams = new
@@ -1454,7 +1414,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> DelEssenceMsg(Guid connection, long msgId)
         {
             ConsoleLog.Debug("Sora", "Sending delete_essence_msg request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.DeleteEssenceMsg,
                 ApiParams = new
@@ -1477,7 +1437,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SendGroupNotice(Guid connection, long gid, string content)
         {
             ConsoleLog.Debug("Sora", "Sending _send_group_notice request");
-            JObject ret = await SendApiRequest(new ApiRequest
+            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType._SendGroupNotice,
                 ApiParams = new
@@ -1496,82 +1456,7 @@ namespace Sora.Server.ServerInterface
 
         #endregion
 
-        #region API通信
-
-        /// <summary>
-        /// 获取到API响应
-        /// </summary>
-        /// <param name="echo">标识符</param>
-        /// <param name="response">响应json</param>
-        internal static void GetResponse(Guid echo, JObject response)
-        {
-            lock (RequestList)
-            {
-                if (RequestList.All(guid => guid.Echo != echo)) return;
-                ConsoleLog.Debug("Sora", $"Get api response {response.ToString(Formatting.None)}");
-                var connectionIndex = RequestList.FindIndex(conn => conn.Echo == echo);
-                var connection      = RequestList[connectionIndex];
-                connection.Response          = response;
-                RequestList[connectionIndex] = connection;
-                ApiSubject.OnNext(echo);
-            }
-        }
-
-        /// <summary>
-        /// 清空API请求记录
-        /// </summary>
-        internal static void ClearApiReqList()
-        {
-            RequestList.Clear();
-        }
-
-        /// <summary>
-        /// 向API客户端发送请求数据
-        /// </summary>
-        /// <param name="apiRequest">请求信息</param>
-        /// <param name="connectionGuid">服务器连接标识符</param>
-        /// <param name="timeout">覆盖原有超时,在不为空时有效</param>
-        /// <returns>API返回</returns>
-        private static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid,
-                                                               int? timeout = null)
-        {
-            //添加新的请求记录
-            RequestList.Add(new ApiData
-            {
-                Echo       = apiRequest.Echo,
-                Response   = null,
-                CreateTime = DateTime.Now
-            });
-            //向客户端发送请求数据
-            if (!ConnectionManager.SendMessage(connectionGuid, JsonConvert.SerializeObject(apiRequest, Formatting.None))
-            ) return null;
-            //等待客户端返回调用结果
-            var responseGuid = await ApiSubject
-                                     .Where(guid => guid == apiRequest.Echo)
-                                     .Select(guid => guid)
-                                     .Take(1)
-                                     .Timeout(TimeSpan.FromMilliseconds(timeout ?? (int) TimeOut))
-                                     .Catch(Observable.Return(Guid.Empty))
-                                     .ToTask()
-                                     .RunCatch(e =>
-                                               {
-                                                   ConsoleLog.Error("ApiSubject Error", ConsoleLog.ErrorLogBuilder(e));
-                                                   return Guid.Empty;
-                                               });
-            if (responseGuid.Equals(Guid.Empty)) ConsoleLog.Debug("Sora", "observer time out");
-            //查找返回值
-            var reqIndex = RequestList.FindIndex(apiResponse => apiResponse.Echo == apiRequest.Echo);
-            ConsoleLog.Debug("Sora", $"Get {apiRequest.Echo} index {reqIndex}");
-            if (reqIndex == -1)
-            {
-                ConsoleLog.Warning("Sora", "api time out");
-                return null;
-            }
-
-            var ret = RequestList[reqIndex].Response;
-            RequestList.RemoveAt(reqIndex);
-            return ret;
-        }
+        #region 数据处理
 
         /// <summary>
         /// 获取API状态返回值

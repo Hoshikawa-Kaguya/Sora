@@ -167,7 +167,7 @@ namespace Sora.Server.ServerInterface
                         Guid.TryParse(echoJson.ToString(), out var echo))
                     {
                         //取出返回值中的数据
-                        ApiInterface.GetResponse(echo, messageJson);
+                        ReactiveApiManager.GetResponse(echo, messageJson);
                     }
                     else ConsoleLog.Warning("Sora", $"Unknown message type:{GetBaseEventType(messageJson)}");
 
