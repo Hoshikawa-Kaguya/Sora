@@ -84,7 +84,7 @@ namespace Sora.Server
         /// <param name="timeout">覆盖原有超时,在不为空时有效</param>
         /// <returns>API返回</returns>
         internal static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid,
-                                                               int? timeout = null)
+                                                                int? timeout = null)
         {
             //添加新的请求记录
             lock (RequestList)
@@ -97,6 +97,7 @@ namespace Sora.Server
                     CreateTime     = DateTime.Now
                 });
             }
+
             //向客户端发送请求数据
             if (!ConnectionManager.SendMessage(connectionGuid, JsonConvert.SerializeObject(apiRequest, Formatting.None))
             ) return null;
@@ -110,7 +111,8 @@ namespace Sora.Server
                                      .ToTask()
                                      .RunCatch(e =>
                                                {
-                                                   ConsoleLog.Error("Sora|ReactiveApiManager", $"ApiSubject Error {ConsoleLog.ErrorLogBuilder(e)}");
+                                                   ConsoleLog.Error("Sora|ReactiveApiManager",
+                                                                    $"ApiSubject Error {ConsoleLog.ErrorLogBuilder(e)}");
                                                    return Guid.Empty;
                                                });
             if (responseGuid.Equals(Guid.Empty)) ConsoleLog.Debug("Sora|ReactiveApiManager", "observer time out");
@@ -142,7 +144,6 @@ namespace Sora.Server
         /// </summary>
         internal static void ClearApiReqList()
         {
-            
             lock (RequestList)
             {
                 ConsoleLog.Debug("Sora|ReactiveApiManager", $"Force Clean All Requests [{RequestList.Count}]");
@@ -162,6 +163,7 @@ namespace Sora.Server
                 ConsoleLog.Debug("Sora|ReactiveApiManager", $"Clean Invalid Requests [{oldCount - RequestList.Count}]");
             }
         }
+
         #endregion
     }
 }

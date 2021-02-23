@@ -6,6 +6,7 @@ namespace Sora.Entities.Info
     public struct UserInfo
     {
         #region 属性
+
         /// <summary>
         /// 用户id
         /// </summary>
@@ -35,6 +36,7 @@ namespace Sora.Entities.Info
         /// 登陆天数
         /// </summary>
         public int LoginDays { get; internal init; }
+
         #endregion
     }
 }

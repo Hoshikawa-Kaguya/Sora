@@ -9,6 +9,7 @@ namespace Sora.Entities
     public class Anonymous
     {
         #region 属性
+
         /// <summary>
         /// 匿名用户 flag
         /// </summary>
@@ -26,16 +27,22 @@ namespace Sora.Entities
         /// </summary>
         [JsonProperty(PropertyName = "name")]
         public string Name { get; private init; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 构造函数
         /// </summary>
-        internal Anonymous() {}
+        internal Anonymous()
+        {
+        }
+
         #endregion
 
         #region 运算符重载
+
         /// <summary>
         /// 等于重载
         /// </summary>
@@ -56,9 +63,11 @@ namespace Sora.Entities
         {
             return !(anonymousL == anonymousR);
         }
+
         #endregion
 
         #region 常用重载
+
         /// <summary>
         /// 比较重载
         /// </summary>
@@ -68,6 +77,7 @@ namespace Sora.Entities
             {
                 return this == anonymous;
             }
+
             return false;
         }
 
@@ -78,6 +88,7 @@ namespace Sora.Entities
         {
             return HashCode.Combine(Flag, Id, Name);
         }
+
         #endregion
     }
 }

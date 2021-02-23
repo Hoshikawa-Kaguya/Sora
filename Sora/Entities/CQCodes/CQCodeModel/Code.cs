@@ -11,6 +11,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     public struct Code
     {
         #region 属性
+
         /// <summary>
         /// 内容
         /// </summary>
@@ -21,8 +22,9 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// 是否走富文本通道
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
-        [JsonProperty(PropertyName = "resid",NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "resid", NullValueHandling = NullValueHandling.Ignore)]
         public int? Resid { get; internal set; }
+
         #endregion
     }
 }

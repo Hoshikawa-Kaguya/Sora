@@ -11,12 +11,14 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     public struct Poke
     {
         #region 属性
+
         /// <summary>
         /// 需要戳的成员
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "qq")]
         public long Uid { get; internal set; }
+
         #endregion
     }
 }

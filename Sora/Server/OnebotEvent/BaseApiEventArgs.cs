@@ -12,11 +12,13 @@ namespace Sora.Server.OnebotEvent
         /// </summary>
         [JsonProperty(PropertyName = "time", NullValueHandling = NullValueHandling.Ignore)]
         internal long Time { get; set; }
+
         /// <summary>
         /// 收到事件的机器人 QQ 号
         /// </summary>
         [JsonProperty(PropertyName = "self_id", NullValueHandling = NullValueHandling.Ignore)]
         internal long SelfID { get; set; }
+
         /// <summary>
         /// 事件类型
         /// </summary>

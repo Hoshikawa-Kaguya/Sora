@@ -16,17 +16,23 @@ namespace Sora.Exceptions
         /// <summary>
         /// 初始化
         /// </summary>
-        public SoraServerIsRuningException() : base("Server is running"){}
+        public SoraServerIsRuningException() : base("Server is running")
+        {
+        }
 
         /// <summary>
         /// 初始化
         /// </summary>
-        public SoraServerIsRuningException(string message) : base(message) {}
+        public SoraServerIsRuningException(string message) : base(message)
+        {
+        }
 
         /// <summary>
         /// 初始化
         /// </summary>
-        public SoraServerIsRuningException(string message, Exception? innerException) : base(message, innerException) {}
+        public SoraServerIsRuningException(string message, Exception? innerException) : base(message, innerException)
+        {
+        }
 
         /// <summary>
         /// 初始化

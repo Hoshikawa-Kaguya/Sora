@@ -11,6 +11,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class FriendRequestEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 请求发送者实例
         /// </summary>
@@ -25,9 +26,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 当前请求的flag标识
         /// </summary>
         public string RequsetFlag { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -42,9 +45,11 @@ namespace Sora.EventArgs.SoraEvent
             this.Comment     = friendRequestArgs.Comment;
             this.RequsetFlag = friendRequestArgs.Flag;
         }
+
         #endregion
 
         #region 公有方法
+
         /// <summary>
         /// 同意当前申请
         /// </summary>
@@ -61,6 +66,7 @@ namespace Sora.EventArgs.SoraEvent
         {
             await base.SoraApi.SetFriendAddRequest(this.RequsetFlag, false);
         }
+
         #endregion
     }
 }

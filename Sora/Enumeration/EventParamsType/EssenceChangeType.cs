@@ -10,12 +10,11 @@ namespace Sora.Enumeration.EventParamsType
         /// <summary>
         /// 添加
         /// </summary>
-        [Description("add")]
-        Add,
+        [Description("add")] Add,
+
         /// <summary>
         /// 删除
         /// </summary>
-        [Description("delete")]
-        Delete
+        [Description("delete")] Delete
     }
 }

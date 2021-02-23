@@ -13,10 +13,12 @@ namespace Sora.Enumeration.ApiType
         /// 安全
         /// </summary>
         Safe = 1,
+
         /// <summary>
         /// 未知
         /// </summary>
         Unknown = 2,
+
         /// <summary>
         /// 危险
         /// </summary>

@@ -11,6 +11,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class GroupMemberChangeEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 变更成员
         /// </summary>
@@ -30,19 +31,22 @@ namespace Sora.EventArgs.SoraEvent
         /// 事件子类型
         /// </summary>
         public MemberChangeType SubType { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupMemberChangeArgs">群成员数量变更参数</param>
-        internal GroupMemberChangeEventArgs(Guid connectionGuid, string eventName, ApiGroupMemberChangeEventArgs groupMemberChangeArgs) :
+        internal GroupMemberChangeEventArgs(Guid connectionGuid, string eventName,
+                                            ApiGroupMemberChangeEventArgs groupMemberChangeArgs) :
             base(connectionGuid, eventName, groupMemberChangeArgs.SelfID, groupMemberChangeArgs.Time)
         {
-            this.ChangedUser   = new User(connectionGuid, groupMemberChangeArgs.UserId);
+            this.ChangedUser = new User(connectionGuid, groupMemberChangeArgs.UserId);
             //执行者和变动成员可能为同一人
             this.Operator = groupMemberChangeArgs.UserId == groupMemberChangeArgs.OperatorId
                 ? this.ChangedUser
@@ -50,6 +54,7 @@ namespace Sora.EventArgs.SoraEvent
             this.SourceGroup = new Group(connectionGuid, groupMemberChangeArgs.GroupId);
             this.SubType     = groupMemberChangeArgs.SubType;
         }
+
         #endregion
     }
 }

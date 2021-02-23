@@ -45,7 +45,7 @@ namespace Sora.Server.ServerInterface
         /// <summary>
         /// 登录账号发送消息事件
         /// </summary>
-        public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnSelfMessage; 
+        public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnSelfMessage;
 
         /// <summary>
         /// 私聊事件
@@ -549,6 +549,7 @@ namespace Sora.Server.ServerInterface
                             ConsoleLog.Warning("Sora|Notify", $"接收到未知事件[{GetNotifyType(messageJson)}]");
                             break;
                     }
+
                     break;
                 default:
                     ConsoleLog.Warning("Sora|Notice", $"接收到未知事件[{GetNoticeType(messageJson)}]");

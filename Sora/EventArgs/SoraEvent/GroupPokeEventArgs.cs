@@ -10,6 +10,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class GroupPokeEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 发送者
         /// </summary>
@@ -24,9 +25,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 消息源群
         /// </summary>
         public Group SourceGroup { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -40,6 +43,7 @@ namespace Sora.EventArgs.SoraEvent
             this.TargetUser  = new User(connectionGuid, pokeEventArgs.TargetId);
             this.SourceGroup = new Group(connectionGuid, pokeEventArgs.GroupId);
         }
+
         #endregion
     }
 }

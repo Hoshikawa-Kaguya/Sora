@@ -10,6 +10,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class GroupMuteEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 被执行成员
         /// </summary>
@@ -29,9 +30,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 禁言时长(s)
         /// </summary>
         internal long Duration { get; set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -46,6 +49,7 @@ namespace Sora.EventArgs.SoraEvent
             this.SourceGroup = new Group(connectionGuid, groupMuteArgs.GroupId);
             this.Duration    = groupMuteArgs.Duration;
         }
+
         #endregion
     }
 }

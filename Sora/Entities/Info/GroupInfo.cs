@@ -6,6 +6,7 @@ namespace Sora.Entities.Info
     public struct GroupInfo
     {
         #region 属性
+
         /// <summary>
         /// 群名称
         /// </summary>
@@ -25,6 +26,7 @@ namespace Sora.Entities.Info
         /// 群组ID
         /// </summary>
         public long GroupId { get; internal init; }
+
         #endregion
     }
 }

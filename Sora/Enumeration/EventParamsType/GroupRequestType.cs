@@ -10,12 +10,11 @@ namespace Sora.Enumeration.EventParamsType
         /// <summary>
         /// 加群申请
         /// </summary>
-        [Description("add")]
-        Add,
+        [Description("add")] Add,
+
         /// <summary>
         /// 加群邀请
         /// </summary>
-        [Description("invite")]
-        Invite
+        [Description("invite")] Invite
     }
 }
