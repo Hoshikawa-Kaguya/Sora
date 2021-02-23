@@ -84,7 +84,7 @@ namespace Sora.Server
             if (config.Port == 0 || config.Port > 65535) throw new ArgumentOutOfRangeException(nameof(config.Port));
             this.Config = config;
             //API超时
-            ApiInterface.TimeOut = config.ApiTimeOut;
+            ReactiveApiManager.TimeOut = config.ApiTimeOut;
             //实例化事件接口
             this.Event = new EventInterface();
             //禁用原log
@@ -204,7 +204,7 @@ namespace Sora.Server
         public void Dispose()
         {
             Server?.Dispose();
-            ApiInterface.ClearApiReqList();
+            ReactiveApiManager.ClearApiReqList();
         }
         #endregion
 
