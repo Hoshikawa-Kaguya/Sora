@@ -23,13 +23,13 @@ namespace Sora.Entities.Info
         /// 等级
         /// </summary>
         [JsonProperty(PropertyName = "level")]
-        public long Level { get; internal init; } 
+        public long Level { get; internal init; }
 
         /// <summary>
         /// 等级加速度
         /// </summary>
         [JsonProperty(PropertyName = "level_speed")]
-        public double LevelSpeed { get; internal init; } 
+        public double LevelSpeed { get; internal init; }
 
         /// <summary>
         /// 会员等级

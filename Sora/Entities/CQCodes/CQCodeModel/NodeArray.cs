@@ -16,6 +16,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         public List<Node> NodeMsgList { get; internal set; } = new List<Node>();
 
         #region Node处理
+
         /// <summary>
         /// 处理消息节点的消息为CQCode
         /// </summary>
@@ -23,6 +24,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         {
             this.NodeMsgList.ForEach(node => node.CQCodeMsgList = MessageParse.Parse(node.MessageList));
         }
+
         #endregion
     }
 }

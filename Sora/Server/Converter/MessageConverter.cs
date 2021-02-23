@@ -34,6 +34,7 @@ namespace Sora.Server.Converter
                         break;
                 }
             }
+
             return msgList;
         }
 

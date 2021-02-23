@@ -6,6 +6,7 @@ namespace Sora.Entities.Info
     public struct FriendInfo
     {
         #region 属性
+
         /// <summary>
         /// 好友备注
         /// </summary>
@@ -20,6 +21,7 @@ namespace Sora.Entities.Info
         /// 好友ID
         /// </summary>
         public long UserId { get; internal init; }
+
         #endregion
     }
 }

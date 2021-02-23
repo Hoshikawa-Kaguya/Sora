@@ -10,13 +10,11 @@ namespace Sora.Enumeration.EventParamsType
         /// <summary>
         /// 私聊消息
         /// </summary>
-        [Description("private")]
-        Private,
+        [Description("private")] Private,
 
         /// <summary>
         /// 群消息
         /// </summary>
-        [Description("group")]
-        Group
+        [Description("group")] Group
     }
 }

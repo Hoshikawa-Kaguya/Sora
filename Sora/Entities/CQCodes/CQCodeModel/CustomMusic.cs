@@ -7,8 +7,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     /// </summary>
     public struct CustomMusic
     {
-        [JsonProperty(PropertyName = "type")]
-        internal string ShareType;
+        [JsonProperty(PropertyName = "type")] internal string ShareType;
 
         /// <summary>
         /// 跳转URL

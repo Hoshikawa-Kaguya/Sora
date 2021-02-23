@@ -11,6 +11,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class HonorEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 荣誉获得者
         /// </summary>
@@ -25,9 +26,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 荣誉类型
         /// </summary>
         public HonorType Honor { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -41,6 +44,7 @@ namespace Sora.EventArgs.SoraEvent
             this.SourceGroup = new Group(connectionGuid, honorEventArgs.GroupId);
             this.Honor       = honorEventArgs.HonorType;
         }
+
         #endregion
     }
 }

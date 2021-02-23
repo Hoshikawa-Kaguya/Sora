@@ -8,6 +8,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     public struct Image
     {
         #region 属性
+
         /// <summary>
         /// 文件名/绝对路径/URL/base64
         /// </summary>
@@ -36,14 +37,13 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// 通过网络下载图片时的线程数，默认单线程。
         /// </summary>
         [JsonProperty(PropertyName = "c", NullValueHandling = NullValueHandling.Ignore)]
-        public int? ThreadCount { get; internal set; } 
+        public int? ThreadCount { get; internal set; }
 
         /// <summary>
         /// 发送秀图时的特效id，默认为40000
         /// </summary>
         [JsonProperty(PropertyName = "id", NullValueHandling = NullValueHandling.Ignore)]
         public int? Id { get; internal set; }
-
 
         #endregion
     }

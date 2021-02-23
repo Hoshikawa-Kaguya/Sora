@@ -11,6 +11,7 @@ namespace Sora.EventArgs.SoraEvent
     public class EssenceChangeEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 消息ID
         /// </summary>
@@ -35,9 +36,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 精华变动类型
         /// </summary>
         public EssenceChangeType EssenceChangeType { get; internal set; }
+
         #endregion
 
         #region 构造函数
+
         internal EssenceChangeEventArgs(Guid connectionGuid, string eventName,
                                         ApiEssenceChangeEventArgs essenceChangeEvent) : base(connectionGuid, eventName,
             essenceChangeEvent.SelfID, essenceChangeEvent.Time)
@@ -48,6 +51,7 @@ namespace Sora.EventArgs.SoraEvent
             SourceGroup       = new Group(connectionGuid, essenceChangeEvent.GroupId);
             EssenceChangeType = essenceChangeEvent.EssenceChangeType;
         }
+
         #endregion
     }
 }

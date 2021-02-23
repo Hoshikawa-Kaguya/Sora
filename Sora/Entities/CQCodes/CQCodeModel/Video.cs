@@ -9,6 +9,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     public struct Video
     {
         #region 属性
+
         /// <summary>
         /// 视频文件名
         /// </summary>
@@ -41,6 +42,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "timeout", NullValueHandling = NullValueHandling.Ignore)]
         public int? Timeout { get; internal set; }
+
         #endregion
     }
 }

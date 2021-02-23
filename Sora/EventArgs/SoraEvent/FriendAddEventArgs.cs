@@ -10,13 +10,16 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class FriendAddEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 新好友
         /// </summary>
         public User NewFriend { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -28,6 +31,7 @@ namespace Sora.EventArgs.SoraEvent
         {
             this.NewFriend = new User(connectionGuid, friendAddArgs.UserId);
         }
+
         #endregion
     }
 }

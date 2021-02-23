@@ -9,6 +9,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     public struct Reply
     {
         #region 属性
+
         /// <summary>
         /// At目标UID
         /// 为<see langword="null"/>时为At全体
@@ -16,6 +17,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "id")]
         public int Traget { get; internal set; }
+
         #endregion
     }
 }

@@ -10,12 +10,11 @@ namespace Sora.Enumeration.EventParamsType
         /// <summary>
         /// 设置
         /// </summary>
-        [Description("set")]
-        Set,
+        [Description("set")] Set,
+
         /// <summary>
         /// 取消
         /// </summary>
-        [Description("unset")]
-        UnSet
+        [Description("unset")] UnSet
     }
 }
