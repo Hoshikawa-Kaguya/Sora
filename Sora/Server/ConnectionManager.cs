@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Sora.EventArgs.WSSeverEvent;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
 
 namespace Sora.Server
@@ -42,7 +42,7 @@ namespace Sora.Server
 
         #region 属性
 
-        private ServerConfig Config { get; set; }
+        private ServerConfig Config { get; }
 
         #endregion
 
@@ -157,12 +157,11 @@ namespace Sora.Server
                 }
                 catch (Exception e)
                 {
-                    ConsoleLog.Error("Sora", $"Send message to client error\r\n{ConsoleLog.ErrorLogBuilder(e)}");
+                    Log.Error("Sora", $"Send message to client error\r\n{Log.ErrorLogBuilder(e)}");
                 }
 
                 return true;
             }
-
         }
 
         #endregion
@@ -175,8 +174,8 @@ namespace Sora.Server
         internal void HeartBeatCheck(object obj)
         {
             if (ConnectionList.Count == 0) return;
-            ConsoleLog.Debug("HeartBeatCheck", $"Connection count={ConnectionList.Count}");
-            List<Guid> lostConnections = new List<Guid>();
+            Log.Debug("HeartBeatCheck", $"Connection count={ConnectionList.Count}");
+            List<Guid> lostConnections = new();
             //锁定列表
             lock (ConnectionList)
             {
@@ -192,14 +191,14 @@ namespace Sora.Server
 
                         //关闭超时的连接
                         connection.Connection.Close();
-                        ConsoleLog.Error("Sora",
-                                         $"与Onebot客户端[{connection.Connection.ConnectionInfo.ClientIpAddress}:{connection.Connection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
+                        Log.Error("Sora",
+                                  $"与Onebot客户端[{connection.Connection.ConnectionInfo.ClientIpAddress}:{connection.Connection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
                         HeartBeatTimeOutEvent(connection.SelfId, connection.Connection.ConnectionInfo);
                     }
                     catch (Exception e)
                     {
-                        ConsoleLog.Error("Sora", "检查心跳包时发生错误 code -2");
-                        ConsoleLog.Error("Sora", ConsoleLog.ErrorLogBuilder(e));
+                        Log.Error("Sora", "检查心跳包时发生错误 code -2");
+                        Log.Error("Sora", Log.ErrorLogBuilder(e));
                         //添加需要删除的连接
                         lostConnections.Add(connection.ConnectionGuid);
                     }
@@ -210,7 +209,7 @@ namespace Sora.Server
             foreach (var lostConnection in lostConnections
                 .Where(lostConnection => !RemoveConnection(lostConnection)))
             {
-                ConsoleLog.Error("Sora", $"检查心跳包时发生错误 code -1, 连接[{lostConnection}]无法被关闭");
+                Log.Error("Sora", $"检查心跳包时发生错误 code -1, 连接[{lostConnection}]无法被关闭");
             }
 
             //清理无效API请求
@@ -246,7 +245,7 @@ namespace Sora.Server
             if (!AddConnection(socket.ConnectionInfo.Id, socket, selfId))
             {
                 socket.Close();
-                ConsoleLog.Error("Sora", $"处理连接请求时发生问题 无法记录该连接[{socket.ConnectionInfo.Id}]");
+                Log.Error("Sora", $"处理连接请求时发生问题 无法记录该连接[{socket.ConnectionInfo.Id}]");
                 return;
             }
 
@@ -269,8 +268,8 @@ namespace Sora.Server
         {
             if (!RemoveConnection(socket.ConnectionInfo.Id))
             {
-                ConsoleLog.Fatal("Sora", "客户端连接被关闭失败");
-                ConsoleLog.Warning("Sora", "将在5s后自动退出");
+                Log.Fatal("Sora", "客户端连接被关闭失败");
+                Log.Warning("Sora", "将在5s后自动退出");
                 Thread.Sleep(5000);
                 Environment.Exit(-1);
             }

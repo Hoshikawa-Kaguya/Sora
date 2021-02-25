@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Server.ApiParams;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 using YukariToolBox.Extensions;
 
 namespace Sora.Server
@@ -67,7 +67,7 @@ namespace Sora.Server
             lock (RequestList)
             {
                 if (RequestList.All(guid => guid.Echo != echo)) return;
-                ConsoleLog.Debug("Sora|ReactiveApiManager", $"Get api response {response.ToString(Formatting.None)}");
+                Log.Debug("Sora|ReactiveApiManager", $"Get api response {response.ToString(Formatting.None)}");
                 var connectionIndex = RequestList.FindIndex(conn => conn.Echo == echo);
                 var connection      = RequestList[connectionIndex];
                 connection.Response          = response;
@@ -111,21 +111,21 @@ namespace Sora.Server
                                      .ToTask()
                                      .RunCatch(e =>
                                                {
-                                                   ConsoleLog.Error("Sora|ReactiveApiManager",
-                                                                    $"ApiSubject Error {ConsoleLog.ErrorLogBuilder(e)}");
+                                                   Log.Error("Sora|ReactiveApiManager",
+                                                             $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
                                                    return Guid.Empty;
                                                });
-            if (responseGuid.Equals(Guid.Empty)) ConsoleLog.Debug("Sora|ReactiveApiManager", "observer time out");
+            if (responseGuid.Equals(Guid.Empty)) Log.Debug("Sora|ReactiveApiManager", "observer time out");
             lock (RequestList)
             {
                 //查找返回值
                 var reqIndex = RequestList.FindIndex(apiResponse =>
                                                          apiResponse.Echo           == apiRequest.Echo &&
                                                          apiResponse.ConnectionGuid == connectionGuid);
-                ConsoleLog.Debug("Sora|ReactiveApiManager", $"Get [{apiRequest.Echo}] index [{reqIndex}]");
+                Log.Debug("Sora|ReactiveApiManager", $"Get [{apiRequest.Echo}] index [{reqIndex}]");
                 if (reqIndex == -1)
                 {
-                    ConsoleLog.Warning("Sora|ReactiveApiManager", "api time out");
+                    Log.Warning("Sora|ReactiveApiManager", "api time out");
                     return null;
                 }
 
@@ -146,7 +146,7 @@ namespace Sora.Server
         {
             lock (RequestList)
             {
-                ConsoleLog.Debug("Sora|ReactiveApiManager", $"Force Clean All Requests [{RequestList.Count}]");
+                Log.Debug("Sora|ReactiveApiManager", $"Force Clean All Requests [{RequestList.Count}]");
                 RequestList.Clear();
             }
         }
@@ -160,7 +160,7 @@ namespace Sora.Server
             {
                 var oldCount = RequestList.Count;
                 RequestList.RemoveAll(req => DateTime.Now - req.CreateTime > TimeSpan.FromMilliseconds(TimeOut));
-                ConsoleLog.Debug("Sora|ReactiveApiManager", $"Clean Invalid Requests [{oldCount - RequestList.Count}]");
+                Log.Debug("Sora|ReactiveApiManager", $"Clean Invalid Requests [{oldCount - RequestList.Count}]");
             }
         }
 
