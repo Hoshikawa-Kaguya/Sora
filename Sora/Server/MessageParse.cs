@@ -4,7 +4,7 @@ using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Enumeration;
 using Sora.Server.ApiParams;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace Sora.Server
 {
@@ -48,8 +48,8 @@ namespace Sora.Server
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Sora", ConsoleLog.ErrorLogBuilder(e));
-                ConsoleLog.Error("Sora", $"Json CQ码转换错误 未知CQ码格式，出错CQ码{messageElement.MsgType},请向框架开发者反应此问题");
+                Log.Error("Sora", Log.ErrorLogBuilder(e));
+                Log.Error("Sora", $"Json CQ码转换错误 未知CQ码格式，出错CQ码{messageElement.MsgType},请向框架开发者反应此问题");
                 return new CQCode(CQFunction.Unknown, messageElement.RawData);
             }
         }
@@ -60,7 +60,7 @@ namespace Sora.Server
         /// <param name="messages">消息段数组</param>
         internal static List<CQCode> Parse(List<MessageElement> messages)
         {
-            ConsoleLog.Debug("Sora", "Parsing msg list");
+            Log.Debug("Sora", "Parsing msg list");
             if (messages == null || messages.Count == 0) return new List<CQCode>();
             List<CQCode> retMsg = new();
             foreach (var message in messages)
@@ -68,7 +68,7 @@ namespace Sora.Server
                 retMsg.Add(ParseMessageElement(message));
             }
 
-            ConsoleLog.Debug("Sora", $"Get msg len={retMsg.Count}");
+            Log.Debug("Sora", $"Get msg len={retMsg.Count}");
             return retMsg;
         }
     }

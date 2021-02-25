@@ -50,13 +50,23 @@
 
 详细内容请关注文档的更新
 
-> 本框架是通过和[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.40](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.40))通讯进行调试的，如使用其他平台可能会出现兼容性的问题
+> 本框架是通过和[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.40-fix2](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.40-fix2))通讯进行调试的，如使用其他平台可能会出现兼容性的问题
+
+## 关于ISSUE
+
+ISSUE 目前只接受bug的提交和新功能的建议
+
+如果有使用问题或者不确定的问题请使用[Discussions](https://github.com/Yukari316/Sora/discussions)
 
 > 请注意, 开发者并没有**义务**回复您的问题. 您应该具备基本的提问技巧。
 >
-> 如果issue被直接关闭了
->
-> 那么请在提问前阅读 [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md) 和 [正确的提问姿势](https://github.com/tangx/Stop-Ask-Questions-The-Stupid-Ways/blob/master/README.md)
+> 如果不知道该怎么样提问，那么请在提问前阅读 [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)
+
+以下ISSUE会被直接关闭
+
+- 提交BUG时没有使用Template
+- 提交当前版本下已经被修复的BUG
+- 询问问题（为什么不用用[Discussions](https://github.com/Yukari316/Sora/discussions)呢）
 
 ## 关于本框架
 

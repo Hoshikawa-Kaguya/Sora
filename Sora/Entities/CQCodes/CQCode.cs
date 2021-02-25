@@ -8,7 +8,7 @@ using Sora.Enumeration.EventParamsType;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Enumeration;
 using Sora.Server.ApiParams;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace Sora.Entities.CQCodes
 {
@@ -65,7 +65,7 @@ namespace Sora.Entities.CQCodes
         {
             if (uid < 10000)
             {
-                ConsoleLog.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
+                Log.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
                 return CQIlleage();
             }
 
@@ -78,8 +78,8 @@ namespace Sora.Entities.CQCodes
         /// </summary>
         public static CQCode CQAtAll()
         {
-            return new CQCode(CQFunction.At,
-                              new At {Traget = "all"});
+            return new(CQFunction.At,
+                       new At {Traget = "all"});
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Sora.Entities.CQCodes
             //检查ID合法性
             if (id is < 0 or > 244)
             {
-                ConsoleLog.Error("CQCode|CQFace", $"非法参数，已忽略CQ码[id超出范围限制({id})]");
+                Log.Error("CQCode|CQFace", $"非法参数，已忽略CQ码[id超出范围限制({id})]");
                 return CQIlleage();
             }
 
@@ -113,7 +113,7 @@ namespace Sora.Entities.CQCodes
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQRecord", $"非法参数({data})，已忽略此CQ码");
+                Log.Error("CQCode|CQRecord", $"非法参数({data})，已忽略此CQ码");
                 return CQIlleage();
             }
 
@@ -140,7 +140,7 @@ namespace Sora.Entities.CQCodes
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
+                Log.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
@@ -166,7 +166,7 @@ namespace Sora.Entities.CQCodes
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
+                Log.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
@@ -193,7 +193,7 @@ namespace Sora.Entities.CQCodes
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQShowImage", $"非法参数({data})，已忽略CQ码");
+                Log.Error("CQCode|CQShowImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
@@ -220,7 +220,7 @@ namespace Sora.Entities.CQCodes
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQVideo", $"非法参数({data})，已忽略CQ码");
+                Log.Error("CQCode|CQVideo", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
@@ -241,12 +241,12 @@ namespace Sora.Entities.CQCodes
         /// <param name="musicId">音乐Id</param>
         public static CQCode CQMusic(MusicShareType musicType, long musicId)
         {
-            return new CQCode(CQFunction.Music,
-                              new Music
-                              {
-                                  MusicType = musicType,
-                                  MusicId   = musicId
-                              });
+            return new(CQFunction.Music,
+                       new Music
+                       {
+                           MusicType = musicType,
+                           MusicId   = musicId
+                       });
         }
 
         /// <summary>
@@ -260,16 +260,16 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQCustomMusic(string url, string musicUrl, string title, string content = null,
                                            string coverImageUrl = null)
         {
-            return new CQCode(CQFunction.Music,
-                              new CustomMusic
-                              {
-                                  ShareType     = "custom",
-                                  Url           = url,
-                                  MusicUrl      = musicUrl,
-                                  Title         = title,
-                                  Content       = content,
-                                  CoverImageUrl = coverImageUrl
-                              });
+            return new(CQFunction.Music,
+                       new CustomMusic
+                       {
+                           ShareType     = "custom",
+                           Url           = url,
+                           MusicUrl      = musicUrl,
+                           Title         = title,
+                           Content       = content,
+                           CoverImageUrl = coverImageUrl
+                       });
         }
 
         /// <summary>
@@ -284,14 +284,14 @@ namespace Sora.Entities.CQCodes
                                      string content = null,
                                      string imageUrl = null)
         {
-            return new CQCode(CQFunction.Share,
-                              new Share
-                              {
-                                  Url      = url,
-                                  Title    = title,
-                                  Content  = content,
-                                  ImageUrl = imageUrl
-                              });
+            return new(CQFunction.Share,
+                       new Share
+                       {
+                           Url      = url,
+                           Title    = title,
+                           Content  = content,
+                           ImageUrl = imageUrl
+                       });
         }
 
         /// <summary>
@@ -300,11 +300,11 @@ namespace Sora.Entities.CQCodes
         /// <param name="id">消息id</param>
         public static CQCode CQReply(int id)
         {
-            return new CQCode(CQFunction.Reply,
-                              new Reply
-                              {
-                                  Traget = id
-                              });
+            return new(CQFunction.Reply,
+                       new Reply
+                       {
+                           Traget = id
+                       });
         }
 
         #region GoCQ扩展码
@@ -318,7 +318,7 @@ namespace Sora.Entities.CQCodes
         {
             if (uid < 10000)
             {
-                ConsoleLog.Error("CQCode|CQPoke", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
+                Log.Error("CQCode|CQPoke", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
                 return CQIlleage();
             }
 
@@ -426,7 +426,7 @@ namespace Sora.Entities.CQCodes
             (string dataStr, bool isDataStr) = ParseDataStr(imageFile);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQCardImage", $"非法参数({imageFile})，已忽略CQ码");
+                Log.Error("CQCode|CQCardImage", $"非法参数({imageFile})，已忽略CQ码");
                 return CQIlleage();
             }
 
