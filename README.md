@@ -76,4 +76,4 @@ Sora这个名字来源于日语中"空"的罗马音
 
 这个项目同时也是我学习C#这个语言的过程中的产物，所以里面可能会部分拉高血压的代码 ~~屎山~~
 
-如果有什么建议的话，可以在issue里提出哦
+如果有什么建议的话，可以在[Discussions](https://github.com/Yukari316/Sora/discussions)里提出哦
