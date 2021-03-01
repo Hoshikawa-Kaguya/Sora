@@ -12,50 +12,50 @@ namespace Sora.Entities.Info
         /// 请求ID
         /// </summary>
         [JsonProperty(PropertyName = "request_id")]
-        public long ID { get; internal set; }
+        public long ID { get; internal init; }
 
         /// <summary>
         /// 请求源UID
         /// </summary>
         [JsonProperty(PropertyName = "invitor_uin")]
-        public long UserID { get; internal set; }
+        public long UserID { get; internal init; }
 
         /// <summary>
         /// 请求源用户名
         /// </summary>
         [JsonProperty(PropertyName = "invitor_nick")]
-        public string UserNick { get; internal set; }
+        public string UserNick { get; internal init; }
 
         /// <summary>
         /// <para>验证消息</para>
         /// <para>当信息类型为邀请列表时此字段为空</para>
         /// </summary>
         [JsonProperty(PropertyName = "message", NullValueHandling = NullValueHandling.Ignore)]
-        public string Message { get; internal set; }
+        public string Message { get; internal init; }
 
         /// <summary>
         /// 请求源群号
         /// </summary>
         [JsonProperty(PropertyName = "group_id")]
-        public long GroupId { get; internal set; }
+        public long GroupId { get; internal init; }
 
         /// <summary>
         /// 请求源群名
         /// </summary>
         [JsonProperty(PropertyName = "group_name")]
-        public string GroupName { get; internal set; }
+        public string GroupName { get; internal init; }
 
         /// <summary>
         /// 请求是否已经被处理
         /// </summary>
         [JsonProperty(PropertyName = "checked")]
-        public bool Checked { get; internal set; }
+        public bool Checked { get; internal init; }
 
         /// <summary>
         /// <para>处理者UID</para>
         /// <para>未处理时为0</para>
         /// </summary>
         [JsonProperty(PropertyName = "actor")]
-        public long ActorUserId { get; internal set; }
+        public long ActorUserId { get; internal init; }
     }
 }

@@ -13,55 +13,55 @@ namespace Sora.Entities.Info
         /// 发送者 QQ 号
         /// </summary>
         [JsonProperty(PropertyName = "user_id")]
-        public long UserId { get; internal set; }
+        public long UserId { get; internal init; }
 
         /// <summary>
         /// 昵称
         /// </summary>
         [JsonProperty(PropertyName = "nickname")]
-        public string Nick { get; internal set; }
+        public string Nick { get; internal init; }
 
         /// <summary>
         /// 群名片/备注
         /// </summary>
         [JsonProperty(PropertyName = "card")]
-        public string Card { get; internal set; }
+        public string Card { get; internal init; }
 
         /// <summary>
         /// 性别
         /// </summary>
         [JsonProperty(PropertyName = "sex")]
-        public string Sex { get; internal set; }
+        public string Sex { get; internal init; }
 
         /// <summary>
         /// 年龄
         /// </summary>
         [JsonProperty(PropertyName = "age")]
-        public int Age { get; internal set; }
+        public int Age { get; internal init; }
 
         /// <summary>
         /// 地区
         /// </summary>
         [JsonProperty(PropertyName = "area")]
-        public string Area { get; internal set; }
+        public string Area { get; internal init; }
 
         /// <summary>
         /// 成员等级
         /// </summary>
         [JsonProperty(PropertyName = "level")]
-        public string Level { get; internal set; }
+        public string Level { get; internal init; }
 
         /// <summary>
         /// 角色(权限等级)
         /// </summary>
         [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "role")]
-        public MemberRoleType Role { get; internal set; }
+        public MemberRoleType Role { get; internal init; }
 
         /// <summary>
         /// 专属头衔
         /// </summary>
         [JsonProperty(PropertyName = "title")]
-        public string Title { get; internal set; }
+        public string Title { get; internal init; }
     }
 }

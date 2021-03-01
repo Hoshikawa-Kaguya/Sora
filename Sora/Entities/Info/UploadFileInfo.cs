@@ -11,24 +11,24 @@ namespace Sora.Entities.Info
         /// 文件 ID
         /// </summary>
         [JsonProperty(PropertyName = "id")]
-        public string FileId { get; internal set; }
+        public string FileId { get; internal init; }
 
         /// <summary>
         /// 文件名
         /// </summary>
         [JsonProperty(PropertyName = "name")]
-        public string Name { get; internal set; }
+        public string Name { get; internal init; }
 
         /// <summary>
         /// 文件大小(Byte)
         /// </summary>
         [JsonProperty(PropertyName = "size")]
-        public long Size { get; internal set; }
+        public long Size { get; internal init; }
 
         /// <summary>
         /// 未知字段
         /// </summary>
         [JsonProperty(PropertyName = "busid")]
-        public long Busid { get; internal set; }
+        public long Busid { get; internal init; }
     }
 }

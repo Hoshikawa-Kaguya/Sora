@@ -11,6 +11,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class GroupAdminChangeEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 消息源群
         /// </summary>
@@ -25,6 +26,7 @@ namespace Sora.EventArgs.SoraEvent
         /// 动作类型
         /// </summary>
         public AdminChangeType SubType { get; private set; }
+
         #endregion
 
         #region 构造函数
@@ -35,13 +37,15 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="adminChangeArgs">管理员变动事件参数</param>
-        internal GroupAdminChangeEventArgs(Guid connectionGuid, string eventName, ApiAdminChangeEventArgs adminChangeArgs) :
+        internal GroupAdminChangeEventArgs(Guid connectionGuid, string eventName,
+                                           ApiAdminChangeEventArgs adminChangeArgs) :
             base(connectionGuid, eventName, adminChangeArgs.SelfID, adminChangeArgs.Time)
         {
             this.SourceGroup = new Group(connectionGuid, adminChangeArgs.GroupId);
             this.Sender      = new User(connectionGuid, adminChangeArgs.UserId);
             this.SubType     = adminChangeArgs.SubType;
         }
+
         #endregion
     }
 }

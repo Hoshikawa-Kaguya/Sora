@@ -10,12 +10,11 @@ namespace Sora.Enumeration.EventParamsType
         /// <summary>
         /// 群组请求
         /// </summary>
-        [Description("group")]
-        Group,
+        [Description("group")] Group,
+
         /// <summary>
         /// 好友请求
         /// </summary>
-        [Description("friend")]
-        Friend
+        [Description("friend")] Friend
     }
 }

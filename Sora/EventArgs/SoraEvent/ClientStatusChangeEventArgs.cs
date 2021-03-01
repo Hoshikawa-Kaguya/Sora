@@ -10,6 +10,7 @@ namespace Sora.EventArgs.SoraEvent
     public class ClientStatusChangeEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 客户端信息
         /// </summary>
@@ -19,9 +20,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 是否在线
         /// </summary>
         public bool Online { get; private set; }
+
         #endregion
 
         #region 构造方法
+
         internal ClientStatusChangeEventArgs(Guid connectionGuid, string eventName,
                                              ApiClientStatusEventArgs clientStatus) : base(connectionGuid, eventName,
             clientStatus.SelfID, clientStatus.Time)
@@ -29,6 +32,7 @@ namespace Sora.EventArgs.SoraEvent
             this.Client = clientStatus.ClientInfo;
             this.Online = clientStatus.Online;
         }
+
         #endregion
     }
 }

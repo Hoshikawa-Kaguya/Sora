@@ -8,24 +8,27 @@ namespace Sora.Entities
     public class Vector2
     {
         #region 属性
+
         /// <summary>
         /// X
         /// </summary>
         [JsonProperty(PropertyName = "x")]
-        public int X { get; internal set; }
+        public int X { get; internal init; }
 
         /// <summary>
         /// Y
         /// </summary>
         [JsonProperty(PropertyName = "y")]
-        public int Y { get; internal set; }
+        public int Y { get; internal init; }
+
         #endregion
 
-        #region 构造函数
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        internal Vector2() {}
+        #region 构造方法
+
+        internal Vector2()
+        {
+        }
+
         #endregion
     }
 }

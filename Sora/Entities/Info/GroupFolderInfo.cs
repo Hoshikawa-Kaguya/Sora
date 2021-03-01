@@ -13,13 +13,13 @@ namespace Sora.Entities.Info
         /// 文件夹ID
         /// </summary>
         [JsonProperty(PropertyName = "folder_id")]
-        public string Id { get; internal set; }
+        public string Id { get; internal init; }
 
         /// <summary>
         /// 文件夹名
         /// </summary>
         [JsonProperty(PropertyName = "folder_name")]
-        public string Name { get; internal set; }
+        public string Name { get; internal init; }
 
         /// <summary>
         /// 创建时间
@@ -38,18 +38,18 @@ namespace Sora.Entities.Info
         /// 创建者UID
         /// </summary>
         [JsonProperty(PropertyName = "creator")]
-        public long CreatorUserId { get; internal set; }
+        public long CreatorUserId { get; internal init; }
 
         /// <summary>
         /// 创建者名
         /// </summary>
         [JsonProperty(PropertyName = "creator_name")]
-        public string CreatorUserName { get; internal set; }
+        public string CreatorUserName { get; internal init; }
 
         /// <summary>
         /// 子文件数量
         /// </summary>
         [JsonProperty(PropertyName = "total_file_count")]
-        public int FileCount { get; internal set; }
+        public int FileCount { get; internal init; }
     }
 }

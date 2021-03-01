@@ -13,25 +13,25 @@ namespace Sora.Entities.Info
         /// 文件ID
         /// </summary>
         [JsonProperty(PropertyName = "file_id")]
-        public string Id { get; internal set; }
+        public string Id { get; internal init; }
 
         /// <summary>
         /// 文件名
         /// </summary>
         [JsonProperty(PropertyName = "file_name")]
-        public string Name { get; internal set; }
+        public string Name { get; internal init; }
 
         /// <summary>
         /// 文件类型ID
         /// </summary>
         [JsonProperty(PropertyName = "busid")]
-        public int BusId { get; internal set; }
+        public int BusId { get; internal init; }
 
         /// <summary>
         /// 文件大小
         /// </summary>
         [JsonProperty(PropertyName = "file_size")]
-        public long Size { get; internal set; }
+        public long Size { get; internal init; }
 
         /// <summary>
         /// 上传时间
@@ -77,18 +77,18 @@ namespace Sora.Entities.Info
         /// 下载次数
         /// </summary>
         [JsonProperty(PropertyName = "download_times")]
-        public int DownloadCount { get; internal set; }
+        public int DownloadCount { get; internal init; }
 
         /// <summary>
         /// 上传者UID
         /// </summary>
         [JsonProperty(PropertyName = "uploader")]
-        public long UploadUserId { get; internal set; }
+        public long UploadUserId { get; internal init; }
 
         /// <summary>
         /// 上传者名
         /// </summary>
         [JsonProperty(PropertyName = "uploader_name")]
-        public string UploadUserName { get; internal set; }
+        public string UploadUserName { get; internal init; }
     }
 }

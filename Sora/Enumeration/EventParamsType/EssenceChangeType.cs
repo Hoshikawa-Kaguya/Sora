@@ -3,18 +3,18 @@ using System.ComponentModel;
 namespace Sora.Enumeration.EventParamsType
 {
     /// <summary>
-    /// 音乐分享类型
+    /// 精华信息变动类型
     /// </summary>
-    public enum MusicShareType
+    public enum EssenceChangeType
     {
         /// <summary>
-        /// 网易云音乐
+        /// 添加
         /// </summary>
-        [Description("163")] Netease,
+        [Description("add")] Add,
 
         /// <summary>
-        /// QQ 音乐
+        /// 删除
         /// </summary>
-        [Description("qq")] QQMusic
+        [Description("delete")] Delete
     }
 }
