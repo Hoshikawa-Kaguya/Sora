@@ -11,24 +11,24 @@ namespace Sora.Entities.Info
         /// 文件总数
         /// </summary>
         [JsonProperty(PropertyName = "file_count")]
-        public int FileCount { get; internal set; }
+        public int FileCount { get; internal init; }
 
         /// <summary>
         /// 文件数量上限
         /// </summary>
         [JsonProperty(PropertyName = "limit_count")]
-        public int FileLimit { get; internal set; }
+        public int FileLimit { get; internal init; }
 
         /// <summary>
         /// 已使用空间(Byte)
         /// </summary>
         [JsonProperty(PropertyName = "used_space")]
-        public long UsedSpace { get; internal set; }
+        public long UsedSpace { get; internal init; }
 
         /// <summary>
         /// 总空间(Byte)
         /// </summary>
         [JsonProperty(PropertyName = "total_space")]
-        public long TotalSpace { get; internal set; }
+        public long TotalSpace { get; internal init; }
     }
 }

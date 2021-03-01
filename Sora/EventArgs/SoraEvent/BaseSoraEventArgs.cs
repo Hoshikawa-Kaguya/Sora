@@ -10,6 +10,7 @@ namespace Sora.EventArgs.SoraEvent
     public abstract class BaseSoraEventArgs : System.EventArgs
     {
         #region 属性
+
         /// <summary>
         /// 当前事件的API执行实例
         /// </summary>
@@ -34,9 +35,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 事件产生时间戳
         /// </summary>
         internal long TimeStamp { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -52,6 +55,7 @@ namespace Sora.EventArgs.SoraEvent
             this.TimeStamp = time;
             this.Time      = time.ToDateTime();
         }
+
         #endregion
     }
 }

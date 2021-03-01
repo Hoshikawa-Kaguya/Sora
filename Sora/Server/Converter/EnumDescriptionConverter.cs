@@ -29,12 +29,14 @@ namespace Sora.Server.Converter
                 writer.WriteValue("");
                 return;
             }
+
             FieldInfo fieldInfo = value.GetType().GetField(value.ToString()!);
             if (fieldInfo == null)
             {
                 writer.WriteValue("");
                 return;
             }
+
             DescriptionAttribute[] attributes =
                 (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
             writer.WriteValue(attributes.Length > 0 ? attributes[0].Description : "");
@@ -44,7 +46,8 @@ namespace Sora.Server.Converter
         /// 序列化时执行的转换
         /// 通过Description获取枚举值
         /// </summary>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+                                        JsonSerializer serializer)
         {
             FieldInfo[] fields    = objectType.GetFields();
             string      readValue = reader.Value?.ToString() ?? string.Empty;
@@ -54,9 +57,10 @@ namespace Sora.Server.Converter
                 if (objects.Any(item => (item as DescriptionAttribute)?.Description ==
                                         readValue))
                 {
-                    return Convert.ChangeType(field.GetValue(-1),objectType);
+                    return Convert.ChangeType(field.GetValue(-1), objectType);
                 }
             }
+
             return CQFunction.Unknown;
         }
     }

@@ -11,17 +11,16 @@ namespace Sora.Enumeration.EventParamsType
         /// <summary>
         /// 成员
         /// </summary>
-        [Description("member")]
-        Member,
+        [Description("member")] Member,
+
         /// <summary>
         /// 管理员
         /// </summary>
-        [Description("admin")]
-        Admin,
+        [Description("admin")] Admin,
+
         /// <summary>
         /// 群主
         /// </summary>
-        [Description("owner")]
-        Owner
+        [Description("owner")] Owner
     }
 }

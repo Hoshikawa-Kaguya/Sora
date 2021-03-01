@@ -16,48 +16,57 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 消息内容
         /// </summary>
-        public Message Message { get; private set; }
+        public Message Message { get; }
 
         /// <summary>
         /// 是否来源于匿名群成员
         /// </summary>
-        public bool IsAnonymousMessage { get; private set; }
+        public bool IsAnonymousMessage { get; }
+
+        /// <summary>
+        /// 是否为Bot账号所发送的消息
+        /// </summary>
+        public bool IsSelfMessage { get; }
 
         /// <summary>
         /// 消息发送者实例
         /// </summary>
-        public User Sender { get; private set; }
+        public User Sender { get; }
 
         /// <summary>
         /// 发送者信息
         /// </summary>
-        public GroupSenderInfo SenderInfo { get; private set; }
+        public GroupSenderInfo SenderInfo { get; }
 
         /// <summary>
         /// 消息来源群组实例
         /// </summary>
-        public Group SourceGroup { get; private set; }
+        public Group SourceGroup { get; }
 
         /// <summary>
         /// 匿名用户实例
         /// </summary>
-        public Anonymous Anonymous { get; private set; }
+        public Anonymous Anonymous { get; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupMsgArgs">群消息事件参数</param>
-        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs
-        ) : base(connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
+        internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs)
+            : base(connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
         {
             this.IsAnonymousMessage = groupMsgArgs.Anonymous != null;
+            this.IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
             //将api消息段转换为CQ码
             this.Message = new Message(connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
                                        MessageParse.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
@@ -67,9 +76,11 @@ namespace Sora.EventArgs.SoraEvent
             this.SenderInfo  = groupMsgArgs.SenderInfo;
             this.Anonymous   = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
         }
+
         #endregion
 
         #region 快捷方法
+
         /// <summary>
         /// 快速回复
         /// </summary>
@@ -116,10 +127,12 @@ namespace Sora.EventArgs.SoraEvent
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(bool useCache = true)
+        public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(
+            bool useCache = true)
         {
             return await base.SoraApi.GetGroupMemberInfo(this.SourceGroup.Id, this.Sender.Id, useCache);
         }
+
         #endregion
     }
 }

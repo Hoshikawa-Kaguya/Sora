@@ -10,6 +10,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     public struct Node
     {
         #region 属性
+
         /// <summary>
         /// 发送者昵称
         /// </summary>
@@ -33,9 +34,11 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// </summary>
         [JsonIgnore]
         public List<CQCode> CQCodeMsgList { get; internal set; }
+
         #endregion
 
         #region 发送者结构体
+
         /// <summary>
         /// 节点消息发送者
         /// </summary>
@@ -53,6 +56,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
             [JsonProperty(PropertyName = "user_id")]
             public long Uid { get; internal set; }
         }
+
         #endregion
     }
 }

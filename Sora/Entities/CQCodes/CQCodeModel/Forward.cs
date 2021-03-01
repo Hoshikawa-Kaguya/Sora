@@ -8,11 +8,13 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     public struct Forward
     {
         #region 属性
+
         /// <summary>
         /// 转发消息ID
         /// </summary>
         [JsonProperty(PropertyName = "id")]
         public string MessageId { get; internal set; }
+
         #endregion
     }
 }

@@ -11,6 +11,7 @@ namespace Sora.EventArgs.SoraEvent
     public class OfflineFileEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 文件发送者
         /// </summary>
@@ -20,9 +21,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 离线文件信息
         /// </summary>
         public OfflineFileInfo OfflineFileInfo { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -35,6 +38,7 @@ namespace Sora.EventArgs.SoraEvent
             this.Sender          = new User(connectionGuid, offlineFileArgs.UserId);
             this.OfflineFileInfo = offlineFileArgs.Info;
         }
+
         #endregion
     }
 }

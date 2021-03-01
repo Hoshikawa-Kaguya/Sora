@@ -10,6 +10,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class GroupCardUpdateEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 名片改变的成员
         /// </summary>
@@ -29,23 +30,27 @@ namespace Sora.EventArgs.SoraEvent
         /// 旧名片
         /// </summary>
         public string OldCard { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupCardUpdateArgs">群名片更新事件参数</param>
-        internal GroupCardUpdateEventArgs(Guid connectionGuid, string eventName, ApiGroupCardUpdateEventArgs groupCardUpdateArgs) :
+        internal GroupCardUpdateEventArgs(Guid connectionGuid, string eventName,
+                                          ApiGroupCardUpdateEventArgs groupCardUpdateArgs) :
             base(connectionGuid, eventName, groupCardUpdateArgs.SelfID, groupCardUpdateArgs.Time)
         {
-            this.User        = new User(connectionGuid,groupCardUpdateArgs.UserId);
+            this.User        = new User(connectionGuid, groupCardUpdateArgs.UserId);
             this.SourceGroup = new Group(connectionGuid, groupCardUpdateArgs.GroupId);
             this.NewCard     = groupCardUpdateArgs.NewCard;
             this.OldCard     = groupCardUpdateArgs.OldCard;
         }
+
         #endregion
     }
 }

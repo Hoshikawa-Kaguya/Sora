@@ -10,6 +10,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class GroupRecallEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 消息发送者
         /// </summary>
@@ -29,9 +30,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 被撤消息ID
         /// </summary>
         public int MessageId { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -49,6 +52,7 @@ namespace Sora.EventArgs.SoraEvent
             this.SourceGroup = new Group(connectionGuid, groupRecallArgs.GroupId);
             this.MessageId   = groupRecallArgs.MessageId;
         }
+
         #endregion
     }
 }

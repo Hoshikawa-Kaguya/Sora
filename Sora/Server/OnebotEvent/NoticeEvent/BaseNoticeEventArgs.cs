@@ -10,13 +10,13 @@ namespace Sora.Server.OnebotEvent.NoticeEvent
         /// <summary>
         /// 消息类型
         /// </summary>
-        [JsonProperty(PropertyName = "notice_type")]
+        [JsonProperty(PropertyName = "notice_type", NullValueHandling = NullValueHandling.Ignore)]
         internal string NoticeType { get; set; }
 
         /// <summary>
         /// 操作对象UID
         /// </summary>
-        [JsonProperty(PropertyName = "user_id")]
+        [JsonProperty(PropertyName = "user_id", NullValueHandling = NullValueHandling.Ignore)]
         internal long UserId { get; set; }
     }
 }

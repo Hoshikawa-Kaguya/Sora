@@ -8,6 +8,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     public struct Share
     {
         #region 属性
+
         /// <summary>
         /// URL
         /// </summary>
@@ -23,14 +24,15 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// <summary>
         /// 可选，内容描述
         /// </summary>
-        [JsonProperty(PropertyName = "content",NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "content", NullValueHandling = NullValueHandling.Ignore)]
         public string Content { get; internal set; }
 
         /// <summary>
         /// 可选，图片 URL
         /// </summary>
-        [JsonProperty(PropertyName = "image",NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "image", NullValueHandling = NullValueHandling.Ignore)]
         public string ImageUrl { get; internal set; }
+
         #endregion
     }
 }

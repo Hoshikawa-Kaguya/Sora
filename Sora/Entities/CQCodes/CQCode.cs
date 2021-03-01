@@ -8,7 +8,7 @@ using Sora.Enumeration.EventParamsType;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Enumeration;
 using Sora.Server.ApiParams;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace Sora.Entities.CQCodes
 {
@@ -18,18 +18,21 @@ namespace Sora.Entities.CQCodes
     public sealed class CQCode
     {
         #region 属性
+
         /// <summary>
         /// CQ码类型
         /// </summary>
-        public CQFunction Function { get; private set; }
+        public CQFunction Function { get; }
 
         /// <summary>
         /// CQ码数据实例
         /// </summary>
-        public object CQData { get; private set; }
+        public object CQData { get; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 构造CQ码实例
         /// </summary>
@@ -40,17 +43,18 @@ namespace Sora.Entities.CQCodes
             this.Function = cqFunction;
             this.CQData   = dataObj;
         }
+
         #endregion
 
         #region CQ码构建方法
+
         /// <summary>
         /// 纯文本
         /// </summary>
         /// <param name="msg">文本消息</param>
         public static CQCode CQText(string msg)
         {
-            return new CQCode(CQFunction.Text,
-                              new Text {Content = msg});
+            return new(CQFunction.Text, new Text {Content = msg});
         }
 
         /// <summary>
@@ -61,9 +65,10 @@ namespace Sora.Entities.CQCodes
         {
             if (uid < 10000)
             {
-                ConsoleLog.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
+                Log.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
                 return CQIlleage();
             }
+
             return new CQCode(CQFunction.At,
                               new At {Traget = uid.ToString()});
         }
@@ -73,8 +78,8 @@ namespace Sora.Entities.CQCodes
         /// </summary>
         public static CQCode CQAtAll()
         {
-            return new CQCode(CQFunction.At,
-                              new At {Traget = "all"});
+            return new(CQFunction.At,
+                       new At {Traget = "all"});
         }
 
         /// <summary>
@@ -86,9 +91,10 @@ namespace Sora.Entities.CQCodes
             //检查ID合法性
             if (id is < 0 or > 244)
             {
-                ConsoleLog.Error("CQCode|CQFace", $"非法参数，已忽略CQ码[id超出范围限制({id})]");
+                Log.Error("CQCode|CQFace", $"非法参数，已忽略CQ码[id超出范围限制({id})]");
                 return CQIlleage();
             }
+
             return new CQCode(CQFunction.Face,
                               new Face {Id = id});
         }
@@ -107,9 +113,10 @@ namespace Sora.Entities.CQCodes
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQRecord", $"非法参数({data})，已忽略此CQ码");
+                Log.Error("CQCode|CQRecord", $"非法参数({data})，已忽略此CQ码");
                 return CQIlleage();
             }
+
             return new CQCode(CQFunction.Record,
                               new Record
                               {
@@ -129,11 +136,11 @@ namespace Sora.Entities.CQCodes
         /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
         public static CQCode CQImage(string data, bool useCache = true, int? threadCount = null)
         {
-            if(string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
+            if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
+                Log.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
@@ -155,11 +162,11 @@ namespace Sora.Entities.CQCodes
         /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
         public static CQCode CQFlashImage(string data, bool useCache = true, int? threadCount = null)
         {
-            if(string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
+            if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
+                Log.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
@@ -182,11 +189,11 @@ namespace Sora.Entities.CQCodes
         /// <param name="id">秀图特效id，默认为40000</param>
         public static CQCode CQShowImage(string data, int id = 40000, bool useCache = true, int? threadCount = null)
         {
-            if(string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
+            if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQShowImage", $"非法参数({data})，已忽略CQ码");
+                Log.Error("CQCode|CQShowImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
@@ -213,9 +220,10 @@ namespace Sora.Entities.CQCodes
             (string dataStr, bool isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQVideo", $"非法参数({data})，已忽略CQ码");
+                Log.Error("CQCode|CQVideo", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
+
             return new CQCode(CQFunction.Video,
                               new Video
                               {
@@ -233,12 +241,12 @@ namespace Sora.Entities.CQCodes
         /// <param name="musicId">音乐Id</param>
         public static CQCode CQMusic(MusicShareType musicType, long musicId)
         {
-            return new CQCode(CQFunction.Music,
-                              new Music
-                              {
-                                  MusicType = musicType,
-                                  MusicId   = musicId
-                              });
+            return new(CQFunction.Music,
+                       new Music
+                       {
+                           MusicType = musicType,
+                           MusicId   = musicId
+                       });
         }
 
         /// <summary>
@@ -252,16 +260,16 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQCustomMusic(string url, string musicUrl, string title, string content = null,
                                            string coverImageUrl = null)
         {
-            return new CQCode(CQFunction.Music,
-                              new CustomMusic
-                              {
-                                  ShareType     = "custom",
-                                  Url           = url,
-                                  MusicUrl      = musicUrl,
-                                  Title         = title,
-                                  Content       = content,
-                                  CoverImageUrl = coverImageUrl
-                              });
+            return new(CQFunction.Music,
+                       new CustomMusic
+                       {
+                           ShareType     = "custom",
+                           Url           = url,
+                           MusicUrl      = musicUrl,
+                           Title         = title,
+                           Content       = content,
+                           CoverImageUrl = coverImageUrl
+                       });
         }
 
         /// <summary>
@@ -271,20 +279,19 @@ namespace Sora.Entities.CQCodes
         /// <param name="title">标题</param>
         /// <param name="content">可选，内容描述</param>
         /// <param name="imageUrl">可选，图片 URL</param>
-
         public static CQCode CQShare(string url,
                                      string title,
                                      string content = null,
                                      string imageUrl = null)
         {
-            return new CQCode(CQFunction.Share,
-                              new Share
-                              {
-                                  Url      = url,
-                                  Title    = title,
-                                  Content  = content,
-                                  ImageUrl = imageUrl
-                              });
+            return new(CQFunction.Share,
+                       new Share
+                       {
+                           Url      = url,
+                           Title    = title,
+                           Content  = content,
+                           ImageUrl = imageUrl
+                       });
         }
 
         /// <summary>
@@ -293,14 +300,15 @@ namespace Sora.Entities.CQCodes
         /// <param name="id">消息id</param>
         public static CQCode CQReply(int id)
         {
-            return new CQCode(CQFunction.Reply,
-                              new Reply
-                              {
-                                  Traget = id
-                              });
+            return new(CQFunction.Reply,
+                       new Reply
+                       {
+                           Traget = id
+                       });
         }
 
         #region GoCQ扩展码
+
         /// <summary>
         /// 群成员戳一戳
         /// 只支持Go-CQHttp
@@ -310,9 +318,10 @@ namespace Sora.Entities.CQCodes
         {
             if (uid < 10000)
             {
-                ConsoleLog.Error("CQCode|CQPoke", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
+                Log.Error("CQCode|CQPoke", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
                 return CQIlleage();
             }
+
             return new CQCode(CQFunction.Poke,
                               new Poke
                               {
@@ -341,7 +350,7 @@ namespace Sora.Entities.CQCodes
         /// <param name="target">目标uid</param>
         public static CQCode CQGift(int giftId, long target)
         {
-            if(giftId is < 0 or > 8 || target < 10000) throw new ArgumentOutOfRangeException(nameof(giftId));
+            if (giftId is < 0 or > 8 || target < 10000) throw new ArgumentOutOfRangeException(nameof(giftId));
             return new CQCode(CQFunction.Gift,
                               new Gift
                               {
@@ -370,7 +379,7 @@ namespace Sora.Entities.CQCodes
         /// </summary>
         /// <param name="content">JSON 文本</param>
         /// <param name="richText">富文本内容</param>
-        public static CQCode CQJson(string content,bool richText = false)
+        public static CQCode CQJson(string content, bool richText = false)
         {
             if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
             return new CQCode(CQFunction.Json,
@@ -391,7 +400,7 @@ namespace Sora.Entities.CQCodes
             return new CQCode(CQFunction.Json,
                               new Code
                               {
-                                  Content = JsonConvert.SerializeObject(content,Formatting.None)
+                                  Content = JsonConvert.SerializeObject(content, Formatting.None)
                               });
         }
 
@@ -413,13 +422,14 @@ namespace Sora.Entities.CQCodes
                                          long maxWidth = 400,
                                          long maxHeight = 400)
         {
-            if(string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
+            if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
             (string dataStr, bool isDataStr) = ParseDataStr(imageFile);
             if (!isDataStr)
             {
-                ConsoleLog.Error("CQCode|CQCardImage", $"非法参数({imageFile})，已忽略CQ码");
+                Log.Error("CQCode|CQCardImage", $"非法参数({imageFile})，已忽略CQ码");
                 return CQIlleage();
             }
+
             return new CQCode(CQFunction.CardImage,
                               new CardImage
                               {
@@ -440,13 +450,14 @@ namespace Sora.Entities.CQCodes
         /// <returns></returns>
         public static CQCode CQTTS(string messageStr)
         {
-            if(string.IsNullOrEmpty(messageStr)) throw new NullReferenceException(nameof(messageStr));
+            if (string.IsNullOrEmpty(messageStr)) throw new NullReferenceException(nameof(messageStr));
             return new CQCode(CQFunction.TTS,
                               new
                               {
                                   text = messageStr
                               });
         }
+
         #endregion
 
         /// <summary>
@@ -454,10 +465,12 @@ namespace Sora.Entities.CQCodes
         /// <para>当存在非法参数时CQ码将被本函数重置</para>
         /// </summary>
         private static CQCode CQIlleage() =>
-            new (CQFunction.Text, new Text{Content = null});
+            new(CQFunction.Text, new Text {Content = null});
+
         #endregion
 
         #region 辅助函数
+
         /// <summary>
         /// 获取CQ码数据格式类型
         /// 用于将object转换为可读结构体
@@ -470,28 +483,36 @@ namespace Sora.Entities.CQCodes
         {
             return cqCode.CQData.GetType();
         }
+
         #endregion
 
         #region 获取CQ码内容(仅用于序列化)
+
         internal MessageElement ToOnebotMessage() => new()
         {
             MsgType = this.Function,
             RawData = JObject.FromObject(this.CQData)
         };
+
         #endregion
 
         #region 正则匹配字段
+
         private static readonly List<Regex> FileRegices = new()
         {
-            new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled),                                                  //绝对路径-linux/osx
-            new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled),                                        //绝对路径-win
-            new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$", RegexOptions.Compiled),                          //base64
-            new Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$", RegexOptions.Compiled), //网络图片链接
-            new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled)                                                                    //文件名
+            new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled),           //绝对路径-linux/osx
+            new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled), //绝对路径-win
+            new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
+                      RegexOptions.Compiled), //base64
+            new Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
+                      RegexOptions.Compiled),                              //网络图片链接
+            new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled) //文件名
         };
+
         #endregion
 
         #region 程序集方法
+
         /// <summary>
         /// 处理传入数据
         /// </summary>
@@ -500,7 +521,7 @@ namespace Sora.Entities.CQCodes
         /// <para><see langword="retStr"/>处理后数据字符串</para>
         /// <para><see langword="isMatch"/>是否为合法数据字符串</para>
         /// </returns>
-        internal static (string retStr,bool isMatch) ParseDataStr(string dataStr)
+        internal static (string retStr, bool isMatch) ParseDataStr(string dataStr)
         {
             if (string.IsNullOrEmpty(dataStr)) return (null, false);
             var isMatch = false;
@@ -514,14 +535,14 @@ namespace Sora.Entities.CQCodes
                 {
                     switch (i)
                     {
-                        case 0://linux/osx
-                            if (Environment.OSVersion.Platform != PlatformID.Unix &&
+                        case 0: //linux/osx
+                            if (Environment.OSVersion.Platform != PlatformID.Unix   &&
                                 Environment.OSVersion.Platform != PlatformID.MacOSX &&
-                                !File.Exists(dataStr)) 
+                                !File.Exists(dataStr))
                                 return (dataStr, false);
                             else
-                                return ($"file:///{dataStr}",true);
-                        case 1://win
+                                return ($"file:///{dataStr}", true);
+                        case 1: //win
                             if (Environment.OSVersion.Platform == PlatformID.Win32NT && File.Exists(dataStr))
                                 return ($"file:///{dataStr}", true);
                             else
@@ -531,8 +552,59 @@ namespace Sora.Entities.CQCodes
                     }
                 }
             }
+
             return (dataStr, false);
         }
+
+        #endregion
+
+        #region 运算符重载
+
+        /// <summary>
+        /// 等于重载
+        /// </summary>
+        public static bool operator ==(CQCode cqCodeL, CQCode cqCodeR)
+        {
+            if (cqCodeL is null && cqCodeR is null) return true;
+
+            return cqCodeL is not null                  && cqCodeR is not null &&
+                   cqCodeL.Function == cqCodeR.Function &&
+                   JToken.DeepEquals(JToken.FromObject(cqCodeL.CQData), JToken.FromObject(cqCodeR.CQData));
+        }
+
+        /// <summary>
+        /// 不等于重载
+        /// </summary>
+        public static bool operator !=(CQCode cqCodeL, CQCode cqCodeR)
+        {
+            return !(cqCodeL == cqCodeR);
+        }
+
+        #endregion
+
+        #region 常用重载
+
+        /// <summary>
+        /// 比较重载
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            if (obj is CQCode cqCode)
+            {
+                return this == cqCode;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// GetHashCode
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Function, CQData);
+        }
+
         #endregion
     }
 }

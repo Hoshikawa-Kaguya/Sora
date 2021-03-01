@@ -6,6 +6,7 @@ namespace Sora.EventArgs.WSSeverEvent
     public sealed class ConnectionEventArgs : System.EventArgs
     {
         #region 属性
+
         /// <summary>
         /// 客户端类型
         /// </summary>
@@ -15,14 +16,17 @@ namespace Sora.EventArgs.WSSeverEvent
         /// 机器人登录账号UID
         /// </summary>
         public long SelfId { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         internal ConnectionEventArgs(string role, long selfId)
         {
             this.SelfId = selfId;
             this.Role   = role;
         }
+
         #endregion
     }
 }

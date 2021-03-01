@@ -9,6 +9,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
     public struct Record
     {
         #region 属性
+
         /// <summary>
         /// 文件名/绝对路径/URL/base64
         /// </summary>
@@ -48,6 +49,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "timeout", NullValueHandling = NullValueHandling.Ignore)]
         public int? Timeout { get; internal set; }
+
         #endregion
     }
 }

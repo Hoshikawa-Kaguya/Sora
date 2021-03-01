@@ -11,6 +11,7 @@ namespace Sora.EventArgs.SoraEvent
     public sealed class FileUploadEventArgs : BaseSoraEventArgs
     {
         #region 属性
+
         /// <summary>
         /// 消息源群
         /// </summary>
@@ -25,9 +26,11 @@ namespace Sora.EventArgs.SoraEvent
         /// 上传文件的信息
         /// </summary>
         public UploadFileInfo FileInfo { get; private set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -41,6 +44,7 @@ namespace Sora.EventArgs.SoraEvent
             this.Sender      = new User(connectionGuid, fileUploadArgs.UserId);
             this.FileInfo    = fileUploadArgs.Upload;
         }
+
         #endregion
     }
 }
