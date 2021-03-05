@@ -1,4 +1,3 @@
-using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 
 namespace Sora.Command.Attributes
@@ -8,22 +7,37 @@ namespace Sora.Command.Attributes
     /// </summary>
     public sealed class GroupCommand : Command
     {
+        #region 属性
+
         /// <summary>
-        /// 成员权限限制
+        /// <para>成员权限限制</para>
+        /// <para>默认值:<see cref="MemberRoleType.Member"/></para>
         /// </summary>
-        internal MemberRoleType PermissionLevel { get; }
+        public MemberRoleType PermissionLevel { get; init; } = MemberRoleType.Member;
+
+        #endregion
+
+        #region 构造方法
 
         /// <summary>
         /// 构造方法
         /// </summary>
-        /// <param name="command">指令表达式</param>
-        /// <param name="permissionLevel">权限限制</param>
-        /// <param name="matchType">匹配类型</param>
-        /// <param name="desc">说明(在执行失败时可能会用到)</param>
-        public GroupCommand(string command, MemberRoleType permissionLevel, MatchType matchType, string desc = "") :
-            base(command, matchType, desc)
+        /// <param name="command">
+        /// <para>正则指令表达式</para>
+        /// <para>默认为全字匹配(注意:由于使用的是正则匹配模式，部分符号需要转义，如<see langword="\?"/>)</para>
+        /// <para>也可以为正则表达式</para>
+        /// </param>
+        public GroupCommand(string command) : base(command)
         {
-            PermissionLevel = permissionLevel;
         }
+
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        public GroupCommand()
+        {
+        }
+
+        #endregion
     }
 }

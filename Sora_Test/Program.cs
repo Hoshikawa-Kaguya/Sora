@@ -33,9 +33,10 @@ server.ConnManager.OnHeartBeatTimeOut += (connectionInfo, eventArgs) =>
                                              return ValueTask.CompletedTask;
                                          };
 //群聊消息事件
-server.Event.OnGroupMessage += async (msgType, eventArgs) =>
+server.Event.OnGroupMessage += (msgType, eventArgs) =>
                                {
-                                   //await eventArgs.SourceGroup.SendGroupMessage("好耶");
+                                   Log.Debug("群消息", eventArgs.Message);
+                                   return ValueTask.CompletedTask;
                                };
 server.Event.OnSelfMessage += (type, eventArgs) =>
                               {
@@ -43,9 +44,10 @@ server.Event.OnSelfMessage += (type, eventArgs) =>
                                   return ValueTask.CompletedTask;
                               };
 //私聊消息事件
-server.Event.OnPrivateMessage += async (msgType, eventArgs) =>
+server.Event.OnPrivateMessage += (msgType, eventArgs) =>
                                  {
-                                     await eventArgs.Sender.SendPrivateMessage("好耶");
+                                     Log.Debug("私聊消息", eventArgs.Message);
+                                     return ValueTask.CompletedTask;
                                  };
 
 #endregion

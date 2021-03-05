@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Command.Attributes;
+using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
@@ -106,6 +107,7 @@ namespace Sora.Command
                                 Log.Error("Command", $"can not create instance [{classType.FullName}]");
                                 continue;
                             }
+
                             instanceDict.Add(classType, instance);
                         }
 
@@ -153,71 +155,50 @@ namespace Sora.Command
         /// </summary>
         /// <param name="type">类型</param>
         /// <param name="eventArgs">事件参数</param>
-        internal ValueTask GroupCommandAdapter(string type, GroupMessageEventArgs eventArgs)
+        internal ValueTask CommandAdapter(string type, object eventArgs)
         {
             //处理消息段
-            var message = eventArgs.Message;
-            //判空
-            if (message == null) return ValueTask.CompletedTask;
-            foreach (var command in groupCommands)
+            CommandInfo matchedCommand;
+            switch (eventArgs)
             {
-                var cmdRegex = new Regex(command.Regex);
-                if (!cmdRegex.IsMatch(message.RawText ?? string.Empty)) continue;
-                //判断权限
-                if (eventArgs.SenderInfo.Role < (command.PermissonType ?? MemberRoleType.Member))
+                case GroupMessageEventArgs groupEventArgs:
                 {
-                    Log.Warning("Command", $"成员{eventArgs.SenderInfo.UserId}正在尝试执行指令{command.MethodInfo.Name}");
-                    continue;
+                    matchedCommand = groupCommands.SingleOrDefault(command => Regex.IsMatch(groupEventArgs.Message.RawText, command.Regex));
+                    if(matchedCommand.MethodInfo == null) return ValueTask.CompletedTask;
+                    //判断权限
+                    if (groupEventArgs.SenderInfo.Role < (matchedCommand.PermissonType ?? MemberRoleType.Member))
+                    {
+                        Log.Warning("Command", $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{matchedCommand.MethodInfo.Name}");
+                        return ValueTask.CompletedTask;
+                    }
+                    break;
                 }
-
-                Log.Debug("CommandAdapter", $"get command {command.MethodInfo.Name}");
-                try
+                case PrivateMessageEventArgs privateEventArgs:
                 {
-                    Log.Info("Command", $"Trigger command [{command.MethodInfo.Name}]");
-                    //执行指令方法
-                    command.MethodInfo.Invoke(instanceDict[command.InstanceType], new object[] {eventArgs});
+                    matchedCommand = privateCommands.SingleOrDefault(command => Regex.IsMatch(privateEventArgs.Message.RawText, command.Regex));
+                    if(matchedCommand.MethodInfo == null) return ValueTask.CompletedTask;
+                    break;
                 }
-                catch (Exception e)
-                {
-                    Log.Error("Command", Log.ErrorLogBuilder(e));
-                    if (!string.IsNullOrEmpty(command.Desc))
-                        Log.Info("Command Tips", command.Desc);
-                }
+                default:
+                    Log.Error("CommandAdapter", "cannot parse eventArgs");
+                    return ValueTask.CompletedTask;
             }
 
-            return ValueTask.CompletedTask;
-        }
-
-        /// <summary>
-        /// 处理聊天指令
-        /// </summary>
-        /// <param name="type">类型</param>
-        /// <param name="eventArgs">事件参数</param>
-        internal ValueTask PrivateCommandAdapter(string type, PrivateMessageEventArgs eventArgs)
-        {
-            //处理消息段
-            var message = eventArgs.Message;
-            //判空
-            if (message == null) return ValueTask.CompletedTask;
-            foreach (var command in privateCommands)
+            Log.Debug("CommandAdapter", $"get command {matchedCommand.MethodInfo.Name}");
+            try
             {
-                var cmdRegex = new Regex(command.Regex);
-                if (!cmdRegex.IsMatch(message.RawText ?? string.Empty)) continue;
-                Log.Debug("CommandAdapter", $"get command {command.MethodInfo.Name}");
-                try
+                Log.Info("Command", $"Trigger command [{matchedCommand.MethodInfo.Name}]");
+                //执行指令方法
+                matchedCommand.MethodInfo.Invoke(instanceDict[matchedCommand.InstanceType], new object[] {eventArgs});
+            }
+            catch (Exception e)
+            {
+                Log.Error("Command", Log.ErrorLogBuilder(e));
+                if (!string.IsNullOrEmpty(matchedCommand.Desc))
                 {
-                    Log.Info("Command", $"Trigger command [{command.MethodInfo.Name}]");
-                    //执行指令方法
-                    command.MethodInfo.Invoke(instanceDict[command.InstanceType], new object[] {eventArgs});
-                }
-                catch (Exception e)
-                {
-                    Log.Error("Command", Log.ErrorLogBuilder(e));
-                    if (!string.IsNullOrEmpty(command.Desc))
-                        Log.Info("Command Tips", command.Desc);
+                    Log.Warning("Command Error", $"Command desc:{matchedCommand.Desc}");
                 }
             }
-
             return ValueTask.CompletedTask;
         }
 
