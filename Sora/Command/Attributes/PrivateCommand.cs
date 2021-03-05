@@ -1,5 +1,3 @@
-using Sora.Enumeration;
-
 namespace Sora.Command.Attributes
 {
     /// <summary>

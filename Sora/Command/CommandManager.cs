@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Command.Attributes;
-using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
@@ -108,6 +107,7 @@ namespace Sora.Command
                                 continue;
                             }
 
+                            //添加实例
                             instanceDict.Add(classType, instance);
                         }
 
@@ -117,6 +117,8 @@ namespace Sora.Command
                                                   cmdGroupInfo.GroupName,
                                                   methodInfo,
                                                   (commandAttr as GroupCommand)?.PermissionLevel,
+                                                  (commandAttr as Attributes.Command)?.TriggerEventAfterCommand ??
+                                                  false,
                                                   classType);
                     }
                     else
@@ -126,7 +128,9 @@ namespace Sora.Command
                                                   matchExp,
                                                   cmdGroupInfo.GroupName,
                                                   methodInfo,
-                                                  (commandAttr as GroupCommand)?.PermissionLevel);
+                                                  (commandAttr as GroupCommand)?.PermissionLevel,
+                                                  (commandAttr as Attributes.Command)?.TriggerEventAfterCommand ??
+                                                  false);
                     }
 
                     //添加指令
@@ -153,9 +157,8 @@ namespace Sora.Command
         /// <summary>
         /// 处理聊天指令
         /// </summary>
-        /// <param name="type">类型</param>
         /// <param name="eventArgs">事件参数</param>
-        internal ValueTask CommandAdapter(string type, object eventArgs)
+        internal ValueTask<bool> CommandAdapter(object eventArgs)
         {
             //处理消息段
             CommandInfo matchedCommand;
@@ -163,25 +166,31 @@ namespace Sora.Command
             {
                 case GroupMessageEventArgs groupEventArgs:
                 {
-                    matchedCommand = groupCommands.SingleOrDefault(command => Regex.IsMatch(groupEventArgs.Message.RawText, command.Regex));
-                    if(matchedCommand.MethodInfo == null) return ValueTask.CompletedTask;
+                    matchedCommand =
+                        groupCommands.SingleOrDefault(command => Regex.IsMatch(groupEventArgs.Message.RawText,
+                                                                               command.Regex));
+                    if (matchedCommand.MethodInfo == null) return new ValueTask<bool>(true);
                     //判断权限
                     if (groupEventArgs.SenderInfo.Role < (matchedCommand.PermissonType ?? MemberRoleType.Member))
                     {
-                        Log.Warning("Command", $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{matchedCommand.MethodInfo.Name}");
-                        return ValueTask.CompletedTask;
+                        Log.Warning("Command",
+                                    $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{matchedCommand.MethodInfo.Name}");
+                        return new ValueTask<bool>(true);
                     }
+
                     break;
                 }
                 case PrivateMessageEventArgs privateEventArgs:
                 {
-                    matchedCommand = privateCommands.SingleOrDefault(command => Regex.IsMatch(privateEventArgs.Message.RawText, command.Regex));
-                    if(matchedCommand.MethodInfo == null) return ValueTask.CompletedTask;
+                    matchedCommand =
+                        privateCommands.SingleOrDefault(command => Regex.IsMatch(privateEventArgs.Message.RawText,
+                                                            command.Regex));
+                    if (matchedCommand.MethodInfo == null) return new ValueTask<bool>(true);
                     break;
                 }
                 default:
                     Log.Error("CommandAdapter", "cannot parse eventArgs");
-                    return ValueTask.CompletedTask;
+                    return new ValueTask<bool>(true);
             }
 
             Log.Debug("CommandAdapter", $"get command {matchedCommand.MethodInfo.Name}");
@@ -189,7 +198,7 @@ namespace Sora.Command
             {
                 Log.Info("Command", $"Trigger command [{matchedCommand.MethodInfo.Name}]");
                 //执行指令方法
-                matchedCommand.MethodInfo.Invoke(instanceDict[matchedCommand.InstanceType], new object[] {eventArgs});
+                matchedCommand.MethodInfo.Invoke(instanceDict[matchedCommand.InstanceType], new[] {eventArgs});
             }
             catch (Exception e)
             {
@@ -199,7 +208,8 @@ namespace Sora.Command
                     Log.Warning("Command Error", $"Command desc:{matchedCommand.Desc}");
                 }
             }
-            return ValueTask.CompletedTask;
+
+            return new ValueTask<bool>(matchedCommand.TriggerEventAfterCommand);
         }
 
         #endregion
