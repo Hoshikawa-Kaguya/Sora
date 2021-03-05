@@ -95,7 +95,7 @@ namespace Sora.Server
             //API超时
             ReactiveApiManager.TimeOut = config.ApiTimeOut;
             //实例化事件接口
-            this.Event = new EventInterface();
+            this.Event = new EventInterface(config.EnableSoraCommandManager);
             //禁用原log
             FleckLog.Level = (LogLevel) 4;
             this.Server = new WebSocketServer($"ws://{config.Location}:{config.Port}")
