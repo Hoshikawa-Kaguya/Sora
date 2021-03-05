@@ -10,11 +10,19 @@ namespace Sora.Command.Attributes
         /// <summary>
         /// 构造方法
         /// </summary>
-        /// <param name="command">指令表达式</param>
-        /// <param name="matchType">匹配类型</param>
-        /// <param name="desc">说明(在执行失败时可能会用到)</param>
-        public PrivateCommand(string command, MatchType matchType, string desc = "") :
-            base(command, matchType, desc)
+        /// <param name="command">
+        /// <para>正则指令表达式</para>
+        /// <para>默认为全字匹配(注意:由于使用的是正则匹配模式，部分符号需要转义，如<see langword="\?"/>)</para>
+        /// <para>也可以为正则表达式</para>
+        /// </param>
+        public PrivateCommand(string command) : base(command)
+        {
+        }
+
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        public PrivateCommand()
         {
         }
     }
