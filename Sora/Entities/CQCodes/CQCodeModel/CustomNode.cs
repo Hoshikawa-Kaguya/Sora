@@ -73,7 +73,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
             Name      = name;
             UserId    = userId.ToString();
             Messages  = customMessage.Select(msg => msg.ToOnebotMessage()).ToList();
-            Time      = $"{(time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds())}";
+            Time      = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";
         }
 
         /// <summary>
@@ -85,11 +85,11 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// <param name="time">消息段转发时间</param>
         public CustomNode(string name, long userId, string cqString, DateTimeOffset? time = null)
         {
-            MessageId   = null;
-            Name        = name;
-            UserId      = userId.ToString();
-            Messages    = cqString;
-            Time        = $"{(time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds())}";
+            MessageId = null;
+            Name      = name;
+            UserId    = userId.ToString();
+            Messages  = cqString;
+            Time      = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";
         }
     }
 }

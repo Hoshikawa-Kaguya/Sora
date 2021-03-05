@@ -5,7 +5,7 @@ namespace Sora.Entities
     /// <summary>
     /// 二维向量
     /// </summary>
-    public class Vector2
+    public sealed class Vector2
     {
         #region 属性
 

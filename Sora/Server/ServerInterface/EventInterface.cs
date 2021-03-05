@@ -5,7 +5,9 @@ using Sora.Server.OnebotEvent.MetaEvent;
 using Sora.Server.OnebotEvent.NoticeEvent;
 using Sora.Server.OnebotEvent.RequestEvent;
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
+using Sora.Command;
 using YukariToolBox.FormatLog;
 
 namespace Sora.Server.ServerInterface
@@ -16,6 +18,25 @@ namespace Sora.Server.ServerInterface
     /// </summary>
     public class EventInterface
     {
+        #region 属性
+
+        /// <summary>
+        /// 特性指令管理器
+        /// </summary>
+        private CommandManager CommandManager { get; set; }
+
+        #endregion
+
+        #region 构造方法
+
+        internal EventInterface()
+        {
+            CommandManager = new CommandManager();
+            CommandManager.MappingCommands(Assembly.GetEntryAssembly());
+        }
+
+        #endregion
+
         #region 事件委托
 
         /// <summary>
@@ -24,7 +45,6 @@ namespace Sora.Server.ServerInterface
         /// <typeparam name="TEventArgs">事件参数</typeparam>
         /// <param name="type">事件的主要类型</param>
         /// <param name="eventArgs">事件参数</param>
-        /// <returns></returns>
         public delegate ValueTask EventAsyncCallBackHandler<in TEventArgs>(string type, TEventArgs eventArgs)
             where TEventArgs : System.EventArgs;
 
@@ -214,7 +234,7 @@ namespace Sora.Server.ServerInterface
 
                     Log.Info("Sora", $"已连接到{clientType}客户端,版本:{clientVer}");
                     if (OnClientConnect == null) break;
-                    //执行回调函数
+                    //执行回调
                     await OnClientConnect("Meta Event",
                                           new ConnectEventArgs(connection, "lifecycle",
                                                                lifeCycle?.SelfID ?? -1, clientType, clientVer,
@@ -247,10 +267,12 @@ namespace Sora.Server.ServerInterface
                     if (privateMsg == null) break;
                     Log.Debug("Sora",
                               $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
-                    //执行回调函数
+                    var eventArgs = new PrivateMessageEventArgs(connection, "private", privateMsg);
+                    //处理指令
+                    await CommandManager.PrivateCommandAdapter("Message", eventArgs);
+                    //执行回调
                     if (OnPrivateMessage == null) break;
-                    await OnPrivateMessage("Message",
-                                           new PrivateMessageEventArgs(connection, "private", privateMsg));
+                    await OnPrivateMessage("Message", eventArgs);
                     break;
                 }
                 //群聊事件
@@ -260,10 +282,12 @@ namespace Sora.Server.ServerInterface
                     if (groupMsg == null) break;
                     Log.Debug("Sora",
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
-                    //执行回调函数
+                    var eventArgs = new GroupMessageEventArgs(connection, "private", groupMsg);
+                    //处理指令
+                    await CommandManager.GroupCommandAdapter("Message", eventArgs);
+                    //执行回调
                     if (OnGroupMessage == null) break;
-                    await OnGroupMessage("Message",
-                                         new GroupMessageEventArgs(connection, "group", groupMsg));
+                    await OnGroupMessage("Message", eventArgs);
                     break;
                 }
                 default:
@@ -291,7 +315,7 @@ namespace Sora.Server.ServerInterface
                     if (groupMsg == null) break;
                     Log.Debug("Sora",
                               $"Group self msg[{groupMsg.GroupId}] -> {groupMsg.RawMessage}");
-                    //执行回调函数
+                    //执行回调
                     if (OnSelfMessage == null) break;
                     await OnSelfMessage("Message",
                                         new GroupMessageEventArgs(connection, "group", groupMsg));
@@ -323,7 +347,7 @@ namespace Sora.Server.ServerInterface
                     if (friendRequest == null) break;
                     Log.Debug("Sora",
                               $"Friend request form [{friendRequest.UserId}] with commont[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
-                    //执行回调函数
+                    //执行回调
                     if (OnFriendRequest == null) break;
                     await OnFriendRequest("Request",
                                           new FriendRequestEventArgs(connection, "request|friend",
@@ -343,7 +367,7 @@ namespace Sora.Server.ServerInterface
                     if (groupRequest == null) break;
                     Log.Debug("Sora",
                               $"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
-                    //执行回调函数
+                    //执行回调
                     if (OnGroupRequest == null) break;
                     await OnGroupRequest("Request",
                                          new AddGroupRequestEventArgs(connection, "request|group",
@@ -376,7 +400,7 @@ namespace Sora.Server.ServerInterface
                     if (fileUpload == null) break;
                     Log.Debug("Sora",
                               $"Group notice[Upload file] file[{fileUpload.Upload.Name}] from group[{fileUpload.GroupId}({fileUpload.UserId})]");
-                    //执行回调函数
+                    //执行回调
                     if (OnFileUpload == null) break;
                     await OnFileUpload("Notice",
                                        new FileUploadEventArgs(connection, "group_upload", fileUpload));
@@ -389,7 +413,7 @@ namespace Sora.Server.ServerInterface
                     if (adminChange == null) break;
                     Log.Debug("Sora",
                               $"Group amdin change[{adminChange.SubType}] from group[{adminChange.GroupId}] by[{adminChange.UserId}]");
-                    //执行回调函数
+                    //执行回调
                     if (OnGroupAdminChange == null) break;
                     await OnGroupAdminChange("Notice",
                                              new GroupAdminChangeEventArgs(connection, "group_upload", adminChange));
@@ -404,7 +428,7 @@ namespace Sora.Server.ServerInterface
                     if (groupMemberChange == null) break;
                     Log.Debug("Sora",
                               $"{groupMemberChange.NoticeType} type[{groupMemberChange.SubType}] member {groupMemberChange.GroupId}[{groupMemberChange.UserId}]");
-                    //执行回调函数
+                    //执行回调
                     if (OnGroupMemberChange == null) break;
                     await OnGroupMemberChange("Notice",
                                               new GroupMemberChangeEventArgs(connection, "group_member_change",
@@ -418,7 +442,7 @@ namespace Sora.Server.ServerInterface
                     if (groupMute == null) break;
                     Log.Debug("Sora",
                               $"Group[{groupMute.GroupId}] {groupMute.ActionType} member[{groupMute.UserId}]{groupMute.Duration}");
-                    //执行回调函数
+                    //执行回调
                     if (OnGroupMemberMute == null) break;
                     await OnGroupMemberMute("Notice",
                                             new GroupMuteEventArgs(connection, "group_ban", groupMute));
@@ -430,7 +454,7 @@ namespace Sora.Server.ServerInterface
                     ApiFriendAddEventArgs friendAdd = messageJson.ToObject<ApiFriendAddEventArgs>();
                     if (friendAdd == null) break;
                     Log.Debug("Sora", $"Friend add user[{friendAdd.UserId}]");
-                    //执行回调函数
+                    //执行回调
                     if (OnFriendAdd == null) break;
                     await OnFriendAdd("Notice",
                                       new FriendAddEventArgs(connection, "friend_add", friendAdd));
@@ -443,7 +467,7 @@ namespace Sora.Server.ServerInterface
                     if (groupRecall == null) break;
                     Log.Debug("Sora",
                               $"Group[{groupRecall.GroupId}] recall by [{groupRecall.OperatorId}],msg id={groupRecall.MessageId} sender={groupRecall.UserId}");
-                    //执行回调函数
+                    //执行回调
                     if (OnGroupRecall == null) break;
                     await OnGroupRecall("Notice",
                                         new GroupRecallEventArgs(connection, "group_recall", groupRecall));
@@ -455,7 +479,7 @@ namespace Sora.Server.ServerInterface
                     ApiFriendRecallEventArgs friendRecall = messageJson.ToObject<ApiFriendRecallEventArgs>();
                     if (friendRecall == null) break;
                     Log.Debug("Sora", $"Friend[{friendRecall.UserId}] recall msg id={friendRecall.MessageId}");
-                    //执行回调函数
+                    //执行回调
                     if (OnFriendRecall == null) break;
                     await OnFriendRecall("Notice",
                                          new FriendRecallEventArgs(connection, "friend_recall", friendRecall));
