@@ -41,6 +41,11 @@ namespace Sora.Entities.Info
         /// </summary>
         internal Type InstanceType { get; }
 
+        /// <summary>
+        /// 是否在指令后触发事件
+        /// </summary>
+        public bool TriggerEventAfterCommand { get; }
+
         #endregion
 
         #region 构造方法
@@ -49,14 +54,15 @@ namespace Sora.Entities.Info
         /// 指令信息构造
         /// </summary>
         internal CommandInfo(string desc, string regex, string groupName, MethodInfo method,
-                             MemberRoleType? permissonType = null, Type instanceType = null)
+                             MemberRoleType? permissonType, bool triggerEventAfterCommand, Type instanceType = null)
         {
-            Desc          = desc;
-            Regex         = regex;
-            GroupName     = groupName;
-            MethodInfo    = method;
-            InstanceType  = instanceType;
-            PermissonType = permissonType;
+            Desc                     = desc;
+            Regex                    = regex;
+            GroupName                = groupName;
+            MethodInfo               = method;
+            InstanceType             = instanceType;
+            TriggerEventAfterCommand = triggerEventAfterCommand;
+            PermissonType            = permissonType;
         }
 
         #endregion
