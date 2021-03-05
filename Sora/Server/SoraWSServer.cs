@@ -34,18 +34,17 @@ namespace Sora.Server
         /// <summary>
         /// 心跳包检查计时器
         /// </summary>
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         private Timer HeartBeatTimer { get; set; }
 
         /// <summary>
         /// 事件接口
         /// </summary>
-        public EventInterface Event { get; private set; }
+        public EventInterface Event { get; }
 
         /// <summary>
         /// 服务器连接管理器
         /// </summary>
-        public ConnectionManager ConnManager { get; private set; }
+        public ConnectionManager ConnManager { get; }
 
         #endregion
 
@@ -187,7 +186,6 @@ namespace Sora.Server
                              socket.OnMessage = (message) =>
                                                 {
                                                     //处理接收的数据
-                                                    // ReSharper disable once SimplifyLinqExpressionUseAll
                                                     if (!ConnectionManager.ConnectionExitis(socket.ConnectionInfo.Id))
                                                         return;
                                                     //进入事件处理和分发
@@ -225,7 +223,7 @@ namespace Sora.Server
         /// </summary>
         public void Dispose()
         {
-            Server?.Dispose();
+            GC.SuppressFinalize(Server);
             ReactiveApiManager.ClearApiReqList();
         }
 
