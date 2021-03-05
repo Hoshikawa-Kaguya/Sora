@@ -6,7 +6,7 @@ namespace Sora.Entities
     /// <summary>
     /// 匿名用户类
     /// </summary>
-    public class Anonymous
+    public sealed class Anonymous
     {
         #region 属性
 
