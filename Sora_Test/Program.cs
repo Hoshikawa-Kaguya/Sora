@@ -35,7 +35,7 @@ server.ConnManager.OnHeartBeatTimeOut += (connectionInfo, eventArgs) =>
 //群聊消息事件
 server.Event.OnGroupMessage += async (msgType, eventArgs) =>
                                {
-                                   //await eventArgs.SourceGroup.SendGroupMessage("好耶");
+                                   await eventArgs.SourceGroup.SendGroupMessage("好耶");
                                };
 server.Event.OnSelfMessage += (type, eventArgs) =>
                               {
