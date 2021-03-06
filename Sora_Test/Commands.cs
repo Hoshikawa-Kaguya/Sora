@@ -13,7 +13,7 @@ namespace Sora_Test
             await eventArgs.Reply("坏耶");
         }
 
-        [GroupCommand(CommandExpression = "贴贴")]
+        [GroupCommand(CommandExpression = "贴贴", Description = "不能贴爪巴")]
         public async ValueTask TestCommand2(GroupMessageEventArgs eventArgs)
         {
             await eventArgs.Reply("爪巴");

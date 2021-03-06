@@ -263,13 +263,13 @@ namespace Sora.Server.ServerInterface
                 //私聊事件
                 case "private":
                 {
-                    ApiPrivateMsgEventArgs privateMsg = messageJson.ToObject<ApiPrivateMsgEventArgs>();
+                    var privateMsg = messageJson.ToObject<ApiPrivateMsgEventArgs>();
                     if (privateMsg == null) break;
                     Log.Debug("Sora",
                               $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                     var eventArgs = new PrivateMessageEventArgs(connection, "private", privateMsg);
                     //处理指令
-                    if (!CommandManager.CommandAdapter(eventArgs))
+                    if (!await CommandManager.CommandAdapter(eventArgs))
                         break;
                     //执行回调
                     if (OnPrivateMessage == null) break;
@@ -285,7 +285,7 @@ namespace Sora.Server.ServerInterface
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(connection, "private", groupMsg);
                     //处理指令
-                    if (!CommandManager.CommandAdapter(eventArgs))
+                    if (!await CommandManager.CommandAdapter(eventArgs))
                         break;
                     //执行回调
                     if (OnGroupMessage == null) break;

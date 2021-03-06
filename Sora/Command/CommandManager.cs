@@ -171,7 +171,7 @@ namespace Sora.Command
         /// 处理聊天指令
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
-        internal bool CommandAdapter(object eventArgs)
+        internal async ValueTask<bool> CommandAdapter(object eventArgs)
         {
             //检查使能
             if (!enableSoraCommandManager) return true;
@@ -179,26 +179,26 @@ namespace Sora.Command
             CommandInfo matchedCommand;
             switch (eventArgs)
             {
-                case GroupMessageEventArgs groupEventArgs:
+                case GroupMessageEventArgs groupMessageEvent:
                 {
                     matchedCommand =
-                        groupCommands.SingleOrDefault(command => Regex.IsMatch(groupEventArgs.Message.RawText,
+                        groupCommands.SingleOrDefault(command => Regex.IsMatch(groupMessageEvent.Message.RawText,
                                                                                command.Regex));
                     if (matchedCommand.MethodInfo == null) return true;
                     //判断权限
-                    if (groupEventArgs.SenderInfo.Role < (matchedCommand.PermissonType ?? MemberRoleType.Member))
+                    if (groupMessageEvent.SenderInfo.Role < (matchedCommand.PermissonType ?? MemberRoleType.Member))
                     {
-                        Log.Warning("Command",
-                                    $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{matchedCommand.MethodInfo.Name}");
+                        Log.Warning("CommandAdapter",
+                                    $"成员{groupMessageEvent.SenderInfo.UserId}正在尝试执行指令{matchedCommand.MethodInfo.Name}");
                         return true;
                     }
 
                     break;
                 }
-                case PrivateMessageEventArgs privateEventArgs:
+                case PrivateMessageEventArgs privateMessageEvent:
                 {
                     matchedCommand =
-                        privateCommands.SingleOrDefault(command => Regex.IsMatch(privateEventArgs.Message.RawText,
+                        privateCommands.SingleOrDefault(command => Regex.IsMatch(privateMessageEvent.Message.RawText,
                                                             command.Regex));
                     if (matchedCommand.MethodInfo == null) return true;
                     break;
@@ -211,16 +211,26 @@ namespace Sora.Command
             Log.Debug("CommandAdapter", $"get command {matchedCommand.MethodInfo.Name}");
             try
             {
-                Log.Info("Command", $"Trigger command [{matchedCommand.MethodInfo.Name}]");
+                Log.Info("CommandAdapter", $"Trigger command [{matchedCommand.MethodInfo.Name}]");
                 //执行指令方法
                 matchedCommand.MethodInfo.Invoke(instanceDict[matchedCommand.InstanceType], new[] {eventArgs});
             }
             catch (Exception e)
             {
-                Log.Error("Command", Log.ErrorLogBuilder(e));
-                if (!string.IsNullOrEmpty(matchedCommand.Desc))
+                Log.Error("CommandAdapter", Log.ErrorLogBuilder(e));
+                if (string.IsNullOrEmpty(matchedCommand.Desc)) return matchedCommand.TriggerEventAfterCommand;
+                switch (eventArgs)
                 {
-                    Log.Warning("Command Error", $"Command desc:{matchedCommand.Desc}");
+                    case GroupMessageEventArgs groupMessageEvent:
+                    {
+                        await groupMessageEvent.Reply($"指令执行错误\n指令信息:{matchedCommand.Desc}");
+                        break;
+                    }
+                    case PrivateMessageEventArgs privateMessageEvent:
+                    {
+                        await privateMessageEvent.Reply($"指令执行错误\n指令信息:{matchedCommand.Desc}");
+                        break;
+                    }
                 }
             }
 
