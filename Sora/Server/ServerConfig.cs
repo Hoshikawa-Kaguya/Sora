@@ -47,5 +47,10 @@ namespace Sora.Server
         /// <para>默认为1000无需修改</para>
         /// </summary>
         public uint ApiTimeOut { get; init; } = 1000;
+
+        /// <summary>
+        /// 是否启用Sora自带的指令系统
+        /// </summary>
+        public bool EnableSoraCommandManager { get; init; } = true;
     }
 }

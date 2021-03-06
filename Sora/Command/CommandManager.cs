@@ -150,7 +150,7 @@ namespace Sora.Command
                     }
                 }
             }
-
+            Regex.CacheSize += privateCommands.Count + groupCommands.Count;
             Log.Info("Command", $"Registered {groupCommands.Count + privateCommands.Count} commands");
         }
 
