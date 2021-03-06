@@ -27,8 +27,18 @@ namespace Sora.Command
 
         private readonly Dictionary<Type, object> instanceDict = new();
 
+        private readonly bool enableSoraCommandManager;
+
         #endregion
 
+        #region 构造方法
+
+        internal CommandManager(bool enableSoraCommandManager)
+        {
+            this.enableSoraCommandManager = enableSoraCommandManager;
+        }
+
+        #endregion
 
         #region 公有管理方法
 
@@ -38,6 +48,8 @@ namespace Sora.Command
         /// <param name="assembly">包含指令的程序集</param>
         internal void MappingCommands(Assembly assembly)
         {
+            //检查使能
+            if (!enableSoraCommandManager) return;
             if (assembly == null) return;
             //查找所有的指令集
             var types = assembly.GetExportedTypes()
@@ -150,6 +162,7 @@ namespace Sora.Command
                     }
                 }
             }
+
             Regex.CacheSize += privateCommands.Count + groupCommands.Count;
             Log.Info("Command", $"Registered {groupCommands.Count + privateCommands.Count} commands");
         }
@@ -158,8 +171,10 @@ namespace Sora.Command
         /// 处理聊天指令
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
-        internal ValueTask<bool> CommandAdapter(object eventArgs)
+        internal bool CommandAdapter(object eventArgs)
         {
+            //检查使能
+            if (!enableSoraCommandManager) return true;
             //处理消息段
             CommandInfo matchedCommand;
             switch (eventArgs)
@@ -169,13 +184,13 @@ namespace Sora.Command
                     matchedCommand =
                         groupCommands.SingleOrDefault(command => Regex.IsMatch(groupEventArgs.Message.RawText,
                                                                                command.Regex));
-                    if (matchedCommand.MethodInfo == null) return new ValueTask<bool>(true);
+                    if (matchedCommand.MethodInfo == null) return true;
                     //判断权限
                     if (groupEventArgs.SenderInfo.Role < (matchedCommand.PermissonType ?? MemberRoleType.Member))
                     {
                         Log.Warning("Command",
                                     $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{matchedCommand.MethodInfo.Name}");
-                        return new ValueTask<bool>(true);
+                        return true;
                     }
 
                     break;
@@ -185,12 +200,12 @@ namespace Sora.Command
                     matchedCommand =
                         privateCommands.SingleOrDefault(command => Regex.IsMatch(privateEventArgs.Message.RawText,
                                                             command.Regex));
-                    if (matchedCommand.MethodInfo == null) return new ValueTask<bool>(true);
+                    if (matchedCommand.MethodInfo == null) return true;
                     break;
                 }
                 default:
                     Log.Error("CommandAdapter", "cannot parse eventArgs");
-                    return new ValueTask<bool>(true);
+                    return true;
             }
 
             Log.Debug("CommandAdapter", $"get command {matchedCommand.MethodInfo.Name}");
@@ -209,7 +224,7 @@ namespace Sora.Command
                 }
             }
 
-            return new ValueTask<bool>(matchedCommand.TriggerEventAfterCommand);
+            return matchedCommand.TriggerEventAfterCommand;
         }
 
         #endregion

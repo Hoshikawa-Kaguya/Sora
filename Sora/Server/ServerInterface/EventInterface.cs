@@ -18,8 +18,6 @@ namespace Sora.Server.ServerInterface
     /// </summary>
     public class EventInterface
     {
-        private bool enableSoraCommandManager;
-
         #region 属性
 
         /// <summary>
@@ -33,12 +31,8 @@ namespace Sora.Server.ServerInterface
 
         internal EventInterface(bool enableSoraCommandManager)
         {
-            if (enableSoraCommandManager)
-            {
-                CommandManager = new CommandManager();
-                CommandManager.MappingCommands(Assembly.GetEntryAssembly());
-            }
-            this.enableSoraCommandManager = enableSoraCommandManager;
+            CommandManager = new CommandManager(enableSoraCommandManager);
+            CommandManager.MappingCommands(Assembly.GetEntryAssembly());
         }
 
         #endregion
@@ -275,8 +269,8 @@ namespace Sora.Server.ServerInterface
                               $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                     var eventArgs = new PrivateMessageEventArgs(connection, "private", privateMsg);
                     //处理指令
-                    if (enableSoraCommandManager)
-                            if (!await CommandManager.CommandAdapter(eventArgs)) break;
+                    if (!CommandManager.CommandAdapter(eventArgs))
+                        break;
                     //执行回调
                     if (OnPrivateMessage == null) break;
                     await OnPrivateMessage("Message", eventArgs);
@@ -291,8 +285,8 @@ namespace Sora.Server.ServerInterface
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(connection, "private", groupMsg);
                     //处理指令
-                    if (enableSoraCommandManager)
-                            if (!await CommandManager.CommandAdapter(eventArgs)) break;
+                    if (!CommandManager.CommandAdapter(eventArgs))
+                        break;
                     //执行回调
                     if (OnGroupMessage == null) break;
                     await OnGroupMessage("Message", eventArgs);
