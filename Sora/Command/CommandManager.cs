@@ -211,7 +211,7 @@ namespace Sora.Command
             Log.Debug("CommandAdapter", $"get command {matchedCommand.MethodInfo.Name}");
             try
             {
-                Log.Info("CommandAdapter", $"Trigger command [{matchedCommand.MethodInfo.Name}]");
+                Log.Info("CommandAdapter", $"trigger command [{matchedCommand.MethodInfo.Name}]");
                 //执行指令方法
                 matchedCommand.MethodInfo.Invoke(instanceDict[matchedCommand.InstanceType], new[] {eventArgs});
             }
