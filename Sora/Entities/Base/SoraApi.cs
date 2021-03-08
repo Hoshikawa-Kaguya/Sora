@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.CQCodes;
@@ -164,11 +165,12 @@ namespace Sora.Entities.Base
         /// <param name="nodeList">
         /// 节点(<see cref="Node"/>)消息段列表
         /// </param>
-        public async ValueTask<APIStatusType> SendGroupForwardMsg(long groupId, List<CustomNode> nodeList)
+        public async ValueTask<APIStatusType> SendGroupForwardMsg(long groupId, IEnumerable<CustomNode> nodeList)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            if (nodeList == null || nodeList.Count == 0) throw new NullReferenceException(nameof(nodeList));
-            return (APIStatusType) await ApiInterface.SendGroupForwardMsg(this.ConnectionGuid, groupId, nodeList);
+            IEnumerable<CustomNode> customNodes = nodeList as CustomNode[] ?? nodeList.ToArray();
+            if (nodeList == null || !customNodes.Any()) throw new NullReferenceException(nameof(nodeList));
+            return (APIStatusType) await ApiInterface.SendGroupForwardMsg(this.ConnectionGuid, groupId, customNodes);
         }
 
         /// <summary>
