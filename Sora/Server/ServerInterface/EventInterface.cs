@@ -316,7 +316,7 @@ namespace Sora.Server.ServerInterface
                     ApiGroupMsgEventArgs groupMsg = messageJson.ToObject<ApiGroupMsgEventArgs>();
                     if (groupMsg == null) break;
                     Log.Debug("Sora",
-                              $"Group self msg[{groupMsg.GroupId}] -> {groupMsg.RawMessage}");
+                              $"Group self msg[{groupMsg.GroupId}]:{groupMsg.RawMessage}");
                     //执行回调
                     if (OnSelfMessage == null) break;
                     await OnSelfMessage("Message",

@@ -35,9 +35,9 @@ namespace Sora.Server.ServerInterface
             Log.Debug("Sora", "Sending send_msg(Private) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //转换消息段列表
-            List<MessageElement> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
+            var messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendMsg,
                 ApiParams = new SendMessageParams
@@ -48,13 +48,14 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int code = GetBaseRetCode(ret).retCode;
-            if (code != 0) return (code, -1);
-            int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
+            var retCode = GetBaseRetCode(ret).retCode;
+            Log.Debug("Sora", $"Get send_msg(Private) response retcode={retCode}");
+            if (retCode != 0) return (retCode, -1);
+            var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
                 ? messageCode
                 : -1;
-            Log.Debug("Sora", $"Get send_msg(Private) response retcode={code}|msg_id={msgCode}");
-            return (code, msgCode);
+
+            return (retCode, msgCode);
         }
 
         /// <summary>
@@ -72,9 +73,9 @@ namespace Sora.Server.ServerInterface
             Log.Debug("Sora", "Sending send_msg(Group) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //转换消息段列表
-            List<MessageElement> messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
+            var messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendMsg,
                 ApiParams = new SendMessageParams
@@ -85,13 +86,14 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int code = GetBaseRetCode(ret).retCode;
-            if (code != 0) return (code, -1);
-            int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
+            var retCode = GetBaseRetCode(ret).retCode;
+            Log.Debug("Sora", $"Get send_msg(Group) response retcode={retCode}");
+            if (retCode != 0) return (retCode, -1);
+            var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
                 ? messageCode
                 : -1;
-            Log.Debug("Sora", $"Get send_msg(Group) response retcode={code}|msg_id={msgCode}");
-            return (code, msgCode);
+
+            return (retCode, msgCode);
         }
 
         /// <summary>
@@ -102,7 +104,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, long uid, string nick)> GetLoginInfo(Guid connection)
         {
             Log.Debug("Sora", "Sending get_login_info request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetLoginInfo
             }, connection);
@@ -113,7 +115,7 @@ namespace Sora.Server.ServerInterface
             return
             (
                 retCode,
-                uid: int.TryParse(ret?["data"]?["user_id"]?.ToString(), out int uid) ? uid : -1,
+                uid: int.TryParse(ret?["data"]?["user_id"]?.ToString(), out var uid) ? uid : -1,
                 nick: ret?["data"]?["nickname"]?.ToString() ?? string.Empty
             );
         }
@@ -126,12 +128,12 @@ namespace Sora.Server.ServerInterface
             Guid connection)
         {
             Log.Debug("Sora", "Sending get_version_info request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetVersion
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_version_info response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, "unknown", null);
             var verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
@@ -147,27 +149,23 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, List<FriendInfo> friendList)> GetFriendList(Guid connection)
         {
             Log.Debug("Sora", "Sending get_friend_list request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetFriendList
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_friend_list response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, null);
-            List<FriendInfo> friendList = new List<FriendInfo>();
             //处理返回的好友信息
-            foreach (JToken token in ret["data"]?.ToArray())
+            var friendInfos = ret["data"]?.Select(token => new FriendInfo
             {
-                friendList.Add(new FriendInfo
-                {
-                    UserId = Convert.ToInt64(token["user_id"] ?? -1),
-                    Remark = token["remark"]?.ToString()   ?? string.Empty,
-                    Nick   = token["nickname"]?.ToString() ?? string.Empty
-                });
-            }
+                UserId = Convert.ToInt64(token["user_id"] ?? -1),
+                Remark = token["remark"]?.ToString()   ?? string.Empty,
+                Nick   = token["nickname"]?.ToString() ?? string.Empty
+            }).ToList();
 
-            return (retCode, friendList);
+            return (retCode, friendInfos);
         }
 
         /// <summary>
@@ -178,26 +176,22 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, List<GroupInfo> groupList)> GetGroupList(Guid connection)
         {
             Log.Debug("Sora", "Sending get_group_list request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupList
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_list response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             //处理返回群组列表
-            List<GroupInfo> groupList = new List<GroupInfo>();
-            foreach (JToken token in ret["data"]?.ToArray())
+            var groupList = ret["data"].Select(token => new GroupInfo
             {
-                groupList.Add(new GroupInfo
-                {
-                    GroupId        = Convert.ToInt64(token["group_id"] ?? -1),
-                    GroupName      = token["group_name"]?.ToString() ?? string.Empty,
-                    MemberCount    = Convert.ToInt32(token["member_count"]     ?? -1),
-                    MaxMemberCount = Convert.ToInt32(token["max_member_count"] ?? -1)
-                });
-            }
+                GroupId        = Convert.ToInt64(token["group_id"] ?? -1),
+                GroupName      = token["group_name"]?.ToString() ?? string.Empty,
+                MemberCount    = Convert.ToInt32(token["member_count"]     ?? -1),
+                MaxMemberCount = Convert.ToInt32(token["max_member_count"] ?? -1)
+            }).ToList();
 
             return (retCode, groupList);
         }
@@ -210,7 +204,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
             Guid connection, long gid)
         {
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMemberList,
                 ApiParams = new
@@ -219,7 +213,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_member_list response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             //处理返回群成员列表
@@ -237,7 +231,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, long gid, bool useCache)
         {
             Log.Debug("Sora", "Sending get_group_info request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupInfo,
                 ApiParams = new
@@ -247,7 +241,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_info response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, new GroupInfo());
             return (retCode,
@@ -272,7 +266,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, long gid, long uid, bool useCache)
         {
             Log.Debug("Sora", "Sending get_group_member_info request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMemberInfo,
                 ApiParams = new
@@ -283,7 +277,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_member_info response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, new GroupMemberInfo());
             return (retCode,
@@ -302,7 +296,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, long uid, bool useCache)
         {
             Log.Debug("Sora", "Sending get_stranger_info request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetStrangerInfo,
                 ApiParams = new
@@ -312,7 +306,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_stranger_info response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, new UserInfo(), string.Empty);
             return (retCode, new UserInfo
@@ -333,12 +327,12 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, bool canSend)> CanSendImage(Guid connection)
         {
             Log.Debug("Sora", "Sending can_send_image request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CanSendImage
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get can_send_image response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, false);
             return (retCode,
@@ -352,12 +346,12 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, bool canSend)> CanSendRecord(Guid connection)
         {
             Log.Debug("Sora", "Sending can_send_record request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CanSendRecord
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get can_send_record response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, false);
             return (retCode,
@@ -372,12 +366,12 @@ namespace Sora.Server.ServerInterface
             Guid connection)
         {
             Log.Debug("Sora", "Sending get_status request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetStatus
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_status response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, false, false, null);
             return (retCode,
@@ -397,7 +391,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, string cacheFileName)
         {
             Log.Debug("Sora", "Sending get_image request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetImage,
                 ApiParams = new
@@ -406,7 +400,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_image response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, -1, null, null);
             return (retCode,
@@ -425,7 +419,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, int msgId)
         {
             Log.Debug("Sora", "Sending get_msg request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetMessage,
                 ApiParams = new
@@ -434,7 +428,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_msg response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, null, null, null, 0, false);
             //处理消息段
@@ -470,7 +464,7 @@ namespace Sora.Server.ServerInterface
         {
             if (string.IsNullOrEmpty(text)) throw new NullReferenceException(nameof(text));
             Log.Debug("Sora", "Sending .get_word_slices request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetWordSlices,
                 ApiParams = new
@@ -479,7 +473,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get .get_word_slices response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             return (retCode,
@@ -498,7 +492,7 @@ namespace Sora.Server.ServerInterface
             if (string.IsNullOrEmpty(msgId)) throw new NullReferenceException(nameof(msgId));
             Log.Debug("Sora", "Sending get_forward_msg request");
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetForwardMessage,
                 ApiParams = new
@@ -507,12 +501,11 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_forward_msg response retcode={retCode}");
             if (retCode != 0) return (retCode, null);
             //转换消息类型
-            NodeArray messageList =
-                ret?["data"]?.ToObject<NodeArray>() ?? new NodeArray();
+            var messageList = ret?["data"]?.ToObject<NodeArray>() ?? new NodeArray();
             messageList.ParseNode();
             return (retCode, messageList);
         }
@@ -528,20 +521,20 @@ namespace Sora.Server.ServerInterface
         {
             Log.Debug("Sora", "Sending get_group_system_msg request");
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupSystemMsg
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_system_msg response retcode={retCode}");
             if (retCode != 0)
                 return (retCode, new List<GroupRequestInfo>(), new List<GroupRequestInfo>());
             //解析消息
-            List<GroupRequestInfo> joinList =
+            var joinList =
                 ret?["data"]?["join_requests"]?.ToObject<List<GroupRequestInfo>>() ??
                 new List<GroupRequestInfo>();
-            List<GroupRequestInfo> invitedList =
+            var invitedList =
                 ret?["data"]?["invited_requests"]?.ToObject<List<GroupRequestInfo>>() ??
                 new List<GroupRequestInfo>();
             return (retCode, joinList, invitedList);
@@ -558,7 +551,7 @@ namespace Sora.Server.ServerInterface
         {
             Log.Debug("Sora", "Sending get_group_file_system_info request");
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupFileSystemInfo,
                 ApiParams = new
@@ -567,7 +560,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_file_system_info response retcode={retCode}");
             return retCode != 0
                 ? (retCode, new GroupFileSysInfo())
@@ -587,7 +580,7 @@ namespace Sora.Server.ServerInterface
         {
             Log.Debug("Sora", "Sending get_group_root_files request");
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupRootFiles,
                 ApiParams = new
@@ -596,7 +589,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_root_files response retcode={retCode}");
             if (retCode != 0)
                 return (retCode, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
@@ -618,7 +611,7 @@ namespace Sora.Server.ServerInterface
         {
             Log.Debug("Sora", "Sending get_group_files_by_folder request");
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupFilesByFolder,
                 ApiParams = new
@@ -628,7 +621,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_files_by_folder response retcode={retCode}");
             if (retCode != 0)
                 return (retCode, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
@@ -650,7 +643,7 @@ namespace Sora.Server.ServerInterface
         {
             Log.Debug("Sora", "Sending get_group_file_url request");
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupFileUrl,
                 ApiParams = new
@@ -661,7 +654,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_file_url response retcode={retCode}");
             return retCode != 0
                 ? (retCode, null)
@@ -679,7 +672,7 @@ namespace Sora.Server.ServerInterface
         {
             Log.Debug("Sora", "Sending get_group_at_all_remain request");
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupAtAllRemain,
                 ApiParams = new
@@ -688,7 +681,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_at_all_remain response retcode={retCode}");
             if (retCode != 0)
                 return (retCode, false, -1, -1);
@@ -709,7 +702,7 @@ namespace Sora.Server.ServerInterface
         {
             Log.Debug("Sora", "Sending ocr_image request");
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.Ocr,
                 ApiParams = new
@@ -718,7 +711,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get ocr_image response retcode={retCode}");
 
             if (retCode != 0)
@@ -752,7 +745,7 @@ namespace Sora.Server.ServerInterface
             Log.Debug("Sora", "Sending download_file request");
 
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.DownloadFile,
                 ApiParams = new
@@ -764,9 +757,8 @@ namespace Sora.Server.ServerInterface
             }, connection, timeout);
 
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get download_file response retcode={retCode}");
-            Log.Debug("Sora", $"get file path = {ret?["data"]?["file"] ?? ""}");
             return retCode != 0 ? (retCode, string.Empty) : (retCode, ret?["data"]?["file"]?.ToString());
         }
 
@@ -781,7 +773,7 @@ namespace Sora.Server.ServerInterface
             int? msgSeq, long gid, Guid connection)
         {
             Log.Debug("Sora", "Sending get_group_msg_history request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMsgHistory,
                 ApiParams = msgSeq == null
@@ -796,7 +788,7 @@ namespace Sora.Server.ServerInterface
                     }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_group_msg_history response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             //处理消息段
@@ -817,7 +809,7 @@ namespace Sora.Server.ServerInterface
         {
             Log.Debug("Sora", "Sending get_online_clients request");
             //发送信息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetOnlineClients,
                 ApiParams = new
@@ -826,7 +818,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_online_clients response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             //处理客户端信息
@@ -842,7 +834,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, long gid)
         {
             Log.Debug("Sora", "Sending get_essence_msg_list request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetEssenceMsgList,
                 ApiParams = new
@@ -851,7 +843,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get get_essence_msg_list response retcode={retCode}");
             return (retCode, (ret?["data"] ?? new JArray())
                              .Select(element => new EssenceInfo(element, connection)).ToList());
@@ -866,7 +858,7 @@ namespace Sora.Server.ServerInterface
             Guid connection, string url)
         {
             Log.Debug("Sora", "Sending check_url_safely request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CheckUrlSafely,
                 ApiParams = new
@@ -875,7 +867,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get check_url_safely response retcode={retCode}");
             return (retCode, (SecurityLevelType) Convert.ToInt32(ret?["data"]?["level"] ?? 1));
         }
@@ -889,7 +881,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<(int retCode, VipInfo securityLevel)> GetVipInfo(Guid connection, long uid)
         {
             Log.Debug("Sora", "Sending _get_vip_info request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType._GetVipInfo,
                 ApiParams = new
@@ -898,7 +890,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get _get_vip_info response retcode={retCode}");
             return (retCode, ret?["data"]?.ToObject<VipInfo>() ?? new VipInfo());
         }
@@ -917,7 +909,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> RecallMsg(Guid connection, int msgId)
         {
             Log.Debug("Sora", "Sending delete_msg request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.RecallMsg,
                 ApiParams = new
@@ -926,7 +918,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get delete_msg response retcode={retCode}");
             return retCode;
         }
@@ -943,7 +935,7 @@ namespace Sora.Server.ServerInterface
         {
             if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
             Log.Debug("Sora", "Sending set_friend_add_request request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetFriendAddRequest,
                 ApiParams = new
@@ -954,7 +946,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_friend_add_request response retcode={retCode}");
             return retCode;
         }
@@ -974,7 +966,7 @@ namespace Sora.Server.ServerInterface
                                                                 string reason = null)
         {
             Log.Debug("Sora", "Sending set_group_add_request request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAddRequest,
                 ApiParams = new SetGroupAddRequestParams
@@ -986,7 +978,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_add_request response retcode={retCode}");
             return retCode;
         }
@@ -1001,7 +993,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupCard(Guid connection, long gid, long uid, string card)
         {
             Log.Debug("Sora", "Sending set_group_card request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupCard,
                 ApiParams = new
@@ -1012,7 +1004,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_card response retcode={retCode}");
             return retCode;
         }
@@ -1027,7 +1019,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupSpecialTitle(Guid connection, long gid, long uid, string title)
         {
             Log.Debug("Sora", "Sending set_group_special_title request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupSpecialTitle,
                 ApiParams = new
@@ -1039,7 +1031,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_special_title response retcode={retCode}");
             return retCode;
         }
@@ -1054,7 +1046,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> KickGroupMember(Guid connection, long gid, long uid, bool rejectRequest)
         {
             Log.Debug("Sora", "Sending set_group_kick request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupKick,
                 ApiParams = new
@@ -1065,7 +1057,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_kick response retcode={retCode}");
             return retCode;
         }
@@ -1080,7 +1072,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupBan(Guid connection, long gid, long uid, long duration)
         {
             Log.Debug("Sora", "Sending set_group_ban request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupBan,
                 ApiParams = new
@@ -1091,7 +1083,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_ban response retcode={retCode}");
             return retCode;
         }
@@ -1105,7 +1097,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupWholeBan(Guid connection, long gid, bool enable)
         {
             Log.Debug("Sora", "Sending set_group_whole_ban request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupWholeBan,
                 ApiParams = new
@@ -1115,7 +1107,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_whole_ban response retcode={retCode}");
             return retCode;
         }
@@ -1131,7 +1123,7 @@ namespace Sora.Server.ServerInterface
                                                              long duration)
         {
             Log.Debug("Sora", "Sending set_group_anonymous_ban request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
                 ApiParams = new
@@ -1142,7 +1134,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_anonymous_ban response retcode={retCode}");
             return retCode;
         }
@@ -1158,7 +1150,7 @@ namespace Sora.Server.ServerInterface
                                                              long duration)
         {
             Log.Debug("Sora", "Sending set_group_anonymous_ban request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
                 ApiParams = new
@@ -1169,7 +1161,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_anonymous_ban response retcode={retCode}");
             return retCode;
         }
@@ -1184,7 +1176,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupAdmin(Guid connection, long uid, long gid, bool enable)
         {
             Log.Debug("Sora", "Sending set_group_admin request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAdmin,
                 ApiParams = new
@@ -1195,7 +1187,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_admin response retcode={retCode}");
             return retCode;
         }
@@ -1209,7 +1201,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetGroupLeave(Guid connection, long gid, bool dismiss)
         {
             Log.Debug("Sora", "Sending set_group_leave request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupLeave,
                 ApiParams = new
@@ -1219,7 +1211,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_leave response retcode={retCode}");
             return retCode;
         }
@@ -1232,7 +1224,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> Restart(Guid connection, int delay)
         {
             Log.Debug("Sora", "Sending restart client requset");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.Restart,
                 ApiParams = new
@@ -1241,7 +1233,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get restart response retcode={retCode}");
             return retCode;
         }
@@ -1258,7 +1250,7 @@ namespace Sora.Server.ServerInterface
         {
             if (string.IsNullOrEmpty(name)) throw new NullReferenceException(nameof(name));
             Log.Debug("Sora", "Sending set_group_name request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupName,
                 ApiParams = new
@@ -1268,7 +1260,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_name response retcode={retCode}");
             return retCode;
         }
@@ -1284,7 +1276,7 @@ namespace Sora.Server.ServerInterface
         {
             if (string.IsNullOrEmpty(file)) throw new NullReferenceException(nameof(file));
             Log.Debug("Sora", "Sending set_group_portrait request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupPortrait,
                 ApiParams = new
@@ -1295,7 +1287,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_group_portrait response retcode={retCode}");
             return retCode;
         }
@@ -1306,22 +1298,22 @@ namespace Sora.Server.ServerInterface
         /// <param name="connection">服务器连接标识</param>
         /// <param name="gid">群号</param>
         /// <param name="msgList">消息段数组</param>
-        internal static async ValueTask<int> SendGroupForwardMsg(Guid connection, long gid, List<CustomNode> msgList)
+        internal static async ValueTask<int> SendGroupForwardMsg(Guid connection, long gid,
+                                                                 IEnumerable<CustomNode> msgList)
         {
+            //将消息段转换为数组
+            var customNodes = msgList as CustomNode[] ?? msgList.ToArray();
+            if (msgList == null || !customNodes.Any()) throw new NullReferenceException("msgList is null or empty");
             //处理发送消息段
-            List<object> dataObj = new List<object>();
-            foreach (CustomNode node in msgList)
+            var dataObj = customNodes.Select(node => new
             {
-                dataObj.Add(new
-                {
-                    type = "node",
-                    data = node
-                });
-            }
+                type = "node",
+                data = node
+            }).ToList();
 
             Log.Debug("Sora", "Sending send_group_forward_msg request");
             //发送消息
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendGroupForwardMsg,
                 ApiParams = new
@@ -1331,7 +1323,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get send_group_forward_msg response retcode={retCode}");
             return retCode;
         }
@@ -1343,12 +1335,12 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> ReloadEventFilter(Guid connection)
         {
             Log.Debug("Sora", "Sending reload_event_filter request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.ReloadEventFilter
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get reload_event_filter response retcode={retCode}");
             return retCode;
         }
@@ -1367,7 +1359,7 @@ namespace Sora.Server.ServerInterface
                                                              string floderId = null, int timeout = 10000)
         {
             Log.Debug("Sora", "Sending upload_group_file request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.UploadGroupFile,
                 ApiParams = new
@@ -1379,7 +1371,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection, timeout);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get upload_group_file response retcode={retCode}");
             return retCode;
         }
@@ -1392,7 +1384,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SetEssenceMsg(Guid connection, long msgId)
         {
             Log.Debug("Sora", "Sending set_essence_msg request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetEssenceMsg,
                 ApiParams = new
@@ -1401,7 +1393,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get set_essence_msg response retcode={retCode}");
             return retCode;
         }
@@ -1414,7 +1406,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> DelEssenceMsg(Guid connection, long msgId)
         {
             Log.Debug("Sora", "Sending delete_essence_msg request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.DeleteEssenceMsg,
                 ApiParams = new
@@ -1423,7 +1415,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get delete_essence_msg response retcode={retCode}");
             return retCode;
         }
@@ -1437,7 +1429,7 @@ namespace Sora.Server.ServerInterface
         internal static async ValueTask<int> SendGroupNotice(Guid connection, long gid, string content)
         {
             Log.Debug("Sora", "Sending _send_group_notice request");
-            JObject ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType._SendGroupNotice,
                 ApiParams = new
@@ -1447,7 +1439,7 @@ namespace Sora.Server.ServerInterface
                 }
             }, connection);
             //处理API返回信息
-            int retCode = GetBaseRetCode(ret).retCode;
+            var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get _send_group_notice response retcode={retCode}");
             return retCode;
         }
