@@ -82,7 +82,7 @@ Sora这个名字来源于日语中"空"的罗马音
 
 感谢以下大佬对本框架开发的帮助
 
-[Mrs4s](https://github.com/Mrs4s) | [wdvxdr1123](https://github.com/wdvxdr1123)
+[Mrs4s](https://github.com/Mrs4s) | [wdvxdr1123](https://github.com/wdvxdr1123) | [Kengxxiao](https://github.com/Kengxxiao)
 
 ### 源代码参考
 
