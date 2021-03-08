@@ -1,6 +1,6 @@
 <h1 align="center">
 	<br>
-	<img width="200" src="https://i.loli.net/2020/10/14/Q3NPTLuC4no16ye.png" alt="LOGO">
+	<img width="200" src="Sora/icon.png" alt="LOGO">
 	<br>
 	Sora
 	<h4 align="center">
@@ -50,7 +50,7 @@
 
 详细内容请关注文档的更新
 
-> 本框架是通过和[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.40-fix2](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.40-fix2))通讯进行调试的，如使用其他平台可能会出现兼容性的问题
+> 本框架是通过和[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.40-fix3](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.40-fix3))通讯进行调试的，如使用其他平台可能会出现兼容性的问题
 
 ## 关于ISSUE
 
@@ -77,3 +77,23 @@ Sora这个名字来源于日语中"空"的罗马音
 这个项目同时也是我学习C#这个语言的过程中的产物，所以里面可能会部分拉高血压的代码 ~~屎山~~
 
 如果有什么建议的话，可以在[Discussions](https://github.com/Yukari316/Sora/discussions)里提出哦
+
+## 鸣谢
+
+感谢以下大佬对本框架开发的帮助
+
+[Mrs4s](https://github.com/Mrs4s) | [wdvxdr1123](https://github.com/wdvxdr1123)
+
+### 源代码参考
+
+[Jie2GG](https://github.com/Jie2GG)/[Native.Framework](https://github.com/Jie2GG/Native.Framework)
+
+### 使用到的开源库
+
+[Fleck](https://github.com/statianzo/Fleck) | [Newtonsoft.Json](https://www.newtonsoft.com/json) | [System.Reactive](https://github.com/dotnet/reactive) | [YukariToolBox](https://github.com/DeepOceanSoft/YukariToolBox)
+
+### 感谢 [JetBrains](https://www.jetbrains.com/?from=mirai) 为开源项目提供免费的全家桶授权
+
+> 本项目使用了免费的[ReSharper](https://www.jetbrains.com/resharper/)插件
+
+[<img src=".github/jetbrains-variant-3.png" width="200"/>](https://www.jetbrains.com/)
