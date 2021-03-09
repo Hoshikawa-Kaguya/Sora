@@ -11,17 +11,17 @@ namespace Sora.Command.Attributes
     {
         #region 属性
 
-        private readonly string commandExpression;
+        private readonly string[] commandExpressions;
 
         /// <summary>
         /// <para>正则指令表达式</para>
         /// <para>默认为全字匹配(注意:由于使用的是正则匹配模式，部分符号需要转义，如<see langword="\?"/>)</para>
         /// <para>也可以为正则表达式</para>
         /// </summary>
-        public string CommandExpression
+        public string[] CommandExpressions
         {
-            get => commandExpression ?? throw new NullReferenceException("CommandExpression cannot be null");
-            init => commandExpression = value ?? throw new NullReferenceException("CommandExpression cannot be null");
+            get => commandExpressions ?? throw new NullReferenceException("CommandExpression cannot be null");
+            init => commandExpressions = value ?? throw new NullReferenceException("CommandExpression cannot be null");
         }
 
         /// <summary>
@@ -49,9 +49,9 @@ namespace Sora.Command.Attributes
         /// <summary>
         /// 构造方法
         /// </summary>
-        protected Command(string command)
+        protected Command(string[] commands)
         {
-            CommandExpression = command;
+            CommandExpressions = commands;
         }
 
         /// <summary>

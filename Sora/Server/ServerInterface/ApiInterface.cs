@@ -54,7 +54,7 @@ namespace Sora.Server.ServerInterface
             var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
                 ? messageCode
                 : -1;
-
+            Log.Debug("Sora", $"msg send -> private[{target}]");
             return (retCode, msgCode);
         }
 
@@ -92,7 +92,7 @@ namespace Sora.Server.ServerInterface
             var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
                 ? messageCode
                 : -1;
-
+            Log.Debug("Sora", $"msg send -> group[{target}]");
             return (retCode, msgCode);
         }
 
