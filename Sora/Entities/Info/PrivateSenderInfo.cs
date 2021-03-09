@@ -30,5 +30,11 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonProperty(PropertyName = "age")]
         public int Age { get; internal init; }
+
+        /// <summary>
+        /// 来源群号
+        /// </summary>
+        [JsonProperty(PropertyName = "group_id")]
+        public long? GroupId { get; internal init; }
     }
 }

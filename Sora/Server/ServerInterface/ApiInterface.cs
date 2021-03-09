@@ -25,12 +25,13 @@ namespace Sora.Server.ServerInterface
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="target">发送目标uid</param>
+        /// <param name="groupId">临时会话来源群</param>
         /// <param name="messages">发送的信息</param>
         /// <returns>
         /// message id
         /// </returns>
         internal static async ValueTask<(int retCode, int messageId)> SendPrivateMessage(
-            Guid connection, long target, List<CQCode> messages)
+            Guid connection, long target, long? groupId, List<CQCode> messages)
         {
             Log.Debug("Sora", "Sending send_msg(Private) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
@@ -44,7 +45,8 @@ namespace Sora.Server.ServerInterface
                 {
                     MessageType = MessageType.Private,
                     UserId      = target,
-                    Message     = messagesList
+                    Message     = messagesList,
+                    GroupId     = groupId
                 }
             }, connection);
             //处理API返回信息
