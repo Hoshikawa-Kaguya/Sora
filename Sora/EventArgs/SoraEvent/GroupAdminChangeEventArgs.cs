@@ -1,5 +1,5 @@
 using System;
-using Sora.Server.OnebotEvent.NoticeEvent;
+using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.Entities;
 using Sora.Enumeration.EventParamsType;
 

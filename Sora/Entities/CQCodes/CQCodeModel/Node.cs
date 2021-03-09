@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.Server.ApiParams;
+using Sora.OnebotModel.ApiParams;
 
 namespace Sora.Entities.CQCodes.CQCodeModel
 {

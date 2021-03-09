@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 using Sora.Enumeration.EventParamsType;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Enumeration;
-using Sora.Server.ApiParams;
+using Sora.OnebotModel.ApiParams;
 using YukariToolBox.FormatLog;
 
 namespace Sora.Entities.CQCodes
