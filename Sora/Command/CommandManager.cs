@@ -52,118 +52,40 @@ namespace Sora.Command
             if (!enableSoraCommandManager) return;
             if (assembly == null) return;
             //查找所有的指令集
-            var types = assembly.GetExportedTypes()
-                                .Where(type => type.GetCustomAttributes(true)
-                                                   .Any(attr => attr is CommandGroup))
-                                .ToArray();
-            //遍历指令集注册指令
-            foreach (var type in types)
+            var cmdGroups = assembly.GetExportedTypes()
+                                    //获取指令组
+                                    .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
+                                    .Select(type => (type, type.GetMethods()
+                                                               .Where(method => method.CheckMethod())
+                                                               .ToArray())
+                                           )
+                                    .ToDictionary(methods => methods.type, methods => methods.Item2.ToArray());
+
+            //生成指令信息
+            foreach (var (classType, methodInfos) in cmdGroups)
             {
-                //获取指令集信息
-                var cmdGroupInfo = type.GetCustomAttribute<CommandGroup>();
-                if (cmdGroupInfo == null)
+                foreach (var methodInfo in methodInfos)
                 {
-                    Log.Error("Command", "can not get commandgroup");
-                    continue;
-                }
-
-                Log.Debug("Command", $"Registering command group {cmdGroupInfo.GroupName}");
-
-                //遍历指令集内方法
-                foreach (var methodInfo in type.GetMethods())
-                {
-                    //获取指令属性
-                    var commandAttr = methodInfo.GetCustomAttribute(typeof(GroupCommand)) ??
-                                      methodInfo.GetCustomAttribute(typeof(PrivateCommand));
-                    if (commandAttr == null) continue;
-                    //注册指令
-                    //获取参数类型
-                    var para = methodInfo.GetParameters();
-                    //判断参数类型
-                    if (para.Length != 1) continue;
-                    if (para[0].ParameterType == typeof(GroupMessageEventArgs)   && commandAttr is PrivateCommand ||
-                        para[0].ParameterType == typeof(PrivateMessageEventArgs) && commandAttr is GroupCommand)
-                        continue;
-                    if (commandAttr == null)
-                        throw new NullReferenceException("command attribute is null with unknown reason");
-                    Log.Debug("Command", $"Registering command [{methodInfo.Name}]");
-                    //处理指令匹配类型
-                    var match = (commandAttr as Attributes.Command)?.MatchType ?? MatchType.Full;
-                    //处理表达式
-                    var matchExp = match switch
-                    {
-                        MatchType.Full => $"^{(commandAttr as Attributes.Command)?.CommandExpression}$",
-                        MatchType.Regex => (commandAttr as Attributes.Command)?.CommandExpression,
-                        _ => null
-                    };
-                    if (matchExp == null) continue;
-                    CommandInfo command;
-                    if (!methodInfo.IsStatic)
-                    {
-                        //获取类属性
-                        var classType = methodInfo.ReflectedType;
-                        if (!classType?.IsClass ?? true)
-                        {
-                            Log.Error("Command", "method reflected objcet is not a class");
-                            continue;
-                        }
-
-                        //检查是否已创建过实例
-                        if (instanceDict.All(ins => ins.Key != classType))
-                        {
-                            //创建实例
-                            var instance = FormatterServices.GetUninitializedObject(classType);
-                            if (instance == null)
-                            {
-                                Log.Error("Command", $"can not create instance [{classType.FullName}]");
-                                continue;
-                            }
-
-                            //添加实例
-                            instanceDict.Add(classType, instance);
-                        }
-
-                        //在指令表中添加新的指令
-                        command = new CommandInfo((commandAttr as Attributes.Command)?.Description,
-                                                  matchExp,
-                                                  cmdGroupInfo.GroupName,
-                                                  methodInfo,
-                                                  (commandAttr as GroupCommand)?.PermissionLevel,
-                                                  (commandAttr as Attributes.Command)?.TriggerEventAfterCommand ??
-                                                  false,
-                                                  classType);
-                    }
-                    else
-                    {
-                        //在指令表中添加新的指令
-                        command = new CommandInfo((commandAttr as Attributes.Command)?.Description,
-                                                  matchExp,
-                                                  cmdGroupInfo.GroupName,
-                                                  methodInfo,
-                                                  (commandAttr as GroupCommand)?.PermissionLevel,
-                                                  (commandAttr as Attributes.Command)?.TriggerEventAfterCommand ??
-                                                  false);
-                    }
-
-                    //添加指令
-                    switch (commandAttr)
+                    switch (GenerateCommandInfo(methodInfo, classType, out CommandInfo commandInfo))
                     {
                         case GroupCommand:
-                            groupCommands.Add(command);
+                            groupCommands.Add(commandInfo);
                             Log.Debug("Command", $"Registered group command [{methodInfo.Name}]");
                             break;
                         case PrivateCommand:
-                            privateCommands.Add(command);
+                            privateCommands.Add(commandInfo);
                             Log.Debug("Command", $"Registered private command [{methodInfo.Name}]");
                             break;
                         default:
-                            Log.Warning("Commadn", "未知的指令类型");
+                            Log.Warning("Command", "未知的指令类型");
                             continue;
                     }
                 }
             }
 
-            Regex.CacheSize += privateCommands.Count + groupCommands.Count;
+            //修改缓存大小
+            Regex.CacheSize += privateCommands.Sum(commands => commands.Regex.Length) +
+                               groupCommands.Sum(commands => commands.Regex.Length);
             Log.Info("Command", $"Registered {groupCommands.Count + privateCommands.Count} commands");
         }
 
@@ -182,8 +104,9 @@ namespace Sora.Command
                 case GroupMessageEventArgs groupMessageEvent:
                 {
                     matchedCommand =
-                        groupCommands.SingleOrDefault(command => Regex.IsMatch(groupMessageEvent.Message.RawText,
-                                                                               command.Regex));
+                        groupCommands.SingleOrDefault(command => command.Regex.Any(regex =>
+                                                          Regex.IsMatch(groupMessageEvent.Message.RawText,
+                                                                        regex)));
                     if (matchedCommand.MethodInfo == null) return true;
                     //判断权限
                     if (groupMessageEvent.SenderInfo.Role < (matchedCommand.PermissonType ?? MemberRoleType.Member))
@@ -198,8 +121,10 @@ namespace Sora.Command
                 case PrivateMessageEventArgs privateMessageEvent:
                 {
                     matchedCommand =
-                        privateCommands.SingleOrDefault(command => Regex.IsMatch(privateMessageEvent.Message.RawText,
-                                                            command.Regex));
+                        privateCommands.SingleOrDefault(command => command.Regex.Any(regex =>
+                                                            Regex
+                                                                .IsMatch(privateMessageEvent.Message.RawText,
+                                                                         regex, RegexOptions.Compiled)));
                     if (matchedCommand.MethodInfo == null) return true;
                     break;
                 }
@@ -235,6 +160,88 @@ namespace Sora.Command
             }
 
             return matchedCommand.TriggerEventAfterCommand;
+        }
+
+        #endregion
+
+        #region 私有管理方法
+
+        /// <summary>
+        /// 生成指令信息
+        /// </summary>
+        private Attribute GenerateCommandInfo(MethodInfo method, Type classType, out CommandInfo commandInfo)
+        {
+            //获取指令属性
+            var commandAttr = method.GetCustomAttribute(typeof(GroupCommand)) ??
+                              method.GetCustomAttribute(typeof(PrivateCommand));
+            if (commandAttr == null)
+                throw new NullReferenceException("command attribute is null with unknown reason");
+            Log.Debug("Command", $"Registering command [{method.Name}]");
+            //处理指令匹配类型
+            var match = (commandAttr as Attributes.Command)?.MatchType ?? MatchType.Full;
+            //处理表达式
+            var matchExp = match switch
+            {
+                MatchType.Full => (commandAttr as Attributes.Command)?.CommandExpressions
+                                                                     .Select(command => $"^{command}$").ToArray(),
+                MatchType.Regex => (commandAttr as Attributes.Command)?.CommandExpressions,
+                _ => null
+            };
+            if (matchExp == null)
+            {
+                commandInfo = (CommandInfo) FormatterServices.GetUninitializedObject(typeof(CommandInfo));
+                return null;
+            }
+
+            //检查和创建实例
+            if (!method.IsStatic && !CheckAndCreateInstace(classType))
+            {
+                commandInfo = (CommandInfo) FormatterServices.GetUninitializedObject(typeof(CommandInfo));
+                return null;
+            }
+
+            //创建指令信息
+            commandInfo = new CommandInfo((commandAttr as Attributes.Command).Description,
+                                          matchExp,
+                                          classType.Name,
+                                          method,
+                                          (commandAttr as GroupCommand)?.PermissionLevel,
+                                          (Attributes.Command) commandAttr is {TriggerEventAfterCommand: true},
+                                          method.IsStatic ? null : classType);
+
+            return commandAttr;
+        }
+
+        /// <summary>
+        /// 检查实例的存在和生成
+        /// </summary>
+        private bool CheckAndCreateInstace(Type classType)
+        {
+            //获取类属性
+            if (!classType?.IsClass ?? true)
+            {
+                Log.Error("Command", "method reflected objcet is not a class");
+                return false;
+            }
+
+            //检查是否已创建过实例
+            if (instanceDict.Any(ins => ins.Key == classType)) return true;
+
+            try
+            {
+                //创建实例
+                var instance = FormatterServices.GetUninitializedObject(classType);
+
+                //添加实例
+                instanceDict.Add(classType, instance);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Command", $"cannot create instance with error:{Log.ErrorLogBuilder(e)}");
+                return false;
+            }
+
+            return true;
         }
 
         #endregion

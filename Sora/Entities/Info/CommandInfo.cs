@@ -19,7 +19,7 @@ namespace Sora.Entities.Info
         /// <summary>
         /// 匹配指令的正则
         /// </summary>
-        internal string Regex { get; }
+        internal string[] Regex { get; }
 
         /// <summary>
         /// 指令组名
@@ -53,7 +53,7 @@ namespace Sora.Entities.Info
         /// <summary>
         /// 指令信息构造
         /// </summary>
-        internal CommandInfo(string desc, string regex, string groupName, MethodInfo method,
+        internal CommandInfo(string desc, string[] regex, string groupName, MethodInfo method,
                              MemberRoleType? permissonType, bool triggerEventAfterCommand, Type instanceType = null)
         {
             Desc                     = desc;
