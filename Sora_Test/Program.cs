@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
-using Sora.Server;
+using Sora.Net;
+using Sora.OnebotModel;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Extensions;
 

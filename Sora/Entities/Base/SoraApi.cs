@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Sora.Converter;
 using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Server;
-using Sora.Server.Converter;
-using Sora.Server.ServerInterface;
+using Sora.Net;
+using Sora.OnebotInterface;
 
 namespace Sora.Entities.Base
 {

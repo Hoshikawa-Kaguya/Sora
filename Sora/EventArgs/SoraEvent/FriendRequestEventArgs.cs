@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Sora.Server.OnebotEvent.RequestEvent;
+using Sora.OnebotModel.OnebotEvent.RequestEvent;
 using Sora.Entities;
 
 namespace Sora.EventArgs.SoraEvent
