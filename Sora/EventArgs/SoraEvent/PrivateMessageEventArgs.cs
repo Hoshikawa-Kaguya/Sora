@@ -32,6 +32,11 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         public PrivateSenderInfo SenderInfo { get; private set; }
 
+        /// <summary>
+        /// 是否为临时会话
+        /// </summary>
+        public bool IsTemporaryMessage { get; private set; }
+
         #endregion
 
         #region 构造函数
@@ -49,8 +54,9 @@ namespace Sora.EventArgs.SoraEvent
             this.Message = new Message(connectionGuid, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
                                        MessageParse.Parse(privateMsgArgs.MessageList),
                                        privateMsgArgs.Time, privateMsgArgs.Font, null);
-            this.Sender     = new User(connectionGuid, privateMsgArgs.UserId);
-            this.SenderInfo = privateMsgArgs.SenderInfo;
+            this.Sender             = new User(connectionGuid, privateMsgArgs.UserId);
+            this.SenderInfo         = privateMsgArgs.SenderInfo;
+            this.IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
         }
 
         #endregion
