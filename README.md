@@ -20,9 +20,6 @@
 	<img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=for-the-badge">
 	</h4>
 </h1>
-
-----
-
 ## 文档
 
 查看框架的说明文档 [Docs](https://sora-docs.yukari.one/)
@@ -32,6 +29,12 @@
 详细的介绍文档还在编写
 
 如需要查看最新自动生成的文档请前往 [![Sora on fuget.org](https://www.fuget.org/packages/Sora/badge.svg)](https://www.fuget.org/packages/Sora)
+
+## 支持的连接方式
+
+正向Websocket
+
+反向Websocket
 
 ## 开发注意事项
 
