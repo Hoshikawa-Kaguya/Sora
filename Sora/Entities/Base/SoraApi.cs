@@ -680,10 +680,10 @@ namespace Sora.Entities.Base
         /// <para><see cref="APIStatusType"/> API执行状态</para>
         /// <para><see langword="nick"/> 账号昵称</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, string nick)> GetLoginUserName()
+        public async ValueTask<(APIStatusType apiStatus, long uid, string nick)> GetLoginInfo()
         {
-            (int retCode, _, string nick) = await ApiInterface.GetLoginInfo(this.ConnectionGuid);
-            return ((APIStatusType) retCode, nick);
+            return ((APIStatusType apiStatus, long uid, string nick))
+                await ApiInterface.GetLoginInfo(this.ConnectionGuid);
         }
 
         /// <summary>
@@ -994,7 +994,8 @@ namespace Sora.Entities.Base
         }
 
         /// <summary>
-        /// 获取登录账号的id
+        /// <para>获取登录账号的id</para>
+        /// <para>使用正向ws链接时此方法在触发lifecycle事件前失效</para>
         /// </summary>
         public long GetLoginUserId()
         {

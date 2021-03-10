@@ -1,9 +1,9 @@
 using Newtonsoft.Json.Linq;
-using Sora.EventArgs.SoraEvent;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Sora.Command;
+using Sora.EventArgs.SoraEvent;
 using Sora.Net;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.OnebotModel.OnebotEvent.MetaEvent;
@@ -226,14 +226,23 @@ namespace Sora.OnebotInterface
                     if (lifeCycle != null)
                         Log.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
 
-                    (int retCode, string clientType, string clientVer) = await ApiInterface.GetClientInfo(connection);
+                    var (retCode, clientType, clientVer) = await ApiInterface.GetClientInfo(connection);
                     if (retCode != 0) //检查返回值
                     {
-                        Log.Error("Sora", $"获取客户端版本失败(retcode={retCode})");
+                        Log.Error("Sora", $"获取onebot版本失败(retcode={retCode})");
                         break;
                     }
 
-                    Log.Info("Sora", $"已连接到{clientType}客户端,版本:{clientVer}");
+                    var (retCode2, uid, _) = await ApiInterface.GetLoginInfo(connection);
+                    if (retCode2 != 0) //检查返回值
+                    {
+                        Log.Error("Sora", $"获取uid失败(retcode={retCode2})");
+                        break;
+                    }
+
+                    ConnectionManager.UpdateUid(connection, uid);
+
+                    Log.Info("Sora", $"已连接到{clientType},版本:{clientVer}");
                     if (OnClientConnect == null) break;
                     //执行回调
                     await OnClientConnect("Meta Event",
@@ -284,7 +293,7 @@ namespace Sora.OnebotInterface
                     if (groupMsg == null) break;
                     Log.Debug("Sora",
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
-                    var eventArgs = new GroupMessageEventArgs(connection, "private", groupMsg);
+                    var eventArgs = new GroupMessageEventArgs(connection, "group", groupMsg);
                     //处理指令
                     if (!await CommandManager.CommandAdapter(eventArgs))
                         break;

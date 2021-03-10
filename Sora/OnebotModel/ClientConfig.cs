@@ -1,20 +1,20 @@
 namespace Sora.OnebotModel
 {
     /// <summary>
-    /// <para>服务器配置类</para>
+    /// <para>客户端配置类</para>
     /// <para>所有设置项都有默认值一般不需要配置</para>
     /// </summary>
-    public sealed class ServerConfig
+    public class ClientConfig
     {
         /// <summary>
-        /// 反向服务器监听地址
+        /// 服务器地址
         /// </summary>
-        public string Location { get; init; } = "127.0.0.1";
+        public string Host { get; init; } = "127.0.0.1";
 
         /// <summary>
-        /// 反向服务器端口
+        /// 服务器端口
         /// </summary>
-        public uint Port { get; init; } = 8080;
+        public uint Port { get; init; } = 6700;
 
         /// <summary>
         /// 鉴权Token
