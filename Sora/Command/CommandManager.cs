@@ -1,3 +1,8 @@
+using Sora.Command.Attributes;
+using Sora.Entities.Info;
+using Sora.Enumeration;
+using Sora.Enumeration.EventParamsType;
+using Sora.EventArgs.SoraEvent;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,11 +10,6 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Sora.Command.Attributes;
-using Sora.Entities.Info;
-using Sora.Enumeration;
-using Sora.Enumeration.EventParamsType;
-using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 
 namespace Sora.Command
@@ -46,18 +46,21 @@ namespace Sora.Command
         /// 自动注册所有指令
         /// </summary>
         /// <param name="assembly">包含指令的程序集</param>
+        [Reviewed("XiaoHe321", "2021-03-11 00:45")]
         internal void MappingCommands(Assembly assembly)
         {
             //检查使能
             if (!enableSoraCommandManager) return;
             if (assembly == null) return;
+
             //查找所有的指令集
             var cmdGroups = assembly.GetExportedTypes()
                                     //获取指令组
                                     .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
-                                    .Select(type => (type, type.GetMethods()
-                                                               .Where(method => method.CheckMethod())
-                                                               .ToArray())
+                                    .Select(type => (type,
+                                                     type.GetMethods()
+                                                         .Where(method => method.CheckMethodLegality())
+                                                         .ToArray())
                                            )
                                     .ToDictionary(methods => methods.type, methods => methods.Item2.ToArray());
 
@@ -86,6 +89,7 @@ namespace Sora.Command
             //修改缓存大小
             Regex.CacheSize += privateCommands.Sum(commands => commands.Regex.Length) +
                                groupCommands.Sum(commands => commands.Regex.Length);
+
             Log.Info("Command", $"Registered {groupCommands.Count + privateCommands.Count} commands");
         }
 
@@ -93,39 +97,39 @@ namespace Sora.Command
         /// 处理聊天指令
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
+        [Reviewed("XiaoHe321", "2021-03-11 00:45")]
         internal async ValueTask<bool> CommandAdapter(object eventArgs)
         {
             //检查使能
             if (!enableSoraCommandManager) return true;
+
             //处理消息段
-            CommandInfo matchedCommand;
+            List<CommandInfo> matchedCommand;
             switch (eventArgs)
             {
                 case GroupMessageEventArgs groupMessageEvent:
                 {
+                    //注意可能匹配到多个的情况，下同
                     matchedCommand =
-                        groupCommands.SingleOrDefault(command => command.Regex.Any(regex =>
-                                                          Regex.IsMatch(groupMessageEvent.Message.RawText,
-                                                                        regex)));
-                    if (matchedCommand.MethodInfo == null) return true;
-                    //判断权限
-                    if (groupMessageEvent.SenderInfo.Role < (matchedCommand.PermissonType ?? MemberRoleType.Member))
-                    {
-                        Log.Warning("CommandAdapter",
-                                    $"成员{groupMessageEvent.SenderInfo.UserId}正在尝试执行指令{matchedCommand.MethodInfo.Name}");
-                        return true;
-                    }
+                        groupCommands.Where(command => command.Regex.Any(regex =>
+                                                                             Regex
+                                                                                 .IsMatch(groupMessageEvent.Message.RawText,
+                                                                                     regex)
+                                                                          && command.MethodInfo != null))
+                                     .ToList();
 
                     break;
                 }
                 case PrivateMessageEventArgs privateMessageEvent:
                 {
                     matchedCommand =
-                        privateCommands.SingleOrDefault(command => command.Regex.Any(regex =>
-                                                            Regex
-                                                                .IsMatch(privateMessageEvent.Message.RawText,
-                                                                         regex, RegexOptions.Compiled)));
-                    if (matchedCommand.MethodInfo == null) return true;
+                        privateCommands.Where(command => command.Regex.Any(regex =>
+                                                                               Regex
+                                                                                   .IsMatch(privateMessageEvent.Message.RawText,
+                                                                                       regex,
+                                                                                       RegexOptions.Compiled)
+                                                                            && command.MethodInfo != null))
+                                       .ToList();
                     break;
                 }
                 default:
@@ -133,33 +137,54 @@ namespace Sora.Command
                     return true;
             }
 
-            Log.Debug("CommandAdapter", $"get command {matchedCommand.MethodInfo.Name}");
-            try
+            //最终是否触发命令（如果匹配到多个命令，则如果其中一个要触发，则直接返回触发）
+            bool isFinalTrigger = false;
+
+            //遍历匹配到的每个命令
+            foreach (CommandInfo commandInfo in matchedCommand)
             {
-                Log.Info("CommandAdapter", $"trigger command [{matchedCommand.MethodInfo.Name}]");
-                //执行指令方法
-                matchedCommand.MethodInfo.Invoke(instanceDict[matchedCommand.InstanceType], new[] {eventArgs});
-            }
-            catch (Exception e)
-            {
-                Log.Error("CommandAdapter", Log.ErrorLogBuilder(e));
-                if (string.IsNullOrEmpty(matchedCommand.Desc)) return matchedCommand.TriggerEventAfterCommand;
-                switch (eventArgs)
+                //若是群，则判断权限
+                if (eventArgs is GroupMessageEventArgs groupEventArgs)
                 {
-                    case GroupMessageEventArgs groupMessageEvent:
+                    if (groupEventArgs.SenderInfo.Role < (commandInfo.PermissonType ?? MemberRoleType.Member))
                     {
-                        await groupMessageEvent.Reply($"指令执行错误\n指令信息:{matchedCommand.Desc}");
-                        break;
-                    }
-                    case PrivateMessageEventArgs privateMessageEvent:
-                    {
-                        await privateMessageEvent.Reply($"指令执行错误\n指令信息:{matchedCommand.Desc}");
-                        break;
+                        Log.Warning("CommandAdapter",
+                                    $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{commandInfo.MethodInfo.Name}");
+                        return true;
                     }
                 }
+
+                Log.Debug("CommandAdapter", $"get command {commandInfo.MethodInfo.Name}");
+                try
+                {
+                    Log.Info("CommandAdapter", $"trigger command [{commandInfo.MethodInfo.Name}]");
+                    //执行指令方法
+                    commandInfo.MethodInfo.Invoke(instanceDict[commandInfo.InstanceType], new[] {eventArgs});
+                }
+                catch (Exception e)
+                {
+                    Log.Error("CommandAdapter", Log.ErrorLogBuilder(e));
+                    if (string.IsNullOrEmpty(commandInfo.Desc)) return commandInfo.TriggerEventAfterCommand;
+                    switch (eventArgs)
+                    {
+                        case GroupMessageEventArgs groupMessageEvent:
+                        {
+                            await groupMessageEvent.Reply($"指令执行错误\n指令信息:{commandInfo.Desc}");
+                            break;
+                        }
+                        case PrivateMessageEventArgs privateMessageEvent:
+                        {
+                            await privateMessageEvent.Reply($"指令执行错误\n指令信息:{commandInfo.Desc}");
+                            break;
+                        }
+                    }
+                }
+
+                isFinalTrigger |= commandInfo.TriggerEventAfterCommand;
             }
 
-            return matchedCommand.TriggerEventAfterCommand;
+
+            return isFinalTrigger;
         }
 
         #endregion
@@ -172,18 +197,21 @@ namespace Sora.Command
         private Attribute GenerateCommandInfo(MethodInfo method, Type classType, out CommandInfo commandInfo)
         {
             //获取指令属性
-            var commandAttr = method.GetCustomAttribute(typeof(GroupCommand)) ??
-                              method.GetCustomAttribute(typeof(PrivateCommand));
-            if (commandAttr == null)
+            var commandAttr =
+                method.GetCustomAttribute(typeof(GroupCommand)) ??
+                method.GetCustomAttribute(typeof(PrivateCommand)) ??
                 throw new NullReferenceException("command attribute is null with unknown reason");
+
             Log.Debug("Command", $"Registering command [{method.Name}]");
+
             //处理指令匹配类型
             var match = (commandAttr as Attributes.Command)?.MatchType ?? MatchType.Full;
             //处理表达式
             var matchExp = match switch
             {
                 MatchType.Full => (commandAttr as Attributes.Command)?.CommandExpressions
-                                                                     .Select(command => $"^{command}$").ToArray(),
+                                                                     .Select(command => $"^{command}$")
+                                                                     .ToArray(),
                 MatchType.Regex => (commandAttr as Attributes.Command)?.CommandExpressions,
                 _ => null
             };
