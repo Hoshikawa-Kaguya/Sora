@@ -15,7 +15,7 @@ namespace Sora.Net
     /// <summary>
     /// Sora正向WS链接客户端
     /// </summary>
-    public class SoraWebsocketClient : ISoraService
+    public class SoraWebsocketClient : IDisposable, ISoraService
     {
         #region 属性
 
@@ -68,14 +68,6 @@ namespace Sora.Net
         {
             Log.Info("Sora", $"Sora 框架版本:{Assembly.GetExecutingAssembly().GetName().Version}");
             Log.Debug("Sora", "开发交流群：1081190562");
-            //检查端口占用
-            if (!NetUtils.IsPortInUse(config.Port))
-            {
-                Log.Fatal("Sora", $"端口{config.Port}没有任何服务器在运行");
-                Log.Warning("Sora", "将在5s后自动退出");
-                Thread.Sleep(5000);
-                Environment.Exit(0);
-            }
 
             clientReady = false;
             Log.Info("Sora", "Sora WebSocket客户端初始化...");
@@ -101,7 +93,12 @@ namespace Sora.Net
                                                             $"Bearer {config.AccessToken}");
                                                         return clientWebSocket;
                                                     });
-            this.Client = new WebsocketClient(new Uri($"ws://{config.Host}:{config.Port}"), factory);
+            this.Client =
+                new WebsocketClient(new Uri($"ws://{config.Host}:{config.Port}"), factory)
+                {
+                    ReconnectTimeout      = TimeSpan.FromSeconds(5),
+                    ErrorReconnectTimeout = TimeSpan.FromSeconds(5)
+                };
             //全局异常事件
             AppDomain.CurrentDomain.UnhandledException += (_, args) =>
                                                           {
@@ -114,6 +111,8 @@ namespace Sora.Net
         }
 
         #endregion
+
+        #region 客户端启动
 
         /// <summary>
         /// 启动客户端并自动连接服务器
@@ -138,18 +137,18 @@ namespace Sora.Net
                                                                         )
                                                                             ConnManager.CloseConnection("Universal",
                                                                                 uid.ToString(), clientId);
-                                                                        Log.Info("Sora", "服务器连接被关闭");
+
                                                                         if (info.Exception != null)
                                                                             Log.Error("Sora",
-                                                                                Log
-                                                                                    .ErrorLogBuilder(info
-                                                                                        .Exception));
+                                                                                $"监听服务器时发生错误{Log.ErrorLogBuilder(info.Exception)}");
+                                                                        else
+                                                                            Log.Info("Sora", "服务器连接被关闭");
                                                                     }));
             Client.ReconnectionHappened.Subscribe(info => Task.Run(() =>
                                                                    {
                                                                        if (info.Type == ReconnectionType.Initial)
                                                                            return;
-                                                                       Log.Info("Sora", $"服务器已自动重连");
+                                                                       Log.Info("Sora", "服务器已自动重连");
                                                                        ConnManager.OpenConnection("Universal", "0",
                                                                            Client, clientId);
                                                                    }));
@@ -186,5 +185,7 @@ namespace Sora.Net
             GC.SuppressFinalize(this);
             ReactiveApiManager.ClearApiReqList();
         }
+
+        #endregion
     }
 }
