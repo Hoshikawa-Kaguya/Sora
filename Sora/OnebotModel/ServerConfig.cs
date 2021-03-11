@@ -4,7 +4,7 @@ namespace Sora.OnebotModel
     /// <para>服务器配置类</para>
     /// <para>所有设置项都有默认值一般不需要配置</para>
     /// </summary>
-    public sealed class ServerConfig
+    public sealed class ServerConfig : ISoraConfig
     {
         /// <summary>
         /// 反向服务器监听地址

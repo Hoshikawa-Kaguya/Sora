@@ -15,7 +15,7 @@ namespace Sora.Net
     /// <summary>
     /// Sora服务器实例
     /// </summary>
-    public sealed class SoraWebsocketServer : IDisposable
+    public sealed class SoraWebsocketServer : IDisposable, ISoraService
     {
         #region 属性
 
@@ -112,6 +112,12 @@ namespace Sora.Net
         #endregion
 
         #region 服务端启动
+
+        /// <summary>
+        /// 启动 Sora 服务
+        /// </summary>
+        /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
+        public ValueTask StartService() => StartServer();
 
         /// <summary>
         /// 启动WS服务端

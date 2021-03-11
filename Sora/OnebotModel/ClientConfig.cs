@@ -4,7 +4,7 @@ namespace Sora.OnebotModel
     /// <para>客户端配置类</para>
     /// <para>所有设置项都有默认值一般不需要配置</para>
     /// </summary>
-    public class ClientConfig
+    public class ClientConfig : ISoraConfig
     {
         /// <summary>
         /// 服务器地址
