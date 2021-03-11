@@ -25,13 +25,7 @@ namespace Sora.Net
         /// 启动 Sora 服务
         /// </summary>
         /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
-        public ValueTask StartService()
-            => this switch
-            {
-                SoraWebsocketServer s1 => s1.StartServer(),
-                SoraWebsocketClient s2 => s2.StartClient(),
-                _ => throw new ArgumentException("接收到了不认识的 Sora 服务对象。")
-            };
+        public ValueTask StartService();
 
         /// <summary>
         /// Sora 实例工厂
