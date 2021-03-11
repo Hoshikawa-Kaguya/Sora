@@ -1,4 +1,4 @@
-namespace Sora.OnebotModel
+namespace Sora.Interfaces
 {
     /// <summary>
     /// Sora 配置文件

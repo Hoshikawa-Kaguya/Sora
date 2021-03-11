@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.Exceptions;
+using Sora.Interfaces;
 using Sora.OnebotInterface;
 using Sora.OnebotModel;
 using Websocket.Client;
