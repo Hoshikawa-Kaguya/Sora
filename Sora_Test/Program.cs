@@ -7,26 +7,26 @@ using YukariToolBox.Extensions;
 //设置log等级
 Log.SetLogLevel(LogLevel.Debug);
 
-//实例化服务器
+//实例化客户端
 SoraWebsocketClient client = new(new ClientConfig());
 
 #region 服务器事件处理
 
-//服务器连接事件
+//客户端连接事件
 client.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
                                             {
                                                 Log.Debug("Sora_Test",
                                                                  $"connectionId = {connectionInfo} type = {eventArgs.Role}");
                                                 return ValueTask.CompletedTask;
                                             };
-//服务器连接关闭事件
+//客户端连接关闭事件
 client.ConnManager.OnCloseConnectionAsync += (connectionInfo, eventArgs) =>
                                              {
                                                  Log.Debug("Sora_Test",
                                                                   $"connectionId = {connectionInfo} type = {eventArgs.Role}");
                                                  return ValueTask.CompletedTask;
                                              };
-//服务器心跳包超时事件
+//客户端心跳包超时事件
 client.ConnManager.OnHeartBeatTimeOut += (connectionInfo, eventArgs) =>
                                          {
                                              Log.Debug("Sora_Test",
@@ -51,5 +51,7 @@ client.Event.OnPrivateMessage += async (msgType, eventArgs) =>
 
 #endregion
 
-//启动服务器并捕捉错误
+//启动客户端并捕捉错误
 await client.StartClient().RunCatch(e => Log.Error("Server Error", Log.ErrorLogBuilder(e)));
+
+await Task.Delay(-1);
