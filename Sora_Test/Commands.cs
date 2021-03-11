@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
 using Sora.Command.Attributes;
 using Sora.EventArgs.SoraEvent;
+using System.Threading.Tasks;
 
 namespace Sora_Test
 {
