@@ -15,7 +15,7 @@ namespace Sora.Net
     /// <summary>
     /// Sora正向WS链接客户端
     /// </summary>
-    public class SoraWebsocketClient : IDisposable
+    public class SoraWebsocketClient : IDisposable, ISoraService
     {
         #region 属性
 
@@ -25,7 +25,7 @@ namespace Sora.Net
         private ClientConfig Config { get; set; }
 
         /// <summary>
-        /// WS服务器
+        /// WS客户端
         /// </summary>
         private WebsocketClient Client { get; set; }
 
@@ -113,6 +113,12 @@ namespace Sora.Net
         #endregion
 
         #region 客户端启动
+
+        /// <summary>
+        /// 启动 Sora 服务
+        /// </summary>
+        /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
+        public ValueTask StartService() => StartClient();
 
         /// <summary>
         /// 启动客户端并自动连接服务器
