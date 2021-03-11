@@ -15,7 +15,7 @@ namespace Sora.Net
     /// <summary>
     /// Sora服务器实例
     /// </summary>
-    public sealed class SoraWebsocketServer : IDisposable
+    public sealed class SoraWebsocketServer : IDisposable, ISoraService
     {
         #region 属性
 

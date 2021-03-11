@@ -15,7 +15,7 @@ namespace Sora.Net
     /// <summary>
     /// Sora正向WS链接客户端
     /// </summary>
-    public class SoraWebsocketClient
+    public class SoraWebsocketClient : ISoraService
     {
         #region 属性
 
@@ -25,7 +25,7 @@ namespace Sora.Net
         private ClientConfig Config { get; set; }
 
         /// <summary>
-        /// WS服务器
+        /// WS客户端
         /// </summary>
         private WebsocketClient Client { get; set; }
 
