@@ -1,8 +1,6 @@
-using System;
 using System.Threading.Tasks;
 using Sora.Exceptions;
 using Sora.OnebotInterface;
-using Sora.OnebotModel;
 
 namespace Sora.Net
 {
@@ -26,19 +24,5 @@ namespace Sora.Net
         /// </summary>
         /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
         public ValueTask StartService();
-
-        /// <summary>
-        /// Sora 实例工厂
-        /// </summary>
-        /// <param name="config">服务器配置</param>
-        /// <param name="crashAction">发生未处理异常时的回调</param>
-        /// <returns></returns>
-        static ISoraService SoraServiceFactory(ISoraConfig config, Action<Exception> crashAction = null)
-            => config switch
-            {
-                ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
-                ServerConfig s2 => new SoraWebsocketServer(s2, crashAction),
-                _ => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
-            };
     }
 }
