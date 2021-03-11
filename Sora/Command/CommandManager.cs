@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YukariToolBox.FormatLog;
@@ -194,6 +193,7 @@ namespace Sora.Command
         /// <summary>
         /// 生成指令信息
         /// </summary>
+        [Reviewed("XiaoHe321", "2021-03-11 22:57")]
         private Attribute GenerateCommandInfo(MethodInfo method, Type classType, out CommandInfo commandInfo)
         {
             //获取指令属性
@@ -217,14 +217,14 @@ namespace Sora.Command
             };
             if (matchExp == null)
             {
-                commandInfo = (CommandInfo) FormatterServices.GetUninitializedObject(typeof(CommandInfo));
+                commandInfo = Helper.CreateInstance<CommandInfo>();
                 return null;
             }
 
             //检查和创建实例
-            if (!method.IsStatic && !CheckAndCreateInstace(classType))
+            if (!method.IsStatic && !CheckAndCreateInstance(classType))
             {
-                commandInfo = (CommandInfo) FormatterServices.GetUninitializedObject(typeof(CommandInfo));
+                commandInfo = Helper.CreateInstance<CommandInfo>();
                 return null;
             }
 
@@ -243,7 +243,7 @@ namespace Sora.Command
         /// <summary>
         /// 检查实例的存在和生成
         /// </summary>
-        private bool CheckAndCreateInstace(Type classType)
+        private bool CheckAndCreateInstance(Type classType)
         {
             //获取类属性
             if (!classType?.IsClass ?? true)
@@ -258,7 +258,7 @@ namespace Sora.Command
             try
             {
                 //创建实例
-                var instance = FormatterServices.GetUninitializedObject(classType);
+                var instance = classType.CreateInstance();
 
                 //添加实例
                 instanceDict.Add(classType, instance);
