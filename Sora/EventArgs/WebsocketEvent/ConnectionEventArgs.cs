@@ -1,4 +1,4 @@
-namespace Sora.EventArgs.WSSeverEvent
+namespace Sora.EventArgs.WebsocketEvent
 {
     /// <summary>
     /// 服务器连接事件
