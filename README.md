@@ -51,7 +51,22 @@
  - 删除/移动/重命名API
  - 删除/移动/重命名命名空间
 
- 
+**有关代码复查的提示：**
+
+如果有代码复查，请在函数上面贴上Reviewed以代表是谁以及什么时候进行了代码复查
+
+例如：
+
+```c#
+[Reviewed("XiaoHe321", "2021-03-11 00:45")]
+internal async ValueTask<bool> CommandAdapter(object eventArgs)
+```
+
+若修改了这段代码，请将Reviewed注解及时删除，以方便代码复查人员知道，你改了这段代码，方便进行复查。
+
+对于自己代码的复查，请不要贴上Reviewed。
+
+
 
 详细内容请关注文档的更新
 
