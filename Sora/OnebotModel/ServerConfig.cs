@@ -1,3 +1,5 @@
+using Sora.Interfaces;
+
 namespace Sora.OnebotModel
 {
     /// <summary>

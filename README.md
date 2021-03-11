@@ -51,13 +51,15 @@
  - 删除/移动/重命名API
  - 删除/移动/重命名命名空间
 
-**有关代码复查的提示：**
+详细内容请关注文档的更新
+
+### **有关代码复查的提示：**
 
 如果有代码复查，请在函数上面贴上Reviewed以代表是谁以及什么时候进行了代码复查
 
 例如：
 
-```c#
+```csharp
 [Reviewed("XiaoHe321", "2021-03-11 00:45")]
 internal async ValueTask<bool> CommandAdapter(object eventArgs)
 ```
@@ -66,11 +68,7 @@ internal async ValueTask<bool> CommandAdapter(object eventArgs)
 
 对于自己代码的复查，请不要贴上Reviewed。
 
-
-
-详细内容请关注文档的更新
-
-> 本框架是通过和[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.40-fix3](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.40-fix3))通讯进行调试的，如使用其他平台可能会出现兼容性的问题
+> 本框架是通过和[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.40-fix4](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.40-fix4))通讯进行调试的，如使用其他平台可能会出现兼容性的问题
 
 ## 关于ISSUE
 
@@ -112,8 +110,8 @@ Sora这个名字来源于日语中"空"的罗马音
 
 [Fleck](https://github.com/statianzo/Fleck) | [Newtonsoft.Json](https://www.newtonsoft.com/json) | [System.Reactive](https://github.com/dotnet/reactive) | [YukariToolBox](https://github.com/DeepOceanSoft/YukariToolBox)
 
-### 感谢 [JetBrains](https://www.jetbrains.com/?from=mirai) 为开源项目提供免费的全家桶授权
+### 感谢 [JetBrains](https://www.jetbrains.com/?from=Sora) 为开源项目提供免费的全家桶授权
 
 > 本项目使用了免费的[ReSharper](https://www.jetbrains.com/resharper/)插件
 
-[<img src=".github/jetbrains-variant-3.png" width="200"/>](https://www.jetbrains.com/)
+[<img src=".github/jetbrains-variant-4.svg" width="200"/>](https://www.jetbrains.com/?from=Sora) [<img src=".github/icon-resharper.svg" width="100"/>](https://www.jetbrains.com/ReSharper/?from=Sora)

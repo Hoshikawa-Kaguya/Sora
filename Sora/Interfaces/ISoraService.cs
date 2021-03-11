@@ -1,8 +1,9 @@
 using System.Threading.Tasks;
 using Sora.Exceptions;
+using Sora.Net;
 using Sora.OnebotInterface;
 
-namespace Sora.Net
+namespace Sora.Interfaces
 {
     /// <summary>
     /// Sora 连接服务
