@@ -115,6 +115,12 @@ namespace Sora.Net
         #region 客户端启动
 
         /// <summary>
+        /// 启动 Sora 服务
+        /// </summary>
+        /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
+        public ValueTask StartService() => StartClient();
+
+        /// <summary>
         /// 启动客户端并自动连接服务器
         /// </summary>
         public async ValueTask StartClient()
