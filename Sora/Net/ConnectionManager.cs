@@ -5,7 +5,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
-using Sora.EventArgs.WSSeverEvent;
+using Sora.EventArgs.WebsocketEvent;
 using Sora.OnebotModel;
 using Websocket.Client;
 using YukariToolBox.FormatLog;
