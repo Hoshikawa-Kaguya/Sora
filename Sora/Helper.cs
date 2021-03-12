@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.Serialization;
 
@@ -39,6 +40,14 @@ namespace Sora
             catch (Exception)
             {
                 return null;
+            }
+        }
+
+        public static void AddOrExist<T>(this List<T> list, T data)
+        {
+            if (!list.Contains(data))
+            {
+                list.Add(data);
             }
         }
     }

@@ -24,7 +24,7 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 特性指令管理器
         /// </summary>
-        private CommandManager CommandManager { get; set; }
+        public CommandManager CommandManager { get; set; }
 
         #endregion
 

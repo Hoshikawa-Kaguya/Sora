@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Threading.Tasks;
 using Sora.Net;
 using Sora.OnebotModel;
@@ -9,9 +10,8 @@ Log.SetLogLevel(LogLevel.Debug);
 
 //实例化客户端
 SoraWebsocketClient client = new(new ClientConfig());
-
+client.Event.CommandManager.MappingCommands(Assembly.GetEntryAssembly());
 #region 服务器事件处理
-
 //客户端连接事件
 client.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
                                             {
