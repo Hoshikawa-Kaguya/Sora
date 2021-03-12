@@ -108,7 +108,7 @@ Sora这个名字来源于日语中"空"的罗马音
 
 ### 使用到的开源库
 
-[Fleck](https://github.com/statianzo/Fleck) | [Newtonsoft.Json](https://www.newtonsoft.com/json) | [System.Reactive](https://github.com/dotnet/reactive) | [YukariToolBox](https://github.com/DeepOceanSoft/YukariToolBox)
+[Fleck](https://github.com/statianzo/Fleck) | [Newtonsoft.Json](https://www.newtonsoft.com/json) | [System.Reactive](https://github.com/dotnet/reactive) | [YukariToolBox](https://github.com/DeepOceanSoft/YukariToolBox) | [Websocket.Client](https://github.com/Marfusios/websocket-client)
 
 ### 感谢 [JetBrains](https://www.jetbrains.com/?from=Sora) 为开源项目提供免费的全家桶授权
 
