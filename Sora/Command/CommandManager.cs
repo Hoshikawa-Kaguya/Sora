@@ -45,6 +45,7 @@ namespace Sora.Command
         /// 自动注册所有指令
         /// </summary>
         /// <param name="assembly">包含指令的程序集</param>
+        [Reviewed("XiaoHe321", "2021-03-12 23:55")]
         public void MappingCommands(Assembly assembly)
         {
             //检查使能

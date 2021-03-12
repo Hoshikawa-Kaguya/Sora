@@ -103,7 +103,7 @@ namespace Sora.Net
             AppDomain.CurrentDomain.UnhandledException += (_, args) =>
                                                           {
                                                               if (crashAction == null)
-                                                                  NetUtils.FriendlyException(args);
+                                                                  Helper.FriendlyException(args);
                                                               else
                                                                   crashAction(args.ExceptionObject as Exception);
                                                           };

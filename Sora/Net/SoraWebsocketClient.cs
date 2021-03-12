@@ -1,13 +1,13 @@
-using System;
-using System.Net.WebSockets;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.Exceptions;
 using Sora.Interfaces;
 using Sora.OnebotInterface;
 using Sora.OnebotModel;
+using System;
+using System.Net.WebSockets;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Websocket.Client;
 using YukariToolBox.FormatLog;
 
@@ -104,7 +104,7 @@ namespace Sora.Net
             AppDomain.CurrentDomain.UnhandledException += (_, args) =>
                                                           {
                                                               if (crashAction == null)
-                                                                  NetUtils.FriendlyException(args);
+                                                                  Helper.FriendlyException(args);
                                                               else
                                                                   crashAction(args.ExceptionObject as Exception);
                                                           };

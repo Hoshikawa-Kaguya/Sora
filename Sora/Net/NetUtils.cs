@@ -24,18 +24,5 @@ namespace Sora.Net
             IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
                               .Any(ipEndPoint => ipEndPoint.Port == port);
 
-        /// <summary>
-        /// 友好的崩溃提示(x)
-        /// </summary>
-        internal static void FriendlyException(UnhandledExceptionEventArgs args)
-        {
-            var e = args.ExceptionObject as Exception;
-            if (e is JsonSerializationException)
-            {
-                Log.Error("Sora", "Json反序列化时出现错误，可能是go-cqhttp配置出现问题。请把go-cqhttp配置中的post_message_format从string改为array。");
-            }
-
-            Log.UnhandledExceptionLog(args);
-        }
     }
 }

@@ -1,9 +1,11 @@
+using Newtonsoft.Json;
 using Sora.Entities.Info;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using YukariToolBox.FormatLog;
 
 namespace Sora
 {
@@ -12,6 +14,21 @@ namespace Sora
     /// </summary>
     public static class Helper
     {
+
+        /// <summary>
+        /// 友好的崩溃提示(x)
+        /// </summary>
+        internal static void FriendlyException(UnhandledExceptionEventArgs args)
+        {
+            var e = args.ExceptionObject as Exception;
+            if (e is JsonSerializationException)
+            {
+                Log.Error("Sora", "Json反序列化时出现错误，可能是go-cqhttp配置出现问题。请把go-cqhttp配置中的post_message_format从string改为array。");
+            }
+
+            Log.UnhandledExceptionLog(args);
+        }
+
         /// <summary>
         /// 忽略构造方法并创建实例
         /// </summary>
