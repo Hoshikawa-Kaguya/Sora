@@ -7,7 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DllTest\Sora_DllTest.csproj" />
     <ProjectReference Include="..\Sora\Sora.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Sora_DllTest">
+      <HintPath>..\DllTest\bin\Debug\net5.0\Sora_DllTest.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

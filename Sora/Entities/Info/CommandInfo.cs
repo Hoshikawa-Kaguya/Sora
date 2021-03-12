@@ -1,6 +1,6 @@
+using Sora.Enumeration.EventParamsType;
 using System;
 using System.Reflection;
-using Sora.Enumeration.EventParamsType;
 
 namespace Sora.Entities.Info
 {
@@ -66,5 +66,20 @@ namespace Sora.Entities.Info
         }
 
         #endregion
+
+        internal bool Equals(CommandInfo another)
+        {
+            if (MethodInfo.Name == another.MethodInfo.Name
+             && MethodInfo.GetGenericArguments().ArrayEquals(another.MethodInfo.GetGenericArguments())
+             && Regex.ArrayEquals(another.Regex)
+             && PermissonType == another.PermissonType
+             && InstanceType  == another.InstanceType
+            )
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }
