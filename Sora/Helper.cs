@@ -1,6 +1,8 @@
+using Sora.Entities.Info;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Sora
@@ -68,12 +70,56 @@ namespace Sora
             }
         }
 
-        public static void AddOrExist<T>(this List<T> list, T data)
+#nullable enable
+        public static bool ArrayEquals<T>(this T[]? arr1, T[]? arr2)
         {
-            if (!list.Contains(data))
+            if (arr1?.Length != arr2?.Length
+             || (arr1 is null    && !(arr2 is null))
+             || (!(arr1 is null) && arr2 is null))
+            {
+                return false;
+            }
+
+            if (arr1 is null && arr2 is null)
+            {
+                return true;
+            }
+
+            for (int i = 0; i < arr1?.Length; i++)
+            {
+                if (!(arr1[i] is null && arr2[i] is null))
+                {
+                    if (arr1[i] is null || arr2[i] is null)
+                    {
+                        return false;
+                    }
+
+                    if (!arr1[i].Equals(arr2[i]))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 对列表进行添加 CommandInfo 元素，或如果存在该项的话，忽略
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list">要添加元素的列表</param>
+        /// <param name="data">要添加的元素</param>
+        /// <returns>是否成功添加，若已存在则返回false。</returns>
+        internal static bool AddOrExist(this List<CommandInfo> list, CommandInfo data)
+        {
+            if (!list.Any(i => i.Equals(data)))
             {
                 list.Add(data);
+                return true;
             }
+
+            return false;
         }
     }
 }

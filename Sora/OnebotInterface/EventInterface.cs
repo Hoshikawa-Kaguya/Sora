@@ -1,7 +1,4 @@
 using Newtonsoft.Json.Linq;
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
 using Sora.Command;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
@@ -9,6 +6,9 @@ using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.OnebotModel.OnebotEvent.MetaEvent;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
 using YukariToolBox.FormatLog;
 
 namespace Sora.OnebotInterface
@@ -24,7 +24,7 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 特性指令管理器
         /// </summary>
-        public CommandManager CommandManager { get; set; }
+        public CommandManager CommandManager { get; }
 
         #endregion
 

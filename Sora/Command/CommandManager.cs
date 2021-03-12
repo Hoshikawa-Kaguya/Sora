@@ -45,7 +45,6 @@ namespace Sora.Command
         /// 自动注册所有指令
         /// </summary>
         /// <param name="assembly">包含指令的程序集</param>
-        [Reviewed("XiaoHe321", "2021-03-11 00:45")]
         public void MappingCommands(Assembly assembly)
         {
             //检查使能
@@ -71,12 +70,12 @@ namespace Sora.Command
                     switch (GenerateCommandInfo(methodInfo, classType, out CommandInfo commandInfo))
                     {
                         case GroupCommand:
-                            groupCommands.AddOrExist(commandInfo);
-                            Log.Debug("Command", $"Registered group command [{methodInfo.Name}]");
+                            if (groupCommands.AddOrExist(commandInfo))
+                                Log.Debug("Command", $"Registered group command [{methodInfo.Name}]");
                             break;
                         case PrivateCommand:
-                            privateCommands.AddOrExist(commandInfo);
-                            Log.Debug("Command", $"Registered private command [{methodInfo.Name}]");
+                            if (privateCommands.AddOrExist(commandInfo))
+                                Log.Debug("Command", $"Registered private command [{methodInfo.Name}]");
                             break;
                         default:
                             Log.Warning("Command", "未知的指令类型");
