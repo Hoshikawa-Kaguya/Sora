@@ -1,4 +1,5 @@
 using System;
+using Sora.Interfaces;
 using Sora.OnebotModel;
 
 namespace Sora.Net
