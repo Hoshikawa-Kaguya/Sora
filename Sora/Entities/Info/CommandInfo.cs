@@ -1,6 +1,7 @@
 using Sora.Enumeration.EventParamsType;
 using System;
 using System.Reflection;
+using YukariToolBox.FormatLog;
 
 namespace Sora.Entities.Info
 {
@@ -73,7 +74,7 @@ namespace Sora.Entities.Info
              && MethodInfo.GetGenericArguments().ArrayEquals(another.MethodInfo.GetGenericArguments())
              && Regex.ArrayEquals(another.Regex)
              && PermissonType == another.PermissonType
-             && InstanceType  == another.InstanceType
+             //&& InstanceType  == another.InstanceType
             )
             {
                 return true;
