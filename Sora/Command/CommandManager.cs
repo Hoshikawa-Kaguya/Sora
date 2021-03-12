@@ -16,7 +16,7 @@ namespace Sora.Command
     /// <summary>
     /// 特性指令管理器
     /// </summary>
-    internal class CommandManager
+    public class CommandManager
     {
         #region 私有字段
 
@@ -46,7 +46,7 @@ namespace Sora.Command
         /// </summary>
         /// <param name="assembly">包含指令的程序集</param>
         [Reviewed("XiaoHe321", "2021-03-11 00:45")]
-        internal void MappingCommands(Assembly assembly)
+        public void MappingCommands(Assembly assembly)
         {
             //检查使能
             if (!enableSoraCommandManager) return;
@@ -71,11 +71,11 @@ namespace Sora.Command
                     switch (GenerateCommandInfo(methodInfo, classType, out CommandInfo commandInfo))
                     {
                         case GroupCommand:
-                            groupCommands.Add(commandInfo);
+                            groupCommands.AddOrExist(commandInfo);
                             Log.Debug("Command", $"Registered group command [{methodInfo.Name}]");
                             break;
                         case PrivateCommand:
-                            privateCommands.Add(commandInfo);
+                            privateCommands.AddOrExist(commandInfo);
                             Log.Debug("Command", $"Registered private command [{methodInfo.Name}]");
                             break;
                         default:
