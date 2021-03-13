@@ -142,7 +142,7 @@ namespace Sora.OnebotInterface
             if (retCode != 0 || ret?["data"] == null) return (retCode, "unknown", null);
             var verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
 
-            return (retCode, ret["data"]?["app_name"]?.ToString() ?? "unknow", verStr);
+            return (retCode, ret["data"]?["app_name"]?.ToString() ?? "unknown", verStr);
         }
 
         /// <summary>
