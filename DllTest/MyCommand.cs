@@ -1,8 +1,8 @@
+using System.Threading.Tasks;
 using Sora.Command.Attributes;
 using Sora.EventArgs.SoraEvent;
-using System.Threading.Tasks;
 
-namespace DllTest
+namespace Sora_DllTest
 {
     [CommandGroup]
     public class MyCommand

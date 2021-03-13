@@ -1,9 +1,9 @@
-using DllTest;
 using Sora.Interfaces;
 using Sora.Net;
 using Sora.OnebotModel;
 using System.Reflection;
 using System.Threading.Tasks;
+using Sora_DllTest;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
