@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YukariToolBox.FormatLog;
+using YukariToolBox.Helpers;
 
 namespace Sora.Command
 {
@@ -217,14 +218,14 @@ namespace Sora.Command
             };
             if (matchExp == null)
             {
-                commandInfo = Helper.CreateInstance<CommandInfo>();
+                commandInfo = ObjectHelper.CreateInstance<CommandInfo>();
                 return null;
             }
 
             //检查和创建实例
             if (!method.IsStatic && !CheckAndCreateInstance(classType))
             {
-                commandInfo = Helper.CreateInstance<CommandInfo>();
+                commandInfo = ObjectHelper.CreateInstance<CommandInfo>();
                 return null;
             }
 

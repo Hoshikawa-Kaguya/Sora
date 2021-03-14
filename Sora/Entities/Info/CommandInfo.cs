@@ -1,6 +1,7 @@
 using Sora.Enumeration.EventParamsType;
 using System;
 using System.Reflection;
+using YukariToolBox.Extensions;
 
 namespace Sora.Entities.Info
 {
