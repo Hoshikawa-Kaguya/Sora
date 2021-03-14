@@ -1,4 +1,4 @@
-using Sora.Command.Attributes;
+using Sora.Attributes.Command;
 using Sora.Entities.Info;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Sora.Attributes;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Helpers;
 
@@ -97,7 +98,6 @@ namespace Sora.Command
         /// 处理聊天指令
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
-        [Reviewed("XiaoHe321", "2021-03-11 00:45")]
         internal async ValueTask<bool> CommandAdapter(object eventArgs)
         {
             //检查使能
@@ -138,10 +138,10 @@ namespace Sora.Command
             }
 
             //最终是否触发命令（如果匹配到多个命令，则如果其中一个要触发，则直接返回触发）
-            bool isFinalTrigger = false;
+            var isFinalTrigger = false;
 
             //遍历匹配到的每个命令
-            foreach (CommandInfo commandInfo in matchedCommand)
+            foreach (var commandInfo in matchedCommand)
             {
                 //若是群，则判断权限
                 if (eventArgs is GroupMessageEventArgs groupEventArgs)
@@ -154,10 +154,11 @@ namespace Sora.Command
                     }
                 }
 
-                Log.Debug("CommandAdapter", $"get command {commandInfo.MethodInfo.Name}");
+                Log.Debug("CommandAdapter",
+                          $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+                Log.Info("CommandAdapter", $"触发指令[{commandInfo.MethodInfo.Name}]");
                 try
                 {
-                    Log.Info("CommandAdapter", $"trigger command [{commandInfo.MethodInfo.Name}]");
                     //执行指令方法
                     commandInfo.MethodInfo.Invoke(instanceDict[commandInfo.InstanceType], new[] {eventArgs});
                 }
@@ -206,14 +207,14 @@ namespace Sora.Command
             Log.Debug("Command", $"Registering command [{method.Name}]");
 
             //处理指令匹配类型
-            var match = (commandAttr as Attributes.Command)?.MatchType ?? MatchType.Full;
+            var match = (commandAttr as Attributes.Command.Command)?.MatchType ?? MatchType.Full;
             //处理表达式
             var matchExp = match switch
             {
-                MatchType.Full => (commandAttr as Attributes.Command)?.CommandExpressions
-                                                                     .Select(command => $"^{command}$")
-                                                                     .ToArray(),
-                MatchType.Regex => (commandAttr as Attributes.Command)?.CommandExpressions,
+                MatchType.Full => (commandAttr as Attributes.Command.Command)?.CommandExpressions
+                                                                             .Select(command => $"^{command}$")
+                                                                             .ToArray(),
+                MatchType.Regex => (commandAttr as Attributes.Command.Command)?.CommandExpressions,
                 _ => null
             };
             if (matchExp == null)
@@ -230,12 +231,12 @@ namespace Sora.Command
             }
 
             //创建指令信息
-            commandInfo = new CommandInfo((commandAttr as Attributes.Command).Description,
+            commandInfo = new CommandInfo((commandAttr as Attributes.Command.Command).Description,
                                           matchExp,
                                           classType.Name,
                                           method,
                                           (commandAttr as GroupCommand)?.PermissionLevel,
-                                          (Attributes.Command) commandAttr is {TriggerEventAfterCommand: true},
+                                          (Attributes.Command.Command) commandAttr is {TriggerEventAfterCommand: true},
                                           method.IsStatic ? null : classType);
 
             return commandAttr;
