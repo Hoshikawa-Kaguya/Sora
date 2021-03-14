@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Command.Attributes;
+using Sora.Entities;
+using Sora.Entities.Info;
 using Sora.EventArgs.SoraEvent;
 
 namespace Sora_DllTest

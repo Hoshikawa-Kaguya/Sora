@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using YukariToolBox.FormatLog;
+using BindingFlags = System.Reflection.BindingFlags;
 
 namespace Sora
 {
@@ -14,7 +16,6 @@ namespace Sora
     /// </summary>
     public static class Helper
     {
-
         /// <summary>
         /// 友好的崩溃提示(x)
         /// </summary>
@@ -30,23 +31,25 @@ namespace Sora
         }
 
         /// <summary>
-        /// 忽略构造方法并创建实例
+        /// 创建实例
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <returns>实例</returns>
         public static T CreateInstance<T>()
-        {
-            return (T) FormatterServices.GetUninitializedObject(typeof(T));
-        }
+            => (T) typeof(T).CreateInstance();
 
         /// <summary>
-        /// 忽略构造方法并创建实例
+        /// 创建实例
         /// </summary>
         /// <param name="type">类型</param>
         /// <returns>实例</returns>
         public static object CreateInstance(this Type type)
         {
-            return FormatterServices.GetUninitializedObject(type);
+            var constructor = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+                                  .FirstOrDefault(con => con.GetParameters().Length == 0);
+
+
+            return constructor?.Invoke(null) ?? FormatterServices.GetUninitializedObject(type);
         }
 
         /// <summary>
