@@ -1,6 +1,6 @@
 using System;
 
-namespace Sora.Command.Attributes
+namespace Sora.Attributes.Command
 {
     /// <summary>
     /// 指令组

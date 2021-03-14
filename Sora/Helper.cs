@@ -3,6 +3,8 @@ using Sora.Entities.Info;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using Sora.Attributes;
 using YukariToolBox.FormatLog;
 
 namespace Sora
@@ -29,7 +31,6 @@ namespace Sora
         /// <summary>
         /// 对列表进行添加 CommandInfo 元素，或如果存在该项的话，忽略
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="list">要添加元素的列表</param>
         /// <param name="data">要添加的元素</param>
         /// <returns>是否成功添加，若已存在则返回false。</returns>
@@ -42,6 +43,47 @@ namespace Sora
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// <para>仅用于项目组内部的代码审查</para>
+        /// <para>请不要使用此方法</para>
+        /// </summary>
+        public static void CheckReviewed()
+        {
+            var assembly = AppDomain.CurrentDomain.GetAssemblies()
+                                     .Single(assem => assem.FullName == Assembly.GetExecutingAssembly().FullName);
+
+            var methods = new List<MemberInfo>();
+
+            assembly.GetTypes()
+                    .Where(type => type.IsClass)
+                    .Select(type => type.GetMethods())
+                    .ToList()
+                    .ForEach(array => methods.AddRange(array));
+
+            assembly.GetTypes()
+                    .Where(type => type.IsClass)
+                    .Select(type => type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance))
+                    .ToList()
+                    .ForEach(array => methods.AddRange(array));
+
+            
+
+            var totalMethod = methods.Count;
+
+            var checkedMethod = methods.Where(m => m.IsDefined(typeof(Reviewed), false))
+                                       .ToDictionary(m => m, m => m.GetCustomAttribute<Reviewed>());
+
+            var uncheckedMethod = methods.Where(m => !m.IsDefined(typeof(Reviewed), false))
+                                         .ToList();
+
+            Log.Debug("Total Method Count", totalMethod);
+
+            Log.Debug("Checked Method",
+                      $"\n{string.Join("\n", checkedMethod.Select(m => $"{m.Key.ReflectedType?.FullName}.{m.Key.Name} checked by {m.Value?.Person} {m.Value?.Time}"))}");
+
+            Log.Debug("Unchecked Method Count", uncheckedMethod.Count);
         }
     }
 }

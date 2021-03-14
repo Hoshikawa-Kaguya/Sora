@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Sora.Command.Attributes;
+using Sora.Attributes.Command;
 using Sora.EventArgs.SoraEvent;
 using System.Threading.Tasks;
 using Sora.Entities;

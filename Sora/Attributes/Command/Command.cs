@@ -1,7 +1,7 @@
 using System;
 using Sora.Enumeration;
 
-namespace Sora.Command.Attributes
+namespace Sora.Attributes.Command
 {
     /// <summary>
     /// 指令

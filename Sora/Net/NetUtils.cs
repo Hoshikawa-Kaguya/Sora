@@ -1,8 +1,5 @@
-using System;
 using System.Linq;
 using System.Net.NetworkInformation;
-using Newtonsoft.Json;
-using YukariToolBox.FormatLog;
 
 namespace Sora.Net
 {

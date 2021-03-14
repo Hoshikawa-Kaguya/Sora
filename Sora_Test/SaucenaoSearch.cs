@@ -11,7 +11,7 @@ using YukariToolBox.FormatLog;
 
 namespace Sora_Test
 {
-    public class SaucenaoSearch
+    public static class SaucenaoSearch
     {
         public static async ValueTask<List<CQCode>> SearchByUrl(string apiKey, string url, GroupMessageEventArgs eventArgs)
         {

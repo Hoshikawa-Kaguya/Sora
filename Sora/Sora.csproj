@@ -50,4 +50,8 @@
     <PackageReference Include="YukariToolBox" Version="1.1.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Command\Attributes\" />
+  </ItemGroup>
+
 </Project>
