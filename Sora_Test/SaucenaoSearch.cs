@@ -13,7 +13,8 @@ namespace Sora_Test
 {
     public static class SaucenaoSearch
     {
-        public static async ValueTask<List<CQCode>> SearchByUrl(string apiKey, string url, GroupMessageEventArgs eventArgs)
+        public static async ValueTask<List<CQCode>> SearchByUrl(string apiKey, string url,
+                                                                GroupMessageEventArgs eventArgs)
         {
             List<CQCode> message = new();
             var req =
@@ -24,15 +25,16 @@ namespace Sora_Test
             var res     = req.Json();
             var resCode = Convert.ToInt32(res?["header"]?["status"] ?? -1);
             Log.Debug("pic", $"get api result code [{resCode}]");
-            
-            if(res == null || resCode != 0)
+
+            if (res == null || resCode != 0)
             {
                 message.Add(CQCode.CQAt(eventArgs.Sender));
                 message.Add(CQCode.CQText("图片获取失败"));
                 return message;
             }
+
             var resData = res["results"]?.ToObject<List<SaucenaoResult>>();
-            
+
             if (resData == null)
             {
                 message.Add(CQCode.CQAt(eventArgs.Sender));
@@ -54,12 +56,14 @@ namespace Sora_Test
 
             foreach (var data in parsedPic)
             {
-                var          pixInfo = await GetPixivCatInfo(data.PixivData.PixivId);
+                var pixInfo = await GetPixivCatInfo(data.PixivData.PixivId);
                 if (!pixInfo.success)
                 {
-                    await eventArgs.Reply(CQCode.CQAt(eventArgs.Sender),$"处理代理连接发生错误\r\nApi Message:{pixInfo.message}");
+                    await eventArgs.Reply(CQCode.CQAt(eventArgs.Sender),
+                                          $"处理代理连接发生错误\r\nApi Message:{pixInfo.message}");
                     continue;
                 }
+
                 message.Add(CQCode.CQText($"图片名:{data.PixivData.Title}\r\n"));
                 message.Add(CQCode.CQImage(pixInfo.urls[0]));
                 message.Add(CQCode.CQText($"id:{data.PixivData.PixivId}\r\n"));

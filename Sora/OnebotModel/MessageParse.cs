@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Enumeration;
@@ -20,31 +21,20 @@ namespace Sora.OnebotModel
             if (messageElement?.RawData == null || messageElement.RawData.Count == 0) return null;
             try
             {
-                switch (messageElement.MsgType)
+                return messageElement.MsgType switch
                 {
-                    case CQFunction.Text:
-                        return new CQCode(CQFunction.Text, messageElement.RawData.ToObject<Text>());
-                    case CQFunction.Face:
-                        return new CQCode(CQFunction.Face, messageElement.RawData.ToObject<Face>());
-                    case CQFunction.Image:
-                        return new CQCode(CQFunction.Image, messageElement.RawData.ToObject<Image>());
-                    case CQFunction.Record:
-                        return new CQCode(CQFunction.Record, messageElement.RawData.ToObject<Record>());
-                    case CQFunction.At:
-                        return new CQCode(CQFunction.At, messageElement.RawData.ToObject<At>());
-                    case CQFunction.Share:
-                        return new CQCode(CQFunction.Share, messageElement.RawData.ToObject<Share>());
-                    case CQFunction.Reply:
-                        return new CQCode(CQFunction.Reply, messageElement.RawData.ToObject<Reply>());
-                    case CQFunction.Forward:
-                        return new CQCode(CQFunction.Forward, messageElement.RawData.ToObject<Forward>());
-                    case CQFunction.Xml:
-                        return new CQCode(CQFunction.Xml, messageElement.RawData.ToObject<Code>());
-                    case CQFunction.Json:
-                        return new CQCode(CQFunction.Json, messageElement.RawData.ToObject<Code>());
-                    default:
-                        return new CQCode(CQFunction.Unknown, messageElement.RawData);
-                }
+                    CQFunction.Text => new CQCode(CQFunction.Text, messageElement.RawData.ToObject<Text>()),
+                    CQFunction.Face => new CQCode(CQFunction.Face, messageElement.RawData.ToObject<Face>()),
+                    CQFunction.Image => new CQCode(CQFunction.Image, messageElement.RawData.ToObject<Image>()),
+                    CQFunction.Record => new CQCode(CQFunction.Record, messageElement.RawData.ToObject<Record>()),
+                    CQFunction.At => new CQCode(CQFunction.At, messageElement.RawData.ToObject<At>()),
+                    CQFunction.Share => new CQCode(CQFunction.Share, messageElement.RawData.ToObject<Share>()),
+                    CQFunction.Reply => new CQCode(CQFunction.Reply, messageElement.RawData.ToObject<Reply>()),
+                    CQFunction.Forward => new CQCode(CQFunction.Forward, messageElement.RawData.ToObject<Forward>()),
+                    CQFunction.Xml => new CQCode(CQFunction.Xml, messageElement.RawData.ToObject<Code>()),
+                    CQFunction.Json => new CQCode(CQFunction.Json, messageElement.RawData.ToObject<Code>()),
+                    _ => new CQCode(CQFunction.Unknown, messageElement.RawData)
+                };
             }
             catch (Exception e)
             {
@@ -62,11 +52,7 @@ namespace Sora.OnebotModel
         {
             Log.Debug("Sora", "Parsing msg list");
             if (messages == null || messages.Count == 0) return new List<CQCode>();
-            List<CQCode> retMsg = new();
-            foreach (var message in messages)
-            {
-                retMsg.Add(ParseMessageElement(message));
-            }
+            var retMsg = messages.Select(ParseMessageElement).ToList();
 
             Log.Debug("Sora", $"Get msg len={retMsg.Count}");
             return retMsg;

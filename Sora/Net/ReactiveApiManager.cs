@@ -23,7 +23,7 @@ namespace Sora.Net
         /// <summary>
         /// API超时时间
         /// </summary>
-        internal static uint TimeOut { get; set; }
+        internal static TimeSpan TimeOut { get; set; }
 
         #endregion
 
@@ -77,7 +77,7 @@ namespace Sora.Net
         /// <param name="timeout">覆盖原有超时,在不为空时有效</param>
         /// <returns>API返回</returns>
         internal static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid,
-                                                                int? timeout = null)
+                                                                TimeSpan? timeout = null)
         {
             //添加新的请求记录
             lock (RequestList)
@@ -97,7 +97,7 @@ namespace Sora.Net
                                      .Where(guid => guid == apiRequest.Echo)
                                      .Select(guid => guid)
                                      .Take(1)
-                                     .Timeout(TimeSpan.FromMilliseconds(timeout ?? (int) TimeOut))
+                                     .Timeout(timeout ?? TimeOut)
                                      .Catch(Observable.Return(Guid.Empty))
                                      .ToTask()
                                      .RunCatch(e =>
@@ -147,7 +147,7 @@ namespace Sora.Net
             lock (RequestList)
             {
                 var removedKeys = RequestList
-                                  .Where(p => DateTime.Now - p.Value.CreateTime > TimeSpan.FromMilliseconds(TimeOut))
+                                  .Where(p => DateTime.Now - p.Value.CreateTime > TimeOut)
                                   .Select(p => p.Key).ToList();
                 foreach (var key in removedKeys)
                 {

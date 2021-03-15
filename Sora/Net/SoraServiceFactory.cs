@@ -15,7 +15,7 @@ namespace Sora.Net
         /// </summary>
         /// <param name="config">服务器配置</param>
         /// <param name="crashAction">发生未处理异常时的回调</param>
-        /// <returns></returns>
+        /// <returns>Sora 服务实例</returns>
         public static ISoraService CreateInstance(ISoraConfig config, Action<Exception> crashAction = null)
             => config switch
             {
