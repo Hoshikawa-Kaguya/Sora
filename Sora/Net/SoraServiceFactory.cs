@@ -16,7 +16,7 @@ namespace Sora.Net
         /// <param name="config">服务器配置</param>
         /// <param name="crashAction">发生未处理异常时的回调</param>
         /// <returns></returns>
-        static ISoraService CreateInstance(ISoraConfig config, Action<Exception> crashAction = null)
+        public static ISoraService CreateInstance(ISoraConfig config, Action<Exception> crashAction = null)
             => config switch
             {
                 ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
