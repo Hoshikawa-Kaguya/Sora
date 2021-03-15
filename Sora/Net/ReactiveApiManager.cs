@@ -32,7 +32,7 @@ namespace Sora.Net
         /// <summary>
         /// 暂存数据结构定义
         /// </summary>
-        private struct ApiData
+        private class ApiData
         {
             internal Guid ConnectionGuid;
 
@@ -46,7 +46,7 @@ namespace Sora.Net
         /// <summary>
         /// API请求表
         /// </summary>
-        private static readonly List<ApiData> RequestList = new();
+        private static readonly Dictionary<Guid, ApiData> RequestList = new();
 
         /// <summary>
         /// API响应被观察者
@@ -66,13 +66,12 @@ namespace Sora.Net
         {
             lock (RequestList)
             {
-                if (RequestList.All(guid => guid.Echo != echo)) return;
-                Log.Debug("Sora|ReactiveApiManager", $"Get api response {response.ToString(Formatting.None)}");
-                var connectionIndex = RequestList.FindIndex(conn => conn.Echo == echo);
-                var connection      = RequestList[connectionIndex];
-                connection.Response          = response;
-                RequestList[connectionIndex] = connection;
-                ApiSubject.OnNext(echo);
+                if (RequestList.TryGetValue(echo, out var connection))
+                {
+                    Log.Debug("Sora|ReactiveApiManager", $"Get api response {response.ToString(Formatting.None)}");
+                    connection.Response = response;
+                    ApiSubject.OnNext(echo);
+                }
             }
         }
 
@@ -89,7 +88,7 @@ namespace Sora.Net
             //添加新的请求记录
             lock (RequestList)
             {
-                RequestList.Add(new ApiData
+                RequestList.Add(apiRequest.Echo, new ApiData
                 {
                     ConnectionGuid = connectionGuid,
                     Echo           = apiRequest.Echo,
@@ -115,23 +114,24 @@ namespace Sora.Net
                                                              $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
                                                    return Guid.Empty;
                                                });
-            if (responseGuid.Equals(Guid.Empty)) Log.Debug("Sora|ReactiveApiManager", "observer time out");
+            if (responseGuid.Equals(Guid.Empty))
+            {
+                Log.Debug("Sora|ReactiveApiManager", "observer time out");
+                return null;
+            }
             lock (RequestList)
             {
-                //查找返回值
-                var reqIndex = RequestList.FindIndex(apiResponse =>
-                                                         apiResponse.Echo           == apiRequest.Echo &&
-                                                         apiResponse.ConnectionGuid == connectionGuid);
-                Log.Debug("Sora|ReactiveApiManager", $"Get [{apiRequest.Echo}] index [{reqIndex}]");
-                if (reqIndex == -1)
+                if (RequestList.TryGetValue(apiRequest.Echo, out var connection)) //查找返回值
+                {
+                    Log.Debug("Sora|ReactiveApiManager", $"Get [{apiRequest.Echo}]");
+                    RequestList.Remove(apiRequest.Echo);
+                    return connection.Response;
+                }
+                else
                 {
                     Log.Warning("Sora|ReactiveApiManager", "api time out");
                     return null;
                 }
-
-                var ret = RequestList[reqIndex].Response;
-                RequestList.RemoveAt(reqIndex);
-                return ret;
             }
         }
 
@@ -159,8 +159,12 @@ namespace Sora.Net
             lock (RequestList)
             {
                 var oldCount = RequestList.Count;
-                RequestList.RemoveAll(req => DateTime.Now - req.CreateTime > TimeSpan.FromMilliseconds(TimeOut));
-                Log.Debug("Sora|ReactiveApiManager", $"Clean Invalid Requests [{oldCount - RequestList.Count}]");
+                var removedKeys = RequestList.Where(p => DateTime.Now - p.Value.CreateTime > TimeSpan.FromMilliseconds(TimeOut)).Select(p => p.Key).ToList();
+                foreach (var key in removedKeys)
+                {
+                    RequestList.Remove(key);
+                }
+                Log.Debug("Sora|ReactiveApiManager", $"Clean Invalid Requests [{removedKeys.Count}]");
             }
         }
 
