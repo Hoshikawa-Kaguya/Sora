@@ -1,4 +1,3 @@
-using Sora.Interfaces;
 using Sora.Net;
 using Sora.OnebotModel;
 using System.Threading.Tasks;
@@ -9,7 +8,7 @@ using YukariToolBox.FormatLog;
 Log.SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
-ISoraService service = new SoraWebsocketClient(new ClientConfig());
+var service = SoraServiceFactory.CreateInstance(new ClientConfig());
 
 #region 事件处理
 
