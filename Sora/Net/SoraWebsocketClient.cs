@@ -94,11 +94,16 @@ namespace Sora.Net
                                                             $"Bearer {config.AccessToken}");
                                                         return clientWebSocket;
                                                     });
+            //处理连接路径
+            var serverPath = string.IsNullOrEmpty(config.UniversalPath)
+                ? $"ws://{config.Host}:{config.Port}"
+                : $"ws://{config.Host}:{config.Port}/{config.UniversalPath.Trim('/')}/";
+            Log.Debug("Sora", $"Onebot服务器地址:{serverPath}");
             this.Client =
-                new WebsocketClient(new Uri($"ws://{config.Host}:{config.Port}"), factory)
+                new WebsocketClient(new Uri(serverPath), factory)
                 {
-                    ReconnectTimeout      = TimeSpan.FromSeconds(5),
-                    ErrorReconnectTimeout = TimeSpan.FromSeconds(5)
+                    ReconnectTimeout      = config.ReconnectTimeOut,
+                    ErrorReconnectTimeout = config.ReconnectTimeOut
                 };
             //全局异常事件
             AppDomain.CurrentDomain.UnhandledException += (_, args) =>
@@ -169,8 +174,7 @@ namespace Sora.Net
             Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
             //启动心跳包超时检查计时器
             this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
-                                            new TimeSpan(0, 0, 0, (int) Config.HeartBeatTimeOut, 0),
-                                            new TimeSpan(0, 0, 0, (int) Config.HeartBeatTimeOut, 0));
+                                            Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
             NetUtils.serviceExitis = true;
             await Task.Delay(-1);
         }

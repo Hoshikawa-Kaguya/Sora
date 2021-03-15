@@ -26,10 +26,10 @@ namespace Sora.Net
         /// </summary>
         private struct SoraConnectionInfo
         {
-            internal Guid   ConnectionGuid;
-            internal object Connection;
-            internal long   LastHeartBeatTime;
-            internal long   SelfId;
+            internal Guid     ConnectionGuid;
+            internal object   Connection;
+            internal DateTime LastHeartBeatTime;
+            internal long     SelfId;
         }
 
         #endregion
@@ -45,7 +45,7 @@ namespace Sora.Net
 
         #region 属性
 
-        private long HeartBeatTimeOut { get; }
+        private TimeSpan HeartBeatTimeOut { get; }
 
         #endregion
 
@@ -113,7 +113,7 @@ namespace Sora.Net
                     {
                         ConnectionGuid    = connectionGuid,
                         Connection        = connectionInfo,
-                        LastHeartBeatTime = TimeStamp.GetNowTimeStamp(),
+                        LastHeartBeatTime = DateTime.Now,
                         SelfId            = uid
                     });
                     return true;
@@ -148,7 +148,12 @@ namespace Sora.Net
         /// </summary>
         /// <param name="connectionGuid">连接标识</param>
         internal static bool ConnectionExitis(Guid connectionGuid)
-            => ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid);
+        {
+            lock (ConnectionList)
+            {
+                return ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid);
+            }
+        }
 
         #endregion
 
@@ -200,7 +205,7 @@ namespace Sora.Net
                 //遍历超时的连接
                 foreach (var connection in ConnectionList
                     .Where(connection =>
-                               TimeStamp.GetNowTimeStamp() - connection.LastHeartBeatTime > HeartBeatTimeOut))
+                               DateTime.Now - connection.LastHeartBeatTime > HeartBeatTimeOut))
                 {
                     try
                     {
@@ -257,7 +262,7 @@ namespace Sora.Net
             var connectionIndex = ConnectionList.FindIndex(conn => conn.ConnectionGuid == connectionGuid);
             if (connectionIndex == -1) return;
             var connection = ConnectionList[connectionIndex];
-            connection.LastHeartBeatTime    = TimeStamp.GetNowTimeStamp();
+            connection.LastHeartBeatTime    = DateTime.Now;
             ConnectionList[connectionIndex] = connection;
         }
 

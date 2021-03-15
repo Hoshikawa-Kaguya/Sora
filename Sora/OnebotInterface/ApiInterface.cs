@@ -758,7 +758,7 @@ namespace Sora.OnebotInterface
                     thread_count = threadCount,
                     headers      = customHeaderStr
                 }
-            }, connection, timeout);
+            }, connection, TimeSpan.FromMilliseconds(timeout));
 
             //处理API返回信息
             var retCode = GetBaseRetCode(ret).retCode;
@@ -1373,7 +1373,7 @@ namespace Sora.OnebotInterface
                     name     = fileName      ?? throw new NullReferenceException("fileName is null"),
                     folder   = floderId      ?? string.Empty
                 }
-            }, connection, timeout);
+            }, connection, TimeSpan.FromMilliseconds(timeout));
             //处理API返回信息
             var retCode = GetBaseRetCode(ret).retCode;
             Log.Debug("Sora", $"Get upload_group_file response retcode={retCode}");
