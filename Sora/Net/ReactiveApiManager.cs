@@ -114,11 +114,7 @@ namespace Sora.Net
                                                              $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
                                                    return Guid.Empty;
                                                });
-            if (responseGuid.Equals(Guid.Empty))
-            {
-                Log.Debug("Sora|ReactiveApiManager", "observer time out");
-                return null;
-            }
+            Log.Debug("Sora|ReactiveApiManager", "observer time out");
             lock (RequestList)
             {
                 if (RequestList.TryGetValue(apiRequest.Echo, out var connection)) //查找返回值
