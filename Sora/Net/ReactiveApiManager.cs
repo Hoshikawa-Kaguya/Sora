@@ -34,10 +34,6 @@ namespace Sora.Net
         /// </summary>
         private class ApiData
         {
-            internal Guid ConnectionGuid;
-
-            internal Guid Echo;
-
             internal JObject Response;
 
             internal DateTime CreateTime;
@@ -66,12 +62,10 @@ namespace Sora.Net
         {
             lock (RequestList)
             {
-                if (RequestList.TryGetValue(echo, out var connection))
-                {
-                    Log.Debug("Sora|ReactiveApiManager", $"Get api response {response.ToString(Formatting.None)}");
-                    connection.Response = response;
-                    ApiSubject.OnNext(echo);
-                }
+                if (!RequestList.TryGetValue(echo, out var connection)) return;
+                Log.Debug("Sora|ReactiveApiManager", $"Get api response {response.ToString(Formatting.None)}");
+                connection.Response = response;
+                ApiSubject.OnNext(echo);
             }
         }
 
@@ -90,8 +84,6 @@ namespace Sora.Net
             {
                 RequestList.Add(apiRequest.Echo, new ApiData
                 {
-                    ConnectionGuid = connectionGuid,
-                    Echo           = apiRequest.Echo,
                     Response       = null,
                     CreateTime     = DateTime.Now
                 });
@@ -114,7 +106,7 @@ namespace Sora.Net
                                                              $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
                                                    return Guid.Empty;
                                                });
-            Log.Debug("Sora|ReactiveApiManager", "observer time out");
+            if(responseGuid == Guid.Empty) Log.Debug("Sora|ReactiveApiManager", "observer time out");
             lock (RequestList)
             {
                 if (RequestList.TryGetValue(apiRequest.Echo, out var connection)) //查找返回值
@@ -154,12 +146,14 @@ namespace Sora.Net
         {
             lock (RequestList)
             {
-                var oldCount = RequestList.Count;
-                var removedKeys = RequestList.Where(p => DateTime.Now - p.Value.CreateTime > TimeSpan.FromMilliseconds(TimeOut)).Select(p => p.Key).ToList();
+                var removedKeys = RequestList
+                                  .Where(p => DateTime.Now - p.Value.CreateTime > TimeSpan.FromMilliseconds(TimeOut))
+                                  .Select(p => p.Key).ToList();
                 foreach (var key in removedKeys)
                 {
                     RequestList.Remove(key);
                 }
+
                 Log.Debug("Sora|ReactiveApiManager", $"Clean Invalid Requests [{removedKeys.Count}]");
             }
         }
