@@ -194,7 +194,6 @@ namespace Sora.Net
         {
             Client.Dispose();
             GC.SuppressFinalize(this);
-            ReactiveApiManager.ClearApiReqList();
         }
 
         #endregion

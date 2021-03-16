@@ -224,7 +224,6 @@ namespace Sora.Net
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            ReactiveApiManager.ClearApiReqList();
         }
 
         #endregion
