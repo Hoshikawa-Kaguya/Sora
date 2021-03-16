@@ -9,7 +9,6 @@ namespace Sora.Net
     /// </summary>
     public class SoraServiceFactory
     {
-
         /// <summary>
         /// 创建 Sora 服务实例
         /// </summary>
