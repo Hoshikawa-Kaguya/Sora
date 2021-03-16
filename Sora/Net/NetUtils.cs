@@ -20,6 +20,5 @@ namespace Sora.Net
         internal static bool IsPortInUse(uint port) =>
             IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
                               .Any(ipEndPoint => ipEndPoint.Port == port);
-
     }
 }

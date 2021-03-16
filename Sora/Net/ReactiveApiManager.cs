@@ -26,6 +26,7 @@ namespace Sora.Net
         #endregion
 
         #region 被观察对象
+
         /// <summary>
         /// API响应被观察对象
         /// </summary>

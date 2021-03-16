@@ -138,7 +138,7 @@ namespace Sora.Command
             }
 
             //在没有匹配到指令时直接跳转至Event触发
-            if(matchedCommand.Count == 0) return true;
+            if (matchedCommand.Count == 0) return true;
 
             //最终是否触发命令（如果匹配到多个命令，则如果其中一个要触发，则直接返回触发）
             var isFinalTrigger = false;
