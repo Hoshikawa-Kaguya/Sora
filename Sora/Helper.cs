@@ -52,7 +52,7 @@ namespace Sora
         public static void CheckReviewed()
         {
             var assembly = AppDomain.CurrentDomain.GetAssemblies()
-                                     .Single(assem => assem.FullName == Assembly.GetExecutingAssembly().FullName);
+                                    .Single(assem => assem.FullName == Assembly.GetExecutingAssembly().FullName);
 
             var methods = new List<MemberInfo>();
 
@@ -68,7 +68,6 @@ namespace Sora
                     .ToList()
                     .ForEach(array => methods.AddRange(array));
 
-            
 
             var totalMethod = methods.Count;
 
