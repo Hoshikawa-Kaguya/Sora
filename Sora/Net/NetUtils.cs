@@ -1,8 +1,5 @@
-using System;
 using System.Linq;
 using System.Net.NetworkInformation;
-using Newtonsoft.Json;
-using YukariToolBox.FormatLog;
 
 namespace Sora.Net
 {
@@ -23,6 +20,5 @@ namespace Sora.Net
         internal static bool IsPortInUse(uint port) =>
             IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
                               .Any(ipEndPoint => ipEndPoint.Port == port);
-
     }
 }

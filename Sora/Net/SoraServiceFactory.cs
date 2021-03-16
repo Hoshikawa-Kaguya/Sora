@@ -9,14 +9,13 @@ namespace Sora.Net
     /// </summary>
     public class SoraServiceFactory
     {
-
         /// <summary>
         /// 创建 Sora 服务实例
         /// </summary>
         /// <param name="config">服务器配置</param>
         /// <param name="crashAction">发生未处理异常时的回调</param>
-        /// <returns></returns>
-        static ISoraService CreateInstance(ISoraConfig config, Action<Exception> crashAction = null)
+        /// <returns>Sora 服务实例</returns>
+        public static ISoraService CreateInstance(ISoraConfig config, Action<Exception> crashAction = null)
             => config switch
             {
                 ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),

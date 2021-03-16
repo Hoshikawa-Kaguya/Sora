@@ -94,7 +94,7 @@ namespace Sora.Net
             this.Event = new EventInterface(config.EnableSoraCommandManager);
             //禁用原log
             FleckLog.Level = (LogLevel) 4;
-            this.Server = new WebSocketServer($"ws://{config.Location}:{config.Port}")
+            this.Server = new WebSocketServer($"ws://{config.Host}:{config.Port}")
             {
                 //出错后进行重启
                 RestartAfterListenError = true
@@ -192,9 +192,6 @@ namespace Sora.Net
                              //上报接收
                              socket.OnMessage = (message) =>
                                                 {
-                                                    //处理接收的数据
-                                                    if (!ConnectionManager.ConnectionExitis(socket.ConnectionInfo.Id))
-                                                        return;
                                                     //进入事件处理和分发
                                                     Task.Run(() =>
                                                              {
@@ -204,11 +201,10 @@ namespace Sora.Net
                                                              });
                                                 };
                          });
-            Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Location}:{Config.Port}]");
+            Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
             //启动心跳包超时检查计时器
             this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
-                                            new TimeSpan(0, 0, 0, (int) Config.HeartBeatTimeOut, 0),
-                                            new TimeSpan(0, 0, 0, (int) Config.HeartBeatTimeOut, 0));
+                                            Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
             NetUtils.serviceExitis = true;
 
             await Task.Delay(-1);
@@ -228,7 +224,6 @@ namespace Sora.Net
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            ReactiveApiManager.ClearApiReqList();
         }
 
         #endregion

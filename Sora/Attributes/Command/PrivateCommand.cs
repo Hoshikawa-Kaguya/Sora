@@ -1,4 +1,4 @@
-namespace Sora.Command.Attributes
+namespace Sora.Attributes.Command
 {
     /// <summary>
     /// 私聊指令
