@@ -1,6 +1,6 @@
 using Sora.Enumeration.EventParamsType;
 
-namespace Sora.Command.Attributes
+namespace Sora.Attributes.Command
 {
     /// <summary>
     /// 群组指令

@@ -16,10 +16,13 @@
 	<a href="https://opensource.org/licenses/AGPL-3.0">
 		<img src="https://img.shields.io/github/license/Yukari316/Sora?style=for-the-badge&color=blueviolet">
 	</a>
+    <br>
 	<img src="https://img.shields.io/github/stars/Yukari316/Sora?style=for-the-badge">
 	<img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=for-the-badge">
+    <img src="https://img.shields.io/badge/go--cqhttp-v0.9.40--fix4-blue?style=for-the-badge">
 	</h4>
 </h1>
+
 
 
 ## 文档
@@ -67,8 +70,6 @@ internal async ValueTask<bool> CommandAdapter(object eventArgs)
 若修改了这段代码，请将Reviewed注解及时删除，以方便代码复查人员知道，你改了这段代码，方便进行复查。
 
 对于自己代码的复查，请不要贴上Reviewed。
-
-> 本框架是通过和[Go-Cqhttp](https://github.com/Mrs4s/go-cqhttp)(版本:[0.9.40-fix4](https://github.com/Mrs4s/go-cqhttp/releases/tag/v0.9.40-fix4))通讯进行调试的，如使用其他平台可能会出现兼容性的问题
 
 ## 关于ISSUE
 
