@@ -23,7 +23,7 @@ namespace Sora.Attributes
         /// </summary>
         /// <param name="person">审核人</param>
         /// <param name="dt">时间</param>
-        public Reviewed(string person,string dt)
+        public Reviewed(string person, string dt)
         {
             Person = person;
             Time   = dt;
