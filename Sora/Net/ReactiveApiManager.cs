@@ -71,7 +71,6 @@ namespace Sora.Net
                                                   $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
                                         return new JObject();
                                     });
-
             if (!ConnectionManager.SendMessage(connectionGuid, JsonConvert.SerializeObject(apiRequest, Formatting.None))
             ) return null;
             //等待客户端返回调用结果

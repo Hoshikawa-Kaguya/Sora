@@ -274,7 +274,8 @@ namespace Sora.Command
                 var instance = classType.CreateInstance();
 
                 //添加实例
-                instanceDict.Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"), instance);
+                instanceDict.Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
+                                 instance);
             }
             catch (Exception e)
             {
