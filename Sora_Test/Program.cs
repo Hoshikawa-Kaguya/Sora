@@ -8,7 +8,7 @@ using YukariToolBox.FormatLog;
 Log.SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
-var service = SoraServiceFactory.CreateInstance(new ServerConfig());
+var service = SoraServiceFactory.CreateInstance(new ClientConfig());
 
 #region 事件处理
 
