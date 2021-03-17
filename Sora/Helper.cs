@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Sora.Attributes;
+using Sora.Entities.CQCodes;
 using YukariToolBox.FormatLog;
 
 namespace Sora
@@ -43,6 +44,17 @@ namespace Sora
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// <para>添加纯文本消息段</para>
+        /// <para>CQ码消息段扩展</para>
+        /// </summary>
+        /// <param name="msgList">CQ消息段</param>
+        /// <param name="text">纯文本信息</param>
+        public static void AddText(this List<CQCode> msgList, string text)
+        {
+            msgList.Add(CQCode.CQText(text));
         }
 
         /// <summary>
