@@ -98,7 +98,7 @@ namespace Sora.Command
         /// 处理聊天指令
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
-        [Reviewed("XiaoHe321","2021-03-16 21:06")]
+        [Reviewed("XiaoHe321", "2021-03-16 21:06")]
         internal async ValueTask<bool> CommandAdapter(object eventArgs)
         {
             //检查使能
@@ -154,7 +154,7 @@ namespace Sora.Command
                     {
                         Log.Warning("CommandAdapter",
                                     $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{commandInfo.MethodInfo.Name}");
-                        
+
                         //权限不足，跳过本命令执行
                         continue;
                     }
@@ -163,7 +163,7 @@ namespace Sora.Command
                 Log.Debug("CommandAdapter",
                           $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
                 Log.Info("CommandAdapter", $"触发指令[{commandInfo.MethodInfo.Name}]");
-                
+
                 try
                 {
                     //执行指令方法
@@ -172,7 +172,7 @@ namespace Sora.Command
                 catch (Exception e)
                 {
                     Log.Error("CommandAdapter", Log.ErrorLogBuilder(e));
-                    
+
                     //描述不为空，才需要打印错误信息
                     if (!string.IsNullOrEmpty(commandInfo.Desc))
                     {
@@ -194,7 +194,7 @@ namespace Sora.Command
 
                 isFinalTrigger |= commandInfo.TriggerEventAfterCommand;
             }
-            
+
             return isFinalTrigger;
         }
 
@@ -220,13 +220,13 @@ namespace Sora.Command
             var match = (commandAttr as Attributes.Command.Command)?.MatchType ?? MatchType.Full;
             //处理表达式
             var matchExp = match switch
-                           {
-                               MatchType.Full => (commandAttr as Attributes.Command.Command)?.CommandExpressions
-                                   .Select(command => $"^{command}$")
-                                   .ToArray(),
-                               MatchType.Regex => (commandAttr as Attributes.Command.Command)?.CommandExpressions,
-                               _               => null
-                           };
+            {
+                MatchType.Full => (commandAttr as Attributes.Command.Command)?.CommandExpressions
+                                                                             .Select(command => $"^{command}$")
+                                                                             .ToArray(),
+                MatchType.Regex => (commandAttr as Attributes.Command.Command)?.CommandExpressions,
+                _ => null
+            };
             if (matchExp == null)
             {
                 commandInfo = ObjectHelper.CreateInstance<CommandInfo>();
@@ -241,7 +241,7 @@ namespace Sora.Command
             }
 
             //创建指令信息
-            commandInfo = new CommandInfo((commandAttr as Attributes.Command.Command).Description,
+            commandInfo = new CommandInfo((commandAttr as Attributes.Command.Command)?.Description,
                                           matchExp,
                                           classType.Name,
                                           method,
@@ -255,7 +255,7 @@ namespace Sora.Command
         /// <summary>
         /// 检查实例的存在和生成
         /// </summary>
-        [Reviewed("XiaoHe321","2021-03-16 21:07")]
+        [Reviewed("XiaoHe321", "2021-03-16 21:07")]
         private bool CheckAndCreateInstance(Type classType)
         {
             //获取类属性
@@ -274,7 +274,7 @@ namespace Sora.Command
                 var instance = classType.CreateInstance();
 
                 //添加实例
-                instanceDict.Add(classType, instance);
+                instanceDict.Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"), instance);
             }
             catch (Exception e)
             {

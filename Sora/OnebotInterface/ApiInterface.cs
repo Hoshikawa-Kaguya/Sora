@@ -189,7 +189,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_group_list response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, null);
             //处理返回群组列表
-            var groupList = ret["data"].Select(token => new GroupInfo
+            var groupList = ret["data"]?.Select(token => new GroupInfo
             {
                 GroupId        = Convert.ToInt64(token["group_id"] ?? -1),
                 GroupName      = token["group_name"]?.ToString() ?? string.Empty,
@@ -251,10 +251,10 @@ namespace Sora.OnebotInterface
             return (retCode,
                     new GroupInfo
                     {
-                        GroupId        = Convert.ToInt64(ret["data"]["group_id"] ?? -1),
-                        GroupName      = ret["data"]["group_name"]?.ToString() ?? string.Empty,
-                        MemberCount    = Convert.ToInt32(ret["data"]["member_count"]     ?? -1),
-                        MaxMemberCount = Convert.ToInt32(ret["data"]["max_member_count"] ?? -1)
+                        GroupId        = Convert.ToInt64(ret["data"]?["group_id"] ?? -1),
+                        GroupName      = ret["data"]?["group_name"]?.ToString() ?? string.Empty,
+                        MemberCount    = Convert.ToInt32(ret["data"]?["member_count"]     ?? -1),
+                        MaxMemberCount = Convert.ToInt32(ret["data"]?["max_member_count"] ?? -1)
                     }
                 );
         }
@@ -379,9 +379,9 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_status response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, false, false, null);
             return (retCode,
-                    Convert.ToBoolean(ret["data"]?["online"]?.ToString() ?? "false"),
-                    Convert.ToBoolean(ret["data"]?["good"]?.ToString()   ?? "false"),
-                    JObject.FromObject(ret["data"]?["stat"]              ?? ret["data"]));
+                    Convert.ToBoolean(ret["data"]?["online"]?.ToString()     ?? "false"),
+                    Convert.ToBoolean(ret["data"]?["good"]?.ToString()       ?? "false"),
+                    JObject.FromObject((ret["data"]?["stat"] ?? ret["data"]) ?? new JObject()));
         }
 
         #region Go API
