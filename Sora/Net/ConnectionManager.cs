@@ -168,21 +168,20 @@ namespace Sora.Net
                     {
                         case IWebSocketConnection serverConnection:
                             serverConnection.Send(message);
-                            break;
+                            return true;
                         case WebsocketClient client:
-                            client.Send(message);
-                            break;
+                            client.SendInstant(message);
+                            return true;
                         default:
                             Log.Error("ConnectionManager", "unknown error when get Connection instance");
-                            break;
+                            return false;
                     }
                 }
                 catch (Exception e)
                 {
                     Log.Error("Sora", $"Send message to client error\r\n{Log.ErrorLogBuilder(e)}");
+                    return false;
                 }
-
-                return true;
             }
         }
 

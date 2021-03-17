@@ -5,5 +5,4 @@ using YukariToolBox.FormatLog;
 
 Log.SetLogLevel(LogLevel.Debug);
 Helper.CheckReviewed();
-
 return 0;

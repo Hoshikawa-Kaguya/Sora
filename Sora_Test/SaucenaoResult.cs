@@ -17,8 +17,7 @@ namespace Sora_Test
         [JsonProperty(PropertyName = "index_name")]
         public string IndexName { get; set; }
 
-        [JsonProperty(PropertyName = "dupes")] 
-        public int Dupes { get; set; }
+        [JsonProperty(PropertyName = "dupes")] public int Dupes { get; set; }
     }
 
     public class PixivData
@@ -26,8 +25,7 @@ namespace Sora_Test
         [JsonProperty(PropertyName = "ext_urls")]
         public List<string> ExtUrls { get; set; }
 
-        [JsonProperty(PropertyName = "title")]
-        public string Title { get; set; }
+        [JsonProperty(PropertyName = "title")] public string Title { get; set; }
 
         [JsonProperty(PropertyName = "pixiv_id")]
         public int PixivId { get; set; }
