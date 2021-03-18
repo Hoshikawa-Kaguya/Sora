@@ -49,7 +49,7 @@
 
 由于框架还在快速迭代中
 
-框架可能因为各种调整而做出**毁灭性**调整
+框架可能因为各种调整而做出**毁灭性**调整 ~~等昵昵发布1.0我应该就LTS了~~
 
 并且每次做出以下改动时会修改框架的子版本号，请在更新时注意：
 
@@ -103,11 +103,11 @@ Sora这个名字来源于日语中"空"的罗马音
 
 感谢以下大佬对本框架开发的帮助
 
-[Mrs4s](https://github.com/Mrs4s) | [wdvxdr1123](https://github.com/wdvxdr1123) | [Kengxxiao](https://github.com/Kengxxiao)
+[Mrs4s](https://github.com/Mrs4s) | [wdvxdr1123](https://github.com/wdvxdr1123) | [Kengxxiao](https://github.com/Kengxxiao) | [ExerciseBook](https://github.com/ExerciseBook)
 
 ### 源代码参考
 
-[Jie2GG](https://github.com/Jie2GG)/[Native.Framework](https://github.com/Jie2GG/Native.Framework)
+[Jie2GG](https://github.com/Jie2GG)/[Native.Framework](https://github.com/Jie2GG/Native.Framework) (CQ码处理)
 
 ### 使用到的开源库
 
