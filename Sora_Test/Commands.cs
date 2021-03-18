@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using Sora.Attributes.Command;
 using Sora.EventArgs.SoraEvent;
 using System.Threading.Tasks;
-using Sora;
-using Sora.Entities.CQCodes;
 
 namespace Sora_Test
 {
