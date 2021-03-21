@@ -1,22 +1,37 @@
 using Sora.Attributes.Command;
 using Sora.EventArgs.SoraEvent;
 using System.Threading.Tasks;
+using Sora.Entities.CQCodes;
+using Sora.Entities.CQCodes.CQCodeModel;
+using Sora.Enumeration;
 
 namespace Sora_Test
 {
     [CommandGroup]
-    public class Commands
+    public static class Commands
     {
         [GroupCommand(CommandExpressions = new[] {"好耶", "哇噢"})]
-        public async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
+        public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
         {
             await eventArgs.Reply("坏耶");
         }
 
-        [GroupCommand(CommandExpressions = new[] {"贴贴"}, Description = "不能贴爪巴")]
-        public async ValueTask TestCommand2(GroupMessageEventArgs eventArgs)
+        [GroupCommand(CommandExpressions = new[] {@"^echo\s[\s\S]+$"},
+                      MatchType          = MatchType.Regex)]
+        public static async ValueTask Echo(GroupMessageEventArgs eventArgs)
         {
-            await eventArgs.Reply("爪巴");
+            //处理开头字符串
+            if (eventArgs.Message.MessageList[0].Function == CQFunction.Text)
+            {
+                if (eventArgs.Message.MessageList[0].CQData is Text str && str.Content.StartsWith("echo "))
+                {
+                    if (str.Content.Equals("echo ")) eventArgs.Message.MessageList.RemoveAt(0);
+                    else eventArgs.Message.MessageList[0] = CQCode.CQText(str.Content.Substring(5));
+                }
+            }
+
+            //复读
+            if (eventArgs.Message.MessageList.Count != 0) await eventArgs.Reply(eventArgs.Message.MessageList);
         }
     }
 }

@@ -98,7 +98,6 @@ namespace Sora.Command
         /// 处理聊天指令
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
-        [Reviewed("XiaoHe321", "2021-03-16 21:06")]
         internal async ValueTask<bool> CommandAdapter(object eventArgs)
         {
             //检查使能
@@ -167,7 +166,9 @@ namespace Sora.Command
                 try
                 {
                     //执行指令方法
-                    commandInfo.MethodInfo.Invoke(instanceDict[commandInfo.InstanceType], new[] {eventArgs});
+                    commandInfo.MethodInfo
+                               .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
+                                       new[] {eventArgs});
                 }
                 catch (Exception e)
                 {
