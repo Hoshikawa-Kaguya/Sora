@@ -37,13 +37,9 @@ namespace Sora
         /// <returns>是否成功添加，若已存在则返回false。</returns>
         internal static bool AddOrExist(this List<CommandInfo> list, CommandInfo data)
         {
-            if (!list.Any(i => i.Equals(data)))
-            {
-                list.Add(data);
-                return true;
-            }
-
-            return false;
+            if (list.Any(i => i.Equals(data))) return false;
+            list.Add(data);
+            return true;
         }
 
         /// <summary>

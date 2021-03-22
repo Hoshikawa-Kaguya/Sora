@@ -20,6 +20,15 @@ namespace Sora.Command
     /// </summary>
     public class CommandManager
     {
+        #region 属性
+
+        /// <summary>
+        /// 指令服务正常运行标识
+        /// </summary>
+        public bool ServiceIsRunning { get; private set; }
+
+        #endregion
+
         #region 私有字段
 
         private readonly List<CommandInfo> groupCommands = new();
@@ -36,6 +45,7 @@ namespace Sora.Command
 
         internal CommandManager(bool enableSoraCommandManager)
         {
+            ServiceIsRunning              = false;
             this.enableSoraCommandManager = enableSoraCommandManager;
         }
 
@@ -47,7 +57,6 @@ namespace Sora.Command
         /// 自动注册所有指令
         /// </summary>
         /// <param name="assembly">包含指令的程序集</param>
-        [Reviewed("XiaoHe321", "2021-03-12 23:55")]
         public void MappingCommands(Assembly assembly)
         {
             //检查使能
@@ -70,7 +79,7 @@ namespace Sora.Command
             {
                 foreach (var methodInfo in methodInfos)
                 {
-                    switch (GenerateCommandInfo(methodInfo, classType, out CommandInfo commandInfo))
+                    switch (GenerateCommandInfo(methodInfo, classType, out var commandInfo))
                     {
                         case GroupCommand:
                             if (groupCommands.AddOrExist(commandInfo))
@@ -92,6 +101,7 @@ namespace Sora.Command
                                groupCommands.Sum(commands => commands.Regex.Length);
 
             Log.Info("Command", $"Registered {groupCommands.Count + privateCommands.Count} commands");
+            ServiceIsRunning = true;
         }
 
         /// <summary>
@@ -197,6 +207,24 @@ namespace Sora.Command
             }
 
             return isFinalTrigger;
+        }
+
+        /// <summary>
+        /// 获取已注册过的实例
+        /// </summary>
+        /// <param name="instance">实例</param>
+        /// <typeparam name="T">Type</typeparam>
+        /// <returns>获取是否成功</returns>
+        public bool GetInstance<T>(out T instance)
+        {
+            if (instanceDict.Any(type => type.Key == typeof(T)) && instanceDict[typeof(T)] is T outVal)
+            {
+                instance = outVal;
+                return true;
+            }
+
+            instance = default;
+            return false;
         }
 
         #endregion
