@@ -277,7 +277,7 @@ namespace Sora.Net
             //添加服务器记录
             if (!AddConnection(id, socket, selfId))
             {
-                //关闭超时的连接
+                //记录添加失败关闭超时的连接
                 switch (socket)
                 {
                     case IWebSocketConnection serverConn:
@@ -292,7 +292,6 @@ namespace Sora.Net
                         Log.Error("ConnectionManager", "unknown error when get Connection instance");
                         break;
                 }
-
                 return;
             }
 
@@ -307,7 +306,7 @@ namespace Sora.Net
         /// <param name="role">通道标识</param>
         /// <param name="selfId">事件源</param>
         /// <param name="id">id</param>
-        internal void CloseConnection(string role, string selfId, Guid id)
+        internal void CloseConnection(string role, long selfId, Guid id)
         {
             if (!RemoveConnection(id))
             {
@@ -318,8 +317,7 @@ namespace Sora.Net
             }
 
             if (OnCloseConnectionAsync == null) return;
-            long.TryParse(selfId, out var uid);
-            Task.Run(async () => { await OnCloseConnectionAsync(id, new ConnectionEventArgs(role, uid)); });
+            Task.Run(async () => { await OnCloseConnectionAsync(id, new ConnectionEventArgs(role, selfId)); });
         }
 
         internal static void UpdateUid(Guid connectionGuid, long uid)

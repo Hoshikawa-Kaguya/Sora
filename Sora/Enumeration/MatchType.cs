@@ -11,8 +11,13 @@ namespace Sora.Enumeration
         Full,
 
         /// <summary>
-        /// 正则
+        /// 正则匹配
         /// </summary>
-        Regex
+        Regex,
+
+        /// <summary>
+        /// 关键字匹配
+        /// </summary>
+        KeyWord
     }
 }

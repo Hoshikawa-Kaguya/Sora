@@ -183,7 +183,7 @@ namespace Sora.Net
                                               {
                                                   //移除原连接信息
                                                   if (ConnectionManager.ConnectionExitis(socket.ConnectionInfo.Id))
-                                                      ConnManager.CloseConnection(role, selfId,
+                                                      ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
                                                           socket.ConnectionInfo.Id);
 
                                                   Log.Info("Sora",
