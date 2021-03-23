@@ -292,6 +292,7 @@ namespace Sora.Net
                         Log.Error("ConnectionManager", "unknown error when get Connection instance");
                         break;
                 }
+
                 return;
             }
 
