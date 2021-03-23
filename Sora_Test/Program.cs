@@ -15,24 +15,32 @@ var service = SoraServiceFactory.CreateInstance(new ClientConfig());
 //连接事件
 service.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
                                              {
-                                                 Log.Debug("Sora_Test",
+                                                 Log.Debug("Sora_Test|OnOpenConnectionAsync",
                                                            $"connectionId = {connectionInfo} type = {eventArgs.Role}");
                                                  return ValueTask.CompletedTask;
                                              };
 //连接关闭事件
 service.ConnManager.OnCloseConnectionAsync += (connectionInfo, eventArgs) =>
                                               {
-                                                  Log.Debug("Sora_Test",
-                                                            $"connectionId = {connectionInfo} type = {eventArgs.Role}");
+                                                  Log.Debug("Sora_Test|OnCloseConnectionAsync",
+                                                            $"uid = {eventArgs.SelfId} connectionId = {connectionInfo} type = {eventArgs.Role}");
                                                   return ValueTask.CompletedTask;
                                               };
 //心跳包超时事件
 service.ConnManager.OnHeartBeatTimeOut += (connectionInfo, eventArgs) =>
                                           {
-                                              Log.Debug("Sora_Test",
+                                              Log.Debug("Sora_Test|OnHeartBeatTimeOut",
                                                         $"Get heart beat time out from[{connectionInfo}] uid[{eventArgs.SelfId}]");
                                               return ValueTask.CompletedTask;
                                           };
+//连接成功元事件
+service.Event.OnClientConnect += (type, eventArgs) =>
+                                 {
+                                     Log.Debug("Sora_Test|OnClientConnect",
+                                               $"uid = {eventArgs.LoginUid}");
+                                     return ValueTask.CompletedTask;
+                                 };
+
 //群聊消息事件
 service.Event.OnGroupMessage += async (msgType, eventArgs) => { await eventArgs.SourceGroup.SendGroupMessage("好耶"); };
 service.Event.OnSelfMessage += (type, eventArgs) =>

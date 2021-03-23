@@ -119,7 +119,7 @@ namespace Sora.OnebotInterface
             return
             (
                 retCode,
-                uid: int.TryParse(ret?["data"]?["user_id"]?.ToString(), out var uid) ? uid : -1,
+                uid: long.TryParse(ret?["data"]?["user_id"]?.ToString(), out var uid) ? uid : -1,
                 nick: ret?["data"]?["nickname"]?.ToString() ?? string.Empty
             );
         }

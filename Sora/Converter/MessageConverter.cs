@@ -9,8 +9,6 @@ namespace Sora.Converter
     /// </summary>
     internal static class MessageConverter
     {
-        #region 常用扩展函数
-
         /// <summary>
         /// 预处理消息队列
         /// </summary>
@@ -37,7 +35,5 @@ namespace Sora.Converter
 
             return msgList;
         }
-
-        #endregion
     }
 }

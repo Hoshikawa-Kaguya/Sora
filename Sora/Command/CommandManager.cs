@@ -234,7 +234,6 @@ namespace Sora.Command
         /// <summary>
         /// 生成指令信息
         /// </summary>
-        [Reviewed("XiaoHe321", "2021-03-11 22:57")]
         private Attribute GenerateCommandInfo(MethodInfo method, Type classType, out CommandInfo commandInfo)
         {
             //获取指令属性
@@ -254,6 +253,9 @@ namespace Sora.Command
                                                                              .Select(command => $"^{command}$")
                                                                              .ToArray(),
                 MatchType.Regex => (commandAttr as Attributes.Command.Command)?.CommandExpressions,
+                MatchType.KeyWord => (commandAttr as Attributes.Command.Command)?.CommandExpressions
+                    .Select(command => $"[{command}]+")
+                    .ToArray(),
                 _ => null
             };
             if (matchExp == null)

@@ -54,7 +54,7 @@ namespace Sora.OnebotInterface
         #region 事件回调
 
         /// <summary>
-        /// 客户端链接完成事件
+        /// onebot链接完成事件
         /// </summary>
         public event EventAsyncCallBackHandler<ConnectEventArgs> OnClientConnect;
 

@@ -148,7 +148,7 @@ namespace Sora.Net
                                                                         if (ConnectionManager.ConnectionExitis(clientId)
                                                                         )
                                                                             ConnManager.CloseConnection("Universal",
-                                                                                uid.ToString(), clientId);
+                                                                                uid, clientId);
 
                                                                         if (info.Exception != null)
                                                                             Log.Error("Sora",

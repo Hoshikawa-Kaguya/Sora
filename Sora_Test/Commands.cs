@@ -16,6 +16,13 @@ namespace Sora_Test
             await eventArgs.Reply("坏耶");
         }
 
+        [GroupCommand(CommandExpressions = new[] {"来点色图"},
+                      MatchType          = MatchType.KeyWord)]
+        public static async ValueTask TestCommand2(GroupMessageEventArgs eventArgs)
+        {
+            await eventArgs.Reply("不给");
+        }
+
         [GroupCommand(CommandExpressions = new[] {@"^echo\s[\s\S]+$"},
                       MatchType          = MatchType.Regex)]
         public static async ValueTask Echo(GroupMessageEventArgs eventArgs)
