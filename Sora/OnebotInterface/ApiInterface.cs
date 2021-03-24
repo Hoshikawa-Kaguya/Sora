@@ -239,7 +239,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         /// <param name="gid">群号</param>
         /// <param name="useCache">是否使用缓存</param>
-        [Reviewed()]
+        [Reviewed("nidbCN", "2021-03-24 20:55")]
         internal static async ValueTask<(int retCode, GroupInfo groupInfo)> GetGroupInfo(
             Guid connection, long gid, bool useCache)
         {
