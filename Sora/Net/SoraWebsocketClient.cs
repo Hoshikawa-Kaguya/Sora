@@ -67,7 +67,7 @@ namespace Sora.Net
         /// <param name="crashAction">发生未处理异常时的回调</param>
         public SoraWebsocketClient(ClientConfig config, Action<Exception> crashAction = null)
         {
-            Log.Info("Sora", $"Sora 框架版本:{Assembly.GetExecutingAssembly().GetName().Version}");
+            Log.Info("Sora", $"Sora 框架版本:1.0.0-RC.1"); //{Assembly.GetExecutingAssembly().GetName().Version}");
             Log.Debug("Sora", "开发交流群：1081190562");
 
             clientReady = false;
