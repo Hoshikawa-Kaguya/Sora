@@ -18,9 +18,11 @@ namespace Sora
         /// <summary>
         /// 友好的崩溃提示(x)
         /// </summary>
+        [Reviewed("nidbCN", "2021-03-24 19:31")]
         internal static void FriendlyException(UnhandledExceptionEventArgs args)
         {
             var e = args.ExceptionObject as Exception;
+
             if (e is JsonSerializationException)
             {
                 Log.Error("Sora", "Json反序列化时出现错误，可能是go-cqhttp配置出现问题。请把go-cqhttp配置中的post_message_format从string改为array。");
@@ -35,6 +37,7 @@ namespace Sora
         /// <param name="list">要添加元素的列表</param>
         /// <param name="data">要添加的元素</param>
         /// <returns>是否成功添加，若已存在则返回false。</returns>
+        [Reviewed("nidbCN", "2021-03-24 19:39")]
         internal static bool AddOrExist(this List<CommandInfo> list, CommandInfo data)
         {
             if (list.Any(i => i.Equals(data))) return false;
@@ -48,10 +51,9 @@ namespace Sora
         /// </summary>
         /// <param name="msgList">CQ消息段</param>
         /// <param name="text">纯文本信息</param>
-        public static void AddText(this List<CQCode> msgList, string text)
-        {
+        [Reviewed("nidbCN", "2021-03-24 19:40")]
+        public static void AddText(this List<CQCode> msgList, string text) =>
             msgList.Add(CQCode.CQText(text));
-        }
 
         /// <summary>
         /// <para>仅用于项目组内部的代码审查</para>
