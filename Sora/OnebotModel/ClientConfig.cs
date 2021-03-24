@@ -22,12 +22,12 @@ namespace Sora.OnebotModel
         /// <summary>
         /// 鉴权Token
         /// </summary>
-        public string AccessToken { get; init; } = "";
+        public string AccessToken { get; init; } = string.Empty;
 
         /// <summary>
         /// Universal请求路径
         /// </summary>
-        public string UniversalPath { get; init; } = "";
+        public string UniversalPath { get; init; } = string.Empty;
 
         /// <summary>
         /// <para>心跳包超时设置(秒)</para>
