@@ -22,6 +22,9 @@
 	<a href="https://github.com/Mrs4s/go-cqhttp">
 		<img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--alpha1-blue?style=for-the-badge">
 	</a>
+	<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FYukari316%2FSora?ref=badge_small">
+		<img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FYukari316%2FSora.svg?type=small">
+	</a>
 	</h4>
 </h1>
 
