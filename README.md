@@ -40,8 +40,11 @@
 
 <details>
   <summary>支持的连接方式</summary>
+	
 - 正向Websocket
 - 反向Websocket
+
+
 </details>
 
 ## 开发注意事项
