@@ -22,11 +22,9 @@
 	<a href="https://github.com/Mrs4s/go-cqhttp">
 		<img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--alpha1-blue?style=for-the-badge">
 	</a>
-	<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FYukari316%2FSora?ref=badge_small">
-		<img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FYukari316%2FSora.svg?type=small">
-	</a>
 	</h4>
 </h1>
+
 
 
 
@@ -40,11 +38,11 @@
 
 如需要查看最新自动生成的文档请前往 [![Sora on fuget.org](https://www.fuget.org/packages/Sora/badge.svg)](https://www.fuget.org/packages/Sora)
 
-## 支持的连接方式
-
-正向Websocket
-
-反向Websocket
+<details>
+  <summary>支持的连接方式</summary>
+- 正向Websocket
+- 反向Websocket
+</details>
 
 ## 开发注意事项
 
@@ -55,6 +53,16 @@
 框架可能因为各种调整而做出**毁灭性**调整 ~~等昵昵发布1.0我应该就LTS了~~
 
 详细内容请关注文档的更新
+
+### 关于开源协议
+
+本项目使用了`AGPL-3.0`开源协议
+
+这意味着在引用/修改本类库时需要遵守相关的协议规定
+
+并且我们**不鼓励，不支持**一切的**商用**计划
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FYukari316%2FSora.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2FYukari316%2FSora?ref=badge_small)
 
 ### **有关代码复查的提示：**
 
