@@ -13,7 +13,6 @@
 	<a href="https://github.com/howmanybots/onebot">
 		<img src="https://img.shields.io/badge/OneBot-v11-black?style=for-the-badge">
 	</a>
-<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FYukari316%2FSora?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FYukari316%2FSora.svg?type=shield"/></a>
 	<a href="https://opensource.org/licenses/AGPL-3.0">
 		<img src="https://img.shields.io/github/license/Yukari316/Sora?style=for-the-badge&color=blueviolet">
 	</a>
@@ -22,6 +21,9 @@
 	<img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=for-the-badge">
 	<a href="https://github.com/Mrs4s/go-cqhttp">
 		<img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--alpha1-blue?style=for-the-badge">
+	</a>
+	<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FYukari316%2FSora?ref=badge_small">
+		<img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FYukari316%2FSora.svg?type=small">
 	</a>
 	</h4>
 </h1>
@@ -114,7 +116,3 @@ Sora这个名字来源于日语中"空"的罗马音
 > 本项目使用了免费的[ReSharper](https://www.jetbrains.com/resharper/)插件
 
 [<img src=".github/jetbrains-variant-4.svg" width="200"/>](https://www.jetbrains.com/?from=Sora) [<img src=".github/icon-resharper.svg" width="100"/>](https://www.jetbrains.com/ReSharper/?from=Sora)
-
-
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FYukari316%2FSora.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FYukari316%2FSora?ref=badge_large)
