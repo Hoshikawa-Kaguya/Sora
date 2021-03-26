@@ -37,10 +37,9 @@ namespace Sora.Attributes.Command
         public MatchType MatchType { get; init; } = MatchType.Full;
 
         /// <summary>
-        /// <para>是否在指令后触发事件</para>
-        /// <para>默认不触发，如果需要触发请改为<see langword="true"/></para>
+        /// 优先级
         /// </summary>
-        public bool TriggerEventAfterCommand { get; init; } = false;
+        public int Priority { get; init; } = 0;
 
         #endregion
 

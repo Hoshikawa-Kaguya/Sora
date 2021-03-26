@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Attributes;
@@ -126,8 +127,8 @@ namespace Sora.Command
                                                                                  .IsMatch(groupMessageEvent.Message.RawText,
                                                                                      regex)
                                                                           && command.MethodInfo != null))
+                                     .OrderByDescending(p => p.Priority)
                                      .ToList();
-
                     break;
                 }
                 case PrivateMessageEventArgs privateMessageEvent:
@@ -139,6 +140,7 @@ namespace Sora.Command
                                                                                        regex,
                                                                                        RegexOptions.Compiled)
                                                                             && command.MethodInfo != null))
+                                       .OrderByDescending(p => p.Priority)
                                        .ToList();
                     break;
                 }
@@ -149,9 +151,6 @@ namespace Sora.Command
 
             //在没有匹配到指令时直接跳转至Event触发
             if (matchedCommand.Count == 0) return true;
-
-            //最终是否触发命令（如果匹配到多个命令，则如果其中一个要触发，则直接返回触发）
-            var isFinalTrigger = false;
 
             //遍历匹配到的每个命令
             foreach (var commandInfo in matchedCommand)
@@ -175,10 +174,17 @@ namespace Sora.Command
 
                 try
                 {
+                    var isAsyncMethod = (AsyncStateMachineAttribute)commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
                     //执行指令方法
-                    commandInfo.MethodInfo
-                               .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
-                                       new[] {eventArgs});
+                    if (isAsyncMethod)
+                        await ((dynamic)commandInfo.MethodInfo
+                                                   .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
+                                                           new[] {eventArgs}))!;
+                    else
+                        commandInfo.MethodInfo
+                                   .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
+                                           new[] {eventArgs});
+                    if (!((BaseSoraEventArgs) eventArgs).TriggerAfterThis) return false;
                 }
                 catch (Exception e)
                 {
@@ -191,22 +197,19 @@ namespace Sora.Command
                         {
                             case GroupMessageEventArgs groupMessageEvent:
                             {
-                                await groupMessageEvent.Reply($"指令执行错误\n指令信息:{commandInfo.Desc}");
+                                await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
                                 break;
                             }
                             case PrivateMessageEventArgs privateMessageEvent:
                             {
-                                await privateMessageEvent.Reply($"指令执行错误\n指令信息:{commandInfo.Desc}");
+                                await privateMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
                                 break;
                             }
                         }
                     }
                 }
-
-                isFinalTrigger |= commandInfo.TriggerEventAfterCommand;
             }
-
-            return isFinalTrigger;
+            return true;
         }
 
         /// <summary>
@@ -215,7 +218,7 @@ namespace Sora.Command
         /// <param name="instance">实例</param>
         /// <typeparam name="T">Type</typeparam>
         /// <returns>获取是否成功</returns>
-        public bool GetInstance<T>(out T instance)
+        public bool GetInzstance<T>(out T instance)
         {
             if (instanceDict.Any(type => type.Key == typeof(T)) && instanceDict[typeof(T)] is T outVal)
             {
@@ -277,7 +280,7 @@ namespace Sora.Command
                                           classType.Name,
                                           method,
                                           (commandAttr as GroupCommand)?.PermissionLevel,
-                                          (Attributes.Command.Command) commandAttr is {TriggerEventAfterCommand: true},
+                                          (commandAttr as Attributes.Command.Command)?.Priority ?? 0,
                                           method.IsStatic ? null : classType);
 
             return commandAttr;

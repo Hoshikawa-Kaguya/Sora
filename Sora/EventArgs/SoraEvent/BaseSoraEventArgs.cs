@@ -36,6 +36,13 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         internal long TimeStamp { get; private set; }
 
+        /// <summary>
+        /// <para>是否在处理本次事件后再次触发其他事件，默认为不触发</para>
+        /// <para>如:处理Command后可以将此值设置为<see langword="false"/>来阻止后续的事件触发</para>
+        /// <para>但如有多个Command同时被触发时，只要有一次事件处理后此值为<see langword="true"/>，则无论如何都将触发后续事件</para>
+        /// </summary>
+        public bool TriggerAfterThis { get; set; }
+
         #endregion
 
         #region 构造函数
@@ -49,11 +56,12 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="time">连接时间</param>
         internal BaseSoraEventArgs(Guid connectionGuid, string eventName, long loginUid, long time)
         {
-            this.SoraApi   = new SoraApi(connectionGuid);
-            this.EventName = eventName;
-            this.LoginUid  = loginUid;
-            this.TimeStamp = time;
-            this.Time      = time.ToDateTime();
+            SoraApi          = new SoraApi(connectionGuid);
+            EventName        = eventName;
+            LoginUid         = loginUid;
+            TimeStamp        = time;
+            Time             = time.ToDateTime();
+            TriggerAfterThis = false;
         }
 
         #endregion
