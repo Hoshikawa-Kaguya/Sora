@@ -218,7 +218,7 @@ namespace Sora.Command
         /// <param name="instance">实例</param>
         /// <typeparam name="T">Type</typeparam>
         /// <returns>获取是否成功</returns>
-        public bool GetInzstance<T>(out T instance)
+        public bool GetInstance<T>(out T instance)
         {
             if (instanceDict.Any(type => type.Key == typeof(T)) && instanceDict[typeof(T)] is T outVal)
             {
