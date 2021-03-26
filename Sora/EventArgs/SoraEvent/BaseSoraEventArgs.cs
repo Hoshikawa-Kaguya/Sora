@@ -34,14 +34,14 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 事件产生时间戳
         /// </summary>
-        internal long TimeStamp { get; private set; }
+        private long TimeStamp { get; set; }
 
         /// <summary>
         /// <para>是否在处理本次事件后再次触发其他事件，默认为不触发</para>
         /// <para>如:处理Command后可以将此值设置为<see langword="false"/>来阻止后续的事件触发，为<see langword="true"/>时则会触发其他相匹配的指令和事件</para>
         /// <para>如果出现了不同表达式同时被触发且优先级相同的情况，则这几个指令的执行顺序将是不确定的，请避免这种情况的发生</para>
         /// </summary>
-        public bool TriggerAfterThis { get; set; }
+        public bool IsContinueEventChain { get; set; }
 
         #endregion
 
@@ -61,7 +61,7 @@ namespace Sora.EventArgs.SoraEvent
             LoginUid         = loginUid;
             TimeStamp        = time;
             Time             = time.ToDateTime();
-            TriggerAfterThis = false;
+            IsContinueEventChain = false;
         }
 
         #endregion

@@ -1,11 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
+using Sora.Attributes.Command;
 using Sora.Entities.CQCodes;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
+using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
+using Sora.OnebotInterface;
 using Sora.OnebotModel;
 
 namespace Sora.EventArgs.SoraEvent
@@ -96,6 +101,14 @@ namespace Sora.EventArgs.SoraEvent
         public async ValueTask<(APIStatusType apiStatus, int messageId)> Reply(params object[] message)
         {
             return await base.SoraApi.SendGroupMessage(this.SourceGroup.Id, message);
+        }
+        
+        public async ValueTask WaitForUser(MethodInfo parent,string[] commandList,MatchType matchType)
+        {
+            AutoResetEvent semaphore = new(false);
+            StaticVariable.CommandWaitList.Enqueue((new WaitiableCommand(parent,commandList,matchType),semaphore));
+            semaphore.WaitOne();
+            return;
         }
 
         /// <summary>
