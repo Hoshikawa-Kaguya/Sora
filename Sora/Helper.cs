@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Sora.Attributes;
 using Sora.Entities.CQCodes;
+using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
 namespace Sora
@@ -41,6 +42,9 @@ namespace Sora
         internal static bool AddOrExist(this List<CommandInfo> list, CommandInfo data)
         {
             if (list.Any(i => i.Equals(data))) return false;
+            //当有指令表达式相同且优先级相同时，抛出错误
+            if (list.Any(i => i.Regex.ArrayEquals(data.Regex) && i.Priority == data.Priority))
+                throw new NotSupportedException("Priority cannot be the same value");
             list.Add(data);
             return true;
         }

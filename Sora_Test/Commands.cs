@@ -10,10 +10,18 @@ namespace Sora_Test
     [CommandGroup]
     public static class Commands
     {
-        [GroupCommand(CommandExpressions = new[] {"好耶", "哇噢"})]
+        [GroupCommand(CommandExpressions = new[] {"好耶", "哇噢"}, Priority = 1)]
         public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
         {
-            await eventArgs.Reply("坏耶");
+            await eventArgs.Reply("这是1");
+            eventArgs.TriggerAfterThis = true;
+        }
+
+        [GroupCommand(CommandExpressions = new[] {"好耶", "哇噢"}, Priority = 0)]
+        public static async ValueTask TestCommand3(GroupMessageEventArgs eventArgs)
+        {
+            await eventArgs.Reply("这是0");
+            eventArgs.TriggerAfterThis = false;
         }
 
         [GroupCommand(CommandExpressions = new[] {"来点色图"},

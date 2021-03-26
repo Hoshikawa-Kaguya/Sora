@@ -5,7 +5,6 @@ using Sora.OnebotInterface;
 using Sora.OnebotModel;
 using System;
 using System.Net.WebSockets;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Websocket.Client;

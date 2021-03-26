@@ -43,9 +43,9 @@ namespace Sora.Entities.Info
         internal Type InstanceType { get; }
 
         /// <summary>
-        /// 是否在指令后触发事件
+        /// 优先级
         /// </summary>
-        public bool TriggerEventAfterCommand { get; }
+        public int Priority { get; }
 
         #endregion
 
@@ -55,15 +55,15 @@ namespace Sora.Entities.Info
         /// 指令信息构造
         /// </summary>
         internal CommandInfo(string desc, string[] regex, string groupName, MethodInfo method,
-                             MemberRoleType? permissonType, bool triggerEventAfterCommand, Type instanceType = null)
+                             MemberRoleType? permissonType, int priority, Type instanceType = null)
         {
-            Desc                     = desc;
-            Regex                    = regex;
-            GroupName                = groupName;
-            MethodInfo               = method;
-            InstanceType             = instanceType;
-            TriggerEventAfterCommand = triggerEventAfterCommand;
-            PermissonType            = permissonType;
+            Desc          = desc;
+            Regex         = regex;
+            GroupName     = groupName;
+            MethodInfo    = method;
+            InstanceType  = instanceType;
+            PermissonType = permissonType;
+            Priority      = priority;
         }
 
         #endregion
@@ -73,7 +73,8 @@ namespace Sora.Entities.Info
             if (MethodInfo.Name == another.MethodInfo.Name
              && MethodInfo.GetGenericArguments().ArrayEquals(another.MethodInfo.GetGenericArguments())
              && Regex.ArrayEquals(another.Regex)
-             && PermissonType == another.PermissonType
+             && PermissonType == another.PermissonType 
+             && Priority == another.Priority
                 //&& InstanceType  == another.InstanceType
             )
             {
