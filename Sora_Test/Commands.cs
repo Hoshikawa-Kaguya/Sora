@@ -1,27 +1,36 @@
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using Sora.Attributes.Command;
 using Sora.EventArgs.SoraEvent;
 using System.Threading.Tasks;
 using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Enumeration;
+using MatchType = Sora.Enumeration.MatchType;
 
 namespace Sora_Test
 {
     [CommandGroup]
     public static class Commands
     {
-        [GroupCommand(CommandExpressions = new[] {"好耶", "哇噢"}, Priority = 1)]
+        [GroupCommand(CommandExpressions = new[] {"耶"}, Priority = 0)]
         public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
         {
             await eventArgs.Reply("这是1");
-            eventArgs.TriggerAfterThis = true;
+            await eventArgs.WaitForUser(typeof(Commands)
+                                        .GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                                        .Where(m => m.Name=="TestCommand1")
+                                        ?.First(),new[] {"好耶", "哇噢"}, MatchType.Full);
+            await eventArgs.Reply("这是2");
+            eventArgs.IsContinueEventChain = true;
         }
 
         [GroupCommand(CommandExpressions = new[] {"好耶", "哇噢"}, Priority = 0)]
         public static async ValueTask TestCommand3(GroupMessageEventArgs eventArgs)
         {
             await eventArgs.Reply("这是0");
-            eventArgs.TriggerAfterThis = false;
+            eventArgs.IsContinueEventChain = false;
         }
 
         [GroupCommand(CommandExpressions = new[] {"来点色图"},

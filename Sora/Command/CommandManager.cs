@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
 using YukariToolBox.FormatLog;
@@ -78,23 +79,21 @@ namespace Sora.Command
             //生成指令信息
             foreach (var (classType, methodInfos) in cmdGroups)
             {
-                foreach (var methodInfo in methodInfos)
+                Dictionary<MethodInfo, AutoResetEvent> methodGroups = new Dictionary<MethodInfo, AutoResetEvent>();
+                foreach (MethodInfo methodInfo in methodInfos)
                 {
-                    switch (GenerateCommandInfo(methodInfo, classType, out var commandInfo))
-                    {
-                        case GroupCommand:
-                            if (groupCommands.AddOrExist(commandInfo))
-                                Log.Debug("Command", $"Registered group command [{methodInfo.Name}]");
-                            break;
-                        case PrivateCommand:
-                            if (privateCommands.AddOrExist(commandInfo))
-                                Log.Debug("Command", $"Registered private command [{methodInfo.Name}]");
-                            break;
-                        default:
-                            Log.Warning("Command", "未知的指令类型");
-                            continue;
-                    }
+                    methodGroups.Add(methodInfo, null);
                 }
+
+                MappingCommands(classType, methodGroups);
+            }
+        }
+
+        public void MappingCommands(Type classType, Dictionary<MethodInfo, AutoResetEvent> cmdGroups)
+        {
+            foreach (var methodInfo in cmdGroups)
+            {
+                MappingCommands(classType, methodInfo.Key, false, methodInfo.Value);
             }
 
             //修改缓存大小
@@ -103,6 +102,46 @@ namespace Sora.Command
 
             Log.Info("Command", $"Registered {groupCommands.Count + privateCommands.Count} commands");
             ServiceIsRunning = true;
+        }
+
+        public void MappingCommands(Type classType, MethodInfo methodInfo, bool isUseSempaore, AutoResetEvent sempaore)
+        {
+            switch (GenerateCommandInfo(methodInfo, classType, isUseSempaore, sempaore,
+                                        out var commandInfo))
+            {
+                case GroupCommand:
+                    if (groupCommands.AddOrExist(commandInfo))
+                        Log.Debug("Command", $"Registered group command [{methodInfo.Name}]");
+                    break;
+                case PrivateCommand:
+                    if (privateCommands.AddOrExist(commandInfo))
+                        Log.Debug("Command", $"Registered private command [{methodInfo.Name}]");
+                    break;
+                default:
+                    Log.Warning("Command", "未知的指令类型");
+                    break;
+            }
+
+            ServiceIsRunning = true;
+        }
+
+        public void UnMappingCommands(Type classType, MethodInfo methodInfo, AutoResetEvent sempaore)
+        {
+            switch (GenerateCommandInfo(methodInfo, classType, sempaore == null, sempaore,
+                                        out var commandInfo))
+            {
+                case GroupCommand:
+                    if (groupCommands.Remove(commandInfo))
+                        Log.Debug("Command", $"Unregistered group command [{methodInfo.Name}]");
+                    break;
+                case PrivateCommand:
+                    if (privateCommands.Remove(commandInfo))
+                        Log.Debug("Command", $"Unregistered private command [{methodInfo.Name}]");
+                    break;
+                default:
+                    Log.Warning("Command", "未知的指令类型");
+                    break;
+            }
         }
 
         /// <summary>
@@ -129,6 +168,7 @@ namespace Sora.Command
                                                                           && command.MethodInfo != null))
                                      .OrderByDescending(p => p.Priority)
                                      .ToList();
+
                     break;
                 }
                 case PrivateMessageEventArgs privateMessageEvent:
@@ -142,12 +182,14 @@ namespace Sora.Command
                                                                             && command.MethodInfo != null))
                                        .OrderByDescending(p => p.Priority)
                                        .ToList();
+
                     break;
                 }
                 default:
                     Log.Error("CommandAdapter", "cannot parse eventArgs");
                     return true;
             }
+
 
             //在没有匹配到指令时直接跳转至Event触发
             if (matchedCommand.Count == 0) return true;
@@ -174,17 +216,28 @@ namespace Sora.Command
 
                 try
                 {
-                    var isAsyncMethod = (AsyncStateMachineAttribute)commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
-                    //执行指令方法
-                    if (isAsyncMethod)
-                        await ((dynamic)commandInfo.MethodInfo
-                                                   .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
-                                                           new[] {eventArgs}))!;
+                    //是否正在等待信号量，若是，则直接触发信号量即可
+                    if (commandInfo.IsWaittingSemaphore)
+                    {
+                        commandInfo.Semaphore.Set();
+                    }
                     else
-                        commandInfo.MethodInfo
-                                   .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
-                                           new[] {eventArgs});
-                    if (!((BaseSoraEventArgs) eventArgs).TriggerAfterThis) return false;
+                    {
+                        var isAsyncMethod =
+                            (AsyncStateMachineAttribute)
+                            commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
+                        //执行指令方法
+                        if (isAsyncMethod)
+                            await ((dynamic) commandInfo.MethodInfo
+                                                        .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
+                                                                new[] {eventArgs}))!;
+                        else
+                            commandInfo.MethodInfo
+                                       .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
+                                               new[] {eventArgs});
+                    }
+
+                    if (!((BaseSoraEventArgs) eventArgs).IsContinueEventChain) return false;
                 }
                 catch (Exception e)
                 {
@@ -209,6 +262,7 @@ namespace Sora.Command
                     }
                 }
             }
+
             return true;
         }
 
@@ -234,10 +288,8 @@ namespace Sora.Command
 
         #region 私有管理方法
 
-        /// <summary>
-        /// 生成指令信息
-        /// </summary>
-        private Attribute GenerateCommandInfo(MethodInfo method, Type classType, out CommandInfo commandInfo)
+        private Attribute GenerateCommandInfo(MethodInfo     method,    Type classType, bool isWaittingSemaphore,
+                                              AutoResetEvent semaphore, out CommandInfo commandInfo)
         {
             //获取指令属性
             var commandAttr =
@@ -251,16 +303,16 @@ namespace Sora.Command
             var match = (commandAttr as Attributes.Command.Command)?.MatchType ?? MatchType.Full;
             //处理表达式
             var matchExp = match switch
-            {
-                MatchType.Full => (commandAttr as Attributes.Command.Command)?.CommandExpressions
-                                                                             .Select(command => $"^{command}$")
-                                                                             .ToArray(),
-                MatchType.Regex => (commandAttr as Attributes.Command.Command)?.CommandExpressions,
-                MatchType.KeyWord => (commandAttr as Attributes.Command.Command)?.CommandExpressions
-                    .Select(command => $"[{command}]+")
-                    .ToArray(),
-                _ => null
-            };
+                           {
+                               MatchType.Full => (commandAttr as Attributes.Command.Command)?.CommandExpressions
+                                   .Select(command => $"^{command}$")
+                                   .ToArray(),
+                               MatchType.Regex => (commandAttr as Attributes.Command.Command)?.CommandExpressions,
+                               MatchType.KeyWord => (commandAttr as Attributes.Command.Command)?.CommandExpressions
+                                   .Select(command => $"[{command}]+")
+                                   .ToArray(),
+                               _ => null
+                           };
             if (matchExp == null)
             {
                 commandInfo = ObjectHelper.CreateInstance<CommandInfo>();
@@ -281,11 +333,17 @@ namespace Sora.Command
                                           method,
                                           (commandAttr as GroupCommand)?.PermissionLevel,
                                           (commandAttr as Attributes.Command.Command)?.Priority ?? 0,
+                                          isWaittingSemaphore,
+                                          semaphore,
                                           method.IsStatic ? null : classType);
 
             return commandAttr;
         }
 
+
+        /// <summary>
+        /// 生成指令信息
+        /// </summary>
         /// <summary>
         /// 检查实例的存在和生成
         /// </summary>

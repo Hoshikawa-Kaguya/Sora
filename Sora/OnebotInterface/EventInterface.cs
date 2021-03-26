@@ -7,8 +7,13 @@ using Sora.OnebotModel.OnebotEvent.MetaEvent;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
 using System;
+using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
+using Sora.Attributes.Command;
+using Sora.Entities.Info;
+using Sora.Enumeration;
 using YukariToolBox.FormatLog;
 
 namespace Sora.OnebotInterface
@@ -294,9 +299,24 @@ namespace Sora.OnebotInterface
                     Log.Debug("Sora",
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(connection, "group", groupMsg);
+
+                    //将等待列表的命令出队
+                    while (StaticVariable.CommandWaitList.Count > 0)
+                    {
+                        bool isSucc =
+                            StaticVariable.CommandWaitList.TryDequeue(out (WaitiableCommand Command, AutoResetEvent
+                                                                          ResetEvent) command);
+                        if (isSucc)
+                            //TODO:没有做私聊消息处理
+                            CommandManager.MappingCommands(null,command.Command.ParentMethod, true, command.ResetEvent);
+                    }
+
                     //处理指令
                     if (!await CommandManager.CommandAdapter(eventArgs))
+                    {
                         break;
+                    }
+
                     //执行回调
                     if (OnGroupMessage == null) break;
                     await OnGroupMessage("Message", eventArgs);
