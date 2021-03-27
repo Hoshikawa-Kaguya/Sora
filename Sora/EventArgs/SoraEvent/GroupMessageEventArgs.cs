@@ -152,7 +152,7 @@ namespace Sora.EventArgs.SoraEvent
 
         #region 连续对话
 
-        public ValueTask<GroupMessageEventArgs> WaitForNextMessage(string[] commandExps, MatchType matchType)
+        public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType)
         {
             return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType, SourceGroup));
         }

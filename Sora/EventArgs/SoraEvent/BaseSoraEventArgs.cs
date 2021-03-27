@@ -69,7 +69,7 @@ namespace Sora.EventArgs.SoraEvent
 
         #endregion
 
-        internal object WaitForUser(long sourceUid, string[] commandExps, MatchType matchType, long sourceGroup = 0)
+        internal object WaitForNextMessage(long sourceUid, string[] commandExps, MatchType matchType, long sourceGroup = 0)
         {
             IsContinueEventChain = false;
 
