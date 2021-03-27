@@ -11,13 +11,15 @@ namespace Sora_Test
     [CommandGroup]
     public static class Commands
     {
-        [GroupCommand(CommandExpressions = new[] {"耶"}, Priority = 0)]
+        [GroupCommand(CommandExpressions = new[] {"1"}, Priority = 0)]
         public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
         {
             await eventArgs.Reply("cmd1_1");
-            var ea = await eventArgs.WaitForNextMessageAsync(new []{"好耶"}, MatchType.Full);
-            await eventArgs.Reply("cmd1_2");
-            ea.IsContinueEventChain = false;
+            var ea1 = await eventArgs.WaitForNextMessageAsync(new []{"2"}, MatchType.Full);
+            await ea1.Reply("cmd1_2");
+            var ea2 = await ea1.WaitForNextMessageAsync(new []{"3"}, MatchType.Full);
+            await ea2.Reply("cmd1_3");
+
         }
 
         [GroupCommand(CommandExpressions = new[] {"好耶", "哇噢"}, Priority = 0)]

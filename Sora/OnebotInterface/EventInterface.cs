@@ -294,7 +294,6 @@ namespace Sora.OnebotInterface
                     Log.Debug("Sora",
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(connection, "group", groupMsg);
-                    Log.Debug("th", $"start {Environment.CurrentManagedThreadId}");
 
                     // //将等待列表的命令出队
                     // while (StaticVariable.CommandWaitList.Count > 0)
@@ -308,7 +307,7 @@ namespace Sora.OnebotInterface
                     // }
 
                     //处理指令
-                    if (CommandManager.CommandAdapter(eventArgs) || !eventArgs.IsContinueEventChain)
+                    if (!CommandManager.CommandAdapter(eventArgs))
                         break;
                     //执行回调
                     if (OnGroupMessage == null) break;

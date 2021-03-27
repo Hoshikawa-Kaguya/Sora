@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
+using Sora.OnebotInterface;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Helpers;
 using static Sora.OnebotInterface.StaticVariable;
@@ -152,12 +153,12 @@ namespace Sora.Command
         internal bool CommandAdapter(object eventArgs)
         {
             //检查使能
-            if (!enableSoraCommandManager) return false;
+            if (!enableSoraCommandManager) return true;
 
             #region 信号量处理
 
             //处理消息段
-            List<WaitingInfo> waitingCommand;
+            Dictionary<Guid, WaitingInfo> waitingCommand;
             switch (eventArgs)
             {
                 case GroupMessageEventArgs groupMessageEvent:
@@ -166,46 +167,52 @@ namespace Sora.Command
                     waitingCommand = WaitingDict
                                      .Where(command =>
                                                 //判断来自同一个连接
-                                                command.ConnectionId ==
+                                                command.Value.ConnectionId ==
                                                 groupMessageEvent.SoraApi.ConnectionGuid
                                                 //判断来着同一个群
-                                             && command.Source.g == groupMessageEvent.SourceGroup
+                                             && command.Value.Source.g == groupMessageEvent.SourceGroup
                                                 //判断来自同一人
-                                             && command.Source.u == groupMessageEvent.Sender
+                                             && command.Value.Source.u == groupMessageEvent.Sender
                                                 //匹配
-                                             && command.CommandExpressions.Any(regex =>
-                                                                                   Regex
-                                                                                       .IsMatch(groupMessageEvent.Message.RawText,
-                                                                                           regex)))
-                                     .ToList();
+                                             && command.Value.CommandExpressions.Any(regex =>
+                                                    Regex
+                                                        .IsMatch(groupMessageEvent.Message.RawText,
+                                                                 regex)))
+                                     .ToDictionary(i => i.Key, i => i.Value);
                     break;
                 }
                 case PrivateMessageEventArgs privateMessageEvent:
                 {
                     waitingCommand = WaitingDict
                                      .Where(command =>
-                                                command.ConnectionId ==
-                                                privateMessageEvent.SoraApi.ConnectionGuid &&
-                                                command.CommandExpressions.Any(regex =>
-                                                                                   Regex.IsMatch(privateMessageEvent.Message.RawText,
-                                                                                       regex)))
-                                     .ToList();
+                                                //判断来自同一个连接
+                                                command.Value.ConnectionId ==
+                                                privateMessageEvent.SoraApi.ConnectionGuid
+                                                //判断来自同一人
+                                             && command.Value.Source.u == privateMessageEvent.Sender
+                                                //
+                                             && command.Value.CommandExpressions.Any(regex =>
+                                                                                   Regex
+                                                                                       .IsMatch(privateMessageEvent.Message.RawText,
+                                                                                           regex)))
+                                     .ToDictionary(i => i.Key, i => i.Value);
                     break;
                 }
                 default:
                     Log.Error("CommandAdapter", "cannot parse eventArgs");
-                    return false;
+                    return true;
             }
 
-            for (var i = 0; i < waitingCommand.Count; i++)
+            foreach (var cmd in waitingCommand)
             {
-                var newInfo = waitingCommand[i];
+                var oldInfo = WaitingDict[cmd.Key];
+                var newInfo = oldInfo;
                 newInfo.EventArgs = eventArgs;
-                waitingCommand[i] = newInfo;
-                waitingCommand[i].Semaphore.Set();
+                WaitingDict.TryUpdate(cmd.Key, newInfo, oldInfo);
+                WaitingDict[cmd.Key].Semaphore.Set();
             }
 
-            if (waitingCommand.Count != 0) return true;
+            if (waitingCommand.Count != 0) return false;
 
             #endregion
 
@@ -243,11 +250,11 @@ namespace Sora.Command
                 }
                 default:
                     Log.Error("CommandAdapter", "cannot parse eventArgs");
-                    return false;
+                    return true;
             }
             
             //在没有匹配到指令时直接跳转至Event触发
-            if (matchedCommand.Count == 0) return false;
+            if (matchedCommand.Count == 0) return true;
             
             //遍历匹配到的每个命令
             foreach (var commandInfo in matchedCommand)
@@ -298,7 +305,7 @@ namespace Sora.Command
                                                new[] {eventArgs});
                     }
 
-                    if (!((BaseSoraEventArgs) eventArgs).IsContinueEventChain) return false;
+                    return ((BaseSoraEventArgs) eventArgs).IsContinueEventChain;
                 }
                 catch (Exception e)
                 {
@@ -332,7 +339,7 @@ namespace Sora.Command
 
             #endregion
 
-            return false;
+            return true;
         }
 
         /// <summary>
