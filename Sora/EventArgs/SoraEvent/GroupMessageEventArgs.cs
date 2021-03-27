@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes.Command;
-using Sora.Command;
 using Sora.Entities.CQCodes;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
@@ -110,7 +109,6 @@ namespace Sora.EventArgs.SoraEvent
             
             StaticVariable.CommandWaitList.Enqueue((new WaitiableCommand(parent,commandList,matchType),semaphore));
             semaphore.WaitOne();
-            return;
         }
         
         
@@ -154,9 +152,9 @@ namespace Sora.EventArgs.SoraEvent
 
         #region 连续对话
 
-        public ValueTask<GroupMessageEventArgs> WaitForUser(string[] commandExps, MatchType matchType)
+        public ValueTask<GroupMessageEventArgs> WaitForNextMessage(string[] commandExps, MatchType matchType)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs)WaitForUser(Sender, commandExps, matchType, SourceGroup));
+            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType, SourceGroup));
         }
 
         #endregion

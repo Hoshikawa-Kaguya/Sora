@@ -7,13 +7,8 @@ using Sora.OnebotModel.OnebotEvent.MetaEvent;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
 using System;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
-using Sora.Attributes.Command;
-using Sora.Entities.Info;
-using Sora.Enumeration;
 using YukariToolBox.FormatLog;
 
 namespace Sora.OnebotInterface

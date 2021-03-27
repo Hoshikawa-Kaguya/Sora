@@ -1,6 +1,3 @@
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using Sora.Attributes.Command;
 using Sora.EventArgs.SoraEvent;
 using System.Threading.Tasks;
@@ -18,9 +15,9 @@ namespace Sora_Test
         public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
         {
             await eventArgs.Reply("cmd1_1");
-            var ea = await eventArgs.WaitForUser(new []{"好耶"}, MatchType.Full) as GroupMessageEventArgs;
+            var ea = await eventArgs.WaitForNextMessageAsync(new []{"好耶"}, MatchType.Full);
             await eventArgs.Reply("cmd1_2");
-            if (ea != null) ea.IsContinueEventChain = false;
+            ea.IsContinueEventChain = false;
         }
 
         [GroupCommand(CommandExpressions = new[] {"好耶", "哇噢"}, Priority = 0)]
@@ -30,7 +27,7 @@ namespace Sora_Test
             eventArgs.IsContinueEventChain = false;
         }
 
-        [GroupCommand(CommandExpressions = new[] {"来点色图"},
+        [GroupCommand(CommandExpressions = new[] {"怪"},
                       MatchType          = MatchType.KeyWord)]
         public static async ValueTask TestCommand2(GroupMessageEventArgs eventArgs)
         {
