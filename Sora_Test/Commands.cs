@@ -17,19 +17,16 @@ namespace Sora_Test
         [GroupCommand(CommandExpressions = new[] {"耶"}, Priority = 0)]
         public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
         {
-            await eventArgs.Reply("这是1");
-            await eventArgs.WaitForUser(typeof(Commands)
-                                        .GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                                        .Where(m => m.Name=="TestCommand1")
-                                        ?.First(),new[] {"好耶", "哇噢"}, MatchType.Full);
-            await eventArgs.Reply("这是2");
-            eventArgs.IsContinueEventChain = true;
+            await eventArgs.Reply("cmd1_1");
+            var ea = await eventArgs.WaitForUser(new []{"好耶"}, MatchType.Full) as GroupMessageEventArgs;
+            await eventArgs.Reply("cmd1_2");
+            if (ea != null) ea.IsContinueEventChain = false;
         }
 
         [GroupCommand(CommandExpressions = new[] {"好耶", "哇噢"}, Priority = 0)]
         public static async ValueTask TestCommand3(GroupMessageEventArgs eventArgs)
         {
-            await eventArgs.Reply("这是0");
+            await eventArgs.Reply("cmd3");
             eventArgs.IsContinueEventChain = false;
         }
 
@@ -37,7 +34,7 @@ namespace Sora_Test
                       MatchType          = MatchType.KeyWord)]
         public static async ValueTask TestCommand2(GroupMessageEventArgs eventArgs)
         {
-            await eventArgs.Reply("不给");
+            await eventArgs.Reply("cmd2");
         }
 
         [GroupCommand(CommandExpressions = new[] {@"^echo\s[\s\S]+$"},

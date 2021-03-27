@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes.Command;
+using Sora.Command;
 using Sora.Entities.CQCodes;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
@@ -106,10 +107,13 @@ namespace Sora.EventArgs.SoraEvent
         public async ValueTask WaitForUser(MethodInfo parent,string[] commandList,MatchType matchType)
         {
             AutoResetEvent semaphore = new(false);
+            
             StaticVariable.CommandWaitList.Enqueue((new WaitiableCommand(parent,commandList,matchType),semaphore));
             semaphore.WaitOne();
             return;
         }
+        
+        
 
         /// <summary>
         /// 没什么用的复读功能
@@ -144,6 +148,15 @@ namespace Sora.EventArgs.SoraEvent
             bool useCache = true)
         {
             return await base.SoraApi.GetGroupMemberInfo(this.SourceGroup.Id, this.Sender.Id, useCache);
+        }
+
+        #endregion
+
+        #region 连续对话
+
+        public ValueTask<GroupMessageEventArgs> WaitForUser(string[] commandExps, MatchType matchType)
+        {
+            return ValueTask.FromResult((GroupMessageEventArgs)WaitForUser(Sender, commandExps, matchType, SourceGroup));
         }
 
         #endregion
