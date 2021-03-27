@@ -12,7 +12,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
-using Sora.OnebotInterface;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Helpers;
 using static Sora.OnebotInterface.StaticVariable;

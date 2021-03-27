@@ -1,10 +1,8 @@
 using System;
-using System.Threading.Tasks;
 using Sora.Command;
 using Sora.Entities.Base;
 using Sora.Enumeration;
 using Sora.OnebotInterface;
-using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using YukariToolBox.Time;
 
 namespace Sora.EventArgs.SoraEvent
