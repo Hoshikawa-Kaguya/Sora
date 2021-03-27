@@ -97,9 +97,15 @@ namespace Sora.EventArgs.SoraEvent
 
         #region 连续对话
 
+        /// <summary>
+        /// 等待下一条消息触发
+        /// </summary>
+        /// <param name="commandExps">指令表达式</param>
+        /// <param name="matchType">匹配类型</param>
+        /// <returns>触发后的事件参数</returns>
         public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType));
+            return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, commandExps, matchType));
         }
 
         #endregion

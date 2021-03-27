@@ -1,10 +1,10 @@
 using System;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Sora.OnebotInterface;
 using Sora.OnebotModel.ApiParams;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
@@ -25,15 +25,6 @@ namespace Sora.Net
 
         #endregion
 
-        #region 被观察对象
-
-        /// <summary>
-        /// API响应被观察对象
-        /// </summary>
-        private static readonly Subject<Tuple<Guid, JObject>> ApiSubject = new();
-
-        #endregion
-
         #region 通信
 
         /// <summary>
@@ -44,7 +35,7 @@ namespace Sora.Net
         internal static void GetResponse(Guid echo, JObject response)
         {
             Log.Debug("Sora|ReactiveApiManager", $"Get api response {response.ToString(Formatting.None)}");
-            ApiSubject.OnNext(new Tuple<Guid, JObject>(echo, response));
+            StaticVariable.ApiSubject.OnNext(new Tuple<Guid, JObject>(echo, response));
         }
 
         /// <summary>
@@ -58,19 +49,19 @@ namespace Sora.Net
                                                                 TimeSpan? timeout = null)
         {
             //向客户端发送请求数据
-            var apiTask = ApiSubject
-                          .Where(request => request.Item1 == apiRequest.Echo)
-                          .Select(request => request.Item2)
-                          .Take(1)
-                          .Timeout(timeout ?? TimeOut)
-                          .Catch(Observable.Return(new JObject()))
-                          .ToTask()
-                          .RunCatch(e =>
-                                    {
-                                        Log.Error("Sora|ReactiveApiManager",
-                                                  $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
-                                        return new JObject();
-                                    });
+            var apiTask = StaticVariable.ApiSubject
+                                        .Where(request => request.Item1 == apiRequest.Echo)
+                                        .Select(request => request.Item2)
+                                        .Take(1)
+                                        .Timeout(timeout ?? TimeOut)
+                                        .Catch(Observable.Return(new JObject()))
+                                        .ToTask()
+                                        .RunCatch(e =>
+                                                  {
+                                                      Log.Error("Sora|ReactiveApiManager",
+                                                                $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
+                                                      return new JObject();
+                                                  });
             if (!ConnectionManager.SendMessage(connectionGuid, JsonConvert.SerializeObject(apiRequest, Formatting.None))
             ) return null;
             //等待客户端返回调用结果

@@ -48,7 +48,7 @@ namespace Sora
             list.Add(data);
             return true;
         }
-        
+
         /// <summary>
         /// <para>添加纯文本消息段</para>
         /// <para>CQ码消息段扩展</para>
@@ -58,7 +58,7 @@ namespace Sora
         [Reviewed("nidbCN", "2021-03-24 19:40")]
         public static void AddText(this List<CQCode> msgList, string text) =>
             msgList.Add(CQCode.CQText(text));
-        
+
         /// <summary>
         /// <para>仅用于项目组内部的代码审查</para>
         /// <para>请不要使用此方法</para>

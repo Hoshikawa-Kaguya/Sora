@@ -1,7 +1,6 @@
 using Sora.Enumeration.EventParamsType;
 using System;
 using System.Reflection;
-using System.Threading;
 using YukariToolBox.Extensions;
 
 namespace Sora.Entities.Info
@@ -48,16 +47,6 @@ namespace Sora.Entities.Info
         /// </summary>
         public int Priority { get; }
 
-        /// <summary>
-        /// 该函数是否是正在等待信号量
-        /// </summary>
-        public bool IsWaittingSemaphore { get; }
-
-        /// <summary>
-        /// 该函数等待触发的信号量
-        /// </summary>
-        public AutoResetEvent Semaphore { get; }
-
         #endregion
 
         #region 构造方法
@@ -65,39 +54,27 @@ namespace Sora.Entities.Info
         /// <summary>
         /// 指令信息构造
         /// </summary>
-        internal CommandInfo(string          desc,          string[] regex,    string groupName, MethodInfo method,
-                             MemberRoleType? permissonType, int      priority, bool   isWaittingSemaphore,
-                             AutoResetEvent  semaphore,     Type     instanceType = null)
+        internal CommandInfo(string desc, string[] regex, string groupName, MethodInfo method,
+                             MemberRoleType? permissonType, int priority, Type instanceType = null)
         {
-            Desc                = desc;
-            Regex               = regex;
-            GroupName           = groupName;
-            MethodInfo          = method;
-            InstanceType        = instanceType;
-            PermissonType       = permissonType;
-            Priority            = priority;
-            IsWaittingSemaphore = isWaittingSemaphore;
-            Semaphore           = semaphore;
+            Desc          = desc;
+            Regex         = regex;
+            GroupName     = groupName;
+            MethodInfo    = method;
+            InstanceType  = instanceType;
+            PermissonType = permissonType;
+            Priority      = priority;
         }
 
         #endregion
 
         internal bool Equals(CommandInfo another)
         {
-            if (MethodInfo.Name == another.MethodInfo.Name
-             && MethodInfo.GetGenericArguments().ArrayEquals(another.MethodInfo.GetGenericArguments())
-             && Regex.ArrayEquals(another.Regex)
-             && PermissonType           == another.PermissonType
-             && Priority                == another.Priority
-             && IsWaittingSemaphore     == another.IsWaittingSemaphore
-             && Semaphore.GetHashCode() == another.Semaphore.GetHashCode()
-                    //&& InstanceType  == another.InstanceType
-                )
-            {
-                return true;
-            }
-
-            return false;
+            return MethodInfo.Name == another.MethodInfo.Name
+                && MethodInfo.GetGenericArguments().ArrayEquals(another.MethodInfo.GetGenericArguments())
+                && Regex.ArrayEquals(another.Regex)
+                && PermissonType == another.PermissonType
+                && Priority      == another.Priority;
         }
     }
 }

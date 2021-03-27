@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Sora.EventArgs.WebsocketEvent;
+using Sora.OnebotInterface;
 using Sora.OnebotModel;
 using Websocket.Client;
 using YukariToolBox.FormatLog;
@@ -18,30 +19,6 @@ namespace Sora.Net
     /// </summary>
     public class ConnectionManager
     {
-        #region 数据结构体
-
-        /// <summary>
-        /// 用于存储链接信息和心跳时间的结构体
-        /// </summary>
-        private struct SoraConnectionInfo
-        {
-            internal Guid     ConnectionGuid;
-            internal object   Connection;
-            internal DateTime LastHeartBeatTime;
-            internal long     SelfId;
-        }
-
-        #endregion
-
-        #region 私有字段
-
-        /// <summary>
-        /// 静态链接表
-        /// </summary>
-        private static readonly List<SoraConnectionInfo> ConnectionList = new();
-
-        #endregion
-
         #region 属性
 
         private TimeSpan HeartBeatTimeOut { get; }
@@ -102,13 +79,13 @@ namespace Sora.Net
         private static bool AddConnection(Guid connectionGuid, object connectionInfo, string selfId)
         {
             //锁定记录表
-            lock (ConnectionList)
+            lock (StaticVariable.ConnectionList)
             {
                 //检查是否已存在值
-                if (ConnectionList.All(connection => connection.ConnectionGuid != connectionGuid))
+                if (StaticVariable.ConnectionList.All(connection => connection.ConnectionGuid != connectionGuid))
                 {
                     long.TryParse(selfId, out var uid);
-                    ConnectionList.Add(new SoraConnectionInfo
+                    StaticVariable.ConnectionList.Add(new StaticVariable.SoraConnectionInfo
                     {
                         ConnectionGuid    = connectionGuid,
                         Connection        = connectionInfo,
@@ -131,11 +108,12 @@ namespace Sora.Net
         private static bool RemoveConnection(Guid connectionGuid)
         {
             //锁定记录表
-            lock (ConnectionList)
+            lock (StaticVariable.ConnectionList)
             {
-                if (ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid))
+                if (StaticVariable.ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid))
                 {
-                    return ConnectionList.RemoveAll(connection => connection.ConnectionGuid == connectionGuid) > 0;
+                    return StaticVariable.ConnectionList.RemoveAll(connection =>
+                                                                       connection.ConnectionGuid == connectionGuid) > 0;
                 }
 
                 return false;
@@ -148,9 +126,9 @@ namespace Sora.Net
         /// <param name="connectionGuid">连接标识</param>
         internal static bool ConnectionExitis(Guid connectionGuid)
         {
-            lock (ConnectionList)
+            lock (StaticVariable.ConnectionList)
             {
-                return ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid);
+                return StaticVariable.ConnectionList.Any(connection => connection.ConnectionGuid == connectionGuid);
             }
         }
 
@@ -160,11 +138,13 @@ namespace Sora.Net
 
         internal static bool SendMessage(Guid connectionGuid, string message)
         {
-            if (ConnectionList.All(connection => connection.ConnectionGuid != connectionGuid)) return false;
+            if (StaticVariable.ConnectionList.All(connection => connection.ConnectionGuid != connectionGuid))
+                return false;
             {
                 try
                 {
-                    switch (ConnectionList.Single(connection => connection.ConnectionGuid == connectionGuid).Connection)
+                    switch (StaticVariable.ConnectionList
+                                          .Single(connection => connection.ConnectionGuid == connectionGuid).Connection)
                     {
                         case IWebSocketConnection serverConnection:
                             serverConnection.Send(message);
@@ -194,16 +174,17 @@ namespace Sora.Net
         /// </summary>
         internal void HeartBeatCheck(object obj)
         {
-            if (ConnectionList.Count == 0) return;
-            Log.Debug("HeartBeatCheck", $"Connection count={ConnectionList.Count}");
+            if (StaticVariable.ConnectionList.Count == 0) return;
+            Log.Debug("HeartBeatCheck", $"Connection count={StaticVariable.ConnectionList.Count}");
             List<Guid> lostConnections = new();
             //锁定列表
-            lock (ConnectionList)
+            lock (StaticVariable.ConnectionList)
             {
                 //遍历超时的连接
-                foreach (var connection in ConnectionList
-                    .Where(connection =>
-                               DateTime.Now - connection.LastHeartBeatTime > HeartBeatTimeOut))
+                foreach (var connection in StaticVariable.ConnectionList
+                                                         .Where(connection =>
+                                                                    DateTime.Now - connection.LastHeartBeatTime >
+                                                                    HeartBeatTimeOut))
                 {
                     try
                     {
@@ -254,11 +235,12 @@ namespace Sora.Net
         /// <param name="connectionGuid">连接标识</param>
         internal static void HeartBeatUpdate(Guid connectionGuid)
         {
-            var connectionIndex = ConnectionList.FindIndex(conn => conn.ConnectionGuid == connectionGuid);
+            var connectionIndex =
+                StaticVariable.ConnectionList.FindIndex(conn => conn.ConnectionGuid == connectionGuid);
             if (connectionIndex == -1) return;
-            var connection = ConnectionList[connectionIndex];
-            connection.LastHeartBeatTime    = DateTime.Now;
-            ConnectionList[connectionIndex] = connection;
+            var connection = StaticVariable.ConnectionList[connectionIndex];
+            connection.LastHeartBeatTime                   = DateTime.Now;
+            StaticVariable.ConnectionList[connectionIndex] = connection;
         }
 
         #endregion
@@ -323,11 +305,12 @@ namespace Sora.Net
 
         internal static void UpdateUid(Guid connectionGuid, long uid)
         {
-            var connectionIndex = ConnectionList.FindIndex(conn => conn.ConnectionGuid == connectionGuid);
+            var connectionIndex =
+                StaticVariable.ConnectionList.FindIndex(conn => conn.ConnectionGuid == connectionGuid);
             if (connectionIndex == -1) return;
-            var connection = ConnectionList[connectionIndex];
-            connection.SelfId               = uid;
-            ConnectionList[connectionIndex] = connection;
+            var connection = StaticVariable.ConnectionList[connectionIndex];
+            connection.SelfId                              = uid;
+            StaticVariable.ConnectionList[connectionIndex] = connection;
         }
 
         /// <summary>
@@ -347,9 +330,9 @@ namespace Sora.Net
 
         internal static bool GetLoginUid(Guid connectionGuid, out long userId)
         {
-            if (ConnectionList.Any(conn => conn.ConnectionGuid == connectionGuid))
+            if (StaticVariable.ConnectionList.Any(conn => conn.ConnectionGuid == connectionGuid))
             {
-                userId = ConnectionList.Where(conn => conn.ConnectionGuid == connectionGuid)
+                userId = StaticVariable.ConnectionList.Where(conn => conn.ConnectionGuid == connectionGuid)
                                        .Select(conn => conn.SelfId)
                                        .FirstOrDefault();
                 return true;

@@ -26,27 +26,27 @@ namespace Sora.OnebotModel
             {
                 return messageElement.MsgType switch
                 {
-                    CQFunction.Text => 
+                    CQFunction.Text =>
                         new CQCode(CQFunction.Text, messageElement.RawData.ToObject<Text>()),
-                    CQFunction.Face => 
+                    CQFunction.Face =>
                         new CQCode(CQFunction.Face, messageElement.RawData.ToObject<Face>()),
-                    CQFunction.Image => 
+                    CQFunction.Image =>
                         new CQCode(CQFunction.Image, messageElement.RawData.ToObject<Image>()),
-                    CQFunction.Record => 
+                    CQFunction.Record =>
                         new CQCode(CQFunction.Record, messageElement.RawData.ToObject<Record>()),
-                    CQFunction.At => 
+                    CQFunction.At =>
                         new CQCode(CQFunction.At, messageElement.RawData.ToObject<At>()),
-                    CQFunction.Share => 
+                    CQFunction.Share =>
                         new CQCode(CQFunction.Share, messageElement.RawData.ToObject<Share>()),
-                    CQFunction.Reply => 
+                    CQFunction.Reply =>
                         new CQCode(CQFunction.Reply, messageElement.RawData.ToObject<Reply>()),
-                    CQFunction.Forward => 
+                    CQFunction.Forward =>
                         new CQCode(CQFunction.Forward, messageElement.RawData.ToObject<Forward>()),
-                    CQFunction.Xml => 
+                    CQFunction.Xml =>
                         new CQCode(CQFunction.Xml, messageElement.RawData.ToObject<Code>()),
-                    CQFunction.Json => 
+                    CQFunction.Json =>
                         new CQCode(CQFunction.Json, messageElement.RawData.ToObject<Code>()),
-                    
+
                     _ => new CQCode(CQFunction.Unknown, messageElement.RawData)
                 };
             }
