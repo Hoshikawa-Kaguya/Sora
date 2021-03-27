@@ -33,7 +33,7 @@ namespace Sora.OnebotInterface
         /// <returns>
         /// message id
         /// </returns>
-        [Reviewed("nidbCN","2021-03-24 20:26")]
+        [Reviewed("nidbCN", "2021-03-24 20:26")]
         internal static async ValueTask<(int retCode, int messageId)> SendPrivateMessage(
             Guid connection, long target, long? groupId, List<CQCode> messages)
         {

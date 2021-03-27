@@ -15,7 +15,6 @@ using Sora.Attributes;
 using Sora.OnebotInterface;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Helpers;
-using static Sora.OnebotInterface.StaticVariable;
 
 namespace Sora.Command
 {
@@ -81,69 +80,26 @@ namespace Sora.Command
             //生成指令信息
             foreach (var (classType, methodInfos) in cmdGroups)
             {
-                Dictionary<MethodInfo, AutoResetEvent> methodGroups = new Dictionary<MethodInfo, AutoResetEvent>();
                 foreach (MethodInfo methodInfo in methodInfos)
                 {
-                    methodGroups.Add(methodInfo, null);
+                    switch (GenerateCommandInfo(methodInfo, classType, out var commandInfo))
+                    {
+                        case GroupCommand:
+                            if (groupCommands.AddOrExist(commandInfo))
+                                Log.Debug("Command", $"Registered group command [{methodInfo.Name}]");
+                            break;
+                        case PrivateCommand:
+                            if (privateCommands.AddOrExist(commandInfo))
+                                Log.Debug("Command", $"Registered private command [{methodInfo.Name}]");
+                            break;
+                        default:
+                            Log.Warning("Command", "未知的指令类型");
+                            break;
+                    }
                 }
-
-                MappingCommands(classType, methodGroups);
-            }
-        }
-
-        public void MappingCommands(Type classType, Dictionary<MethodInfo, AutoResetEvent> cmdGroups)
-        {
-            foreach (var methodInfo in cmdGroups)
-            {
-                MappingCommands(classType, methodInfo.Key, false, methodInfo.Value);
-            }
-
-            //修改缓存大小
-            Regex.CacheSize += privateCommands.Sum(commands => commands.Regex.Length) +
-                               groupCommands.Sum(commands => commands.Regex.Length);
-
-            Log.Info("Command", $"Registered {groupCommands.Count + privateCommands.Count} commands");
-            ServiceIsRunning = true;
-        }
-
-        public void MappingCommands(Type classType, MethodInfo methodInfo, bool isUseSempaore, AutoResetEvent sempaore)
-        {
-            switch (GenerateCommandInfo(methodInfo, classType, isUseSempaore, sempaore,
-                                        out var commandInfo))
-            {
-                case GroupCommand:
-                    if (groupCommands.AddOrExist(commandInfo))
-                        Log.Debug("Command", $"Registered group command [{methodInfo.Name}]");
-                    break;
-                case PrivateCommand:
-                    if (privateCommands.AddOrExist(commandInfo))
-                        Log.Debug("Command", $"Registered private command [{methodInfo.Name}]");
-                    break;
-                default:
-                    Log.Warning("Command", "未知的指令类型");
-                    break;
             }
 
             ServiceIsRunning = true;
-        }
-
-        public void UnMappingCommands(Type classType, MethodInfo methodInfo, AutoResetEvent sempaore)
-        {
-            switch (GenerateCommandInfo(methodInfo, classType, sempaore == null, sempaore,
-                                        out var commandInfo))
-            {
-                case GroupCommand:
-                    if (groupCommands.Remove(commandInfo))
-                        Log.Debug("Command", $"Unregistered group command [{methodInfo.Name}]");
-                    break;
-                case PrivateCommand:
-                    if (privateCommands.Remove(commandInfo))
-                        Log.Debug("Command", $"Unregistered private command [{methodInfo.Name}]");
-                    break;
-                default:
-                    Log.Warning("Command", "未知的指令类型");
-                    break;
-            }
         }
 
         /// <summary>
@@ -158,44 +114,44 @@ namespace Sora.Command
             #region 信号量处理
 
             //处理消息段
-            Dictionary<Guid, WaitingInfo> waitingCommand;
+            Dictionary<Guid, StaticVariable.WaitingInfo> waitingCommand;
             switch (eventArgs)
             {
                 case GroupMessageEventArgs groupMessageEvent:
                 {
                     //注意可能匹配到多个的情况，下同
-                    waitingCommand = WaitingDict
-                                     .Where(command =>
-                                                //判断来自同一个连接
-                                                command.Value.ConnectionId ==
-                                                groupMessageEvent.SoraApi.ConnectionGuid
-                                                //判断来着同一个群
-                                             && command.Value.Source.g == groupMessageEvent.SourceGroup
-                                                //判断来自同一人
-                                             && command.Value.Source.u == groupMessageEvent.Sender
-                                                //匹配
-                                             && command.Value.CommandExpressions.Any(regex =>
-                                                    Regex
-                                                        .IsMatch(groupMessageEvent.Message.RawText,
-                                                                 regex)))
-                                     .ToDictionary(i => i.Key, i => i.Value);
+                    waitingCommand = StaticVariable.WaitingDict
+                                                   .Where(command =>
+                                                              //判断来自同一个连接
+                                                              command.Value.ConnectionId ==
+                                                              groupMessageEvent.SoraApi.ConnectionGuid
+                                                              //判断来着同一个群
+                                                           && command.Value.Source.g == groupMessageEvent.SourceGroup
+                                                              //判断来自同一人
+                                                           && command.Value.Source.u == groupMessageEvent.Sender
+                                                              //匹配
+                                                           && command.Value.CommandExpressions.Any(regex =>
+                                                                  Regex
+                                                                      .IsMatch(groupMessageEvent.Message.RawText,
+                                                                               regex)))
+                                                   .ToDictionary(i => i.Key, i => i.Value);
                     break;
                 }
                 case PrivateMessageEventArgs privateMessageEvent:
                 {
-                    waitingCommand = WaitingDict
-                                     .Where(command =>
-                                                //判断来自同一个连接
-                                                command.Value.ConnectionId ==
-                                                privateMessageEvent.SoraApi.ConnectionGuid
-                                                //判断来自同一人
-                                             && command.Value.Source.u == privateMessageEvent.Sender
-                                                //
-                                             && command.Value.CommandExpressions.Any(regex =>
-                                                                                   Regex
-                                                                                       .IsMatch(privateMessageEvent.Message.RawText,
-                                                                                           regex)))
-                                     .ToDictionary(i => i.Key, i => i.Value);
+                    waitingCommand = StaticVariable.WaitingDict
+                                                   .Where(command =>
+                                                              //判断来自同一个连接
+                                                              command.Value.ConnectionId ==
+                                                              privateMessageEvent.SoraApi.ConnectionGuid
+                                                              //判断来自同一人
+                                                           && command.Value.Source.u == privateMessageEvent.Sender
+                                                              //
+                                                           && command.Value.CommandExpressions.Any(regex =>
+                                                                  Regex
+                                                                      .IsMatch(privateMessageEvent.Message.RawText,
+                                                                               regex)))
+                                                   .ToDictionary(i => i.Key, i => i.Value);
                     break;
                 }
                 default:
@@ -203,13 +159,13 @@ namespace Sora.Command
                     return true;
             }
 
-            foreach (var cmd in waitingCommand)
+            foreach (var (key, _) in waitingCommand)
             {
-                var oldInfo = WaitingDict[cmd.Key];
+                var oldInfo = StaticVariable.WaitingDict[key];
                 var newInfo = oldInfo;
                 newInfo.EventArgs = eventArgs;
-                WaitingDict.TryUpdate(cmd.Key, newInfo, oldInfo);
-                WaitingDict[cmd.Key].Semaphore.Set();
+                StaticVariable.WaitingDict.TryUpdate(key, newInfo, oldInfo);
+                StaticVariable.WaitingDict[key].Semaphore.Set();
             }
 
             if (waitingCommand.Count != 0) return false;
@@ -252,10 +208,10 @@ namespace Sora.Command
                     Log.Error("CommandAdapter", "cannot parse eventArgs");
                     return true;
             }
-            
+
             //在没有匹配到指令时直接跳转至Event触发
             if (matchedCommand.Count == 0) return true;
-            
+
             //遍历匹配到的每个命令
             foreach (var commandInfo in matchedCommand)
             {
@@ -278,32 +234,25 @@ namespace Sora.Command
 
                 try
                 {
-                    //是否正在等待信号量，若是，则直接触发信号量即可
-                    if (commandInfo.IsWaittingSemaphore)
+                    //尝试执行指令并判断异步状态机
+                    var isAsyncMethod =
+                        (AsyncStateMachineAttribute)
+                        commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
+                    //执行指令方法
+                    if (isAsyncMethod)
                     {
-                        commandInfo.Semaphore.Set();
+                        Task asyncTask = Task.Run(async () =>
+                                                  {
+                                                      await ((dynamic) commandInfo.MethodInfo
+                                                          .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
+                                                                  new[] {eventArgs}))!;
+                                                  });
+                        asyncTask.Wait();
                     }
                     else
-                    {
-                        var isAsyncMethod =
-                            (AsyncStateMachineAttribute)
-                            commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
-                        //执行指令方法
-                        if (isAsyncMethod)
-                        {
-                            Task asyncTask = Task.Run(async () =>
-                                                      {
-                                                          await ((dynamic) commandInfo.MethodInfo
-                                                              .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
-                                                                      new[] {eventArgs}))!;
-                                                      });
-                            asyncTask.Wait();
-                        }
-                        else
-                            commandInfo.MethodInfo
-                                       .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
-                                               new[] {eventArgs});
-                    }
+                        commandInfo.MethodInfo
+                                   .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
+                                           new[] {eventArgs});
 
                     return ((BaseSoraEventArgs) eventArgs).IsContinueEventChain;
                 }
@@ -318,10 +267,7 @@ namespace Sora.Command
                         {
                             case GroupMessageEventArgs groupMessageEvent:
                             {
-                                Task.Run(async () =>
-                                         {
-                                             await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
-                                         });
+                                Task.Run(async () => { await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}"); });
                                 break;
                             }
                             case PrivateMessageEventArgs privateMessageEvent:
@@ -364,7 +310,17 @@ namespace Sora.Command
 
         #region 私有管理方法
 
-        internal static WaitingInfo GenWaitingCommandInfo(long sourceUid, long sourceGroup, string[] cmdExps, MatchType matchType)
+        /// <summary>
+        /// 生成连续对话上下文
+        /// </summary>
+        /// <param name="sourceUid">消息源UID</param>
+        /// <param name="sourceGroup">消息源GID</param>
+        /// <param name="cmdExps">指令表达式</param>
+        /// <param name="matchType">匹配类型</param>
+        /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
+        internal static StaticVariable.WaitingInfo GenWaitingCommandInfo(
+            long sourceUid, long sourceGroup, string[] cmdExps,
+            MatchType matchType)
         {
             if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
             var matchExp = matchType switch
@@ -379,7 +335,7 @@ namespace Sora.Command
                 _ => throw new NotSupportedException("unknown matchtype")
             };
 
-            return new WaitingInfo
+            return new StaticVariable.WaitingInfo
             {
                 Semaphore          = new AutoResetEvent(false),
                 CommandExpressions = matchExp,
@@ -389,8 +345,13 @@ namespace Sora.Command
             };
         }
 
-        private Attribute GenerateCommandInfo(MethodInfo     method,    Type classType, bool isWaittingSemaphore,
-                                              AutoResetEvent semaphore, out CommandInfo commandInfo)
+        /// <summary>
+        /// 生成指令信息
+        /// </summary>
+        /// <param name="method">指令method</param>
+        /// <param name="classType">所在实例类型</param>
+        /// <param name="commandInfo">指令信息</param>
+        private Attribute GenerateCommandInfo(MethodInfo method, Type classType, out CommandInfo commandInfo)
         {
             //获取指令属性
             var commandAttr =
@@ -404,16 +365,16 @@ namespace Sora.Command
             var match = (commandAttr as Attributes.Command.Command)?.MatchType ?? MatchType.Full;
             //处理表达式
             var matchExp = match switch
-                           {
-                               MatchType.Full => (commandAttr as Attributes.Command.Command)?.CommandExpressions
-                                   .Select(command => $"^{command}$")
-                                   .ToArray(),
-                               MatchType.Regex => (commandAttr as Attributes.Command.Command)?.CommandExpressions,
-                               MatchType.KeyWord => (commandAttr as Attributes.Command.Command)?.CommandExpressions
-                                   .Select(command => $"[{command}]+")
-                                   .ToArray(),
-                               _ => null
-                           };
+            {
+                MatchType.Full => (commandAttr as Attributes.Command.Command)?.CommandExpressions
+                                                                             .Select(command => $"^{command}$")
+                                                                             .ToArray(),
+                MatchType.Regex => (commandAttr as Attributes.Command.Command)?.CommandExpressions,
+                MatchType.KeyWord => (commandAttr as Attributes.Command.Command)?.CommandExpressions
+                    .Select(command => $"[{command}]+")
+                    .ToArray(),
+                _ => null
+            };
             if (matchExp == null)
             {
                 commandInfo = ObjectHelper.CreateInstance<CommandInfo>();
@@ -434,17 +395,11 @@ namespace Sora.Command
                                           method,
                                           (commandAttr as GroupCommand)?.PermissionLevel,
                                           (commandAttr as Attributes.Command.Command)?.Priority ?? 0,
-                                          isWaittingSemaphore,
-                                          semaphore,
                                           method.IsStatic ? null : classType);
 
             return commandAttr;
         }
 
-
-        /// <summary>
-        /// 生成指令信息
-        /// </summary>
         /// <summary>
         /// 检查实例的存在和生成
         /// </summary>

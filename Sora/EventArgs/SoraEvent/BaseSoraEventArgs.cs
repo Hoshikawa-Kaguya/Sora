@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Sora.Command;
 using Sora.Entities.Base;
 using Sora.Enumeration;
@@ -49,7 +50,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 连续对话的ID
         /// </summary>
-        internal Guid SessionId { get; set; }
+        private Guid SessionId { get; set; }
 
         #endregion
 
@@ -75,20 +76,33 @@ namespace Sora.EventArgs.SoraEvent
 
         #endregion
 
-        internal object WaitForNextMessage(long sourceUid, string[] commandExps, MatchType matchType, long sourceGroup = 0)
-        {
-            IsContinueEventChain = false;
+        #region 连续指令
 
+        /// <summary>
+        /// 等待下一条消息触发
+        /// </summary>
+        internal object WaitForNextMessage(long sourceUid, string[] commandExps, MatchType matchType,
+                                           long sourceGroup = 0)
+        {
+            //生成指令上下文
             var waitInfo = CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType);
             waitInfo.ConnectionId = SoraApi.ConnectionGuid;
+            //检查是否为初始指令重复触发
+            if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
+                return null;
+            //连续指令不再触发后续事件
+            IsContinueEventChain = false;
             var sessionId = Guid.NewGuid();
             SessionId = sessionId;
+            //添加上下文并等待信号量
             StaticVariable.WaitingDict.TryAdd(sessionId, waitInfo);
             StaticVariable.WaitingDict[sessionId].Semaphore.WaitOne();
+            //取出匹配指令的事件参数并删除上一次的上下文
             var retEventArgs = StaticVariable.WaitingDict[sessionId].EventArgs;
-
             StaticVariable.WaitingDict.TryRemove(sessionId, out _);
             return retEventArgs;
         }
+
+        #endregion
     }
 }

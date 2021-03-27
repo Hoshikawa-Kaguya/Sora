@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
-using Sora.Attributes.Command;
 using Sora.Entities.CQCodes;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
-using Sora.OnebotInterface;
 using Sora.OnebotModel;
 
 namespace Sora.EventArgs.SoraEvent
@@ -102,16 +98,6 @@ namespace Sora.EventArgs.SoraEvent
         {
             return await base.SoraApi.SendGroupMessage(this.SourceGroup.Id, message);
         }
-        
-        public async ValueTask WaitForUser(MethodInfo parent,string[] commandList,MatchType matchType)
-        {
-            AutoResetEvent semaphore = new(false);
-            
-            StaticVariable.CommandWaitList.Enqueue((new WaitiableCommand(parent,commandList,matchType),semaphore));
-            semaphore.WaitOne();
-        }
-        
-        
 
         /// <summary>
         /// 没什么用的复读功能
@@ -152,9 +138,16 @@ namespace Sora.EventArgs.SoraEvent
 
         #region 连续对话
 
+        /// <summary>
+        /// 等待下一条消息触发
+        /// </summary>
+        /// <param name="commandExps">指令表达式</param>
+        /// <param name="matchType">匹配类型</param>
+        /// <returns>触发后的事件参数</returns>
         public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType, SourceGroup));
+            return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, commandExps, matchType,
+                                            SourceGroup));
         }
 
         #endregion

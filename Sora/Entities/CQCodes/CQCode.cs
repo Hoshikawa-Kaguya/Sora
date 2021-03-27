@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Enumeration.EventParamsType;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.Enumeration;
+using Sora.OnebotInterface;
 using Sora.OnebotModel.ApiParams;
 using YukariToolBox.FormatLog;
 
@@ -496,21 +495,6 @@ namespace Sora.Entities.CQCodes
 
         #endregion
 
-        #region 正则匹配字段
-
-        private static readonly List<Regex> FileRegices = new()
-        {
-            new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled),           //绝对路径-linux/osx
-            new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled), //绝对路径-win
-            new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
-                      RegexOptions.Compiled), //base64
-            new Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
-                      RegexOptions.Compiled),                              //网络图片链接
-            new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled) //文件名
-        };
-
-        #endregion
-
         #region 程序集方法
 
         /// <summary>
@@ -530,7 +514,7 @@ namespace Sora.Entities.CQCodes
             if (dataStr.Length > 1000) return (dataStr, true);
             for (var i = 0; i < 5; i++)
             {
-                isMatch |= FileRegices[i].IsMatch(dataStr);
+                isMatch |= StaticVariable.FileRegices[i].IsMatch(dataStr);
                 if (isMatch)
                 {
                     switch (i)
