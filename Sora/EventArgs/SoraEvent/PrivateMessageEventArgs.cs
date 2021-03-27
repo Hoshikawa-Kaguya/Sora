@@ -5,6 +5,7 @@ using Sora.Entities.CQCodes;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
+using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.OnebotModel;
 
@@ -90,6 +91,15 @@ namespace Sora.EventArgs.SoraEvent
         public async ValueTask<(APIStatusType apiStatus, int messageId)> Repeat()
         {
             return await base.SoraApi.SendPrivateMessage(this.Sender.Id, this.Message.MessageList);
+        }
+
+        #endregion
+
+        #region 连续对话
+
+        public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType)
+        {
+            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType));
         }
 
         #endregion

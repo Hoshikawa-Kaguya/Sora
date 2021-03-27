@@ -46,6 +46,11 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         public bool IsContinueEventChain { get; set; }
 
+        /// <summary>
+        /// 连续对话的ID
+        /// </summary>
+        internal Guid SessionId { get; set; }
+
         #endregion
 
         #region 构造函数
@@ -65,6 +70,7 @@ namespace Sora.EventArgs.SoraEvent
             TimeStamp            = time;
             Time                 = time.ToDateTime();
             IsContinueEventChain = false;
+            SessionId            = Guid.Empty;
         }
 
         #endregion
@@ -75,11 +81,14 @@ namespace Sora.EventArgs.SoraEvent
 
             var waitInfo = CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType);
             waitInfo.ConnectionId = SoraApi.ConnectionGuid;
-            StaticVariable.WaitingDict.Add(waitInfo);
-            waitInfo.Semaphore.WaitOne();
+            var sessionId = Guid.NewGuid();
+            SessionId = sessionId;
+            StaticVariable.WaitingDict.TryAdd(sessionId, waitInfo);
+            StaticVariable.WaitingDict[sessionId].Semaphore.WaitOne();
+            var retEventArgs = StaticVariable.WaitingDict[sessionId].EventArgs;
 
-
-            return waitInfo.EventArgs;
+            StaticVariable.WaitingDict.TryRemove(sessionId, out _);
+            return retEventArgs;
         }
     }
 }

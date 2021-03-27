@@ -18,11 +18,13 @@ namespace Sora.OnebotInterface
             internal object           EventArgs;
             internal Guid             ConnectionId;
             internal (long u, long g) Source;
+
+            internal void SetEventArgs(object eventArgs) => EventArgs = eventArgs;
         }
         
         public static readonly ConcurrentQueue<(WaitiableCommand Command, AutoResetEvent ResetEvent)> CommandWaitList
             = new();
 
-        public static readonly List<WaitingInfo> WaitingDict = new();
+        public static readonly ConcurrentDictionary<Guid, WaitingInfo> WaitingDict = new();
     }
 }
