@@ -1,5 +1,10 @@
 using System;
+using System.Threading.Tasks;
+using Sora.Command;
 using Sora.Entities.Base;
+using Sora.Enumeration;
+using Sora.OnebotInterface;
+using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using YukariToolBox.Time;
 
 namespace Sora.EventArgs.SoraEvent
@@ -56,14 +61,27 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="time">连接时间</param>
         internal BaseSoraEventArgs(Guid connectionGuid, string eventName, long loginUid, long time)
         {
-            SoraApi          = new SoraApi(connectionGuid);
-            EventName        = eventName;
-            LoginUid         = loginUid;
-            TimeStamp        = time;
-            Time             = time.ToDateTime();
+            SoraApi              = new SoraApi(connectionGuid);
+            EventName            = eventName;
+            LoginUid             = loginUid;
+            TimeStamp            = time;
+            Time                 = time.ToDateTime();
             IsContinueEventChain = false;
         }
 
         #endregion
+
+        internal object WaitForUser(long sourceUid, string[] commandExps, MatchType matchType, long sourceGroup = 0)
+        {
+            IsContinueEventChain = false;
+
+            var waitInfo = CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType);
+            waitInfo.ConnectionId = SoraApi.ConnectionGuid;
+            StaticVariable.WaitingDict.Add(waitInfo);
+            waitInfo.Semaphore.WaitOne();
+
+
+            return waitInfo.EventArgs;
+        }
     }
 }

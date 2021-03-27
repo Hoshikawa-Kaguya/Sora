@@ -26,7 +26,7 @@ namespace Sora.Entities.Base
         /// 当前实例对应的链接GUID
         /// 用于调用API
         /// </summary>
-        private Guid ConnectionGuid { get; }
+        internal Guid ConnectionGuid { get; }
 
         #endregion
 

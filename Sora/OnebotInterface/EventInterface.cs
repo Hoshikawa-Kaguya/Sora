@@ -284,7 +284,7 @@ namespace Sora.OnebotInterface
                               $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                     var eventArgs = new PrivateMessageEventArgs(connection, "private", privateMsg);
                     //处理指令
-                    if (!await CommandManager.CommandAdapter(eventArgs))
+                    if (CommandManager.CommandAdapter(eventArgs) || !eventArgs.IsContinueEventChain)
                         break;
                     //执行回调
                     if (OnPrivateMessage == null) break;
@@ -299,24 +299,22 @@ namespace Sora.OnebotInterface
                     Log.Debug("Sora",
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(connection, "group", groupMsg);
+                    Log.Debug("th", $"start {Environment.CurrentManagedThreadId}");
 
-                    //将等待列表的命令出队
-                    while (StaticVariable.CommandWaitList.Count > 0)
-                    {
-                        bool isSucc =
-                            StaticVariable.CommandWaitList.TryDequeue(out (WaitiableCommand Command, AutoResetEvent
-                                                                          ResetEvent) command);
-                        if (isSucc)
-                            //TODO:没有做私聊消息处理
-                            CommandManager.MappingCommands(null,command.Command.ParentMethod, true, command.ResetEvent);
-                    }
+                    // //将等待列表的命令出队
+                    // while (StaticVariable.CommandWaitList.Count > 0)
+                    // {
+                    //     bool isSucc =
+                    //         StaticVariable.CommandWaitList.TryDequeue(out (WaitiableCommand Command, AutoResetEvent
+                    //                                                       ResetEvent) command);
+                    //     if (isSucc)
+                    //         //TODO:没有做私聊消息处理
+                    //         CommandManager.MappingCommands(null,command.Command.ParentMethod, true, command.ResetEvent);
+                    // }
 
                     //处理指令
-                    if (!await CommandManager.CommandAdapter(eventArgs))
-                    {
+                    if (CommandManager.CommandAdapter(eventArgs) || !eventArgs.IsContinueEventChain)
                         break;
-                    }
-
                     //执行回调
                     if (OnGroupMessage == null) break;
                     await OnGroupMessage("Message", eventArgs);
