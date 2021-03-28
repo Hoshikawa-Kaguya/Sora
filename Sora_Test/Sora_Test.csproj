@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PyLibSharp.Requests" Version="1.2.7" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Sora\Sora.csproj" />
   </ItemGroup>
 
