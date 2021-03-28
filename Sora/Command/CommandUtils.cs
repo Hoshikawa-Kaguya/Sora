@@ -1,6 +1,7 @@
 using Sora.EventArgs.SoraEvent;
 using System.Linq;
 using System.Reflection;
+using Sora.Attributes;
 using Sora.Attributes.Command;
 
 namespace Sora.Command
@@ -13,6 +14,8 @@ namespace Sora.Command
         /// 检查方法合法性
         /// </summary>
         /// <param name="method">方法信息</param>
+        /// <returns>方法是否合法</returns>
+        [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         internal static bool CheckMethodLegality(this MethodInfo method)
         {
             var isGroupCommandLegality = method.IsDefined(typeof(GroupCommand), false) &&
