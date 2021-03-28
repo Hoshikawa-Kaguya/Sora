@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Enumeration.EventParamsType;
@@ -508,36 +509,29 @@ namespace Sora.Entities.CQCodes
         internal static (string retStr, bool isMatch) ParseDataStr(string dataStr)
         {
             if (string.IsNullOrEmpty(dataStr)) return (null, false);
-            var isMatch = false;
             dataStr = dataStr.Replace('\\', '/');
             //当字符串太长时跳过正则检查
             if (dataStr.Length > 1000) return (dataStr, true);
-            for (var i = 0; i < 5; i++)
-            {
-                isMatch |= StaticVariable.FileRegices[i].IsMatch(dataStr);
-                if (isMatch)
-                {
-                    switch (i)
-                    {
-                        case 0: //linux/osx
-                            if (Environment.OSVersion.Platform != PlatformID.Unix   &&
-                                Environment.OSVersion.Platform != PlatformID.MacOSX &&
-                                !File.Exists(dataStr))
-                                return (dataStr, false);
-                            else
-                                return ($"file:///{dataStr}", true);
-                        case 1: //win
-                            if (Environment.OSVersion.Platform == PlatformID.Win32NT && File.Exists(dataStr))
-                                return ($"file:///{dataStr}", true);
-                            else
-                                return (dataStr, false);
-                        default:
-                            return (dataStr, true);
-                    }
-                }
-            }
 
-            return (dataStr, false);
+            var type = StaticVariable.FileRegices.Single(i => i.Value.IsMatch(dataStr)).Key;
+
+            switch (type)
+            {
+                case CQFileType.UnixFile: //linux/osx
+                    if (Environment.OSVersion.Platform != PlatformID.Unix   &&
+                        Environment.OSVersion.Platform != PlatformID.MacOSX &&
+                        !File.Exists(dataStr))
+                        return (dataStr, false);
+                    else
+                        return ($"file:///{dataStr}", true);
+                case CQFileType.WinFile: //win
+                    if (Environment.OSVersion.Platform == PlatformID.Win32NT && File.Exists(dataStr))
+                        return ($"file:///{dataStr}", true);
+                    else
+                        return (dataStr, false);
+                default:
+                    return (dataStr, true);
+            }
         }
 
         #endregion

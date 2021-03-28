@@ -317,10 +317,11 @@ namespace Sora.Command
         /// <param name="sourceGroup">消息源GID</param>
         /// <param name="cmdExps">指令表达式</param>
         /// <param name="matchType">匹配类型</param>
+        /// <param name="connectionId">连接标识</param>
         /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
         internal static StaticVariable.WaitingInfo GenWaitingCommandInfo(
             long sourceUid, long sourceGroup, string[] cmdExps,
-            MatchType matchType)
+            MatchType matchType, Guid connectionId)
         {
             if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
             var matchExp = matchType switch
@@ -335,14 +336,10 @@ namespace Sora.Command
                 _ => throw new NotSupportedException("unknown matchtype")
             };
 
-            return new StaticVariable.WaitingInfo
-            {
-                Semaphore          = new AutoResetEvent(false),
-                CommandExpressions = matchExp,
-                EventArgs          = null,
-                ConnectionId       = Guid.Empty,
-                Source             = (sourceUid, sourceGroup)
-            };
+            return new StaticVariable.WaitingInfo(semaphore: new AutoResetEvent(false),
+                                                  commandExpressions: matchExp,
+                                                  connectionId: connectionId,
+                                                  source: (sourceUid, sourceGroup));
         }
 
         /// <summary>
