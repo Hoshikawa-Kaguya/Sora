@@ -66,7 +66,7 @@ namespace Sora.Net
         /// <exception cref="ArgumentOutOfRangeException">服务器启动参数错误</exception>
         public SoraWebsocketServer(ServerConfig config, Action<Exception> crashAction = null)
         {
-            Log.Info("Sora", $"Sora 框架版本:1.0.0-RC.1"); //{Assembly.GetExecutingAssembly().GetName().Version}");
+            Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.2"); //{Assembly.GetExecutingAssembly().GetName().Version}");
             Log.Debug("Sora", "开发交流群：1081190562");
             //检查端口占用
             if (NetUtils.IsPortInUse(config.Port))
