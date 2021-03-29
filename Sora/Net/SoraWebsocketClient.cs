@@ -64,7 +64,7 @@ namespace Sora.Net
         /// </summary>
         /// <param name="config">服务器配置</param>
         /// <param name="crashAction">发生未处理异常时的回调</param>
-        public SoraWebsocketClient(ClientConfig config, Action<Exception> crashAction = null)
+        internal SoraWebsocketClient(ClientConfig config, Action<Exception> crashAction = null)
         {
             Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.2"); //{Assembly.GetExecutingAssembly().GetName().Version}");
             Log.Debug("Sora", "开发交流群：1081190562");
@@ -132,7 +132,7 @@ namespace Sora.Net
         {
             if (!clientReady) return;
             //检查是否已有服务器被启动
-            if (NetUtils.serviceExitis) throw new SoraClientIsRuningException();
+            if (NetUtils.ServiceExitis) throw new SoraClientIsRuningException();
             //消息接收订阅
             Client.MessageReceived.Subscribe(msg => Task.Run(() =>
                                                              {
@@ -174,7 +174,7 @@ namespace Sora.Net
             //启动心跳包超时检查计时器
             this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
                                             Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
-            NetUtils.serviceExitis = true;
+            NetUtils.ServiceExitis = true;
             await Task.Delay(-1);
         }
 

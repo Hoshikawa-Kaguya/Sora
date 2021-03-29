@@ -11,7 +11,7 @@ namespace Sora.Net
         /// <summary>
         /// 当前进程服务器已存在的标识
         /// </summary>
-        public static bool serviceExitis = false;
+        internal static bool ServiceExitis = false;
 
         /// <summary>
         /// 检查端口占用
