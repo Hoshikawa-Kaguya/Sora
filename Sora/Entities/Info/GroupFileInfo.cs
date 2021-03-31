@@ -37,13 +37,13 @@ namespace Sora.Entities.Info
         /// 上传时间
         /// </summary>
         [JsonIgnore]
-        public DateTime UploadTime { get; private set; }
+        public DateTime UploadDateTime { get; private set; }
 
         [JsonProperty(PropertyName = "upload_time")]
-        private long UploadTime_
+        private long UploadTimeStamp
         {
-            get => UploadTime.ToTimeStamp();
-            set => UploadTime = value.ToDateTime();
+            get => UploadDateTime.ToTimeStamp();
+            set => UploadDateTime = value.ToDateTime();
         }
 
         /// <summary>
@@ -51,26 +51,26 @@ namespace Sora.Entities.Info
         /// <para>永久文件为0</para>
         /// </summary>
         [JsonIgnore]
-        public DateTime DeadTime { get; private set; }
+        public DateTime DeadDateTime { get; private set; }
 
         [JsonProperty(PropertyName = "dead_time")]
-        private long DeadTime_
+        private long DeadTimeStamp
         {
-            get => DeadTime.ToTimeStamp();
-            set => DeadTime = value.ToDateTime();
+            get => DeadDateTime.ToTimeStamp();
+            set => DeadDateTime = value.ToDateTime();
         }
 
         /// <summary>
         /// 修改时间
         /// </summary>
         [JsonIgnore]
-        public DateTime ModifyTime { get; private set; }
+        public DateTime ModifyDateTime { get; private set; }
 
         [JsonProperty(PropertyName = "modify_time")]
-        private long ModifyTime_
+        private long ModifyTimeStamp
         {
-            get => ModifyTime.ToTimeStamp();
-            set => ModifyTime = value.ToDateTime();
+            get => ModifyDateTime.ToTimeStamp();
+            set => ModifyDateTime = value.ToDateTime();
         }
 
         /// <summary>

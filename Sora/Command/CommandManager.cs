@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,13 +33,13 @@ namespace Sora.Command
 
         #region 私有字段
 
-        private readonly List<CommandInfo> groupCommands = new();
+        private readonly List<CommandInfo> _groupCommands = new();
 
-        private readonly List<CommandInfo> privateCommands = new();
+        private readonly List<CommandInfo> _privateCommands = new();
 
-        private readonly Dictionary<Type, object> instanceDict = new();
+        private readonly Dictionary<Type, object> _instanceDict = new();
 
-        private readonly bool enableSoraCommandManager;
+        private readonly bool _enableSoraCommandManager;
 
         #endregion
 
@@ -49,7 +48,7 @@ namespace Sora.Command
         internal CommandManager(bool enableSoraCommandManager)
         {
             ServiceIsRunning              = false;
-            this.enableSoraCommandManager = enableSoraCommandManager;
+            _enableSoraCommandManager = enableSoraCommandManager;
         }
 
         #endregion
@@ -64,7 +63,7 @@ namespace Sora.Command
         public void MappingCommands(Assembly assembly)
         {
             //检查使能
-            if (!enableSoraCommandManager) return;
+            if (!_enableSoraCommandManager) return;
             if (assembly == null) return;
 
             //查找所有的指令集
@@ -86,11 +85,11 @@ namespace Sora.Command
                     switch (GenerateCommandInfo(methodInfo, classType, out var commandInfo))
                     {
                         case GroupCommand:
-                            if (groupCommands.AddOrExist(commandInfo))
+                            if (_groupCommands.AddOrExist(commandInfo))
                                 Log.Debug("Command", $"Registered group command [{methodInfo.Name}]");
                             break;
                         case PrivateCommand:
-                            if (privateCommands.AddOrExist(commandInfo))
+                            if (_privateCommands.AddOrExist(commandInfo))
                                 Log.Debug("Command", $"Registered private command [{methodInfo.Name}]");
                             break;
                         default:
@@ -111,7 +110,7 @@ namespace Sora.Command
         internal bool CommandAdapter(object eventArgs)
         {
             //检查使能
-            if (!enableSoraCommandManager) return true;
+            if (!_enableSoraCommandManager) return true;
 
             #region 信号量消息处理
 
@@ -191,7 +190,7 @@ namespace Sora.Command
                 {
                     //注意可能匹配到多个的情况，下同
                     matchedCommand =
-                        groupCommands.Where(command => command.Regex.Any(regex =>
+                        _groupCommands.Where(command => command.Regex.Any(regex =>
                                                                              Regex
                                                                                  .IsMatch(groupMessageEvent.Message.RawText,
                                                                                      regex,
@@ -205,7 +204,7 @@ namespace Sora.Command
                 case PrivateMessageEventArgs privateMessageEvent:
                 {
                     matchedCommand =
-                        privateCommands.Where(command => command.Regex.Any(regex =>
+                        _privateCommands.Where(command => command.Regex.Any(regex =>
                                                                                Regex
                                                                                    .IsMatch(privateMessageEvent.Message.RawText,
                                                                                        regex,
@@ -247,24 +246,22 @@ namespace Sora.Command
 
                 try
                 {
-                    //尝试执行指令并判断异步状态机
-                    var isAsyncMethod =
-                        (AsyncStateMachineAttribute)
-                        commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
+                    //尝试执行指令并判断异步方法
+                    var returnParameterType = commandInfo.MethodInfo.ReturnParameter.ParameterType;
                     //执行指令方法
-                    if (isAsyncMethod)
+                    if (returnParameterType == typeof(Task) || returnParameterType == typeof(ValueTask))
                     {
                         Task asyncTask = Task.Run(async () =>
                                                   {
                                                       await ((dynamic) commandInfo.MethodInfo
-                                                          .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
+                                                          .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
                                                                   new[] {eventArgs}))!;
                                                   });
                         asyncTask.Wait();
                     }
                     else
                         commandInfo.MethodInfo
-                                   .Invoke(commandInfo.InstanceType == null ? null : instanceDict[commandInfo.InstanceType],
+                                   .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
                                            new[] {eventArgs});
 
                     return ((BaseSoraEventArgs) eventArgs).IsContinueEventChain;
@@ -310,7 +307,7 @@ namespace Sora.Command
         [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         public bool GetInstance<T>(out T instance)
         {
-            if (instanceDict.Any(type => type.Key == typeof(T)) && instanceDict[typeof(T)] is T outVal)
+            if (_instanceDict.Any(type => type.Key == typeof(T)) && _instanceDict[typeof(T)] is T outVal)
             {
                 instance = outVal;
                 return true;
@@ -433,7 +430,7 @@ namespace Sora.Command
             }
 
             //检查是否已创建过实例
-            if (instanceDict.Any(ins => ins.Key == classType)) return true;
+            if (_instanceDict.Any(ins => ins.Key == classType)) return true;
 
             try
             {
@@ -441,7 +438,7 @@ namespace Sora.Command
                 var instance = classType.CreateInstance();
 
                 //添加实例
-                instanceDict.Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
+                _instanceDict.Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
                                  instance);
             }
             catch (Exception e)
