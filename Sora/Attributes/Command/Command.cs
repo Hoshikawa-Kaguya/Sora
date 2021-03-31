@@ -15,7 +15,7 @@ namespace Sora.Attributes.Command
         private readonly string[] _commandExpressions;
 
         #endregion
-        
+
         #region 属性
 
         /// <summary>

@@ -144,7 +144,8 @@ namespace Sora.Net
                                                                         ConnectionManager.GetLoginUid(_clientId,
                                                                             out var uid);
                                                                         //移除原连接信息
-                                                                        if (ConnectionManager.ConnectionExitis(_clientId)
+                                                                        if (ConnectionManager
+                                                                            .ConnectionExitis(_clientId)
                                                                         )
                                                                             ConnManager.CloseConnection("Universal",
                                                                                 uid, _clientId);
