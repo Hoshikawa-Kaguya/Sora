@@ -1,6 +1,7 @@
 using Sora.Enumeration.EventParamsType;
 using System;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using YukariToolBox.Extensions;
 
 namespace Sora.Entities.Info
@@ -45,7 +46,12 @@ namespace Sora.Entities.Info
         /// <summary>
         /// 优先级
         /// </summary>
-        public int Priority { get; }
+        internal int Priority { get; }
+
+        /// <summary>
+        /// 正则匹配选项
+        /// </summary>
+        internal RegexOptions RegexOptions { get; }
 
         #endregion
 
@@ -55,7 +61,8 @@ namespace Sora.Entities.Info
         /// 指令信息构造
         /// </summary>
         internal CommandInfo(string desc, string[] regex, string groupName, MethodInfo method,
-                             MemberRoleType? permissonType, int priority, Type instanceType = null)
+                             MemberRoleType? permissonType, int priority, RegexOptions regexOptions,
+                             Type instanceType = null)
         {
             Desc          = desc;
             Regex         = regex;
@@ -64,6 +71,7 @@ namespace Sora.Entities.Info
             InstanceType  = instanceType;
             PermissonType = permissonType;
             Priority      = priority;
+            RegexOptions  = regexOptions;
         }
 
         #endregion

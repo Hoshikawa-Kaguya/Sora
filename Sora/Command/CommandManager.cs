@@ -60,7 +60,7 @@ namespace Sora.Command
         /// 自动注册所有指令
         /// </summary>
         /// <param name="assembly">包含指令的程序集</param>
-        [Reviewed("XiaoHe321","2021-03-28 20:45")]
+        [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         public void MappingCommands(Assembly assembly)
         {
             //检查使能
@@ -108,7 +108,6 @@ namespace Sora.Command
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
         /// <returns>是否继续处理接下来的消息</returns>
-        [Reviewed("XiaoHe321","2021-03-28 20:45")]
         internal bool CommandAdapter(object eventArgs)
         {
             //检查使能
@@ -136,7 +135,10 @@ namespace Sora.Command
                                                            && command.Value.CommandExpressions.Any(regex =>
                                                                   Regex
                                                                       .IsMatch(groupMessageEvent.Message.RawText,
-                                                                               regex)))
+                                                                               regex,
+                                                                               RegexOptions.Compiled |
+                                                                               command.Value
+                                                                                   .RegexOptions)))
                                                    .ToDictionary(i => i.Key, i => i.Value);
                     break;
                 }
@@ -149,11 +151,14 @@ namespace Sora.Command
                                                               privateMessageEvent.SoraApi.ConnectionGuid
                                                               //判断来自同一人
                                                            && command.Value.Source.u == privateMessageEvent.Sender
-                                                              //
+                                                              //匹配指令
                                                            && command.Value.CommandExpressions.Any(regex =>
                                                                   Regex
                                                                       .IsMatch(privateMessageEvent.Message.RawText,
-                                                                               regex)))
+                                                                               regex,
+                                                                               RegexOptions.Compiled |
+                                                                               command.Value
+                                                                                   .RegexOptions)))
                                                    .ToDictionary(i => i.Key, i => i.Value);
                     break;
                 }
@@ -171,14 +176,14 @@ namespace Sora.Command
                 StaticVariable.WaitingDict.TryUpdate(key, newInfo, oldInfo);
                 StaticVariable.WaitingDict[key].Semaphore.Set();
             }
-            
+
             //当前流程已经处理过wait command了。不再继续处理普通command，否则会一次发两条消息，普通消息留到下一次处理
             if (waitingCommand.Count != 0) return false;
 
             #endregion
 
             #region 常规指令处理
-            
+
             List<CommandInfo> matchedCommand;
             switch (eventArgs)
             {
@@ -189,7 +194,9 @@ namespace Sora.Command
                         groupCommands.Where(command => command.Regex.Any(regex =>
                                                                              Regex
                                                                                  .IsMatch(groupMessageEvent.Message.RawText,
-                                                                                     regex)
+                                                                                     regex,
+                                                                                     RegexOptions.Compiled |
+                                                                                     command.RegexOptions)
                                                                           && command.MethodInfo != null))
                                      .OrderByDescending(p => p.Priority)
                                      .ToList();
@@ -202,7 +209,8 @@ namespace Sora.Command
                                                                                Regex
                                                                                    .IsMatch(privateMessageEvent.Message.RawText,
                                                                                        regex,
-                                                                                       RegexOptions.Compiled)
+                                                                                       RegexOptions.Compiled |
+                                                                                       command.RegexOptions)
                                                                             && command.MethodInfo != null))
                                        .OrderByDescending(p => p.Priority)
                                        .ToList();
@@ -299,7 +307,7 @@ namespace Sora.Command
         /// <param name="instance">实例</param>
         /// <typeparam name="T">Type</typeparam>
         /// <returns>获取是否成功</returns>
-        [Reviewed("XiaoHe321","2021-03-28 20:45")]
+        [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         public bool GetInstance<T>(out T instance)
         {
             if (instanceDict.Any(type => type.Key == typeof(T)) && instanceDict[typeof(T)] is T outVal)
@@ -323,12 +331,13 @@ namespace Sora.Command
         /// <param name="sourceGroup">消息源GID</param>
         /// <param name="cmdExps">指令表达式</param>
         /// <param name="matchType">匹配类型</param>
+        /// <param name="regexOptions">正则匹配选项</param>
         /// <param name="connectionId">连接标识</param>
         /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
-        [Reviewed("XiaoHe321","2021-03-28 20:45")]
+        [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         internal static StaticVariable.WaitingInfo GenWaitingCommandInfo(
             long sourceUid, long sourceGroup, string[] cmdExps,
-            MatchType matchType, Guid connectionId)
+            MatchType matchType, RegexOptions regexOptions, Guid connectionId)
         {
             if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
             var matchExp = matchType switch
@@ -346,7 +355,8 @@ namespace Sora.Command
             return new StaticVariable.WaitingInfo(semaphore: new AutoResetEvent(false),
                                                   commandExpressions: matchExp,
                                                   connectionId: connectionId,
-                                                  source: (sourceUid, sourceGroup));
+                                                  source: (sourceUid, sourceGroup),
+                                                  regexOptions: regexOptions);
         }
 
         /// <summary>
@@ -355,7 +365,7 @@ namespace Sora.Command
         /// <param name="method">指令method</param>
         /// <param name="classType">所在实例类型</param>
         /// <param name="commandInfo">指令信息</param>
-        [Reviewed("XiaoHe321","2021-03-28 20:45")]
+        [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         private Attribute GenerateCommandInfo(MethodInfo method, Type classType, out CommandInfo commandInfo)
         {
             //获取指令属性
@@ -402,6 +412,8 @@ namespace Sora.Command
                                           method,
                                           (commandAttr as GroupCommand)?.PermissionLevel,
                                           (commandAttr as Attributes.Command.Command)?.Priority ?? 0,
+                                          (commandAttr as Attributes.Command.Command)?.RegexOptions ??
+                                          RegexOptions.None,
                                           method.IsStatic ? null : classType);
 
             return commandAttr;

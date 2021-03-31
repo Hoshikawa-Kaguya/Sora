@@ -86,19 +86,21 @@ namespace Sora.OnebotInterface
             internal readonly string[]         CommandExpressions;
             internal          object           EventArgs;
             internal readonly Guid             ConnectionId;
+            internal readonly RegexOptions     RegexOptions;
             internal readonly (long u, long g) Source;
 
             /// <summary>
             /// 构造方法
             /// </summary>
             internal WaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId,
-                                 (long u, long g) source)
+                                 (long u, long g) source, RegexOptions regexOptions)
             {
                 Semaphore          = semaphore;
                 CommandExpressions = commandExpressions;
                 ConnectionId       = connectionId;
                 Source             = source;
                 EventArgs          = null;
+                RegexOptions       = regexOptions;
             }
 
             /// <summary>
