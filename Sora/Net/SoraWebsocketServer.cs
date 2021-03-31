@@ -51,7 +51,7 @@ namespace Sora.Net
         /// <summary>
         /// 服务器已准备启动标识
         /// </summary>
-        private readonly bool serverReady;
+        private readonly bool _serverReady;
 
         #endregion
 
@@ -77,7 +77,7 @@ namespace Sora.Net
                 Environment.Exit(0);
             }
 
-            serverReady = false;
+            _serverReady = false;
             Log.Info("Sora", "Sora WebSocket服务器初始化...");
             Log.Debug("System", Environment.OSVersion);
             //检查参数
@@ -106,7 +106,7 @@ namespace Sora.Net
                                                               else
                                                                   crashAction(args.ExceptionObject as Exception);
                                                           };
-            serverReady = true;
+            _serverReady = true;
         }
 
         #endregion
@@ -125,7 +125,7 @@ namespace Sora.Net
         /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
         public async ValueTask StartServer()
         {
-            if (!serverReady) return;
+            if (!_serverReady) return;
             //检查是否已有服务器被启动
             if (NetUtils.ServiceExitis) throw new SoraServerIsRuningException();
             //启动服务器

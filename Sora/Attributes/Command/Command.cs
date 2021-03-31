@@ -10,9 +10,13 @@ namespace Sora.Attributes.Command
     [AttributeUsage(AttributeTargets.Method)]
     public abstract class Command : Attribute
     {
-        #region 属性
+        #region 私有字段
 
-        private readonly string[] commandExpressions;
+        private readonly string[] _commandExpressions;
+
+        #endregion
+        
+        #region 属性
 
         /// <summary>
         /// <para>正则指令表达式</para>
@@ -21,8 +25,8 @@ namespace Sora.Attributes.Command
         /// </summary>
         public string[] CommandExpressions
         {
-            get => commandExpressions ?? throw new NullReferenceException("CommandExpression cannot be null");
-            init => commandExpressions = value ?? throw new NullReferenceException("CommandExpression cannot be null");
+            get => _commandExpressions ?? throw new NullReferenceException("CommandExpression cannot be null");
+            init => _commandExpressions = value ?? throw new NullReferenceException("CommandExpression cannot be null");
         }
 
         /// <summary>

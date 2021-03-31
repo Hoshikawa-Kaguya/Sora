@@ -51,9 +51,9 @@ namespace Sora.Net
         /// <summary>
         /// 客户端已准备启动标识
         /// </summary>
-        private readonly bool clientReady;
+        private readonly bool _clientReady;
 
-        internal readonly Guid clientId = Guid.NewGuid();
+        private readonly Guid _clientId = Guid.NewGuid();
 
         #endregion
 
@@ -69,7 +69,7 @@ namespace Sora.Net
             Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.2"); //{Assembly.GetExecutingAssembly().GetName().Version}");
             Log.Debug("Sora", "开发交流群：1081190562");
 
-            clientReady = false;
+            _clientReady = false;
             Log.Info("Sora", "Sora WebSocket客户端初始化...");
             Log.Debug("System", Environment.OSVersion);
             //初始化连接管理器
@@ -112,7 +112,7 @@ namespace Sora.Net
                                                               else
                                                                   crashAction(args.ExceptionObject as Exception);
                                                           };
-            clientReady = true;
+            _clientReady = true;
         }
 
         #endregion
@@ -130,24 +130,24 @@ namespace Sora.Net
         /// </summary>
         public async ValueTask StartClient()
         {
-            if (!clientReady) return;
+            if (!_clientReady) return;
             //检查是否已有服务器被启动
             if (NetUtils.ServiceExitis) throw new SoraClientIsRuningException();
             //消息接收订阅
             Client.MessageReceived.Subscribe(msg => Task.Run(() =>
                                                              {
                                                                  this.Event
-                                                                     .Adapter(JObject.Parse(msg.Text), clientId);
+                                                                     .Adapter(JObject.Parse(msg.Text), _clientId);
                                                              }));
             Client.DisconnectionHappened.Subscribe(info => Task.Run(() =>
                                                                     {
-                                                                        ConnectionManager.GetLoginUid(clientId,
+                                                                        ConnectionManager.GetLoginUid(_clientId,
                                                                             out var uid);
                                                                         //移除原连接信息
-                                                                        if (ConnectionManager.ConnectionExitis(clientId)
+                                                                        if (ConnectionManager.ConnectionExitis(_clientId)
                                                                         )
                                                                             ConnManager.CloseConnection("Universal",
-                                                                                uid, clientId);
+                                                                                uid, _clientId);
 
                                                                         if (info.Exception != null)
                                                                             Log.Error("Sora",
@@ -161,7 +161,7 @@ namespace Sora.Net
                                                                            return;
                                                                        Log.Info("Sora", "服务器已自动重连");
                                                                        ConnManager.OpenConnection("Universal", "0",
-                                                                           Client, clientId);
+                                                                           Client, _clientId);
                                                                    }));
             await Client.Start();
             if (!Client.IsRunning || !Client.IsStarted)
@@ -169,7 +169,7 @@ namespace Sora.Net
                 throw new WebSocketClientException("WebSocket client is not running");
             }
 
-            ConnManager.OpenConnection("Universal", "0", Client, clientId);
+            ConnManager.OpenConnection("Universal", "0", Client, _clientId);
             Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
             //启动心跳包超时检查计时器
             this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
