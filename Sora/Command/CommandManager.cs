@@ -47,7 +47,7 @@ namespace Sora.Command
 
         internal CommandManager(bool enableSoraCommandManager)
         {
-            ServiceIsRunning              = false;
+            ServiceIsRunning          = false;
             _enableSoraCommandManager = enableSoraCommandManager;
         }
 
@@ -191,28 +191,28 @@ namespace Sora.Command
                     //注意可能匹配到多个的情况，下同
                     matchedCommand =
                         _groupCommands.Where(command => command.Regex.Any(regex =>
-                                                                             Regex
-                                                                                 .IsMatch(groupMessageEvent.Message.RawText,
-                                                                                     regex,
-                                                                                     RegexOptions.Compiled |
-                                                                                     command.RegexOptions)
-                                                                          && command.MethodInfo != null))
-                                     .OrderByDescending(p => p.Priority)
-                                     .ToList();
+                                                                              Regex
+                                                                                  .IsMatch(groupMessageEvent.Message.RawText,
+                                                                                      regex,
+                                                                                      RegexOptions.Compiled |
+                                                                                      command.RegexOptions)
+                                                                           && command.MethodInfo != null))
+                                      .OrderByDescending(p => p.Priority)
+                                      .ToList();
                     break;
                 }
                 case PrivateMessageEventArgs privateMessageEvent:
                 {
                     matchedCommand =
                         _privateCommands.Where(command => command.Regex.Any(regex =>
-                                                                               Regex
-                                                                                   .IsMatch(privateMessageEvent.Message.RawText,
-                                                                                       regex,
-                                                                                       RegexOptions.Compiled |
-                                                                                       command.RegexOptions)
-                                                                            && command.MethodInfo != null))
-                                       .OrderByDescending(p => p.Priority)
-                                       .ToList();
+                                                                                Regex
+                                                                                    .IsMatch(privateMessageEvent.Message.RawText,
+                                                                                        regex,
+                                                                                        RegexOptions.Compiled |
+                                                                                        command.RegexOptions)
+                                                                             && command.MethodInfo != null))
+                                        .OrderByDescending(p => p.Priority)
+                                        .ToList();
 
                     break;
                 }
@@ -438,8 +438,9 @@ namespace Sora.Command
                 var instance = classType.CreateInstance();
 
                 //添加实例
-                _instanceDict.Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
-                                 instance);
+                _instanceDict
+                    .Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
+                         instance);
             }
             catch (Exception e)
             {
