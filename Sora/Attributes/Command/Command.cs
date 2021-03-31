@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using Sora.Enumeration;
 
 namespace Sora.Attributes.Command
@@ -40,6 +41,11 @@ namespace Sora.Attributes.Command
         /// 优先级
         /// </summary>
         public int Priority { get; init; } = 0;
+
+        /// <summary>
+        /// 正则匹配选项
+        /// </summary>
+        public RegexOptions RegexOptions { get; init; } = RegexOptions.None;
 
         #endregion
 

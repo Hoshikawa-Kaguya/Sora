@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Sora.Command;
 using Sora.Entities.Base;
 using Sora.Enumeration;
@@ -82,12 +83,12 @@ namespace Sora.EventArgs.SoraEvent
         /// 等待下一条消息触发
         /// </summary>
         internal object WaitForNextMessage(long sourceUid, string[] commandExps, MatchType matchType,
-                                           long sourceGroup = 0)
+                                           RegexOptions regexOptions, long sourceGroup = 0)
         {
             //生成指令上下文
             var waitInfo =
                 CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType,
-                                                     SoraApi.ConnectionGuid);
+                                                     regexOptions, SoraApi.ConnectionGuid);
             //检查是否为初始指令重复触发
             if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
                 return null;

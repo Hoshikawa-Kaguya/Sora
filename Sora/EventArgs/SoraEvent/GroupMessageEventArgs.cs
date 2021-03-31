@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Entities.CQCodes;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
@@ -8,6 +9,7 @@ using Sora.Entities.Info;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.OnebotModel;
+using Group = Sora.Entities.Group;
 
 namespace Sora.EventArgs.SoraEvent
 {
@@ -143,11 +145,13 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="commandExps">指令表达式</param>
         /// <param name="matchType">匹配类型</param>
+        /// <param name="regexOptions">正则匹配选项</param>
         /// <returns>触发后的事件参数</returns>
-        public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType)
+        public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
+                                                                        RegexOptions regexOptions = RegexOptions.None)
         {
             return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, commandExps, matchType,
-                                            SourceGroup));
+                                            regexOptions, SourceGroup));
         }
 
         #endregion
