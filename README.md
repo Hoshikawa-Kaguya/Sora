@@ -20,10 +20,11 @@
 	<img src="https://img.shields.io/github/stars/Yukari316/Sora?style=for-the-badge">
 	<img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=for-the-badge">
 	<a href="https://github.com/Mrs4s/go-cqhttp">
-		<img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--alpha1-blue?style=for-the-badge">
+		<img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--beta1-blue?style=for-the-badge">
 	</a>
 	</h4>
 </h1>
+
 
 
 
@@ -40,7 +41,7 @@
 
 <details>
   <summary>支持的连接方式</summary>
-	
+
 - 正向Websocket
 - 反向Websocket
 
