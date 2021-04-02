@@ -1,51 +1,21 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Sora.Enumeration.EventParamsType;
-using Sora.Entities.CQCodes.CQCodeModel;
+using Sora.Entities.MessageElement.CQModel;
 using Sora.Enumeration;
+using Sora.Enumeration.EventParamsType;
 using Sora.OnebotInterface;
-using Sora.OnebotModel.ApiParams;
 using YukariToolBox.FormatLog;
 
-namespace Sora.Entities.CQCodes
+namespace Sora.Entities.MessageElement
 {
     /// <summary>
-    /// CQ码类
+    /// 消息段构造
     /// </summary>
-    public sealed class CQCode
+    public static class CQCodes
     {
-        #region 属性
-
-        /// <summary>
-        /// CQ码类型
-        /// </summary>
-        public CQFunction Function { get; }
-
-        /// <summary>
-        /// CQ码数据实例
-        /// </summary>
-        public object CQData { get; }
-
-        #endregion
-
-        #region 构造函数
-
-        /// <summary>
-        /// 构造CQ码实例
-        /// </summary>
-        /// <param name="cqFunction">CQ码类型</param>
-        /// <param name="dataObj"></param>
-        internal CQCode(CQFunction cqFunction, object dataObj)
-        {
-            this.Function = cqFunction;
-            this.CQData   = dataObj;
-        }
-
-        #endregion
-
         #region CQ码构建方法
 
         /// <summary>
@@ -54,7 +24,7 @@ namespace Sora.Entities.CQCodes
         /// <param name="msg">文本消息</param>
         public static CQCode CQText(string msg)
         {
-            return new(CQFunction.Text, new Text {Content = msg});
+            return new(CQType.Text, new Text {Content = msg});
         }
 
         /// <summary>
@@ -69,7 +39,7 @@ namespace Sora.Entities.CQCodes
                 return CQIlleage();
             }
 
-            return new CQCode(CQFunction.At,
+            return new CQCode(CQType.At,
                               new At {Traget = uid.ToString()});
         }
 
@@ -78,7 +48,7 @@ namespace Sora.Entities.CQCodes
         /// </summary>
         public static CQCode CQAtAll()
         {
-            return new(CQFunction.At,
+            return new(CQType.At,
                        new At {Traget = "all"});
         }
 
@@ -95,7 +65,7 @@ namespace Sora.Entities.CQCodes
                 return CQIlleage();
             }
 
-            return new CQCode(CQFunction.Face,
+            return new CQCode(CQType.Face,
                               new Face {Id = id});
         }
 
@@ -110,14 +80,14 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQRecord(string data, bool isMagic = false, bool useCache = true, bool useProxy = true,
                                       int? timeout = null)
         {
-            (string dataStr, bool isDataStr) = ParseDataStr(data);
+            var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("CQCode|CQRecord", $"非法参数({data})，已忽略此CQ码");
                 return CQIlleage();
             }
 
-            return new CQCode(CQFunction.Record,
+            return new CQCode(CQType.Record,
                               new Record
                               {
                                   RecordFile = dataStr,
@@ -137,14 +107,14 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQImage(string data, bool useCache = true, int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
-            (string dataStr, bool isDataStr) = ParseDataStr(data);
+            var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
-            return new CQCode(CQFunction.Image,
+            return new CQCode(CQType.Image,
                               new Image
                               {
                                   ImgFile     = dataStr,
@@ -163,14 +133,14 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQFlashImage(string data, bool useCache = true, int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
-            (string dataStr, bool isDataStr) = ParseDataStr(data);
+            var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
-            return new CQCode(CQFunction.Image,
+            return new CQCode(CQType.Image,
                               new Image
                               {
                                   ImgFile     = dataStr,
@@ -190,14 +160,14 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQShowImage(string data, int id = 40000, bool useCache = true, int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
-            (string dataStr, bool isDataStr) = ParseDataStr(data);
+            var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("CQCode|CQShowImage", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
-            return new CQCode(CQFunction.Image,
+            return new CQCode(CQType.Image,
                               new Image
                               {
                                   ImgFile     = dataStr,
@@ -217,14 +187,14 @@ namespace Sora.Entities.CQCodes
         /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
         public static CQCode CQVideo(string data, bool useCache = true, bool useProxy = true, int? timeout = null)
         {
-            (string dataStr, bool isDataStr) = ParseDataStr(data);
+            var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("CQCode|CQVideo", $"非法参数({data})，已忽略CQ码");
                 return CQIlleage();
             }
 
-            return new CQCode(CQFunction.Video,
+            return new CQCode(CQType.Video,
                               new Video
                               {
                                   VideoFile = dataStr,
@@ -241,7 +211,7 @@ namespace Sora.Entities.CQCodes
         /// <param name="musicId">音乐Id</param>
         public static CQCode CQMusic(MusicShareType musicType, long musicId)
         {
-            return new(CQFunction.Music,
+            return new(CQType.Music,
                        new Music
                        {
                            MusicType = musicType,
@@ -260,7 +230,7 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQCustomMusic(string url, string musicUrl, string title, string content = null,
                                            string coverImageUrl = null)
         {
-            return new(CQFunction.Music,
+            return new(CQType.Music,
                        new CustomMusic
                        {
                            ShareType     = "custom",
@@ -284,7 +254,7 @@ namespace Sora.Entities.CQCodes
                                      string content = null,
                                      string imageUrl = null)
         {
-            return new(CQFunction.Share,
+            return new(CQType.Share,
                        new Share
                        {
                            Url      = url,
@@ -300,7 +270,7 @@ namespace Sora.Entities.CQCodes
         /// <param name="id">消息id</param>
         public static CQCode CQReply(int id)
         {
-            return new(CQFunction.Reply,
+            return new(CQType.Reply,
                        new Reply
                        {
                            Traget = id
@@ -322,7 +292,7 @@ namespace Sora.Entities.CQCodes
                 return CQIlleage();
             }
 
-            return new CQCode(CQFunction.Poke,
+            return new CQCode(CQType.Poke,
                               new Poke
                               {
                                   Uid = uid
@@ -336,7 +306,7 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQRedbag(string title)
         {
             if (string.IsNullOrEmpty(title)) throw new NullReferenceException(nameof(title));
-            return new CQCode(CQFunction.RedBag,
+            return new CQCode(CQType.RedBag,
                               new Redbag
                               {
                                   Title = title
@@ -351,7 +321,7 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQGift(int giftId, long target)
         {
             if (giftId is < 0 or > 8 || target < 10000) throw new ArgumentOutOfRangeException(nameof(giftId));
-            return new CQCode(CQFunction.Gift,
+            return new CQCode(CQType.Gift,
                               new Gift
                               {
                                   Target   = target,
@@ -366,7 +336,7 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQXml(string content)
         {
             if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
-            return new CQCode(CQFunction.Xml,
+            return new CQCode(CQType.Xml,
                               new Code
                               {
                                   Content = content,
@@ -382,7 +352,7 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQJson(string content, bool richText = false)
         {
             if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
-            return new CQCode(CQFunction.Json,
+            return new CQCode(CQType.Json,
                               new Code
                               {
                                   Content = content,
@@ -397,7 +367,7 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQJson(JObject content)
         {
             if (content == null) throw new NullReferenceException(nameof(content));
-            return new CQCode(CQFunction.Json,
+            return new CQCode(CQType.Json,
                               new Code
                               {
                                   Content = JsonConvert.SerializeObject(content, Formatting.None)
@@ -423,14 +393,14 @@ namespace Sora.Entities.CQCodes
                                          long maxHeight = 400)
         {
             if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
-            (string dataStr, bool isDataStr) = ParseDataStr(imageFile);
+            var (dataStr, isDataStr) = ParseDataStr(imageFile);
             if (!isDataStr)
             {
                 Log.Error("CQCode|CQCardImage", $"非法参数({imageFile})，已忽略CQ码");
                 return CQIlleage();
             }
 
-            return new CQCode(CQFunction.CardImage,
+            return new CQCode(CQType.CardImage,
                               new CardImage
                               {
                                   ImageFile = dataStr,
@@ -451,7 +421,7 @@ namespace Sora.Entities.CQCodes
         public static CQCode CQTTS(string messageStr)
         {
             if (string.IsNullOrEmpty(messageStr)) throw new NullReferenceException(nameof(messageStr));
-            return new CQCode(CQFunction.TTS,
+            return new CQCode(CQType.TTS,
                               new
                               {
                                   text = messageStr
@@ -465,38 +435,33 @@ namespace Sora.Entities.CQCodes
         /// <para>当存在非法参数时CQ码将被本函数重置</para>
         /// </summary>
         private static CQCode CQIlleage() =>
-            new(CQFunction.Text, new Text {Content = null});
+            new(CQType.Text, new Text {Content = null});
 
         #endregion
 
-        #region 辅助函数
+        #region 扩展构建方法
 
         /// <summary>
-        /// 获取CQ码数据格式类型
-        /// 用于将object转换为可读结构体
+        /// 生成AT CQ码
         /// </summary>
-        /// <param name="cqCode"></param>
-        /// <returns>
-        /// 数据结构体类型
-        /// </returns>
-        public static Type GetCqCodeDataType(CQCode cqCode)
+        /// <param name="uid">uid</param>
+        public static CQCode At(this long uid)
         {
-            return cqCode.CQData.GetType();
+            return CQAt(uid);
+        }
+
+        /// <summary>
+        /// 生成AT CQ码
+        /// </summary>
+        /// <param name="uid">uid</param>
+        public static CQCode At(this int uid)
+        {
+            return CQAt(uid);
         }
 
         #endregion
 
-        #region 获取CQ码内容(仅用于序列化)
-
-        internal MessageElement ToOnebotMessage() => new()
-        {
-            MsgType = this.Function,
-            RawData = JObject.FromObject(this.CQData)
-        };
-
-        #endregion
-
-        #region 程序集方法
+        #region 消息字符串处理
 
         /// <summary>
         /// 处理传入数据
@@ -532,55 +497,6 @@ namespace Sora.Entities.CQCodes
                 default:
                     return (dataStr, true);
             }
-        }
-
-        #endregion
-
-        #region 运算符重载
-
-        /// <summary>
-        /// 等于重载
-        /// </summary>
-        public static bool operator ==(CQCode cqCodeL, CQCode cqCodeR)
-        {
-            if (cqCodeL is null && cqCodeR is null) return true;
-
-            return cqCodeL is not null                  && cqCodeR is not null &&
-                   cqCodeL.Function == cqCodeR.Function &&
-                   JToken.DeepEquals(JToken.FromObject(cqCodeL.CQData), JToken.FromObject(cqCodeR.CQData));
-        }
-
-        /// <summary>
-        /// 不等于重载
-        /// </summary>
-        public static bool operator !=(CQCode cqCodeL, CQCode cqCodeR)
-        {
-            return !(cqCodeL == cqCodeR);
-        }
-
-        #endregion
-
-        #region 常用重载
-
-        /// <summary>
-        /// 比较重载
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj is CQCode cqCode)
-            {
-                return this == cqCode;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// GetHashCode
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Function, CQData);
         }
 
         #endregion

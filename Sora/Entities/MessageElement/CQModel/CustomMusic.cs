@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.CQCodes.CQCodeModel
+namespace Sora.Entities.MessageElement.CQModel
 {
     /// <summary>
     /// 自定义音乐分享

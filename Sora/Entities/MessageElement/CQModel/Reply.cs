@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.CQCodes.CQCodeModel
+namespace Sora.Entities.MessageElement.CQModel
 {
     /// <summary>
-    /// At某人
+    /// 回复
     /// </summary>
-    public struct At
+    public struct Reply
     {
         #region 属性
 
@@ -15,8 +15,8 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// 为<see langword="null"/>时为At全体
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
-        [JsonProperty(PropertyName = "qq")]
-        public string Traget { get; internal set; }
+        [JsonProperty(PropertyName = "id")]
+        public int Traget { get; internal set; }
 
         #endregion
     }

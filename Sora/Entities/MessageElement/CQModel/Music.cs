@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration.EventParamsType;
 
-namespace Sora.Entities.CQCodes.CQCodeModel
+namespace Sora.Entities.MessageElement.CQModel
 {
     /// <summary>
     /// 音乐分享

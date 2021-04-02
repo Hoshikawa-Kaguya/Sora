@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Sora.OnebotModel;
 
-namespace Sora.Entities.CQCodes.CQCodeModel
+namespace Sora.Entities.MessageElement.CQModel
 {
     /// <summary>
     /// 转发消息的列表
@@ -22,7 +22,7 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// </summary>
         public void ParseNode()
         {
-            this.NodeMsgList.ForEach(node => node.CQCodeMsgList = MessageParse.Parse(node.MessageList));
+            this.NodeMsgList.ForEach(node => node.MessageBody = MessageParse.Parse(node.MessageList));
         }
 
         #endregion

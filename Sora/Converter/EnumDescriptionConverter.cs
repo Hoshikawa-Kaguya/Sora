@@ -61,7 +61,7 @@ namespace Sora.Converter
                 }
             }
 
-            return CQFunction.Unknown;
+            return CQType.Unknown;
         }
     }
 }

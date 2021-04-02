@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
-using Sora.Entities.CQCodes;
-using Sora.Entities.CQCodes.CQCodeModel;
+using Sora.Entities.MessageElement.CQModel;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 
@@ -30,7 +29,7 @@ namespace Sora.Entities
         /// <summary>
         /// 消息段列表
         /// </summary>
-        public List<CQCode> MessageList { get; }
+        public MessageBody MessageBody { get; }
 
         /// <summary>
         /// 消息时间戳
@@ -52,12 +51,12 @@ namespace Sora.Entities
 
         #region 构造函数
 
-        internal Message(Guid connectionGuid, int msgId, string text, List<CQCode> cqCodeList, long time, int font,
+        internal Message(Guid connectionGuid, int msgId, string text, MessageBody messageBody, long time, int font,
                          int? messageSequence) : base(connectionGuid)
         {
             this.MessageId       = msgId;
             this.RawText         = text;
-            this.MessageList     = cqCodeList;
+            this.MessageBody     = messageBody;
             this.Time            = time;
             this.Font            = font;
             this.MessageSequence = messageSequence;
@@ -88,8 +87,8 @@ namespace Sora.Entities
         /// </returns>
         public List<long> GetAllAtList()
         {
-            return MessageList.Where(cq => cq.Function == CQFunction.At)
-                              .Select(cq => Convert.ToInt64(((At) cq.CQData).Traget ?? "-1"))
+            return MessageBody.Where(cq => cq.MessageType == CQType.At)
+                              .Select(cq => Convert.ToInt64(((At) cq.DataObject).Traget ?? "-1"))
                               .ToList();
         }
 
@@ -100,8 +99,8 @@ namespace Sora.Entities
         /// <returns>语音文件url</returns>
         public string GetRecordUrl()
         {
-            if (this.MessageList.Count != 1 || MessageList.First().Function != CQFunction.Record) return null;
-            return ((Record) MessageList.First().CQData).Url;
+            if (this.MessageBody.Count != 1 || MessageBody.First().MessageType != CQType.Record) return null;
+            return ((Record) MessageBody.First().DataObject).Url;
         }
 
         /// <summary>
@@ -113,8 +112,8 @@ namespace Sora.Entities
         /// </returns>
         public List<Image> GetAllImage()
         {
-            return MessageList.Where(cq => cq.Function == CQFunction.Image)
-                              .Select(cq => (Image) cq.CQData)
+            return MessageBody.Where(cq => cq.MessageType == CQType.Image)
+                              .Select(cq => (Image) cq.DataObject)
                               .ToList();
         }
 
@@ -123,7 +122,7 @@ namespace Sora.Entities
         /// </summary>
         public bool IsForwardMessage()
         {
-            return MessageList.Count == 1 && MessageList.First().Function == CQFunction.Forward;
+            return MessageBody.Count == 1 && MessageBody.First().MessageType == CQType.Forward;
         }
 
         /// <summary>
@@ -131,7 +130,7 @@ namespace Sora.Entities
         /// </summary>
         public string GetForwardMsgId()
         {
-            return IsForwardMessage() ? ((Forward) MessageList.First().CQData).MessageId : null;
+            return IsForwardMessage() ? ((Forward) MessageBody.First().DataObject).MessageId : null;
         }
 
         #endregion
@@ -198,7 +197,7 @@ namespace Sora.Entities
         /// </summary>
         public override int GetHashCode()
         {
-            return HashCode.Combine(MessageId, RawText, MessageList, Time, Font, MessageSequence);
+            return HashCode.Combine(MessageId, RawText, MessageBody, Time, Font, MessageSequence);
         }
 
         #endregion

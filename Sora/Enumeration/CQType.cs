@@ -6,7 +6,7 @@ namespace Sora.Enumeration
     /// 消息段类型
     /// </summary>
     [DefaultValue(Unknown)]
-    public enum CQFunction
+    public enum CQType
     {
         /// <summary>
         /// 未知

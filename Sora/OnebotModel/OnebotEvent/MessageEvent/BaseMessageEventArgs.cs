@@ -37,7 +37,7 @@ namespace Sora.OnebotModel.OnebotEvent.MessageEvent
         /// 消息内容
         /// </summary>
         [JsonProperty(PropertyName = "message")]
-        internal List<MessageElement> MessageList { get; set; }
+        internal List<OnebotMessageElement> MessageList { get; set; }
 
         /// <summary>
         /// 原始消息内容

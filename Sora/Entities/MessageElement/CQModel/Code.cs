@@ -2,11 +2,11 @@ using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration;
 
-namespace Sora.Entities.CQCodes.CQCodeModel
+namespace Sora.Entities.MessageElement.CQModel
 {
     /// <summary>
     /// <para>Xml与Json集合</para>
-    /// <para>可能为<see cref="CQFunction"/>.<see langword="Json"/>或<see cref="CQFunction"/>.<see langword="Xml"/></para>
+    /// <para>可能为<see cref="CQType"/>.<see langword="Json"/>或<see cref="CQType"/>.<see langword="Xml"/></para>
     /// </summary>
     public struct Code
     {

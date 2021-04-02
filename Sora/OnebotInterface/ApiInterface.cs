@@ -1,7 +1,6 @@
 using Newtonsoft.Json.Linq;
 using Sora.Entities;
-using Sora.Entities.CQCodes;
-using Sora.Entities.CQCodes.CQCodeModel;
+using Sora.Entities.MessageElement.CQModel;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
@@ -15,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sora.Attributes;
+using Sora.Entities.MessageElement;
 using YukariToolBox.FormatLog;
 
 namespace Sora.OnebotInterface
@@ -445,25 +445,25 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_msg response retcode={retCode}");
             if (retCode != 0 || ret?["data"] == null) return (retCode, null, null, null, 0, false);
             //处理消息段
-            var rawMessage = ret["data"]?["message"]?.ToObject<List<MessageElement>>();
+            var rawMessage = ret["data"]?["message"]?.ToObject<List<OnebotMessageElement>>();
             return (retCode,
-                    new Message(connection,
-                                msgId,
-                                ret["data"]?["raw_message"]?.ToString(),
-                                MessageParse.Parse(rawMessage        ?? new List<MessageElement>()),
-                                Convert.ToInt64(ret["data"]?["time"] ?? -1),
-                                0,
-                                Convert.ToBoolean(ret["data"]?["group"]           ?? false)
-                                    ? Convert.ToInt32(ret["data"]?["message_seq"] ?? 0)
-                                    : null),
-                    new User(connection,
-                             Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)),
+                    message: new Message(connection,
+                                         msgId,
+                                         ret["data"]?["raw_message"]?.ToString(),
+                                         MessageParse.Parse(rawMessage        ?? new List<OnebotMessageElement>()),
+                                         Convert.ToInt64(ret["data"]?["time"] ?? -1),
+                                         0,
+                                         Convert.ToBoolean(ret["data"]?["group"]           ?? false)
+                                             ? Convert.ToInt32(ret["data"]?["message_seq"] ?? 0)
+                                             : null),
+                    sender: new User(connection,
+                                     Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)),
                     //判断响应数据中是否有群组信息
-                    Convert.ToBoolean(ret["data"]?["group"] ?? false)
+                    sourceGroup: Convert.ToBoolean(ret["data"]?["group"] ?? false)
                         ? new Group(connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
                         : null,
-                    Convert.ToInt32(ret["data"]?["real_id"]                                    ?? 0),
-                    Convert.ToBoolean(ret["data"]?["message_type"]?.ToString().Equals("group") ?? false));
+                    realId: Convert.ToInt32(ret["data"]?["real_id"]                                        ?? 0),
+                    isGroupMsg: Convert.ToBoolean(ret["data"]?["message_type"]?.ToString().Equals("group") ?? false));
         }
 
         /// <summary>

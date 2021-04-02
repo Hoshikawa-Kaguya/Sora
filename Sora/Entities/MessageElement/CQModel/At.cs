@@ -1,23 +1,22 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.CQCodes.CQCodeModel
+namespace Sora.Entities.MessageElement.CQModel
 {
     /// <summary>
-    /// <para>群成员戳一戳</para>
-    /// <para>仅发送</para>
-    /// <para>仅支持Go</para>
+    /// At某人
     /// </summary>
-    public struct Poke
+    public struct At
     {
         #region 属性
 
         /// <summary>
-        /// 需要戳的成员
+        /// At目标UID
+        /// 为<see langword="null"/>时为At全体
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "qq")]
-        public long Uid { get; internal set; }
+        public string Traget { get; internal set; }
 
         #endregion
     }

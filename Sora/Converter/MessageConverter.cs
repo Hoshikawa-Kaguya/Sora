@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Sora.Entities.CQCodes;
+using Sora.Entities.MessageElement;
 
 namespace Sora.Converter
 {
@@ -28,7 +28,7 @@ namespace Sora.Converter
                         msgList.AddRange(cqCodes);
                         break;
                     default:
-                        msgList.Add(CQCode.CQText(msgObj.ToString()));
+                        msgList.Add(CQCodes.CQText(msgObj.ToString()));
                         break;
                 }
             }

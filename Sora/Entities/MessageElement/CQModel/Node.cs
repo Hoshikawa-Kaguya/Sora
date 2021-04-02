@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Sora.OnebotModel.ApiParams;
 
-namespace Sora.Entities.CQCodes.CQCodeModel
+namespace Sora.Entities.MessageElement.CQModel
 {
     /// <summary>
     /// 自定义合并转发节点
@@ -27,13 +27,13 @@ namespace Sora.Entities.CQCodes.CQCodeModel
         /// 原始消息内容
         /// </summary>
         [JsonProperty(PropertyName = "content")]
-        internal List<MessageElement> MessageList { get; set; }
+        internal List<OnebotMessageElement> MessageList { get; set; }
 
         /// <summary>
         /// 消息内容
         /// </summary>
         [JsonIgnore]
-        public List<CQCode> CQCodeMsgList { get; internal set; }
+        public MessageBody MessageBody { get; internal set; }
 
         #endregion
 
