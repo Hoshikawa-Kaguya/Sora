@@ -2,7 +2,7 @@
 name: Bug反馈
 about: Create a bug report
 title: ''
-labels: 'bug'
+labels: 'bug?'
 assignees: ''
 
 ---
