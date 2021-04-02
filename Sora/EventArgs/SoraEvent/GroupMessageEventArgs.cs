@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Sora.Entities.CQCodes;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
+using Sora.Entities.MessageElement;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.OnebotModel;
@@ -68,16 +68,16 @@ namespace Sora.EventArgs.SoraEvent
         internal GroupMessageEventArgs(Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs)
             : base(connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
         {
-            this.IsAnonymousMessage = groupMsgArgs.Anonymous != null;
-            this.IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
+            IsAnonymousMessage = groupMsgArgs.Anonymous != null;
+            IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
             //将api消息段转换为CQ码
-            this.Message = new Message(connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
-                                       MessageParse.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
-                                       groupMsgArgs.Font, groupMsgArgs.MessageSequence);
-            this.Sender      = new User(connectionGuid, groupMsgArgs.UserId);
-            this.SourceGroup = new Group(connectionGuid, groupMsgArgs.GroupId);
-            this.SenderInfo  = groupMsgArgs.SenderInfo;
-            this.Anonymous   = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
+            Message = new Message(connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
+                                  MessageParse.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
+                                  groupMsgArgs.Font, groupMsgArgs.MessageSequence);
+            Sender      = new User(connectionGuid, groupMsgArgs.UserId);
+            SourceGroup = new Group(connectionGuid, groupMsgArgs.GroupId);
+            SenderInfo  = groupMsgArgs.SenderInfo;
+            Anonymous   = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
         }
 
         #endregion
@@ -98,7 +98,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> Reply(params object[] message)
         {
-            return await base.SoraApi.SendGroupMessage(this.SourceGroup.Id, message);
+            return await SoraApi.SendGroupMessage(SourceGroup.Id, message);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> Repeat()
         {
-            return await base.SoraApi.SendGroupMessage(this.SourceGroup.Id, this.Message.MessageList);
+            return await SoraApi.SendGroupMessage(SourceGroup.Id, Message.MessageBody);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         public async ValueTask RecallSourceMessage()
         {
-            await base.SoraApi.RecallMessage(this.Message.MessageId);
+            await SoraApi.RecallMessage(Message.MessageId);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace Sora.EventArgs.SoraEvent
         public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(
             bool useCache = true)
         {
-            return await base.SoraApi.GetGroupMemberInfo(this.SourceGroup.Id, this.Sender.Id, useCache);
+            return await SoraApi.GetGroupMemberInfo(SourceGroup.Id, Sender.Id, useCache);
         }
 
         #endregion

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
-using Sora.Entities.CQCodes;
 using Sora.Entities.Info;
+using Sora.Entities.MessageElement;
 using Sora.Enumeration.ApiType;
 
 namespace Sora.Entities
@@ -95,7 +95,7 @@ namespace Sora.Entities
         /// </returns>
         public CQCode CQCodeAt()
         {
-            return CQCode.CQAt(this.Id);
+            return CQCodes.CQAt(this.Id);
         }
 
         #endregion

@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.CQCodes.CQCodeModel
+namespace Sora.Entities.MessageElement.CQModel
 {
     /// <summary>
     /// QQ 表情

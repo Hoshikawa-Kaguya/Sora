@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Sora.Entities.CQCodes;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
+using Sora.Entities.MessageElement;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.OnebotModel;
@@ -91,7 +91,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </returns>
         public async ValueTask<(APIStatusType apiStatus, int messageId)> Repeat()
         {
-            return await base.SoraApi.SendPrivateMessage(this.Sender.Id, this.Message.MessageList);
+            return await base.SoraApi.SendPrivateMessage(this.Sender.Id, this.Message.MessageBody);
         }
 
         #endregion

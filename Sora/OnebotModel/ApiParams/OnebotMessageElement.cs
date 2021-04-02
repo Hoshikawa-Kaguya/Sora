@@ -8,14 +8,14 @@ namespace Sora.OnebotModel.ApiParams
     /// <summary>
     /// Onebot消息段
     /// </summary>
-    internal sealed class MessageElement
+    internal sealed class OnebotMessageElement
     {
         /// <summary>
         /// 消息段类型
         /// </summary>
         [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "type")]
-        internal CQFunction MsgType { get; set; }
+        internal CQType MsgType { get; set; }
 
         /// <summary>
         /// 消息段JSON

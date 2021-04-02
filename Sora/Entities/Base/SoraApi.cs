@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.Converter;
-using Sora.Entities.CQCodes;
-using Sora.Entities.CQCodes.CQCodeModel;
+using Sora.Entities.MessageElement.CQModel;
 using Sora.Entities.Info;
+using Sora.Entities.MessageElement;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
@@ -496,7 +496,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
-            (string retFileStr, bool isMatch) = CQCode.ParseDataStr(imageFile);
+            var (retFileStr, isMatch) = CQCodes.ParseDataStr(imageFile);
             if (!isMatch) throw new NotSupportedException($"not supported file type({imageFile})");
             return (APIStatusType) await ApiInterface.SetGroupPortrait(this.ConnectionGuid, groupId, retFileStr,
                                                                        useCache);

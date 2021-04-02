@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Sora.Attributes;
-using Sora.Entities.CQCodes;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
@@ -16,6 +15,8 @@ namespace Sora
     /// </summary>
     public static class Helper
     {
+        #region 崩溃提示
+
         /// <summary>
         /// 友好的崩溃提示(x)
         /// </summary>
@@ -31,6 +32,10 @@ namespace Sora
 
             Log.UnhandledExceptionLog(args);
         }
+
+        #endregion
+
+        #region 指令实例相关
 
         /// <summary>
         /// 对列表进行添加 CommandInfo 元素，或如果存在该项的话，忽略
@@ -49,15 +54,9 @@ namespace Sora
             return true;
         }
 
-        /// <summary>
-        /// <para>添加纯文本消息段</para>
-        /// <para>CQ码消息段扩展</para>
-        /// </summary>
-        /// <param name="msgList">CQ消息段</param>
-        /// <param name="text">纯文本信息</param>
-        [Reviewed("nidbCN", "2021-03-24 19:40")]
-        public static void AddText(this List<CQCode> msgList, string text) =>
-            msgList.Add(CQCode.CQText(text));
+        #endregion
+
+        #region 代码审计
 
         /// <summary>
         /// <para>仅用于项目组内部的代码审查</para>
@@ -98,5 +97,7 @@ namespace Sora
 
             Log.Debug("Unchecked Method Count", uncheckedMethod.Count);
         }
+
+        #endregion
     }
 }

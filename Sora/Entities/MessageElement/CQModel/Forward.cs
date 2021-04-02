@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.CQCodes.CQCodeModel
+namespace Sora.Entities.MessageElement.CQModel
 {
     /// <summary>
     /// 合并转发/合并转发节点
