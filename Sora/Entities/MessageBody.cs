@@ -7,7 +7,7 @@ using Sora.Enumeration;
 namespace Sora.Entities
 {
     /// <summary>
-    /// 消息段构造器
+    /// 消息段
     /// </summary>
     public class MessageBody : IList<CQCode>
     {
