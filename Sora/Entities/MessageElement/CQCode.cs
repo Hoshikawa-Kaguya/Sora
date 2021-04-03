@@ -107,8 +107,7 @@ namespace Sora.Entities.MessageElement
         /// </summary>
         public static implicit operator MessageBody(CQCode cqCode)
         {
-            var messages = new MessageBody {cqCode};
-            return messages;
+            return new() {cqCode};
         }
 
         /// <summary>

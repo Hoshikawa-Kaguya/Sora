@@ -189,6 +189,14 @@ namespace Sora.Entities
             }
         }
 
+        /// <summary>
+        /// 隐式类型转换
+        /// </summary>
+        public static implicit operator MessageBody(string text)
+        {
+            return new() {CQCodes.CQText(text)};
+        }
+
         #endregion
     }
 }
