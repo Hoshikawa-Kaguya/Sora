@@ -53,12 +53,12 @@ namespace Sora.EventArgs.SoraEvent
             : base(connectionGuid, eventName, privateMsgArgs.SelfID, privateMsgArgs.Time)
         {
             //将api消息段转换为CQ码
-            this.Message = new Message(connectionGuid, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
-                                       MessageParse.Parse(privateMsgArgs.MessageList),
-                                       privateMsgArgs.Time, privateMsgArgs.Font, null);
-            this.Sender             = new User(connectionGuid, privateMsgArgs.UserId);
-            this.SenderInfo         = privateMsgArgs.SenderInfo;
-            this.IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
+            Message = new Message(connectionGuid, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
+                                  MessageParse.Parse(privateMsgArgs.MessageList),
+                                  privateMsgArgs.Time, privateMsgArgs.Font, null);
+            Sender             = new User(connectionGuid, privateMsgArgs.UserId);
+            SenderInfo         = privateMsgArgs.SenderInfo;
+            IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
         }
 
         #endregion
@@ -74,24 +74,24 @@ namespace Sora.EventArgs.SoraEvent
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 发送消息的id</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> Reply(params object[] message)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(params object[] message)
         {
-            return await base.SoraApi.SendPrivateMessage(this.Sender.Id, message);
+            return await SoraApi.SendPrivateMessage(Sender.Id, message);
         }
 
         /// <summary>
         /// 没什么用的复读功能
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 发送消息的id</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> Repeat()
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> Repeat()
         {
-            return await base.SoraApi.SendPrivateMessage(this.Sender.Id, this.Message.MessageBody);
+            return await SoraApi.SendPrivateMessage(Sender.Id, Message.MessageBody);
         }
 
         #endregion

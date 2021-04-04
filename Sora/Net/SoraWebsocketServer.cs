@@ -86,14 +86,14 @@ namespace Sora.Net
                 throw new ArgumentOutOfRangeException(nameof(config.Port), "Port out of range");
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
-            this.Config = config;
+            Config      = config;
             //API超时
             ReactiveApiManager.TimeOut = config.ApiTimeOut;
             //实例化事件接口
-            this.Event = new EventInterface(config.EnableSoraCommandManager);
+            Event = new EventInterface(config.EnableSoraCommandManager);
             //禁用原log
             FleckLog.Level = (LogLevel) 4;
-            this.Server = new WebSocketServer($"ws://{config.Host}:{config.Port}")
+            Server = new WebSocketServer($"ws://{config.Host}:{config.Port}")
             {
                 //出错后进行重启
                 RestartAfterListenError = true
@@ -166,7 +166,7 @@ namespace Sora.Net
                                                      var token = headerValue.Split(' ')[1];
                                                      Log.Debug("Server", $"get token = {token}");
                                                      //验证Token
-                                                     if (!token.Equals(this.Config.AccessToken)) return;
+                                                     if (!token.Equals(Config.AccessToken)) return;
                                                  }
 
                                                  //向客户端发送Ping
@@ -194,7 +194,7 @@ namespace Sora.Net
                                                     //进入事件处理和分发
                                                     Task.Run(() =>
                                                              {
-                                                                 this.Event
+                                                                 Event
                                                                      .Adapter(JObject.Parse(message),
                                                                               socket.ConnectionInfo.Id);
                                                              });
@@ -202,8 +202,8 @@ namespace Sora.Net
                          });
             Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
             //启动心跳包超时检查计时器
-            this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
-                                            Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
+            HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
+                                       Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
             NetUtils.ServiceExitis = true;
 
             await Task.Delay(-1);

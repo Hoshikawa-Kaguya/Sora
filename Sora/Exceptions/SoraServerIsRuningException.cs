@@ -40,13 +40,13 @@ namespace Sora.Exceptions
         public SoraServerIsRuningException(string message, long selfId, Exception? innerException) :
             base(message, innerException)
         {
-            this.SelfId = selfId;
+            SelfId = selfId;
         }
 
         internal SoraServerIsRuningException(string message, long selfId) :
             base(message)
         {
-            this.SelfId = selfId;
+            SelfId = selfId;
         }
     }
 }

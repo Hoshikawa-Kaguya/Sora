@@ -93,10 +93,10 @@ namespace Sora.EventArgs.SoraEvent
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 发送消息的id</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> Reply(params object[] message)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(params object[] message)
         {
             return await SoraApi.SendGroupMessage(SourceGroup.Id, message);
         }
@@ -105,10 +105,10 @@ namespace Sora.EventArgs.SoraEvent
         /// 没什么用的复读功能
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 发送消息的id</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> Repeat()
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> Repeat()
         {
             return await SoraApi.SendGroupMessage(SourceGroup.Id, Message.MessageBody);
         }
@@ -127,10 +127,10 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="useCache">是否使用缓存</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(
+        public async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(
             bool useCache = true)
         {
             return await SoraApi.GetGroupMemberInfo(SourceGroup.Id, Sender.Id, useCache);

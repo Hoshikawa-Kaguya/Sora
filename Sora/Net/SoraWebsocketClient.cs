@@ -80,11 +80,11 @@ namespace Sora.Net
                 throw new ArgumentOutOfRangeException(nameof(config.Port), "Port out of range");
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
-            this.Config = config;
+            Config      = config;
             //API超时
             ReactiveApiManager.TimeOut = config.ApiTimeOut;
             //实例化事件接口
-            this.Event = new EventInterface(config.EnableSoraCommandManager);
+            Event = new EventInterface(config.EnableSoraCommandManager);
             //构建Client配置
             var factory = new Func<ClientWebSocket>(() =>
                                                     {
@@ -98,7 +98,7 @@ namespace Sora.Net
                 ? $"ws://{config.Host}:{config.Port}"
                 : $"ws://{config.Host}:{config.Port}/{config.UniversalPath.Trim('/')}/";
             Log.Debug("Sora", $"Onebot服务器地址:{serverPath}");
-            this.Client =
+            Client =
                 new WebsocketClient(new Uri(serverPath), factory)
                 {
                     ReconnectTimeout      = config.ReconnectTimeOut,
@@ -136,7 +136,7 @@ namespace Sora.Net
             //消息接收订阅
             Client.MessageReceived.Subscribe(msg => Task.Run(() =>
                                                              {
-                                                                 this.Event
+                                                                 Event
                                                                      .Adapter(JObject.Parse(msg.Text), _clientId);
                                                              }));
             Client.DisconnectionHappened.Subscribe(info => Task.Run(() =>
@@ -173,8 +173,8 @@ namespace Sora.Net
             ConnManager.OpenConnection("Universal", "0", Client, _clientId);
             Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
             //启动心跳包超时检查计时器
-            this.HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
-                                            Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
+            HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
+                                       Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
             NetUtils.ServiceExitis = true;
             await Task.Delay(-1);
         }

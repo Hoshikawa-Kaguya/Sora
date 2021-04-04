@@ -52,11 +52,11 @@ namespace Sora.EventArgs.SoraEvent
                                           ApiGroupRequestEventArgs groupRequestArgs) :
             base(connectionGuid, eventName, groupRequestArgs.SelfID, groupRequestArgs.Time)
         {
-            this.Sender      = new User(connectionGuid, groupRequestArgs.UserId);
-            this.SourceGroup = new Group(connectionGuid, groupRequestArgs.GroupId);
-            this.Comment     = groupRequestArgs.Comment;
-            this.RequsetFlag = groupRequestArgs.Flag;
-            this.SubType     = groupRequestArgs.GroupRequestType;
+            Sender      = new User(connectionGuid, groupRequestArgs.UserId);
+            SourceGroup = new Group(connectionGuid, groupRequestArgs.GroupId);
+            Comment     = groupRequestArgs.Comment;
+            RequsetFlag = groupRequestArgs.Flag;
+            SubType     = groupRequestArgs.GroupRequestType;
         }
 
         #endregion
@@ -68,7 +68,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         public async ValueTask Accept()
         {
-            await base.SoraApi.SetGroupAddRequest(this.RequsetFlag, this.SubType, true);
+            await SoraApi.SetGroupAddRequest(RequsetFlag, SubType, true);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="reason">原因</param>
         public async ValueTask Reject(string reason = null)
         {
-            await base.SoraApi.SetGroupAddRequest(this.RequsetFlag, this.SubType, false, reason);
+            await SoraApi.SetGroupAddRequest(RequsetFlag, SubType, false, reason);
         }
 
         #endregion

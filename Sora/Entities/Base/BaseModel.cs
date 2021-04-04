@@ -20,7 +20,7 @@ namespace Sora.Entities.Base
 
         internal BaseModel(Guid connectionGuid)
         {
-            this.SoraApi = new SoraApi(connectionGuid);
+            SoraApi = new SoraApi(connectionGuid);
         }
 
         #endregion

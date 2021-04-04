@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
+using Sora.Entities.Info;
 using Sora.Entities.MessageElement.CQModel;
 using Sora.Enumeration;
-using Sora.Enumeration.ApiType;
 
 namespace Sora.Entities
 {
@@ -54,12 +54,12 @@ namespace Sora.Entities
         internal Message(Guid connectionGuid, int msgId, string text, MessageBody messageBody, long time, int font,
                          int? messageSequence) : base(connectionGuid)
         {
-            this.MessageId       = msgId;
-            this.RawText         = text;
-            this.MessageBody     = messageBody;
-            this.Time            = time;
-            this.Font            = font;
-            this.MessageSequence = messageSequence;
+            MessageId       = msgId;
+            RawText         = text;
+            MessageBody     = messageBody;
+            Time            = time;
+            Font            = font;
+            MessageSequence = messageSequence;
         }
 
         #endregion
@@ -69,9 +69,9 @@ namespace Sora.Entities
         /// <summary>
         /// 撤回本条消息
         /// </summary>
-        public async ValueTask<APIStatusType> RecallMessage()
+        public async ValueTask<ApiStatus> RecallMessage()
         {
-            return await base.SoraApi.RecallMessage(this.MessageId);
+            return await SoraApi.RecallMessage(MessageId);
         }
 
         #endregion
@@ -99,7 +99,7 @@ namespace Sora.Entities
         /// <returns>语音文件url</returns>
         public string GetRecordUrl()
         {
-            if (this.MessageBody.Count != 1 || MessageBody.First().MessageType != CQType.Record) return null;
+            if (MessageBody.Count != 1 || MessageBody.First().MessageType != CQType.Record) return null;
             return ((Record) MessageBody.First().DataObject).Url;
         }
 

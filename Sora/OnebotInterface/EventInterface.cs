@@ -9,6 +9,7 @@ using Sora.OnebotModel.OnebotEvent.RequestEvent;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Sora.Enumeration.ApiType;
 using YukariToolBox.FormatLog;
 
 namespace Sora.OnebotInterface
@@ -226,17 +227,17 @@ namespace Sora.OnebotInterface
                     if (lifeCycle != null)
                         Log.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
 
-                    var (retCode, clientType, clientVer) = await ApiInterface.GetClientInfo(connection);
-                    if (retCode != 0) //检查返回值
+                    var (infoApiStatus, clientType, clientVer) = await ApiInterface.GetClientInfo(connection);
+                    if (infoApiStatus.RetCode != ApiStatusType.OK) //检查返回值
                     {
-                        Log.Error("Sora", $"获取onebot版本失败(retcode={retCode})");
+                        Log.Error("Sora", $"获取onebot版本失败(retcode={infoApiStatus})");
                         break;
                     }
 
-                    var (retCode2, uid, _) = await ApiInterface.GetLoginInfo(connection);
-                    if (retCode2 != 0) //检查返回值
+                    var (loginInfoApiStatus, uid, _) = await ApiInterface.GetLoginInfo(connection);
+                    if (loginInfoApiStatus.RetCode != ApiStatusType.OK) //检查返回值
                     {
-                        Log.Error("Sora", $"获取uid失败(retcode={retCode2})");
+                        Log.Error("Sora", $"获取uid失败(retcode={loginInfoApiStatus})");
                         break;
                     }
 

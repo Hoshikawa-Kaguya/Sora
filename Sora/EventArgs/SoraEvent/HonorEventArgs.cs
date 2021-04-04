@@ -40,9 +40,9 @@ namespace Sora.EventArgs.SoraEvent
         internal HonorEventArgs(Guid connectionGuid, string eventName, ApiHonorEventArgs honorEventArgs) :
             base(connectionGuid, eventName, honorEventArgs.SelfID, honorEventArgs.Time)
         {
-            this.TargetUser  = new User(connectionGuid, honorEventArgs.UserId);
-            this.SourceGroup = new Group(connectionGuid, honorEventArgs.GroupId);
-            this.Honor       = honorEventArgs.HonorType;
+            TargetUser  = new User(connectionGuid, honorEventArgs.UserId);
+            SourceGroup = new Group(connectionGuid, honorEventArgs.GroupId);
+            Honor       = honorEventArgs.HonorType;
         }
 
         #endregion

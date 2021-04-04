@@ -31,7 +31,7 @@ namespace Sora.Entities
         /// <param name="uid">用户ID</param>
         internal User(Guid connectionGuid, long uid) : base(connectionGuid)
         {
-            this.Id = uid;
+            Id = uid;
         }
 
         #endregion
@@ -46,9 +46,9 @@ namespace Sora.Entities
         /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
-        public async ValueTask<(APIStatusType apiStatus, int message)> SendPrivateMessage(params object[] message)
+        public async ValueTask<(ApiStatus apiStatus, int message)> SendPrivateMessage(params object[] message)
         {
-            return await base.SoraApi.SendPrivateMessage(this.Id, message);
+            return await SoraApi.SendPrivateMessage(Id, message);
         }
 
         /// <summary>
@@ -60,12 +60,12 @@ namespace Sora.Entities
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendPrivateMessage(List<CQCode> message)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(MessageBody message)
         {
-            return await base.SoraApi.SendPrivateMessage(this.Id, message);
+            return await SoraApi.SendPrivateMessage(Id, message);
         }
 
         /// <summary>
@@ -73,14 +73,14 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="useCache"></param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="UserInfo"/> 群成员信息</para>
         /// <para><see cref="string"/> qid</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
+        public async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
             bool useCache = true)
         {
-            return await base.SoraApi.GetUserInfo(this.Id, useCache);
+            return await SoraApi.GetUserInfo(Id, useCache);
         }
 
         #endregion
@@ -95,7 +95,7 @@ namespace Sora.Entities
         /// </returns>
         public CQCode CQCodeAt()
         {
-            return CQCodes.CQAt(this.Id);
+            return CQCodes.CQAt(Id);
         }
 
         #endregion

@@ -59,8 +59,8 @@ namespace Sora.Entities.MessageElement
 
         internal OnebotMessageElement ToOnebotMessage() => new()
         {
-            MsgType = this.MessageType,
-            RawData = JObject.FromObject(this.DataObject)
+            MsgType = MessageType,
+            RawData = JObject.FromObject(DataObject)
         };
 
         #endregion

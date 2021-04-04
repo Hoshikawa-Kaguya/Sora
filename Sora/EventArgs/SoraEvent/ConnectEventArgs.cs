@@ -35,8 +35,8 @@ namespace Sora.EventArgs.SoraEvent
         internal ConnectEventArgs(Guid connectionGuid, string eventName, long loginUid, string clientType,
                                   string clientVersion, long time) : base(connectionGuid, eventName, loginUid, time)
         {
-            this.ClientType        = clientType;
-            this.ClientVersionCode = clientVersion;
+            ClientType        = clientType;
+            ClientVersionCode = clientVersion;
         }
 
         #endregion

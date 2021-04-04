@@ -39,9 +39,9 @@ namespace Sora.EventArgs.SoraEvent
         internal GroupPokeEventArgs(Guid connectionGuid, string eventName, ApiPokeOrLuckyEventArgs pokeEventArgs) :
             base(connectionGuid, eventName, pokeEventArgs.SelfID, pokeEventArgs.Time)
         {
-            this.SendUser    = new User(connectionGuid, pokeEventArgs.UserId);
-            this.TargetUser  = new User(connectionGuid, pokeEventArgs.TargetId);
-            this.SourceGroup = new Group(connectionGuid, pokeEventArgs.GroupId);
+            SendUser    = new User(connectionGuid, pokeEventArgs.UserId);
+            TargetUser  = new User(connectionGuid, pokeEventArgs.TargetId);
+            SourceGroup = new Group(connectionGuid, pokeEventArgs.GroupId);
         }
 
         #endregion

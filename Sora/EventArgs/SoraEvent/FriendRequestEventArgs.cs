@@ -41,9 +41,9 @@ namespace Sora.EventArgs.SoraEvent
                                         ApiFriendRequestEventArgs friendRequestArgs) :
             base(connectionGuid, eventName, friendRequestArgs.SelfID, friendRequestArgs.Time)
         {
-            this.Sender      = new User(connectionGuid, friendRequestArgs.UserId);
-            this.Comment     = friendRequestArgs.Comment;
-            this.RequsetFlag = friendRequestArgs.Flag;
+            Sender      = new User(connectionGuid, friendRequestArgs.UserId);
+            Comment     = friendRequestArgs.Comment;
+            RequsetFlag = friendRequestArgs.Flag;
         }
 
         #endregion
@@ -56,7 +56,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="remark">设置备注</param>
         public async ValueTask Accept(string remark = null)
         {
-            await base.SoraApi.SetFriendAddRequest(this.RequsetFlag, true, remark);
+            await SoraApi.SetFriendAddRequest(RequsetFlag, true, remark);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         public async ValueTask Reject()
         {
-            await base.SoraApi.SetFriendAddRequest(this.RequsetFlag, false);
+            await SoraApi.SetFriendAddRequest(RequsetFlag, false);
         }
 
         #endregion

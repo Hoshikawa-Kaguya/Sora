@@ -29,8 +29,8 @@ namespace Sora.EventArgs.SoraEvent
                                              ApiClientStatusEventArgs clientStatus) : base(connectionGuid, eventName,
             clientStatus.SelfID, clientStatus.Time)
         {
-            this.Client = clientStatus.ClientInfo;
-            this.Online = clientStatus.Online;
+            Client = clientStatus.ClientInfo;
+            Online = clientStatus.Online;
         }
 
         #endregion

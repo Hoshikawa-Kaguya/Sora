@@ -144,6 +144,14 @@ namespace Sora.Entities
         }
 
         /// <summary>
+        /// AddRange
+        /// </summary>
+        public void AddRange(IEnumerable<CQCode> cqCodes)
+        {
+            _message.AddRange(cqCodes);
+        }
+
+        /// <summary>
         /// 转普通列表
         /// </summary>
         public List<CQCode> ToList()

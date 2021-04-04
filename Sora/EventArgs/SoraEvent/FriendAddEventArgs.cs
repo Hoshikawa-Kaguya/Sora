@@ -29,7 +29,7 @@ namespace Sora.EventArgs.SoraEvent
         internal FriendAddEventArgs(Guid connectionGuid, string eventName, ApiFriendAddEventArgs friendAddArgs) :
             base(connectionGuid, eventName, friendAddArgs.SelfID, friendAddArgs.Time)
         {
-            this.NewFriend = new User(connectionGuid, friendAddArgs.UserId);
+            NewFriend = new User(connectionGuid, friendAddArgs.UserId);
         }
 
         #endregion

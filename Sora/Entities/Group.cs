@@ -33,7 +33,7 @@ namespace Sora.Entities
         /// <param name="gid">群号</param>
         internal Group(Guid connectionGuid, long gid) : base(connectionGuid)
         {
-            this.Id = gid;
+            Id = gid;
         }
 
         #endregion
@@ -49,12 +49,12 @@ namespace Sora.Entities
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendGroupMessage(params object[] message)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(params object[] message)
         {
-            return await base.SoraApi.SendGroupMessage(this.Id, message);
+            return await SoraApi.SendGroupMessage(Id, message);
         }
 
         /// <summary>
@@ -66,12 +66,12 @@ namespace Sora.Entities
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendGroupMessage(List<CQCode> message)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(MessageBody message)
         {
-            return await base.SoraApi.SendGroupMessage(this.Id, message);
+            return await SoraApi.SendGroupMessage(Id, message);
         }
 
         #endregion
@@ -83,24 +83,24 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="useCache">是否使用缓存</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="GroupInfo"/> 群信息</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, GroupInfo groupInfo)> GetGroupInfo(bool useCache = true)
+        public async ValueTask<(ApiStatus apiStatus, GroupInfo groupInfo)> GetGroupInfo(bool useCache = true)
         {
-            return await base.SoraApi.GetGroupInfo(this.Id, useCache);
+            return await SoraApi.GetGroupInfo(Id, useCache);
         }
 
         /// <summary>
         /// 获取群成员列表
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="List{GroupMemberInfo}"/> 群成员列表</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList()
+        public async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList()
         {
-            return await base.SoraApi.GetGroupMemberList(this.Id);
+            return await SoraApi.GetGroupMemberList(Id);
         }
 
         /// <summary>
@@ -109,13 +109,13 @@ namespace Sora.Entities
         /// <param name="userId">用户ID</param>
         /// <param name="useCache">是否使用缓存</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
+        public async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
             long userId, bool useCache = true)
         {
-            return await base.SoraApi.GetGroupMemberInfo(this.Id, userId, useCache);
+            return await SoraApi.GetGroupMemberInfo(Id, userId, useCache);
         }
 
         #region Go扩展
@@ -127,19 +127,19 @@ namespace Sora.Entities
         /// <param name="nodeList">
         /// 节点(<see cref="Node"/>)消息段列表
         /// </param>
-        public async ValueTask<APIStatusType> SendGroupForwardMsg(IEnumerable<CustomNode> nodeList)
+        public async ValueTask<ApiStatus> SendGroupForwardMsg(IEnumerable<CustomNode> nodeList)
         {
-            return await base.SoraApi.SendGroupForwardMsg(this.Id, nodeList);
+            return await SoraApi.SendGroupForwardMsg(Id, nodeList);
         }
 
         /// <summary>
         /// 获取群文件系统信息
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="GroupFileSysInfo"/> 文件系统信息</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, GroupFileSysInfo groupFileSysInfo)> GetGroupFileSysInfo()
+        public async ValueTask<(ApiStatus apiStatus, GroupFileSysInfo groupFileSysInfo)> GetGroupFileSysInfo()
         {
             return await SoraApi.GetGroupFileSysInfo(Id);
         }
@@ -148,12 +148,12 @@ namespace Sora.Entities
         /// 获取群根目录文件列表
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="groupFiles"/> 文件列表</para>
         /// <para><see langword="groupFolders"/> 文件夹列表</para>
         /// </returns>
         public async
-            ValueTask<(APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
             GetGroupRootFiles()
         {
             return await SoraApi.GetGroupRootFiles(Id);
@@ -164,12 +164,12 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="foldId">文件夹ID</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="groupFiles"/> 文件列表</para>
         /// <para><see langword="groupFolders"/> 文件夹列表</para>
         /// </returns>
         public async
-            ValueTask<(APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
             GetGroupFilesByFolder(string foldId)
         {
             return await SoraApi.GetGroupFilesByFolder(Id, foldId);
@@ -181,7 +181,7 @@ namespace Sora.Entities
         /// <param name="fileId">文件ID</param>
         /// <param name="busid">文件类型</param>
         /// <returns>文件链接</returns>
-        public async ValueTask<(APIStatusType apiStatus, string fileUrl)> GetGroupFileUrl(
+        public async ValueTask<(ApiStatus apiStatus, string fileUrl)> GetGroupFileUrl(
             string fileId, int busid)
         {
             return await SoraApi.GetGroupFileUrl(Id, fileId, busid);
@@ -193,31 +193,31 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="messageSequence">起始消息序号，为<see langword="null"/>时默认从最新消息拉取</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="List{T}"/> 消息记录</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(
+        public async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(
             int? messageSequence = null)
         {
-            return await base.SoraApi.GetGroupMessageHistory(this.Id, messageSequence);
+            return await SoraApi.GetGroupMessageHistory(Id, messageSequence);
         }
 
         /// <summary>
         /// 发送群公告
         /// </summary>
         /// <param name="content">公告内容</param>
-        public async ValueTask<APIStatusType> SendGroupNotice(string content)
+        public async ValueTask<ApiStatus> SendGroupNotice(string content)
         {
-            return await base.SoraApi.SendGroupNotice(this.Id, content);
+            return await SoraApi.SendGroupNotice(Id, content);
         }
 
         /// <summary>
         /// 获取群精华消息列表
         /// </summary>
         /// <returns>精华消息列表</returns>
-        public async ValueTask<(APIStatusType apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList()
+        public async ValueTask<(ApiStatus apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList()
         {
-            return await base.SoraApi.GetEssenceMsgList(this.Id);
+            return await SoraApi.GetEssenceMsgList(Id);
         }
 
         /// <summary>
@@ -227,11 +227,11 @@ namespace Sora.Entities
         /// <param name="fileName">上传文件名</param>
         /// <param name="floderId">父目录ID</param>
         /// <returns>API状态</returns>
-        public async ValueTask<APIStatusType> UploadGroupFile(string localFilePath, string fileName,
+        public async ValueTask<ApiStatus> UploadGroupFile(string localFilePath, string fileName,
                                                               string floderId = null)
         {
-            return await base.SoraApi.UploadGroupFile(this.Id, localFilePath,
-                                                      fileName, floderId);
+            return await SoraApi.UploadGroupFile(Id, localFilePath,
+                                                 fileName, floderId);
         }
 
         #endregion
@@ -248,34 +248,34 @@ namespace Sora.Entities
         /// <para>禁言时长(s)</para>
         /// <para>至少60s</para>
         /// </param>
-        public async ValueTask<APIStatusType> EnableGroupMemberMute(long userId, long duration)
+        public async ValueTask<ApiStatus> EnableGroupMemberMute(long userId, long duration)
         {
-            return await base.SoraApi.EnableGroupMemberMute(this.Id, userId, duration);
+            return await SoraApi.EnableGroupMemberMute(Id, userId, duration);
         }
 
         /// <summary>
         /// 解除群组成员禁言
         /// </summary>
         /// <param name="userId">用户id</param>
-        public async ValueTask<APIStatusType> DisableGroupMemberMute(long userId)
+        public async ValueTask<ApiStatus> DisableGroupMemberMute(long userId)
         {
-            return await base.SoraApi.DisableGroupMemberMute(this.Id, userId);
+            return await SoraApi.DisableGroupMemberMute(Id, userId);
         }
 
         /// <summary>
         /// 群组全员禁言
         /// </summary>
-        public async ValueTask<APIStatusType> EnableGroupMute()
+        public async ValueTask<ApiStatus> EnableGroupMute()
         {
-            return await base.SoraApi.EnableGroupMute(this.Id);
+            return await SoraApi.EnableGroupMute(Id);
         }
 
         /// <summary>
         /// 解除群组全员禁言
         /// </summary>s
-        public async ValueTask<APIStatusType> DisableGroupMute()
+        public async ValueTask<ApiStatus> DisableGroupMute()
         {
-            return await base.SoraApi.DisableGroupMute(this.Id);
+            return await SoraApi.DisableGroupMute(Id);
         }
 
         /// <summary>
@@ -286,9 +286,9 @@ namespace Sora.Entities
         /// <para>专属头衔</para>
         /// <para>当值为 <see langword="null"/> 或 <see cref="string"/>.<see langword="Empty"/> 时为清空名片</para>
         /// </param>
-        public async ValueTask<APIStatusType> SetGroupMemberSpecialTitle(long userId, string specialTitle)
+        public async ValueTask<ApiStatus> SetGroupMemberSpecialTitle(long userId, string specialTitle)
         {
-            return await base.SoraApi.SetGroupMemberSpecialTitle(this.Id, userId, specialTitle);
+            return await SoraApi.SetGroupMemberSpecialTitle(Id, userId, specialTitle);
         }
 
         /// <summary>
@@ -299,43 +299,43 @@ namespace Sora.Entities
         /// <para>新名片</para>
         /// <para>当值为 <see langword="null"/> 或 <see cref="string"/>.<see langword="Empty"/> 时为清空名片</para>
         /// </param>
-        public async ValueTask<APIStatusType> SetGroupCard(long userId, string card)
+        public async ValueTask<ApiStatus> SetGroupCard(long userId, string card)
         {
-            return await base.SoraApi.SetGroupCard(this.Id, userId, card);
+            return await SoraApi.SetGroupCard(Id, userId, card);
         }
 
         /// <summary>
         /// 设置群管理员
         /// </summary>
         /// <param name="userId">成员id</param>
-        public async ValueTask<APIStatusType> EnableGroupAdmin(long userId)
+        public async ValueTask<ApiStatus> EnableGroupAdmin(long userId)
         {
-            return await base.SoraApi.EnableGroupAdmin(this.Id, userId);
+            return await SoraApi.EnableGroupAdmin(Id, userId);
         }
 
         /// <summary>
         /// 取消群管理员
         /// </summary>
         /// <param name="userId">成员id</param>
-        public async ValueTask<APIStatusType> DisableGroupAdmin(long userId)
+        public async ValueTask<ApiStatus> DisableGroupAdmin(long userId)
         {
-            return await base.SoraApi.DisableGroupAdmin(this.Id, userId);
+            return await SoraApi.DisableGroupAdmin(Id, userId);
         }
 
         /// <summary>
         /// 退出群
         /// </summary>
-        public async ValueTask<APIStatusType> LeaveGroup()
+        public async ValueTask<ApiStatus> LeaveGroup()
         {
-            return await base.SoraApi.LeaveGroup(this.Id);
+            return await SoraApi.LeaveGroup(Id);
         }
 
         /// <summary>
         /// 解散群
         /// </summary>
-        public async ValueTask<APIStatusType> DismissGroup()
+        public async ValueTask<ApiStatus> DismissGroup()
         {
-            return await base.SoraApi.DismissGroup(this.Id);
+            return await SoraApi.DismissGroup(Id);
         }
 
         /// <summary>
@@ -343,9 +343,9 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="userId">用户id</param>
         /// <param name="rejectRequest">拒绝此人的加群请求</param>
-        public async ValueTask<APIStatusType> KickGroupMember(long userId, bool rejectRequest = false)
+        public async ValueTask<ApiStatus> KickGroupMember(long userId, bool rejectRequest = false)
         {
-            return await base.SoraApi.KickGroupMember(this.Id, userId, rejectRequest);
+            return await SoraApi.KickGroupMember(Id, userId, rejectRequest);
         }
 
         #region Go扩展
@@ -354,9 +354,9 @@ namespace Sora.Entities
         /// 设置群名
         /// </summary>
         /// <param name="newName">新群名</param>
-        public async ValueTask<APIStatusType> SetGroupName(string newName)
+        public async ValueTask<ApiStatus> SetGroupName(string newName)
         {
-            return await base.SoraApi.SetGroupName(this.Id, newName);
+            return await SoraApi.SetGroupName(Id, newName);
         }
 
         /// <summary>
@@ -364,24 +364,24 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="imageFile">图片名/绝对路径/URL/base64</param>
         /// <param name="useCache">是否使用缓存</param>
-        public async ValueTask<APIStatusType> SetGroupPortrait(string imageFile, bool useCache = true)
+        public async ValueTask<ApiStatus> SetGroupPortrait(string imageFile, bool useCache = true)
         {
-            return await base.SoraApi.SetGroupPortrait(this.Id, imageFile, useCache);
+            return await SoraApi.SetGroupPortrait(Id, imageFile, useCache);
         }
 
         /// <summary>
         /// 获取群@全体成员剩余次数
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="canAt"/> 是否可以@全体成员</para>
         /// <para><see langword="groupRemain"/> 群内所有管理当天剩余@全体成员次数</para>
         /// <para><see langword="botRemain"/> BOT当天剩余@全体成员次数</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, bool canAt, short groupRemain, short botRemain)>
+        public async ValueTask<(ApiStatus apiStatus, bool canAt, short groupRemain, short botRemain)>
             GetGroupAtAllRemain()
         {
-            return await base.SoraApi.GetGroupAtAllRemain(this.Id);
+            return await SoraApi.GetGroupAtAllRemain(Id);
         }
 
         #endregion

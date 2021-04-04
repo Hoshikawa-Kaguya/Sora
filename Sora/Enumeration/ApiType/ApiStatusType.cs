@@ -6,7 +6,7 @@ namespace Sora.Enumeration.ApiType
     /// API返回值
     /// </summary>
     [DefaultValue(OK)]
-    public enum APIStatusType
+    public enum ApiStatusType
     {
         /// <summary>
         /// API执行成功
