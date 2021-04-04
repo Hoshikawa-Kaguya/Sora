@@ -40,9 +40,9 @@ namespace Sora.EventArgs.SoraEvent
         internal FileUploadEventArgs(Guid connectionGuid, string eventName, ApiFileUploadEventArgs fileUploadArgs) :
             base(connectionGuid, eventName, fileUploadArgs.SelfID, fileUploadArgs.Time)
         {
-            this.SourceGroup = new Group(connectionGuid, fileUploadArgs.GroupId);
-            this.Sender      = new User(connectionGuid, fileUploadArgs.UserId);
-            this.FileInfo    = fileUploadArgs.Upload;
+            SourceGroup = new Group(connectionGuid, fileUploadArgs.GroupId);
+            Sender      = new User(connectionGuid, fileUploadArgs.UserId);
+            FileInfo    = fileUploadArgs.Upload;
         }
 
         #endregion

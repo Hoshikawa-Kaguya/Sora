@@ -45,10 +45,10 @@ namespace Sora.EventArgs.SoraEvent
                                           ApiGroupCardUpdateEventArgs groupCardUpdateArgs) :
             base(connectionGuid, eventName, groupCardUpdateArgs.SelfID, groupCardUpdateArgs.Time)
         {
-            this.User        = new User(connectionGuid, groupCardUpdateArgs.UserId);
-            this.SourceGroup = new Group(connectionGuid, groupCardUpdateArgs.GroupId);
-            this.NewCard     = groupCardUpdateArgs.NewCard;
-            this.OldCard     = groupCardUpdateArgs.OldCard;
+            User        = new User(connectionGuid, groupCardUpdateArgs.UserId);
+            SourceGroup = new Group(connectionGuid, groupCardUpdateArgs.GroupId);
+            NewCard     = groupCardUpdateArgs.NewCard;
+            OldCard     = groupCardUpdateArgs.OldCard;
         }
 
         #endregion

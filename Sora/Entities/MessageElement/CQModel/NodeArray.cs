@@ -22,7 +22,7 @@ namespace Sora.Entities.MessageElement.CQModel
         /// </summary>
         public void ParseNode()
         {
-            this.NodeMsgList.ForEach(node => node.MessageBody = MessageParse.Parse(node.MessageList));
+            NodeMsgList.ForEach(node => node.MessageBody = MessageParse.Parse(node.MessageList));
         }
 
         #endregion

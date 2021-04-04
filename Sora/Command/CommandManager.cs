@@ -37,7 +37,7 @@ namespace Sora.Command
 
         private readonly List<CommandInfo> _privateCommands = new();
 
-        private readonly Dictionary<Type, object> _instanceDict = new();
+        private readonly Dictionary<Type, dynamic> _instanceDict = new();
 
         private readonly bool _enableSoraCommandManager;
 
@@ -107,7 +107,7 @@ namespace Sora.Command
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
         /// <returns>是否继续处理接下来的消息</returns>
-        internal bool CommandAdapter(object eventArgs)
+        internal bool CommandAdapter(dynamic eventArgs)
         {
             //检查使能
             if (!_enableSoraCommandManager) return true;

@@ -46,13 +46,13 @@ namespace Sora.EventArgs.SoraEvent
                                             ApiGroupMemberChangeEventArgs groupMemberChangeArgs) :
             base(connectionGuid, eventName, groupMemberChangeArgs.SelfID, groupMemberChangeArgs.Time)
         {
-            this.ChangedUser = new User(connectionGuid, groupMemberChangeArgs.UserId);
+            ChangedUser = new User(connectionGuid, groupMemberChangeArgs.UserId);
             //执行者和变动成员可能为同一人
-            this.Operator = groupMemberChangeArgs.UserId == groupMemberChangeArgs.OperatorId
-                ? this.ChangedUser
+            Operator = groupMemberChangeArgs.UserId == groupMemberChangeArgs.OperatorId
+                ? ChangedUser
                 : new User(connectionGuid, groupMemberChangeArgs.OperatorId);
-            this.SourceGroup = new Group(connectionGuid, groupMemberChangeArgs.GroupId);
-            this.SubType     = groupMemberChangeArgs.SubType;
+            SourceGroup = new Group(connectionGuid, groupMemberChangeArgs.GroupId);
+            SubType     = groupMemberChangeArgs.SubType;
         }
 
         #endregion

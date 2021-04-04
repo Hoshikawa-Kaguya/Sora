@@ -38,7 +38,7 @@ namespace Sora.Entities.Base
         /// <param name="connectionGuid"></param>
         internal SoraApi(Guid connectionGuid)
         {
-            this.ConnectionGuid = connectionGuid;
+            ConnectionGuid = connectionGuid;
         }
 
         #endregion
@@ -57,16 +57,15 @@ namespace Sora.Entities.Base
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendPrivateMessage(
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
             long userId, params object[] message)
         {
             if (userId         < 10000) throw new ArgumentOutOfRangeException($"{nameof(userId)} too small");
             if (message.Length == 0) throw new NullReferenceException(nameof(message));
-            return ((APIStatusType apiStatus, int messageId)) await ApiInterface.SendPrivateMessage(this.ConnectionGuid,
-                userId, null, message.ToCQCodeList());
+            return await ApiInterface.SendPrivateMessage(ConnectionGuid, userId, message.ToCQCodeList());
         }
 
         /// <summary>
@@ -79,16 +78,15 @@ namespace Sora.Entities.Base
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendPrivateMessage(
-            long userId, List<CQCode> message)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
+            long userId, MessageBody message)
         {
             if (userId        < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
             if (message.Count == 0) throw new NullReferenceException(nameof(message));
-            return ((APIStatusType apiStatus, int messageId))
-                await ApiInterface.SendPrivateMessage(this.ConnectionGuid, userId, null, message);
+            return await ApiInterface.SendPrivateMessage(ConnectionGuid, userId, message);
         }
 
         /// <summary>
@@ -102,17 +100,16 @@ namespace Sora.Entities.Base
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendTemporaryMessage(
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendTemporaryMessage(
             long userId, long groupId, params object[] message)
         {
             if (userId         < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
             if (groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Length == 0) throw new NullReferenceException(nameof(message));
-            return ((APIStatusType apiStatus, int messageId))
-                await ApiInterface.SendPrivateMessage(this.ConnectionGuid, userId, groupId, message.ToCQCodeList());
+            return await ApiInterface.SendPrivateMessage(ConnectionGuid, userId, message.ToCQCodeList(), groupId);
         }
 
         /// <summary>
@@ -126,17 +123,16 @@ namespace Sora.Entities.Base
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendTemporaryMessage(
-            long userId, long groupId, List<CQCode> message)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendTemporaryMessage(
+            long userId, long groupId, MessageBody message)
         {
             if (userId        < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
             if (groupId       < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Count == 0) throw new NullReferenceException(nameof(message));
-            return ((APIStatusType apiStatus, int messageId))
-                await ApiInterface.SendPrivateMessage(this.ConnectionGuid, userId, groupId, message);
+            return await ApiInterface.SendPrivateMessage(ConnectionGuid, userId, message, groupId);
         }
 
         /// <summary>
@@ -149,16 +145,15 @@ namespace Sora.Entities.Base
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendGroupMessage(
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
             long groupId, params object[] message)
         {
             if (groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Length == 0) throw new NullReferenceException(nameof(message));
-            return ((APIStatusType apiStatus, int messageId))
-                await ApiInterface.SendGroupMessage(this.ConnectionGuid, groupId, message.ToCQCodeList());
+            return await ApiInterface.SendGroupMessage(ConnectionGuid, groupId, message.ToCQCodeList());
         }
 
         /// <summary>
@@ -171,25 +166,24 @@ namespace Sora.Entities.Base
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int messageId)> SendGroupMessage(
-            long groupId, List<CQCode> message)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
+            long groupId, MessageBody message)
         {
             if (groupId       < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Count == 0) throw new NullReferenceException(nameof(message));
-            return ((APIStatusType apiStatus, int messageId))
-                await ApiInterface.SendGroupMessage(this.ConnectionGuid, groupId, message);
+            return await ApiInterface.SendGroupMessage(ConnectionGuid, groupId, message);
         }
 
         /// <summary>
         /// 撤回消息
         /// </summary>
         /// <param name="messageId">消息ID</param>
-        public async ValueTask<APIStatusType> RecallMessage(int messageId)
+        public async ValueTask<ApiStatus> RecallMessage(int messageId)
         {
-            return (APIStatusType) await ApiInterface.RecallMsg(this.ConnectionGuid, messageId);
+            return await ApiInterface.RecallMsg(ConnectionGuid, messageId);
         }
 
         #region GoAPI
@@ -199,14 +193,14 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="forwardId"></param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="nodeArray"/> 消息节点列表</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<Node> nodeArray)> GetForwardMessage(string forwardId)
+        public async ValueTask<(ApiStatus apiStatus, List<Node> nodeArray)> GetForwardMessage(string forwardId)
         {
             if (string.IsNullOrEmpty(forwardId)) throw new NullReferenceException(nameof(forwardId));
-            var (retCode, nodeArray) = await ApiInterface.GetForwardMessage(this.ConnectionGuid, forwardId);
-            return ((APIStatusType) retCode, nodeArray.NodeMsgList);
+            var (apiStatus, nodeArray) = await ApiInterface.GetForwardMessage(ConnectionGuid, forwardId);
+            return (apiStatus, nodeArray.NodeMsgList);
         }
 
         /// <summary>
@@ -217,12 +211,12 @@ namespace Sora.Entities.Base
         /// <param name="nodeList">
         /// 节点(<see cref="Node"/>)消息段列表
         /// </param>
-        public async ValueTask<APIStatusType> SendGroupForwardMsg(long groupId, IEnumerable<CustomNode> nodeList)
+        public async ValueTask<ApiStatus> SendGroupForwardMsg(long groupId, IEnumerable<CustomNode> nodeList)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             IEnumerable<CustomNode> customNodes = nodeList as CustomNode[] ?? nodeList.ToArray();
             if (nodeList == null || !customNodes.Any()) throw new NullReferenceException(nameof(nodeList));
-            return (APIStatusType) await ApiInterface.SendGroupForwardMsg(this.ConnectionGuid, groupId, customNodes);
+            return await ApiInterface.SendGroupForwardMsg(ConnectionGuid, groupId, customNodes);
         }
 
         /// <summary>
@@ -230,17 +224,16 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="cacheFileName">缓存文件名</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="size"/> 文件大小(Byte)</para>
         /// <para><see langword="fileName"/> 文件名</para>
         /// <para><see langword="url"/> 文件链接</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, int size, string fileName, string url)> GetImage(
+        public async ValueTask<(ApiStatus apiStatus, int size, string fileName, string url)> GetImage(
             string cacheFileName)
         {
             if (string.IsNullOrEmpty(cacheFileName)) throw new ArgumentOutOfRangeException(nameof(cacheFileName));
-            return ((APIStatusType apiStatus, int size, string fileName, string url))
-                await ApiInterface.GetImage(this.ConnectionGuid, cacheFileName);
+            return await ApiInterface.GetImage(ConnectionGuid, cacheFileName);
         }
 
         /// <summary>
@@ -249,18 +242,16 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="messageId"></param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="Message"/> 消息内容</para>
         /// <para><see cref="User"/> 发送者</para>
         /// <para><see cref="Group"/> 消息来源群，如果不是群消息则为<see langword="null"/></para>
         /// </returns>
         public async
-            ValueTask<(APIStatusType apiStatus, Message message, User sender, Group sourceGroup,
+            ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup,
                 int realId, bool isGroupMsg)> GetMessages(int messageId)
         {
-            return ((APIStatusType apiStatus, Message message, User sender, Group sourceGroup, int realId, bool
-                    isGroupMsg))
-                await ApiInterface.GetMessage(this.ConnectionGuid, messageId);
+            return await ApiInterface.GetMessage(ConnectionGuid, messageId);
         }
 
         /// <summary>
@@ -270,14 +261,13 @@ namespace Sora.Entities.Base
         /// <param name="messageSequence">起始消息序号，为<see langword="null"/>时默认从最新消息拉取</param>
         /// <param name="groupId">群号</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="List{T}"/> 消息记录</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(
+        public async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(
             long groupId, int? messageSequence = null)
         {
-            return ((APIStatusType apiStatus, List<GroupMessageEventArgs> messages))
-                await ApiInterface.GetGroupMessageHistory(messageSequence, groupId, this.ConnectionGuid);
+            return await ApiInterface.GetGroupMessageHistory(messageSequence, groupId, ConnectionGuid);
         }
 
         /// <summary>
@@ -285,13 +275,12 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="useCache">是否使用缓存</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="List{T}"/> 在线客户端信息列表</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<ClientInfo> clients)> GetOnlineClients(bool useCache)
+        public async ValueTask<(ApiStatus apiStatus, List<ClientInfo> clients)> GetOnlineClients(bool useCache)
         {
-            return ((APIStatusType apiStatus, List<ClientInfo> clients))
-                await ApiInterface.GetOnlineClients(useCache, this.ConnectionGuid);
+            return await ApiInterface.GetOnlineClients(useCache, ConnectionGuid);
         }
 
         #endregion
@@ -309,11 +298,11 @@ namespace Sora.Entities.Base
         /// <para>新名片</para>
         /// <para>当值为 <see langword="null"/> 或 <see cref="string"/>.<see langword="Empty"/> 时为清空名片</para>
         /// </param>
-        public async ValueTask<APIStatusType> SetGroupCard(long groupId, long userId, string card)
+        public async ValueTask<ApiStatus> SetGroupCard(long groupId, long userId, string card)
         {
             if (groupId is < 100000 || userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return (APIStatusType) await ApiInterface.SetGroupCard(this.ConnectionGuid, groupId, userId, card);
+            return  await ApiInterface.SetGroupCard(ConnectionGuid, groupId, userId, card);
         }
 
         /// <summary>
@@ -322,11 +311,11 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <param name="userId">用户id</param>
         /// <param name="specialTitle">专属头衔(为空时清空)</param>
-        public async ValueTask<APIStatusType> SetGroupMemberSpecialTitle(long groupId, long userId, string specialTitle)
+        public async ValueTask<ApiStatus> SetGroupMemberSpecialTitle(long groupId, long userId, string specialTitle)
         {
             if (groupId is < 100000 || userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return (APIStatusType) await ApiInterface.SetGroupSpecialTitle(this.ConnectionGuid, groupId, userId,
+            return  await ApiInterface.SetGroupSpecialTitle(ConnectionGuid, groupId, userId,
                                                                            specialTitle);
         }
 
@@ -336,11 +325,11 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <param name="userId">用户id</param>
         /// <param name="rejectRequest">拒绝此人的加群请求</param>
-        public async ValueTask<APIStatusType> KickGroupMember(long groupId, long userId, bool rejectRequest)
+        public async ValueTask<ApiStatus> KickGroupMember(long groupId, long userId, bool rejectRequest)
         {
             if (groupId is < 100000 || userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return (APIStatusType) await ApiInterface.KickGroupMember(this.ConnectionGuid, groupId, userId,
+            return  await ApiInterface.KickGroupMember(ConnectionGuid, groupId, userId,
                                                                       rejectRequest);
         }
 
@@ -353,12 +342,12 @@ namespace Sora.Entities.Base
         /// <para>禁言时长(s)</para>
         /// <para>至少60s</para>
         /// </param>
-        public async ValueTask<APIStatusType> EnableGroupMemberMute(long groupId, long userId, long duration)
+        public async ValueTask<ApiStatus> EnableGroupMemberMute(long groupId, long userId, long duration)
         {
             if (groupId is < 100000 || userId is < 10000 || duration < 60)
                 throw new
                     ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} or {nameof(duration)} out of range");
-            return (APIStatusType) await ApiInterface.SetGroupBan(this.ConnectionGuid, groupId, userId, duration);
+            return  await ApiInterface.SetGroupBan(ConnectionGuid, groupId, userId, duration);
         }
 
         /// <summary>
@@ -366,11 +355,11 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="userId">用户id</param>
-        public async ValueTask<APIStatusType> DisableGroupMemberMute(long groupId, long userId)
+        public async ValueTask<ApiStatus> DisableGroupMemberMute(long groupId, long userId)
         {
             if (groupId is < 100000 || userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return (APIStatusType) await ApiInterface.SetGroupBan(this.ConnectionGuid, groupId, userId, 0);
+            return  await ApiInterface.SetGroupBan(ConnectionGuid, groupId, userId, 0);
         }
 
         /// <summary>
@@ -379,13 +368,13 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <param name="anonymous">匿名用户对象</param>
         /// <param name="duration">禁言时长, 单位秒</param>
-        public async ValueTask<APIStatusType> EnableGroupAnonymousMute(long groupId, Anonymous anonymous, long duration)
+        public async ValueTask<ApiStatus> EnableGroupAnonymousMute(long groupId, Anonymous anonymous, long duration)
         {
             if (groupId is < 100000 || duration < 60)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(duration)} out of range");
             if (anonymous == null)
                 throw new NullReferenceException("anonymous is null");
-            return (APIStatusType) await ApiInterface.SetAnonymousBan(this.ConnectionGuid, groupId, anonymous,
+            return  await ApiInterface.SetAnonymousBan(ConnectionGuid, groupId, anonymous,
                                                                       duration);
         }
 
@@ -395,14 +384,14 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <param name="anonymousFlag">匿名用户Flag</param>
         /// <param name="duration">禁言时长, 单位秒</param>
-        public async ValueTask<APIStatusType> EnableGroupAnonymousMute(long groupId, string anonymousFlag,
+        public async ValueTask<ApiStatus> EnableGroupAnonymousMute(long groupId, string anonymousFlag,
                                                                        long duration)
         {
             if (groupId is < 100000 || duration < 60)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(duration)} out of range");
             if (anonymousFlag == null)
                 throw new NullReferenceException("anonymousFlag is null");
-            return (APIStatusType) await ApiInterface.SetAnonymousBan(this.ConnectionGuid, groupId, anonymousFlag,
+            return  await ApiInterface.SetAnonymousBan(ConnectionGuid, groupId, anonymousFlag,
                                                                       duration);
         }
 
@@ -410,22 +399,22 @@ namespace Sora.Entities.Base
         /// 群组全员禁言
         /// </summary>
         /// <param name="groupId">群号</param>
-        public async ValueTask<APIStatusType> EnableGroupMute(long groupId)
+        public async ValueTask<ApiStatus> EnableGroupMute(long groupId)
         {
             if (groupId < 100000)
                 throw new ArgumentOutOfRangeException(nameof(groupId));
-            return (APIStatusType) await ApiInterface.SetGroupWholeBan(this.ConnectionGuid, groupId, true);
+            return  await ApiInterface.SetGroupWholeBan(ConnectionGuid, groupId, true);
         }
 
         /// <summary>
         /// 解除群组全员禁言
         /// </summary>
         /// <param name="groupId">群号</param>
-        public async ValueTask<APIStatusType> DisableGroupMute(long groupId)
+        public async ValueTask<ApiStatus> DisableGroupMute(long groupId)
         {
             if (groupId < 100000)
                 throw new ArgumentOutOfRangeException(nameof(groupId));
-            return (APIStatusType) await ApiInterface.SetGroupWholeBan(this.ConnectionGuid, groupId, false);
+            return  await ApiInterface.SetGroupWholeBan(ConnectionGuid, groupId, false);
         }
 
         /// <summary>
@@ -433,11 +422,11 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="userId">成员id</param>
-        public async ValueTask<APIStatusType> EnableGroupAdmin(long groupId, long userId)
+        public async ValueTask<ApiStatus> EnableGroupAdmin(long groupId, long userId)
         {
             if (groupId is < 100000 || userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return (APIStatusType) await ApiInterface.SetGroupAdmin(this.ConnectionGuid, userId, groupId, true);
+            return  await ApiInterface.SetGroupAdmin(ConnectionGuid, userId, groupId, true);
         }
 
         /// <summary>
@@ -445,31 +434,31 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="userId">成员id</param>
-        public async ValueTask<APIStatusType> DisableGroupAdmin(long groupId, long userId)
+        public async ValueTask<ApiStatus> DisableGroupAdmin(long groupId, long userId)
         {
             if (groupId is < 100000 || userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return (APIStatusType) await ApiInterface.SetGroupAdmin(this.ConnectionGuid, userId, groupId, false);
+            return  await ApiInterface.SetGroupAdmin(ConnectionGuid, userId, groupId, false);
         }
 
         /// <summary>
         /// 退出群
         /// </summary>
         /// <param name="groupId">群号</param>
-        public async ValueTask<APIStatusType> LeaveGroup(long groupId)
+        public async ValueTask<ApiStatus> LeaveGroup(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return (APIStatusType) await ApiInterface.SetGroupLeave(this.ConnectionGuid, groupId, false);
+            return  await ApiInterface.SetGroupLeave(ConnectionGuid, groupId, false);
         }
 
         /// <summary>
         /// 解散群
         /// </summary>
         /// <param name="groupId">群号</param>
-        public async ValueTask<APIStatusType> DismissGroup(long groupId)
+        public async ValueTask<ApiStatus> DismissGroup(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return (APIStatusType) await ApiInterface.SetGroupLeave(this.ConnectionGuid, groupId, true);
+            return  await ApiInterface.SetGroupLeave(ConnectionGuid, groupId, true);
         }
 
         #region GoAPI
@@ -479,11 +468,11 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="newName">新群名</param>
-        public async ValueTask<APIStatusType> SetGroupName(long groupId, string newName)
+        public async ValueTask<ApiStatus> SetGroupName(long groupId, string newName)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (string.IsNullOrEmpty(newName)) throw new NullReferenceException(nameof(newName));
-            return (APIStatusType) await ApiInterface.SetGroupName(this.ConnectionGuid, groupId, newName);
+            return  await ApiInterface.SetGroupName(ConnectionGuid, groupId, newName);
         }
 
         /// <summary>
@@ -492,13 +481,13 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <param name="imageFile">图片名/绝对路径/URL/base64</param>
         /// <param name="useCache">是否使用缓存</param>
-        public async ValueTask<APIStatusType> SetGroupPortrait(long groupId, string imageFile, bool useCache = true)
+        public async ValueTask<ApiStatus> SetGroupPortrait(long groupId, string imageFile, bool useCache = true)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
             var (retFileStr, isMatch) = CQCodes.ParseDataStr(imageFile);
             if (!isMatch) throw new NotSupportedException($"not supported file type({imageFile})");
-            return (APIStatusType) await ApiInterface.SetGroupPortrait(this.ConnectionGuid, groupId, retFileStr,
+            return  await ApiInterface.SetGroupPortrait(ConnectionGuid, groupId, retFileStr,
                                                                        useCache);
         }
 
@@ -506,16 +495,15 @@ namespace Sora.Entities.Base
         /// 获取群组系统消息
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="joinList"/> 进群消息列表</para>
         /// <para><see langword="invitedList"/> 邀请消息列表</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<GroupRequestInfo> joinList, List<GroupRequestInfo>
+        public async ValueTask<(ApiStatus apiStatus, List<GroupRequestInfo> joinList, List<GroupRequestInfo>
                 invitedList)>
             GetGroupSystemMsg()
         {
-            return ((APIStatusType apiStatus, List<GroupRequestInfo> joinList, List<GroupRequestInfo> invitedList))
-                await ApiInterface.GetGroupSystemMsg(this.ConnectionGuid);
+            return await ApiInterface.GetGroupSystemMsg(ConnectionGuid);
         }
 
         /// <summary>
@@ -523,14 +511,13 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="GroupFileSysInfo"/> 文件系统信息</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, GroupFileSysInfo groupFileSysInfo)> GetGroupFileSysInfo(
+        public async ValueTask<(ApiStatus apiStatus, GroupFileSysInfo groupFileSysInfo)> GetGroupFileSysInfo(
             long groupId)
         {
-            return ((APIStatusType apiStatus, GroupFileSysInfo groupFileSysInfo))
-                await ApiInterface.GetGroupFileSysInfo(groupId, this.ConnectionGuid);
+            return await ApiInterface.GetGroupFileSysInfo(groupId, ConnectionGuid);
         }
 
         /// <summary>
@@ -538,16 +525,15 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="groupFiles"/> 文件列表</para>
         /// <para><see langword="groupFolders"/> 文件夹列表</para>
         /// </returns>
         public async
-            ValueTask<(APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
             GetGroupRootFiles(long groupId)
         {
-            return ((APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders))
-                await ApiInterface.GetGroupRootFiles(groupId, this.ConnectionGuid);
+            return await ApiInterface.GetGroupRootFiles(groupId, ConnectionGuid);
         }
 
         /// <summary>
@@ -556,16 +542,15 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <param name="foldId">文件夹ID</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="groupFiles"/> 文件列表</para>
         /// <para><see langword="groupFolders"/> 文件夹列表</para>
         /// </returns>
         public async
-            ValueTask<(APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+            ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
             GetGroupFilesByFolder(long groupId, string foldId)
         {
-            return ((APIStatusType apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders))
-                await ApiInterface.GetGroupFilesByFolder(groupId, foldId, this.ConnectionGuid);
+            return await ApiInterface.GetGroupFilesByFolder(groupId, foldId, ConnectionGuid);
         }
 
         /// <summary>
@@ -573,16 +558,15 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="canAt"/> 是否可以@全体成员</para>
         /// <para><see langword="groupRemain"/> 群内所有管理当天剩余@全体成员次数</para>
         /// <para><see langword="botRemain"/> BOT当天剩余@全体成员次数</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, bool canAt, short groupRemain, short botRemain)>
+        public async ValueTask<(ApiStatus apiStatus, bool canAt, short groupRemain, short botRemain)>
             GetGroupAtAllRemain(long groupId)
         {
-            return ((APIStatusType apiStatus, bool canAt, short groupRemain, short botRemain)) await ApiInterface
-                .GetGroupAtAllRemain(groupId, this.ConnectionGuid);
+            return  await ApiInterface.GetGroupAtAllRemain(groupId, ConnectionGuid);
         }
 
         /// <summary>
@@ -592,11 +576,10 @@ namespace Sora.Entities.Base
         /// <param name="fileId">文件ID</param>
         /// <param name="busid">文件类型</param>
         /// <returns>文件链接</returns>
-        public async ValueTask<(APIStatusType apiStatus, string fileUrl)> GetGroupFileUrl(
+        public async ValueTask<(ApiStatus apiStatus, string fileUrl)> GetGroupFileUrl(
             long groupId, string fileId, int busid)
         {
-            return ((APIStatusType apiStatus, string fileUrl))
-                await ApiInterface.GetGroupFileUrl(groupId, fileId, busid, this.ConnectionGuid);
+            return await ApiInterface.GetGroupFileUrl(groupId, fileId, busid, ConnectionGuid);
         }
 
         /// <summary>
@@ -607,10 +590,10 @@ namespace Sora.Entities.Base
         /// <param name="fileName">上传文件名</param>
         /// <param name="floderId">父目录ID</param>
         /// <returns>API状态</returns>
-        public async ValueTask<APIStatusType> UploadGroupFile(long groupId, string localFilePath, string fileName,
+        public async ValueTask<ApiStatus> UploadGroupFile(long groupId, string localFilePath, string fileName,
                                                               string floderId = null)
         {
-            return (APIStatusType) await ApiInterface.UploadGroupFile(this.ConnectionGuid, groupId, localFilePath,
+            return  await ApiInterface.UploadGroupFile(ConnectionGuid, groupId, localFilePath,
                                                                       fileName, floderId);
         }
 
@@ -619,9 +602,9 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="messageId">消息ID</param>
         /// <returns>API状态</returns>
-        public async ValueTask<APIStatusType> SetEssenceMessage(long messageId)
+        public async ValueTask<ApiStatus> SetEssenceMessage(long messageId)
         {
-            return (APIStatusType) await ApiInterface.SetEssenceMsg(this.ConnectionGuid, messageId);
+            return  await ApiInterface.SetEssenceMsg(ConnectionGuid, messageId);
         }
 
         /// <summary>
@@ -629,9 +612,9 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="messageId">消息ID</param>
         /// <returns>API状态</returns>
-        public async ValueTask<APIStatusType> DelEssenceMessage(long messageId)
+        public async ValueTask<ApiStatus> DelEssenceMessage(long messageId)
         {
-            return (APIStatusType) await ApiInterface.DelEssenceMsg(this.ConnectionGuid, messageId);
+            return  await ApiInterface.DelEssenceMsg(ConnectionGuid, messageId);
         }
 
         /// <summary>
@@ -639,10 +622,9 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="gid">群号</param>
         /// <returns>精华消息列表</returns>
-        public async ValueTask<(APIStatusType apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList(long gid)
+        public async ValueTask<(ApiStatus apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList(long gid)
         {
-            return ((APIStatusType apiStatus, List<EssenceInfo> essenceInfos))
-                await ApiInterface.GetEssenceMsgList(this.ConnectionGuid, gid);
+            return await ApiInterface.GetEssenceMsgList(ConnectionGuid, gid);
         }
 
         /// <summary>
@@ -651,10 +633,9 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="url">需要检查的链接</param>
         /// <returns>安全性</returns>
-        public async ValueTask<(APIStatusType apiStatus, SecurityLevelType securityLevel)> CheckUrlSafely(string url)
+        public async ValueTask<(ApiStatus apiStatus, SecurityLevelType securityLevel)> CheckUrlSafely(string url)
         {
-            return ((APIStatusType apiStatus, SecurityLevelType securityLevel))
-                await ApiInterface.CheckUrlSafely(this.ConnectionGuid, url);
+            return await ApiInterface.CheckUrlSafely(ConnectionGuid, url);
         }
 
         /// <summary>
@@ -662,9 +643,9 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="content">公告内容</param>
-        public async ValueTask<APIStatusType> SendGroupNotice(long groupId, string content)
+        public async ValueTask<ApiStatus> SendGroupNotice(long groupId, string content)
         {
-            return (APIStatusType) await ApiInterface.SendGroupNotice(this.ConnectionGuid, groupId, content);
+            return  await ApiInterface.SendGroupNotice(ConnectionGuid, groupId, content);
         }
 
         #endregion
@@ -677,39 +658,36 @@ namespace Sora.Entities.Base
         /// <para>获取登陆QQ的名字</para>
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="nick"/> 账号昵称</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, long uid, string nick)> GetLoginInfo()
+        public async ValueTask<(ApiStatus apiStatus, long uid, string nick)> GetLoginInfo()
         {
-            return ((APIStatusType apiStatus, long uid, string nick))
-                await ApiInterface.GetLoginInfo(this.ConnectionGuid);
+            return await ApiInterface.GetLoginInfo(ConnectionGuid);
         }
 
         /// <summary>
         /// 获取好友列表
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="friendList"/> 好友列表</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<FriendInfo> friendList)> GetFriendList()
+        public async ValueTask<(ApiStatus apiStatus, List<FriendInfo> friendList)> GetFriendList()
         {
-            return ((APIStatusType apiStatus, List<FriendInfo> friendList))
-                await ApiInterface.GetFriendList(this.ConnectionGuid);
+            return await ApiInterface.GetFriendList(ConnectionGuid);
         }
 
         /// <summary>
         /// 获取群组列表
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="groupList"/> 群组列表</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<GroupInfo> groupList)> GetGroupList()
+        public async ValueTask<(ApiStatus apiStatus, List<GroupInfo> groupList)> GetGroupList()
         {
-            return ((APIStatusType apiStatus, List<GroupInfo> groupList))
-                await ApiInterface.GetGroupList(this.ConnectionGuid);
+            return await ApiInterface.GetGroupList(ConnectionGuid);
         }
 
         /// <summary>
@@ -717,16 +695,15 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="List{T}"/> 群成员列表</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
+        public async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
             long groupId)
         {
             if (groupId < 100000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} out of range");
-            return ((APIStatusType apiStatus, List<GroupMemberInfo> groupMemberList))
-                await ApiInterface.GetGroupMemberList(this.ConnectionGuid, groupId);
+            return await ApiInterface.GetGroupMemberList(ConnectionGuid, groupId);
         }
 
         /// <summary>
@@ -735,16 +712,15 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <param name="useCache">是否使用缓存</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="GroupInfo"/> 群信息列表</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, GroupInfo groupInfo)> GetGroupInfo(
+        public async ValueTask<(ApiStatus apiStatus, GroupInfo groupInfo)> GetGroupInfo(
             long groupId, bool useCache = true)
         {
             if (groupId is < 100000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} out of range");
-            return ((APIStatusType apiStatus, GroupInfo groupInfo))
-                await ApiInterface.GetGroupInfo(this.ConnectionGuid, groupId, useCache);
+            return await ApiInterface.GetGroupInfo(ConnectionGuid, groupId, useCache);
         }
 
         /// <summary>
@@ -754,16 +730,15 @@ namespace Sora.Entities.Base
         /// <param name="userId">用户ID</param>
         /// <param name="useCache">是否使用缓存</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
+        public async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
             long groupId, long userId, bool useCache = true)
         {
             if (groupId is < 100000 && userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return ((APIStatusType apiStatus, GroupMemberInfo memberInfo))
-                await ApiInterface.GetGroupMemberInfo(this.ConnectionGuid, groupId, userId, useCache);
+            return await ApiInterface.GetGroupMemberInfo(ConnectionGuid, groupId, userId, useCache);
         }
 
         /// <summary>
@@ -772,16 +747,15 @@ namespace Sora.Entities.Base
         /// <param name="userId">用户ID</param>
         /// <param name="useCache"></param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="UserInfo"/> 群成员信息</para>
         /// <para><see cref="string"/> qid</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
+        public async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
             long userId, bool useCache = true)
         {
             if (userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            return ((APIStatusType apiStatus, UserInfo userInfo, string qid))
-                await ApiInterface.GetUserInfo(this.ConnectionGuid, userId, useCache);
+            return await ApiInterface.GetUserInfo(ConnectionGuid, userId, useCache);
         }
 
         /// <summary>
@@ -790,11 +764,10 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="userId">用户ID</param>
         [Obsolete]
-        public async ValueTask<(APIStatusType apiStatus, VipInfo vipInfo)> GetVipInfo(long userId)
+        public async ValueTask<(ApiStatus apiStatus, VipInfo vipInfo)> GetVipInfo(long userId)
         {
             if (userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            return ((APIStatusType apiStatus, VipInfo vipInfo))
-                await ApiInterface.GetVipInfo(this.ConnectionGuid, userId);
+            return await ApiInterface.GetVipInfo(ConnectionGuid, userId);
         }
 
         #endregion
@@ -808,69 +781,65 @@ namespace Sora.Entities.Base
         /// <para>客户端类型</para>
         /// <para><see langword="ver"/>客户端版本号</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, string clientType, string ver)> GetClientInfo()
+        public async ValueTask<(ApiStatus apiStatus, string clientType, string ver)> GetClientInfo()
         {
-            return ((APIStatusType apiStatus, string clientType, string ver))
-                await ApiInterface.GetClientInfo(this.ConnectionGuid);
+            return await ApiInterface.GetClientInfo(ConnectionGuid);
         }
 
         /// <summary>
         /// 检查是否可以发送图片
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="canSend"/> 是否能发送</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, bool canSend)> CanSendImage()
+        public async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendImage()
         {
-            return ((APIStatusType apiStatus, bool canSend))
-                await ApiInterface.CanSendImage(this.ConnectionGuid);
+            return await ApiInterface.CanSendImage(ConnectionGuid);
         }
 
         /// <summary>
         /// 检查是否可以发送语音
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="canSend"/> 是否能发送</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, bool canSend)> CanSendRecord()
+        public async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendRecord()
         {
-            return ((APIStatusType apiStatus, bool canSend))
-                await ApiInterface.CanSendRecord(this.ConnectionGuid);
+            return await ApiInterface.CanSendRecord(ConnectionGuid);
         }
 
         /// <summary>
         /// 获取客户端状态
         /// </summary>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="online"/> 客户端是否在线</para>
         /// <para><see langword="good"/> 客户端是否正常运行</para>
         /// <para><see langword="statData"/> 统计信息，如为go-cqhttp详细内容参照文档：https://ishkong.github.io/go-cqhttp-docs/api/#%E8%8E%B7%E5%8F%96%E7%8A%B6%E6%80%81</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, bool online, bool good, JObject )> GetStatus()
+        public async ValueTask<(ApiStatus apiStatus, bool online, bool good, JObject )> GetStatus()
         {
-            return ((APIStatusType apiStatus, bool online, bool good, JObject statData))
-                await ApiInterface.GetStatus(this.ConnectionGuid);
+            return await ApiInterface.GetStatus(ConnectionGuid);
         }
 
         /// <summary>
         /// 重启客户端
         /// </summary>
         /// <param name="delay">延迟(ms)</param>
-        public async ValueTask<APIStatusType> RebootClient(int delay = 0)
+        public async ValueTask<ApiStatus> RebootClient(int delay = 0)
         {
             if (delay < 0) throw new ArgumentOutOfRangeException(nameof(delay));
-            return (APIStatusType) await ApiInterface.Restart(this.ConnectionGuid, delay);
+            return  await ApiInterface.Restart(ConnectionGuid, delay);
         }
 
         /// <summary>
         /// 重载事件过滤器
         /// </summary>
-        public async ValueTask<APIStatusType> ReloadEventFilter()
+        public async ValueTask<ApiStatus> ReloadEventFilter()
         {
-            return (APIStatusType) await ApiInterface.ReloadEventFilter(this.ConnectionGuid);
+            return  await ApiInterface.ReloadEventFilter(ConnectionGuid);
         }
 
         #endregion
@@ -883,11 +852,11 @@ namespace Sora.Entities.Base
         /// <param name="flag">请求flag</param>
         /// <param name="approve">是否同意</param>
         /// <param name="remark">好友备注</param>
-        public async ValueTask<APIStatusType> SetFriendAddRequest(string flag, bool approve,
+        public async ValueTask<ApiStatus> SetFriendAddRequest(string flag, bool approve,
                                                                   string remark = null)
         {
             if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
-            return (APIStatusType) await ApiInterface.SetFriendAddRequest(this.ConnectionGuid, flag, approve, remark);
+            return  await ApiInterface.SetFriendAddRequest(ConnectionGuid, flag, approve, remark);
         }
 
         /// <summary>
@@ -897,13 +866,13 @@ namespace Sora.Entities.Base
         /// <param name="requestType">请求类型</param>
         /// <param name="approve">是否同意</param>
         /// <param name="reason">拒绝理由</param>
-        public async ValueTask<APIStatusType> SetGroupAddRequest(string flag,
+        public async ValueTask<ApiStatus> SetGroupAddRequest(string flag,
                                                                  GroupRequestType requestType,
                                                                  bool approve,
                                                                  string reason = null)
         {
             if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
-            return (APIStatusType) await ApiInterface.SetGroupAddRequest(this.ConnectionGuid, flag, requestType,
+            return  await ApiInterface.SetGroupAddRequest(ConnectionGuid, flag, requestType,
                                                                          approve, reason);
         }
 
@@ -918,14 +887,13 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="text">内容</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="wordList"/> 分词列表</para>
         /// </returns>
-        public async ValueTask<(APIStatusType apiStatus, List<string> wordList)> GetWordSlices(string text)
+        public async ValueTask<(ApiStatus apiStatus, List<string> wordList)> GetWordSlices(string text)
         {
             if (string.IsNullOrEmpty(text)) throw new NullReferenceException(nameof(text));
-            return ((APIStatusType apiStatus, List<string> wordList))
-                await ApiInterface.GetWordSlices(this.ConnectionGuid, text);
+            return await ApiInterface.GetWordSlices(ConnectionGuid, text);
         }
 
         /// <summary>
@@ -937,7 +905,7 @@ namespace Sora.Entities.Base
         /// <param name="customHeader">自定义请求头</param>
         /// <param name="timeout">超时(ms)</param>
         /// <returns>文件绝对路径</returns>
-        public async ValueTask<(APIStatusType retCode, string filePath)> DownloadFile(
+        public async ValueTask<(ApiStatus apiStatus, string filePath)> DownloadFile(
             string url, int threadCount, Dictionary<string, string> customHeader = null,
             int timeout = 10000)
         {
@@ -946,8 +914,7 @@ namespace Sora.Entities.Base
                 throw new ArgumentOutOfRangeException(nameof(threadCount), "threadCount is less than 1");
             if (timeout < 1000)
                 throw new ArgumentOutOfRangeException(nameof(timeout), "timeout is less than 1000");
-            return ((APIStatusType retCode, string filePath))
-                await ApiInterface.DownloadFile(url, threadCount, this.ConnectionGuid, customHeader, timeout);
+            return await ApiInterface.DownloadFile(url, threadCount, ConnectionGuid, customHeader, timeout);
         }
 
         /// <summary>
@@ -955,14 +922,13 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="imageId">图片ID</param>
         /// <returns>
-        /// <para><see cref="APIStatusType"/> API执行状态</para>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="texts"/> 识别结果</para>
         /// <para><see langword="language"/> 识别语言</para>
         /// </returns>
-        public async ValueTask<(APIStatusType retCode, List<TextDetection> texts, string lang)> OcrImage(string imageId)
+        public async ValueTask<(ApiStatus apiStatus, List<TextDetection> texts, string lang)> OcrImage(string imageId)
         {
-            return ((APIStatusType retCode, List<TextDetection> texts, string lang))
-                await ApiInterface.OcrImage(imageId, this.ConnectionGuid);
+            return await ApiInterface.OcrImage(imageId, ConnectionGuid);
         }
 
         #endregion
@@ -980,7 +946,7 @@ namespace Sora.Entities.Base
         public User GetUser(long userId)
         {
             if (userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            return new User(this.ConnectionGuid, userId);
+            return new User(ConnectionGuid, userId);
         }
 
         /// <summary>
@@ -990,7 +956,7 @@ namespace Sora.Entities.Base
         public Group GetGroup(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return new Group(this.ConnectionGuid, groupId);
+            return new Group(ConnectionGuid, groupId);
         }
 
         /// <summary>
@@ -999,7 +965,7 @@ namespace Sora.Entities.Base
         /// </summary>
         public long GetLoginUserId()
         {
-            if (ConnectionManager.GetLoginUid(this.ConnectionGuid, out long uid))
+            if (ConnectionManager.GetLoginUid(ConnectionGuid, out var uid))
             {
                 return uid;
             }

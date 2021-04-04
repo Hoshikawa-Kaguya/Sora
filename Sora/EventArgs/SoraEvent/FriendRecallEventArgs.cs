@@ -35,8 +35,8 @@ namespace Sora.EventArgs.SoraEvent
                                        ApiFriendRecallEventArgs friendRecallArgs) :
             base(connectionGuid, eventName, friendRecallArgs.SelfID, friendRecallArgs.Time)
         {
-            this.Sender    = new User(connectionGuid, friendRecallArgs.UserId);
-            this.MessageId = friendRecallArgs.MessageId;
+            Sender    = new User(connectionGuid, friendRecallArgs.UserId);
+            MessageId = friendRecallArgs.MessageId;
         }
 
         #endregion

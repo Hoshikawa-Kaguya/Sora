@@ -44,10 +44,10 @@ namespace Sora.EventArgs.SoraEvent
         internal GroupMuteEventArgs(Guid connectionGuid, string eventName, ApiGroupMuteEventArgs groupMuteArgs) :
             base(connectionGuid, eventName, groupMuteArgs.SelfID, groupMuteArgs.Time)
         {
-            this.User        = new User(connectionGuid, groupMuteArgs.UserId);
-            this.Operator    = new User(connectionGuid, groupMuteArgs.OperatorId);
-            this.SourceGroup = new Group(connectionGuid, groupMuteArgs.GroupId);
-            this.Duration    = groupMuteArgs.Duration;
+            User        = new User(connectionGuid, groupMuteArgs.UserId);
+            Operator    = new User(connectionGuid, groupMuteArgs.OperatorId);
+            SourceGroup = new Group(connectionGuid, groupMuteArgs.GroupId);
+            Duration    = groupMuteArgs.Duration;
         }
 
         #endregion

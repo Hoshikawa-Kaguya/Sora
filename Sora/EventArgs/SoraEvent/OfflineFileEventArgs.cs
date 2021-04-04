@@ -35,8 +35,8 @@ namespace Sora.EventArgs.SoraEvent
         internal OfflineFileEventArgs(Guid connectionGuid, string eventName, ApiOfflineFileEventArgs offlineFileArgs) :
             base(connectionGuid, eventName, offlineFileArgs.SelfID, offlineFileArgs.Time)
         {
-            this.Sender          = new User(connectionGuid, offlineFileArgs.UserId);
-            this.OfflineFileInfo = offlineFileArgs.Info;
+            Sender          = new User(connectionGuid, offlineFileArgs.UserId);
+            OfflineFileInfo = offlineFileArgs.Info;
         }
 
         #endregion

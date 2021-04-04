@@ -29,6 +29,6 @@ namespace Sora.OnebotModel.ApiParams
         /// 不需要参数时不需要设置
         /// </summary>
         [JsonProperty(PropertyName = "params")]
-        internal object ApiParams { get; set; } = new { };
+        internal dynamic ApiParams { get; set; } = new { };
     }
 }

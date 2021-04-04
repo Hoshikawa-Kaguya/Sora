@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sora.Entities;
 using Sora.Entities.MessageElement;
 
 namespace Sora.Converter
@@ -13,10 +14,10 @@ namespace Sora.Converter
         /// 预处理消息队列
         /// </summary>
         /// <param name="content">消息数据</param>
-        internal static List<CQCode> ToCQCodeList(this object[] content)
+        internal static MessageBody ToCQCodeList(this object[] content)
         {
             if (content == null) throw new ArgumentNullException(nameof(content));
-            List<CQCode> msgList = new();
+            MessageBody msgList = new();
             foreach (var msgObj in content)
             {
                 switch (msgObj)

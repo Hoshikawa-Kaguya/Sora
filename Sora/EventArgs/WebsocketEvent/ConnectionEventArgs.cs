@@ -23,8 +23,8 @@ namespace Sora.EventArgs.WebsocketEvent
 
         internal ConnectionEventArgs(string role, long selfId)
         {
-            this.SelfId = selfId;
-            this.Role   = role;
+            SelfId = selfId;
+            Role   = role;
         }
 
         #endregion

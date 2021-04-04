@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -33,19 +32,13 @@ namespace Sora.Entities.MessageElement.CQModel
         /// 具体消息
         /// </summary>
         [JsonProperty(PropertyName = "content", NullValueHandling = NullValueHandling.Ignore)]
-        internal object Messages { get; set; }
+        internal dynamic Messages { get; set; }
 
         /// <summary>
         /// 转发时间
         /// </summary>
         [JsonProperty(PropertyName = "time", NullValueHandling = NullValueHandling.Ignore)]
         internal string Time { get; set; }
-
-        /// <summary>
-        /// 消息段
-        /// </summary>
-        [JsonIgnore]
-        public List<CQCode> MessageList { get; internal set; }
 
         /// <summary>
         /// 构造自定义节点
@@ -67,7 +60,7 @@ namespace Sora.Entities.MessageElement.CQModel
         /// <param name="userId">发送者ID</param>
         /// <param name="customMessage">消息段</param>
         /// <param name="time">消息段转发时间</param>
-        public CustomNode(string name, long userId, List<CQCode> customMessage, DateTimeOffset? time = null)
+        public CustomNode(string name, long userId, MessageBody customMessage, DateTimeOffset? time = null)
         {
             MessageId = null;
             Name      = name;

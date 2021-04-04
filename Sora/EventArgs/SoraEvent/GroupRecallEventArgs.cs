@@ -44,13 +44,13 @@ namespace Sora.EventArgs.SoraEvent
         internal GroupRecallEventArgs(Guid connectionGuid, string eventName, ApiGroupRecallEventArgs groupRecallArgs) :
             base(connectionGuid, eventName, groupRecallArgs.SelfID, groupRecallArgs.Time)
         {
-            this.MessageSender = new User(connectionGuid, groupRecallArgs.UserId);
+            MessageSender = new User(connectionGuid, groupRecallArgs.UserId);
             //执行者和发送者可能是同一人
-            this.Operator = groupRecallArgs.UserId == groupRecallArgs.OperatorId
-                ? this.MessageSender
+            Operator = groupRecallArgs.UserId == groupRecallArgs.OperatorId
+                ? MessageSender
                 : new User(connectionGuid, groupRecallArgs.OperatorId);
-            this.SourceGroup = new Group(connectionGuid, groupRecallArgs.GroupId);
-            this.MessageId   = groupRecallArgs.MessageId;
+            SourceGroup = new Group(connectionGuid, groupRecallArgs.GroupId);
+            MessageId   = groupRecallArgs.MessageId;
         }
 
         #endregion

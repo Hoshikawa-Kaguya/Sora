@@ -41,9 +41,9 @@ namespace Sora.EventArgs.SoraEvent
                                            ApiAdminChangeEventArgs adminChangeArgs) :
             base(connectionGuid, eventName, adminChangeArgs.SelfID, adminChangeArgs.Time)
         {
-            this.SourceGroup = new Group(connectionGuid, adminChangeArgs.GroupId);
-            this.Sender      = new User(connectionGuid, adminChangeArgs.UserId);
-            this.SubType     = adminChangeArgs.SubType;
+            SourceGroup = new Group(connectionGuid, adminChangeArgs.GroupId);
+            Sender      = new User(connectionGuid, adminChangeArgs.UserId);
+            SubType     = adminChangeArgs.SubType;
         }
 
         #endregion

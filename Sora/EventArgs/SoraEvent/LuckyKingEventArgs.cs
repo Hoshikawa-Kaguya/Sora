@@ -39,9 +39,9 @@ namespace Sora.EventArgs.SoraEvent
         internal LuckyKingEventArgs(Guid connectionGuid, string eventName, ApiPokeOrLuckyEventArgs luckyKingEventArgs) :
             base(connectionGuid, eventName, luckyKingEventArgs.SelfID, luckyKingEventArgs.Time)
         {
-            this.SendUser    = new User(connectionGuid, luckyKingEventArgs.UserId);
-            this.TargetUser  = new User(connectionGuid, luckyKingEventArgs.TargetId);
-            this.SourceGroup = new Group(connectionGuid, luckyKingEventArgs.GroupId);
+            SendUser    = new User(connectionGuid, luckyKingEventArgs.UserId);
+            TargetUser  = new User(connectionGuid, luckyKingEventArgs.TargetId);
+            SourceGroup = new Group(connectionGuid, luckyKingEventArgs.GroupId);
         }
 
         #endregion
