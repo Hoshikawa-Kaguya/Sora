@@ -28,6 +28,9 @@ namespace Sora.Converter
                     case IEnumerable<CQCode> cqCodes:
                         msgList.AddRange(cqCodes);
                         break;
+                    case null:
+                        msgList.Add(CQCodes.CQText("null"));
+                        break;
                     default:
                         msgList.Add(CQCodes.CQText(msgObj.ToString()));
                         break;
