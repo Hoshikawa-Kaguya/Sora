@@ -42,10 +42,10 @@ service.Event.OnClientConnect += (type, eventArgs) =>
                                  };
 
 //群聊消息事件
-service.Event.OnGroupMessage += async (msgType, eventArgs) => {await eventArgs.Reply("好耶");};
+service.Event.OnGroupMessage += async (msgType, eventArgs) => { await eventArgs.Reply("好耶"); };
 service.Event.OnSelfMessage += (type, eventArgs) =>
                                {
-                                   Log.Info("test", $"self msg {eventArgs.Message.MessageId}");
+                                   Log.Info("Sora_Test|OnSelfMessage", $"self msg {eventArgs.Message.MessageId}");
                                    return ValueTask.CompletedTask;
                                };
 //私聊消息事件

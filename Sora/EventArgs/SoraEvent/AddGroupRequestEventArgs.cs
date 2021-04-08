@@ -45,15 +45,16 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupRequestArgs">加群申请事件参数</param>
-        internal AddGroupRequestEventArgs(Guid connectionGuid, string eventName,
+        internal AddGroupRequestEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
                                           ApiGroupRequestEventArgs groupRequestArgs) :
-            base(connectionGuid, eventName, groupRequestArgs.SelfID, groupRequestArgs.Time)
+            base(serviceId, connectionGuid, eventName, groupRequestArgs.SelfID, groupRequestArgs.Time)
         {
-            Sender      = new User(connectionGuid, groupRequestArgs.UserId);
-            SourceGroup = new Group(connectionGuid, groupRequestArgs.GroupId);
+            Sender      = new User(serviceId, connectionGuid, groupRequestArgs.UserId);
+            SourceGroup = new Group(serviceId, connectionGuid, groupRequestArgs.GroupId);
             Comment     = groupRequestArgs.Comment;
             RequsetFlag = groupRequestArgs.Flag;
             SubType     = groupRequestArgs.GroupRequestType;

@@ -27,12 +27,18 @@ namespace Sora.OnebotInterface
         /// </summary>
         public CommandManager CommandManager { get; }
 
+        /// <summary>
+        /// 服务ID
+        /// </summary>
+        private Guid ServiceId { get; }
+
         #endregion
 
         #region 构造方法
 
-        internal EventInterface(bool enableSoraCommandManager)
+        internal EventInterface(Guid serviceId, bool enableSoraCommandManager)
         {
+            ServiceId      = serviceId;
             CommandManager = new CommandManager(enableSoraCommandManager);
             CommandManager.MappingCommands(Assembly.GetEntryAssembly());
         }
@@ -246,10 +252,11 @@ namespace Sora.OnebotInterface
                     ConnectionManager.UpdateUid(connection, uid);
 
                     Log.Info("Sora", $"已连接到{clientType},版本:{clientVer}");
+
                     if (OnClientConnect == null) break;
                     //执行回调
                     await OnClientConnect("Meta Event",
-                                          new ConnectEventArgs(connection, "lifecycle",
+                                          new ConnectEventArgs(ServiceId, connection, "lifecycle",
                                                                lifeCycle?.SelfID ?? -1, clientType, clientVer,
                                                                lifeCycle?.Time   ?? 0));
                     break;
@@ -280,7 +287,7 @@ namespace Sora.OnebotInterface
                     if (privateMsg == null) break;
                     Log.Debug("Sora",
                               $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
-                    var eventArgs = new PrivateMessageEventArgs(connection, "private", privateMsg);
+                    var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
                     //处理指令
                     if (CommandManager.CommandAdapter(eventArgs) || !eventArgs.IsContinueEventChain)
                         break;
@@ -296,7 +303,7 @@ namespace Sora.OnebotInterface
                     if (groupMsg == null) break;
                     Log.Debug("Sora",
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
-                    var eventArgs = new GroupMessageEventArgs(connection, "group", groupMsg);
+                    var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
                     //处理指令
                     if (!CommandManager.CommandAdapter(eventArgs))
                         break;
@@ -333,7 +340,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnSelfMessage == null) break;
                     await OnSelfMessage("Message",
-                                        new GroupMessageEventArgs(connection, "group", groupMsg));
+                                        new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg));
                     break;
                 }
                 default:
@@ -365,7 +372,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnFriendRequest == null) break;
                     await OnFriendRequest("Request",
-                                          new FriendRequestEventArgs(connection, "request|friend",
+                                          new FriendRequestEventArgs(ServiceId, connection, "request|friend",
                                                                      friendRequest));
                     break;
                 }
@@ -385,7 +392,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnGroupRequest == null) break;
                     await OnGroupRequest("Request",
-                                         new AddGroupRequestEventArgs(connection, "request|group",
+                                         new AddGroupRequestEventArgs(ServiceId, connection, "request|group",
                                                                       groupRequest));
                     break;
                 }
@@ -418,7 +425,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnFileUpload == null) break;
                     await OnFileUpload("Notice",
-                                       new FileUploadEventArgs(connection, "group_upload", fileUpload));
+                                       new FileUploadEventArgs(ServiceId, connection, "group_upload", fileUpload));
                     break;
                 }
                 //群管理员变动
@@ -431,7 +438,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnGroupAdminChange == null) break;
                     await OnGroupAdminChange("Notice",
-                                             new GroupAdminChangeEventArgs(connection, "group_upload", adminChange));
+                                             new GroupAdminChangeEventArgs(ServiceId, connection, "group_upload", adminChange));
                     break;
                 }
                 //群成员变动
@@ -446,7 +453,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnGroupMemberChange == null) break;
                     await OnGroupMemberChange("Notice",
-                                              new GroupMemberChangeEventArgs(connection, "group_member_change",
+                                              new GroupMemberChangeEventArgs(ServiceId, connection, "group_member_change",
                                                                              groupMemberChange));
                     break;
                 }
@@ -460,7 +467,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnGroupMemberMute == null) break;
                     await OnGroupMemberMute("Notice",
-                                            new GroupMuteEventArgs(connection, "group_ban", groupMute));
+                                            new GroupMuteEventArgs(ServiceId, connection, "group_ban", groupMute));
                     break;
                 }
                 //好友添加
@@ -472,7 +479,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnFriendAdd == null) break;
                     await OnFriendAdd("Notice",
-                                      new FriendAddEventArgs(connection, "friend_add", friendAdd));
+                                      new FriendAddEventArgs(ServiceId, connection, "friend_add", friendAdd));
                     break;
                 }
                 //群消息撤回
@@ -485,7 +492,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnGroupRecall == null) break;
                     await OnGroupRecall("Notice",
-                                        new GroupRecallEventArgs(connection, "group_recall", groupRecall));
+                                        new GroupRecallEventArgs(ServiceId, connection, "group_recall", groupRecall));
                     break;
                 }
                 //好友消息撤回
@@ -497,7 +504,7 @@ namespace Sora.OnebotInterface
                     //执行回调
                     if (OnFriendRecall == null) break;
                     await OnFriendRecall("Notice",
-                                         new FriendRecallEventArgs(connection, "friend_recall", friendRecall));
+                                         new FriendRecallEventArgs(ServiceId, connection, "friend_recall", friendRecall));
                     break;
                 }
                 //群名片变更
@@ -510,7 +517,7 @@ namespace Sora.OnebotInterface
                               $"Group[{groupCardUpdate.GroupId}] member[{groupCardUpdate.UserId}] card update [{groupCardUpdate.OldCard} => {groupCardUpdate.NewCard}]");
                     if (OnGroupCardUpdate == null) break;
                     await OnGroupCardUpdate("Notice",
-                                            new GroupCardUpdateEventArgs(connection, "group_card", groupCardUpdate));
+                                            new GroupCardUpdateEventArgs(ServiceId, connection, "group_card", groupCardUpdate));
                     break;
                 }
                 case "offline_file":
@@ -521,7 +528,7 @@ namespace Sora.OnebotInterface
                               $"Get offline file from[{offlineFile.UserId}] file name = {offlineFile.Info.Name}");
                     if (OnOfflineFileEvent == null) break;
                     await OnOfflineFileEvent("Notice",
-                                             new OfflineFileEventArgs(connection, "offline_file", offlineFile));
+                                             new OfflineFileEventArgs(ServiceId, connection, "offline_file", offlineFile));
                     break;
                 }
                 case "client_status":
@@ -532,7 +539,7 @@ namespace Sora.OnebotInterface
                               $"Get client status change from[{clientStatus.UserId}] client id = {clientStatus.ClientInfo.AppId}");
                     if (OnClientStatusChangeEvent == null) break;
                     await OnClientStatusChangeEvent("Notice",
-                                                    new ClientStatusChangeEventArgs(connection, "client_status",
+                                                    new ClientStatusChangeEventArgs(ServiceId, connection, "client_status",
                                                         clientStatus));
                     break;
                 }
@@ -544,7 +551,7 @@ namespace Sora.OnebotInterface
                               $"Get essence change msg_id = {essenceChange.MessageId} type = {essenceChange.EssenceChangeType}");
                     if (OnEssenceChange == null) break;
                     await OnEssenceChange("Notice",
-                                          new EssenceChangeEventArgs(connection, "essence", essenceChange));
+                                          new EssenceChangeEventArgs(ServiceId, connection, "essence", essenceChange));
                     break;
                 }
                 //通知类事件
@@ -559,7 +566,7 @@ namespace Sora.OnebotInterface
                                       $"Group[{pokeEvent.GroupId}] poke from [{pokeEvent.UserId}] to [{pokeEvent.TargetId}]");
                             if (OnGroupPoke == null) break;
                             await OnGroupPoke("Notify",
-                                              new GroupPokeEventArgs(connection, "poke", pokeEvent));
+                                              new GroupPokeEventArgs(ServiceId, connection, "poke", pokeEvent));
                             break;
                         }
                         case "lucky_king": //运气王
@@ -570,7 +577,7 @@ namespace Sora.OnebotInterface
                                       $"Group[{luckyEvent.GroupId}] lucky king user[{luckyEvent.TargetId}]");
                             if (OnLuckyKingEvent == null) break;
                             await OnLuckyKingEvent("Notify",
-                                                   new LuckyKingEventArgs(connection, "lucky_king", luckyEvent));
+                                                   new LuckyKingEventArgs(ServiceId, connection, "lucky_king", luckyEvent));
                             break;
                         }
                         case "honor":
@@ -581,7 +588,7 @@ namespace Sora.OnebotInterface
                                       $"Group[{honorEvent.GroupId}] member honor change [{honorEvent.HonorType}]");
                             if (OnHonorEvent == null) break;
                             await OnHonorEvent("Notify",
-                                               new HonorEventArgs(connection, "honor", honorEvent));
+                                               new HonorEventArgs(ServiceId, connection, "honor", honorEvent));
                             break;
                         }
                         default:

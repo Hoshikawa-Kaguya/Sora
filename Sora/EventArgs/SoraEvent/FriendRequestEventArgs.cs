@@ -34,14 +34,15 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="friendRequestArgs">好友申请事件参数</param>
-        internal FriendRequestEventArgs(Guid connectionGuid, string eventName,
+        internal FriendRequestEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
                                         ApiFriendRequestEventArgs friendRequestArgs) :
-            base(connectionGuid, eventName, friendRequestArgs.SelfID, friendRequestArgs.Time)
+            base(serviceId, connectionGuid, eventName, friendRequestArgs.SelfID, friendRequestArgs.Time)
         {
-            Sender      = new User(connectionGuid, friendRequestArgs.UserId);
+            Sender      = new User(serviceId, connectionGuid, friendRequestArgs.UserId);
             Comment     = friendRequestArgs.Comment;
             RequsetFlag = friendRequestArgs.Flag;
         }

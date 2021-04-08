@@ -33,15 +33,16 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="luckyKingEventArgs">运气王事件参数</param>
-        internal LuckyKingEventArgs(Guid connectionGuid, string eventName, ApiPokeOrLuckyEventArgs luckyKingEventArgs) :
-            base(connectionGuid, eventName, luckyKingEventArgs.SelfID, luckyKingEventArgs.Time)
+        internal LuckyKingEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiPokeOrLuckyEventArgs luckyKingEventArgs) :
+            base(serviceId, connectionGuid, eventName, luckyKingEventArgs.SelfID, luckyKingEventArgs.Time)
         {
-            SendUser    = new User(connectionGuid, luckyKingEventArgs.UserId);
-            TargetUser  = new User(connectionGuid, luckyKingEventArgs.TargetId);
-            SourceGroup = new Group(connectionGuid, luckyKingEventArgs.GroupId);
+            SendUser    = new User(serviceId, connectionGuid, luckyKingEventArgs.UserId);
+            TargetUser  = new User(serviceId, connectionGuid, luckyKingEventArgs.TargetId);
+            SourceGroup = new Group(serviceId, connectionGuid, luckyKingEventArgs.GroupId);
         }
 
         #endregion

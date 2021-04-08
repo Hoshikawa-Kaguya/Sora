@@ -60,13 +60,14 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceGuid">当前服务ID</param>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="loginUid">当前使用的QQ号</param>
         /// <param name="time">连接时间</param>
-        internal BaseSoraEventArgs(Guid connectionGuid, string eventName, long loginUid, long time)
+        internal BaseSoraEventArgs(Guid serviceGuid, Guid connectionGuid, string eventName, long loginUid, long time)
         {
-            SoraApi              = new SoraApi(connectionGuid);
+            SoraApi              = new SoraApi(serviceGuid, connectionGuid);
             EventName            = eventName;
             LoginUid             = loginUid;
             TimeStamp            = time;

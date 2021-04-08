@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Sora.Entities;
+using Sora.Entities.Info.InternalDataInfo;
 using Sora.EventArgs.WebsocketEvent;
 using Sora.OnebotModel;
 using Websocket.Client;
@@ -73,22 +74,23 @@ namespace Sora.Net
         /// <summary>
         /// 添加服务器连接记录
         /// </summary>
+        /// <param name="serviceId">服务Id</param>
         /// <param name="connectionGuid">连接标识</param>
         /// <param name="connectionInfo">连接信息</param>
         /// <param name="selfId">机器人UID</param>
         /// <param name="apiTimeout">api超时</param>
-        private bool AddConnection(Guid connectionGuid, object connectionInfo, string selfId, TimeSpan apiTimeout)
+        private bool AddConnection(Guid serviceId, Guid connectionGuid, object connectionInfo, string selfId, TimeSpan apiTimeout)
         {
             //检查是否已存在值
-            if (StaticVariable.ConnectionList.ContainsKey(connectionGuid)) return false;
+            if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid)) return false;
             long.TryParse(selfId, out var uid);
-            return StaticVariable.ConnectionList.TryAdd(connectionGuid, new StaticVariable.SoraConnectionInfo
-                                                            (
-                                                             connection: connectionInfo,
-                                                             lastHeartBeatTime: DateTime.Now,
-                                                             selfId: uid,
-                                                             apiTimeout: apiTimeout
-                                                            ));
+            return StaticVariable.ConnectionInfos.TryAdd(connectionGuid, new SoraConnectionInfo
+                                                             (serviceId: serviceId,
+                                                              connection: connectionInfo,
+                                                              lastHeartBeatTime: DateTime.Now,
+                                                              selfId: uid,
+                                                              apiTimeout: apiTimeout
+                                                             ));
         }
 
         /// <summary>
@@ -97,7 +99,7 @@ namespace Sora.Net
         /// <param name="connectionGuid">连接标识</param>
         private bool RemoveConnection(Guid connectionGuid)
         {
-            return StaticVariable.ConnectionList.TryRemove(connectionGuid, out _);
+            return StaticVariable.ConnectionInfos.TryRemove(connectionGuid, out _);
         }
 
         /// <summary>
@@ -106,7 +108,7 @@ namespace Sora.Net
         /// <param name="connectionGuid">连接标识</param>
         internal bool ConnectionExitis(Guid connectionGuid)
         {
-            return StaticVariable.ConnectionList.ContainsKey(connectionGuid);
+            return StaticVariable.ConnectionInfos.ContainsKey(connectionGuid);
         }
 
         #endregion
@@ -115,12 +117,12 @@ namespace Sora.Net
 
         internal static bool SendMessage(Guid connectionGuid, string message)
         {
-            if (StaticVariable.ConnectionList.All(connection => connection.Key != connectionGuid))
+            if (StaticVariable.ConnectionInfos.All(connection => connection.Key != connectionGuid))
                 return false;
 
             try
             {
-                switch (StaticVariable.ConnectionList[connectionGuid].Connection)
+                switch (StaticVariable.ConnectionInfos[connectionGuid].Connection)
                 {
                     case IWebSocketConnection serverConnection:
                         serverConnection.Send(message);
@@ -149,12 +151,16 @@ namespace Sora.Net
         /// </summary>
         internal void HeartBeatCheck(object obj)
         {
-            if (StaticVariable.ConnectionList.IsEmpty) return;
-            Log.Debug("HeartBeatCheck", $"Connection count={StaticVariable.ConnectionList.Count}");
+            if (StaticVariable.ConnectionInfos.IsEmpty) return;
+            Log.Debug("HeartBeatCheck", $"Connection count={StaticVariable.ConnectionInfos.Count}");
 
-            Dictionary<Guid, StaticVariable.SoraConnectionInfo> timeoutDict = StaticVariable.ConnectionList
-                .Where(conn => DateTime.Now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
-                .ToDictionary(conn => conn.Key, conn => conn.Value);
+            //查找超时连接
+            Dictionary<Guid, SoraConnectionInfo> timeoutDict =
+                StaticVariable.ConnectionInfos
+                              .Where(conn =>
+                                         DateTime.Now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
+                              .ToDictionary(conn => conn.Key,
+                                            conn => conn.Value);
 
             //遍历超时的连接
             foreach (var (connection, info) in timeoutDict)
@@ -187,7 +193,7 @@ namespace Sora.Net
                     Log.Error("Sora", Log.ErrorLogBuilder(e));
                 }
 
-                if (!StaticVariable.ConnectionList.TryRemove(connection, out _))
+                if (!StaticVariable.ConnectionInfos.TryRemove(connection, out _))
                 {
                     Log.Error("Sora", "检查心跳包时发生错误(删除超时连接时发生错误)");
                 }
@@ -200,10 +206,10 @@ namespace Sora.Net
         /// <param name="connectionGuid">连接标识</param>
         internal static void HeartBeatUpdate(Guid connectionGuid)
         {
-            var oldInfo = StaticVariable.ConnectionList[connectionGuid];
+            var oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
             var newInfo = oldInfo;
             newInfo.LastHeartBeatTime = DateTime.Now;
-            StaticVariable.ConnectionList.TryUpdate(connectionGuid, newInfo, oldInfo);
+            StaticVariable.ConnectionInfos.TryUpdate(connectionGuid, newInfo, oldInfo);
         }
 
         #endregion
@@ -216,12 +222,13 @@ namespace Sora.Net
         /// <param name="role">通道标识</param>
         /// <param name="selfId">事件源</param>
         /// <param name="socket">连接</param>
-        /// <param name="id">ID</param>
+        /// <param name="serviceId">服务ID</param>
+        /// <param name="connId">连接ID</param>
         /// <param name="apiTimeout">api超时</param>
-        internal void OpenConnection(string role, string selfId, object socket, Guid id, TimeSpan apiTimeout)
+        internal void OpenConnection(string role, string selfId, object socket, Guid serviceId, Guid connId, TimeSpan apiTimeout)
         {
             //添加服务器记录
-            if (!AddConnection(id, socket, selfId, apiTimeout))
+            if (!AddConnection(serviceId, connId, socket, selfId, apiTimeout))
             {
                 //记录添加失败关闭超时的连接
                 switch (socket)
@@ -232,7 +239,7 @@ namespace Sora.Net
                         break;
                     case WebsocketClient client:
                         client.Stop(WebSocketCloseStatus.Empty, "cannot add client to list");
-                        Log.Error("Sora", $"处理连接请求时发生问题 无法记录该连接[{id}]");
+                        Log.Error("Sora", $"处理连接请求时发生问题 无法记录该连接[{connId}]");
                         break;
                     default:
                         Log.Error("ConnectionManager", "unknown error when get Connection instance");
@@ -244,7 +251,7 @@ namespace Sora.Net
 
             if (OnOpenConnectionAsync == null) return;
             long.TryParse(selfId, out var uid);
-            Task.Run(async () => { await OnOpenConnectionAsync(id, new ConnectionEventArgs(role, uid)); });
+            Task.Run(async () => { await OnOpenConnectionAsync(connId, new ConnectionEventArgs(role, uid)); });
         }
 
         /// <summary>
@@ -269,10 +276,10 @@ namespace Sora.Net
 
         internal static void UpdateUid(Guid connectionGuid, long uid)
         {
-            var oldInfo = StaticVariable.ConnectionList[connectionGuid];
+            var oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
             var newInfo = oldInfo;
             newInfo.SelfId = uid;
-            StaticVariable.ConnectionList.TryUpdate(connectionGuid, newInfo, oldInfo);
+            StaticVariable.ConnectionInfos.TryUpdate(connectionGuid, newInfo, oldInfo);
         }
 
         /// <summary>
@@ -297,9 +304,9 @@ namespace Sora.Net
         /// <param name="userId">UID</param>
         internal static bool GetLoginUid(Guid connectionGuid, out long userId)
         {
-            if (StaticVariable.ConnectionList.ContainsKey(connectionGuid))
+            if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid))
             {
-                userId = StaticVariable.ConnectionList[connectionGuid].SelfId;
+                userId = StaticVariable.ConnectionInfos[connectionGuid].SelfId;
                 return true;
             }
 
@@ -314,9 +321,9 @@ namespace Sora.Net
         /// <param name="timeout">超时</param>
         internal static bool GetApiTimeout(Guid connectionGuid, out TimeSpan timeout)
         {
-            if (StaticVariable.ConnectionList.ContainsKey(connectionGuid))
+            if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid))
             {
-                timeout = StaticVariable.ConnectionList[connectionGuid].ApiTimeout;
+                timeout = StaticVariable.ConnectionInfos[connectionGuid].ApiTimeout;
                 return true;
             }
 

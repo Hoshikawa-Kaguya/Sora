@@ -1,5 +1,4 @@
 using Sora.Attributes.Command;
-using Sora.Entities.Info;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
@@ -13,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
 using Sora.Entities;
+using Sora.Entities.Info.InternalDataInfo;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Helpers;
 
@@ -116,7 +116,7 @@ namespace Sora.Command
             #region 信号量消息处理
 
             //处理消息段
-            Dictionary<Guid, StaticVariable.WaitingInfo> waitingCommand;
+            Dictionary<Guid, WaitingInfo> waitingCommand;
             switch (eventArgs)
             {
                 case GroupMessageEventArgs groupMessageEvent:
@@ -254,12 +254,12 @@ namespace Sora.Command
                     //执行指令方法
                     if (isAsnyc)
                     {
-                        Log.Debug("Command", "invoke async method");
+                        Log.Debug("Command", "invoke async command method");
                         Task asyncTask = Task.Run(async () =>
                                                   {
-                                                      await ((dynamic) commandInfo.MethodInfo
-                                                          .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                                  new[] {eventArgs}))!;
+                                                      await commandInfo.MethodInfo
+                                                                       .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
+                                                                               new[] {eventArgs});
                                                   });
                         try
                         {
@@ -271,9 +271,12 @@ namespace Sora.Command
                         }
                     }
                     else
+                    {
+                        Log.Debug("Command", "invoke command method");
                         commandInfo.MethodInfo
                                    .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
                                            new[] {eventArgs});
+                    }
 
                     return ((BaseSoraEventArgs) eventArgs).IsContinueEventChain;
                 }
@@ -289,7 +292,7 @@ namespace Sora.Command
                             case GroupMessageEventArgs groupMessageEvent:
                             {
                                 Task.Run(async () => { await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}"); });
-                                break;
+                                break; 
                             }
                             case PrivateMessageEventArgs privateMessageEvent:
                             {
@@ -343,7 +346,7 @@ namespace Sora.Command
         /// <param name="connectionId">连接标识</param>
         /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
         [Reviewed("XiaoHe321", "2021-03-28 20:45")]
-        internal static StaticVariable.WaitingInfo GenWaitingCommandInfo(
+        internal static WaitingInfo GenWaitingCommandInfo(
             long sourceUid, long sourceGroup, string[] cmdExps,
             MatchType matchType, RegexOptions regexOptions, Guid connectionId)
         {
@@ -360,11 +363,11 @@ namespace Sora.Command
                 _ => throw new NotSupportedException("unknown matchtype")
             };
 
-            return new StaticVariable.WaitingInfo(semaphore: new AutoResetEvent(false),
-                                                  commandExpressions: matchExp,
-                                                  connectionId: connectionId,
-                                                  source: (sourceUid, sourceGroup),
-                                                  regexOptions: regexOptions);
+            return new WaitingInfo(semaphore: new AutoResetEvent(false),
+                                   commandExpressions: matchExp,
+                                   connectionId: connectionId,
+                                   source: (sourceUid, sourceGroup),
+                                   regexOptions: regexOptions);
         }
 
         /// <summary>

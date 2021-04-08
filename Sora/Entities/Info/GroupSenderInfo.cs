@@ -7,7 +7,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 群组消息发送者
     /// </summary>
-    public struct GroupSenderInfo
+    public class GroupSenderInfo
     {
         /// <summary>
         /// 发送者 QQ 号
@@ -56,7 +56,7 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "role")]
-        public MemberRoleType Role { get; internal init; }
+        public MemberRoleType Role { get; internal set; }
 
         /// <summary>
         /// 专属头衔

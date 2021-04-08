@@ -355,7 +355,7 @@ namespace Sora.Entities.MessageElement
                               new Code
                               {
                                   Content = content,
-                                  Resid   = richText ? (int?) 1 : null
+                                  Resid   = richText ? 1 : null
                               });
         }
 

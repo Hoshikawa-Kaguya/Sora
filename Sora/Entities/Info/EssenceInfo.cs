@@ -44,13 +44,13 @@ namespace Sora.Entities.Info
         /// </summary>
         public DateTime MessageSendTime { get; }
 
-        internal EssenceInfo(JToken dataJson, Guid connection)
+        internal EssenceInfo(JToken dataJson, Guid serviceId, Guid connection)
         {
             MessageId       = Convert.ToInt64(dataJson["message_id"] ?? 0);
-            Operator        = new User(connection, Convert.ToInt64(dataJson["operator_id"] ?? 0));
+            Operator        = new User(serviceId, connection, Convert.ToInt64(dataJson["operator_id"] ?? 0));
             OperatorName    = dataJson["operator_nick"]?.ToString() ?? string.Empty;
             Time            = Convert.ToInt64(dataJson["operator_time"] ?? 0).ToDateTime();
-            Sender          = new User(connection, Convert.ToInt64(dataJson["sender_id"] ?? 0));
+            Sender          = new User(serviceId, connection, Convert.ToInt64(dataJson["sender_id"] ?? 0));
             SenderName      = dataJson["sender_nick"]?.ToString() ?? string.Empty;
             MessageSendTime = Convert.ToInt64(dataJson["sender_time"] ?? 0).ToDateTime();
         }

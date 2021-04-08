@@ -7,6 +7,8 @@ using System;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Sora.Entities;
+using Sora.Entities.Info.InternalDataInfo;
 using Websocket.Client;
 using YukariToolBox.FormatLog;
 
@@ -53,6 +55,9 @@ namespace Sora.Net
         /// </summary>
         private readonly bool _clientReady;
 
+        /// <summary>
+        /// 客户端ID
+        /// </summary>
         private readonly Guid _clientId = Guid.NewGuid();
 
         #endregion
@@ -66,23 +71,21 @@ namespace Sora.Net
         /// <param name="crashAction">发生未处理异常时的回调</param>
         internal SoraWebsocketClient(ClientConfig config, Action<Exception> crashAction = null)
         {
-            Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.2"); //{Assembly.GetExecutingAssembly().GetName().Version}");
-            Log.Debug("Sora", "开发交流群：1081190562");
-
             _clientReady = false;
-            Log.Info("Sora", "Sora WebSocket客户端初始化...");
-            Log.Debug("System", Environment.OSVersion);
+            Log.Info("Sora", $"Sora WebSocket客户端初始化... [{_clientId}]");
+            //写入初始化信息
+            StaticVariable.ServiceInfos.TryAdd(_clientId, new ServiceInfo(_clientId, config.SuperUsers));
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
             //检查参数
             if (config == null) throw new ArgumentNullException(nameof(config));
-            if (config.Port == 0 || config.Port > 65535)
+            if (config.Port is 0 or > 65535)
                 throw new ArgumentOutOfRangeException(nameof(config.Port), "Port out of range");
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
             Config      = config;
             //实例化事件接口
-            Event = new EventInterface(config.EnableSoraCommandManager);
+            Event = new EventInterface(_clientId, config.EnableSoraCommandManager);
             //构建Client配置
             var factory = new Func<ClientWebSocket>(() =>
                                                     {
@@ -157,7 +160,7 @@ namespace Sora.Net
                                                                            return;
                                                                        Log.Info("Sora", "服务器已自动重连");
                                                                        ConnManager.OpenConnection("Universal", "0",
-                                                                           Client, _clientId, Config.ApiTimeOut);
+                                                                           Client, _clientId, _clientId, Config.ApiTimeOut);
                                                                    }));
             await Client.Start();
             if (!Client.IsRunning || !Client.IsStarted)
@@ -165,7 +168,7 @@ namespace Sora.Net
                 throw new WebSocketClientException("WebSocket client is not running");
             }
 
-            ConnManager.OpenConnection("Universal", "0", Client, _clientId, Config.ApiTimeOut);
+            ConnManager.OpenConnection("Universal", "0", Client, _clientId, _clientId, Config.ApiTimeOut);
             Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
             //启动心跳包超时检查计时器
             HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,

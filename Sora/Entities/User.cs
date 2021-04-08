@@ -27,9 +27,10 @@ namespace Sora.Entities
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId"></param>
         /// <param name="connectionGuid">服务器连接标识</param>
         /// <param name="uid">用户ID</param>
-        internal User(Guid connectionGuid, long uid) : base(connectionGuid)
+        internal User(Guid serviceId, Guid connectionGuid, long uid) : base(serviceId, connectionGuid)
         {
             Id = uid;
         }
