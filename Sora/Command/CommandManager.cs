@@ -7,11 +7,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
-using Sora.OnebotInterface;
+using Sora.Entities;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Helpers;
 
@@ -247,17 +248,27 @@ namespace Sora.Command
                 try
                 {
                     //尝试执行指令并判断异步方法
-                    var returnParameterType = commandInfo.MethodInfo.ReturnParameter.ParameterType;
+                    var isAsnyc =
+                        commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
+                                                                  false) is not null;
                     //执行指令方法
-                    if (returnParameterType == typeof(Task) || returnParameterType == typeof(ValueTask))
+                    if (isAsnyc)
                     {
+                        Log.Debug("Command", "invoke async method");
                         Task asyncTask = Task.Run(async () =>
                                                   {
                                                       await ((dynamic) commandInfo.MethodInfo
                                                           .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
                                                                   new[] {eventArgs}))!;
                                                   });
-                        asyncTask.Wait();
+                        try
+                        {
+                            if (!asyncTask.IsCompleted) asyncTask.Wait();
+                        }
+                        catch (Exception)
+                        {
+                            Log.Warning("Command", "Try wait method failed");
+                        }
                     }
                     else
                         commandInfo.MethodInfo

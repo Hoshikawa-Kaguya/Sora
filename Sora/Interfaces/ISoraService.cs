@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Sora.Exceptions;
 using Sora.Net;
 using Sora.OnebotInterface;
 
@@ -23,7 +22,6 @@ namespace Sora.Interfaces
         /// <summary>
         /// 启动 Sora 服务
         /// </summary>
-        /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
         public ValueTask StartService();
     }
 }

@@ -118,7 +118,7 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_login_info response {nameof(apiStatus)}={apiStatus.RetCode}");
-            if (apiStatus.RetCode != ApiStatusType.OK)return (apiStatus, -1, null);
+            if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, -1, null);
             return
             (
                 apiStatus,
@@ -155,7 +155,8 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         /// <returns>好友信息列表</returns>
         [Reviewed("nidbCN", "2021-03-24 20:40")]
-        internal static async ValueTask<(ApiStatus apiStatus, List<FriendInfo> friendList)> GetFriendList(Guid connection)
+        internal static async ValueTask<(ApiStatus apiStatus, List<FriendInfo> friendList)> GetFriendList(
+            Guid connection)
         {
             Log.Debug("Sora", "Sending get_friend_list request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -212,8 +213,9 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         /// <param name="gid">群号</param>
         [Reviewed("nidbCN", "2021-03-24 20:49")]
-        internal static async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
-            Guid connection, long gid)
+        internal static async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)>
+            GetGroupMemberList(
+                Guid connection, long gid)
         {
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
@@ -291,7 +293,8 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_member_info response {nameof(apiStatus)}={apiStatus.RetCode}");
-            if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, new GroupMemberInfo());
+            if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
+                return (apiStatus, new GroupMemberInfo());
             return (apiStatus,
                     ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo());
         }
@@ -320,7 +323,8 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_stranger_info response {nameof(apiStatus)}={apiStatus.RetCode}");
-            if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, new UserInfo(), string.Empty);
+            if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
+                return (apiStatus, new UserInfo(), string.Empty);
             return (apiStatus, new UserInfo
             {
                 UserId    = Convert.ToInt64(ret["data"]?["user_id"] ?? -1),
@@ -426,7 +430,8 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="msgId">消息ID</param>
-        internal static async ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup, int realId, bool
+        internal static async ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup, int
+            realId, bool
             isGroupMsg)> GetMessage(
             Guid connection, int msgId)
         {
@@ -442,7 +447,8 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
-            if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null, null, null, 0, false);
+            if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
+                return (apiStatus, null, null, null, 0, false);
             //处理消息段
             var rawMessage = ret["data"]?["message"]?.ToObject<List<OnebotMessageElement>>();
             return (apiStatus,
@@ -515,7 +521,7 @@ namespace Sora.OnebotInterface
             //处理API返回信息
             var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_forward_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
-            if (apiStatus.RetCode != ApiStatusType.OK)return (apiStatus, null);
+            if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, null);
             //转换消息类型
             var messageList = ret?["data"]?.ToObject<NodeArray>() ?? new NodeArray();
             messageList.ParseNode();
@@ -559,7 +565,8 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接标识</param>
         /// <returns>文件系统信息</returns>
         internal static async
-            ValueTask<(ApiStatus apiStatus, GroupFileSysInfo fileSysInfo)> GetGroupFileSysInfo(long gid, Guid connection)
+            ValueTask<(ApiStatus apiStatus, GroupFileSysInfo fileSysInfo)> GetGroupFileSysInfo(
+                long gid, Guid connection)
         {
             Log.Debug("Sora", "Sending get_group_file_system_info request");
             //发送信息
@@ -783,8 +790,9 @@ namespace Sora.OnebotInterface
         /// <param name="gid">群号</param>
         /// <param name="connection">连接标识</param>
         /// <returns>消息</returns>
-        internal static async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> msgList)> GetGroupMessageHistory(
-            int? msgSeq, long gid, Guid connection)
+        internal static async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> msgList)>
+            GetGroupMessageHistory(
+                int? msgSeq, long gid, Guid connection)
         {
             Log.Debug("Sora", "Sending get_group_msg_history request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -860,7 +868,7 @@ namespace Sora.OnebotInterface
             var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_essence_msg_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             return (apiStatus, (ret?["data"] ?? new JArray())
-                             .Select(element => new EssenceInfo(element, connection)).ToList());
+                               .Select(element => new EssenceInfo(element, connection)).ToList());
         }
 
         /// <summary>
@@ -892,7 +900,8 @@ namespace Sora.OnebotInterface
         /// <param name="connection">链接标识</param>
         /// <param name="uid">需要检查的链接</param>
         [Obsolete]
-        internal static async ValueTask<(ApiStatus apiStatus, VipInfo securityLevel)> GetVipInfo(Guid connection, long uid)
+        internal static async ValueTask<(ApiStatus apiStatus, VipInfo securityLevel)> GetVipInfo(
+            Guid connection, long uid)
         {
             Log.Debug("Sora", "Sending _get_vip_info request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -945,7 +954,7 @@ namespace Sora.OnebotInterface
         /// <param name="approve">是否同意</param>
         /// <param name="remark">好友备注</param>
         internal static async ValueTask<ApiStatus> SetFriendAddRequest(Guid connection, string flag, bool approve,
-                                                                 string remark = null)
+                                                                       string remark = null)
         {
             if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
             Log.Debug("Sora", "Sending set_friend_add_request request");
@@ -974,10 +983,10 @@ namespace Sora.OnebotInterface
         /// <param name="approve">是否同意</param>
         /// <param name="reason">好友备注</param>
         internal static async ValueTask<ApiStatus> SetGroupAddRequest(Guid connection,
-                                                                string flag,
-                                                                GroupRequestType requestType,
-                                                                bool approve,
-                                                                string reason = null)
+                                                                      string flag,
+                                                                      GroupRequestType requestType,
+                                                                      bool approve,
+                                                                      string reason = null)
         {
             Log.Debug("Sora", "Sending set_group_add_request request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1030,7 +1039,8 @@ namespace Sora.OnebotInterface
         /// <param name="gid">群号</param>
         /// <param name="uid">用户id</param>
         /// <param name="title">头衔</param>
-        internal static async ValueTask<ApiStatus> SetGroupSpecialTitle(Guid connection, long gid, long uid, string title)
+        internal static async ValueTask<ApiStatus> SetGroupSpecialTitle(Guid connection, long gid, long uid,
+                                                                        string title)
         {
             Log.Debug("Sora", "Sending set_group_special_title request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1057,7 +1067,8 @@ namespace Sora.OnebotInterface
         /// <param name="gid">群号</param>
         /// <param name="uid">用户id</param>
         /// <param name="rejectRequest">拒绝此人的加群请求</param>
-        internal static async ValueTask<ApiStatus> KickGroupMember(Guid connection, long gid, long uid, bool rejectRequest)
+        internal static async ValueTask<ApiStatus> KickGroupMember(Guid connection, long gid, long uid,
+                                                                   bool rejectRequest)
         {
             Log.Debug("Sora", "Sending set_group_kick request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1134,7 +1145,7 @@ namespace Sora.OnebotInterface
         /// <param name="anonymous">匿名用户对象</param>
         /// <param name="duration">禁言时长, 单位秒</param>
         internal static async ValueTask<ApiStatus> SetAnonymousBan(Guid connection, long gid, Anonymous anonymous,
-                                                             long duration)
+                                                                   long duration)
         {
             Log.Debug("Sora", "Sending set_group_anonymous_ban request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1161,7 +1172,7 @@ namespace Sora.OnebotInterface
         /// <param name="anonymousFlag">匿名用户flag</param>
         /// <param name="duration">禁言时长, 单位秒</param>
         internal static async ValueTask<ApiStatus> SetAnonymousBan(Guid connection, long gid, string anonymousFlag,
-                                                             long duration)
+                                                                   long duration)
         {
             Log.Debug("Sora", "Sending set_group_anonymous_ban request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1286,7 +1297,8 @@ namespace Sora.OnebotInterface
         /// <param name="gid">群号</param>
         /// <param name="file">图片文件</param>
         /// <param name="useCache">是否使用缓存</param>
-        internal static async ValueTask<ApiStatus> SetGroupPortrait(Guid connection, long gid, string file, bool useCache)
+        internal static async ValueTask<ApiStatus> SetGroupPortrait(Guid connection, long gid, string file,
+                                                                    bool useCache)
         {
             if (string.IsNullOrEmpty(file)) throw new NullReferenceException(nameof(file));
             Log.Debug("Sora", "Sending set_group_portrait request");
@@ -1313,7 +1325,7 @@ namespace Sora.OnebotInterface
         /// <param name="gid">群号</param>
         /// <param name="msgList">消息段数组</param>
         internal static async ValueTask<ApiStatus> SendGroupForwardMsg(Guid connection, long gid,
-                                                                 IEnumerable<CustomNode> msgList)
+                                                                       IEnumerable<CustomNode> msgList)
         {
             //将消息段转换为数组
             var customNodes = msgList as CustomNode[] ?? msgList.ToArray();
@@ -1369,8 +1381,8 @@ namespace Sora.OnebotInterface
         /// <param name="floderId">父目录ID 为<see langword="null"/>时则上传到根目录</param>
         /// <param name="timeout">超时</param>
         internal static async ValueTask<ApiStatus> UploadGroupFile(Guid connection, long gid, string localFilePath,
-                                                             string fileName,
-                                                             string floderId = null, int timeout = 10000)
+                                                                   string fileName,
+                                                                   string floderId = null, int timeout = 10000)
         {
             Log.Debug("Sora", "Sending upload_group_file request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1471,12 +1483,13 @@ namespace Sora.OnebotInterface
         /// <param name="msg">消息JSON</param>
         private static ApiStatus GetApiStatus(JObject msg)
         {
-            if (msg == null) return new ApiStatus
-            {
-                RetCode      = ApiStatusType.TimeOut,
-                ApiMessage   = "cannot get api status",
-                ApiStatusStr = null
-            };
+            if (msg == null)
+                return new ApiStatus
+                {
+                    RetCode      = ApiStatusType.TimeOut,
+                    ApiMessage   = "cannot get api status",
+                    ApiStatusStr = null
+                };
             return new ApiStatus
             {
                 RetCode = (ApiStatusType) (int.TryParse(msg["retcode"]?.ToString(), out var messageCode)

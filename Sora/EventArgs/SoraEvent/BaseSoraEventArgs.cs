@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sora.Command;
+using Sora.Entities;
 using Sora.Entities.Base;
 using Sora.Enumeration;
-using Sora.OnebotInterface;
 using YukariToolBox.Time;
 
 namespace Sora.EventArgs.SoraEvent

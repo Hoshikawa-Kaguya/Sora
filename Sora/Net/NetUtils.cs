@@ -9,11 +9,6 @@ namespace Sora.Net
     internal static class NetUtils
     {
         /// <summary>
-        /// 当前进程服务器已存在的标识
-        /// </summary>
-        internal static bool ServiceExitis = false;
-
-        /// <summary>
         /// 检查端口占用
         /// </summary>
         /// <param name="port">端口号</param>

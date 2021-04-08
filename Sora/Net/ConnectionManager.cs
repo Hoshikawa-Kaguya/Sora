@@ -5,8 +5,8 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
+using Sora.Entities;
 using Sora.EventArgs.WebsocketEvent;
-using Sora.OnebotInterface;
 using Sora.OnebotModel;
 using Websocket.Client;
 using YukariToolBox.FormatLog;
@@ -76,16 +76,18 @@ namespace Sora.Net
         /// <param name="connectionGuid">连接标识</param>
         /// <param name="connectionInfo">连接信息</param>
         /// <param name="selfId">机器人UID</param>
-        private static bool AddConnection(Guid connectionGuid, object connectionInfo, string selfId)
+        /// <param name="apiTimeout">api超时</param>
+        private bool AddConnection(Guid connectionGuid, object connectionInfo, string selfId, TimeSpan apiTimeout)
         {
             //检查是否已存在值
-            if (StaticVariable.ConnectionList.Any(connection => connection.Key == connectionGuid)) return false;
+            if (StaticVariable.ConnectionList.ContainsKey(connectionGuid)) return false;
             long.TryParse(selfId, out var uid);
             return StaticVariable.ConnectionList.TryAdd(connectionGuid, new StaticVariable.SoraConnectionInfo
                                                             (
                                                              connection: connectionInfo,
                                                              lastHeartBeatTime: DateTime.Now,
-                                                             selfId: uid
+                                                             selfId: uid,
+                                                             apiTimeout: apiTimeout
                                                             ));
         }
 
@@ -93,7 +95,7 @@ namespace Sora.Net
         /// 移除服务器连接记录
         /// </summary>
         /// <param name="connectionGuid">连接标识</param>
-        private static bool RemoveConnection(Guid connectionGuid)
+        private bool RemoveConnection(Guid connectionGuid)
         {
             return StaticVariable.ConnectionList.TryRemove(connectionGuid, out _);
         }
@@ -102,9 +104,9 @@ namespace Sora.Net
         /// 检查是否存在连接
         /// </summary>
         /// <param name="connectionGuid">连接标识</param>
-        internal static bool ConnectionExitis(Guid connectionGuid)
+        internal bool ConnectionExitis(Guid connectionGuid)
         {
-            return StaticVariable.ConnectionList.Any(connection => connection.Key == connectionGuid);
+            return StaticVariable.ConnectionList.ContainsKey(connectionGuid);
         }
 
         #endregion
@@ -215,10 +217,11 @@ namespace Sora.Net
         /// <param name="selfId">事件源</param>
         /// <param name="socket">连接</param>
         /// <param name="id">ID</param>
-        internal void OpenConnection(string role, string selfId, object socket, Guid id)
+        /// <param name="apiTimeout">api超时</param>
+        internal void OpenConnection(string role, string selfId, object socket, Guid id, TimeSpan apiTimeout)
         {
             //添加服务器记录
-            if (!AddConnection(id, socket, selfId))
+            if (!AddConnection(id, socket, selfId, apiTimeout))
             {
                 //记录添加失败关闭超时的连接
                 switch (socket)
@@ -287,15 +290,37 @@ namespace Sora.Net
 
         #region API
 
+        /// <summary>
+        /// 获取当前登录连接的账号ID
+        /// </summary>
+        /// <param name="connectionGuid">连接标识</param>
+        /// <param name="userId">UID</param>
         internal static bool GetLoginUid(Guid connectionGuid, out long userId)
         {
-            if (StaticVariable.ConnectionList.Any(conn => conn.Key == connectionGuid))
+            if (StaticVariable.ConnectionList.ContainsKey(connectionGuid))
             {
                 userId = StaticVariable.ConnectionList[connectionGuid].SelfId;
                 return true;
             }
 
             userId = -1;
+            return false;
+        }
+
+        /// <summary>
+        /// 获取当前连接设置的API超时
+        /// </summary>
+        /// <param name="connectionGuid">连接标识</param>
+        /// <param name="timeout">超时</param>
+        internal static bool GetApiTimeout(Guid connectionGuid, out TimeSpan timeout)
+        {
+            if (StaticVariable.ConnectionList.ContainsKey(connectionGuid))
+            {
+                timeout = StaticVariable.ConnectionList[connectionGuid].ApiTimeout;
+                return true;
+            }
+
+            timeout = TimeSpan.Zero;
             return false;
         }
 
