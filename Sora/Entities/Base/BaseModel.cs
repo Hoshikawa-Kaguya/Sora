@@ -18,9 +18,9 @@ namespace Sora.Entities.Base
 
         #region 构造函数
 
-        internal BaseModel(Guid connectionGuid)
+        internal BaseModel(Guid serviceGuid, Guid connectionGuid)
         {
-            SoraApi = new SoraApi(connectionGuid);
+            SoraApi = new SoraApi(serviceGuid, connectionGuid);
         }
 
         #endregion

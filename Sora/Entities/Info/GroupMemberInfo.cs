@@ -7,10 +7,8 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 群成员信息
     /// </summary>
-    public struct GroupMemberInfo
+    public class GroupMemberInfo
     {
-        #region 属性
-
         /// <summary>
         /// 群号
         /// </summary>
@@ -76,7 +74,7 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "role")]
-        public MemberRoleType Role { get; internal init; }
+        public MemberRoleType Role { get; internal set; }
 
         /// <summary>
         /// 是否不良记录成员
@@ -101,7 +99,5 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonProperty(PropertyName = "card_changeable")]
         public bool CardChangeable { get; internal init; }
-
-        #endregion
     }
 }

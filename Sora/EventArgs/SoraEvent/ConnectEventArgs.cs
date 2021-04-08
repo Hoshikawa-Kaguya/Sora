@@ -26,14 +26,15 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="loginUid">当前使用的QQ号</param>
         /// <param name="clientType">当前客户端类型</param>
         /// <param name="clientVersion">当前客户端版本</param>
         /// <param name="time">连接时间</param>
-        internal ConnectEventArgs(Guid connectionGuid, string eventName, long loginUid, string clientType,
-                                  string clientVersion, long time) : base(connectionGuid, eventName, loginUid, time)
+        internal ConnectEventArgs(Guid serviceId, Guid connectionGuid, string eventName, long loginUid, string clientType,
+                                  string clientVersion, long time) : base(serviceId, connectionGuid, eventName, loginUid, time)
         {
             ClientType        = clientType;
             ClientVersionCode = clientVersion;

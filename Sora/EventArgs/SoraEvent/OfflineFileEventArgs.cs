@@ -29,13 +29,14 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="offlineFileArgs">离线文件事件参数</param>
-        internal OfflineFileEventArgs(Guid connectionGuid, string eventName, ApiOfflineFileEventArgs offlineFileArgs) :
-            base(connectionGuid, eventName, offlineFileArgs.SelfID, offlineFileArgs.Time)
+        internal OfflineFileEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiOfflineFileEventArgs offlineFileArgs) :
+            base(serviceId, connectionGuid, eventName, offlineFileArgs.SelfID, offlineFileArgs.Time)
         {
-            Sender          = new User(connectionGuid, offlineFileArgs.UserId);
+            Sender          = new User(serviceId, connectionGuid, offlineFileArgs.UserId);
             OfflineFileInfo = offlineFileArgs.Info;
         }
 

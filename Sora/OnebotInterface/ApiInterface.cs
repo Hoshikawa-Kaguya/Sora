@@ -210,12 +210,12 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 获取群成员列表
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="gid">群号</param>
         [Reviewed("nidbCN", "2021-03-24 20:49")]
         internal static async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)>
-            GetGroupMemberList(
-                Guid connection, long gid)
+            GetGroupMemberList(Guid serviceId, Guid connection, long gid)
         {
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
@@ -230,8 +230,13 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_group_member_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理返回群成员列表
-            return (apiStatus,
-                    ret["data"]?.ToObject<List<GroupMemberInfo>>());
+            var memberList = ret["data"]?.ToObject<List<GroupMemberInfo>>() ?? new List<GroupMemberInfo>()!;
+            foreach (var t in memberList.Where(t => StaticVariable.ServiceInfos[serviceId].SuperUsers
+                                                                  .Any(id => id == t.UserId)))
+            {
+                t.Role = MemberRoleType.SuperUser;
+            }
+            return (apiStatus, memberList);
         }
 
         /// <summary>
@@ -273,11 +278,12 @@ namespace Sora.OnebotInterface
         /// 获取群成员信息
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="gid">群号</param>
         /// <param name="uid">用户ID</param>
         /// <param name="useCache">是否使用缓存</param>
         internal static async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
-            Guid connection, long gid, long uid, bool useCache)
+            Guid serviceId, Guid connection, long gid, long uid, bool useCache)
         {
             Log.Debug("Sora", "Sending get_group_member_info request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -295,8 +301,11 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_group_member_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
                 return (apiStatus, new GroupMemberInfo());
-            return (apiStatus,
-                    ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo());
+            var memberInfo = ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo();
+            if (memberInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+                              .Any(id => id == memberInfo.UserId))
+                memberInfo.Role = MemberRoleType.SuperUser;
+            return (apiStatus, memberInfo);
         }
 
         /// <summary>
@@ -428,12 +437,14 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 获取消息
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="msgId">消息ID</param>
-        internal static async ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup, int
+        internal static async
+            ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup, int
             realId, bool
             isGroupMsg)> GetMessage(
-            Guid connection, int msgId)
+            Guid serviceId, Guid connection, int msgId)
         {
             Log.Debug("Sora", "Sending get_msg request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -452,7 +463,8 @@ namespace Sora.OnebotInterface
             //处理消息段
             var rawMessage = ret["data"]?["message"]?.ToObject<List<OnebotMessageElement>>();
             return (apiStatus,
-                    message: new Message(connection,
+                    message: new Message(serviceId,
+                                         connection,
                                          msgId,
                                          ret["data"]?["raw_message"]?.ToString(),
                                          MessageParse.Parse(rawMessage        ?? new List<OnebotMessageElement>()),
@@ -461,11 +473,11 @@ namespace Sora.OnebotInterface
                                          Convert.ToBoolean(ret["data"]?["group"]           ?? false)
                                              ? Convert.ToInt32(ret["data"]?["message_seq"] ?? 0)
                                              : null),
-                    sender: new User(connection,
+                    sender: new User(serviceId, connection,
                                      Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)),
                     //判断响应数据中是否有群组信息
                     sourceGroup: Convert.ToBoolean(ret["data"]?["group"] ?? false)
-                        ? new Group(connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
+                        ? new Group(serviceId, connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
                         : null,
                     realId: Convert.ToInt32(ret["data"]?["real_id"]                                        ?? 0),
                     isGroupMsg: Convert.ToBoolean(ret["data"]?["message_type"]?.ToString().Equals("group") ?? false));
@@ -788,11 +800,12 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="msgSeq">消息序号*</param>
         /// <param name="gid">群号</param>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connection">连接标识</param>
         /// <returns>消息</returns>
         internal static async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> msgList)>
             GetGroupMessageHistory(
-                int? msgSeq, long gid, Guid connection)
+                int? msgSeq, long gid,Guid serviceId,  Guid connection)
         {
             Log.Debug("Sora", "Sending get_group_msg_history request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -816,7 +829,8 @@ namespace Sora.OnebotInterface
             //处理消息段
             return (apiStatus, ret["data"]?["messages"]?.ToObject<List<ApiGroupMsgEventArgs>>()
                                                        ?.Select(messageArg =>
-                                                                    new GroupMessageEventArgs(connection, "group",
+                                                                    new GroupMessageEventArgs(serviceId, connection,
+                                                                        "group",
                                                                         messageArg)).ToList());
         }
 
@@ -850,10 +864,11 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 获取群精华消息列表
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connection">链接标识</param>
         /// <param name="gid">群号</param>
         internal static async ValueTask<(ApiStatus apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList(
-            Guid connection, long gid)
+            Guid serviceId, Guid connection, long gid)
         {
             Log.Debug("Sora", "Sending get_essence_msg_list request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -868,7 +883,7 @@ namespace Sora.OnebotInterface
             var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_essence_msg_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             return (apiStatus, (ret?["data"] ?? new JArray())
-                               .Select(element => new EssenceInfo(element, connection)).ToList());
+                               .Select(element => new EssenceInfo(element, serviceId, connection)).ToList());
         }
 
         /// <summary>

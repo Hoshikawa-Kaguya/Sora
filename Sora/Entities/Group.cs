@@ -29,9 +29,10 @@ namespace Sora.Entities
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionGuid">服务器连接标识</param>
         /// <param name="gid">群号</param>
-        internal Group(Guid connectionGuid, long gid) : base(connectionGuid)
+        internal Group(Guid serviceId, Guid connectionGuid, long gid) : base(serviceId, connectionGuid)
         {
             Id = gid;
         }

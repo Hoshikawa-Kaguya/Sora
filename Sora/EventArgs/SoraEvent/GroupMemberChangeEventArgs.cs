@@ -39,19 +39,20 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupMemberChangeArgs">群成员数量变更参数</param>
-        internal GroupMemberChangeEventArgs(Guid connectionGuid, string eventName,
+        internal GroupMemberChangeEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
                                             ApiGroupMemberChangeEventArgs groupMemberChangeArgs) :
-            base(connectionGuid, eventName, groupMemberChangeArgs.SelfID, groupMemberChangeArgs.Time)
+            base(serviceId, connectionGuid, eventName, groupMemberChangeArgs.SelfID, groupMemberChangeArgs.Time)
         {
-            ChangedUser = new User(connectionGuid, groupMemberChangeArgs.UserId);
+            ChangedUser = new User(serviceId, connectionGuid, groupMemberChangeArgs.UserId);
             //执行者和变动成员可能为同一人
             Operator = groupMemberChangeArgs.UserId == groupMemberChangeArgs.OperatorId
                 ? ChangedUser
-                : new User(connectionGuid, groupMemberChangeArgs.OperatorId);
-            SourceGroup = new Group(connectionGuid, groupMemberChangeArgs.GroupId);
+                : new User(serviceId, connectionGuid, groupMemberChangeArgs.OperatorId);
+            SourceGroup = new Group(serviceId, connectionGuid, groupMemberChangeArgs.GroupId);
             SubType     = groupMemberChangeArgs.SubType;
         }
 

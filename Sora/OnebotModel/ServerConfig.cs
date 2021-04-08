@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Sora.Interfaces;
 
 namespace Sora.OnebotModel
@@ -9,6 +10,15 @@ namespace Sora.OnebotModel
     /// </summary>
     public sealed class ServerConfig : ISoraConfig
     {
+        #region 私有字段
+
+        /// <summary>
+        /// 机器人管理员UID
+        /// </summary>
+        private readonly long[] _superUsers;
+
+        #endregion
+        
         /// <summary>
         /// 反向服务器监听地址
         /// </summary>
@@ -18,6 +28,19 @@ namespace Sora.OnebotModel
         /// 反向服务器端口
         /// </summary>
         public uint Port { get; init; } = 8080;
+
+        /// <summary>
+        /// 机器人管理员UID
+        /// </summary>
+        public long[] SuperUsers
+        {
+            get => _superUsers ?? new long[0];
+            init
+            {
+                if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");
+                _superUsers = value;
+            }
+        }
 
         /// <summary>
         /// 鉴权Token

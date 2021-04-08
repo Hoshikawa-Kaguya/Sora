@@ -1,10 +1,10 @@
-using Sora.Enumeration.EventParamsType;
 using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Sora.Enumeration.EventParamsType;
 using YukariToolBox.Extensions;
 
-namespace Sora.Entities.Info
+namespace Sora.Entities.Info.InternalDataInfo
 {
     /// <summary>
     /// 指令信息

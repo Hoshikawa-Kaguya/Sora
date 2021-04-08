@@ -1,6 +1,7 @@
 using System;
 using Sora.Interfaces;
 using Sora.OnebotModel;
+using YukariToolBox.FormatLog;
 
 namespace Sora.Net
 {
@@ -9,6 +10,8 @@ namespace Sora.Net
     /// </summary>
     public class SoraServiceFactory
     {
+        private static bool _haveStartupLog;
+
         /// <summary>
         /// 创建 Sora 服务实例
         /// </summary>
@@ -17,6 +20,14 @@ namespace Sora.Net
         /// <returns>Sora 服务实例</returns>
         public static ISoraService CreateService(ISoraConfig config, Action<Exception> crashAction = null)
         {
+            if (!_haveStartupLog)
+            {
+                Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.5"); //{Assembly.GetExecutingAssembly().GetName().Version}");
+                Log.Debug("Sora", "开发交流群：1081190562");
+                Log.Debug("System", Environment.OSVersion);
+                _haveStartupLog = true;
+            }
+
             return config switch
             {
                 ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),

@@ -21,6 +21,11 @@ namespace Sora.Enumeration.EventParamsType
         /// <summary>
         /// 群主
         /// </summary>
-        [Description("owner")] Owner
+        [Description("owner")] Owner,
+
+        /// <summary>
+        /// 该服务的管理员
+        /// </summary>
+        SuperUser
     }
 }

@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
+using Sora.Entities;
+using Sora.Entities.Info.InternalDataInfo;
 using Sora.Interfaces;
 using Sora.OnebotInterface;
 using Sora.OnebotModel;
@@ -52,6 +54,11 @@ namespace Sora.Net
         /// </summary>
         private readonly bool _serverReady;
 
+        /// <summary>
+        /// 服务器ID
+        /// </summary>
+        private readonly Guid _serverId = Guid.NewGuid();
+
         #endregion
 
         #region 构造函数
@@ -65,8 +72,6 @@ namespace Sora.Net
         /// <exception cref="ArgumentOutOfRangeException">服务器启动参数错误</exception>
         internal SoraWebsocketServer(ServerConfig config, Action<Exception> crashAction = null)
         {
-            Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.2"); //{Assembly.GetExecutingAssembly().GetName().Version}");
-            Log.Debug("Sora", "开发交流群：1081190562");
             //检查端口占用
             if (NetUtils.IsPortInUse(config.Port))
             {
@@ -77,17 +82,18 @@ namespace Sora.Net
             }
 
             _serverReady = false;
-            Log.Info("Sora", "Sora WebSocket服务器初始化...");
-            Log.Debug("System", Environment.OSVersion);
+            Log.Info("Sora", $"Sora WebSocket服务器初始化... [{_serverId}]");
+            //写入初始化信息
+            StaticVariable.ServiceInfos.TryAdd(_serverId, new ServiceInfo(_serverId, config.SuperUsers));
             //检查参数
             if (config == null) throw new ArgumentNullException(nameof(config));
-            if (config.Port == 0 || config.Port > 65535)
+            if (config.Port is 0 or > 65535)
                 throw new ArgumentOutOfRangeException(nameof(config.Port), "Port out of range");
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
             Config      = config;
             //实例化事件接口
-            Event = new EventInterface(config.EnableSoraCommandManager);
+            Event = new EventInterface(_serverId, config.EnableSoraCommandManager);
             //禁用原log
             FleckLog.Level = (LogLevel) 4;
             Server = new WebSocketServer($"ws://{config.Host}:{config.Port}")
@@ -166,7 +172,7 @@ namespace Sora.Net
                                                  socket.SendPing(new byte[] {1, 2, 5});
                                                  //事件回调
                                                  ConnManager.OpenConnection(role, selfId, socket,
-                                                                            socket.ConnectionInfo.Id,
+                                                                            _serverId, socket.ConnectionInfo.Id,
                                                                             Config.ApiTimeOut);
                                                  Log.Info("Sora",
                                                           $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
@@ -214,6 +220,7 @@ namespace Sora.Net
         /// </summary>
         public void Dispose()
         {
+            
             GC.SuppressFinalize(this);
         }
 

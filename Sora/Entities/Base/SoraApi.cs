@@ -23,10 +23,15 @@ namespace Sora.Entities.Base
         #region 属性
 
         /// <summary>
-        /// 当前实例对应的链接GUID
+        /// 当前实例对应的链接ID
         /// 用于调用API
         /// </summary>
         internal Guid ConnectionGuid { get; }
+
+        /// <summary>
+        /// 当前实例对应的服务ID
+        /// </summary>
+        internal Guid ServiceGuid { get; }
 
         #endregion
 
@@ -35,9 +40,11 @@ namespace Sora.Entities.Base
         /// <summary>
         /// 初始化Api实例
         /// </summary>
+        /// <param name="serviceGuid"></param>
         /// <param name="connectionGuid"></param>
-        internal SoraApi(Guid connectionGuid)
+        internal SoraApi(Guid serviceGuid, Guid connectionGuid)
         {
+            ServiceGuid    = serviceGuid;
             ConnectionGuid = connectionGuid;
         }
 
@@ -251,7 +258,7 @@ namespace Sora.Entities.Base
             ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup,
                 int realId, bool isGroupMsg)> GetMessages(int messageId)
         {
-            return await ApiInterface.GetMessage(ConnectionGuid, messageId);
+            return await ApiInterface.GetMessage(ServiceGuid, ConnectionGuid, messageId);
         }
 
         /// <summary>
@@ -267,7 +274,7 @@ namespace Sora.Entities.Base
         public async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(
             long groupId, int? messageSequence = null)
         {
-            return await ApiInterface.GetGroupMessageHistory(messageSequence, groupId, ConnectionGuid);
+            return await ApiInterface.GetGroupMessageHistory(messageSequence, groupId, ServiceGuid, ConnectionGuid);
         }
 
         /// <summary>
@@ -624,7 +631,7 @@ namespace Sora.Entities.Base
         /// <returns>精华消息列表</returns>
         public async ValueTask<(ApiStatus apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList(long gid)
         {
-            return await ApiInterface.GetEssenceMsgList(ConnectionGuid, gid);
+            return await ApiInterface.GetEssenceMsgList(ServiceGuid, ConnectionGuid, gid);
         }
 
         /// <summary>
@@ -703,7 +710,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} out of range");
-            return await ApiInterface.GetGroupMemberList(ConnectionGuid, groupId);
+            return await ApiInterface.GetGroupMemberList(ServiceGuid, ConnectionGuid, groupId);
         }
 
         /// <summary>
@@ -738,7 +745,7 @@ namespace Sora.Entities.Base
         {
             if (groupId is < 100000 && userId is < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return await ApiInterface.GetGroupMemberInfo(ConnectionGuid, groupId, userId, useCache);
+            return await ApiInterface.GetGroupMemberInfo(ServiceGuid, ConnectionGuid, groupId, userId, useCache);
         }
 
         /// <summary>
@@ -946,7 +953,7 @@ namespace Sora.Entities.Base
         public User GetUser(long userId)
         {
             if (userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            return new User(ConnectionGuid, userId);
+            return new User(ServiceGuid, ConnectionGuid, userId);
         }
 
         /// <summary>
@@ -956,7 +963,7 @@ namespace Sora.Entities.Base
         public Group GetGroup(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return new Group(ConnectionGuid, groupId);
+            return new Group(ServiceGuid, ConnectionGuid, groupId);
         }
 
         /// <summary>

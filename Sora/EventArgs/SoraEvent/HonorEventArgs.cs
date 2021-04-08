@@ -34,14 +34,15 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="honorEventArgs">荣誉变更事件参数</param>
-        internal HonorEventArgs(Guid connectionGuid, string eventName, ApiHonorEventArgs honorEventArgs) :
-            base(connectionGuid, eventName, honorEventArgs.SelfID, honorEventArgs.Time)
+        internal HonorEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiHonorEventArgs honorEventArgs) :
+            base(serviceId, connectionGuid, eventName, honorEventArgs.SelfID, honorEventArgs.Time)
         {
-            TargetUser  = new User(connectionGuid, honorEventArgs.UserId);
-            SourceGroup = new Group(connectionGuid, honorEventArgs.GroupId);
+            TargetUser  = new User(serviceId, connectionGuid, honorEventArgs.UserId);
+            SourceGroup = new Group(serviceId, connectionGuid, honorEventArgs.GroupId);
             Honor       = honorEventArgs.HonorType;
         }
 

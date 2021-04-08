@@ -38,15 +38,16 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupCardUpdateArgs">群名片更新事件参数</param>
-        internal GroupCardUpdateEventArgs(Guid connectionGuid, string eventName,
+        internal GroupCardUpdateEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
                                           ApiGroupCardUpdateEventArgs groupCardUpdateArgs) :
-            base(connectionGuid, eventName, groupCardUpdateArgs.SelfID, groupCardUpdateArgs.Time)
+            base(serviceId, connectionGuid, eventName, groupCardUpdateArgs.SelfID, groupCardUpdateArgs.Time)
         {
-            User        = new User(connectionGuid, groupCardUpdateArgs.UserId);
-            SourceGroup = new Group(connectionGuid, groupCardUpdateArgs.GroupId);
+            User        = new User(serviceId, connectionGuid, groupCardUpdateArgs.UserId);
+            SourceGroup = new Group(serviceId, connectionGuid, groupCardUpdateArgs.GroupId);
             NewCard     = groupCardUpdateArgs.NewCard;
             OldCard     = groupCardUpdateArgs.OldCard;
         }
