@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sora.Interfaces;
 
 namespace Sora.OnebotModel
@@ -45,5 +46,6 @@ namespace Sora.OnebotModel
         /// 是否启用Sora自带的指令系统
         /// </summary>
         public bool EnableSoraCommandManager { get; init; } = true;
+
     }
 }
