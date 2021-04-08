@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Sora.Interfaces
 {
@@ -43,5 +44,6 @@ namespace Sora.Interfaces
         /// 是否启用Sora自带的指令系统
         /// </summary>
         public bool EnableSoraCommandManager { get; init; }
+
     }
 }
