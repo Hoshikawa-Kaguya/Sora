@@ -41,10 +41,10 @@ namespace Sora.Net
         /// <summary>
         /// 连续创建多个 Sora 服务实例
         /// </summary>
-        /// <param name="configList">服务器配置列表</param>
+        /// <param name="configList">服务配置列表</param>
         /// <param name="crashAction">发生未处理异常时的统一回调</param>
         /// <returns>Sora 服务实例列表</returns>
-        public static List<ISoraService> CreateMultiService(List<ISoraConfig> configList,
+        public static List<ISoraService> CreateMultiService(IEnumerable<ISoraConfig> configList,
                                                             Action<Exception> crashAction = null)
         {
             List<ISoraService> createdService = new();
@@ -55,17 +55,38 @@ namespace Sora.Net
 
             return createdService;
         }
+        
+        /// <summary>
+        /// 连续创建多个 Sora 服务实例
+        /// </summary>
+        /// <param name="config">服务配置</param>
+        /// <param name="crashAction">发生未处理异常时的统一回调</param>
+        /// <returns>Sora 服务实例列表</returns>
+        public static List<ISoraService> CreateMultiService(ISoraConfig config,
+                                                            Action<Exception> crashAction = null)
+        {
+            List<ISoraService> createdService = new();
+            createdService.Add(CreateService(config, crashAction));
+
+            return createdService;
+        }
     }
 
+    /// <summary>
+    /// SoraServiceFactoryExtension
+    /// </summary>
     public static class SoraServiceFactoryExtension
     {
-        public static ValueTask StartMultiService(this List<ISoraService> serviceList)
+        /// <summary>
+        /// 启动多个服务
+        /// </summary>
+        /// <param name="serviceList"></param>
+        public static async ValueTask StartMultiService(this IEnumerable<ISoraService> serviceList)
         {
             foreach (ISoraService soraService in serviceList)
             {
-                soraService.StartService();
+                await soraService.StartService();
             }
-            return  ValueTask.CompletedTask;
         }
     }
 }

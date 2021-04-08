@@ -9,7 +9,7 @@ using YukariToolBox.FormatLog;
 Log.SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
-var service = SoraServiceFactory.CreateMultiService(new ServerConfig() {Port = 1000});
+var service = SoraServiceFactory.CreateMultiService(new ServerConfig());
 
 foreach (ISoraService soraService in service)
 {
