@@ -81,8 +81,6 @@ namespace Sora.Net
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
             Config      = config;
-            //API超时
-            ReactiveApiManager.TimeOut = config.ApiTimeOut;
             //实例化事件接口
             Event = new EventInterface(config.EnableSoraCommandManager);
             //构建Client配置
@@ -122,17 +120,14 @@ namespace Sora.Net
         /// <summary>
         /// 启动 Sora 服务
         /// </summary>
-        /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
         public ValueTask StartService() => StartClient();
 
         /// <summary>
         /// 启动客户端并自动连接服务器
         /// </summary>
-        public async ValueTask StartClient()
+        private async ValueTask StartClient()
         {
             if (!_clientReady) return;
-            //检查是否已有服务器被启动
-            if (NetUtils.ServiceExitis) throw new SoraClientIsRuningException();
             //消息接收订阅
             Client.MessageReceived.Subscribe(msg => Task.Run(() =>
                                                              {
@@ -144,7 +139,7 @@ namespace Sora.Net
                                                                         ConnectionManager.GetLoginUid(_clientId,
                                                                             out var uid);
                                                                         //移除原连接信息
-                                                                        if (ConnectionManager
+                                                                        if (ConnManager
                                                                             .ConnectionExitis(_clientId)
                                                                         )
                                                                             ConnManager.CloseConnection("Universal",
@@ -162,7 +157,7 @@ namespace Sora.Net
                                                                            return;
                                                                        Log.Info("Sora", "服务器已自动重连");
                                                                        ConnManager.OpenConnection("Universal", "0",
-                                                                           Client, _clientId);
+                                                                           Client, _clientId, Config.ApiTimeOut);
                                                                    }));
             await Client.Start();
             if (!Client.IsRunning || !Client.IsStarted)
@@ -170,13 +165,11 @@ namespace Sora.Net
                 throw new WebSocketClientException("WebSocket client is not running");
             }
 
-            ConnManager.OpenConnection("Universal", "0", Client, _clientId);
+            ConnManager.OpenConnection("Universal", "0", Client, _clientId, Config.ApiTimeOut);
             Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
             //启动心跳包超时检查计时器
             HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
                                        Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
-            NetUtils.ServiceExitis = true;
-            await Task.Delay(-1);
         }
 
         /// <summary>

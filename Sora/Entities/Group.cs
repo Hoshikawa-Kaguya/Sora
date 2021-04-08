@@ -228,7 +228,7 @@ namespace Sora.Entities
         /// <param name="floderId">父目录ID</param>
         /// <returns>API状态</returns>
         public async ValueTask<ApiStatus> UploadGroupFile(string localFilePath, string fileName,
-                                                              string floderId = null)
+                                                          string floderId = null)
         {
             return await SoraApi.UploadGroupFile(Id, localFilePath,
                                                  fileName, floderId);

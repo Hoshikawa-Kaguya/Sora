@@ -191,7 +191,9 @@ namespace Sora.OnebotInterface
                         //取出返回值中的数据
                         ReactiveApiManager.GetResponse(echo, messageJson);
                     }
-                    else Log.Warning("Sora", $"Unknown message type:{GetBaseEventType(messageJson)}");
+                    else
+                        Log.Warning("Sora",
+                                    $"Unknown message type:{GetBaseEventType(messageJson)}\r\njson = {messageJson}");
 
                     break;
             }

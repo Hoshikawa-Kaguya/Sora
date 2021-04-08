@@ -10,7 +10,7 @@ using Sora.Enumeration;
 using Websocket.Client;
 using YukariToolBox.Extensions;
 
-namespace Sora.OnebotInterface
+namespace Sora.Entities
 {
     /// <summary>
     /// 静态变量存放区
@@ -127,13 +127,15 @@ namespace Sora.OnebotInterface
             internal readonly object   Connection;
             internal          DateTime LastHeartBeatTime;
             internal          long     SelfId;
+            internal readonly TimeSpan ApiTimeout;
             private readonly  int      HashCode;
 
-            internal SoraConnectionInfo(object connection, DateTime lastHeartBeatTime, long selfId)
+            internal SoraConnectionInfo(object connection, DateTime lastHeartBeatTime, long selfId, TimeSpan apiTimeout)
             {
                 Connection        = connection;
                 LastHeartBeatTime = lastHeartBeatTime;
                 SelfId            = selfId;
+                ApiTimeout        = apiTimeout;
                 HashCode = connection switch
                 {
                     IWebSocketConnection serverConnection => serverConnection.ConnectionInfo.Id.GetHashCode(),

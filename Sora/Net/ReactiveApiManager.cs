@@ -4,7 +4,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Sora.OnebotInterface;
+using Sora.Entities;
 using Sora.OnebotModel.ApiParams;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
@@ -16,15 +16,6 @@ namespace Sora.Net
     /// </summary>
     internal static class ReactiveApiManager
     {
-        #region 静态属性
-
-        /// <summary>
-        /// API超时时间
-        /// </summary>
-        internal static TimeSpan TimeOut { get; set; }
-
-        #endregion
-
         #region 通信
 
         /// <summary>
@@ -48,12 +39,27 @@ namespace Sora.Net
         internal static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid,
                                                                 TimeSpan? timeout = null)
         {
+            TimeSpan currentTimeout;
+            if (timeout is null)
+            {
+                if (!ConnectionManager.GetApiTimeout(connectionGuid, out currentTimeout))
+                {
+                    Log.Error("Sora|ReactiveApiManager", "Cannot get api timout");
+                    currentTimeout = TimeSpan.FromSeconds(5);
+                }
+            }
+            else
+            {
+                Log.Debug("Sora|ReactiveApiManager", $"timeout covered to {timeout.Value.TotalMilliseconds} ms");
+                currentTimeout = (TimeSpan) timeout;
+            }
+
             //向客户端发送请求数据
             var apiTask = StaticVariable.ApiSubject
                                         .Where(request => request.Item1 == apiRequest.Echo)
                                         .Select(request => request.Item2)
                                         .Take(1)
-                                        .Timeout(timeout ?? TimeOut)
+                                        .Timeout(currentTimeout)
                                         .Catch(Observable.Return(new JObject()))
                                         .ToTask()
                                         .RunCatch(e =>

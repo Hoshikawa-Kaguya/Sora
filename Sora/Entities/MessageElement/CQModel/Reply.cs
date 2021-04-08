@@ -11,8 +11,7 @@ namespace Sora.Entities.MessageElement.CQModel
         #region 属性
 
         /// <summary>
-        /// At目标UID
-        /// 为<see langword="null"/>时为At全体
+        /// 消息ID
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "id")]

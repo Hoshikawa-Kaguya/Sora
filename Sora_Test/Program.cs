@@ -8,7 +8,7 @@ using YukariToolBox.FormatLog;
 Log.SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
-var service = SoraServiceFactory.CreateInstance(new ServerConfig());
+var service = SoraServiceFactory.CreateService(new ServerConfig());
 
 #region 事件处理
 
@@ -42,7 +42,7 @@ service.Event.OnClientConnect += (type, eventArgs) =>
                                  };
 
 //群聊消息事件
-service.Event.OnGroupMessage += async (msgType, eventArgs) => { await eventArgs.SourceGroup.SendGroupMessage("好耶"); };
+service.Event.OnGroupMessage += async (msgType, eventArgs) => {await eventArgs.Reply("好耶");};
 service.Event.OnSelfMessage += (type, eventArgs) =>
                                {
                                    Log.Info("test", $"self msg {eventArgs.Message.MessageId}");

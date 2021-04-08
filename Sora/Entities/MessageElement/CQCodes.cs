@@ -6,7 +6,6 @@ using Newtonsoft.Json.Linq;
 using Sora.Entities.MessageElement.CQModel;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
-using Sora.OnebotInterface;
 using YukariToolBox.FormatLog;
 
 namespace Sora.Entities.MessageElement

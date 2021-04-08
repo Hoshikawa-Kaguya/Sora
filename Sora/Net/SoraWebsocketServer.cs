@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
-using Sora.Exceptions;
 using Sora.Interfaces;
 using Sora.OnebotInterface;
 using Sora.OnebotModel;
@@ -87,8 +86,6 @@ namespace Sora.Net
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
             Config      = config;
-            //API超时
-            ReactiveApiManager.TimeOut = config.ApiTimeOut;
             //实例化事件接口
             Event = new EventInterface(config.EnableSoraCommandManager);
             //禁用原log
@@ -116,18 +113,14 @@ namespace Sora.Net
         /// <summary>
         /// 启动 Sora 服务
         /// </summary>
-        /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
         public ValueTask StartService() => StartServer();
 
         /// <summary>
         /// 启动WS服务端
         /// </summary>
-        /// <exception cref="SoraServerIsRuningException">已有服务器在运行</exception>
-        public async ValueTask StartServer()
+        private ValueTask StartServer()
         {
-            if (!_serverReady) return;
-            //检查是否已有服务器被启动
-            if (NetUtils.ServiceExitis) throw new SoraServerIsRuningException();
+            if (!_serverReady) return ValueTask.CompletedTask;
             //启动服务器
             Server.Start(socket =>
                          {
@@ -173,7 +166,8 @@ namespace Sora.Net
                                                  socket.SendPing(new byte[] {1, 2, 5});
                                                  //事件回调
                                                  ConnManager.OpenConnection(role, selfId, socket,
-                                                                            socket.ConnectionInfo.Id);
+                                                                            socket.ConnectionInfo.Id,
+                                                                            Config.ApiTimeOut);
                                                  Log.Info("Sora",
                                                           $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
                                              };
@@ -181,7 +175,7 @@ namespace Sora.Net
                              socket.OnClose = () =>
                                               {
                                                   //移除原连接信息
-                                                  if (ConnectionManager.ConnectionExitis(socket.ConnectionInfo.Id))
+                                                  if (ConnManager.ConnectionExitis(socket.ConnectionInfo.Id))
                                                       ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
                                                           socket.ConnectionInfo.Id);
 
@@ -204,9 +198,7 @@ namespace Sora.Net
             //启动心跳包超时检查计时器
             HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
                                        Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
-            NetUtils.ServiceExitis = true;
-
-            await Task.Delay(-1);
+            return ValueTask.CompletedTask;
         }
 
         /// <summary>
