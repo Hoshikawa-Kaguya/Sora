@@ -99,5 +99,9 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonProperty(PropertyName = "card_changeable")]
         public bool CardChangeable { get; internal init; }
+
+        internal GroupMemberInfo()
+        {
+        }
     }
 }

@@ -18,18 +18,18 @@ namespace Sora.OnebotModel
         private readonly long[] _superUsers;
 
         #endregion
-        
+
         /// <summary>
         /// 服务器地址
         /// </summary>
         public string Host { get; init; } = "127.0.0.1";
-        
+
         /// <summary>
         /// 机器人管理员UID
         /// </summary>
         public long[] SuperUsers
         {
-            get => _superUsers ?? new long[0];
+            get => _superUsers ?? Array.Empty<long>();
             init
             {
                 if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");

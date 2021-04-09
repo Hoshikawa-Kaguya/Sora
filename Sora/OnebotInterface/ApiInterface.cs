@@ -32,14 +32,11 @@ namespace Sora.OnebotInterface
         /// <returns>
         /// message id
         /// </returns>
-        [Reviewed("nidbCN", "2021-03-24 20:26")]
         internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
             Guid connection, long target, MessageBody messages, long? groupId = null)
         {
             Log.Debug("Sora", "Sending send_msg(Private) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
-            //转换消息段列表
-            var messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
@@ -48,8 +45,9 @@ namespace Sora.OnebotInterface
                 {
                     MessageType = MessageType.Private,
                     UserId      = target,
-                    Message     = messagesList,
-                    GroupId     = groupId
+                    //转换消息段列表
+                    Message = messages.Select(msg => msg.ToOnebotMessage()).ToList(),
+                    GroupId = groupId
                 }
             }, connection);
             //处理API返回信息
@@ -72,14 +70,11 @@ namespace Sora.OnebotInterface
         /// <returns>
         /// ApiResponseCollection
         /// </returns>
-        [Reviewed("nidbCN", "2021-03-24 20:35")]
         internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
             Guid connection, long target, MessageBody messages)
         {
             Log.Debug("Sora", "Sending send_msg(Group) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
-            //转换消息段列表
-            var messagesList = messages.Select(msg => msg.ToOnebotMessage()).ToList();
             //发送信息
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
@@ -88,7 +83,8 @@ namespace Sora.OnebotInterface
                 {
                     MessageType = MessageType.Group,
                     GroupId     = target,
-                    Message     = messagesList
+                    //转换消息段列表
+                    Message = messages.Select(msg => msg.ToOnebotMessage()).ToList(),
                 }
             }, connection);
             //处理API返回信息
