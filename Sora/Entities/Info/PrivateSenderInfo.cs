@@ -43,5 +43,9 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonIgnore]
         public MemberRoleType Role { get; internal set; }
+
+        internal PrivateSenderInfo()
+        {
+        }
     }
 }
