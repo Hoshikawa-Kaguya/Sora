@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Sora.Converter;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
@@ -10,7 +11,6 @@ using Sora.Entities.MessageElement;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
-using Sora.OnebotModel;
 using Group = Sora.Entities.Group;
 
 namespace Sora.EventArgs.SoraEvent
@@ -68,20 +68,21 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupMsgArgs">群消息事件参数</param>
-        internal GroupMessageEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiGroupMsgEventArgs groupMsgArgs)
+        internal GroupMessageEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+                                       ApiGroupMsgEventArgs groupMsgArgs)
             : base(serviceId, connectionGuid, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
         {
             IsAnonymousMessage = groupMsgArgs.Anonymous != null;
             IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
             //将api消息段转换为CQ码
             Message = new Message(serviceId, connectionGuid, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
-                                  MessageParse.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
+                                  MessageConverter.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
                                   groupMsgArgs.Font, groupMsgArgs.MessageSequence);
             Sender      = new User(serviceId, connectionGuid, groupMsgArgs.UserId);
             SourceGroup = new Group(serviceId, connectionGuid, groupMsgArgs.GroupId);
             SenderInfo  = groupMsgArgs.SenderInfo;
             Anonymous   = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
-            
+
             //检查服务管理员权限
             if (SenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
                                                         .Any(id => id == SenderInfo.UserId))

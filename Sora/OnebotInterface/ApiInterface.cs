@@ -6,7 +6,6 @@ using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
-using Sora.OnebotModel;
 using Sora.OnebotModel.ApiParams;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using System;
@@ -14,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sora.Attributes;
+using Sora.Converter;
 using YukariToolBox.FormatLog;
 
 namespace Sora.OnebotInterface
@@ -236,6 +236,7 @@ namespace Sora.OnebotInterface
             {
                 t.Role = MemberRoleType.SuperUser;
             }
+
             return (apiStatus, memberList);
         }
 
@@ -303,7 +304,7 @@ namespace Sora.OnebotInterface
                 return (apiStatus, new GroupMemberInfo());
             var memberInfo = ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo();
             if (memberInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
-                              .Any(id => id == memberInfo.UserId))
+                                                        .Any(id => id == memberInfo.UserId))
                 memberInfo.Role = MemberRoleType.SuperUser;
             return (apiStatus, memberInfo);
         }
@@ -442,9 +443,9 @@ namespace Sora.OnebotInterface
         /// <param name="msgId">消息ID</param>
         internal static async
             ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup, int
-            realId, bool
-            isGroupMsg)> GetMessage(
-            Guid serviceId, Guid connection, int msgId)
+                realId, bool
+                isGroupMsg)> GetMessage(
+                Guid serviceId, Guid connection, int msgId)
         {
             Log.Debug("Sora", "Sending get_msg request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -467,7 +468,7 @@ namespace Sora.OnebotInterface
                                          connection,
                                          msgId,
                                          ret["data"]?["raw_message"]?.ToString(),
-                                         MessageParse.Parse(rawMessage        ?? new List<OnebotMessageElement>()),
+                                         MessageConverter.Parse(rawMessage    ?? new List<OnebotMessageElement>()),
                                          Convert.ToInt64(ret["data"]?["time"] ?? -1),
                                          0,
                                          Convert.ToBoolean(ret["data"]?["group"]           ?? false)
@@ -805,7 +806,7 @@ namespace Sora.OnebotInterface
         /// <returns>消息</returns>
         internal static async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> msgList)>
             GetGroupMessageHistory(
-                int? msgSeq, long gid,Guid serviceId,  Guid connection)
+                int? msgSeq, long gid, Guid serviceId, Guid connection)
         {
             Log.Debug("Sora", "Sending get_group_msg_history request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest

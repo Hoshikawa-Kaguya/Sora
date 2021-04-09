@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sora.OnebotModel;
+using Sora.Converter;
 
 namespace Sora.Entities.MessageElement.CQModel
 {
@@ -22,7 +22,7 @@ namespace Sora.Entities.MessageElement.CQModel
         /// </summary>
         public void ParseNode()
         {
-            NodeMsgList.ForEach(node => node.MessageBody = MessageParse.Parse(node.MessageList));
+            NodeMsgList.ForEach(node => node.MessageBody = MessageConverter.Parse(node.MessageList));
         }
 
         #endregion

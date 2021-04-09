@@ -18,7 +18,7 @@ namespace Sora.OnebotModel
         private readonly long[] _superUsers;
 
         #endregion
-        
+
         /// <summary>
         /// 反向服务器监听地址
         /// </summary>
@@ -34,7 +34,7 @@ namespace Sora.OnebotModel
         /// </summary>
         public long[] SuperUsers
         {
-            get => _superUsers ?? new long[0];
+            get => _superUsers ?? Array.Empty<long>();
             init
             {
                 if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");
@@ -68,6 +68,5 @@ namespace Sora.OnebotModel
         /// 是否启用Sora自带的指令系统
         /// </summary>
         public bool EnableSoraCommandManager { get; init; } = true;
-
     }
 }
