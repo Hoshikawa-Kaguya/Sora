@@ -35,6 +35,7 @@ namespace Sora_Test
             var nodes = list.Select(member => new CustomNode(member.Nick, member.UserId, "好耶"))
                             .ToList();
             await eventArgs.SourceGroup.SendGroupForwardMsg(nodes);
+            eventArgs.IsContinueEventChain = false;
         }
     }
 }

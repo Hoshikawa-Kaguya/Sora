@@ -682,7 +682,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, List<FriendInfo> friendList)> GetFriendList()
         {
-            return await ApiInterface.GetFriendList(ConnectionGuid);
+            return await ApiInterface.GetFriendList(ServiceGuid, ConnectionGuid);
         }
 
         /// <summary>
@@ -762,7 +762,7 @@ namespace Sora.Entities.Base
             long userId, bool useCache = true)
         {
             if (userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            return await ApiInterface.GetUserInfo(ConnectionGuid, userId, useCache);
+            return await ApiInterface.GetUserInfo(ServiceGuid, ConnectionGuid, userId, useCache);
         }
 
         /// <summary>

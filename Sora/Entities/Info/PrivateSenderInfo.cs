@@ -1,11 +1,12 @@
 using Newtonsoft.Json;
+using Sora.Enumeration.EventParamsType;
 
 namespace Sora.Entities.Info
 {
     /// <summary>
     /// 私聊消息发送者
     /// </summary>
-    public struct PrivateSenderInfo
+    public class PrivateSenderInfo
     {
         /// <summary>
         /// 发送者 QQ 号
@@ -36,5 +37,11 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonProperty(PropertyName = "group_id")]
         public long? GroupId { get; internal init; }
+
+        /// <summary>
+        /// 权限等级
+        /// </summary>
+        [JsonIgnore]
+        public MemberRoleType Role { get; internal set; }
     }
 }

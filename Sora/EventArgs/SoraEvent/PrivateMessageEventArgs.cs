@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Converter;
@@ -9,6 +10,7 @@ using Sora.Entities.Info;
 using Sora.Entities.MessageElement;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
+using Sora.Enumeration.EventParamsType;
 
 namespace Sora.EventArgs.SoraEvent
 {
@@ -61,6 +63,11 @@ namespace Sora.EventArgs.SoraEvent
             Sender             = new User(serviceId, connectionGuid, privateMsgArgs.UserId);
             SenderInfo         = privateMsgArgs.SenderInfo;
             IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
+
+            //检查服务管理员权限
+            if (SenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+                                                        .Any(id => id == SenderInfo.UserId))
+                SenderInfo.Role = MemberRoleType.SuperUser;
         }
 
         #endregion
