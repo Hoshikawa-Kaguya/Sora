@@ -63,5 +63,9 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonProperty(PropertyName = "title")]
         public string Title { get; internal init; }
+
+        internal GroupSenderInfo()
+        {
+        }
     }
 }

@@ -16,7 +16,8 @@ namespace Sora.Entities.Info.InternalDataInfo
         internal readonly TimeSpan ApiTimeout;
         private readonly  int      HashCode;
 
-        internal SoraConnectionInfo(Guid serviceId, object connection, DateTime lastHeartBeatTime, long selfId, TimeSpan apiTimeout)
+        internal SoraConnectionInfo(Guid serviceId, object connection, DateTime lastHeartBeatTime, long selfId,
+                                    TimeSpan apiTimeout)
         {
             ServiceId         = serviceId;
             Connection        = connection;
@@ -25,8 +26,9 @@ namespace Sora.Entities.Info.InternalDataInfo
             ApiTimeout        = apiTimeout;
             HashCode = connection switch
             {
-                IWebSocketConnection serverConnection => serverConnection.ConnectionInfo.Id.GetHashCode(),
-                WebsocketClient client => client.GetHashCode(),
+                IWebSocketConnection serverConnection => System.HashCode.Combine(ServiceId,
+                    serverConnection.ConnectionInfo.Id.GetHashCode()),
+                WebsocketClient client => System.HashCode.Combine(ServiceId, client.GetHashCode()),
                 _ => throw new NotSupportedException("unknown connection type")
             };
         }
