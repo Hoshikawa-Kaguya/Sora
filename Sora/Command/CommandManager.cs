@@ -108,10 +108,10 @@ namespace Sora.Command
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
         /// <returns>是否继续处理接下来的消息</returns>
-        internal bool CommandAdapter(dynamic eventArgs)
+        internal void CommandAdapter(dynamic eventArgs)
         {
             //检查使能
-            if (!_enableSoraCommandManager) return true;
+            if (!_enableSoraCommandManager) return;
 
             #region 信号量消息处理
 
@@ -164,7 +164,7 @@ namespace Sora.Command
                 }
                 default:
                     Log.Error("CommandAdapter", "cannot parse eventArgs");
-                    return true;
+                    return;
             }
 
             foreach (var (key, _) in waitingCommand)
@@ -178,7 +178,11 @@ namespace Sora.Command
             }
 
             //当前流程已经处理过wait command了。不再继续处理普通command，否则会一次发两条消息，普通消息留到下一次处理
-            if (waitingCommand.Count != 0) return false;
+            if (waitingCommand.Count != 0)
+            {
+                ((BaseSoraEventArgs) eventArgs).IsContinueEventChain = false;
+                return;
+            }
 
             #endregion
 
@@ -219,11 +223,11 @@ namespace Sora.Command
                 }
                 default:
                     Log.Error("CommandAdapter", "cannot parse eventArgs");
-                    return true;
+                    return;
             }
 
             //在没有匹配到指令时直接跳转至Event触发
-            if (matchedCommand.Count == 0) return true;
+            if (matchedCommand.Count == 0) return;
 
             //遍历匹配到的每个命令
             foreach (var commandInfo in matchedCommand)
@@ -244,6 +248,7 @@ namespace Sora.Command
                 Log.Debug("CommandAdapter",
                           $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
                 Log.Info("CommandAdapter", $"触发指令[{commandInfo.MethodInfo.Name}]");
+
 
                 try
                 {
@@ -278,7 +283,7 @@ namespace Sora.Command
                                            new[] {eventArgs});
                     }
 
-                    return ((BaseSoraEventArgs) eventArgs).IsContinueEventChain;
+                    return;
                 }
                 catch (Exception e)
                 {
@@ -292,7 +297,7 @@ namespace Sora.Command
                             case GroupMessageEventArgs groupMessageEvent:
                             {
                                 Task.Run(async () => { await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}"); });
-                                break; 
+                                break;
                             }
                             case PrivateMessageEventArgs privateMessageEvent:
                             {
@@ -308,8 +313,6 @@ namespace Sora.Command
             }
 
             #endregion
-
-            return true;
         }
 
         /// <summary>

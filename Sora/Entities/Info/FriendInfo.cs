@@ -1,3 +1,5 @@
+using Sora.Enumeration.EventParamsType;
+
 namespace Sora.Entities.Info
 {
     /// <summary>
@@ -16,6 +18,11 @@ namespace Sora.Entities.Info
         /// 用户名
         /// </summary>
         public string Nick { get; internal init; }
+
+        /// <summary>
+        /// 权限等级
+        /// </summary>
+        public MemberRoleType Role { get; internal init; }
 
         /// <summary>
         /// 好友ID

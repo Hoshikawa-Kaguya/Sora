@@ -148,11 +148,12 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 获取好友列表
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connection">服务器连接标识</param>
         /// <returns>好友信息列表</returns>
         [Reviewed("nidbCN", "2021-03-24 20:40")]
         internal static async ValueTask<(ApiStatus apiStatus, List<FriendInfo> friendList)> GetFriendList(
-            Guid connection)
+            Guid serviceId, Guid connection)
         {
             Log.Debug("Sora", "Sending get_friend_list request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -168,7 +169,12 @@ namespace Sora.OnebotInterface
             {
                 UserId = Convert.ToInt64(token["user_id"] ?? -1),
                 Remark = token["remark"]?.ToString()   ?? string.Empty,
-                Nick   = token["nickname"]?.ToString() ?? string.Empty
+                Nick   = token["nickname"]?.ToString() ?? string.Empty,
+                Role = Convert.ToInt64(token["user_id"] ?? -1) != -1 && StaticVariable.ServiceInfos[serviceId]
+                    .SuperUsers
+                    .Any(id => id == Convert.ToInt64(token["user_id"]))
+                    ? MemberRoleType.SuperUser
+                    : MemberRoleType.Member
             }).ToList();
 
             return (apiStatus, friendInfos);
@@ -309,12 +315,13 @@ namespace Sora.OnebotInterface
         /// 获取用户信息
         /// 可以为好友或陌生人
         /// </summary>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="uid">用户ID</param>
         /// <param name="useCache"></param>
         /// <returns></returns>
         internal static async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
-            Guid connection, long uid, bool useCache)
+            Guid serviceId, Guid connection, long uid, bool useCache)
         {
             Log.Debug("Sora", "Sending get_stranger_info request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -331,14 +338,21 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_stranger_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
                 return (apiStatus, new UserInfo(), string.Empty);
+            var userId = Convert.ToInt64(ret["data"]?["user_id"] ?? -1);
+            //检查服务管理员权限
+            var senderRole = userId != -1 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+                                                           .Any(id => id == userId)
+                ? MemberRoleType.SuperUser
+                : MemberRoleType.Member;
             return (apiStatus, new UserInfo
             {
-                UserId    = Convert.ToInt64(ret["data"]?["user_id"] ?? -1),
+                UserId    = userId,
                 Nick      = ret["data"]?["nickname"]?.ToString(),
                 Age       = Convert.ToInt32(ret["data"]?["age"] ?? -1),
                 Sex       = ret["data"]?["sex"]?.ToString(),
                 Level     = Convert.ToInt32(ret["data"]?["level"]      ?? -1),
-                LoginDays = Convert.ToInt32(ret["data"]?["login_days"] ?? -1)
+                LoginDays = Convert.ToInt32(ret["data"]?["login_days"] ?? -1),
+                Role      = senderRole
             }, ret["data"]?["qid"]?.ToString());
         }
 
