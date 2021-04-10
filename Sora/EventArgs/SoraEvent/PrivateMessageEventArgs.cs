@@ -61,13 +61,14 @@ namespace Sora.EventArgs.SoraEvent
                                   MessageConverter.Parse(privateMsgArgs.MessageList),
                                   privateMsgArgs.Time, privateMsgArgs.Font, null);
             Sender             = new User(serviceId, connectionGuid, privateMsgArgs.UserId);
-            SenderInfo         = privateMsgArgs.SenderInfo;
             IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
 
             //检查服务管理员权限
-            if (SenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
-                                                        .Any(id => id == SenderInfo.UserId))
-                SenderInfo.Role = MemberRoleType.SuperUser;
+            var privateSenderInfo = privateMsgArgs.SenderInfo;
+            if (privateSenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+                                                               .Any(id => id == privateSenderInfo.UserId))
+                privateSenderInfo.Role = MemberRoleType.SuperUser;
+            SenderInfo = privateSenderInfo;
         }
 
         #endregion

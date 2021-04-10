@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration.EventParamsType;
@@ -55,13 +56,13 @@ namespace Sora.Entities.Info
         /// 加群时间戳
         /// </summary>
         [JsonProperty(PropertyName = "join_time")]
-        public int JoinTime { get; internal init; }
+        public DateTime JoinTime { get; internal init; }
 
         /// <summary>
         /// 最后发言时间戳
         /// </summary>
         [JsonProperty(PropertyName = "last_sent_time")]
-        public int LastSentTime { get; internal init; }
+        public DateTime LastSentTime { get; internal init; }
 
         /// <summary>
         /// 成员等级

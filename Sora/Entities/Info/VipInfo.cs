@@ -5,7 +5,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// VIP信息
     /// </summary>
-    public struct VipInfo
+    public readonly struct VipInfo
     {
         /// <summary>
         /// 用户id

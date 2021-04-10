@@ -5,7 +5,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 设备信息
     /// </summary>
-    public struct ClientInfo
+    public readonly struct ClientInfo
     {
         /// <summary>
         /// 客户端ID

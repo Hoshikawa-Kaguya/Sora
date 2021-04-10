@@ -5,7 +5,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 用户信息
     /// </summary>
-    public struct UserInfo
+    public readonly struct UserInfo
     {
         #region 属性
 

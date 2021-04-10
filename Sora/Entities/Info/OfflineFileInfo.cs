@@ -5,7 +5,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 离线文件信息
     /// </summary>
-    public struct OfflineFileInfo
+    public readonly struct OfflineFileInfo
     {
         /// <summary>
         /// 文件名

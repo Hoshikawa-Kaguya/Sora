@@ -3,7 +3,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 群信息
     /// </summary>
-    public struct GroupInfo
+    public readonly struct GroupInfo
     {
         #region 属性
 

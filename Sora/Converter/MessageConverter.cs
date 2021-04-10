@@ -57,10 +57,9 @@ namespace Sora.Converter
         /// </summary>
         /// <param name="onebotMessageElement">消息段</param>
         /// <returns>消息段列表</returns>
-        [Reviewed("nidbCN", "2021-03-24 19:50")]
         private static CQCode ParseMessageElement(OnebotMessageElement onebotMessageElement)
         {
-            if (onebotMessageElement?.RawData == null || onebotMessageElement.RawData.Count == 0)
+            if (onebotMessageElement.RawData == null || onebotMessageElement.RawData.Count == 0)
                 return new CQCode(CQType.Unknown, null);
 
             try
