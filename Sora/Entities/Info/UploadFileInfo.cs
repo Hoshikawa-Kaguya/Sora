@@ -5,7 +5,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 上传文件的信息
     /// </summary>
-    public struct UploadFileInfo
+    public readonly struct UploadFileInfo
     {
         /// <summary>
         /// 文件 ID

@@ -7,7 +7,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 群文件夹信息
     /// </summary>
-    public struct GroupFolderInfo
+    public readonly struct GroupFolderInfo
     {
         /// <summary>
         /// 文件夹ID
@@ -25,13 +25,13 @@ namespace Sora.Entities.Info
         /// 创建时间
         /// </summary>
         [JsonIgnore]
-        public DateTime CreateDateTime { get; private set; }
+        public DateTime CreateDateTime { get; internal init; }
 
         [JsonProperty(PropertyName = "create_time")]
         private long CreateTimeStamp
         {
             get => CreateDateTime.ToTimeStamp();
-            set => CreateDateTime = value.ToDateTime();
+            init => CreateDateTime = value.ToDateTime();
         }
 
         /// <summary>

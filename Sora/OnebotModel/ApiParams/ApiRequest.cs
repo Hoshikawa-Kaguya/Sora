@@ -15,20 +15,20 @@ namespace Sora.OnebotModel.ApiParams
         /// </summary>
         [JsonProperty(PropertyName = "action")]
         [JsonConverter(typeof(EnumDescriptionConverter))]
-        internal ApiRequestType ApiRequestType { get; set; }
+        internal ApiRequestType ApiRequestType { get; init; }
 
         /// <summary>
         /// 请求标识符
         /// 会自动生成初始值不需要设置
         /// </summary>
         [JsonProperty(PropertyName = "echo")]
-        internal Guid Echo { get; set; } = Guid.NewGuid();
+        internal Guid Echo { get; } = Guid.NewGuid();
 
         /// <summary>
         /// API参数对象
         /// 不需要参数时不需要设置
         /// </summary>
         [JsonProperty(PropertyName = "params")]
-        internal dynamic ApiParams { get; set; } = new { };
+        internal dynamic ApiParams { get; init; } = new { };
     }
 }

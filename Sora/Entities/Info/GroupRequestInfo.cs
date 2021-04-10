@@ -6,7 +6,7 @@ namespace Sora.Entities.Info
     /// <para>群组请求信息</para>
     /// <para>通过获取群系统消息API获得</para>
     /// </summary>
-    public struct GroupRequestInfo
+    public readonly struct GroupRequestInfo
     {
         /// <summary>
         /// 请求ID

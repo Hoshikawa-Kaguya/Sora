@@ -7,7 +7,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 群文件信息
     /// </summary>
-    public struct GroupFileInfo
+    public readonly struct GroupFileInfo
     {
         /// <summary>
         /// 文件ID
@@ -37,13 +37,13 @@ namespace Sora.Entities.Info
         /// 上传时间
         /// </summary>
         [JsonIgnore]
-        public DateTime UploadDateTime { get; private set; }
+        public DateTime UploadDateTime { get; private init; }
 
         [JsonProperty(PropertyName = "upload_time")]
         private long UploadTimeStamp
         {
             get => UploadDateTime.ToTimeStamp();
-            set => UploadDateTime = value.ToDateTime();
+            init => UploadDateTime = value.ToDateTime();
         }
 
         /// <summary>
@@ -51,26 +51,26 @@ namespace Sora.Entities.Info
         /// <para>永久文件为0</para>
         /// </summary>
         [JsonIgnore]
-        public DateTime DeadDateTime { get; private set; }
+        public DateTime DeadDateTime { get; private init; }
 
         [JsonProperty(PropertyName = "dead_time")]
         private long DeadTimeStamp
         {
             get => DeadDateTime.ToTimeStamp();
-            set => DeadDateTime = value.ToDateTime();
+            init => DeadDateTime = value.ToDateTime();
         }
 
         /// <summary>
         /// 修改时间
         /// </summary>
         [JsonIgnore]
-        public DateTime ModifyDateTime { get; private set; }
+        public DateTime ModifyDateTime { get; private init; }
 
         [JsonProperty(PropertyName = "modify_time")]
         private long ModifyTimeStamp
         {
             get => ModifyDateTime.ToTimeStamp();
-            set => ModifyDateTime = value.ToDateTime();
+            init => ModifyDateTime = value.ToDateTime();
         }
 
         /// <summary>

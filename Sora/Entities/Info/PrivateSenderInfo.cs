@@ -6,7 +6,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 私聊消息发送者
     /// </summary>
-    public class PrivateSenderInfo
+    public struct PrivateSenderInfo
     {
         /// <summary>
         /// 发送者 QQ 号
@@ -43,9 +43,5 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonIgnore]
         public MemberRoleType Role { get; internal set; }
-
-        internal PrivateSenderInfo()
-        {
-        }
     }
 }

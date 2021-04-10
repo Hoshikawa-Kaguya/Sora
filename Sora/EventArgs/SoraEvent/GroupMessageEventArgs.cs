@@ -80,13 +80,14 @@ namespace Sora.EventArgs.SoraEvent
                                   groupMsgArgs.Font, groupMsgArgs.MessageSequence);
             Sender      = new User(serviceId, connectionGuid, groupMsgArgs.UserId);
             SourceGroup = new Group(serviceId, connectionGuid, groupMsgArgs.GroupId);
-            SenderInfo  = groupMsgArgs.SenderInfo;
             Anonymous   = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
 
             //检查服务管理员权限
-            if (SenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
-                                                        .Any(id => id == SenderInfo.UserId))
-                SenderInfo.Role = MemberRoleType.SuperUser;
+            var groupSenderInfo = groupMsgArgs.SenderInfo;
+            if (groupSenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+                                                             .Any(id => id == groupSenderInfo.UserId))
+                groupSenderInfo.Role = MemberRoleType.SuperUser;
+            SenderInfo = groupSenderInfo;
         }
 
         #endregion

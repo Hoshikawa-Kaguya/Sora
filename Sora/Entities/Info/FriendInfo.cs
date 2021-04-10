@@ -5,7 +5,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 好友信息
     /// </summary>
-    public struct FriendInfo
+    public readonly struct FriendInfo
     {
         #region 属性
 

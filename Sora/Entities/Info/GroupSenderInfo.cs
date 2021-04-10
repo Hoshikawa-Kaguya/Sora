@@ -7,7 +7,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 群组消息发送者
     /// </summary>
-    public class GroupSenderInfo
+    public struct GroupSenderInfo
     {
         /// <summary>
         /// 发送者 QQ 号
@@ -63,9 +63,5 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonProperty(PropertyName = "title")]
         public string Title { get; internal init; }
-
-        internal GroupSenderInfo()
-        {
-        }
     }
 }

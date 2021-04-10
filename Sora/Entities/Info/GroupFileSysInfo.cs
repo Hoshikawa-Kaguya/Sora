@@ -5,7 +5,7 @@ namespace Sora.Entities.Info
     /// <summary>
     /// 群文件系统信息
     /// </summary>
-    public struct GroupFileSysInfo
+    public readonly struct GroupFileSysInfo
     {
         /// <summary>
         /// 文件总数
