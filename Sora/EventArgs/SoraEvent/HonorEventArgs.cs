@@ -38,7 +38,8 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="honorEventArgs">荣誉变更事件参数</param>
-        internal HonorEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiHonorEventArgs honorEventArgs) :
+        internal HonorEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+                                ApiHonorEventArgs honorEventArgs) :
             base(serviceId, connectionGuid, eventName, honorEventArgs.SelfID, honorEventArgs.Time)
         {
             TargetUser  = new User(serviceId, connectionGuid, honorEventArgs.UserId);

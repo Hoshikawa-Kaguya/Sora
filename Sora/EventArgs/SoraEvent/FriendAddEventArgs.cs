@@ -27,7 +27,8 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="friendAddArgs">好友添加事件参数</param>
-        internal FriendAddEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiFriendAddEventArgs friendAddArgs) :
+        internal FriendAddEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+                                    ApiFriendAddEventArgs friendAddArgs) :
             base(serviceId, connectionGuid, eventName, friendAddArgs.SelfID, friendAddArgs.Time)
         {
             NewFriend = new User(serviceId, connectionGuid, friendAddArgs.UserId);

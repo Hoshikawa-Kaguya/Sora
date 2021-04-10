@@ -42,8 +42,8 @@ namespace Sora.EventArgs.SoraEvent
         #region 构造函数
 
         internal EssenceChangeEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
-                                        ApiEssenceChangeEventArgs essenceChangeEvent) : base(serviceId, connectionGuid, eventName,
-            essenceChangeEvent.SelfID, essenceChangeEvent.Time)
+                                        ApiEssenceChangeEventArgs essenceChangeEvent) :
+            base(serviceId, connectionGuid, eventName, essenceChangeEvent.SelfID, essenceChangeEvent.Time)
         {
             MessageId         = essenceChangeEvent.MessageId;
             Operator          = new User(serviceId, connectionGuid, essenceChangeEvent.OperatorId);

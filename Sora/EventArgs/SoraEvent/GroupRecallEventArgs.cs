@@ -42,7 +42,8 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupRecallArgs">群聊撤回事件参数</param>
-        internal GroupRecallEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiGroupRecallEventArgs groupRecallArgs) :
+        internal GroupRecallEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+                                      ApiGroupRecallEventArgs groupRecallArgs) :
             base(serviceId, connectionGuid, eventName, groupRecallArgs.SelfID, groupRecallArgs.Time)
         {
             MessageSender = new User(serviceId, connectionGuid, groupRecallArgs.UserId);

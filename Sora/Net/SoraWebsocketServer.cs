@@ -220,7 +220,7 @@ namespace Sora.Net
         /// </summary>
         public void Dispose()
         {
-            
+            Server.Dispose();
             GC.SuppressFinalize(this);
         }
 

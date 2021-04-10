@@ -38,7 +38,7 @@ namespace Sora.Interfaces
         /// <para>默认为1000无需修改</para>
         /// </summary>
         public TimeSpan ApiTimeOut { get; init; }
-        
+
         /// <summary>
         /// 机器人管理员UID
         /// </summary>
@@ -48,6 +48,5 @@ namespace Sora.Interfaces
         /// 是否启用Sora自带的指令系统
         /// </summary>
         public bool EnableSoraCommandManager { get; init; }
-
     }
 }

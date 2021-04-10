@@ -31,11 +31,11 @@ namespace Sora.Net
             }
 
             return config switch
-                   {
-                       ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
-                       ServerConfig s2 => new SoraWebsocketServer(s2, crashAction),
-                       _               => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
-                   };
+            {
+                ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
+                ServerConfig s2 => new SoraWebsocketServer(s2, crashAction),
+                _ => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
+            };
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Sora.Net
 
             return createdService;
         }
-        
+
         /// <summary>
         /// 连续创建多个 Sora 服务实例
         /// </summary>

@@ -37,7 +37,8 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="pokeEventArgs">戳一戳事件参数</param>
-        internal GroupPokeEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiPokeOrLuckyEventArgs pokeEventArgs) :
+        internal GroupPokeEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+                                    ApiPokeOrLuckyEventArgs pokeEventArgs) :
             base(serviceId, connectionGuid, eventName, pokeEventArgs.SelfID, pokeEventArgs.Time)
         {
             SendUser    = new User(serviceId, connectionGuid, pokeEventArgs.UserId);
