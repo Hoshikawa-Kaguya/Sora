@@ -38,7 +38,8 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="fileUploadArgs">文件上传事件参数</param>
-        internal FileUploadEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiFileUploadEventArgs fileUploadArgs) :
+        internal FileUploadEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+                                     ApiFileUploadEventArgs fileUploadArgs) :
             base(serviceId, connectionGuid, eventName, fileUploadArgs.SelfID, fileUploadArgs.Time)
         {
             SourceGroup = new Group(serviceId, connectionGuid, fileUploadArgs.GroupId);

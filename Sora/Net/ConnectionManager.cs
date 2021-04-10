@@ -79,7 +79,8 @@ namespace Sora.Net
         /// <param name="connectionInfo">连接信息</param>
         /// <param name="selfId">机器人UID</param>
         /// <param name="apiTimeout">api超时</param>
-        private bool AddConnection(Guid serviceId, Guid connectionGuid, object connectionInfo, string selfId, TimeSpan apiTimeout)
+        private bool AddConnection(Guid serviceId, Guid connectionGuid, object connectionInfo,
+                                   string selfId, TimeSpan apiTimeout)
         {
             //检查是否已存在值
             if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid)) return false;
@@ -225,7 +226,8 @@ namespace Sora.Net
         /// <param name="serviceId">服务ID</param>
         /// <param name="connId">连接ID</param>
         /// <param name="apiTimeout">api超时</param>
-        internal void OpenConnection(string role, string selfId, object socket, Guid serviceId, Guid connId, TimeSpan apiTimeout)
+        internal void OpenConnection(string role, string selfId, object socket, Guid serviceId, Guid connId,
+                                     TimeSpan apiTimeout)
         {
             //添加服务器记录
             if (!AddConnection(serviceId, connId, socket, selfId, apiTimeout))

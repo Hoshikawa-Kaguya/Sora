@@ -160,7 +160,8 @@ namespace Sora.Net
                                                                            return;
                                                                        Log.Info("Sora", "服务器已自动重连");
                                                                        ConnManager.OpenConnection("Universal", "0",
-                                                                           Client, _clientId, _clientId, Config.ApiTimeOut);
+                                                                           Client, _clientId, _clientId,
+                                                                           Config.ApiTimeOut);
                                                                    }));
             await Client.Start();
             if (!Client.IsRunning || !Client.IsStarted)

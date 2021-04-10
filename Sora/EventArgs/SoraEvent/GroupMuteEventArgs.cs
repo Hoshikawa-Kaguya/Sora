@@ -42,7 +42,8 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="connectionGuid">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupMuteArgs">群禁言事件参数</param>
-        internal GroupMuteEventArgs(Guid serviceId, Guid connectionGuid, string eventName, ApiGroupMuteEventArgs groupMuteArgs) :
+        internal GroupMuteEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+                                    ApiGroupMuteEventArgs groupMuteArgs) :
             base(serviceId, connectionGuid, eventName, groupMuteArgs.SelfID, groupMuteArgs.Time)
         {
             User        = new User(serviceId, connectionGuid, groupMuteArgs.UserId);

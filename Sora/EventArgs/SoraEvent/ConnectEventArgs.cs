@@ -33,8 +33,9 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="clientType">当前客户端类型</param>
         /// <param name="clientVersion">当前客户端版本</param>
         /// <param name="time">连接时间</param>
-        internal ConnectEventArgs(Guid serviceId, Guid connectionGuid, string eventName, long loginUid, string clientType,
-                                  string clientVersion, long time) : base(serviceId, connectionGuid, eventName, loginUid, time)
+        internal ConnectEventArgs(Guid serviceId, Guid connectionGuid, string eventName, long loginUid,
+                                  string clientType, string clientVersion, long time) :
+            base(serviceId, connectionGuid, eventName, loginUid, time)
         {
             ClientType        = clientType;
             ClientVersionCode = clientVersion;
