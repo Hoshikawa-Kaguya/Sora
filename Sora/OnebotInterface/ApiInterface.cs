@@ -198,13 +198,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_group_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理返回群组列表
-            var groupList = ret["data"]?.Select(token => new GroupInfo
-            {
-                GroupId        = Convert.ToInt64(token["group_id"] ?? -1),
-                GroupName      = token["group_name"]?.ToString() ?? string.Empty,
-                MemberCount    = Convert.ToInt32(token["member_count"]     ?? -1),
-                MaxMemberCount = Convert.ToInt32(token["max_member_count"] ?? -1)
-            }).ToList();
+            var groupList = ret["data"]?.Select(token => token.ToObject<GroupInfo>()).ToList();
 
             return (apiStatus, groupList);
         }
@@ -267,14 +261,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_group_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, new GroupInfo());
             return (apiStatus,
-                    new GroupInfo
-                    {
-                        GroupId        = Convert.ToInt64(ret["data"]?["group_id"] ?? -1),
-                        GroupName      = ret["data"]?["group_name"]?.ToString() ?? string.Empty,
-                        MemberCount    = Convert.ToInt32(ret["data"]?["member_count"]     ?? -1),
-                        MaxMemberCount = Convert.ToInt32(ret["data"]?["max_member_count"] ?? -1)
-                    }
-                );
+                    ret["data"]?.ToObject<GroupInfo>() ?? new GroupInfo());
         }
 
         /// <summary>

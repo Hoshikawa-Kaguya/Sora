@@ -43,6 +43,28 @@ namespace Sora.Entities.MessageElement
         }
 
         /// <summary>
+        /// At CQ码
+        /// </summary>
+        /// <param name="uid">用户uid</param>
+        /// <param name="name">当在群中找不到此uid的名称时使用的名字</param>
+        // TODO Name参数暂时失效等待测试
+        public static CQCode CQAt(long uid, string name)
+        {
+            if (uid < 10000)
+            {
+                Log.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
+                return CQIlleage();
+            }
+
+            return new CQCode(CQType.At,
+                              new At
+                              {
+                                  Traget = uid.ToString(),
+                                  Name   = name
+                              });
+        }
+
+        /// <summary>
         /// At全体 CQ码
         /// </summary>
         public static CQCode CQAtAll()
@@ -476,7 +498,7 @@ namespace Sora.Entities.MessageElement
         /// 生成AT CQ码
         /// </summary>
         /// <param name="uid">uid</param>
-        public static CQCode At(this long uid)
+        public static CQCode ToAt(this long uid)
         {
             return CQAt(uid);
         }
@@ -485,7 +507,7 @@ namespace Sora.Entities.MessageElement
         /// 生成AT CQ码
         /// </summary>
         /// <param name="uid">uid</param>
-        public static CQCode At(this int uid)
+        public static CQCode ToAt(this int uid)
         {
             return CQAt(uid);
         }
