@@ -749,7 +749,8 @@ namespace Sora.Entities.Base
         }
 
         /// <summary>
-        /// 获取用户信息
+        /// <para>获取用户信息</para>
+        /// <para>注意此API获取的权限等级不是群内权限等级</para>
         /// </summary>
         /// <param name="userId">用户ID</param>
         /// <param name="useCache"></param>
