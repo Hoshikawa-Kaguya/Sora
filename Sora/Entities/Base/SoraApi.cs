@@ -256,7 +256,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async
             ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup,
-                int realId, bool isGroupMsg)> GetMessages(int messageId)
+                int realId, bool isGroupMsg)> GetMessage(int messageId)
         {
             return await ApiInterface.GetMessage(ServiceGuid, ConnectionGuid, messageId);
         }
@@ -272,7 +272,7 @@ namespace Sora.Entities.Base
         /// <para><see cref="List{T}"/> 消息记录</para>
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(
-            long groupId, int? messageSequence = null)
+            long groupId, long? messageSequence = null)
         {
             return await ApiInterface.GetGroupMessageHistory(messageSequence, groupId, ServiceGuid, ConnectionGuid);
         }

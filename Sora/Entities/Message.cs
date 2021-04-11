@@ -45,14 +45,14 @@ namespace Sora.Entities
         /// <para>消息序号</para>
         /// <para>仅用于群聊消息</para>
         /// </summary>
-        public int? MessageSequence { get; }
+        public long? MessageSequence { get; }
 
         #endregion
 
         #region 构造函数
 
         internal Message(Guid serviceId, Guid connectionGuid, int msgId, string text, MessageBody messageBody,
-                         long time, int font, int? messageSequence) :
+                         long time, int font, long? messageSequence) :
             base(serviceId, connectionGuid)
         {
             MessageId       = msgId;

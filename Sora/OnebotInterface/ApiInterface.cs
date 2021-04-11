@@ -816,7 +816,7 @@ namespace Sora.OnebotInterface
         /// <returns>消息</returns>
         internal static async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> msgList)>
             GetGroupMessageHistory(
-                int? msgSeq, long gid, Guid serviceId, Guid connection)
+                long? msgSeq, long gid, Guid serviceId, Guid connection)
         {
             Log.Debug("Sora", "Sending get_group_msg_history request");
             var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
