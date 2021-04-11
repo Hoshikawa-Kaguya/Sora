@@ -276,6 +276,38 @@ namespace Sora.Entities.MessageElement
                        });
         }
 
+        /// <summary>
+        /// 自定义回复
+        /// </summary>
+        /// <param name="text">自定义回复的信息</param>
+        /// <param name="uid">自定义回复时的自定义QQ</param>
+        /// <param name="time">自定义回复时的时间</param>
+        /// <param name="messageSequence">起始消息序号</param>
+        public static CQCode CQReply(string text, long uid, DateTime time, long messageSequence)
+        {
+            if (text == null) throw new ArgumentNullException(nameof(text));
+            if (messageSequence <= 0)
+            {
+                Log.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[messageSequence超出范围限制({messageSequence})]");
+                return CQIlleage();
+            }
+
+            if (uid < 10000)
+            {
+                Log.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
+                return CQIlleage();
+            }
+
+            return new CQCode(CQType.Reply,
+                              new CustomReply
+                              {
+                                  Text            = text,
+                                  Uid             = uid,
+                                  Time            = time,
+                                  MessageSequence = messageSequence
+                              });
+        }
+
         #region GoCQ扩展码
 
         /// <summary>

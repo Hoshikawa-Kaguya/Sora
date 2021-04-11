@@ -31,6 +31,6 @@ namespace Sora.OnebotModel.OnebotEvent.MessageEvent
         /// 消息序号
         /// </summary>
         [JsonProperty(PropertyName = "message_seq")]
-        internal int MessageSequence { get; set; }
+        internal long MessageSequence { get; set; }
     }
 }
