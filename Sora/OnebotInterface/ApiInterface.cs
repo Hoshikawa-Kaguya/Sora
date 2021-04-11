@@ -227,11 +227,10 @@ namespace Sora.OnebotInterface
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理返回群成员列表
             var memberList = ret["data"]?.ToObject<List<GroupMemberInfo>>() ?? new List<GroupMemberInfo>()!;
+            //检查最高级管理员权限
             foreach (var t in memberList.Where(t => StaticVariable.ServiceInfos[serviceId].SuperUsers
                                                                   .Any(id => id == t.UserId)))
-            {
                 t.Role = MemberRoleType.SuperUser;
-            }
 
             return (apiStatus, memberList);
         }
@@ -325,22 +324,17 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_stranger_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
                 return (apiStatus, new UserInfo(), string.Empty);
-            var userId = Convert.ToInt64(ret["data"]?["user_id"] ?? -1);
             //检查服务管理员权限
-            var senderRole = userId != -1 && StaticVariable.ServiceInfos[serviceId].SuperUsers
-                                                           .Any(id => id == userId)
-                ? MemberRoleType.SuperUser
-                : MemberRoleType.Member;
-            return (apiStatus, new UserInfo
+            var info = ret["data"]?.ToObject<UserInfo>() ?? new UserInfo();
+            if (info.UserId is not 0 or -1)
             {
-                UserId    = userId,
-                Nick      = ret["data"]?["nickname"]?.ToString(),
-                Age       = Convert.ToInt32(ret["data"]?["age"] ?? -1),
-                Sex       = ret["data"]?["sex"]?.ToString(),
-                Level     = Convert.ToInt32(ret["data"]?["level"]      ?? -1),
-                LoginDays = Convert.ToInt32(ret["data"]?["login_days"] ?? -1),
-                Role      = senderRole
-            }, ret["data"]?["qid"]?.ToString());
+                info.Role = info.UserId != -1 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+                                                               .Any(id => id == info.UserId)
+                    ? MemberRoleType.SuperUser
+                    : MemberRoleType.Member;
+            }
+
+            return (apiStatus, info, ret["data"]?["qid"]?.ToString());
         }
 
         /// <summary>
