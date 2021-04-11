@@ -24,7 +24,7 @@ namespace Sora.Net
         {
             if (!_haveStartupLog)
             {
-                Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.5"); //{Assembly.GetExecutingAssembly().GetName().Version}");
+                Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.6"); //{Assembly.GetExecutingAssembly().GetName().Version}");
                 Log.Debug("Sora", "开发交流群：1081190562");
                 Log.Debug("System", Environment.OSVersion);
                 _haveStartupLog = true;
