@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using Sora.Interfaces;
 using Sora.OnebotModel;
@@ -15,11 +16,14 @@ namespace Sora.Net
         private static bool _haveStartupLog;
 
         /// <summary>
-        /// 创建 Sora 服务实例
+        /// 创建一个Sora服务
         /// </summary>
-        /// <param name="config">服务器配置</param>
+        /// <param name="config">配置文件</param>
         /// <param name="crashAction">发生未处理异常时的回调</param>
-        /// <returns>Sora 服务实例</returns>
+        /// <exception cref="DataException">数据初始化错误</exception>
+        /// <exception cref="ArgumentNullException">空配置文件错误</exception>
+        /// <exception cref="ArgumentOutOfRangeException">参数错误</exception>
+        /// <exception cref="ArgumentException">配置文件类型错误</exception>
         public static ISoraService CreateService(ISoraConfig config, Action<Exception> crashAction = null)
         {
             if (!_haveStartupLog)

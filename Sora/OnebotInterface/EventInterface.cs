@@ -7,8 +7,10 @@ using Sora.OnebotModel.OnebotEvent.MetaEvent;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Sora.Entities;
 using Sora.Enumeration.ApiType;
 using YukariToolBox.FormatLog;
 
@@ -285,6 +287,8 @@ namespace Sora.OnebotInterface
                 {
                     var privateMsg = messageJson.ToObject<ApiPrivateMsgEventArgs>();
                     if (privateMsg == null) break;
+                    //检查屏蔽用户
+                    if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Any(u => u == privateMsg.UserId)) return;
                     Log.Debug("Sora",
                               $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                     var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
@@ -302,6 +306,7 @@ namespace Sora.OnebotInterface
                 {
                     ApiGroupMsgEventArgs groupMsg = messageJson.ToObject<ApiGroupMsgEventArgs>();
                     if (groupMsg == null) break;
+                    if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Any(u => u == groupMsg.UserId)) return;
                     Log.Debug("Sora",
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
@@ -621,42 +626,42 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="messageJson">消息Json对象</param>
         private static string GetBaseEventType(JObject messageJson) =>
-            !messageJson.TryGetValue("post_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+            messageJson["post_type"]?.ToString() ?? string.Empty;
 
         /// <summary>
         /// 获取元事件类型
         /// </summary>
         /// <param name="messageJson">消息Json对象</param>
         private static string GetMetaEventType(JObject messageJson) =>
-            !messageJson.TryGetValue("meta_event_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+            messageJson["meta_event_type"]?.ToString() ?? string.Empty;
 
         /// <summary>
         /// 获取消息事件类型
         /// </summary>
         /// <param name="messageJson">消息Json对象</param>
         private static string GetMessageType(JObject messageJson) =>
-            !messageJson.TryGetValue("message_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+            messageJson["message_type"]?.ToString() ?? string.Empty;
 
         /// <summary>
         /// 获取请求事件类型
         /// </summary>
         /// <param name="messageJson">消息Json对象</param>
         private static string GetRequestType(JObject messageJson) =>
-            !messageJson.TryGetValue("request_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+            messageJson["request_type"]?.ToString() ?? default;
 
         /// <summary>
         /// 获取通知事件类型
         /// </summary>
         /// <param name="messageJson">消息Json对象</param>
         private static string GetNoticeType(JObject messageJson) =>
-            !messageJson.TryGetValue("notice_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+            messageJson["notice_type"]?.ToString() ?? string.Empty;
 
         /// <summary>
         /// 获取通知事件子类型
         /// </summary>
         /// <param name="messageJson"></param>
         private static string GetNotifyType(JObject messageJson) =>
-            !messageJson.TryGetValue("sub_type", out JToken typeJson) ? string.Empty : typeJson.ToString();
+            messageJson["sub_type"]?.ToString() ?? string.Empty;
 
         #endregion
     }

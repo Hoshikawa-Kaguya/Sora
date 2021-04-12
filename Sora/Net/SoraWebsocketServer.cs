@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
@@ -16,7 +17,7 @@ namespace Sora.Net
     /// <summary>
     /// Sora服务器实例
     /// </summary>
-    public sealed class SoraWebsocketServer : IDisposable, ISoraService
+    public sealed class SoraWebsocketServer : ISoraService
     {
         #region 属性
 
@@ -73,7 +74,7 @@ namespace Sora.Net
         internal SoraWebsocketServer(ServerConfig config, Action<Exception> crashAction = null)
         {
             //检查端口占用
-            if (NetUtils.IsPortInUse(config.Port))
+            if (Helper.IsPortInUse(config.Port))
             {
                 Log.Fatal("Sora", $"端口{config.Port}已被占用，请更换其他端口");
                 Log.Warning("Sora", "将在5s后自动退出");
@@ -81,10 +82,11 @@ namespace Sora.Net
                 Environment.Exit(0);
             }
 
+            //写入初始化信息
+            if (!StaticVariable.ServiceInfos.TryAdd(_serverId, new ServiceInfo(_serverId, config)))
+                throw new DataException("try add service info failed");
             _serverReady = false;
             Log.Info("Sora", $"Sora WebSocket服务器初始化... [{_serverId}]");
-            //写入初始化信息
-            StaticVariable.ServiceInfos.TryAdd(_serverId, new ServiceInfo(_serverId, config.SuperUsers));
             //检查参数
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (config.Port is 0 or > 65535)
@@ -220,6 +222,8 @@ namespace Sora.Net
         /// </summary>
         public void Dispose()
         {
+            StaticVariable.CleanServiceInfo(_serverId);
+            HeartBeatTimer.Dispose();
             Server.Dispose();
             GC.SuppressFinalize(this);
         }

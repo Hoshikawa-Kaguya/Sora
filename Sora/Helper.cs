@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using Sora.Attributes;
 using Sora.Entities.Info.InternalDataInfo;
@@ -97,6 +98,18 @@ namespace Sora
 
             Log.Debug("Unchecked Method Count", uncheckedMethod.Count);
         }
+
+        #endregion
+
+        #region 网络
+
+        /// <summary>
+        /// 检查端口占用
+        /// </summary>
+        /// <param name="port">端口号</param>
+        internal static bool IsPortInUse(uint port) =>
+            IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
+                              .Any(ipEndPoint => ipEndPoint.Port == port);
 
         #endregion
     }

@@ -14,18 +14,20 @@ namespace Sora.Entities.Info.InternalDataInfo
         internal readonly string[]         CommandExpressions;
         internal          object           EventArgs;
         internal readonly Guid             ConnectionId;
+        internal readonly Guid             ServiceId;
         internal readonly RegexOptions     RegexOptions;
         internal readonly (long u, long g) Source;
 
         /// <summary>
         /// 构造方法
         /// </summary>
-        internal WaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId,
+        internal WaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId, Guid serviceId,
                              (long u, long g) source, RegexOptions regexOptions)
         {
             Semaphore          = semaphore;
             CommandExpressions = commandExpressions;
             ConnectionId       = connectionId;
+            ServiceId          = serviceId;
             Source             = source;
             EventArgs          = null;
             RegexOptions       = regexOptions;

@@ -17,25 +17,17 @@ namespace Sora.OnebotModel
         /// </summary>
         private readonly long[] _superUsers;
 
+        /// <summary>
+        /// 屏蔽用户
+        /// </summary>
+        private readonly long[] _blockUsers;
+
         #endregion
 
         /// <summary>
         /// 服务器地址
         /// </summary>
         public string Host { get; init; } = "127.0.0.1";
-
-        /// <summary>
-        /// 机器人管理员UID
-        /// </summary>
-        public long[] SuperUsers
-        {
-            get => _superUsers ?? Array.Empty<long>();
-            init
-            {
-                if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");
-                _superUsers = value;
-            }
-        }
 
         /// <summary>
         /// 服务器端口
@@ -51,6 +43,32 @@ namespace Sora.OnebotModel
         /// Universal请求路径
         /// </summary>
         public string UniversalPath { get; init; } = string.Empty;
+
+        /// <summary>
+        /// 机器人管理员UID
+        /// </summary>
+        public long[] SuperUsers
+        {
+            get => _superUsers ?? Array.Empty<long>();
+            init
+            {
+                if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");
+                _superUsers = value;
+            }
+        }
+
+        /// <summary>
+        /// 不处理来自数组中UID的消息(群聊/私聊)
+        /// </summary>
+        public long[] BlockUsers
+        {
+            get => _blockUsers ?? Array.Empty<long>();
+            init
+            {
+                if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");
+                _blockUsers = value;
+            }
+        }
 
         /// <summary>
         /// <para>心跳包超时设置(秒)</para>

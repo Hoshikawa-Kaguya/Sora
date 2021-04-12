@@ -1,4 +1,5 @@
 ﻿using System;
+using Sora.Interfaces;
 
 namespace Sora.Entities.Info.InternalDataInfo
 {
@@ -17,10 +18,16 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// </summary>
         internal readonly long[] SuperUsers;
 
-        internal ServiceInfo(Guid serviceId, long[] superUsers)
+        /// <summary>
+        /// 屏蔽用户
+        /// </summary>
+        internal readonly long[] BlockUsers;
+
+        internal ServiceInfo(Guid serviceId, ISoraConfig config)
         {
             ServiceId  = serviceId;
-            SuperUsers = superUsers;
+            SuperUsers = config.SuperUsers;
+            BlockUsers = config.BlockUsers;
         }
 
         public override int GetHashCode()
