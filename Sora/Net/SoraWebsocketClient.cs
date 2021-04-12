@@ -136,38 +136,36 @@ namespace Sora.Net
         private async ValueTask StartClient()
         {
             if (!_clientReady) return;
-            //消息接收订阅
+            //消息接收事件
             Client.MessageReceived.Subscribe(msg => Task.Run(() =>
                                                              {
-                                                                 Event
-                                                                     .Adapter(JObject.Parse(msg.Text), _clientId);
+                                                                 Event.Adapter(JObject.Parse(msg.Text), _clientId);
                                                              }));
-            Client.DisconnectionHappened.Subscribe(info => Task.Run(() =>
-                                                                    {
-                                                                        ConnectionManager.GetLoginUid(_clientId,
-                                                                            out var uid);
-                                                                        //移除原连接信息
-                                                                        if (ConnManager
-                                                                            .ConnectionExitis(_clientId)
-                                                                        )
-                                                                            ConnManager.CloseConnection("Universal",
-                                                                                uid, _clientId);
+            //连接断开事件
+            Client.DisconnectionHappened
+                  .Subscribe(info => Task.Run(() =>
+                                              {
+                                                  ConnectionManager.GetLoginUid(_clientId, out var uid);
+                                                  //移除原连接信息
+                                                  if (ConnManager.ConnectionExitis(_clientId))
+                                                      ConnManager.CloseConnection("Universal", uid, _clientId);
 
-                                                                        if (info.Exception != null)
-                                                                            Log.Error("Sora",
-                                                                                $"监听服务器时发生错误{Log.ErrorLogBuilder(info.Exception)}");
-                                                                        else
-                                                                            Log.Info("Sora", "服务器连接被关闭");
-                                                                    }));
-            Client.ReconnectionHappened.Subscribe(info => Task.Run(() =>
-                                                                   {
-                                                                       if (info.Type == ReconnectionType.Initial)
-                                                                           return;
-                                                                       Log.Info("Sora", "服务器已自动重连");
-                                                                       ConnManager.OpenConnection("Universal", "0",
-                                                                           Client, _clientId, _clientId,
-                                                                           Config.ApiTimeOut);
-                                                                   }));
+                                                  if (info.Exception != null)
+                                                      Log.Error("Sora",
+                                                                $"监听服务器时发生错误{Log.ErrorLogBuilder(info.Exception)}");
+                                                  else
+                                                      Log.Info("Sora", "服务器连接被关闭");
+                                              }));
+            //重连事件
+            Client.ReconnectionHappened
+                  .Subscribe(info => Task.Run(() =>
+                                              {
+                                                  if (info.Type == ReconnectionType.Initial) return;
+                                                  Log.Info("Sora", "服务器已自动重连");
+                                                  ConnManager.OpenConnection("Universal", "0", Client, _clientId,
+                                                                             _clientId, Config.ApiTimeOut);
+                                              }));
+            //开始客户端
             await Client.Start();
             if (!Client.IsRunning || !Client.IsStarted)
             {
