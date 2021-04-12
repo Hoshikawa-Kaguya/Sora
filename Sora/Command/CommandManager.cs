@@ -354,7 +354,6 @@ namespace Sora.Command
         /// <param name="connectionId">连接标识</param>
         /// <param name="serviceId">服务标识</param>
         /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
-        [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         internal static WaitingInfo GenWaitingCommandInfo(
             long sourceUid, long sourceGroup, string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
             RegexOptions regexOptions, Guid connectionId, Guid serviceId)
@@ -387,7 +386,6 @@ namespace Sora.Command
         /// <param name="method">指令method</param>
         /// <param name="classType">所在实例类型</param>
         /// <param name="commandInfo">指令信息</param>
-        [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         private Attribute GenerateCommandInfo(MethodInfo method, Type classType, out CommandInfo commandInfo)
         {
             //获取指令属性
