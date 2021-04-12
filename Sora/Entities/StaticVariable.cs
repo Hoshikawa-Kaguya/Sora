@@ -89,7 +89,7 @@ namespace Sora.Entities
                         serverConn.Close();
                         break;
                     case WebsocketClient client:
-                        client.Stop(WebSocketCloseStatus.Empty, "cannot add client to list");
+                        client.Stop(WebSocketCloseStatus.Empty, "sora service dispose");
                         break;
                     default:
                         Log.Error("ConnectionManager", "unknown error when destory Connection instance");
