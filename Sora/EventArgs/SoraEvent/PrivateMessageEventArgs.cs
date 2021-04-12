@@ -125,14 +125,14 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 等待下一条消息触发
         /// </summary>
-        /// <param name="commandExps">指令表达式</param>
+        /// <param name="commandExp">指令表达式</param>
         /// <param name="matchType">匹配类型</param>
         /// <param name="regexOptions">正则匹配选项</param>
         /// <returns>触发后的事件参数</returns>
-        public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string commandExps, MatchType matchType,
+        public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return WaitForNextMessageAsync(new[] {commandExps}, matchType, regexOptions);
+            return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
         }
 
         #endregion
