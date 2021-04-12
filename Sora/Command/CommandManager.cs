@@ -124,8 +124,10 @@ namespace Sora.Command
                     //注意可能匹配到多个的情况，下同
                     waitingCommand = StaticVariable.WaitingDict
                                                    .Where(command =>
+                                                              //判断发起源
+                                                              command.Value.SourceFlag == SourceFlag.Group
                                                               //判断来自同一个连接
-                                                              command.Value.ConnectionId ==
+                                                           && command.Value.ConnectionId ==
                                                               groupMessageEvent.SoraApi.ConnectionGuid
                                                               //判断来着同一个群
                                                            && command.Value.Source.g == groupMessageEvent.SourceGroup
@@ -146,8 +148,10 @@ namespace Sora.Command
                 {
                     waitingCommand = StaticVariable.WaitingDict
                                                    .Where(command =>
+                                                              //判断发起源
+                                                              command.Value.SourceFlag == SourceFlag.Private
                                                               //判断来自同一个连接
-                                                              command.Value.ConnectionId ==
+                                                           && command.Value.ConnectionId ==
                                                               privateMessageEvent.SoraApi.ConnectionGuid
                                                               //判断来自同一人
                                                            && command.Value.Source.u == privateMessageEvent.Sender
@@ -345,13 +349,14 @@ namespace Sora.Command
         /// <param name="sourceGroup">消息源GID</param>
         /// <param name="cmdExps">指令表达式</param>
         /// <param name="matchType">匹配类型</param>
+        /// <param name="sourceFlag">来源标识</param>
         /// <param name="regexOptions">正则匹配选项</param>
         /// <param name="connectionId">连接标识</param>
         /// <param name="serviceId">服务标识</param>
         /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
         [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         internal static WaitingInfo GenWaitingCommandInfo(
-            long sourceUid, long sourceGroup, string[] cmdExps, MatchType matchType,
+            long sourceUid, long sourceGroup, string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
             RegexOptions regexOptions, Guid connectionId, Guid serviceId)
         {
             if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
@@ -372,6 +377,7 @@ namespace Sora.Command
                                    serviceId: serviceId,
                                    connectionId: connectionId,
                                    source: (sourceUid, sourceGroup),
+                                   sourceFlag: sourceFlag,
                                    regexOptions: regexOptions);
         }
 
