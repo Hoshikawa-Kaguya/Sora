@@ -347,11 +347,12 @@ namespace Sora.Command
         /// <param name="matchType">匹配类型</param>
         /// <param name="regexOptions">正则匹配选项</param>
         /// <param name="connectionId">连接标识</param>
+        /// <param name="serviceId">服务标识</param>
         /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
         [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         internal static WaitingInfo GenWaitingCommandInfo(
-            long sourceUid, long sourceGroup, string[] cmdExps,
-            MatchType matchType, RegexOptions regexOptions, Guid connectionId)
+            long sourceUid, long sourceGroup, string[] cmdExps, MatchType matchType,
+            RegexOptions regexOptions, Guid connectionId, Guid serviceId)
         {
             if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
             var matchExp = matchType switch
@@ -368,6 +369,7 @@ namespace Sora.Command
 
             return new WaitingInfo(semaphore: new AutoResetEvent(false),
                                    commandExpressions: matchExp,
+                                   serviceId: serviceId,
                                    connectionId: connectionId,
                                    source: (sourceUid, sourceGroup),
                                    regexOptions: regexOptions);

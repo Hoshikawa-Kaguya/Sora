@@ -89,7 +89,7 @@ namespace Sora.EventArgs.SoraEvent
             //生成指令上下文
             var waitInfo =
                 CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType,
-                                                     regexOptions, SoraApi.ConnectionGuid);
+                                                     regexOptions, SoraApi.ConnectionGuid, SoraApi.ServiceGuid);
             //检查是否为初始指令重复触发
             if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
                 return null;

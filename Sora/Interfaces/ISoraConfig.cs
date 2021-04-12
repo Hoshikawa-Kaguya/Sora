@@ -45,6 +45,11 @@ namespace Sora.Interfaces
         public long[] SuperUsers { get; init; }
 
         /// <summary>
+        /// 不处理来自数组中UID的消息(群聊/私聊)
+        /// </summary>
+        public long[] BlockUsers { get; init; }
+
+        /// <summary>
         /// 是否启用Sora自带的指令系统
         /// </summary>
         public bool EnableSoraCommandManager { get; init; }

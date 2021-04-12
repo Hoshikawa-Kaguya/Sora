@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Sora.Net;
 using Sora.OnebotInterface;
@@ -7,10 +8,10 @@ namespace Sora.Interfaces
     /// <summary>
     /// Sora 连接服务
     /// </summary>
-    public interface ISoraService
+    public interface ISoraService : IDisposable
     {
         /// <summary>
-        /// 事件接口
+        /// 事件接口    
         /// </summary>
         public EventInterface Event { get; }
 

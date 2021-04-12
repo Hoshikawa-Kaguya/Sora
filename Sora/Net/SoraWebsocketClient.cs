@@ -4,6 +4,7 @@ using Sora.Interfaces;
 using Sora.OnebotInterface;
 using Sora.OnebotModel;
 using System;
+using System.Data;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace Sora.Net
     /// <summary>
     /// Sora正向WS链接客户端
     /// </summary>
-    public class SoraWebsocketClient : IDisposable, ISoraService
+    public class SoraWebsocketClient : ISoraService
     {
         #region 属性
 
@@ -67,14 +68,18 @@ namespace Sora.Net
         /// <summary>
         /// 创建一个正向WS客户端
         /// </summary>
-        /// <param name="config">服务器配置</param>
+        /// <param name="config">配置文件</param>
         /// <param name="crashAction">发生未处理异常时的回调</param>
+        /// <exception cref="DataException">数据初始化错误</exception>
+        /// <exception cref="ArgumentNullException">空配置文件错误</exception>
+        /// <exception cref="ArgumentOutOfRangeException">参数错误</exception>
         internal SoraWebsocketClient(ClientConfig config, Action<Exception> crashAction = null)
         {
             _clientReady = false;
             Log.Info("Sora", $"Sora WebSocket客户端初始化... [{_clientId}]");
             //写入初始化信息
-            StaticVariable.ServiceInfos.TryAdd(_clientId, new ServiceInfo(_clientId, config.SuperUsers));
+            if (!StaticVariable.ServiceInfos.TryAdd(_clientId, new ServiceInfo(_clientId, config)))
+                throw new DataException("try add service info failed");
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
             //检查参数
@@ -189,6 +194,8 @@ namespace Sora.Net
         /// </summary>
         public void Dispose()
         {
+            StaticVariable.CleanServiceInfo(_clientId);
+            HeartBeatTimer.Dispose();
             Client.Dispose();
             GC.SuppressFinalize(this);
         }
