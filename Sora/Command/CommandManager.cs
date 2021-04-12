@@ -108,6 +108,7 @@ namespace Sora.Command
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
         /// <returns>是否继续处理接下来的消息</returns>
+        [Reviewed("XiaoHe321","2021-04-12 22:52")]
         internal void CommandAdapter(dynamic eventArgs)
         {
             //检查使能
