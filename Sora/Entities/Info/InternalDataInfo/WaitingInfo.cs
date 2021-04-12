@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Sora.Enumeration;
 using YukariToolBox.Extensions;
 
 namespace Sora.Entities.Info.InternalDataInfo
@@ -17,12 +18,13 @@ namespace Sora.Entities.Info.InternalDataInfo
         internal readonly Guid             ServiceId;
         internal readonly RegexOptions     RegexOptions;
         internal readonly (long u, long g) Source;
+        internal readonly SourceFlag       SourceFlag;
 
         /// <summary>
         /// 构造方法
         /// </summary>
         internal WaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId, Guid serviceId,
-                             (long u, long g) source, RegexOptions regexOptions)
+                             (long u, long g) source, RegexOptions regexOptions, SourceFlag sourceFlag)
         {
             Semaphore          = semaphore;
             CommandExpressions = commandExpressions;
@@ -31,6 +33,7 @@ namespace Sora.Entities.Info.InternalDataInfo
             Source             = source;
             EventArgs          = null;
             RegexOptions       = regexOptions;
+            SourceFlag         = sourceFlag;
         }
 
         /// <summary>
@@ -38,7 +41,8 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// </summary>
         internal bool IsSameSource(WaitingInfo info)
         {
-            return info.Source       == Source
+            return info.SourceFlag   == SourceFlag
+                && info.Source       == Source
                 && info.ConnectionId == ConnectionId
                 && info.CommandExpressions.ArrayEquals(CommandExpressions);
         }

@@ -84,11 +84,12 @@ namespace Sora.EventArgs.SoraEvent
         /// 等待下一条消息触发
         /// </summary>
         internal object WaitForNextMessage(long sourceUid, string[] commandExps, MatchType matchType,
+                                           SourceFlag sourceFlag,
                                            RegexOptions regexOptions, long sourceGroup = 0)
         {
             //生成指令上下文
             var waitInfo =
-                CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType,
+                CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, sourceFlag,
                                                      regexOptions, SoraApi.ConnectionGuid, SoraApi.ServiceGuid);
             //检查是否为初始指令重复触发
             if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
