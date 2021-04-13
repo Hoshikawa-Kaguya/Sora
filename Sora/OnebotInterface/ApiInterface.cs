@@ -38,7 +38,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", "Sending send_msg(Private) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendMsg,
                 ApiParams = new SendMessageParams
@@ -50,8 +50,6 @@ namespace Sora.OnebotInterface
                     GroupId = groupId
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get send_msg(Private) response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, -1);
             var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
@@ -76,7 +74,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", "Sending send_msg(Group) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendMsg,
                 ApiParams = new SendMessageParams
@@ -87,8 +85,6 @@ namespace Sora.OnebotInterface
                     Message = messages.Select(msg => msg.ToOnebotMessage()).ToList(),
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get send_msg(Group) response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, -1);
             var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
@@ -107,12 +103,10 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<(ApiStatus apiStatus, long uid, string nick)> GetLoginInfo(Guid connection)
         {
             Log.Debug("Sora", "Sending get_login_info request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetLoginInfo
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_login_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, -1, null);
             return
@@ -132,12 +126,10 @@ namespace Sora.OnebotInterface
             Guid connection)
         {
             Log.Debug("Sora", "Sending get_version_info request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetVersion
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_version_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, "unknown", null);
             var verStr = ret["data"]?["version"]?.ToString() ?? ret["data"]?["app_version"]?.ToString() ?? string.Empty;
@@ -156,12 +148,10 @@ namespace Sora.OnebotInterface
             Guid serviceId, Guid connection)
         {
             Log.Debug("Sora", "Sending get_friend_list request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetFriendList
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_friend_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理返回的好友信息
@@ -189,12 +179,10 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<(ApiStatus apiStatus, List<GroupInfo> groupList)> GetGroupList(Guid connection)
         {
             Log.Debug("Sora", "Sending get_group_list request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupList
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理返回群组列表
@@ -213,7 +201,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)>
             GetGroupMemberList(Guid serviceId, Guid connection, long gid)
         {
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMemberList,
                 ApiParams = new
@@ -221,8 +209,6 @@ namespace Sora.OnebotInterface
                     group_id = gid
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_member_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理返回群成员列表
@@ -246,7 +232,7 @@ namespace Sora.OnebotInterface
             Guid connection, long gid, bool useCache)
         {
             Log.Debug("Sora", "Sending get_group_info request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupInfo,
                 ApiParams = new
@@ -255,8 +241,6 @@ namespace Sora.OnebotInterface
                     no_cache = !useCache
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, new GroupInfo());
             return (apiStatus,
@@ -275,7 +259,7 @@ namespace Sora.OnebotInterface
             Guid serviceId, Guid connection, long gid, long uid, bool useCache)
         {
             Log.Debug("Sora", "Sending get_group_member_info request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMemberInfo,
                 ApiParams = new
@@ -285,8 +269,6 @@ namespace Sora.OnebotInterface
                     no_cache = !useCache
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_member_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
                 return (apiStatus, new GroupMemberInfo());
@@ -310,7 +292,7 @@ namespace Sora.OnebotInterface
             Guid serviceId, Guid connection, long uid, bool useCache)
         {
             Log.Debug("Sora", "Sending get_stranger_info request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetStrangerInfo,
                 ApiParams = new
@@ -319,8 +301,6 @@ namespace Sora.OnebotInterface
                     no_cache = !useCache
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_stranger_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
                 return (apiStatus, new UserInfo(), string.Empty);
@@ -344,12 +324,10 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendImage(Guid connection)
         {
             Log.Debug("Sora", "Sending can_send_image request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CanSendImage
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get can_send_image response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, false);
             return (apiStatus,
@@ -363,12 +341,10 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendRecord(Guid connection)
         {
             Log.Debug("Sora", "Sending can_send_record request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CanSendRecord
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get can_send_record response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, false);
             return (apiStatus,
@@ -383,12 +359,10 @@ namespace Sora.OnebotInterface
             Guid connection)
         {
             Log.Debug("Sora", "Sending get_status request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetStatus
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_status response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, false, false, null);
             return (apiStatus,
@@ -408,7 +382,7 @@ namespace Sora.OnebotInterface
             Guid connection, string cacheFileName)
         {
             Log.Debug("Sora", "Sending get_image request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetImage,
                 ApiParams = new
@@ -416,8 +390,6 @@ namespace Sora.OnebotInterface
                     file = cacheFileName
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_image response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, -1, null, null);
             return (apiStatus,
@@ -439,7 +411,7 @@ namespace Sora.OnebotInterface
                 Guid serviceId, Guid connection, int msgId)
         {
             Log.Debug("Sora", "Sending get_msg request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetMessage,
                 ApiParams = new
@@ -447,8 +419,6 @@ namespace Sora.OnebotInterface
                     message_id = msgId
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
                 return (apiStatus, null, null, null, 0, false);
@@ -486,7 +456,7 @@ namespace Sora.OnebotInterface
         {
             if (string.IsNullOrEmpty(text)) throw new NullReferenceException(nameof(text));
             Log.Debug("Sora", "Sending .get_word_slices request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetWordSlices,
                 ApiParams = new
@@ -494,8 +464,6 @@ namespace Sora.OnebotInterface
                     content = text
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get .get_word_slices response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             return (apiStatus,
@@ -514,7 +482,7 @@ namespace Sora.OnebotInterface
             if (string.IsNullOrEmpty(msgId)) throw new NullReferenceException(nameof(msgId));
             Log.Debug("Sora", "Sending get_forward_msg request");
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetForwardMessage,
                 ApiParams = new
@@ -522,8 +490,6 @@ namespace Sora.OnebotInterface
                     message_id = msgId
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_forward_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, null);
             //转换消息类型
@@ -543,12 +509,10 @@ namespace Sora.OnebotInterface
         {
             Log.Debug("Sora", "Sending get_group_system_msg request");
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupSystemMsg
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_system_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK)
                 return (apiStatus, new List<GroupRequestInfo>(), new List<GroupRequestInfo>());
@@ -574,7 +538,7 @@ namespace Sora.OnebotInterface
         {
             Log.Debug("Sora", "Sending get_group_file_system_info request");
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupFileSystemInfo,
                 ApiParams = new
@@ -582,8 +546,6 @@ namespace Sora.OnebotInterface
                     group_id = gid
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_file_system_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus.RetCode != ApiStatusType.OK
                 ? (apiStatus, new GroupFileSysInfo())
@@ -603,7 +565,7 @@ namespace Sora.OnebotInterface
         {
             Log.Debug("Sora", "Sending get_group_root_files request");
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupRootFiles,
                 ApiParams = new
@@ -611,8 +573,6 @@ namespace Sora.OnebotInterface
                     group_id = gid
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_root_files response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK)
                 return (apiStatus, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
@@ -634,7 +594,7 @@ namespace Sora.OnebotInterface
         {
             Log.Debug("Sora", "Sending get_group_files_by_folder request");
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupFilesByFolder,
                 ApiParams = new
@@ -643,8 +603,6 @@ namespace Sora.OnebotInterface
                     folder_id = folderID
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_files_by_folder response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK)
                 return (apiStatus, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
@@ -666,7 +624,7 @@ namespace Sora.OnebotInterface
         {
             Log.Debug("Sora", "Sending get_group_file_url request");
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupFileUrl,
                 ApiParams = new
@@ -676,8 +634,6 @@ namespace Sora.OnebotInterface
                     busid    = busId
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_file_url response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus.RetCode != ApiStatusType.OK
                 ? (apiStatus, null)
@@ -695,7 +651,7 @@ namespace Sora.OnebotInterface
         {
             Log.Debug("Sora", "Sending get_group_at_all_remain request");
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupAtAllRemain,
                 ApiParams = new
@@ -703,8 +659,6 @@ namespace Sora.OnebotInterface
                     group_id = gid
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_at_all_remain response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK)
                 return (apiStatus, false, -1, -1);
@@ -725,7 +679,7 @@ namespace Sora.OnebotInterface
         {
             Log.Debug("Sora", "Sending ocr_image request");
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.Ocr,
                 ApiParams = new
@@ -733,8 +687,6 @@ namespace Sora.OnebotInterface
                     image = imgId
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get ocr_image response {nameof(apiStatus)}={apiStatus.RetCode}");
 
             if (apiStatus.RetCode != ApiStatusType.OK)
@@ -768,7 +720,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", "Sending download_file request");
 
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.DownloadFile,
                 ApiParams = new
@@ -779,8 +731,6 @@ namespace Sora.OnebotInterface
                 }
             }, connection, TimeSpan.FromMilliseconds(timeout));
 
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get download_file response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus.RetCode != ApiStatusType.OK
                 ? (apiStatus, string.Empty)
@@ -800,7 +750,7 @@ namespace Sora.OnebotInterface
                 long? msgSeq, long gid, Guid serviceId, Guid connection)
         {
             Log.Debug("Sora", "Sending get_group_msg_history request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMsgHistory,
                 ApiParams = msgSeq == null
@@ -814,8 +764,6 @@ namespace Sora.OnebotInterface
                         group_id    = gid
                     }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_group_msg_history response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理消息段
@@ -837,7 +785,7 @@ namespace Sora.OnebotInterface
         {
             Log.Debug("Sora", "Sending get_online_clients request");
             //发送信息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetOnlineClients,
                 ApiParams = new
@@ -845,8 +793,6 @@ namespace Sora.OnebotInterface
                     no_cache = !useCache
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_online_clients response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理客户端信息
@@ -863,7 +809,7 @@ namespace Sora.OnebotInterface
             Guid serviceId, Guid connection, long gid)
         {
             Log.Debug("Sora", "Sending get_essence_msg_list request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetEssenceMsgList,
                 ApiParams = new
@@ -871,8 +817,6 @@ namespace Sora.OnebotInterface
                     group_id = gid
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get get_essence_msg_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             return (apiStatus, (ret?["data"] ?? new JArray())
                                .Select(element => new EssenceInfo(element, serviceId, connection)).ToList());
@@ -887,7 +831,7 @@ namespace Sora.OnebotInterface
             Guid connection, string url)
         {
             Log.Debug("Sora", "Sending check_url_safely request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CheckUrlSafely,
                 ApiParams = new
@@ -895,8 +839,6 @@ namespace Sora.OnebotInterface
                     url
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get check_url_safely response {nameof(apiStatus)}={apiStatus.RetCode}");
             return (apiStatus, (SecurityLevelType) Convert.ToInt32(ret?["data"]?["level"] ?? 1));
         }
@@ -911,7 +853,7 @@ namespace Sora.OnebotInterface
             Guid connection, long uid)
         {
             Log.Debug("Sora", "Sending _get_vip_info request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType._GetVipInfo,
                 ApiParams = new
@@ -919,8 +861,6 @@ namespace Sora.OnebotInterface
                     user_id = uid
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get _get_vip_info response {nameof(apiStatus)}={apiStatus.RetCode}");
             return (apiStatus, ret?["data"]?.ToObject<VipInfo>() ?? new VipInfo());
         }
@@ -939,7 +879,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> RecallMsg(Guid connection, int msgId)
         {
             Log.Debug("Sora", "Sending delete_msg request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.RecallMsg,
                 ApiParams = new
@@ -947,8 +887,6 @@ namespace Sora.OnebotInterface
                     message_id = msgId
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get delete_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -965,7 +903,7 @@ namespace Sora.OnebotInterface
         {
             if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
             Log.Debug("Sora", "Sending set_friend_add_request request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetFriendAddRequest,
                 ApiParams = new
@@ -975,8 +913,6 @@ namespace Sora.OnebotInterface
                     remark
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_friend_add_request response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -996,7 +932,7 @@ namespace Sora.OnebotInterface
                                                                       string reason = null)
         {
             Log.Debug("Sora", "Sending set_group_add_request request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAddRequest,
                 ApiParams = new SetGroupAddRequestParams
@@ -1007,8 +943,6 @@ namespace Sora.OnebotInterface
                     Reason           = reason
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_add_request response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1023,7 +957,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> SetGroupCard(Guid connection, long gid, long uid, string card)
         {
             Log.Debug("Sora", "Sending set_group_card request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupCard,
                 ApiParams = new
@@ -1033,8 +967,6 @@ namespace Sora.OnebotInterface
                     card
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_card response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1050,7 +982,7 @@ namespace Sora.OnebotInterface
                                                                         string title)
         {
             Log.Debug("Sora", "Sending set_group_special_title request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupSpecialTitle,
                 ApiParams = new
@@ -1061,8 +993,6 @@ namespace Sora.OnebotInterface
                     duration      = -1
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_special_title response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1078,7 +1008,7 @@ namespace Sora.OnebotInterface
                                                                    bool rejectRequest)
         {
             Log.Debug("Sora", "Sending set_group_kick request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupKick,
                 ApiParams = new
@@ -1088,8 +1018,6 @@ namespace Sora.OnebotInterface
                     reject_add_request = rejectRequest
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_kick response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1104,7 +1032,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> SetGroupBan(Guid connection, long gid, long uid, long duration)
         {
             Log.Debug("Sora", "Sending set_group_ban request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupBan,
                 ApiParams = new
@@ -1114,8 +1042,6 @@ namespace Sora.OnebotInterface
                     duration
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_ban response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1129,7 +1055,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> SetGroupWholeBan(Guid connection, long gid, bool enable)
         {
             Log.Debug("Sora", "Sending set_group_whole_ban request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupWholeBan,
                 ApiParams = new
@@ -1138,8 +1064,6 @@ namespace Sora.OnebotInterface
                     enable
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_whole_ban response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1155,7 +1079,7 @@ namespace Sora.OnebotInterface
                                                                    long duration)
         {
             Log.Debug("Sora", "Sending set_group_anonymous_ban request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
                 ApiParams = new
@@ -1165,8 +1089,6 @@ namespace Sora.OnebotInterface
                     duration
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_anonymous_ban response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1182,7 +1104,7 @@ namespace Sora.OnebotInterface
                                                                    long duration)
         {
             Log.Debug("Sora", "Sending set_group_anonymous_ban request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
                 ApiParams = new
@@ -1192,8 +1114,6 @@ namespace Sora.OnebotInterface
                     duration
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_anonymous_ban response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1208,7 +1128,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> SetGroupAdmin(Guid connection, long uid, long gid, bool enable)
         {
             Log.Debug("Sora", "Sending set_group_admin request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupAdmin,
                 ApiParams = new
@@ -1218,8 +1138,6 @@ namespace Sora.OnebotInterface
                     enable
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_admin response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1233,7 +1151,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> SetGroupLeave(Guid connection, long gid, bool dismiss)
         {
             Log.Debug("Sora", "Sending set_group_leave request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupLeave,
                 ApiParams = new
@@ -1242,8 +1160,6 @@ namespace Sora.OnebotInterface
                     is_dismiss = dismiss
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_leave response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1256,7 +1172,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> Restart(Guid connection, int delay)
         {
             Log.Debug("Sora", "Sending restart client requset");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.Restart,
                 ApiParams = new
@@ -1264,8 +1180,6 @@ namespace Sora.OnebotInterface
                     delay
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get restart response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1282,7 +1196,7 @@ namespace Sora.OnebotInterface
         {
             if (string.IsNullOrEmpty(name)) throw new NullReferenceException(nameof(name));
             Log.Debug("Sora", "Sending set_group_name request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupName,
                 ApiParams = new
@@ -1291,8 +1205,6 @@ namespace Sora.OnebotInterface
                     group_name = name
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_name response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1309,7 +1221,7 @@ namespace Sora.OnebotInterface
         {
             if (string.IsNullOrEmpty(file)) throw new NullReferenceException(nameof(file));
             Log.Debug("Sora", "Sending set_group_portrait request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetGroupPortrait,
                 ApiParams = new
@@ -1319,8 +1231,6 @@ namespace Sora.OnebotInterface
                     cache = useCache ? 1 : 0
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_group_portrait response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1346,7 +1256,7 @@ namespace Sora.OnebotInterface
 
             Log.Debug("Sora", "Sending send_group_forward_msg request");
             //发送消息
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SendGroupForwardMsg,
                 ApiParams = new
@@ -1355,8 +1265,6 @@ namespace Sora.OnebotInterface
                     messages = dataObj
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get send_group_forward_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1368,12 +1276,10 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> ReloadEventFilter(Guid connection)
         {
             Log.Debug("Sora", "Sending reload_event_filter request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.ReloadEventFilter
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get reload_event_filter response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1392,7 +1298,7 @@ namespace Sora.OnebotInterface
                                                                    string floderId = null, int timeout = 10000)
         {
             Log.Debug("Sora", "Sending upload_group_file request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.UploadGroupFile,
                 ApiParams = new
@@ -1403,8 +1309,6 @@ namespace Sora.OnebotInterface
                     folder   = floderId      ?? string.Empty
                 }
             }, connection, TimeSpan.FromMilliseconds(timeout));
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get upload_group_file response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1417,7 +1321,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> SetEssenceMsg(Guid connection, long msgId)
         {
             Log.Debug("Sora", "Sending set_essence_msg request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.SetEssenceMsg,
                 ApiParams = new
@@ -1425,8 +1329,6 @@ namespace Sora.OnebotInterface
                     message_id = msgId
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get set_essence_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1439,7 +1341,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> DelEssenceMsg(Guid connection, long msgId)
         {
             Log.Debug("Sora", "Sending delete_essence_msg request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.DeleteEssenceMsg,
                 ApiParams = new
@@ -1447,8 +1349,6 @@ namespace Sora.OnebotInterface
                     message_id = msgId
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get delete_essence_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
@@ -1462,7 +1362,7 @@ namespace Sora.OnebotInterface
         internal static async ValueTask<ApiStatus> SendGroupNotice(Guid connection, long gid, string content)
         {
             Log.Debug("Sora", "Sending _send_group_notice request");
-            var ret = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType._SendGroupNotice,
                 ApiParams = new
@@ -1471,41 +1371,11 @@ namespace Sora.OnebotInterface
                     content
                 }
             }, connection);
-            //处理API返回信息
-            var apiStatus = GetApiStatus(ret);
             Log.Debug("Sora", $"Get _send_group_notice response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
 
         #endregion
-
-        #endregion
-
-        #region 数据处理
-
-        /// <summary>
-        /// 获取API状态返回值
-        /// 所有API回调请求都会返回状态值
-        /// </summary>
-        /// <param name="msg">消息JSON</param>
-        private static ApiStatus GetApiStatus(JObject msg)
-        {
-            if (msg == null)
-                return new ApiStatus
-                {
-                    RetCode      = ApiStatusType.TimeOut,
-                    ApiMessage   = "cannot get api status",
-                    ApiStatusStr = null
-                };
-            return new ApiStatus
-            {
-                RetCode = (ApiStatusType) (int.TryParse(msg["retcode"]?.ToString(), out var messageCode)
-                    ? messageCode
-                    : -1),
-                ApiMessage   = $"{msg["msg"]}({msg["wording"]})",
-                ApiStatusStr = msg["status"]?.ToString() ?? "failed"
-            };
-        }
 
         #endregion
     }

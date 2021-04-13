@@ -21,6 +21,11 @@ namespace Sora.Enumeration.ApiType
         /// <summary>
         /// 404
         /// </summary>
+        Forbidden = 404,
+
+        /// <summary>
+        /// 404
+        /// </summary>
         NotFound = 404,
 
         /// <summary>
@@ -29,13 +34,28 @@ namespace Sora.Enumeration.ApiType
         Error = 502,
 
         /// <summary>
-        /// API执行失败
-        /// </summary>
-        Failed_ = 102,
-
-        /// <summary>
         /// API超时
         /// </summary>
-        TimeOut = -1
+        TimeOut = -1,
+
+        /// <summary>
+        /// API没有返回任何信息
+        /// </summary>
+        NullResponse = -2,
+
+        /// <summary>
+        /// WS通信失败
+        /// </summary>
+        SocketSendError = -3,
+
+        /// <summary>
+        /// 未知错误
+        /// </summary>
+        ObservableError = -4,
+
+        /// <summary>
+        /// 未知状态
+        /// </summary>
+        UnknownStatus = -5
     }
 }

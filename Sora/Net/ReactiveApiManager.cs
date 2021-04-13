@@ -4,7 +4,10 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Sora.Attributes;
 using Sora.Entities;
+using Sora.Entities.Info;
+using Sora.Enumeration.ApiType;
 using Sora.OnebotModel.ApiParams;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
@@ -36,8 +39,9 @@ namespace Sora.Net
         /// <param name="connectionGuid">服务器连接标识符</param>
         /// <param name="timeout">覆盖原有超时,在不为空时有效</param>
         /// <returns>API返回</returns>
-        internal static async ValueTask<JObject> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid,
-                                                                TimeSpan? timeout = null)
+        [NeedReview("L61-L99")]
+        internal static async ValueTask<(ApiStatus, JObject)> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid,
+                                                                             TimeSpan? timeout = null)
         {
             TimeSpan currentTimeout;
             if (timeout is null)
@@ -54,28 +58,97 @@ namespace Sora.Net
                 currentTimeout = (TimeSpan) timeout;
             }
 
+            //错误数据
+            (bool isTimeout, Exception exception) err = (false, null);
             //向客户端发送请求数据
             var apiTask = StaticVariable.ApiSubject
                                         .Where(request => request.Item1 == apiRequest.Echo)
                                         .Select(request => request.Item2)
                                         .Take(1)
                                         .Timeout(currentTimeout)
-                                        .Catch(Observable.Return(new JObject()))
                                         .ToTask()
                                         .RunCatch(e =>
                                                   {
                                                       Log.Error("Sora|ReactiveApiManager",
                                                                 $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
+                                                      err.isTimeout = e is TimeoutException;
+                                                      err.exception = e;
                                                       return new JObject();
                                                   });
-            if (!ConnectionManager.SendMessage(connectionGuid, JsonConvert.SerializeObject(apiRequest, Formatting.None))
-            ) return null;
+            //发送消息
+            if (!ConnectionManager
+                    .SendMessage(connectionGuid, JsonConvert.SerializeObject(apiRequest, Formatting.None)))
+                //API消息发送失败
+                return (SocketSendError(), null);
+
             //等待客户端返回调用结果
             var response = await apiTask.ConfigureAwait(false);
-            if (response != null && response.Count != 0) return response;
-            Log.Error("Sora|ReactiveApiManager", "api time out");
-            return null;
+            //检查API返回
+            if (response != null && response.Count != 0)
+            {
+                return (GetApiStatus(response), response);
+            }
+
+            //空响应
+            if (err.exception == null) return (NullResponse(), null);
+            //观察者抛出异常
+            if (err.isTimeout) Log.Error("Sora|ReactiveApiManager", "api time out");
+            return err.isTimeout
+                ? (TimeOut(), null)
+                : (ObservableError(Log.ErrorLogBuilder(err.exception)), null);
         }
+
+        #endregion
+
+        #region API状态处理
+
+        /// <summary>
+        /// 获取API状态返回值
+        /// 所有API回调请求都会返回状态值
+        /// </summary>
+        /// <param name="msg">消息JSON</param>
+        [NeedReview("ALL")]
+        private static ApiStatus GetApiStatus(JObject msg)
+            => new()
+            {
+                RetCode = Enum.TryParse<ApiStatusType>(msg["retcode"]?.ToString() ?? string.Empty, out var messageCode)
+                    ? messageCode
+                    : ApiStatusType.UnknownStatus,
+                ApiMessage   = $"{msg["msg"]}({msg["wording"]})",
+                ApiStatusStr = msg["status"]?.ToString() ?? "failed"
+            };
+
+        private static ApiStatus TimeOut()
+            => new()
+            {
+                RetCode      = ApiStatusType.TimeOut,
+                ApiMessage   = "api timeout",
+                ApiStatusStr = "timeout"
+            };
+
+        private static ApiStatus NullResponse()
+            => new()
+            {
+                RetCode      = ApiStatusType.NullResponse,
+                ApiMessage   = "get null response from api",
+                ApiStatusStr = "failed"
+            };
+
+        private static ApiStatus SocketSendError()
+            => new()
+            {
+                RetCode      = ApiStatusType.SocketSendError,
+                ApiMessage   = "cannot send message to api",
+                ApiStatusStr = "failed"
+            };
+
+        private static ApiStatus ObservableError(string errLog)
+            => new()
+            {
+                RetCode      = ApiStatusType.ObservableError,
+                ApiMessage   = errLog,
+                ApiStatusStr = "observable error"
+            };
 
         #endregion
     }
