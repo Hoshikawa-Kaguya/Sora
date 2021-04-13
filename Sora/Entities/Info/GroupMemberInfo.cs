@@ -2,6 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration.EventParamsType;
+using YukariToolBox.Time;
 
 namespace Sora.Entities.Info
 {
@@ -55,14 +56,20 @@ namespace Sora.Entities.Info
         /// <summary>
         /// 加群时间戳
         /// </summary>
+        [JsonIgnore]
+        public DateTime JoinTime => JoinTimeStamp.ToDateTime();
+
         [JsonProperty(PropertyName = "join_time")]
-        public DateTime JoinTime { get; internal init; }
+        private long JoinTimeStamp { get; set; }
 
         /// <summary>
         /// 最后发言时间戳
         /// </summary>
+        [JsonIgnore]
+        public DateTime LastSentTime => LastSentTimeStamp.ToDateTime();
+
         [JsonProperty(PropertyName = "last_sent_time")]
-        public DateTime LastSentTime { get; internal init; }
+        private long LastSentTimeStamp { get; init; }
 
         /// <summary>
         /// 成员等级
@@ -90,10 +97,19 @@ namespace Sora.Entities.Info
         public string Title { get; internal init; }
 
         /// <summary>
-        /// 专属头衔过期时间戳
+        /// <para>专属头衔过期时间戳</para>
+        /// <para>在<see cref="Title"/>不为空时有效</para>
         /// </summary>
-        [JsonProperty(PropertyName = "title_expire_time")]
-        public long TitleExpireTime { get; internal init; }
+        [JsonIgnore]
+        public DateTime? TitleExpireTime { get; internal init; }
+
+        [JsonProperty(PropertyName         = "title_expire_time", NullValueHandling = NullValueHandling.Ignore,
+                      DefaultValueHandling = DefaultValueHandling.Ignore)]
+        private long? TitleExpireTimeStamp
+        {
+            get => TitleExpireTime?.ToTimeStamp();
+            init => value?.ToDateTime();
+        }
 
         /// <summary>
         /// 是否允许修改群名片

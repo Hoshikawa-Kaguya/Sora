@@ -35,7 +35,8 @@ namespace Sora.Entities.Info
         /// <summary>
         /// 来源群号
         /// </summary>
-        [JsonProperty(PropertyName = "group_id")]
+        [JsonProperty(PropertyName         = "group_id", NullValueHandling = NullValueHandling.Ignore,
+                      DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long? GroupId { get; internal init; }
 
         /// <summary>
