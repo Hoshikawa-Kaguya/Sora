@@ -82,6 +82,12 @@ namespace Sora
                     .ToList()
                     .ForEach(array => methods.AddRange(array));
 
+            assembly.GetTypes()
+                    .Where(type => type.IsClass)
+                    .Select(type => type.GetMethods(BindingFlags.NonPublic | BindingFlags.Static))
+                    .ToList()
+                    .ForEach(array => methods.AddRange(array));
+
 
             var totalMethod = methods.Count;
 
@@ -94,7 +100,7 @@ namespace Sora
             Log.Debug("Total Method Count", totalMethod);
 
             Log.Debug("Checked Method",
-                      $"\n{string.Join("\n", checkedMethod.Select(m => $"{m.Key.ReflectedType?.FullName}.{m.Key.Name} checked by {m.Value?.Person} {m.Value?.Time}"))}");
+                      $"{checkedMethod.Count}\n{string.Join("\n", checkedMethod.Select(m => $"{m.Key.ReflectedType?.FullName}.{m.Key.Name} checked by {m.Value?.Person} {m.Value?.Time}"))}");
 
             Log.Debug("Unchecked Method Count", uncheckedMethod.Count);
         }
