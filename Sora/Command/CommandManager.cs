@@ -108,7 +108,7 @@ namespace Sora.Command
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
         /// <returns>是否继续处理接下来的消息</returns>
-        internal void CommandAdapter(dynamic eventArgs)
+        internal async ValueTask CommandAdapter(dynamic eventArgs)
         {
             //检查使能
             if (!_enableSoraCommandManager) return;
@@ -261,23 +261,12 @@ namespace Sora.Command
                         commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
                                                                   false) is not null;
                     //执行指令方法
-                    if (isAsnyc)
+                    if (isAsnyc && commandInfo.MethodInfo.ReturnType != typeof(void))
                     {
                         Log.Debug("Command", "invoke async command method");
-                        Task asyncTask = Task.Run(async () =>
-                                                  {
-                                                      await commandInfo.MethodInfo
-                                                                       .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                                               new[] {eventArgs});
-                                                  });
-                        try
-                        {
-                            if (!asyncTask.IsCompleted) asyncTask.Wait();
-                        }
-                        catch (Exception)
-                        {
-                            Log.Warning("Command", "Try wait method failed");
-                        }
+                        await commandInfo.MethodInfo
+                                         .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
+                                                 new[] {eventArgs});
                     }
                     else
                     {
@@ -300,15 +289,12 @@ namespace Sora.Command
                         {
                             case GroupMessageEventArgs groupMessageEvent:
                             {
-                                Task.Run(async () => { await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}"); });
+                                await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
                                 break;
                             }
                             case PrivateMessageEventArgs privateMessageEvent:
                             {
-                                Task.Run(async () =>
-                                         {
-                                             await privateMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
-                                         });
+                                await privateMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
                                 break;
                             }
                         }
