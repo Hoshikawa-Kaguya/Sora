@@ -293,7 +293,7 @@ namespace Sora.OnebotInterface
                               $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                     var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
                     //处理指令
-                    CommandManager.CommandAdapter(eventArgs);
+                    await CommandManager.CommandAdapter(eventArgs);
                     if (!eventArgs.IsContinueEventChain)
                         break;
                     //执行回调
@@ -311,7 +311,7 @@ namespace Sora.OnebotInterface
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
                     //处理指令
-                    CommandManager.CommandAdapter(eventArgs);
+                    await CommandManager.CommandAdapter(eventArgs);
                     if (!eventArgs.IsContinueEventChain)
                         break;
                     //执行回调

@@ -12,6 +12,7 @@ namespace Sora_Test
         [GroupCommand(CommandExpressions = new[] {"1"})]
         public static async ValueTask TestCommand(GroupMessageEventArgs eventArgs)
         {
+            eventArgs.IsContinueEventChain = false;
             await eventArgs.Reply("怪欸");
         }
     }

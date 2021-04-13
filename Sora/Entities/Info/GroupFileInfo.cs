@@ -37,41 +37,29 @@ namespace Sora.Entities.Info
         /// 上传时间
         /// </summary>
         [JsonIgnore]
-        public DateTime UploadDateTime { get; private init; }
+        public DateTime UploadTime => UploadTimeStamp.ToDateTime();
 
         [JsonProperty(PropertyName = "upload_time")]
-        private long UploadTimeStamp
-        {
-            get => UploadDateTime.ToTimeStamp();
-            init => UploadDateTime = value.ToDateTime();
-        }
+        private long UploadTimeStamp { get; init; }
 
         /// <summary>
         /// <para>过期时间</para>
         /// <para>永久文件为0</para>
         /// </summary>
         [JsonIgnore]
-        public DateTime DeadDateTime { get; private init; }
+        public DateTime DeadTime => DeadTimeStamp.ToDateTime();
 
         [JsonProperty(PropertyName = "dead_time")]
-        private long DeadTimeStamp
-        {
-            get => DeadDateTime.ToTimeStamp();
-            init => DeadDateTime = value.ToDateTime();
-        }
+        private long DeadTimeStamp { get; init; }
 
         /// <summary>
         /// 修改时间
         /// </summary>
         [JsonIgnore]
-        public DateTime ModifyDateTime { get; private init; }
+        public DateTime ModifyTime => ModifyTimeStamp.ToDateTime();
 
         [JsonProperty(PropertyName = "modify_time")]
-        private long ModifyTimeStamp
-        {
-            get => ModifyDateTime.ToTimeStamp();
-            init => ModifyDateTime = value.ToDateTime();
-        }
+        private long ModifyTimeStamp { get; init; }
 
         /// <summary>
         /// 下载次数

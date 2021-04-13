@@ -25,14 +25,10 @@ namespace Sora.Entities.Info
         /// 创建时间
         /// </summary>
         [JsonIgnore]
-        public DateTime CreateDateTime { get; internal init; }
+        public DateTime CreateTime => CreateTimeStamp.ToDateTime();
 
         [JsonProperty(PropertyName = "create_time")]
-        private long CreateTimeStamp
-        {
-            get => CreateDateTime.ToTimeStamp();
-            init => CreateDateTime = value.ToDateTime();
-        }
+        private long CreateTimeStamp { get; init; }
 
         /// <summary>
         /// 创建者UID
