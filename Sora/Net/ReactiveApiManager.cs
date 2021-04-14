@@ -39,7 +39,7 @@ namespace Sora.Net
         /// <param name="connectionGuid">服务器连接标识符</param>
         /// <param name="timeout">覆盖原有超时,在不为空时有效</param>
         /// <returns>API返回</returns>
-        [Reviewed("XiaoHe321","2021-04-13 23:00")]
+        [Reviewed("XiaoHe321", "2021-04-13 23:00")]
         internal static async ValueTask<(ApiStatus, JObject)> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid,
                                                                              TimeSpan? timeout = null)
         {
@@ -75,9 +75,8 @@ namespace Sora.Net
                                                       err.exception = e;
                                                       return new JObject();
                                                   });
-            
+
             //这里的错误最终将抛给开发者
-            //TODO:Advise：建议统一错误处理
             //发送消息
             if (!ConnectionManager
                     .SendMessage(connectionGuid, JsonConvert.SerializeObject(apiRequest, Formatting.None)))
@@ -110,15 +109,16 @@ namespace Sora.Net
         /// 所有API回调请求都会返回状态值
         /// </summary>
         /// <param name="msg">消息JSON</param>
-        [Reviewed("XiaoHe321","2021-04-13 22:54")]
+        [Reviewed("XiaoHe321", "2021-04-13 22:54")]
         private static ApiStatus GetApiStatus(JObject msg)
             => new()
             {
-                //TODO:Advise：如果可以建议采用自定义数据结构，避免直接使用JSON对象（总感觉会出问题）
                 RetCode = Enum.TryParse<ApiStatusType>(msg["retcode"]?.ToString() ?? string.Empty, out var messageCode)
-                              ? messageCode
-                              : ApiStatusType.UnknownStatus,
-                ApiMessage   = $"{msg["msg"]}({msg["wording"]})",
+                    ? messageCode
+                    : ApiStatusType.UnknownStatus,
+                ApiMessage = msg["msg"] == null && msg["wording"] == null
+                    ? string.Empty
+                    : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})",
                 ApiStatusStr = msg["status"]?.ToString() ?? "failed"
             };
 
