@@ -5,7 +5,7 @@ namespace Sora.Enumeration.ApiType
     /// <summary>
     /// API返回值
     /// </summary>
-    [DefaultValue(OK)]
+    [DefaultValue(UnknownStatus)]
     public enum ApiStatusType
     {
         /// <summary>
@@ -19,9 +19,9 @@ namespace Sora.Enumeration.ApiType
         Failed = 100,
 
         /// <summary>
-        /// 404
+        /// 403
         /// </summary>
-        Forbidden = 404,
+        Forbidden = 403,
 
         /// <summary>
         /// 404
