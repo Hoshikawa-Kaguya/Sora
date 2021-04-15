@@ -20,10 +20,11 @@
 	<img src="https://img.shields.io/github/stars/Yukari316/Sora?style=for-the-badge">
 	<img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=for-the-badge">
 	<a href="https://github.com/Mrs4s/go-cqhttp">
-		<img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--beta1-blue?style=for-the-badge">
+		<img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--beta3-blue?style=for-the-badge">
 	</a>
 	</h4>
 </h1>
+
 
 
 
@@ -58,7 +59,8 @@
 
 详细内容请关注文档的更新
 
-### 关于开源协议
+<details>
+<summary>开源协议</summary>
 
 本项目使用了`AGPL-3.0`开源协议
 
@@ -68,7 +70,12 @@
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FYukari316%2FSora.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2FYukari316%2FSora?ref=badge_small)
 
-### **有关代码复查的提示：**
+</details>
+
+<details>
+<summary>代码复查</summary>
+
+### 我复查了某一段代码
 
 如果有代码复查，请在函数上面贴上Reviewed以代表是谁以及什么时候进行了代码复查
 
@@ -76,12 +83,27 @@
 
 ```csharp
 [Reviewed("XiaoHe321", "2021-03-11 00:45")]
-internal async ValueTask<bool> CommandAdapter(object eventArgs)
+internal async ValueTask METHOD_NAME()
 ```
 
 若修改了这段代码，请将Reviewed注解及时删除，以方便代码复查人员知道，你改了这段代码，方便进行复查。
 
 对于自己代码的复查，请不要贴上Reviewed。
+
+### 我修改了一段代码需要复查
+
+如果有代码需要复查，请在函数上面贴上NeedReview以代表这段代码需要复查
+
+例如：
+
+> 行号也可以是`ALL`一代表这整个方法都需要检查
+
+```csharp
+[NeedReview("L12-L123")]
+internal async ValueTask METHOD_NAME()
+```
+
+</details>
 
 ## 关于ISSUE
 
