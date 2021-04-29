@@ -1,9 +1,9 @@
 ﻿namespace Sora.Enumeration
 {
     /// <summary>
-    /// 等待命令类型
+    /// 消息来源类型
     /// </summary>
-    internal enum SourceFlag
+    public enum SourceFlag
     {
         /// <summary>
         /// 群聊

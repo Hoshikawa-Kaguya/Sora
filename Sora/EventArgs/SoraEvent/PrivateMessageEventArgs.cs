@@ -116,7 +116,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="regexOptions">正则匹配选项</param>
         /// <returns>触发后的事件参数</returns>
         public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
-                                                                        RegexOptions regexOptions = RegexOptions.None)
+                                                                          RegexOptions regexOptions = RegexOptions.None)
         {
             return ValueTask.FromResult((PrivateMessageEventArgs) WaitForNextMessage(Sender, commandExps, matchType,
                                             SourceFlag.Private, regexOptions));

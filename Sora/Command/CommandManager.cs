@@ -104,10 +104,69 @@ namespace Sora.Command
         }
 
         /// <summary>
+        /// 动态创建指令
+        /// </summary>
+        /// <param name="desc">指令描述</param>
+        /// <param name="cmdExps">指令表达式</param>
+        /// <param name="matchType">匹配类型</param>
+        /// <param name="regexOptions">正则匹配选项</param>
+        /// <param name="commandBlock">指令委托</param>
+        /// <param name="permissonType">权限等级</param>
+        /// <exception cref="NullReferenceException">空参数异常</exception>
+        /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
+        [NeedReview("ALL")]
+        public void RegisterGroupCommand(string[] cmdExps, MatchType matchType,
+                                         Func<GroupMessageEventArgs, ValueTask> commandBlock,
+                                         MemberRoleType permissonType = MemberRoleType.Member,
+                                         RegexOptions regexOptions = RegexOptions.None,
+                                         string desc = "")
+        {
+            //检查使能
+            if (!_enableSoraCommandManager) return;
+
+            //生成指令信息
+            if (_groupCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
+                                                                permissonType)))
+                Log.Debug("Command", "Registered group command [dynamic]");
+            else
+                throw new NotSupportedException("cannot add new group command");
+        }
+
+        /// <summary>
+        /// 动态创建指令
+        /// </summary>
+        /// <param name="desc">指令描述</param>
+        /// <param name="cmdExps">指令表达式</param>
+        /// <param name="matchType">匹配类型</param>
+        /// <param name="regexOptions">正则匹配选项</param>
+        /// <param name="commandBlock">指令委托</param>
+        /// <param name="permissonType">权限等级</param>
+        /// <exception cref="NullReferenceException">空参数异常</exception>
+        /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
+        [NeedReview("ALL")]
+        public void RegisterPrivateCommand(string[] cmdExps, MatchType matchType,
+                                           Func<PrivateMessageEventArgs, ValueTask> commandBlock,
+                                           MemberRoleType permissonType = MemberRoleType.Member,
+                                           RegexOptions regexOptions = RegexOptions.None,
+                                           string desc = "")
+        {
+            //检查使能
+            if (!_enableSoraCommandManager) return;
+
+            //生成指令信息
+            if (_privateCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
+                                                                  permissonType)))
+                Log.Debug("Command", "Registered private command [dynamic]");
+            else
+                throw new NotSupportedException("cannot add new group command");
+        }
+
+        /// <summary>
         /// 处理聊天指令的单次处理器
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
         /// <returns>是否继续处理接下来的消息</returns>
+        [NeedReview("L309-L362")]
         internal async ValueTask CommandAdapter(dynamic eventArgs)
         {
             //检查使能
@@ -204,8 +263,7 @@ namespace Sora.Command
                                                                                   .IsMatch(groupMessageEvent.Message.RawText,
                                                                                       regex,
                                                                                       RegexOptions.Compiled |
-                                                                                      command.RegexOptions)
-                                                                           && command.MethodInfo != null))
+                                                                                      command.RegexOptions)))
                                       .OrderByDescending(p => p.Priority)
                                       .ToList();
                     break;
@@ -218,8 +276,7 @@ namespace Sora.Command
                                                                                     .IsMatch(privateMessageEvent.Message.RawText,
                                                                                         regex,
                                                                                         RegexOptions.Compiled |
-                                                                                        command.RegexOptions)
-                                                                             && command.MethodInfo != null))
+                                                                                        command.RegexOptions)))
                                         .OrderByDescending(p => p.Priority)
                                         .ToList();
 
@@ -239,7 +296,7 @@ namespace Sora.Command
                 //若是群，则判断权限
                 if (eventArgs is GroupMessageEventArgs groupEventArgs)
                 {
-                    if (groupEventArgs.SenderInfo.Role < (commandInfo.PermissonType ?? MemberRoleType.Member))
+                    if (groupEventArgs.SenderInfo.Role < commandInfo.PermissonType)
                     {
                         Log.Warning("CommandAdapter",
                                     $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{commandInfo.MethodInfo.Name}");
@@ -249,31 +306,60 @@ namespace Sora.Command
                     }
                 }
 
-                Log.Debug("CommandAdapter",
-                          $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
-                Log.Info("CommandAdapter", $"触发指令[{commandInfo.MethodInfo.Name}]");
-
-
                 try
                 {
-                    //尝试执行指令并判断异步方法
-                    var isAsnyc =
-                        commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
-                                                                  false) is not null;
-                    //执行指令方法
-                    if (isAsnyc && commandInfo.MethodInfo.ReturnType != typeof(void))
+                    //判断不同的执行方法
+                    switch (commandInfo.InvokeType)
                     {
-                        Log.Debug("Command", "invoke async command method");
-                        await commandInfo.MethodInfo
-                                         .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                 new[] {eventArgs});
-                    }
-                    else
-                    {
-                        Log.Debug("Command", "invoke command method");
-                        commandInfo.MethodInfo
-                                   .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                           new[] {eventArgs});
+                        //特性指令
+                        case InvokeType.Method:
+                        {
+                            Log.Debug("CommandAdapter",
+                                      $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+                            Log.Info("CommandAdapter", $"触发指令[{commandInfo.MethodInfo.Name}]");
+                            //尝试执行指令并判断异步方法
+                            var isAsnyc =
+                                commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
+                                                                          false) is not null;
+                            //执行指令方法
+                            if (isAsnyc && commandInfo.MethodInfo.ReturnType != typeof(void))
+                            {
+                                Log.Debug("Command", "invoke async command method");
+                                await commandInfo.MethodInfo
+                                                 .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
+                                                         new[] {eventArgs});
+                            }
+                            else
+                            {
+                                Log.Debug("Command", "invoke command method");
+                                commandInfo.MethodInfo
+                                           .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
+                                                   new[] {eventArgs});
+                            }
+
+                            break;
+                        }
+                        //动态注册指令
+                        case InvokeType.Action:
+                        {
+                            Log.Debug("CommandAdapter",
+                                      $"trigger command [dynamic command({commandInfo.Priority})]");
+                            Log.Info("CommandAdapter", $"触发指令[dynamic command({commandInfo.Priority})]");
+                            switch (commandInfo.SourceFlag)
+                            {
+                                case SourceFlag.Group:
+                                    await commandInfo.GroupActionBlock.Invoke(eventArgs);
+                                    break;
+                                case SourceFlag.Private:
+                                    await commandInfo.PrivateActionBlock.Invoke(eventArgs);
+                                    break;
+                            }
+
+                            break;
+                        }
+                        default:
+                            Log.Error("CommandAdapter", "Get unknown command type");
+                            break;
                     }
 
                     return;
@@ -385,17 +471,7 @@ namespace Sora.Command
             //处理指令匹配类型
             var match = (commandAttr as Attributes.Command.Command)?.MatchType ?? MatchType.Full;
             //处理表达式
-            var matchExp = match switch
-            {
-                MatchType.Full => (commandAttr as Attributes.Command.Command)?.CommandExpressions
-                                                                             .Select(command => $"^{command}$")
-                                                                             .ToArray(),
-                MatchType.Regex => (commandAttr as Attributes.Command.Command)?.CommandExpressions,
-                MatchType.KeyWord => (commandAttr as Attributes.Command.Command)?.CommandExpressions
-                    .Select(command => $"[{command}]+")
-                    .ToArray(),
-                _ => null
-            };
+            var matchExp = ParseCommandExps((commandAttr as Attributes.Command.Command)?.CommandExpressions, match);
             //若无匹配表达式，则创建一个空白的命令信息
             if (matchExp == null)
             {
@@ -416,13 +492,81 @@ namespace Sora.Command
                                           matchExp,
                                           classType.Name,
                                           method,
-                                          (commandAttr as GroupCommand)?.PermissionLevel,
+                                          (commandAttr as GroupCommand)?.PermissionLevel ?? MemberRoleType.Member,
                                           (commandAttr as Attributes.Command.Command)?.Priority ?? 0,
                                           (commandAttr as Attributes.Command.Command)?.RegexOptions ??
                                           RegexOptions.None,
                                           method.IsStatic ? null : classType);
 
             return commandAttr;
+        }
+
+        /// <summary>
+        /// 生成动态指令信息
+        /// </summary>
+        /// <param name="desc">指令描述</param>
+        /// <param name="cmdExps">指令表达式</param>
+        /// <param name="matchType">匹配类型</param>
+        /// <param name="regexOptions">正则匹配选项</param>
+        /// <param name="commandBlock">指令委托</param>
+        /// <param name="permissonType">权限等级</param>
+        /// <exception cref="NullReferenceException">空参数异常</exception>
+        /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
+        [NeedReview("ALL")]
+        private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
+                                                  RegexOptions regexOptions,
+                                                  Func<GroupMessageEventArgs, ValueTask> commandBlock,
+                                                  MemberRoleType permissonType)
+        {
+            //判断参数合法性
+            if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
+            var parameters = commandBlock.Method.GetParameters();
+            if (parameters.Length != 1) throw new NotSupportedException("unsupport parameter count");
+            //处理表达式
+            var matchExp = ParseCommandExps(cmdExps, matchType);
+
+            //判断指令响应源
+            if (parameters.First().ParameterType != typeof(GroupMessageEventArgs))
+                throw new NotSupportedException("unsupport parameter type");
+
+            //创建指令信息
+            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissonType,
+                                   _groupCommands.Min(cmd => cmd.Priority) - 1,
+                                   regexOptions | RegexOptions.Compiled);
+        }
+
+        /// <summary>
+        /// 生成动态指令信息
+        /// </summary>
+        /// <param name="desc">指令描述</param>
+        /// <param name="cmdExps">指令表达式</param>
+        /// <param name="matchType">匹配类型</param>
+        /// <param name="regexOptions">正则匹配选项</param>
+        /// <param name="commandBlock">指令委托</param>
+        /// <param name="permissonType">权限等级</param>
+        /// <exception cref="NullReferenceException">空参数异常</exception>
+        /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
+        [NeedReview("ALL")]
+        private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
+                                                  RegexOptions regexOptions,
+                                                  Func<PrivateMessageEventArgs, ValueTask> commandBlock,
+                                                  MemberRoleType permissonType)
+        {
+            //判断参数合法性
+            if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
+            var parameters = commandBlock.Method.GetParameters();
+            if (parameters.Length != 1) throw new NotSupportedException("unsupport parameter count");
+            //处理表达式
+            var matchExp = ParseCommandExps(cmdExps, matchType);
+
+            //判断指令响应源
+            if (parameters.First().ParameterType != typeof(GroupMessageEventArgs))
+                throw new NotSupportedException("unsupport parameter type");
+
+            //创建指令信息
+            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissonType,
+                                   _privateCommands.Min(cmd => cmd.Priority) - 1,
+                                   regexOptions | RegexOptions.Compiled);
         }
 
         /// <summary>
@@ -459,6 +603,27 @@ namespace Sora.Command
 
             return true;
         }
+
+        #endregion
+
+        #region 指令表达式处理
+
+        /// <summary>
+        /// 处理指令正则表达式
+        /// </summary>
+        [NeedReview("ALL")]
+        private string[] ParseCommandExps(string[] cmdExps, MatchType matchType)
+            => matchType switch
+            {
+                MatchType.Full => cmdExps
+                                  .Select(command => $"^{command}$")
+                                  .ToArray(),
+                MatchType.Regex => cmdExps,
+                MatchType.KeyWord => cmdExps
+                                     .Select(command => $"[{command}]+")
+                                     .ToArray(),
+                _ => throw new NotSupportedException("unknown matchtype")
+            };
 
         #endregion
     }
