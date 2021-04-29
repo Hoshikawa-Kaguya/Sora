@@ -100,7 +100,9 @@ namespace Sora.Command
                 }
             }
 
-            ServiceIsRunning = true;
+            //增加正则缓存大小
+            Regex.CacheSize  += _privateCommands.Count + _groupCommands.Count;
+            ServiceIsRunning =  true;
         }
 
         /// <summary>
@@ -130,6 +132,9 @@ namespace Sora.Command
                 Log.Debug("Command", "Registered group command [dynamic]");
             else
                 throw new NotSupportedException("cannot add new group command");
+
+            //增加正则缓存大小
+            Regex.CacheSize += 1;
         }
 
         /// <summary>
@@ -159,6 +164,9 @@ namespace Sora.Command
                 Log.Debug("Command", "Registered private command [dynamic]");
             else
                 throw new NotSupportedException("cannot add new group command");
+
+            //增加正则缓存大小
+            Regex.CacheSize += 1;
         }
 
         /// <summary>
@@ -166,7 +174,7 @@ namespace Sora.Command
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
         /// <returns>是否继续处理接下来的消息</returns>
-        [NeedReview("L309-L362")]
+        [NeedReview("L317-L374")]
         internal async ValueTask CommandAdapter(dynamic eventArgs)
         {
             //检查使能
