@@ -15,7 +15,7 @@ namespace Sora.Attributes
     //或者也可以继续提出其他Advise。
     //例：Advise：采用自定义数据结构
     //答：Reply：不采用，因为只有这一处修改（这句话看见后，包括Advise和Reply都会被删除）
-    
+
     /// <summary>
     /// 代码审核特性类
     /// </summary>

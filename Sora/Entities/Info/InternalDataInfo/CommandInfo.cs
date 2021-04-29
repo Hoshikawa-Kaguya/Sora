@@ -1,7 +1,11 @@
 using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Sora.Attributes;
+using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
+using Sora.EventArgs.SoraEvent;
 using YukariToolBox.Extensions;
 
 namespace Sora.Entities.Info.InternalDataInfo
@@ -36,7 +40,22 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// <summary>
         /// 权限限制
         /// </summary>
-        internal MemberRoleType? PermissonType { get; }
+        internal MemberRoleType PermissonType { get; }
+
+        /// <summary>
+        /// 动态指令委托来源
+        /// </summary>
+        internal SourceFlag? SourceFlag { get; }
+
+        /// <summary>
+        /// 动态指令委托
+        /// </summary>
+        internal Func<GroupMessageEventArgs, ValueTask> GroupActionBlock { get; }
+
+        /// <summary>
+        /// 动态指令委托
+        /// </summary>
+        internal Func<PrivateMessageEventArgs, ValueTask> PrivateActionBlock { get; }
 
         /// <summary>
         /// 执行实例
@@ -53,36 +72,98 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// </summary>
         internal RegexOptions RegexOptions { get; }
 
+        /// <summary>
+        /// 执行类型
+        /// </summary>
+        internal InvokeType InvokeType { get; }
+
         #endregion
 
         #region 构造方法
 
         /// <summary>
-        /// 指令信息构造
+        /// 指令信息构造(常规指令构建)
         /// </summary>
         internal CommandInfo(string desc, string[] regex, string groupName, MethodInfo method,
-                             MemberRoleType? permissonType, int priority, RegexOptions regexOptions,
+                             MemberRoleType permissonType, int priority, RegexOptions regexOptions,
                              Type instanceType = null)
         {
-            Desc          = desc;
-            Regex         = regex;
-            GroupName     = groupName;
-            MethodInfo    = method;
-            InstanceType  = instanceType;
-            PermissonType = permissonType;
-            Priority      = priority;
-            RegexOptions  = regexOptions;
+            Desc               = desc;
+            Regex              = regex;
+            GroupName          = groupName;
+            MethodInfo         = method;
+            InstanceType       = instanceType;
+            PermissonType      = permissonType;
+            GroupActionBlock   = null;
+            PrivateActionBlock = null;
+            Priority           = priority;
+            RegexOptions       = regexOptions;
+            InvokeType         = InvokeType.Method;
+            SourceFlag         = null;
+        }
+
+        /// <summary>
+        /// 指令信息构造(动态指令构建)
+        /// </summary>
+        internal CommandInfo(string desc, string[] regex, string groupName,
+                             Func<GroupMessageEventArgs, ValueTask> actionBlock,
+                             MemberRoleType permissonType, int priority, RegexOptions regexOptions)
+        {
+            Desc               = desc;
+            Regex              = regex;
+            GroupName          = groupName;
+            MethodInfo         = null;
+            InstanceType       = null;
+            GroupActionBlock   = actionBlock;
+            PrivateActionBlock = null;
+            PermissonType      = permissonType;
+            Priority           = priority;
+            RegexOptions       = regexOptions;
+            InvokeType         = InvokeType.Action;
+            SourceFlag         = Enumeration.SourceFlag.Group;
+        }
+
+        /// <summary>
+        /// 指令信息构造(动态指令构建)
+        /// </summary>
+        internal CommandInfo(string desc, string[] regex, string groupName,
+                             Func<PrivateMessageEventArgs, ValueTask> actionBlock,
+                             MemberRoleType permissonType, int priority, RegexOptions regexOptions)
+        {
+            Desc               = desc;
+            Regex              = regex;
+            GroupName          = groupName;
+            MethodInfo         = null;
+            InstanceType       = null;
+            GroupActionBlock   = null;
+            PrivateActionBlock = actionBlock;
+            PermissonType      = permissonType;
+            Priority           = priority;
+            RegexOptions       = regexOptions;
+            InvokeType         = InvokeType.Action;
+            SourceFlag         = Enumeration.SourceFlag.Private;
         }
 
         #endregion
 
+        [NeedReview("ALL")]
         internal bool Equals(CommandInfo another)
         {
-            return MethodInfo.Name == another.MethodInfo.Name
-                && MethodInfo.GetGenericArguments().ArrayEquals(another.MethodInfo.GetGenericArguments())
-                && Regex.ArrayEquals(another.Regex)
-                && PermissonType == another.PermissonType
-                && Priority      == another.Priority;
+            if (InvokeType != another.InvokeType) return false;
+
+            return InvokeType switch
+            {
+                InvokeType.Method => MethodInfo.Name == another.MethodInfo.Name &&
+                                     MethodInfo.GetGenericArguments()
+                                               .ArrayEquals(another.MethodInfo.GetGenericArguments()) &&
+                                     Regex.ArrayEquals(another.Regex) && PermissonType == another.PermissonType &&
+                                     Priority == another.Priority,
+                InvokeType.Action => GroupActionBlock.Equals(another.GroupActionBlock) &&
+                                     PrivateActionBlock.Equals(another.PrivateActionBlock) &&
+                                     Regex.ArrayEquals(another.Regex) && PermissonType == another.PermissonType &&
+                                     Priority == another.Priority,
+                _ => throw new NotSupportedException("unknown InvokeType found")
+            };
         }
     }
 }
