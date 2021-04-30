@@ -52,12 +52,11 @@ service.Event.OnSelfMessage += (type, eventArgs) =>
 //私聊消息事件
 service.Event.OnPrivateMessage += async (msgType, eventArgs) => { await eventArgs.Reply("好耶"); };
 //动态向管理器注册指令
-service.Event.CommandManager.RegisterGroupCommand(new[] {"2"}, MatchType.Full, async eventArgs =>
-                                                                               {
-                                                                                   await eventArgs.Reply("坏");
-                                                                                   eventArgs.IsContinueEventChain =
-                                                                                       false;
-                                                                               });
+service.Event.CommandManager.RegisterGroupCommand(async eventArgs =>
+                                                  {
+                                                      await eventArgs.Reply("坏");
+                                                      eventArgs.IsContinueEventChain = false;
+                                                  }, new[] {"2"}, MatchType.Full);
 
 #endregion
 
