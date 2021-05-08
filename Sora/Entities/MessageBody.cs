@@ -72,10 +72,19 @@ namespace Sora.Entities
         /// <summary>
         /// 添加消息段
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">消息段</param>
         public void Add(CQCode item)
         {
             _message.Add(item);
+        }
+
+        /// <summary>
+        /// 添加纯文本消息
+        /// </summary>
+        /// <param name="text">纯文本消息段</param>
+        public void Add(string text)
+        {
+            _message.Add(CQCodes.CQText(text));
         }
 
         /// <summary>
@@ -198,11 +207,12 @@ namespace Sora.Entities
         }
 
         /// <summary>
-        /// 隐式类型转换
+        /// 运算重载
         /// </summary>
-        public static implicit operator MessageBody(string text)
+        public static MessageBody operator +(MessageBody message, string text)
         {
-            return new() {CQCodes.CQText(text)};
+            message.Add(CQCodes.CQText(text));
+            return message;
         }
 
         #endregion
