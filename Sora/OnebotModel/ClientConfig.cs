@@ -80,7 +80,7 @@ namespace Sora.OnebotModel
         /// <para>客户端API调用超时设置(毫秒)</para>
         /// <para>默认为1000ms无需修改</para>
         /// </summary>
-        public TimeSpan ApiTimeOut { get; init; } = TimeSpan.FromMilliseconds(1000);
+        public TimeSpan ApiTimeOut { get; init; } = TimeSpan.FromMilliseconds(5000);
 
         /// <summary>
         /// 是否启用Sora自带的指令系统
