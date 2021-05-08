@@ -117,8 +117,8 @@ namespace Sora.Command
         /// <exception cref="NullReferenceException">空参数异常</exception>
         /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
         [NeedReview("ALL")]
-        public void RegisterGroupCommand(string[] cmdExps, MatchType matchType,
-                                         Func<GroupMessageEventArgs, ValueTask> commandBlock,
+        public void RegisterGroupCommand(Func<GroupMessageEventArgs, ValueTask> commandBlock,
+                                         string[] cmdExps, MatchType matchType,
                                          MemberRoleType permissonType = MemberRoleType.Member,
                                          RegexOptions regexOptions = RegexOptions.None,
                                          string desc = "")
@@ -149,8 +149,8 @@ namespace Sora.Command
         /// <exception cref="NullReferenceException">空参数异常</exception>
         /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
         [NeedReview("ALL")]
-        public void RegisterPrivateCommand(string[] cmdExps, MatchType matchType,
-                                           Func<PrivateMessageEventArgs, ValueTask> commandBlock,
+        public void RegisterPrivateCommand(Func<PrivateMessageEventArgs, ValueTask> commandBlock,
+                                           string[] cmdExps, MatchType matchType,
                                            MemberRoleType permissonType = MemberRoleType.Member,
                                            RegexOptions regexOptions = RegexOptions.None,
                                            string desc = "")
