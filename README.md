@@ -61,6 +61,8 @@
 
 详细内容请关注 [更新日志](https://sora-docs.yukari.one/updatelog/)
 
+更新日志中会标注框架所对应的go-cqhttp版本号，并且框架对所对应的go-cqhttp均具有完整的API支持/扩展
+
 <details>
 <summary>开源协议</summary>
 
