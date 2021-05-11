@@ -115,7 +115,7 @@ namespace Sora.Command
         /// <param name="commandBlock">指令委托</param>
         /// <param name="permissonType">权限等级</param>
         /// <exception cref="NullReferenceException">空参数异常</exception>
-        /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
+        /// <exception cref="NotSupportedException">在遇到不支持的参数类型时抛出</exception>
         [NeedReview("ALL")]
         public void RegisterGroupCommand(Func<GroupMessageEventArgs, ValueTask> commandBlock,
                                          string[] cmdExps, MatchType matchType,
@@ -147,7 +147,7 @@ namespace Sora.Command
         /// <param name="commandBlock">指令委托</param>
         /// <param name="permissonType">权限等级</param>
         /// <exception cref="NullReferenceException">空参数异常</exception>
-        /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
+        /// <exception cref="NotSupportedException">在遇到不支持的参数类型时抛出</exception>
         [NeedReview("ALL")]
         public void RegisterPrivateCommand(Func<PrivateMessageEventArgs, ValueTask> commandBlock,
                                            string[] cmdExps, MatchType matchType,
