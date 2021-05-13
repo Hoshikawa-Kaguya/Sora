@@ -30,6 +30,8 @@
 
 
 
+> Sora将在正式版本改名为OGAS(暂定)
+
 ## 文档
 
 查看框架的说明文档 [Docs](https://sora-docs.yukari.one/) [更新日志](https://sora-docs.yukari.one/updatelog/)
