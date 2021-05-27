@@ -263,7 +263,49 @@ namespace Sora.Enumeration.ApiType
         /// <summary>
         /// 发送群公告
         /// </summary>
-        [Description("_send_group_notice")] _SendGroupNotice
+        [Description("_send_group_notice")] _SendGroupNotice,
+
+        /// <summary>
+        /// 获取企点账号信息
+        /// </summary>
+        [Description("qidian_get_account_info")]
+        GetQidianAccountInfo,
+
+        /// <summary>
+        /// 主动删除好友
+        /// </summary>
+        [Description("delete_friend")] DeleteFriend,
+
+        /// <summary>
+        /// 获取好友在线机型展示信息
+        /// </summary>
+        //TODO 等文档
+        [Description("_get_model_show")] _GetModelShow,
+
+        /// <summary>
+        /// 设置好友在线机型展示信息
+        /// </summary>
+        //TODO 等文档
+        [Description("_set_model_show")] _SetModelShow,
+
+        /// <summary>
+        /// 新建群文件文件夹
+        /// </summary>
+        //TODO 等文档
+        [Description("create_group_file_folder")]
+        CreateGroupFileFolder,
+
+        /// <summary>
+        /// 删除群文件文件夹
+        /// </summary>
+        //TODO 等文档
+        [Description("delete_group_folder")] DeleteGroupFolder,
+
+        /// <summary>
+        /// 删除群文件
+        /// </summary>
+        //TODO 等文档
+        [Description("delete_group_file")] DeleteGroupFile
 
         #endregion
     }

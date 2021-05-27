@@ -207,9 +207,10 @@ namespace Sora.Entities
         /// 发送群公告
         /// </summary>
         /// <param name="content">公告内容</param>
-        public async ValueTask<ApiStatus> SendGroupNotice(string content)
+        /// <param name="image">图片</param>
+        public async ValueTask<ApiStatus> SendGroupNotice(string content, string image = null)
         {
-            return await SoraApi.SendGroupNotice(Id, content);
+            return await SoraApi.SendGroupNotice(Id, content, image);
         }
 
         /// <summary>

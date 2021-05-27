@@ -865,6 +865,24 @@ namespace Sora.OnebotInterface
             return (apiStatus, ret?["data"]?.ToObject<VipInfo>() ?? new VipInfo());
         }
 
+        /// <summary>
+        /// <para>获取企点账号信息</para>
+        /// <para>该API只有企点协议可用</para>
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        internal static async ValueTask<(ApiStatus apiStatus, QidianAccountInfo qidianAccountInfo)>
+            GetQidianAccountInfo(
+                Guid connection)
+        {
+            Log.Debug("Sora", "Sending qidian_get_account_info request");
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.GetQidianAccountInfo
+            }, connection);
+            Log.Debug("Sora", $"Get qidian_get_account_info response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return (apiStatus, ret?["data"]?.ToObject<QidianAccountInfo>() ?? new QidianAccountInfo());
+        }
+
         #endregion
 
         #endregion
@@ -1359,19 +1377,48 @@ namespace Sora.OnebotInterface
         /// <param name="connection">链接标识</param>
         /// <param name="gid">群号</param>
         /// <param name="content">公告内容</param>
-        internal static async ValueTask<ApiStatus> SendGroupNotice(Guid connection, long gid, string content)
+        /// <param name="image">图片</param>
+        internal static async ValueTask<ApiStatus> SendGroupNotice(Guid connection, long gid, string content,
+                                                                   string image)
         {
             Log.Debug("Sora", "Sending _send_group_notice request");
             var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType._SendGroupNotice,
-                ApiParams = new
-                {
-                    group_id = gid,
-                    content
-                }
+                ApiParams = string.IsNullOrEmpty(image)
+                    ? new
+                    {
+                        group_id = gid,
+                        content
+                    }
+                    : new
+                    {
+                        group_id = gid,
+                        content,
+                        image
+                    }
             }, connection);
             Log.Debug("Sora", $"Get _send_group_notice response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return apiStatus;
+        }
+
+        /// <summary>
+        /// 删除好友
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="uid">用户id</param>
+        internal static async ValueTask<ApiStatus> DeleteFriend(Guid connection, long uid)
+        {
+            Log.Debug("Sora", "Sending delete_friend request");
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.DeleteFriend,
+                ApiParams = new
+                {
+                    id = uid
+                }
+            }, connection);
+            Log.Debug("Sora", $"Get delete_friend response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
 

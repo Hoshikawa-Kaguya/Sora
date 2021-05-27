@@ -84,6 +84,17 @@ namespace Sora.Entities
             return await SoraApi.GetUserInfo(Id, useCache);
         }
 
+        /// <summary>
+        /// 删除好友
+        /// </summary>
+        /// <returns>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
+        /// </returns>
+        public async ValueTask<ApiStatus> DeleteFriend()
+        {
+            return await SoraApi.DeleteFriend(Id);
+        }
+
         #endregion
 
         #region CQ码方法
