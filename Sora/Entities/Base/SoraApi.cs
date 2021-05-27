@@ -650,9 +650,10 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="content">公告内容</param>
-        public async ValueTask<ApiStatus> SendGroupNotice(long groupId, string content)
+        /// <param name="image">图片</param>
+        public async ValueTask<ApiStatus> SendGroupNotice(long groupId, string content, string image = null)
         {
-            return await ApiInterface.SendGroupNotice(ConnectionGuid, groupId, content);
+            return await ApiInterface.SendGroupNotice(ConnectionGuid, groupId, content, image);
         }
 
         #endregion
@@ -776,6 +777,27 @@ namespace Sora.Entities.Base
         {
             if (userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
             return await ApiInterface.GetVipInfo(ConnectionGuid, userId);
+        }
+
+        /// <summary>
+        /// <para>获取企点账号信息</para>
+        /// <para>该API只有企点协议可用</para>
+        /// </summary>
+        public async ValueTask<(ApiStatus apiStatus, QidianAccountInfo qidianAccountInfo)> GetQidianAccountInfo()
+        {
+            return await ApiInterface.GetQidianAccountInfo(ConnectionGuid);
+        }
+
+        /// <summary>
+        /// 删除好友
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <returns>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
+        /// </returns>
+        public async ValueTask<ApiStatus> DeleteFriend(long userId)
+        {
+            return await ApiInterface.DeleteFriend(ConnectionGuid, userId);
         }
 
         #endregion
