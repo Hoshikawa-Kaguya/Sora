@@ -279,13 +279,11 @@ namespace Sora.Enumeration.ApiType
         /// <summary>
         /// 获取好友在线机型展示信息
         /// </summary>
-        //TODO 等文档
         [Description("_get_model_show")] _GetModelShow,
 
         /// <summary>
         /// 设置好友在线机型展示信息
         /// </summary>
-        //TODO 等文档
         [Description("_set_model_show")] _SetModelShow,
 
         /// <summary>
