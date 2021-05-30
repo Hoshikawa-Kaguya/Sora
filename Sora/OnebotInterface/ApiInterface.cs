@@ -883,6 +883,27 @@ namespace Sora.OnebotInterface
             return (apiStatus, ret?["data"]?.ToObject<QidianAccountInfo>() ?? new QidianAccountInfo());
         }
 
+        /// <summary>
+        /// 获取在线机型
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="model">型号</param>
+        internal static async ValueTask<(ApiStatus apiStatus, List<Model> models)> GetModelShow(
+            Guid connection, string model)
+        {
+            Log.Debug("Sora", "Sending _get_model_show request");
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType._GetModelShow,
+                ApiParams = new
+                {
+                    model
+                }
+            }, connection);
+            Log.Debug("Sora", $"Get _get_model_show response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return (apiStatus, ret?["data"]?["variants"]?.ToObject<List<Model>>() ?? new List<Model>());
+        }
+
         #endregion
 
         #endregion
@@ -1419,6 +1440,28 @@ namespace Sora.OnebotInterface
                 }
             }, connection);
             Log.Debug("Sora", $"Get delete_friend response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return apiStatus;
+        }
+
+        /// <summary>
+        /// 设置在线机型
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="model">机型名</param>
+        /// <param name="showModel">展示名</param>
+        internal static async ValueTask<ApiStatus> SetModelShow(Guid connection, string model, string showModel)
+        {
+            Log.Debug("Sora", "Sending _set_model_show request");
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType._SetModelShow,
+                ApiParams = new
+                {
+                    model,
+                    model_show = showModel
+                }
+            }, connection);
+            Log.Debug("Sora", $"Get _set_model_show response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
 

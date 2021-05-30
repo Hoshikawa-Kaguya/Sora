@@ -800,6 +800,25 @@ namespace Sora.Entities.Base
             return await ApiInterface.DeleteFriend(ConnectionGuid, userId);
         }
 
+        /// <summary>
+        /// 获取在线机型
+        /// </summary>
+        /// <param name="model">型号</param>
+        public async ValueTask<(ApiStatus apiStatus, List<Model> models)> GetModelShow(string model)
+        {
+            return await ApiInterface.GetModelShow(ConnectionGuid, model);
+        }
+
+        /// <summary>
+        /// 设置在线机型
+        /// </summary>
+        /// <param name="model">机型名</param>
+        /// <param name="showModel">展示名</param>
+        public async ValueTask<ApiStatus> SetModelShow(string model, string showModel)
+        {
+            return await ApiInterface.SetModelShow(ConnectionGuid, model, showModel);
+        }
+
         #endregion
 
         #region 服务端API
