@@ -904,6 +904,38 @@ namespace Sora.OnebotInterface
             return (apiStatus, ret?["data"]?["variants"]?.ToObject<List<Model>>() ?? new List<Model>());
         }
 
+        /// <summary>
+        /// 创建群文件夹
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="name">文件夹名</param>
+        /// <param name="floderId">文件夹ID</param>
+        //TODO 测试发现floderId似乎无效，无法创建文件夹套文件夹，待gocq后续完善
+        internal static async ValueTask<ApiStatus> CreateGroupFileFolder(
+            Guid connection, long gid, string name, string floderId)
+        {
+            Log.Debug("Sora", "Sending create_group_file_folder request");
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.CreateGroupFileFolder,
+                ApiParams = string.IsNullOrEmpty(floderId)
+                    ? new
+                    {
+                        group_id = gid,
+                        name
+                    }
+                    : new
+                    {
+                        group_id = gid,
+                        name,
+                        folder_id = floderId
+                    }
+            }, connection);
+            Log.Debug("Sora", $"Get create_group_file_folder response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return apiStatus;
+        }
+
         #endregion
 
         #endregion

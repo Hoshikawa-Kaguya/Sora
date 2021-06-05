@@ -656,6 +656,16 @@ namespace Sora.Entities.Base
             return await ApiInterface.SendGroupNotice(ConnectionGuid, groupId, content, image);
         }
 
+        /// <summary>
+        /// 在群根目录创建文件夹
+        /// </summary>
+        /// <param name="gid">群号</param>
+        /// <param name="name">文件夹名</param>
+        public async ValueTask<ApiStatus> CreateGroupFileRootFolder(long gid, string name)
+        {
+            return await ApiInterface.CreateGroupFileFolder(ConnectionGuid, gid, name, null);
+        }
+
         #endregion
 
         #endregion
