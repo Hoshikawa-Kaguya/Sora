@@ -904,38 +904,6 @@ namespace Sora.OnebotInterface
             return (apiStatus, ret?["data"]?["variants"]?.ToObject<List<Model>>() ?? new List<Model>());
         }
 
-        /// <summary>
-        /// 创建群文件夹
-        /// </summary>
-        /// <param name="connection">链接标识</param>
-        /// <param name="gid">群号</param>
-        /// <param name="name">文件夹名</param>
-        /// <param name="floderId">文件夹ID</param>
-        //TODO 测试发现floderId似乎无效，无法创建文件夹套文件夹，待gocq后续完善
-        internal static async ValueTask<ApiStatus> CreateGroupFileFolder(
-            Guid connection, long gid, string name, string floderId)
-        {
-            Log.Debug("Sora", "Sending create_group_file_folder request");
-            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-            {
-                ApiRequestType = ApiRequestType.CreateGroupFileFolder,
-                ApiParams = string.IsNullOrEmpty(floderId)
-                    ? new
-                    {
-                        group_id = gid,
-                        name
-                    }
-                    : new
-                    {
-                        group_id = gid,
-                        name,
-                        folder_id = floderId
-                    }
-            }, connection);
-            Log.Debug("Sora", $"Get create_group_file_folder response {nameof(apiStatus)}={apiStatus.RetCode}");
-            return apiStatus;
-        }
-
         #endregion
 
         #endregion
@@ -1494,6 +1462,87 @@ namespace Sora.OnebotInterface
                 }
             }, connection);
             Log.Debug("Sora", $"Get _set_model_show response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return apiStatus;
+        }
+
+        /// <summary>
+        /// 创建群文件夹
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="name">文件夹名</param>
+        /// <param name="floderId">文件夹ID</param>
+        //TODO 测试发现floderId似乎无效，无法创建文件夹套文件夹，待gocq后续完善
+        internal static async ValueTask<ApiStatus> CreateGroupFileFolder(
+            Guid connection, long gid, string name, string floderId)
+        {
+            Log.Debug("Sora", "Sending create_group_file_folder request");
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.CreateGroupFileFolder,
+                ApiParams = string.IsNullOrEmpty(floderId)
+                    ? new
+                    {
+                        group_id = gid,
+                        name
+                    }
+                    : new
+                    {
+                        group_id = gid,
+                        name,
+                        folder_id = floderId
+                    }
+            }, connection);
+            Log.Debug("Sora", $"Get create_group_file_folder response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return apiStatus;
+        }
+
+        /// <summary>
+        /// 删除群文件文件夹
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="floderId">文件夹ID</param>
+        internal static async ValueTask<ApiStatus> DeleteGroupFolder(Guid connection, long gid, string floderId)
+        {
+            Log.Debug("Sora", "Sending delete_group_folder request");
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.DeleteGroupFolder,
+                ApiParams = new
+                {
+                    group_id  = gid,
+                    folder_id = floderId
+                }
+            }, connection);
+            Log.Debug("Sora", $"Get delete_group_folder response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return apiStatus;
+        }
+
+        /// <summary>
+        /// 删除群文件文件夹
+        /// </summary>
+        /// <param name="connection">链接标识</param>
+        /// <param name="gid">群号</param>
+        /// <param name="floderId">文件夹ID</param>
+        /// <param name="fileId">文件ID</param>
+        /// <param name="busId">文件类型</param>
+        internal static async ValueTask<ApiStatus> DeleteGroupFile(Guid connection, long gid, string fileId, int busId,
+                                                                   string floderId)
+        {
+            Log.Debug("Sora", "Sending delete_group_file request");
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.DeleteGroupFile,
+                ApiParams = new
+                {
+                    group_id  = gid,
+                    folder_id = floderId,
+                    file_id   = fileId,
+                    bus_id    = busId
+                }
+            }, connection);
+            Log.Debug("Sora", $"Get delete_group_file response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
 
