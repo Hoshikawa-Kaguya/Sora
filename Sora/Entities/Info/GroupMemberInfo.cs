@@ -1,6 +1,7 @@
 using System;
 using Newtonsoft.Json;
 using Sora.Converter;
+using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using YukariToolBox.Time;
 
@@ -39,7 +40,24 @@ namespace Sora.Entities.Info
         /// 性别
         /// </summary>
         [JsonProperty(PropertyName = "sex")]
-        public string Sex { get; internal init; }
+        private string SexStr { get; init; }
+
+        /// <summary>
+        /// 性别
+        /// </summary>
+        [JsonIgnore]
+        public Sex Sex
+        {
+            get
+            {
+                return SexStr switch
+                {
+                    "male" => Sex.Male,
+                    "female" => Sex.Female,
+                    _ => Sex.Unknown
+                };
+            }
+        }
 
         /// <summary>
         /// 年龄
@@ -97,7 +115,7 @@ namespace Sora.Entities.Info
         public string Title { get; internal init; }
 
         /// <summary>
-        /// <para>专属头衔过期时间戳</para>
+        /// <para>专属头衔过期时间</para>
         /// <para>在<see cref="Title"/>不为空时有效</para>
         /// </summary>
         [JsonIgnore]

@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 
 namespace Sora.Entities.Info
@@ -24,7 +25,24 @@ namespace Sora.Entities.Info
         /// 性别
         /// </summary>
         [JsonProperty(PropertyName = "sex")]
-        public string Sex { get; internal init; }
+        private string SexStr { get; init; }
+
+        /// <summary>
+        /// 性别
+        /// </summary>
+        [JsonIgnore]
+        public Sex Sex
+        {
+            get
+            {
+                return SexStr switch
+                {
+                    "male" => Sex.Male,
+                    "female" => Sex.Female,
+                    _ => Sex.Unknown
+                };
+            }
+        }
 
         /// <summary>
         /// 年龄
