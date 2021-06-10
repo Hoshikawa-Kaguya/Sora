@@ -74,8 +74,6 @@
 
 并且我们**不鼓励，不支持**一切的**商用**计划
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FYukari316%2FSora.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2FYukari316%2FSora?ref=badge_small)
-
 </details>
 
 <details>
@@ -141,7 +139,9 @@ Sora这个名字来源于日语中"空"的罗马音
 
 感谢以下大佬对本框架开发的帮助
 
-[Mrs4s](https://github.com/Mrs4s) | [wdvxdr1123](https://github.com/wdvxdr1123) | [Kengxxiao](https://github.com/Kengxxiao) | [ExerciseBook](https://github.com/ExerciseBook)
+[Mrs4s](https://github.com/Mrs4s) | [wdvxdr1123](https://github.com/wdvxdr1123)  在使用[go-cqhttp](https://github.com/Mrs4s/go-cqhttp)调试时提供了帮助
+
+[Kengxxiao](https://github.com/Kengxxiao) | [ExerciseBook](https://github.com/ExerciseBook)  对框架做出了改进
 
 ### 源代码参考
 
@@ -149,10 +149,18 @@ Sora这个名字来源于日语中"空"的罗马音
 
 ### 使用到的开源库
 
-[Fleck](https://github.com/statianzo/Fleck) | [Newtonsoft.Json](https://www.newtonsoft.com/json) | [System.Reactive](https://github.com/dotnet/reactive) | [YukariToolBox](https://github.com/DeepOceanSoft/YukariToolBox) | [Websocket.Client](https://github.com/Marfusios/websocket-client)
+[Fleck](https://github.com/statianzo/Fleck) | 反向WS服务器
+
+[Websocket.Client](https://github.com/Marfusios/websocket-client) | 正向WS客户端
+
+[Newtonsoft.Json](https://www.newtonsoft.com/json) | Json序列化/反序列化
+
+[System.Reactive](https://github.com/dotnet/reactive) | 响应式异步API支持
+
+[YukariToolBox](https://github.com/DeepOceanSoft/YukariToolBox) | Log，异步扩展工具箱
 
 ### 感谢 [JetBrains](https://www.jetbrains.com/?from=Sora) 为开源项目提供免费的全家桶授权
 
-> 本项目使用了免费的[ReSharper](https://www.jetbrains.com/resharper/)插件
+> 本项目使用了免费的[ReSharper](https://www.jetbrains.com/resharper/)插件/Rider开发环境
 
-[<img src=".github/jetbrains-variant-4.svg" width="200"/>](https://www.jetbrains.com/?from=Sora) [<img src=".github/icon-resharper.svg" width="100"/>](https://www.jetbrains.com/ReSharper/?from=Sora)
+[<img src=".github/jetbrains-variant-4.svg" width="200"/>](https://www.jetbrains.com/?from=Sora) [<img src=".github/icon-resharper.svg" width="100"/>](https://www.jetbrains.com/ReSharper/?from=Sora)[<img src=".github/icon-rider.svg" width="100"/>](https://www.jetbrains.com/rider/?from=Sora)
