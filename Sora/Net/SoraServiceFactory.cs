@@ -11,7 +11,7 @@ namespace Sora.Net
     /// <summary>
     /// Sora 实例工厂
     /// </summary>
-    public class SoraServiceFactory
+    public static class SoraServiceFactory
     {
         private static bool _haveStartupLog;
 
@@ -26,13 +26,19 @@ namespace Sora.Net
         /// <exception cref="ArgumentException">配置文件类型错误</exception>
         public static ISoraService CreateService(ISoraConfig config, Action<Exception> crashAction = null)
         {
-            if (!_haveStartupLog)
-            {
-                Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.7"); //{Assembly.GetExecutingAssembly().GetName().Version}");
-                Log.Debug("Sora", "开发交流群：1081190562");
-                Log.Debug("System", Environment.OSVersion);
-                _haveStartupLog = true;
-            }
+            //如果已经启动过初始化则不显示初始化log
+            if (_haveStartupLog)
+                return config switch
+                {
+                    ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
+                    ServerConfig s2 => new SoraWebsocketServer(s2, crashAction),
+                    _ => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
+                };
+
+            Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.11"); //{Assembly.GetExecutingAssembly().GetName().Version}");
+            Log.Debug("Sora", "开发交流群：1081190562");
+            Log.Debug("System", Environment.OSVersion);
+            _haveStartupLog = true;
 
             return config switch
             {
