@@ -160,8 +160,28 @@ namespace Sora.EventArgs.SoraEvent
         public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, commandExps, matchType,
-                                            SourceFlag.Group, regexOptions, SourceGroup));
+            return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, commandExps,
+                                            matchType, SourceFlag.Group, regexOptions, null, null,
+                                            SourceGroup));
+        }
+
+        /// <summary>
+        /// 等待下一条消息触发
+        /// </summary>
+        /// <param name="commandExps">指令表达式</param>
+        /// <param name="matchType">匹配类型</param>
+        /// <param name="regexOptions">正则匹配选项</param>
+        /// <param name="timeout">超时</param>
+        /// <param name="timeoutTask">超时后执行的动作</param>
+        /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
+        public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
+                                                                        TimeSpan timeout,
+                                                                        Func<ValueTask> timeoutTask = null,
+                                                                        RegexOptions regexOptions = RegexOptions.None)
+        {
+            return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, commandExps,
+                                            matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
+                                            SourceGroup));
         }
 
         /// <summary>
@@ -175,6 +195,25 @@ namespace Sora.EventArgs.SoraEvent
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
             return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
+        }
+
+        /// <summary>
+        /// 等待下一条消息触发
+        /// </summary>
+        /// <param name="commandExp">指令表达式</param>
+        /// <param name="matchType">匹配类型</param>
+        /// <param name="regexOptions">正则匹配选项</param>
+        /// <param name="timeout">超时</param>
+        /// <param name="timeoutTask">超时后执行的动作</param>
+        /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
+        public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
+                                                                        TimeSpan timeout,
+                                                                        Func<ValueTask> timeoutTask = null,
+                                                                        RegexOptions regexOptions = RegexOptions.None)
+        {
+            return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, new[] {commandExp},
+                                            matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
+                                            SourceGroup));
         }
 
         #endregion

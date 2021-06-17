@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Sora.Command;
 using Sora.Entities;
 using Sora.Entities.Base;
@@ -84,8 +85,8 @@ namespace Sora.EventArgs.SoraEvent
         /// 等待下一条消息触发
         /// </summary>
         internal object WaitForNextMessage(long sourceUid, string[] commandExps, MatchType matchType,
-                                           SourceFlag sourceFlag,
-                                           RegexOptions regexOptions, long sourceGroup = 0)
+                                           SourceFlag sourceFlag, RegexOptions regexOptions,
+                                           TimeSpan? timeout, Func<ValueTask> timeoutTask, long sourceGroup = 0)
         {
             //生成指令上下文
             var waitInfo =
@@ -100,10 +101,13 @@ namespace Sora.EventArgs.SoraEvent
             SessionId = sessionId;
             //添加上下文并等待信号量
             StaticVariable.WaitingDict.TryAdd(sessionId, waitInfo);
-            StaticVariable.WaitingDict[sessionId].Semaphore.WaitOne();
+            var receiveSignal = //是否正常接受到触发信号
+                StaticVariable.WaitingDict[sessionId].Semaphore.WaitOne((int) (timeout?.TotalMilliseconds ?? -1));
             //取出匹配指令的事件参数并删除上一次的上下文
-            var retEventArgs = StaticVariable.WaitingDict[sessionId].EventArgs;
+            var retEventArgs = receiveSignal ? StaticVariable.WaitingDict[sessionId].EventArgs : null;
             StaticVariable.WaitingDict.TryRemove(sessionId, out _);
+            //在超时时执行超时任务
+            if (!receiveSignal && timeoutTask != null) Task.Run(timeoutTask.Invoke);
             return retEventArgs;
         }
 
