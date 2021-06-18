@@ -69,10 +69,12 @@ namespace Sora.Net
                                         .ToTask()
                                         .RunCatch(e =>
                                                   {
-                                                      Log.Error("Sora|ReactiveApiManager",
-                                                                $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
                                                       err.isTimeout = e is TimeoutException;
                                                       err.exception = e;
+                                                      //在错误为超时时不打印log
+                                                      if (!err.isTimeout)
+                                                          Log.Error("Sora|ReactiveApiManager",
+                                                                    $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
                                                       return new JObject();
                                                   });
 
@@ -94,7 +96,9 @@ namespace Sora.Net
             //空响应
             if (err.exception == null) return (NullResponse(), null);
             //观察者抛出异常
-            if (err.isTimeout) Log.Error("Sora|ReactiveApiManager", "api time out");
+            if (err.isTimeout)
+                Log.Error("Sora|ReactiveApiManager",
+                          $"api time out[msg echo:{apiRequest.Echo}]");
             return err.isTimeout
                 ? (TimeOut(), null)
                 : (ObservableError(Log.ErrorLogBuilder(err.exception)), null);
