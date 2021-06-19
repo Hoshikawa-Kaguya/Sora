@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Reflection;
 using System.Threading.Tasks;
 using Sora.Interfaces;
 using Sora.OnebotModel;
@@ -35,7 +36,7 @@ namespace Sora.Net
                     _ => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
                 };
 
-            Log.Info("Sora", $"Sora 框架版本:1.0.0-rc.11"); //{Assembly.GetExecutingAssembly().GetName().Version}");
+            Log.Info("Sora", $"Sora 框架版本:{Assembly.GetExecutingAssembly().GetName().Version} rc.12");
             Log.Debug("Sora", "开发交流群：1081190562");
             Log.Debug("System", Environment.OSVersion);
             _haveStartupLog = true;
