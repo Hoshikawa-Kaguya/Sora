@@ -135,7 +135,7 @@ Sora这个名字来源于日语中"空"的罗马音
 
 ### 源代码参考
 
-[Jie2GG](https://github.com/Jie2GG)/[Native.Framework](https://github.com/Jie2GG/Native.Framework) (CQ码处理)
+[Jie2GG](https://github.com/Jie2GG)/[Native.Framework](https://github.com/Jie2GG/Native.Framework) CQ码的数据结构
 
 ### 使用到的开源库
 
