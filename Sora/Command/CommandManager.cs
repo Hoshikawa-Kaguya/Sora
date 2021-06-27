@@ -11,7 +11,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
-using Sora.Entities;
 using Sora.Entities.Info.InternalDataInfo;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Helpers;
@@ -195,7 +194,7 @@ namespace Sora.Command
                                                               command.Value.SourceFlag == SourceFlag.Group
                                                               //判断来自同一个连接
                                                            && command.Value.ConnectionId ==
-                                                              groupMessageEvent.SoraApi.ConnectionGuid
+                                                              groupMessageEvent.SoraApi.ConnectionId
                                                               //判断来着同一个群
                                                            && command.Value.Source.g == groupMessageEvent.SourceGroup
                                                               //判断来自同一人
@@ -219,7 +218,7 @@ namespace Sora.Command
                                                               command.Value.SourceFlag == SourceFlag.Private
                                                               //判断来自同一个连接
                                                            && command.Value.ConnectionId ==
-                                                              privateMessageEvent.SoraApi.ConnectionGuid
+                                                              privateMessageEvent.SoraApi.ConnectionId
                                                               //判断来自同一人
                                                            && command.Value.Source.u == privateMessageEvent.Sender
                                                               //匹配指令

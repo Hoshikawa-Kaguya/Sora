@@ -24,14 +24,14 @@ namespace Sora.EventArgs.SoraEvent
         /// 初始化
         /// </summary>
         /// <param name="serviceId"></param>
-        /// <param name="connectionGuid">服务器链接标识</param>
+        /// <param name="connectionId">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="friendAddArgs">好友添加事件参数</param>
-        internal FriendAddEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+        internal FriendAddEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                     ApiFriendAddEventArgs friendAddArgs) :
-            base(serviceId, connectionGuid, eventName, friendAddArgs.SelfID, friendAddArgs.Time)
+            base(serviceId, connectionId, eventName, friendAddArgs.SelfID, friendAddArgs.Time)
         {
-            NewFriend = new User(serviceId, connectionGuid, friendAddArgs.UserId);
+            NewFriend = new User(serviceId, connectionId, friendAddArgs.UserId);
         }
 
         #endregion

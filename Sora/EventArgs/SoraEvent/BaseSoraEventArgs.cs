@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Command;
-using Sora.Entities;
 using Sora.Entities.Base;
 using Sora.Enumeration;
 using YukariToolBox.Time;
@@ -61,14 +60,14 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
-        /// <param name="serviceGuid">当前服务ID</param>
-        /// <param name="connectionGuid">服务器链接标识</param>
+        /// <param name="serviceId">当前服务ID</param>
+        /// <param name="connectionId">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="loginUid">当前使用的QQ号</param>
         /// <param name="time">连接时间</param>
-        internal BaseSoraEventArgs(Guid serviceGuid, Guid connectionGuid, string eventName, long loginUid, long time)
+        internal BaseSoraEventArgs(Guid serviceId, Guid connectionId, string eventName, long loginUid, long time)
         {
-            SoraApi              = new SoraApi(serviceGuid, connectionGuid);
+            SoraApi              = new SoraApi(serviceId, connectionId);
             EventName            = eventName;
             LoginUid             = loginUid;
             TimeStamp            = time;
@@ -91,7 +90,7 @@ namespace Sora.EventArgs.SoraEvent
             //生成指令上下文
             var waitInfo =
                 CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, sourceFlag,
-                                                     regexOptions, SoraApi.ConnectionGuid, SoraApi.ServiceGuid);
+                                                     regexOptions, SoraApi.ConnectionId, SoraApi.ServiceId);
             //检查是否为初始指令重复触发
             if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
                 return null;

@@ -5,7 +5,6 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
-using Sora.Entities;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.EventArgs.WebsocketEvent;
 using Sora.OnebotModel;
@@ -75,17 +74,17 @@ namespace Sora.Net
         /// 添加服务器连接记录
         /// </summary>
         /// <param name="serviceId">服务Id</param>
-        /// <param name="connectionGuid">连接标识</param>
+        /// <param name="connectionId">连接标识</param>
         /// <param name="connectionInfo">连接信息</param>
         /// <param name="selfId">机器人UID</param>
         /// <param name="apiTimeout">api超时</param>
-        private bool AddConnection(Guid serviceId, Guid connectionGuid, object connectionInfo,
+        private bool AddConnection(Guid serviceId, Guid connectionId, object connectionInfo,
                                    string selfId, TimeSpan apiTimeout)
         {
             //检查是否已存在值
-            if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid)) return false;
+            if (StaticVariable.ConnectionInfos.ContainsKey(connectionId)) return false;
             long.TryParse(selfId, out var uid);
-            return StaticVariable.ConnectionInfos.TryAdd(connectionGuid, new SoraConnectionInfo
+            return StaticVariable.ConnectionInfos.TryAdd(connectionId, new SoraConnectionInfo
                                                              (serviceId: serviceId,
                                                               connection: connectionInfo,
                                                               lastHeartBeatTime: DateTime.Now,
@@ -97,33 +96,33 @@ namespace Sora.Net
         /// <summary>
         /// 移除服务器连接记录
         /// </summary>
-        /// <param name="connectionGuid">连接标识</param>
-        private bool RemoveConnection(Guid connectionGuid)
+        /// <param name="connectionId">连接标识</param>
+        private bool RemoveConnection(Guid connectionId)
         {
-            return StaticVariable.ConnectionInfos.TryRemove(connectionGuid, out _);
+            return StaticVariable.ConnectionInfos.TryRemove(connectionId, out _);
         }
 
         /// <summary>
         /// 检查是否存在连接
         /// </summary>
-        /// <param name="connectionGuid">连接标识</param>
-        internal bool ConnectionExitis(Guid connectionGuid)
+        /// <param name="connectionId">连接标识</param>
+        internal bool ConnectionExitis(Guid connectionId)
         {
-            return StaticVariable.ConnectionInfos.ContainsKey(connectionGuid);
+            return StaticVariable.ConnectionInfos.ContainsKey(connectionId);
         }
 
         #endregion
 
         #region 服务器信息发送
 
-        internal static bool SendMessage(Guid connectionGuid, string message)
+        internal static bool SendMessage(Guid connectionId, string message)
         {
-            if (StaticVariable.ConnectionInfos.All(connection => connection.Key != connectionGuid))
+            if (StaticVariable.ConnectionInfos.All(connection => connection.Key != connectionId))
                 return false;
 
             try
             {
-                switch (StaticVariable.ConnectionInfos[connectionGuid].Connection)
+                switch (StaticVariable.ConnectionInfos[connectionId].Connection)
                 {
                     case IWebSocketConnection serverConnection:
                         serverConnection.Send(message);

@@ -49,18 +49,18 @@ namespace Sora.EventArgs.SoraEvent
         /// 初始化
         /// </summary>
         /// <param name="serviceId">服务ID</param>
-        /// <param name="connectionGuid">服务器链接标识</param>
+        /// <param name="connectionId">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="privateMsgArgs">私聊消息事件参数</param>
-        internal PrivateMessageEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+        internal PrivateMessageEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                          ApiPrivateMsgEventArgs privateMsgArgs)
-            : base(serviceId, connectionGuid, eventName, privateMsgArgs.SelfID, privateMsgArgs.Time)
+            : base(serviceId, connectionId, eventName, privateMsgArgs.SelfID, privateMsgArgs.Time)
         {
             //将api消息段转换为CQ码
-            Message = new Message(serviceId, connectionGuid, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
+            Message = new Message(serviceId, connectionId, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
                                   MessageConverter.Parse(privateMsgArgs.MessageList),
                                   privateMsgArgs.Time, privateMsgArgs.Font, null);
-            Sender             = new User(serviceId, connectionGuid, privateMsgArgs.UserId);
+            Sender             = new User(serviceId, connectionId, privateMsgArgs.UserId);
             IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
 
             //检查服务管理员权限

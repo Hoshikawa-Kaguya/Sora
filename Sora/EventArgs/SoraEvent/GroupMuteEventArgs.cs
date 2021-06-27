@@ -39,16 +39,16 @@ namespace Sora.EventArgs.SoraEvent
         /// 初始化
         /// </summary>
         /// <param name="serviceId">服务ID</param>
-        /// <param name="connectionGuid">服务器链接标识</param>
+        /// <param name="connectionId">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="groupMuteArgs">群禁言事件参数</param>
-        internal GroupMuteEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+        internal GroupMuteEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                     ApiGroupMuteEventArgs groupMuteArgs) :
-            base(serviceId, connectionGuid, eventName, groupMuteArgs.SelfID, groupMuteArgs.Time)
+            base(serviceId, connectionId, eventName, groupMuteArgs.SelfID, groupMuteArgs.Time)
         {
-            User        = new User(serviceId, connectionGuid, groupMuteArgs.UserId);
-            Operator    = new User(serviceId, connectionGuid, groupMuteArgs.OperatorId);
-            SourceGroup = new Group(serviceId, connectionGuid, groupMuteArgs.GroupId);
+            User        = new User(serviceId, connectionId, groupMuteArgs.UserId);
+            Operator    = new User(serviceId, connectionId, groupMuteArgs.OperatorId);
+            SourceGroup = new Group(serviceId, connectionId, groupMuteArgs.GroupId);
             Duration    = groupMuteArgs.Duration;
         }
 

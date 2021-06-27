@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
-using Sora.Entities;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Interfaces;
 using Sora.OnebotInterface;

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Attributes;
-using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.OnebotModel.ApiParams;
@@ -36,17 +35,17 @@ namespace Sora.Net
         /// 向API客户端发送请求数据
         /// </summary>
         /// <param name="apiRequest">请求信息</param>
-        /// <param name="connectionGuid">服务器连接标识符</param>
+        /// <param name="connectionId">服务器连接标识符</param>
         /// <param name="timeout">覆盖原有超时,在不为空时有效</param>
         /// <returns>API返回</returns>
         [Reviewed("XiaoHe321", "2021-04-13 23:00")]
-        internal static async ValueTask<(ApiStatus, JObject)> SendApiRequest(ApiRequest apiRequest, Guid connectionGuid,
+        internal static async ValueTask<(ApiStatus, JObject)> SendApiRequest(ApiRequest apiRequest, Guid connectionId,
                                                                              TimeSpan? timeout = null)
         {
             TimeSpan currentTimeout;
             if (timeout is null)
             {
-                if (!ConnectionManager.GetApiTimeout(connectionGuid, out currentTimeout))
+                if (!ConnectionManager.GetApiTimeout(connectionId, out currentTimeout))
                 {
                     Log.Error("Sora|ReactiveApiManager", "Cannot get api timout");
                     currentTimeout = TimeSpan.FromSeconds(5);
@@ -81,7 +80,7 @@ namespace Sora.Net
             //这里的错误最终将抛给开发者
             //发送消息
             if (!ConnectionManager
-                    .SendMessage(connectionGuid, JsonConvert.SerializeObject(apiRequest, Formatting.None)))
+                    .SendMessage(connectionId, JsonConvert.SerializeObject(apiRequest, Formatting.None)))
                 //API消息发送失败
                 return (SocketSendError(), null);
 

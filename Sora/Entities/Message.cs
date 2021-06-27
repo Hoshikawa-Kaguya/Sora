@@ -51,9 +51,9 @@ namespace Sora.Entities
 
         #region 构造函数
 
-        internal Message(Guid serviceId, Guid connectionGuid, int msgId, string text, MessageBody messageBody,
+        internal Message(Guid serviceId, Guid connectionId, int msgId, string text, MessageBody messageBody,
                          long time, int font, long? messageSequence) :
-            base(serviceId, connectionGuid)
+            base(serviceId, connectionId)
         {
             MessageId       = msgId;
             RawText         = text;
