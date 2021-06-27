@@ -26,12 +26,12 @@ namespace Sora.Entities.Base
         /// 当前实例对应的链接ID
         /// 用于调用API
         /// </summary>
-        internal Guid ConnectionGuid { get; }
+        internal Guid ConnectionId { get; }
 
         /// <summary>
         /// 当前实例对应的服务ID
         /// </summary>
-        internal Guid ServiceGuid { get; }
+        internal Guid ServiceId { get; }
 
         #endregion
 
@@ -40,12 +40,12 @@ namespace Sora.Entities.Base
         /// <summary>
         /// 初始化Api实例
         /// </summary>
-        /// <param name="serviceGuid"></param>
-        /// <param name="connectionGuid"></param>
-        internal SoraApi(Guid serviceGuid, Guid connectionGuid)
+        /// <param name="serviceId"></param>
+        /// <param name="connectionId"></param>
+        internal SoraApi(Guid serviceId, Guid connectionId)
         {
-            ServiceGuid    = serviceGuid;
-            ConnectionGuid = connectionGuid;
+            ServiceId    = serviceId;
+            ConnectionId = connectionId;
         }
 
         #endregion
@@ -72,7 +72,7 @@ namespace Sora.Entities.Base
         {
             if (userId         < 10000) throw new ArgumentOutOfRangeException($"{nameof(userId)} too small");
             if (message.Length == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendPrivateMessage(ConnectionGuid, userId, message.ToCQCodeList());
+            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message.ToCQCodeList());
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Sora.Entities.Base
         {
             if (userId        < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
             if (message.Count == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendPrivateMessage(ConnectionGuid, userId, message);
+            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Sora.Entities.Base
             if (userId         < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
             if (groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Length == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendPrivateMessage(ConnectionGuid, userId, message.ToCQCodeList(), groupId);
+            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message.ToCQCodeList(), groupId);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Sora.Entities.Base
             if (userId        < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
             if (groupId       < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Count == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendPrivateMessage(ConnectionGuid, userId, message, groupId);
+            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message, groupId);
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace Sora.Entities.Base
         {
             if (groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Length == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendGroupMessage(ConnectionGuid, groupId, message.ToCQCodeList());
+            return await ApiInterface.SendGroupMessage(ConnectionId, groupId, message.ToCQCodeList());
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Sora.Entities.Base
         {
             if (groupId       < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Count == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendGroupMessage(ConnectionGuid, groupId, message);
+            return await ApiInterface.SendGroupMessage(ConnectionId, groupId, message);
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace Sora.Entities.Base
         /// <param name="messageId">消息ID</param>
         public async ValueTask<ApiStatus> RecallMessage(int messageId)
         {
-            return await ApiInterface.RecallMsg(ConnectionGuid, messageId);
+            return await ApiInterface.RecallMsg(ConnectionId, messageId);
         }
 
         #region GoAPI
@@ -206,7 +206,7 @@ namespace Sora.Entities.Base
         public async ValueTask<(ApiStatus apiStatus, List<Node> nodeArray)> GetForwardMessage(string forwardId)
         {
             if (string.IsNullOrEmpty(forwardId)) throw new NullReferenceException(nameof(forwardId));
-            var (apiStatus, nodeArray) = await ApiInterface.GetForwardMessage(ConnectionGuid, forwardId);
+            var (apiStatus, nodeArray) = await ApiInterface.GetForwardMessage(ConnectionId, forwardId);
             return (apiStatus, nodeArray.NodeMsgList);
         }
 
@@ -223,7 +223,7 @@ namespace Sora.Entities.Base
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             IEnumerable<CustomNode> customNodes = nodeList as CustomNode[] ?? nodeList.ToArray();
             if (nodeList == null || !customNodes.Any()) throw new NullReferenceException(nameof(nodeList));
-            return await ApiInterface.SendGroupForwardMsg(ConnectionGuid, groupId, customNodes);
+            return await ApiInterface.SendGroupForwardMsg(ConnectionId, groupId, customNodes);
         }
 
         /// <summary>
@@ -240,7 +240,7 @@ namespace Sora.Entities.Base
             string cacheFileName)
         {
             if (string.IsNullOrEmpty(cacheFileName)) throw new ArgumentOutOfRangeException(nameof(cacheFileName));
-            return await ApiInterface.GetImage(ConnectionGuid, cacheFileName);
+            return await ApiInterface.GetImage(ConnectionId, cacheFileName);
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Sora.Entities.Base
             ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup,
                 int realId, bool isGroupMsg)> GetMessage(int messageId)
         {
-            return await ApiInterface.GetMessage(ServiceGuid, ConnectionGuid, messageId);
+            return await ApiInterface.GetMessage(ServiceId, ConnectionId, messageId);
         }
 
         /// <summary>
@@ -274,7 +274,7 @@ namespace Sora.Entities.Base
         public async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(
             long groupId, long? messageSequence = null)
         {
-            return await ApiInterface.GetGroupMessageHistory(messageSequence, groupId, ServiceGuid, ConnectionGuid);
+            return await ApiInterface.GetGroupMessageHistory(messageSequence, groupId, ServiceId, ConnectionId);
         }
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, List<ClientInfo> clients)> GetOnlineClients(bool useCache)
         {
-            return await ApiInterface.GetOnlineClients(useCache, ConnectionGuid);
+            return await ApiInterface.GetOnlineClients(useCache, ConnectionId);
         }
 
         #endregion
@@ -309,7 +309,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000 || userId < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return await ApiInterface.SetGroupCard(ConnectionGuid, groupId, userId, card);
+            return await ApiInterface.SetGroupCard(ConnectionId, groupId, userId, card);
         }
 
         /// <summary>
@@ -322,7 +322,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000 || userId < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return await ApiInterface.SetGroupSpecialTitle(ConnectionGuid, groupId, userId,
+            return await ApiInterface.SetGroupSpecialTitle(ConnectionId, groupId, userId,
                                                            specialTitle);
         }
 
@@ -336,7 +336,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000 || userId < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return await ApiInterface.KickGroupMember(ConnectionGuid, groupId, userId,
+            return await ApiInterface.KickGroupMember(ConnectionId, groupId, userId,
                                                       rejectRequest);
         }
 
@@ -354,7 +354,7 @@ namespace Sora.Entities.Base
             if (groupId < 100000 || userId < 10000 || duration < 60)
                 throw new
                     ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} or {nameof(duration)} out of range");
-            return await ApiInterface.SetGroupBan(ConnectionGuid, groupId, userId, duration);
+            return await ApiInterface.SetGroupBan(ConnectionId, groupId, userId, duration);
         }
 
         /// <summary>
@@ -366,7 +366,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000 || userId < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return await ApiInterface.SetGroupBan(ConnectionGuid, groupId, userId, 0);
+            return await ApiInterface.SetGroupBan(ConnectionId, groupId, userId, 0);
         }
 
         /// <summary>
@@ -381,7 +381,7 @@ namespace Sora.Entities.Base
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(duration)} out of range");
             if (anonymous == null)
                 throw new NullReferenceException("anonymous null");
-            return await ApiInterface.SetAnonymousBan(ConnectionGuid, groupId, anonymous,
+            return await ApiInterface.SetAnonymousBan(ConnectionId, groupId, anonymous,
                                                       duration);
         }
 
@@ -398,7 +398,7 @@ namespace Sora.Entities.Base
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(duration)} out of range");
             if (anonymousFlag == null)
                 throw new NullReferenceException("anonymousFlag null");
-            return await ApiInterface.SetAnonymousBan(ConnectionGuid, groupId, anonymousFlag,
+            return await ApiInterface.SetAnonymousBan(ConnectionId, groupId, anonymousFlag,
                                                       duration);
         }
 
@@ -410,7 +410,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000)
                 throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.SetGroupWholeBan(ConnectionGuid, groupId, true);
+            return await ApiInterface.SetGroupWholeBan(ConnectionId, groupId, true);
         }
 
         /// <summary>
@@ -421,7 +421,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000)
                 throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.SetGroupWholeBan(ConnectionGuid, groupId, false);
+            return await ApiInterface.SetGroupWholeBan(ConnectionId, groupId, false);
         }
 
         /// <summary>
@@ -433,7 +433,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000 || userId < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return await ApiInterface.SetGroupAdmin(ConnectionGuid, userId, groupId, true);
+            return await ApiInterface.SetGroupAdmin(ConnectionId, userId, groupId, true);
         }
 
         /// <summary>
@@ -445,7 +445,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000 || userId < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return await ApiInterface.SetGroupAdmin(ConnectionGuid, userId, groupId, false);
+            return await ApiInterface.SetGroupAdmin(ConnectionId, userId, groupId, false);
         }
 
         /// <summary>
@@ -455,7 +455,7 @@ namespace Sora.Entities.Base
         public async ValueTask<ApiStatus> LeaveGroup(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.SetGroupLeave(ConnectionGuid, groupId, false);
+            return await ApiInterface.SetGroupLeave(ConnectionId, groupId, false);
         }
 
         /// <summary>
@@ -465,7 +465,7 @@ namespace Sora.Entities.Base
         public async ValueTask<ApiStatus> DismissGroup(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.SetGroupLeave(ConnectionGuid, groupId, true);
+            return await ApiInterface.SetGroupLeave(ConnectionId, groupId, true);
         }
 
         #region GoAPI
@@ -479,7 +479,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (string.IsNullOrEmpty(newName)) throw new NullReferenceException(nameof(newName));
-            return await ApiInterface.SetGroupName(ConnectionGuid, groupId, newName);
+            return await ApiInterface.SetGroupName(ConnectionId, groupId, newName);
         }
 
         /// <summary>
@@ -494,7 +494,7 @@ namespace Sora.Entities.Base
             if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
             var (retFileStr, isMatch) = CQCodes.ParseDataStr(imageFile);
             if (!isMatch) throw new NotSupportedException($"not supported file type({imageFile})");
-            return await ApiInterface.SetGroupPortrait(ConnectionGuid, groupId, retFileStr,
+            return await ApiInterface.SetGroupPortrait(ConnectionId, groupId, retFileStr,
                                                        useCache);
         }
 
@@ -510,7 +510,7 @@ namespace Sora.Entities.Base
                 invitedList)>
             GetGroupSystemMsg()
         {
-            return await ApiInterface.GetGroupSystemMsg(ConnectionGuid);
+            return await ApiInterface.GetGroupSystemMsg(ConnectionId);
         }
 
         /// <summary>
@@ -525,7 +525,7 @@ namespace Sora.Entities.Base
             long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.GetGroupFileSysInfo(groupId, ConnectionGuid);
+            return await ApiInterface.GetGroupFileSysInfo(groupId, ConnectionId);
         }
 
         /// <summary>
@@ -542,7 +542,7 @@ namespace Sora.Entities.Base
             GetGroupRootFiles(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.GetGroupRootFiles(groupId, ConnectionGuid);
+            return await ApiInterface.GetGroupRootFiles(groupId, ConnectionId);
         }
 
         /// <summary>
@@ -560,7 +560,7 @@ namespace Sora.Entities.Base
             GetGroupFilesByFolder(long groupId, string foldId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.GetGroupFilesByFolder(groupId, foldId, ConnectionGuid);
+            return await ApiInterface.GetGroupFilesByFolder(groupId, foldId, ConnectionId);
         }
 
         /// <summary>
@@ -577,7 +577,7 @@ namespace Sora.Entities.Base
             GetGroupAtAllRemain(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.GetGroupAtAllRemain(groupId, ConnectionGuid);
+            return await ApiInterface.GetGroupAtAllRemain(groupId, ConnectionId);
         }
 
         /// <summary>
@@ -591,7 +591,7 @@ namespace Sora.Entities.Base
             long groupId, string fileId, int busid)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.GetGroupFileUrl(groupId, fileId, busid, ConnectionGuid);
+            return await ApiInterface.GetGroupFileUrl(groupId, fileId, busid, ConnectionId);
         }
 
         /// <summary>
@@ -606,7 +606,7 @@ namespace Sora.Entities.Base
                                                           string floderId = null)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.UploadGroupFile(ConnectionGuid, groupId, localFilePath,
+            return await ApiInterface.UploadGroupFile(ConnectionId, groupId, localFilePath,
                                                       fileName, floderId);
         }
 
@@ -617,7 +617,7 @@ namespace Sora.Entities.Base
         /// <returns>API状态</returns>
         public async ValueTask<ApiStatus> SetEssenceMessage(long messageId)
         {
-            return await ApiInterface.SetEssenceMsg(ConnectionGuid, messageId);
+            return await ApiInterface.SetEssenceMsg(ConnectionId, messageId);
         }
 
         /// <summary>
@@ -627,7 +627,7 @@ namespace Sora.Entities.Base
         /// <returns>API状态</returns>
         public async ValueTask<ApiStatus> DelEssenceMessage(long messageId)
         {
-            return await ApiInterface.DelEssenceMsg(ConnectionGuid, messageId);
+            return await ApiInterface.DelEssenceMsg(ConnectionId, messageId);
         }
 
         /// <summary>
@@ -637,7 +637,7 @@ namespace Sora.Entities.Base
         /// <returns>精华消息列表</returns>
         public async ValueTask<(ApiStatus apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList(long gid)
         {
-            return await ApiInterface.GetEssenceMsgList(ServiceGuid, ConnectionGuid, gid);
+            return await ApiInterface.GetEssenceMsgList(ServiceId, ConnectionId, gid);
         }
 
         /// <summary>
@@ -648,7 +648,7 @@ namespace Sora.Entities.Base
         /// <returns>安全性</returns>
         public async ValueTask<(ApiStatus apiStatus, SecurityLevelType securityLevel)> CheckUrlSafely(string url)
         {
-            return await ApiInterface.CheckUrlSafely(ConnectionGuid, url);
+            return await ApiInterface.CheckUrlSafely(ConnectionId, url);
         }
 
         /// <summary>
@@ -660,7 +660,7 @@ namespace Sora.Entities.Base
         public async ValueTask<ApiStatus> SendGroupNotice(long groupId, string content, string image = null)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.SendGroupNotice(ConnectionGuid, groupId, content, image);
+            return await ApiInterface.SendGroupNotice(ConnectionId, groupId, content, image);
         }
 
         /// <summary>
@@ -671,7 +671,7 @@ namespace Sora.Entities.Base
         public async ValueTask<ApiStatus> CreateGroupFileRootFolder(long groupId, string name)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.CreateGroupFileFolder(ConnectionGuid, groupId, name, null);
+            return await ApiInterface.CreateGroupFileFolder(ConnectionId, groupId, name, null);
         }
 
         /// <summary>
@@ -682,7 +682,7 @@ namespace Sora.Entities.Base
         public async ValueTask<ApiStatus> DeleteGroupFolder(long groupId, string floderId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.DeleteGroupFolder(ConnectionGuid, groupId, floderId);
+            return await ApiInterface.DeleteGroupFolder(ConnectionId, groupId, floderId);
         }
 
         /// <summary>
@@ -699,7 +699,7 @@ namespace Sora.Entities.Base
                                                           string floderId = null)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.DeleteGroupFile(ConnectionGuid, groupId, fileId, busId, floderId);
+            return await ApiInterface.DeleteGroupFile(ConnectionId, groupId, fileId, busId, floderId);
         }
 
         #endregion
@@ -717,7 +717,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, long uid, string nick)> GetLoginInfo()
         {
-            return await ApiInterface.GetLoginInfo(ConnectionGuid);
+            return await ApiInterface.GetLoginInfo(ConnectionId);
         }
 
         /// <summary>
@@ -729,7 +729,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, List<FriendInfo> friendList)> GetFriendList()
         {
-            return await ApiInterface.GetFriendList(ServiceGuid, ConnectionGuid);
+            return await ApiInterface.GetFriendList(ServiceId, ConnectionId);
         }
 
         /// <summary>
@@ -741,7 +741,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, List<GroupInfo> groupList)> GetGroupList()
         {
-            return await ApiInterface.GetGroupList(ConnectionGuid);
+            return await ApiInterface.GetGroupList(ConnectionId);
         }
 
         /// <summary>
@@ -757,7 +757,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} out of range");
-            return await ApiInterface.GetGroupMemberList(ServiceGuid, ConnectionGuid, groupId);
+            return await ApiInterface.GetGroupMemberList(ServiceId, ConnectionId, groupId);
         }
 
         /// <summary>
@@ -774,7 +774,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} out of range");
-            return await ApiInterface.GetGroupInfo(ConnectionGuid, groupId, useCache);
+            return await ApiInterface.GetGroupInfo(ConnectionId, groupId, useCache);
         }
 
         /// <summary>
@@ -792,7 +792,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000 && userId < 10000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} or {nameof(userId)} out of range");
-            return await ApiInterface.GetGroupMemberInfo(ServiceGuid, ConnectionGuid, groupId, userId, useCache);
+            return await ApiInterface.GetGroupMemberInfo(ServiceId, ConnectionId, groupId, userId, useCache);
         }
 
         /// <summary>
@@ -810,7 +810,7 @@ namespace Sora.Entities.Base
             long userId, bool useCache = true)
         {
             if (userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            return await ApiInterface.GetUserInfo(ServiceGuid, ConnectionGuid, userId, useCache);
+            return await ApiInterface.GetUserInfo(ServiceId, ConnectionId, userId, useCache);
         }
 
         /// <summary>
@@ -822,7 +822,7 @@ namespace Sora.Entities.Base
         public async ValueTask<(ApiStatus apiStatus, VipInfo vipInfo)> GetVipInfo(long userId)
         {
             if (userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            return await ApiInterface.GetVipInfo(ConnectionGuid, userId);
+            return await ApiInterface.GetVipInfo(ConnectionId, userId);
         }
 
         /// <summary>
@@ -831,7 +831,7 @@ namespace Sora.Entities.Base
         /// </summary>
         public async ValueTask<(ApiStatus apiStatus, QidianAccountInfo qidianAccountInfo)> GetQidianAccountInfo()
         {
-            return await ApiInterface.GetQidianAccountInfo(ConnectionGuid);
+            return await ApiInterface.GetQidianAccountInfo(ConnectionId);
         }
 
         /// <summary>
@@ -843,7 +843,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<ApiStatus> DeleteFriend(long userId)
         {
-            return await ApiInterface.DeleteFriend(ConnectionGuid, userId);
+            return await ApiInterface.DeleteFriend(ConnectionId, userId);
         }
 
         /// <summary>
@@ -852,7 +852,7 @@ namespace Sora.Entities.Base
         /// <param name="model">型号</param>
         public async ValueTask<(ApiStatus apiStatus, List<Model> models)> GetModelShow(string model)
         {
-            return await ApiInterface.GetModelShow(ConnectionGuid, model);
+            return await ApiInterface.GetModelShow(ConnectionId, model);
         }
 
         /// <summary>
@@ -862,7 +862,7 @@ namespace Sora.Entities.Base
         /// <param name="showModel">展示名</param>
         public async ValueTask<ApiStatus> SetModelShow(string model, string showModel)
         {
-            return await ApiInterface.SetModelShow(ConnectionGuid, model, showModel);
+            return await ApiInterface.SetModelShow(ConnectionId, model, showModel);
         }
 
         #endregion
@@ -878,7 +878,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, string clientType, string ver)> GetClientInfo()
         {
-            return await ApiInterface.GetClientInfo(ConnectionGuid);
+            return await ApiInterface.GetClientInfo(ConnectionId);
         }
 
         /// <summary>
@@ -890,7 +890,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendImage()
         {
-            return await ApiInterface.CanSendImage(ConnectionGuid);
+            return await ApiInterface.CanSendImage(ConnectionId);
         }
 
         /// <summary>
@@ -902,7 +902,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendRecord()
         {
-            return await ApiInterface.CanSendRecord(ConnectionGuid);
+            return await ApiInterface.CanSendRecord(ConnectionId);
         }
 
         /// <summary>
@@ -916,7 +916,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, bool online, bool good, JObject )> GetStatus()
         {
-            return await ApiInterface.GetStatus(ConnectionGuid);
+            return await ApiInterface.GetStatus(ConnectionId);
         }
 
         /// <summary>
@@ -926,7 +926,7 @@ namespace Sora.Entities.Base
         public async ValueTask<ApiStatus> RebootClient(int delay = 0)
         {
             if (delay < 0) throw new ArgumentOutOfRangeException(nameof(delay));
-            return await ApiInterface.Restart(ConnectionGuid, delay);
+            return await ApiInterface.Restart(ConnectionId, delay);
         }
 
         /// <summary>
@@ -934,7 +934,7 @@ namespace Sora.Entities.Base
         /// </summary>
         public async ValueTask<ApiStatus> ReloadEventFilter()
         {
-            return await ApiInterface.ReloadEventFilter(ConnectionGuid);
+            return await ApiInterface.ReloadEventFilter(ConnectionId);
         }
 
         #endregion
@@ -951,7 +951,7 @@ namespace Sora.Entities.Base
                                                               string remark = null)
         {
             if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
-            return await ApiInterface.SetFriendAddRequest(ConnectionGuid, flag, approve, remark);
+            return await ApiInterface.SetFriendAddRequest(ConnectionId, flag, approve, remark);
         }
 
         /// <summary>
@@ -967,7 +967,7 @@ namespace Sora.Entities.Base
                                                              string reason = null)
         {
             if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
-            return await ApiInterface.SetGroupAddRequest(ConnectionGuid, flag, requestType,
+            return await ApiInterface.SetGroupAddRequest(ConnectionId, flag, requestType,
                                                          approve, reason);
         }
 
@@ -988,7 +988,7 @@ namespace Sora.Entities.Base
         public async ValueTask<(ApiStatus apiStatus, List<string> wordList)> GetWordSlices(string text)
         {
             if (string.IsNullOrEmpty(text)) throw new NullReferenceException(nameof(text));
-            return await ApiInterface.GetWordSlices(ConnectionGuid, text);
+            return await ApiInterface.GetWordSlices(ConnectionId, text);
         }
 
         /// <summary>
@@ -1009,7 +1009,7 @@ namespace Sora.Entities.Base
                 throw new ArgumentOutOfRangeException(nameof(threadCount), "threadCount less than 1");
             if (timeout < 1000)
                 throw new ArgumentOutOfRangeException(nameof(timeout), "timeout less than 1000");
-            return await ApiInterface.DownloadFile(url, threadCount, ConnectionGuid, customHeader, timeout);
+            return await ApiInterface.DownloadFile(url, threadCount, ConnectionId, customHeader, timeout);
         }
 
         /// <summary>
@@ -1023,7 +1023,7 @@ namespace Sora.Entities.Base
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, List<TextDetection> texts, string lang)> OcrImage(string imageId)
         {
-            return await ApiInterface.OcrImage(imageId, ConnectionGuid);
+            return await ApiInterface.OcrImage(imageId, ConnectionId);
         }
 
         #endregion
@@ -1041,7 +1041,7 @@ namespace Sora.Entities.Base
         public User GetUser(long userId)
         {
             if (userId < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            return new User(ServiceGuid, ConnectionGuid, userId);
+            return new User(ServiceId, ConnectionId, userId);
         }
 
         /// <summary>
@@ -1051,7 +1051,7 @@ namespace Sora.Entities.Base
         public Group GetGroup(long groupId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return new Group(ServiceGuid, ConnectionGuid, groupId);
+            return new Group(ServiceId, ConnectionId, groupId);
         }
 
         /// <summary>
@@ -1060,13 +1060,38 @@ namespace Sora.Entities.Base
         /// </summary>
         public long GetLoginUserId()
         {
-            if (ConnectionManager.GetLoginUid(ConnectionGuid, out var uid))
-            {
-                return uid;
-            }
-
+            if (ConnectionManager.GetLoginUid(ConnectionId, out var uid)) return uid;
             return -1;
         }
+
+        /// <summary>
+        /// 屏蔽用户
+        /// 在当前服务实例内不再处理其消息
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        public void BlockUser(long userId)
+            => StaticVariable.ServiceInfos[ServiceId].BlockUsers.Add(userId);
+
+        /// <summary>
+        /// 对用户解除屏蔽
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        public bool RemoveBlock(long userId)
+            => StaticVariable.ServiceInfos[ServiceId].BlockUsers.Remove(userId);
+
+        /// <summary>
+        /// 添加机器人管理员
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        public void AddSuperUser(long userId)
+            => StaticVariable.ServiceInfos[ServiceId].SuperUsers.Add(userId);
+
+        /// <summary>
+        /// 解除机器人管理员
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        public bool RemoveSuperUser(long userId)
+            => StaticVariable.ServiceInfos[ServiceId].SuperUsers.Remove(userId);
 
         #endregion
 
@@ -1079,7 +1104,7 @@ namespace Sora.Entities.Base
         {
             if (apiL is null && apiR is null) return true;
 
-            return apiL is not null && apiR is not null && apiL.ConnectionGuid == apiR.ConnectionGuid;
+            return apiL is not null && apiR is not null && apiL.ConnectionId == apiR.ConnectionId;
         }
 
         /// <summary>
@@ -1112,7 +1137,7 @@ namespace Sora.Entities.Base
         /// </summary>
         public override int GetHashCode()
         {
-            return ConnectionGuid.GetHashCode();
+            return ConnectionId.GetHashCode();
         }
 
         #endregion

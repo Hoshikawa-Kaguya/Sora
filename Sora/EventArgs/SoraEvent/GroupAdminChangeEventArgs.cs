@@ -35,15 +35,15 @@ namespace Sora.EventArgs.SoraEvent
         /// 初始化
         /// </summary>
         /// <param name="serviceId">服务ID</param>
-        /// <param name="connectionGuid">服务器链接标识</param>
+        /// <param name="connectionId">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="adminChangeArgs">管理员变动事件参数</param>
-        internal GroupAdminChangeEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+        internal GroupAdminChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                            ApiAdminChangeEventArgs adminChangeArgs) :
-            base(serviceId, connectionGuid, eventName, adminChangeArgs.SelfID, adminChangeArgs.Time)
+            base(serviceId, connectionId, eventName, adminChangeArgs.SelfID, adminChangeArgs.Time)
         {
-            SourceGroup = new Group(serviceId, connectionGuid, adminChangeArgs.GroupId);
-            Sender      = new User(serviceId, connectionGuid, adminChangeArgs.UserId);
+            SourceGroup = new Group(serviceId, connectionId, adminChangeArgs.GroupId);
+            Sender      = new User(serviceId, connectionId, adminChangeArgs.UserId);
             SubType     = adminChangeArgs.SubType;
         }
 

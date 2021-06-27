@@ -41,14 +41,14 @@ namespace Sora.EventArgs.SoraEvent
 
         #region 构造函数
 
-        internal EssenceChangeEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+        internal EssenceChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                         ApiEssenceChangeEventArgs essenceChangeEvent) :
-            base(serviceId, connectionGuid, eventName, essenceChangeEvent.SelfID, essenceChangeEvent.Time)
+            base(serviceId, connectionId, eventName, essenceChangeEvent.SelfID, essenceChangeEvent.Time)
         {
             MessageId         = essenceChangeEvent.MessageId;
-            Operator          = new User(serviceId, connectionGuid, essenceChangeEvent.OperatorId);
-            Sender            = new User(serviceId, connectionGuid, essenceChangeEvent.SenderId);
-            SourceGroup       = new Group(serviceId, connectionGuid, essenceChangeEvent.GroupId);
+            Operator          = new User(serviceId, connectionId, essenceChangeEvent.OperatorId);
+            Sender            = new User(serviceId, connectionId, essenceChangeEvent.SenderId);
+            SourceGroup       = new Group(serviceId, connectionId, essenceChangeEvent.GroupId);
             EssenceChangeType = essenceChangeEvent.EssenceChangeType;
         }
 

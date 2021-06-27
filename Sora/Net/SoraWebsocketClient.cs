@@ -8,7 +8,6 @@ using System.Data;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Sora.Entities;
 using Sora.Entities.Info.InternalDataInfo;
 using Websocket.Client;
 using YukariToolBox.FormatLog;

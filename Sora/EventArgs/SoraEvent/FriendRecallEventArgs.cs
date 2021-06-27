@@ -29,14 +29,14 @@ namespace Sora.EventArgs.SoraEvent
         /// 初始化
         /// </summary>
         /// <param name="serviceId">服务ID</param>
-        /// <param name="connectionGuid">服务器链接标识</param>
+        /// <param name="connectionId">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="friendRecallArgs">私聊消息撤回事件参数</param>
-        internal FriendRecallEventArgs(Guid serviceId, Guid connectionGuid, string eventName,
+        internal FriendRecallEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                        ApiFriendRecallEventArgs friendRecallArgs) :
-            base(serviceId, connectionGuid, eventName, friendRecallArgs.SelfID, friendRecallArgs.Time)
+            base(serviceId, connectionId, eventName, friendRecallArgs.SelfID, friendRecallArgs.Time)
         {
-            Sender    = new User(serviceId, connectionGuid, friendRecallArgs.UserId);
+            Sender    = new User(serviceId, connectionId, friendRecallArgs.UserId);
             MessageId = friendRecallArgs.MessageId;
         }
 

@@ -10,7 +10,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Sora.Entities;
 using Sora.Enumeration.ApiType;
 using YukariToolBox.FormatLog;
 

@@ -12,7 +12,7 @@ using Sora.Enumeration;
 using Websocket.Client;
 using YukariToolBox.FormatLog;
 
-namespace Sora.Entities
+namespace Sora
 {
     /// <summary>
     /// 静态变量存放区
@@ -21,6 +21,7 @@ namespace Sora.Entities
     {
         /// <summary>
         /// 连续对话匹配上下文
+        /// Key:当前对话标识符
         /// </summary>
         internal static readonly ConcurrentDictionary<Guid, WaitingInfo> WaitingDict = new();
 
@@ -56,16 +57,19 @@ namespace Sora.Entities
 
         /// <summary>
         /// API响应被观察对象
+        /// 结构:Tuple[echo标识符,响应json]
         /// </summary>
         internal static readonly Subject<Tuple<Guid, JObject>> ApiSubject = new();
 
         /// <summary>
         /// WS静态连接记录表
+        /// Key:链接标识符
         /// </summary>
         internal static readonly ConcurrentDictionary<Guid, SoraConnectionInfo> ConnectionInfos = new();
 
         /// <summary>
         /// 服务信息
+        /// Key:服务标识符
         /// </summary>
         internal static readonly ConcurrentDictionary<Guid, ServiceInfo> ServiceInfos = new();
 
