@@ -102,7 +102,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, int messageId)> Repeat()
         {
-            return await SoraApi.SendPrivateMessage(Sender.Id, Message.MessageBody, null);
+            return await SoraApi.SendPrivateMessage(Sender.Id, Message.MessageBody);
         }
 
         #endregion

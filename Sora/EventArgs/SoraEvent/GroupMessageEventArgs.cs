@@ -122,7 +122,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, int messageId)> Repeat()
         {
-            return await SoraApi.SendGroupMessage(SourceGroup.Id, Message.MessageBody, null);
+            return await SoraApi.SendGroupMessage(SourceGroup.Id, Message.MessageBody);
         }
 
         /// <summary>
