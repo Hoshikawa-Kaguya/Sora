@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Sora.Converter;
 using Sora.Entities.MessageElement.CQModel;
 using Sora.Entities.Info;
 using Sora.Entities.MessageElement;
@@ -55,45 +54,25 @@ namespace Sora.Entities.Base
         #region 消息API
 
         /// <summary>
-        /// 发送私聊消息
-        /// </summary>
-        /// <param name="userId">发送目标用户id</param>
-        /// <param name="message">
-        /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
-        /// <returns>
-        /// <para><see cref="ApiStatusType"/> API执行状态</para>
-        /// <para><see langword="messageId"/> 消息ID</para>
-        /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
-            long userId, params object[] message)
-        {
-            if (userId         < 10000) throw new ArgumentOutOfRangeException($"{nameof(userId)} too small");
-            if (message.Length == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message.ToCQCodeList());
-        }
-
-        /// <summary>
         /// 发送群聊消息
         /// </summary>
         /// <param name="userId">发送目标群id</param>
         /// <param name="message">
-        /// <para>消息</para>
-        /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        ///     <para>消息</para>
+        ///     <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        ///     <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
+        /// <param name="timeout"></param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
-            long userId, MessageBody message)
+            long userId, MessageBody message, TimeSpan? timeout = null)
         {
             if (userId        < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
             if (message.Count == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message);
+            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message, null, timeout);
         }
 
         /// <summary>
@@ -102,44 +81,22 @@ namespace Sora.Entities.Base
         /// <param name="userId">发送目标群id</param>
         /// <param name="groupId">群号</param>
         /// <param name="message">
-        /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        ///     <para>消息</para>
+        ///     <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        ///     <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
+        /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, int messageId)> SendTemporaryMessage(
-            long userId, long groupId, params object[] message)
-        {
-            if (userId         < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
-            if (groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            if (message.Length == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message.ToCQCodeList(), groupId);
-        }
-
-        /// <summary>
-        /// 发起群临时会话（私聊）
-        /// </summary>
-        /// <param name="userId">发送目标群id</param>
-        /// <param name="groupId">群号</param>
-        /// <param name="message">
-        /// <para>消息</para>
-        /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
-        /// <returns>
-        /// <para><see cref="ApiStatusType"/> API执行状态</para>
-        /// <para><see langword="messageId"/> 消息ID</para>
-        /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendTemporaryMessage(
-            long userId, long groupId, MessageBody message)
+            long userId, long groupId, MessageBody message, TimeSpan? timeout = null)
         {
             if (userId        < 10000) throw new ArgumentOutOfRangeException(nameof(userId));
             if (groupId       < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Count == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message, groupId);
+            return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message, groupId, timeout);
         }
 
         /// <summary>
@@ -147,41 +104,21 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">发送目标群id</param>
         /// <param name="message">
-        /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        ///     <para>消息</para>
+        ///     <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        ///     <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
+        /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
-            long groupId, params object[] message)
-        {
-            if (groupId        < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            if (message.Length == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendGroupMessage(ConnectionId, groupId, message.ToCQCodeList());
-        }
-
-        /// <summary>
-        /// 发送群聊消息
-        /// </summary>
-        /// <param name="groupId">发送目标群id</param>
-        /// <param name="message">
-        /// <para>消息</para>
-        /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
-        /// <returns>
-        /// <para><see cref="ApiStatusType"/> API执行状态</para>
-        /// <para><see langword="messageId"/> 消息ID</para>
-        /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
-            long groupId, MessageBody message)
+            long groupId, MessageBody message, TimeSpan? timeout = null)
         {
             if (groupId       < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (message.Count == 0) throw new NullReferenceException(nameof(message));
-            return await ApiInterface.SendGroupMessage(ConnectionId, groupId, message);
+            return await ApiInterface.SendGroupMessage(ConnectionId, groupId, message, timeout);
         }
 
         /// <summary>
