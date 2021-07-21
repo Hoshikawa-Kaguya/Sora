@@ -57,11 +57,7 @@ namespace Sora.Entities.Base
         /// 发送群聊消息
         /// </summary>
         /// <param name="userId">发送目标群id</param>
-        /// <param name="message">
-        ///     <para>消息</para>
-        ///     <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
-        ///     <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
+        /// <param name="message">消息内容</param>
         /// <param name="timeout"></param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
@@ -80,11 +76,7 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="userId">发送目标群id</param>
         /// <param name="groupId">群号</param>
-        /// <param name="message">
-        ///     <para>消息</para>
-        ///     <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
-        ///     <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
+        /// <param name="message">消息内容</param>
         /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
@@ -103,11 +95,7 @@ namespace Sora.Entities.Base
         /// 发送群聊消息
         /// </summary>
         /// <param name="groupId">发送目标群id</param>
-        /// <param name="message">
-        ///     <para>消息</para>
-        ///     <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
-        ///     <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
+        /// <param name="message">消息内容</param>
         /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
