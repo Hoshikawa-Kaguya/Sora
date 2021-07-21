@@ -102,13 +102,15 @@ namespace Sora.EventArgs.SoraEvent
         /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
+        /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 发送消息的id</para>
         /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(params object[] message)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(MessageBody message,
+                                                                           TimeSpan? timeout = null)
         {
-            return await SoraApi.SendGroupMessage(SourceGroup.Id, message);
+            return await SoraApi.SendGroupMessage(SourceGroup.Id, message, timeout);
         }
 
         /// <summary>
@@ -120,7 +122,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, int messageId)> Repeat()
         {
-            return await SoraApi.SendGroupMessage(SourceGroup.Id, Message.MessageBody);
+            return await SoraApi.SendGroupMessage(SourceGroup.Id, Message.MessageBody, null);
         }
 
         /// <summary>
