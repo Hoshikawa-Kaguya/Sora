@@ -45,35 +45,18 @@ namespace Sora.Entities
         /// 发送群消息
         /// </summary>
         /// <param name="message">
-        /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/></para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        ///     <para>消息</para>
+        ///     <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        ///     <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
+        /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(params object[] message)
-        {
-            return await SoraApi.SendGroupMessage(Id, message);
-        }
-
-        /// <summary>
-        /// 发送群消息
-        /// </summary>
-        /// <param name="message">
-        /// <para>消息</para>
-        /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
-        /// <returns>
-        /// <para><see cref="ApiStatusType"/> API执行状态</para>
-        /// <para><see langword="messageId"/> 消息ID</para>
-        /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(MessageBody message)
-        {
-            return await SoraApi.SendGroupMessage(Id, message);
-        }
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(MessageBody message,
+            TimeSpan? timeout = null)
+            => await SoraApi.SendGroupMessage(Id, message, timeout);
 
         #endregion
 
@@ -88,9 +71,7 @@ namespace Sora.Entities
         /// <para><see cref="GroupInfo"/> 群信息</para>
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, GroupInfo groupInfo)> GetGroupInfo(bool useCache = true)
-        {
-            return await SoraApi.GetGroupInfo(Id, useCache);
-        }
+            => await SoraApi.GetGroupInfo(Id, useCache);
 
         /// <summary>
         /// 获取群成员列表
@@ -100,9 +81,7 @@ namespace Sora.Entities
         /// <para><see cref="List{GroupMemberInfo}"/> 群成员列表</para>
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList()
-        {
-            return await SoraApi.GetGroupMemberList(Id);
-        }
+            => await SoraApi.GetGroupMemberList(Id);
 
         /// <summary>
         /// 获取群成员信息
@@ -115,9 +94,7 @@ namespace Sora.Entities
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
             long userId, bool useCache = true)
-        {
-            return await SoraApi.GetGroupMemberInfo(Id, userId, useCache);
-        }
+            => await SoraApi.GetGroupMemberInfo(Id, userId, useCache);
 
         #region Go扩展
 

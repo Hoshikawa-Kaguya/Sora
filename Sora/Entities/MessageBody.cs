@@ -200,7 +200,7 @@ namespace Sora.Entities
             }
             set
             {
-                if (value.MessageType == CQType.Unknown)
+                if (value.MessageType == CQType.Unknown || value.DataObject == null)
                     throw new NullReferenceException("message element is null");
                 _message[index] = value;
             }
@@ -213,6 +213,18 @@ namespace Sora.Entities
         {
             message.Add(CQCodes.CQText(text));
             return message;
+        }
+
+        #endregion
+
+        #region 隐式转换
+
+        /// <summary>
+        /// 隐式类型转换
+        /// </summary>
+        public static implicit operator MessageBody(string cqCode)
+        {
+            return new() {CQCodes.CQText(cqCode)};
         }
 
         #endregion

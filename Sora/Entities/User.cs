@@ -40,19 +40,6 @@ namespace Sora.Entities
         #region 常用操作方法
 
         /// <summary>
-        /// 发送私聊消息
-        /// </summary>
-        /// <param name="message">
-        /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
-        public async ValueTask<(ApiStatus apiStatus, int message)> SendPrivateMessage(params object[] message)
-        {
-            return await SoraApi.SendPrivateMessage(Id, message);
-        }
-
-        /// <summary>
         /// 发送群消息
         /// </summary>
         /// <param name="message">
@@ -60,14 +47,14 @@ namespace Sora.Entities
         /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
+        /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
         /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(MessageBody message)
-        {
-            return await SoraApi.SendPrivateMessage(Id, message);
-        }
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
+            MessageBody message, TimeSpan? timeout = null)
+            => await SoraApi.SendPrivateMessage(Id, message, timeout);
 
         /// <summary>
         /// 获取用户信息
@@ -80,9 +67,7 @@ namespace Sora.Entities
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
             bool useCache = true)
-        {
-            return await SoraApi.GetUserInfo(Id, useCache);
-        }
+            => await SoraApi.GetUserInfo(Id, useCache);
 
         /// <summary>
         /// 删除好友
@@ -91,9 +76,7 @@ namespace Sora.Entities
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// </returns>
         public async ValueTask<ApiStatus> DeleteFriend()
-        {
-            return await SoraApi.DeleteFriend(Id);
-        }
+            => await SoraApi.DeleteFriend(Id);
 
         #endregion
 
@@ -106,9 +89,7 @@ namespace Sora.Entities
         /// <see cref="CQCode"/> AT
         /// </returns>
         public CQCode CQCodeAt()
-        {
-            return CQCodes.CQAt(Id);
-        }
+            => CQCodes.CQAt(Id);
 
         #endregion
 
@@ -119,18 +100,14 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="value">转换的 <see cref="User"/> 对象</param>
         public static implicit operator long(User value)
-        {
-            return value.Id;
-        }
+            => value.Id;
 
         /// <summary>
         /// 定义将 <see cref="User"/> 对象转换为 <see cref="string"/>
         /// </summary>
         /// <param name="value">转换的 <see cref="User"/> 对象</param>
         public static implicit operator string(User value)
-        {
-            return value.ToString();
-        }
+            => value.ToString();
 
         #endregion
 

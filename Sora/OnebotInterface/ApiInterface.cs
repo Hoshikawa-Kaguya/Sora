@@ -28,12 +28,13 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         /// <param name="target">发送目标uid</param>
         /// <param name="messages">发送的信息</param>
-        /// <param name="groupId">临时会话来源群</param>
+        /// <param name="groupId">临时会话来源群，非临时会话时为<see langword="null"/></param>
+        /// <param name="timeout">本次调用的超时，为<see langword="null"/>时使用默认超时时</param>
         /// <returns>
         /// message id
         /// </returns>
         internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
-            Guid connection, long target, MessageBody messages, long? groupId = null)
+            Guid connection, long target, MessageBody messages, long? groupId, TimeSpan? timeout)
         {
             Log.Debug("Sora", "Sending send_msg(Private) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
@@ -49,7 +50,7 @@ namespace Sora.OnebotInterface
                     Message = messages.Select(msg => msg.ToOnebotMessage()).ToList(),
                     GroupId = groupId
                 }
-            }, connection);
+            }, connection, timeout);
             Log.Debug("Sora", $"Get send_msg(Private) response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, -1);
             var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
@@ -65,11 +66,12 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         /// <param name="target">发送目标gid</param>
         /// <param name="messages">发送的信息</param>
+        /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// ApiResponseCollection
         /// </returns>
         internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
-            Guid connection, long target, MessageBody messages)
+            Guid connection, long target, MessageBody messages, TimeSpan? timeout)
         {
             Log.Debug("Sora", "Sending send_msg(Group) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
@@ -84,7 +86,7 @@ namespace Sora.OnebotInterface
                     //转换消息段列表
                     Message = messages.Select(msg => msg.ToOnebotMessage()).ToList(),
                 }
-            }, connection);
+            }, connection, timeout);
             Log.Debug("Sora", $"Get send_msg(Group) response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, -1);
             var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
