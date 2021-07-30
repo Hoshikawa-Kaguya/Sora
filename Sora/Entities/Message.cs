@@ -81,16 +81,20 @@ namespace Sora.Entities
 
         /// <summary>
         /// 获取所有At的UID
+        /// Notice:at全体不会被转换
         /// </summary>
         /// <returns>
         /// <para>At的uid列表</para>
         /// <para><see cref="List{T}"/>(T=<see cref="long"/>)</para>
         /// </returns>
-        public List<long> GetAllAtList()
+        public IEnumerable<long> GetAllAtList()
         {
-            return MessageBody.Where(cq => cq.MessageType == CQType.At)
-                              .Select(cq => Convert.ToInt64(((At) cq.DataObject).Traget ?? "-1"))
-                              .ToList();
+            var uidList = MessageBody.Where(cq => cq.MessageType == CQType.At)
+                                     .Select(cq => long.TryParse(((At) cq.DataObject).Traget, out var uid) ? uid : -1)
+                                     .ToList();
+            //去除无法转换的值，如at全体
+            uidList.RemoveAll(uid => uid == -1);
+            return uidList;
         }
 
         /// <summary>
@@ -111,7 +115,7 @@ namespace Sora.Entities
         /// <para>图片信息结构体列表</para>
         /// <para><see cref="List{T}"/>(T=<see cref="Image"/>)</para>
         /// </returns>
-        public List<Image> GetAllImage()
+        public IEnumerable<Image> GetAllImage()
         {
             return MessageBody.Where(cq => cq.MessageType == CQType.Image)
                               .Select(cq => (Image) cq.DataObject)
