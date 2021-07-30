@@ -28,19 +28,13 @@ namespace Sora.Net
         public static ISoraService CreateService(ISoraConfig config, Action<Exception> crashAction = null)
         {
             //如果已经启动过初始化则不显示初始化log
-            if (_haveStartupLog)
-                return config switch
-                {
-                    ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
-                    ServerConfig s2 => new SoraWebsocketServer(s2, crashAction),
-                    _ => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
-                };
-
-            Log.Info("Sora", $"Sora 框架版本:{Assembly.GetExecutingAssembly().GetName().Version} rc.14");
-            Log.Debug("Sora", "开发交流群：1081190562");
-            Log.Debug("System", Environment.OSVersion);
-            _haveStartupLog = true;
-
+            if (!_haveStartupLog)
+            {
+                Log.Info("Sora", $"Sora 框架版本:{Assembly.GetExecutingAssembly().GetName().Version} rc.14");
+                Log.Debug("Sora", "开发交流群：1081190562");
+                Log.Debug("System", Environment.OSVersion);
+                _haveStartupLog = true;
+            }
             return config switch
             {
                 ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
