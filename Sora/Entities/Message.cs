@@ -88,7 +88,7 @@ namespace Sora.Entities
         /// </returns>
         public List<long> GetAllAtList()
         {
-            return MessageBody.Where(cq => cq.MessageType == CQType.At)
+            return MessageBody.Where(cq => cq.MessageType == CQType.At &&long.TryParse(((At) cq.DataObject).Traget))
                               .Select(cq => Convert.ToInt64(((At) cq.DataObject).Traget ?? "-1"))
                               .ToList();
         }
