@@ -616,7 +616,6 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <para>文件夹ID</para>
         /// <para>在删除根目录文件时置空</para>
-        /// </param>
         /// <param name="fileId">文件ID</param>
         /// <param name="busId">文件类型</param>
         public async ValueTask<ApiStatus> DeleteGroupFile(long groupId, string fileId, int busId)
