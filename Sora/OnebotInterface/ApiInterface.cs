@@ -1528,31 +1528,21 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="connection">链接标识</param>
         /// <param name="groupId">群号</param>
-        /// <param name="floderId">文件夹ID</param>
         /// <param name="fileId">文件ID</param>
         /// <param name="busId">文件类型</param>
         internal static async ValueTask<ApiStatus> DeleteGroupFile(Guid connection, long groupId, string fileId,
-                                                                   int busId,
-                                                                   string floderId)
+                                                                   int busId)
         {
             Log.Debug("Sora", "Sending delete_group_file request");
             var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.DeleteGroupFile,
-                ApiParams = string.IsNullOrEmpty(floderId)
-                    ? new
-                    {
-                        group_id = groupId,
-                        file_id  = fileId,
-                        bus_id   = busId
-                    }
-                    : new
-                    {
-                        group_id  = groupId,
-                        folder_id = floderId,
-                        file_id   = fileId,
-                        bus_id    = busId
-                    }
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    file_id  = fileId,
+                    bus_id   = busId
+                }
             }, connection);
             Log.Debug("Sora", $"Get delete_group_file response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
