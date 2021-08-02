@@ -614,17 +614,15 @@ namespace Sora.Entities.Base
         /// 删除群文件文件夹
         /// </summary>
         /// <param name="groupId">群号</param>
-        /// <param name="floderId">
         /// <para>文件夹ID</para>
         /// <para>在删除根目录文件时置空</para>
         /// </param>
         /// <param name="fileId">文件ID</param>
         /// <param name="busId">文件类型</param>
-        public async ValueTask<ApiStatus> DeleteGroupFile(long groupId, string fileId, int busId,
-                                                          string floderId = null)
+        public async ValueTask<ApiStatus> DeleteGroupFile(long groupId, string fileId, int busId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.DeleteGroupFile(ConnectionId, groupId, fileId, busId, floderId);
+            return await ApiInterface.DeleteGroupFile(ConnectionId, groupId, fileId, busId);
         }
 
         #endregion
