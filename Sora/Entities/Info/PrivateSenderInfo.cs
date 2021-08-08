@@ -51,7 +51,8 @@ namespace Sora.Entities.Info
         public int Age { get; internal init; }
 
         /// <summary>
-        /// 来源群号
+        /// <para>来源群号</para>
+        /// <para>仅支持gocq</para>
         /// </summary>
         [JsonProperty(PropertyName         = "group_id", NullValueHandling = NullValueHandling.Ignore,
                       DefaultValueHandling = DefaultValueHandling.Ignore)]
