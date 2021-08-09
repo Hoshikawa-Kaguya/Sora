@@ -172,7 +172,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">客户端链接接口</param>
         internal void Adapter(JObject messageJson, Guid connection)
         {
-            switch (GetBaseEventType(messageJson))
+            switch (GetJsonValue(messageJson, "post_type"))
             {
                 //元事件类型
                 case "meta_event":
@@ -200,7 +200,7 @@ namespace Sora.OnebotInterface
                     }
                     else
                         Log.Warning("Sora",
-                                    $"Unknown message type:{GetBaseEventType(messageJson)}\r\njson = {messageJson}");
+                                    $"Unknown message type:{GetJsonValue(messageJson, "post_type")}\r\njson = {messageJson}");
 
                     break;
             }
@@ -217,7 +217,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void MetaAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetMetaEventType(messageJson))
+            switch (GetJsonValue(messageJson, "meta_event_type"))
             {
                 //心跳包
                 case "heartbeat":
@@ -263,7 +263,7 @@ namespace Sora.OnebotInterface
                     break;
                 }
                 default:
-                    Log.Warning("Sora|Meta Event", $"接收到未知事件[{GetMetaEventType(messageJson)}]");
+                    Log.Warning("Sora|Meta Event", $"接收到未知事件[{GetJsonValue(messageJson, "meta_event_type")}]");
                     break;
             }
         }
@@ -279,7 +279,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void MessageAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetMessageType(messageJson))
+            switch (GetJsonValue(messageJson, "message_type"))
             {
                 //私聊事件
                 case "private":
@@ -319,7 +319,7 @@ namespace Sora.OnebotInterface
                     break;
                 }
                 default:
-                    Log.Warning("Sora|Message", $"接收到未知事件[{GetMessageType(messageJson)}]");
+                    Log.Warning("Sora|Message", $"接收到未知事件[{GetJsonValue(messageJson, "message_type")}]");
                     break;
             }
         }
@@ -335,7 +335,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void SelfMessageAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetMessageType(messageJson))
+            switch (GetJsonValue(messageJson, "message_type"))
             {
                 case "group":
                 {
@@ -350,7 +350,7 @@ namespace Sora.OnebotInterface
                     break;
                 }
                 default:
-                    Log.Warning("Sora|Message", $"接收到未知事件[{GetMessageType(messageJson)}]");
+                    Log.Warning("Sora|Message", $"接收到未知事件[{GetJsonValue(messageJson, "message_type")}]");
                     break;
             }
         }
@@ -366,7 +366,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void RequestAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetRequestType(messageJson))
+            switch (GetJsonValue(messageJson, "request_type"))
             {
                 //好友请求事件
                 case "friend":
@@ -403,7 +403,7 @@ namespace Sora.OnebotInterface
                     break;
                 }
                 default:
-                    Log.Warning("Sora|Request", $"接收到未知事件[{GetRequestType(messageJson)}]");
+                    Log.Warning("Sora|Request", $"接收到未知事件[{GetJsonValue(messageJson, "request_type")}]");
                     break;
             }
         }
@@ -419,7 +419,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void NoticeAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetNoticeType(messageJson))
+            switch (GetJsonValue(messageJson, "notice_type"))
             {
                 //群文件上传
                 case "group_upload":
@@ -568,7 +568,7 @@ namespace Sora.OnebotInterface
                 }
                 //通知类事件
                 case "notify":
-                    switch (GetNotifyType(messageJson))
+                    switch (GetJsonValue(messageJson, "sub_type"))
                     {
                         case "poke": //戳一戳
                         {
@@ -605,13 +605,13 @@ namespace Sora.OnebotInterface
                             break;
                         }
                         default:
-                            Log.Warning("Sora|Notify", $"接收到未知事件[{GetNotifyType(messageJson)}]");
+                            Log.Warning("Sora|Notify", $"接收到未知事件[{GetJsonValue(messageJson, "sub_type")}]");
                             break;
                     }
 
                     break;
                 default:
-                    Log.Warning("Sora|Notice", $"接收到未知事件[{GetNoticeType(messageJson)}]");
+                    Log.Warning("Sora|Notice", $"接收到未知事件[{GetJsonValue(messageJson, "notice_type")}]");
                     break;
             }
         }
@@ -621,46 +621,10 @@ namespace Sora.OnebotInterface
         #region 事件类型获取
 
         /// <summary>
-        /// 获取上报事件类型
+        /// 获取json中的值
         /// </summary>
-        /// <param name="messageJson">消息Json对象</param>
-        private static string GetBaseEventType(JObject messageJson) =>
-            messageJson["post_type"]?.ToString() ?? string.Empty;
-
-        /// <summary>
-        /// 获取元事件类型
-        /// </summary>
-        /// <param name="messageJson">消息Json对象</param>
-        private static string GetMetaEventType(JObject messageJson) =>
-            messageJson["meta_event_type"]?.ToString() ?? string.Empty;
-
-        /// <summary>
-        /// 获取消息事件类型
-        /// </summary>
-        /// <param name="messageJson">消息Json对象</param>
-        private static string GetMessageType(JObject messageJson) =>
-            messageJson["message_type"]?.ToString() ?? string.Empty;
-
-        /// <summary>
-        /// 获取请求事件类型
-        /// </summary>
-        /// <param name="messageJson">消息Json对象</param>
-        private static string GetRequestType(JObject messageJson) =>
-            messageJson["request_type"]?.ToString() ?? default;
-
-        /// <summary>
-        /// 获取通知事件类型
-        /// </summary>
-        /// <param name="messageJson">消息Json对象</param>
-        private static string GetNoticeType(JObject messageJson) =>
-            messageJson["notice_type"]?.ToString() ?? string.Empty;
-
-        /// <summary>
-        /// 获取通知事件子类型
-        /// </summary>
-        /// <param name="messageJson"></param>
-        private static string GetNotifyType(JObject messageJson) =>
-            messageJson["sub_type"]?.ToString() ?? string.Empty;
+        private static string GetJsonValue(JObject dataJson, string key)
+            => dataJson.TryGetValue(key, out var value) ? value.ToString() : string.Empty;
 
         #endregion
     }

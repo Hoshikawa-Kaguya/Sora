@@ -214,7 +214,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_group_member_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理返回群成员列表
-            var memberList = ret["data"]?.ToObject<List<GroupMemberInfo>>() ?? new List<GroupMemberInfo>()!;
+            var memberList = ret["data"]?.ToObject<List<GroupMemberInfo>>() ?? new List<GroupMemberInfo>();
             //检查最高级管理员权限
             foreach (var t in memberList.Where(t => StaticVariable.ServiceInfos[serviceId].SuperUsers
                                                                   .Any(id => id == t.UserId)))
