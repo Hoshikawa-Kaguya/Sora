@@ -70,8 +70,10 @@ namespace Sora.Net
         public static List<ISoraService> CreateMultiService(ISoraConfig config,
                                                             Action<Exception> crashAction = null)
         {
-            List<ISoraService> createdService = new();
-            createdService.Add(CreateService(config, crashAction));
+            List<ISoraService> createdService = new()
+            {
+                CreateService(config, crashAction)
+            };
 
             return createdService;
         }

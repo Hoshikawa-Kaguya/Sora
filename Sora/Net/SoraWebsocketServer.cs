@@ -96,7 +96,7 @@ namespace Sora.Net
             //实例化事件接口
             Event = new EventInterface(_serverId, config.EnableSoraCommandManager);
             //禁用原log
-            FleckLog.Level = (LogLevel) 4;
+            FleckLog.Level = (LogLevel)4;
             Server = new WebSocketServer($"ws://{config.Host}:{config.Port}")
             {
                 //出错后进行重启
@@ -129,83 +129,73 @@ namespace Sora.Net
         {
             if (!_serverReady) return ValueTask.CompletedTask;
             //启动服务器
-            Server.Start(socket =>
-                         {
-                             //接收事件处理
-                             //获取请求头数据
-                             if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID",
-                                                                            out var selfId) || //bot UID
-                                 !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role",
-                                                                            out var role)) //Client Type
-                             {
-                                 return;
-                             }
-
-                             //请求路径检查
-                             var isLost = role switch
-                             {
-                                 "Universal" => !socket.ConnectionInfo.Path.Trim('/')
-                                                       .Equals(Config.UniversalPath.Trim('/')),
-                                 _ => true
-                             };
-                             if (isLost)
-                             {
-                                 socket.Close();
-                                 Log.Warning("Sora",
-                                             $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
-                                 return;
-                             }
-
-                             //打开连接
-                             socket.OnOpen = () =>
-                                             {
-                                                 //获取Token
-                                                 if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",
-                                                     out var headerValue))
-                                                 {
-                                                     var token = headerValue.Split(' ')[1];
-                                                     Log.Debug("Server", $"get token = {token}");
-                                                     //验证Token
-                                                     if (!token.Equals(Config.AccessToken)) return;
-                                                 }
-
-                                                 //向客户端发送Ping
-                                                 socket.SendPing(new byte[] {1, 2, 5});
-                                                 //事件回调
-                                                 ConnManager.OpenConnection(role, selfId, socket,
-                                                                            _serverId, socket.ConnectionInfo.Id,
-                                                                            Config.ApiTimeOut);
-                                                 Log.Info("Sora",
-                                                          $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
-                                             };
-                             //关闭连接
-                             socket.OnClose = () =>
-                                              {
-                                                  //移除原连接信息
-                                                  if (ConnManager.ConnectionExitis(socket.ConnectionInfo.Id))
-                                                      ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
-                                                          socket.ConnectionInfo.Id);
-
-                                                  Log.Info("Sora",
-                                                           $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
-                                              };
-                             //上报接收
-                             socket.OnMessage = (message) =>
-                                                {
-                                                    //进入事件处理和分发
-                                                    Task.Run(() =>
-                                                             {
-                                                                 Event
-                                                                     .Adapter(JObject.Parse(message),
-                                                                              socket.ConnectionInfo.Id);
-                                                             });
-                                                };
-                         });
+            Server.Start(SocketConfig);
             Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
             //启动心跳包超时检查计时器
             HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
                                        Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
             return ValueTask.CompletedTask;
+        }
+
+        private void SocketConfig(IWebSocketConnection socket)
+        {
+            //接收事件处理
+            //获取请求头数据
+            if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID", out var selfId) || //bot UID
+                !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role", out var role)) //Client Type
+            {
+                return;
+            }
+
+            //请求路径检查
+            var isLost = role switch
+            {
+                "Universal" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath.Trim('/')),
+                _ => true
+            };
+            if (isLost)
+            {
+                socket.Close();
+                Log.Warning("Sora",
+                            $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
+                return;
+            }
+
+            //打开连接
+            socket.OnOpen = () =>
+                            {
+                                //获取Token
+                                if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",
+                                                                              out var headerValue))
+                                {
+                                    var token = headerValue.Split(' ')[1];
+                                    Log.Debug("Server", $"get token = {token}");
+                                    //验证Token
+                                    if (!token.Equals(Config.AccessToken)) return;
+                                }
+
+                                //向客户端发送Ping
+                                socket.SendPing(new byte[] { 1, 2, 5 });
+                                //事件回调
+                                ConnManager.OpenConnection(role, selfId, socket, _serverId,
+                                                           socket.ConnectionInfo.Id, Config.ApiTimeOut);
+                                Log.Info("Sora",
+                                         $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
+                            };
+            //关闭连接
+            socket.OnClose = () =>
+                             {
+                                 //移除原连接信息
+                                 if (ConnManager.ConnectionExitis(socket.ConnectionInfo.Id))
+                                     ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
+                                                                 socket.ConnectionInfo.Id);
+
+                                 Log.Info("Sora",
+                                          $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
+                             };
+            //上报接收
+            socket.OnMessage = message =>
+                                   Task.Run(() => Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id));
         }
 
         /// <summary>
