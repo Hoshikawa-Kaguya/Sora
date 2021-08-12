@@ -121,7 +121,7 @@ namespace Sora.Entities.Info
         [JsonIgnore]
         public DateTime? TitleExpireTime { get; internal init; }
 
-        [JsonProperty(PropertyName         = "title_expire_time", NullValueHandling = NullValueHandling.Ignore,
+        [JsonProperty(PropertyName = "title_expire_time", NullValueHandling = NullValueHandling.Ignore,
                       DefaultValueHandling = DefaultValueHandling.Ignore)]
         private long? TitleExpireTimeStamp
         {

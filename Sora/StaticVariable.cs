@@ -52,7 +52,7 @@ namespace Sora
                           RegexOptions.Compiled)
             },
             //文件名
-            {CQFileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled)}
+            { CQFileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled) }
         };
 
         /// <summary>

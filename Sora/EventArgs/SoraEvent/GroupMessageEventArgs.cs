@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Converter;
@@ -85,7 +84,7 @@ namespace Sora.EventArgs.SoraEvent
             //检查服务管理员权限
             var groupSenderInfo = groupMsgArgs.SenderInfo;
             if (groupSenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
-                                                             .Any(id => id == groupSenderInfo.UserId))
+                                                             .Contains(groupSenderInfo.UserId))
                 groupSenderInfo.Role = MemberRoleType.SuperUser;
             SenderInfo = groupSenderInfo;
         }
@@ -162,7 +161,7 @@ namespace Sora.EventArgs.SoraEvent
         public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, commandExps,
+            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps,
                                             matchType, SourceFlag.Group, regexOptions, null, null,
                                             SourceGroup));
         }
@@ -181,7 +180,7 @@ namespace Sora.EventArgs.SoraEvent
                                                                         Func<ValueTask> timeoutTask = null,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, commandExps,
+            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps,
                                             matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
                                             SourceGroup));
         }
@@ -196,7 +195,7 @@ namespace Sora.EventArgs.SoraEvent
         public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
+            return WaitForNextMessageAsync(new[] { commandExp }, matchType, regexOptions);
         }
 
         /// <summary>
@@ -213,7 +212,7 @@ namespace Sora.EventArgs.SoraEvent
                                                                         Func<ValueTask> timeoutTask = null,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs) WaitForNextMessage(Sender, new[] {commandExp},
+            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, new[] { commandExp },
                                             matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
                                             SourceGroup));
         }

@@ -224,7 +224,7 @@ namespace Sora.Entities
         /// </summary>
         public static implicit operator MessageBody(string cqCode)
         {
-            return new() {CQCodes.CQText(cqCode)};
+            return new() { CQCodes.CQText(cqCode) };
         }
 
         #endregion

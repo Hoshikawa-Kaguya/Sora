@@ -56,7 +56,7 @@ service.Event.CommandManager.RegisterGroupCommand(async eventArgs =>
                                                   {
                                                       await eventArgs.Reply("坏");
                                                       eventArgs.IsContinueEventChain = false;
-                                                  }, new[] {"2"}, MatchType.Full);
+                                                  }, new[] { "2" }, MatchType.Full);
 
 #endregion
 

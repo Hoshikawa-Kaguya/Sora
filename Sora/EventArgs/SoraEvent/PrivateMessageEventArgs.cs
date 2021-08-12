@@ -88,7 +88,8 @@ namespace Sora.EventArgs.SoraEvent
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 发送消息的id</para>
         /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(MessageBody message, TimeSpan? timeout = null)
+        public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(
+            MessageBody message, TimeSpan? timeout = null)
         {
             return await SoraApi.SendPrivateMessage(Sender.Id, message, timeout);
         }
@@ -119,7 +120,7 @@ namespace Sora.EventArgs.SoraEvent
         public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((PrivateMessageEventArgs) WaitForNextMessage(Sender, commandExps, matchType,
+            return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType,
                                             SourceFlag.Private, regexOptions, null, null));
         }
 
@@ -137,7 +138,7 @@ namespace Sora.EventArgs.SoraEvent
                                                                           Func<ValueTask> timeoutTask = null,
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((PrivateMessageEventArgs) WaitForNextMessage(Sender, commandExps, matchType,
+            return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType,
                                             SourceFlag.Private, regexOptions, timeout, timeoutTask));
         }
 
@@ -151,7 +152,7 @@ namespace Sora.EventArgs.SoraEvent
         public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
-            return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
+            return WaitForNextMessageAsync(new[] { commandExp }, matchType, regexOptions);
         }
 
         /// <summary>
@@ -168,7 +169,7 @@ namespace Sora.EventArgs.SoraEvent
                                                                           Func<ValueTask> timeoutTask = null,
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((PrivateMessageEventArgs) WaitForNextMessage(Sender, new[] {commandExp},
+            return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, new[] { commandExp },
                                             matchType,
                                             SourceFlag.Private, regexOptions, timeout, timeoutTask));
         }

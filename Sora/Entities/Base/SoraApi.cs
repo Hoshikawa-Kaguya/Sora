@@ -991,7 +991,7 @@ namespace Sora.Entities.Base
         /// 在当前服务实例内不再处理其消息
         /// </summary>
         /// <param name="userId">用户ID</param>
-        public void BlockUser(long userId)
+        public bool BlockUser(long userId)
             => StaticVariable.ServiceInfos[ServiceId].BlockUsers.Add(userId);
 
         /// <summary>
@@ -1005,7 +1005,7 @@ namespace Sora.Entities.Base
         /// 添加机器人管理员
         /// </summary>
         /// <param name="userId">用户ID</param>
-        public void AddSuperUser(long userId)
+        public bool AddSuperUser(long userId)
             => StaticVariable.ServiceInfos[ServiceId].SuperUsers.Add(userId);
 
         /// <summary>

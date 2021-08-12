@@ -54,7 +54,7 @@ namespace Sora.Net
             else
             {
                 Log.Debug("Sora|ReactiveApiManager", $"timeout covered to {timeout.Value.TotalMilliseconds} ms");
-                currentTimeout = (TimeSpan) timeout;
+                currentTimeout = (TimeSpan)timeout;
             }
 
             //错误数据
