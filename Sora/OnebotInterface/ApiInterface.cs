@@ -164,7 +164,7 @@ namespace Sora.OnebotInterface
                 Nick   = token["nickname"]?.ToString() ?? string.Empty,
                 Role = Convert.ToInt64(token["user_id"] ?? -1) != -1 && StaticVariable.ServiceInfos[serviceId]
                     .SuperUsers
-                    .Any(id => id == Convert.ToInt64(token["user_id"]))
+                    .Contains(Convert.ToInt64(token["user_id"]))
                     ? MemberRoleType.SuperUser
                     : MemberRoleType.Member
             }).ToList();
@@ -217,7 +217,7 @@ namespace Sora.OnebotInterface
             var memberList = ret["data"]?.ToObject<List<GroupMemberInfo>>() ?? new List<GroupMemberInfo>();
             //检查最高级管理员权限
             foreach (var t in memberList.Where(t => StaticVariable.ServiceInfos[serviceId].SuperUsers
-                                                                  .Any(id => id == t.UserId)))
+                                                                  .Contains(t.UserId)))
                 t.Role = MemberRoleType.SuperUser;
 
             return (apiStatus, memberList);
@@ -276,7 +276,7 @@ namespace Sora.OnebotInterface
                 return (apiStatus, new GroupMemberInfo());
             var memberInfo = ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo();
             if (memberInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
-                                                        .Any(id => id == memberInfo.UserId))
+                                                        .Contains(memberInfo.UserId))
                 memberInfo.Role = MemberRoleType.SuperUser;
             return (apiStatus, memberInfo);
         }
@@ -311,7 +311,7 @@ namespace Sora.OnebotInterface
             if (info.UserId is not 0 or -1)
             {
                 info.Role = info.UserId != -1 && StaticVariable.ServiceInfos[serviceId].SuperUsers
-                                                               .Any(id => id == info.UserId)
+                                                               .Contains(info.UserId)
                     ? MemberRoleType.SuperUser
                     : MemberRoleType.Member;
             }
@@ -842,7 +842,7 @@ namespace Sora.OnebotInterface
                 }
             }, connection);
             Log.Debug("Sora", $"Get check_url_safely response {nameof(apiStatus)}={apiStatus.RetCode}");
-            return (apiStatus, (SecurityLevelType) Convert.ToInt32(ret?["data"]?["level"] ?? 1));
+            return (apiStatus, (SecurityLevelType)Convert.ToInt32(ret?["data"]?["level"] ?? 1));
         }
 
         /// <summary>

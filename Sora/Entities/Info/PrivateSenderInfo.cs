@@ -54,7 +54,7 @@ namespace Sora.Entities.Info
         /// <para>来源群号</para>
         /// <para>仅支持gocq</para>
         /// </summary>
-        [JsonProperty(PropertyName         = "group_id", NullValueHandling = NullValueHandling.Ignore,
+        [JsonProperty(PropertyName = "group_id", NullValueHandling = NullValueHandling.Ignore,
                       DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long? GroupId { get; internal init; }
 

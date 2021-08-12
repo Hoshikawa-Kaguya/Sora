@@ -23,7 +23,7 @@ namespace Sora.Entities.MessageElement
         /// <param name="msg">文本消息</param>
         public static CQCode CQText(string msg)
         {
-            return new(CQType.Text, new Text {Content = msg});
+            return new(CQType.Text, new Text { Content = msg });
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Sora.Entities.MessageElement
             }
 
             return new CQCode(CQType.At,
-                              new At {Traget = uid.ToString()});
+                              new At { Traget = uid.ToString() });
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Sora.Entities.MessageElement
         public static CQCode CQAtAll()
         {
             return new(CQType.At,
-                       new At {Traget = "all"});
+                       new At { Traget = "all" });
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Sora.Entities.MessageElement
             }
 
             return new CQCode(CQType.Face,
-                              new Face {Id = id});
+                              new Face { Id = id });
         }
 
         /// <summary>
@@ -488,7 +488,7 @@ namespace Sora.Entities.MessageElement
         /// <para>当存在非法参数时CQ码将被本函数重置</para>
         /// </summary>
         private static CQCode CQIlleage() =>
-            new(CQType.Text, new Text {Content = null});
+            new(CQType.Text, new Text { Content = null });
 
         #endregion
 

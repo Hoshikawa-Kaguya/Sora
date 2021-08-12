@@ -101,7 +101,7 @@ namespace Sora.EventArgs.SoraEvent
             //添加上下文并等待信号量
             StaticVariable.WaitingDict.TryAdd(sessionId, waitInfo);
             var receiveSignal = //是否正常接受到触发信号
-                StaticVariable.WaitingDict[sessionId].Semaphore.WaitOne((int) (timeout?.TotalMilliseconds ?? -1));
+                StaticVariable.WaitingDict[sessionId].Semaphore.WaitOne((int)(timeout?.TotalMilliseconds ?? -1));
             //取出匹配指令的事件参数并删除上一次的上下文
             var retEventArgs = receiveSignal ? StaticVariable.WaitingDict[sessionId].EventArgs : null;
             StaticVariable.WaitingDict.TryRemove(sessionId, out _);

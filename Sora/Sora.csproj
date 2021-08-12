@@ -1,58 +1,58 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
-    <Version>1.0.0-rc.15</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>.Net 5异步机器人框架</Description>
-    <Copyright>Copyright © 2020-2021 Yukari316</Copyright>
-    <PackageProjectUrl>https://github.com/Yukari316/Sora</PackageProjectUrl>
-    <Authors>Yukari316</Authors>
-    <Company>Yukari316</Company>
-    <PackageIcon>icon.png</PackageIcon>
-    <LangVersion>preview</LangVersion>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-	<Title>Sora</Title>
-	<Nullable>warnings</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <Version>1.0.0-rc.15</Version>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <Description>.Net 5异步机器人框架</Description>
+        <Copyright>Copyright © 2020-2021 Yukari316</Copyright>
+        <PackageProjectUrl>https://github.com/Yukari316/Sora</PackageProjectUrl>
+        <Authors>Yukari316</Authors>
+        <Company>Yukari316</Company>
+        <PackageIcon>icon.png</PackageIcon>
+        <LangVersion>preview</LangVersion>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <Title>Sora</Title>
+        <Nullable>warnings</Nullable>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE</DefineConstants>
-    <DocumentationFile>.\Sora.xml</DocumentationFile>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DefineConstants>TRACE</DefineConstants>
+        <DocumentationFile>.\Sora.xml</DocumentationFile>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>.\Sora.xml</DocumentationFile>
-	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DocumentationFile>.\Sora.xml</DocumentationFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Command\Attributes\**" />
-    <Compile Remove="OnebotModel\OnebotEvent\ApiEvent\**" />
-    <Compile Remove="TypeEnum\**" />
-    <EmbeddedResource Remove="Command\Attributes\**" />
-    <EmbeddedResource Remove="OnebotModel\OnebotEvent\ApiEvent\**" />
-    <EmbeddedResource Remove="TypeEnum\**" />
-    <None Remove="Command\Attributes\**" />
-    <None Remove="OnebotModel\OnebotEvent\ApiEvent\**" />
-    <None Remove="TypeEnum\**" />
-    <None Remove="Sora.xml" />
-    <EmbeddedResource Include="Sora.xml" />
-    <None Include="icon.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="Command\Attributes\**"/>
+        <Compile Remove="OnebotModel\OnebotEvent\ApiEvent\**"/>
+        <Compile Remove="TypeEnum\**"/>
+        <EmbeddedResource Remove="Command\Attributes\**"/>
+        <EmbeddedResource Remove="OnebotModel\OnebotEvent\ApiEvent\**"/>
+        <EmbeddedResource Remove="TypeEnum\**"/>
+        <None Remove="Command\Attributes\**"/>
+        <None Remove="OnebotModel\OnebotEvent\ApiEvent\**"/>
+        <None Remove="TypeEnum\**"/>
+        <None Remove="Sora.xml"/>
+        <EmbeddedResource Include="Sora.xml"/>
+        <None Include="icon.png">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fleck" Version="1.2.0"/>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
-    <PackageReference Include="System.Threading.Channels" Version="5.0.0" />
-    <PackageReference Include="Websocket.Client" Version="4.3.32"/>
-    <PackageReference Include="YukariToolBox" Version="1.1.3" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Fleck" Version="1.2.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
+        <PackageReference Include="System.Reactive" Version="5.0.0"/>
+        <PackageReference Include="System.Threading.Channels" Version="5.0.0"/>
+        <PackageReference Include="Websocket.Client" Version="4.3.32"/>
+        <PackageReference Include="YukariToolBox" Version="1.1.3"/>
+    </ItemGroup>
 
 </Project>

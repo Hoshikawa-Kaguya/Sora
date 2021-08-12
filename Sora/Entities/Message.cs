@@ -90,7 +90,7 @@ namespace Sora.Entities
         public IEnumerable<long> GetAllAtList()
         {
             var uidList = MessageBody.Where(cq => cq.MessageType == CQType.At)
-                                     .Select(cq => long.TryParse(((At) cq.DataObject).Traget, out var uid) ? uid : -1)
+                                     .Select(cq => long.TryParse(((At)cq.DataObject).Traget, out var uid) ? uid : -1)
                                      .ToList();
             //去除无法转换的值，如at全体
             uidList.RemoveAll(uid => uid == -1);
@@ -105,7 +105,7 @@ namespace Sora.Entities
         public string GetRecordUrl()
         {
             if (MessageBody.Count != 1 || MessageBody.First().MessageType != CQType.Record) return null;
-            return ((Record) MessageBody.First().DataObject).Url;
+            return ((Record)MessageBody.First().DataObject).Url;
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Sora.Entities
         public IEnumerable<Image> GetAllImage()
         {
             return MessageBody.Where(cq => cq.MessageType == CQType.Image)
-                              .Select(cq => (Image) cq.DataObject)
+                              .Select(cq => (Image)cq.DataObject)
                               .ToList();
         }
 
@@ -135,7 +135,7 @@ namespace Sora.Entities
         /// </summary>
         public string GetForwardMsgId()
         {
-            return IsForwardMessage() ? ((Forward) MessageBody.First().DataObject).MessageId : null;
+            return IsForwardMessage() ? ((Forward)MessageBody.First().DataObject).MessageId : null;
         }
 
         #endregion

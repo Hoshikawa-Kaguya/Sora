@@ -287,7 +287,7 @@ namespace Sora.OnebotInterface
                     var privateMsg = messageJson.ToObject<ApiPrivateMsgEventArgs>();
                     if (privateMsg == null) break;
                     //检查屏蔽用户
-                    if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Any(u => u == privateMsg.UserId)) return;
+                    if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Contains(privateMsg.UserId)) return;
                     Log.Debug("Sora",
                               $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                     var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
@@ -305,7 +305,7 @@ namespace Sora.OnebotInterface
                 {
                     ApiGroupMsgEventArgs groupMsg = messageJson.ToObject<ApiGroupMsgEventArgs>();
                     if (groupMsg == null) break;
-                    if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Any(u => u == groupMsg.UserId)) return;
+                    if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Contains(groupMsg.UserId)) return;
                     Log.Debug("Sora",
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);

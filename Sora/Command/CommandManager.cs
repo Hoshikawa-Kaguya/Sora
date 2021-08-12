@@ -250,7 +250,7 @@ namespace Sora.Command
             //当前流程已经处理过wait command了。不再继续处理普通command，否则会一次发两条消息，普通消息留到下一次处理
             if (waitingCommand.Count != 0)
             {
-                ((BaseSoraEventArgs) eventArgs).IsContinueEventChain = false;
+                ((BaseSoraEventArgs)eventArgs).IsContinueEventChain = false;
                 return;
             }
 
@@ -334,14 +334,14 @@ namespace Sora.Command
                                 Log.Debug("Command", "invoke async command method");
                                 await commandInfo.MethodInfo
                                                  .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                         new[] {eventArgs});
+                                                         new[] { eventArgs });
                             }
                             else
                             {
                                 Log.Debug("Command", "invoke command method");
                                 commandInfo.MethodInfo
                                            .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                   new[] {eventArgs});
+                                                   new[] { eventArgs });
                             }
 
                             break;

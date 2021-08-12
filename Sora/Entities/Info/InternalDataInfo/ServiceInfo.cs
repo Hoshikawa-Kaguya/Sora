@@ -18,18 +18,18 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// <summary>
         /// 该服务的管理员UID
         /// </summary>
-        internal readonly List<long> SuperUsers;
+        internal readonly HashSet<long> SuperUsers;
 
         /// <summary>
         /// 屏蔽用户
         /// </summary>
-        internal readonly List<long> BlockUsers;
+        internal readonly HashSet<long> BlockUsers;
 
         internal ServiceInfo(Guid serviceId, ISoraConfig config)
         {
             ServiceId  = serviceId;
-            SuperUsers = config.SuperUsers.ToList();
-            BlockUsers = config.BlockUsers.ToList();
+            SuperUsers = new HashSet<long>(config.SuperUsers);
+            BlockUsers = new HashSet<long>(config.BlockUsers);
         }
 
         public override int GetHashCode()

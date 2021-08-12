@@ -38,7 +38,7 @@ namespace Sora.Converter
             }
 
             DescriptionAttribute[] attributes =
-                (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+                (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
             writer.WriteValue(attributes.Length > 0 ? attributes[0].Description : "");
         }
 

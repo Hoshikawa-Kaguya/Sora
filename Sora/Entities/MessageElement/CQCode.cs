@@ -89,7 +89,7 @@ namespace Sora.Entities.MessageElement
         /// </summary>
         public static MessageBody operator +(CQCode codeR, CQCode codeL)
         {
-            var messages = new MessageBody {codeR, codeL};
+            var messages = new MessageBody { codeR, codeL };
             return messages;
         }
 
@@ -107,7 +107,7 @@ namespace Sora.Entities.MessageElement
         /// </summary>
         public static implicit operator MessageBody(CQCode cqCode)
         {
-            return new() {cqCode};
+            return new() { cqCode };
         }
 
         /// <summary>

@@ -35,6 +35,7 @@ namespace Sora.Net
                 Log.Debug("System", Environment.OSVersion);
                 _haveStartupLog = true;
             }
+
             return config switch
             {
                 ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
