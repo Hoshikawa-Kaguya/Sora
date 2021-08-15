@@ -68,7 +68,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="groupMsgArgs">群消息事件参数</param>
         internal GroupMessageEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                       ApiGroupMsgEventArgs groupMsgArgs)
+                                       OnebotGroupMsgEventArgs groupMsgArgs)
             : base(serviceId, connectionId, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
         {
             IsAnonymousMessage = groupMsgArgs.Anonymous != null;

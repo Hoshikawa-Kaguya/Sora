@@ -2,19 +2,19 @@ using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration.EventParamsType;
 
-namespace Sora.OnebotModel.OnebotEvent.NoticeEvent
+namespace Sora.OnebotModel.OnebotEvent.RequestEvent
 {
     /// <summary>
-    /// 群管理员变动事件
+    /// 群聊邀请/入群请求事件
     /// </summary>
-    internal sealed class ApiAdminChangeEventArgs : BaseNoticeEventArgs
+    internal sealed class OnebotGroupRequestEventArgs : BaseRequestEvent
     {
         /// <summary>
-        /// 事件子类型
+        /// 请求子类型
         /// </summary>
         [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "sub_type")]
-        internal AdminChangeType SubType { get; set; }
+        internal GroupRequestType GroupRequestType { get; set; }
 
         /// <summary>
         /// 群号

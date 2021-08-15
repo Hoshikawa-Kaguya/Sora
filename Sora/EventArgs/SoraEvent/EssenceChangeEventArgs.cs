@@ -42,7 +42,7 @@ namespace Sora.EventArgs.SoraEvent
         #region 构造函数
 
         internal EssenceChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                        ApiEssenceChangeEventArgs essenceChangeEvent) :
+                                        OnebotEssenceChangeEventArgs essenceChangeEvent) :
             base(serviceId, connectionId, eventName, essenceChangeEvent.SelfID, essenceChangeEvent.Time)
         {
             MessageId         = essenceChangeEvent.MessageId;

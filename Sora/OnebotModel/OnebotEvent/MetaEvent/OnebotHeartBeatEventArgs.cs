@@ -5,7 +5,7 @@ namespace Sora.OnebotModel.OnebotEvent.MetaEvent
     /// <summary>
     /// 心跳包
     /// </summary>
-    internal sealed class ApiHeartBeatEventArgs : BaseMetaEventArgs
+    internal sealed class OnebotHeartBeatEventArgs : BaseMetaEventArgs
     {
         /// <summary>
         /// 状态信息

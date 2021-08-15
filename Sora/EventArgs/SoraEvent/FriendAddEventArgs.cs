@@ -28,7 +28,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="friendAddArgs">好友添加事件参数</param>
         internal FriendAddEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                    ApiFriendAddEventArgs friendAddArgs) :
+                                    OnebotFriendAddEventArgs friendAddArgs) :
             base(serviceId, connectionId, eventName, friendAddArgs.SelfID, friendAddArgs.Time)
         {
             NewFriend = new User(serviceId, connectionId, friendAddArgs.UserId);

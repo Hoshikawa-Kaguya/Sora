@@ -43,7 +43,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="groupCardUpdateArgs">群名片更新事件参数</param>
         internal GroupCardUpdateEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                          ApiGroupCardUpdateEventArgs groupCardUpdateArgs) :
+                                          OnebotGroupCardUpdateEventArgs groupCardUpdateArgs) :
             base(serviceId, connectionId, eventName, groupCardUpdateArgs.SelfID, groupCardUpdateArgs.Time)
         {
             User        = new User(serviceId, connectionId, groupCardUpdateArgs.UserId);

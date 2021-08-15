@@ -33,7 +33,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="friendRecallArgs">私聊消息撤回事件参数</param>
         internal FriendRecallEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                       ApiFriendRecallEventArgs friendRecallArgs) :
+                                       OnebotFriendRecallEventArgs friendRecallArgs) :
             base(serviceId, connectionId, eventName, friendRecallArgs.SelfID, friendRecallArgs.Time)
         {
             Sender    = new User(serviceId, connectionId, friendRecallArgs.UserId);

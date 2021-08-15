@@ -39,7 +39,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="fileUploadArgs">文件上传事件参数</param>
         internal FileUploadEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                     ApiFileUploadEventArgs fileUploadArgs) :
+                                     OnebotFileUploadEventArgs fileUploadArgs) :
             base(serviceId, connectionId, eventName, fileUploadArgs.SelfID, fileUploadArgs.Time)
         {
             SourceGroup = new Group(serviceId, connectionId, fileUploadArgs.GroupId);

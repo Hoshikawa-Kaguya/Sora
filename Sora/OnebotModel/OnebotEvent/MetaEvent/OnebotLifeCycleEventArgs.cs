@@ -5,7 +5,7 @@ namespace Sora.OnebotModel.OnebotEvent.MetaEvent
     /// <summary>
     /// 生命周期事件
     /// </summary>
-    internal sealed class ApiLifeCycleEventArgs : BaseMetaEventArgs
+    internal sealed class OnebotLifeCycleEventArgs : BaseMetaEventArgs
     {
         /// <summary>
         /// <para>事件子类型</para>

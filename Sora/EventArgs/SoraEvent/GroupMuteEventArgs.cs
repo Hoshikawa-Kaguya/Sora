@@ -43,7 +43,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="groupMuteArgs">群禁言事件参数</param>
         internal GroupMuteEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                    ApiGroupMuteEventArgs groupMuteArgs) :
+                                    OnebotGroupMuteEventArgs groupMuteArgs) :
             base(serviceId, connectionId, eventName, groupMuteArgs.SelfID, groupMuteArgs.Time)
         {
             User        = new User(serviceId, connectionId, groupMuteArgs.UserId);

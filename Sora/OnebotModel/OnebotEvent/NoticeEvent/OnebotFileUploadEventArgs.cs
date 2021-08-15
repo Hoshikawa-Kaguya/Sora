@@ -6,7 +6,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent
     /// <summary>
     /// 群文件上传事件
     /// </summary>
-    internal sealed class ApiFileUploadEventArgs : BaseNoticeEventArgs
+    internal sealed class OnebotFileUploadEventArgs : BaseNoticeEventArgs
     {
         /// <summary>
         /// 群号

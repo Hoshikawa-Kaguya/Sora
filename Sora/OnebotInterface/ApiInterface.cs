@@ -769,7 +769,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_group_msg_history response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
             //处理消息段
-            return (apiStatus, ret["data"]?["messages"]?.ToObject<List<ApiGroupMsgEventArgs>>()
+            return (apiStatus, ret["data"]?["messages"]?.ToObject<List<OnebotGroupMsgEventArgs>>()
                                                        ?.Select(messageArg =>
                                                                     new GroupMessageEventArgs(serviceId, connection,
                                                                         "group",
