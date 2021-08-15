@@ -31,7 +31,7 @@ namespace Sora.Net
             //如果已经启动过初始化则不显示初始化log
             if (!_haveStartupLog)
             {
-                Log.Info("Sora", $"Sora 框架版本:{Assembly.GetExecutingAssembly().GetName().Version} rc.15");
+                Log.Info("Sora", $"Sora 框架版本:{Assembly.GetExecutingAssembly().GetName().Version} rc.17");
                 Log.Debug("Sora", "开发交流群：1081190562");
                 Log.Debug("System", Environment.OSVersion);
                 Regex.CacheSize += 5;
