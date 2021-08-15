@@ -53,7 +53,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="privateMsgArgs">私聊消息事件参数</param>
         internal PrivateMessageEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                         ApiPrivateMsgEventArgs privateMsgArgs)
+                                         OnebotPrivateMsgEventArgs privateMsgArgs)
             : base(serviceId, connectionId, eventName, privateMsgArgs.SelfID, privateMsgArgs.Time)
         {
             //将api消息段转换为CQ码

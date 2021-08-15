@@ -6,7 +6,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent
     /// Go扩展事件
     /// 群成员名片变更事件
     /// </summary>
-    internal sealed class ApiGroupCardUpdateEventArgs : BaseNoticeEventArgs
+    internal sealed class OnebotGroupCardUpdateEventArgs : BaseNoticeEventArgs
     {
         /// <summary>
         /// 群号

@@ -50,7 +50,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="groupRequestArgs">加群申请事件参数</param>
         internal AddGroupRequestEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                          ApiGroupRequestEventArgs groupRequestArgs) :
+                                          OnebotGroupRequestEventArgs groupRequestArgs) :
             base(serviceId, connectionId, eventName, groupRequestArgs.SelfID, groupRequestArgs.Time)
         {
             Sender      = new User(serviceId, connectionId, groupRequestArgs.UserId);

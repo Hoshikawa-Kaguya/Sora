@@ -5,7 +5,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent
     /// <summary>
     /// 好友消息撤回
     /// </summary>
-    internal sealed class ApiFriendRecallEventArgs : BaseNoticeEventArgs
+    internal sealed class OnebotFriendRecallEventArgs : BaseNoticeEventArgs
     {
         /// <summary>
         /// 被撤回的消息 ID

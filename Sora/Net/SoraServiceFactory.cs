@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Interfaces;
 using Sora.OnebotModel;
@@ -33,6 +34,7 @@ namespace Sora.Net
                 Log.Info("Sora", $"Sora 框架版本:{Assembly.GetExecutingAssembly().GetName().Version} rc.15");
                 Log.Debug("Sora", "开发交流群：1081190562");
                 Log.Debug("System", Environment.OSVersion);
+                Regex.CacheSize += 5;
                 _haveStartupLog = true;
             }
 

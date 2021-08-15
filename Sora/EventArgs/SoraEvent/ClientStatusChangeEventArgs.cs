@@ -26,7 +26,7 @@ namespace Sora.EventArgs.SoraEvent
         #region 构造方法
 
         internal ClientStatusChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                             ApiClientStatusEventArgs clientStatus) :
+                                             OnebotClientStatusEventArgs clientStatus) :
             base(serviceId, connectionId, eventName, clientStatus.SelfID, clientStatus.Time)
         {
             Client = clientStatus.ClientInfo;

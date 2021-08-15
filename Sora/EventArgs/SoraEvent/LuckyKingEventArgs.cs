@@ -38,7 +38,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="luckyKingEventArgs">运气王事件参数</param>
         internal LuckyKingEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                    ApiPokeOrLuckyEventArgs luckyKingEventArgs) :
+                                    OnebotPokeOrLuckyEventArgs luckyKingEventArgs) :
             base(serviceId, connectionId, eventName, luckyKingEventArgs.SelfID, luckyKingEventArgs.Time)
         {
             SendUser    = new User(serviceId, connectionId, luckyKingEventArgs.UserId);

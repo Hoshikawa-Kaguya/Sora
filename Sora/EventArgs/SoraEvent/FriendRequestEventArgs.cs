@@ -39,7 +39,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="friendRequestArgs">好友申请事件参数</param>
         internal FriendRequestEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                        ApiFriendRequestEventArgs friendRequestArgs) :
+                                        OnebotFriendRequestEventArgs friendRequestArgs) :
             base(serviceId, connectionId, eventName, friendRequestArgs.SelfID, friendRequestArgs.Time)
         {
             Sender      = new User(serviceId, connectionId, friendRequestArgs.UserId);

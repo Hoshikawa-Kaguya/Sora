@@ -6,7 +6,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent
     /// <summary>
     /// 其他客户端在线状态变更
     /// </summary>
-    internal sealed class ApiClientStatusEventArgs : BaseNoticeEventArgs
+    internal sealed class OnebotClientStatusEventArgs : BaseNoticeEventArgs
     {
         /// <summary>
         /// 客户端信息

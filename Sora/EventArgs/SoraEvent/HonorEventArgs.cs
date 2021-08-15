@@ -39,7 +39,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="honorEventArgs">荣誉变更事件参数</param>
         internal HonorEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                ApiHonorEventArgs honorEventArgs) :
+                                OnebotHonorEventArgs honorEventArgs) :
             base(serviceId, connectionId, eventName, honorEventArgs.SelfID, honorEventArgs.Time)
         {
             TargetUser  = new User(serviceId, connectionId, honorEventArgs.UserId);

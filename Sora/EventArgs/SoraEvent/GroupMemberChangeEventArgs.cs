@@ -44,7 +44,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="eventName">事件名</param>
         /// <param name="groupMemberChangeArgs">群成员数量变更参数</param>
         internal GroupMemberChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                            ApiGroupMemberChangeEventArgs groupMemberChangeArgs) :
+                                            OnebotGroupMemberChangeEventArgs groupMemberChangeArgs) :
             base(serviceId, connectionId, eventName, groupMemberChangeArgs.SelfID, groupMemberChangeArgs.Time)
         {
             ChangedUser = new User(serviceId, connectionId, groupMemberChangeArgs.UserId);
