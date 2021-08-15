@@ -20,12 +20,27 @@ namespace Sora.OnebotInterface
     /// </summary>
     public class EventInterface
     {
+        #region 私有字段
+
+        private readonly CommandManager _commandManager;
+
+        #endregion
+
         #region 属性
 
         /// <summary>
         /// 特性指令管理器
         /// </summary>
-        public CommandManager CommandManager { get; }
+        public CommandManager CommandManager
+        {
+            init => _commandManager = value;
+            get
+            {
+                if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager) return _commandManager;
+                Log.Fatal("非法操作", "指令服务已被禁用");
+                throw new InvalidOperationException("在禁用指令管理器后尝试调用管理器，请在开启指令服务后再调用此实例");
+            }
+        }
 
         /// <summary>
         /// 服务ID
@@ -41,12 +56,13 @@ namespace Sora.OnebotInterface
 
         #region 构造方法
 
-        internal EventInterface(Guid serviceId, bool enableSoraCommandManager, bool autoMarkMessageRead)
+        internal EventInterface(Guid serviceId, bool autoMarkMessageRead)
         {
             ServiceId           = serviceId;
             AutoMarkMessageRead = autoMarkMessageRead;
-            CommandManager      = new CommandManager(enableSoraCommandManager);
-            CommandManager.MappingCommands(Assembly.GetEntryAssembly());
+            CommandManager = StaticVariable.ServiceInfos[serviceId].EnableSoraCommandManager
+                ? new CommandManager(Assembly.GetEntryAssembly())
+                : null;
         }
 
         #endregion
@@ -307,7 +323,8 @@ namespace Sora.OnebotInterface
                         ApiInterface.MarkMessageRead(connection, privateMsg.MessageId);
 #pragma warning restore 4014
                     //处理指令
-                    await CommandManager.CommandAdapter(eventArgs);
+                    if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager)
+                        await CommandManager.CommandAdapter(eventArgs);
                     if (!eventArgs.IsContinueEventChain)
                         break;
                     //执行回调
@@ -330,7 +347,8 @@ namespace Sora.OnebotInterface
                         ApiInterface.MarkMessageRead(connection, groupMsg.MessageId);
 #pragma warning restore 4014
                     //处理指令
-                    await CommandManager.CommandAdapter(eventArgs);
+                    if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager)
+                        await CommandManager.CommandAdapter(eventArgs);
                     if (!eventArgs.IsContinueEventChain)
                         break;
                     //执行回调

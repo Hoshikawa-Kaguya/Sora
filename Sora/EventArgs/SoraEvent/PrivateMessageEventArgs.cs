@@ -11,6 +11,7 @@ using Sora.Entities.MessageElement;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
+using YukariToolBox.FormatLog;
 
 namespace Sora.EventArgs.SoraEvent
 {
@@ -24,22 +25,22 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 消息内容
         /// </summary>
-        public Message Message { get; private set; }
+        public Message Message { get; }
 
         /// <summary>
         /// 消息发送者实例
         /// </summary>
-        public User Sender { get; private set; }
+        public User Sender { get; }
 
         /// <summary>
         /// 发送者信息
         /// </summary>
-        public PrivateSenderInfo SenderInfo { get; private set; }
+        public PrivateSenderInfo SenderInfo { get; }
 
         /// <summary>
         /// 是否为临时会话
         /// </summary>
-        public bool IsTemporaryMessage { get; private set; }
+        public bool IsTemporaryMessage { get; }
 
         #endregion
 
@@ -120,8 +121,11 @@ namespace Sora.EventArgs.SoraEvent
         public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType,
-                                            SourceFlag.Private, regexOptions, null, null));
+            if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+                return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType,
+                                                SourceFlag.Private, regexOptions, null, null));
+            CommandDisableTip();
+            return ValueTask.FromResult<PrivateMessageEventArgs>(null);
         }
 
         /// <summary>
@@ -138,8 +142,11 @@ namespace Sora.EventArgs.SoraEvent
                                                                           Func<ValueTask> timeoutTask = null,
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType,
-                                            SourceFlag.Private, regexOptions, timeout, timeoutTask));
+            if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+                return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType,
+                                                SourceFlag.Private, regexOptions, timeout, timeoutTask));
+            CommandDisableTip();
+            return ValueTask.FromResult<PrivateMessageEventArgs>(null);
         }
 
         /// <summary>
@@ -152,7 +159,10 @@ namespace Sora.EventArgs.SoraEvent
         public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
-            return WaitForNextMessageAsync(new[] { commandExp }, matchType, regexOptions);
+            if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+                return WaitForNextMessageAsync(new[] { commandExp }, matchType, regexOptions);
+            CommandDisableTip();
+            return ValueTask.FromResult<PrivateMessageEventArgs>(null);
         }
 
         /// <summary>
@@ -169,10 +179,19 @@ namespace Sora.EventArgs.SoraEvent
                                                                           Func<ValueTask> timeoutTask = null,
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, new[] { commandExp },
-                                            matchType,
-                                            SourceFlag.Private, regexOptions, timeout, timeoutTask));
+            if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+                return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, new[] { commandExp },
+                                                matchType,
+                                                SourceFlag.Private, regexOptions, timeout, timeoutTask));
+            CommandDisableTip();
+            return ValueTask.FromResult<PrivateMessageEventArgs>(null);
         }
+
+        #endregion
+
+        #region 私有方法
+
+        private void CommandDisableTip() => Log.Error("非法操作", "指令服务已被禁用，无法执行连续对话操作");
 
         #endregion
     }

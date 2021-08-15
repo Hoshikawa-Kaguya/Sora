@@ -24,11 +24,17 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// </summary>
         internal readonly HashSet<long> BlockUsers;
 
+        /// <summary>
+        /// 是否已启用指令服务
+        /// </summary>
+        internal readonly bool EnableSoraCommandManager;
+
         internal ServiceInfo(Guid serviceId, ISoraConfig config)
         {
-            ServiceId  = serviceId;
-            SuperUsers = new HashSet<long>(config.SuperUsers);
-            BlockUsers = new HashSet<long>(config.BlockUsers);
+            ServiceId                = serviceId;
+            EnableSoraCommandManager = config.EnableSoraCommandManager;
+            SuperUsers               = new HashSet<long>(config.SuperUsers);
+            BlockUsers               = new HashSet<long>(config.BlockUsers);
         }
 
         public override int GetHashCode()

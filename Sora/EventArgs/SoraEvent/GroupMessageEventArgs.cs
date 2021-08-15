@@ -10,6 +10,7 @@ using Sora.Entities.MessageElement;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
+using YukariToolBox.FormatLog;
 using Group = Sora.Entities.Group;
 
 namespace Sora.EventArgs.SoraEvent
@@ -161,9 +162,12 @@ namespace Sora.EventArgs.SoraEvent
         public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps,
-                                            matchType, SourceFlag.Group, regexOptions, null, null,
-                                            SourceGroup));
+            if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+                return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps,
+                                                matchType, SourceFlag.Group, regexOptions, null, null,
+                                                SourceGroup));
+            CommandDisableTip();
+            return ValueTask.FromResult<GroupMessageEventArgs>(null);
         }
 
         /// <summary>
@@ -180,9 +184,12 @@ namespace Sora.EventArgs.SoraEvent
                                                                         Func<ValueTask> timeoutTask = null,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps,
-                                            matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
-                                            SourceGroup));
+            if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+                return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps,
+                                                matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
+                                                SourceGroup));
+            CommandDisableTip();
+            return ValueTask.FromResult<GroupMessageEventArgs>(null);
         }
 
         /// <summary>
@@ -195,7 +202,10 @@ namespace Sora.EventArgs.SoraEvent
         public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return WaitForNextMessageAsync(new[] { commandExp }, matchType, regexOptions);
+            if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+                return WaitForNextMessageAsync(new[] { commandExp }, matchType, regexOptions);
+            CommandDisableTip();
+            return ValueTask.FromResult<GroupMessageEventArgs>(null);
         }
 
         /// <summary>
@@ -212,10 +222,19 @@ namespace Sora.EventArgs.SoraEvent
                                                                         Func<ValueTask> timeoutTask = null,
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
-            return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, new[] { commandExp },
-                                            matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
-                                            SourceGroup));
+            if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+                return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, new[] { commandExp },
+                                                matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
+                                                SourceGroup));
+            CommandDisableTip();
+            return ValueTask.FromResult<GroupMessageEventArgs>(null);
         }
+
+        #endregion
+
+        #region 私有方法
+
+        private void CommandDisableTip() => Log.Error("非法操作", "指令服务已被禁用，无法执行连续对话操作");
 
         #endregion
     }

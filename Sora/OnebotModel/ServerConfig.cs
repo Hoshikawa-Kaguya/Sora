@@ -83,7 +83,8 @@ namespace Sora.OnebotModel
         public TimeSpan ApiTimeOut { get; init; } = TimeSpan.FromMilliseconds(5000);
 
         /// <summary>
-        /// 是否启用Sora自带的指令系统
+        /// <para>是否启用Sora自带的指令系统</para>
+        /// <para>禁用后EventInterface中的CommandManager将为<see langword="null"/>,同时连续对话的服务也将被禁用</para>
         /// </summary>
         public bool EnableSoraCommandManager { get; init; } = true;
 
