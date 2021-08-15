@@ -39,16 +39,14 @@ namespace Sora.Command
 
         private readonly Dictionary<Type, dynamic> _instanceDict = new();
 
-        private readonly bool _enableSoraCommandManager;
-
         #endregion
 
         #region 构造方法
 
-        internal CommandManager(bool enableSoraCommandManager)
+        internal CommandManager(Assembly assembly)
         {
-            ServiceIsRunning          = false;
-            _enableSoraCommandManager = enableSoraCommandManager;
+            ServiceIsRunning = false;
+            MappingCommands(assembly);
         }
 
         #endregion
@@ -62,8 +60,6 @@ namespace Sora.Command
         [Reviewed("XiaoHe321", "2021-03-28 20:45")]
         public void MappingCommands(Assembly assembly)
         {
-            //检查使能
-            if (!_enableSoraCommandManager) return;
             if (assembly == null) return;
 
             //查找所有的指令集
@@ -122,9 +118,6 @@ namespace Sora.Command
                                          RegexOptions regexOptions = RegexOptions.None,
                                          string desc = "")
         {
-            //检查使能
-            if (!_enableSoraCommandManager) return;
-
             //生成指令信息
             if (_groupCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
                                                                 permissonType)))
@@ -154,9 +147,6 @@ namespace Sora.Command
                                            RegexOptions regexOptions = RegexOptions.None,
                                            string desc = "")
         {
-            //检查使能
-            if (!_enableSoraCommandManager) return;
-
             //生成指令信息
             if (_privateCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
                                                                   permissonType)))
@@ -176,9 +166,6 @@ namespace Sora.Command
         [NeedReview("L317-L374")]
         internal async ValueTask CommandAdapter(dynamic eventArgs)
         {
-            //检查使能
-            if (!_enableSoraCommandManager) return;
-
             #region 信号量消息处理
 
             //处理消息段
@@ -257,6 +244,9 @@ namespace Sora.Command
             #endregion
 
             #region 常规指令处理
+
+            //检查指令池
+            if (_groupCommands.Count == 0 && _privateCommands.Count == 0) return;
 
             List<CommandInfo> matchedCommand;
             switch (eventArgs)
