@@ -89,7 +89,7 @@ namespace Sora.Net
             ConnManager = new ConnectionManager(config);
             Config      = config;
             //实例化事件接口
-            Event = new EventInterface(_clientId, config.EnableSoraCommandManager);
+            Event = new EventInterface(_clientId, config.EnableSoraCommandManager, config.AutoMarkMessageRead);
             //构建Client配置
             var factory = new Func<ClientWebSocket>(() =>
                                                     {

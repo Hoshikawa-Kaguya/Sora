@@ -7,7 +7,6 @@ using Sora.OnebotModel.OnebotEvent.MetaEvent;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Sora.Enumeration.ApiType;
@@ -32,15 +31,21 @@ namespace Sora.OnebotInterface
         /// 服务ID
         /// </summary>
         private Guid ServiceId { get; }
+        
+        /// <summary>
+        /// 自动标记消息已读
+        /// </summary>
+        private bool AutoMarkMessageRead { get; }
 
         #endregion
 
         #region 构造方法
 
-        internal EventInterface(Guid serviceId, bool enableSoraCommandManager)
+        internal EventInterface(Guid serviceId, bool enableSoraCommandManager, bool autoMarkMessageRead)
         {
-            ServiceId      = serviceId;
-            CommandManager = new CommandManager(enableSoraCommandManager);
+            ServiceId           = serviceId;
+            AutoMarkMessageRead = autoMarkMessageRead;
+            CommandManager      = new CommandManager(enableSoraCommandManager);
             CommandManager.MappingCommands(Assembly.GetEntryAssembly());
         }
 
@@ -291,6 +296,11 @@ namespace Sora.OnebotInterface
                     Log.Debug("Sora",
                               $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                     var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
+                    //标记消息已读
+                    if (AutoMarkMessageRead)
+#pragma warning disable 4014
+                        ApiInterface.MarkMessageRead(connection, privateMsg.MessageId);
+#pragma warning restore 4014
                     //处理指令
                     await CommandManager.CommandAdapter(eventArgs);
                     if (!eventArgs.IsContinueEventChain)
@@ -309,6 +319,11 @@ namespace Sora.OnebotInterface
                     Log.Debug("Sora",
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
+                    //标记消息已读
+                    if(AutoMarkMessageRead)
+#pragma warning disable 4014
+                        ApiInterface.MarkMessageRead(connection, groupMsg.MessageId);
+#pragma warning restore 4014
                     //处理指令
                     await CommandManager.CommandAdapter(eventArgs);
                     if (!eventArgs.IsContinueEventChain)

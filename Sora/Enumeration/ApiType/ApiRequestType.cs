@@ -289,21 +289,23 @@ namespace Sora.Enumeration.ApiType
         /// <summary>
         /// 新建群文件文件夹
         /// </summary>
-        //TODO 等文档
         [Description("create_group_file_folder")]
         CreateGroupFileFolder,
 
         /// <summary>
         /// 删除群文件文件夹
         /// </summary>
-        //TODO 等文档
         [Description("delete_group_folder")] DeleteGroupFolder,
 
         /// <summary>
         /// 删除群文件
         /// </summary>
-        //TODO 等文档
-        [Description("delete_group_file")] DeleteGroupFile
+        [Description("delete_group_file")] DeleteGroupFile,
+        
+        /// <summary>
+        /// 标记消息已读
+        /// </summary>
+        [Description("mark_msg_as_read")] MarkMsgAsRead,
 
         #endregion
     }

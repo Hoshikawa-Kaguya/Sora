@@ -88,6 +88,12 @@ namespace Sora.OnebotModel
         public bool EnableSoraCommandManager { get; init; } = true;
 
         /// <summary>
+        /// <para>在触发事件后自动向ob端标记消息已读</para>
+        /// <para>仅支持gocq-1.0-beta6以上版本</para>
+        /// </summary>
+        public bool AutoMarkMessageRead { get; init; } = true;
+
+        /// <summary>
         /// <para>丢失连接时的重连超时</para>
         /// <para>默认5秒无需修改</para>
         /// </summary>

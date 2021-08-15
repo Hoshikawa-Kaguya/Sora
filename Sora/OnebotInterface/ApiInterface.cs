@@ -1548,6 +1548,26 @@ namespace Sora.OnebotInterface
             return apiStatus;
         }
 
+        /// <summary>
+        /// 标记消息已读
+        /// </summary>
+        /// <param name="connection">连接标识</param>
+        /// <param name="msgId">消息ID</param>
+        internal static async ValueTask<ApiStatus> MarkMessageRead(Guid connection, int msgId)
+        {
+            Log.Debug("Sora", "Sending mark_msg_as_read request");
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.MarkMsgAsRead,
+                ApiParams = new
+                {
+                    message_id = msgId
+                }
+            }, connection);
+            Log.Debug("Sora", $"Get mark_msg_as_read response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return apiStatus;
+        }
+
         #endregion
 
         #endregion

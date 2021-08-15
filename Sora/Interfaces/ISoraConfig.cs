@@ -53,5 +53,11 @@ namespace Sora.Interfaces
         /// 是否启用Sora自带的指令系统
         /// </summary>
         public bool EnableSoraCommandManager { get; init; }
+        
+        /// <summary>
+        /// <para>在触发事件后自动向ob端标记消息已读</para>
+        /// <para>仅支持gocq-1.0-beta6以上版本</para>
+        /// </summary>
+        public bool AutoMarkMessageRead { get; init; }
     }
 }
