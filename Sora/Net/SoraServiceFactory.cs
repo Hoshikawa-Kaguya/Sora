@@ -35,7 +35,7 @@ namespace Sora.Net
                 Log.Debug("Sora", "开发交流群：1081190562");
                 Log.Debug("System", Environment.OSVersion);
                 Regex.CacheSize += 5;
-                _haveStartupLog = true;
+                _haveStartupLog =  true;
             }
 
             return config switch

@@ -80,8 +80,9 @@ namespace Sora.Entities
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="List{GroupMemberInfo}"/> 群成员列表</para>
         /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList()
-            => await SoraApi.GetGroupMemberList(Id);
+        public async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
+            bool useCache = true)
+            => await SoraApi.GetGroupMemberList(Id, useCache);
 
         /// <summary>
         /// 获取群成员信息

@@ -176,14 +176,20 @@ namespace Sora.OnebotInterface
         /// 获取群组列表
         /// </summary>
         /// <param name="connection">服务器连接标识</param>
+        /// <param name="useCache">使用缓存</param>
         /// <returns>群组信息列表</returns>
         [Reviewed("nidbCN", "2021-03-24 20:44")]
-        internal static async ValueTask<(ApiStatus apiStatus, List<GroupInfo> groupList)> GetGroupList(Guid connection)
+        internal static async ValueTask<(ApiStatus apiStatus, List<GroupInfo> groupList)> GetGroupList(
+            Guid connection, bool useCache)
         {
             Log.Debug("Sora", "Sending get_group_list request");
             var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
-                ApiRequestType = ApiRequestType.GetGroupList
+                ApiRequestType = ApiRequestType.GetGroupList,
+                ApiParams = new
+                {
+                    no_cache = !useCache
+                }
             }, connection);
             Log.Debug("Sora", $"Get get_group_list response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null) return (apiStatus, null);
@@ -199,16 +205,18 @@ namespace Sora.OnebotInterface
         /// <param name="serviceId">服务ID</param>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="groupId">群号</param>
+        /// <param name="useCache">使用缓存</param>
         [Reviewed("nidbCN", "2021-03-24 20:49")]
         internal static async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)>
-            GetGroupMemberList(Guid serviceId, Guid connection, long groupId)
+            GetGroupMemberList(Guid serviceId, Guid connection, long groupId, bool useCache)
         {
             var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.GetGroupMemberList,
                 ApiParams = new
                 {
-                    group_id = groupId
+                    group_id = groupId,
+                    no_cache = !useCache
                 }
             }, connection);
             Log.Debug("Sora", $"Get get_group_member_list response {nameof(apiStatus)}={apiStatus.RetCode}");
