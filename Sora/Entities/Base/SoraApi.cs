@@ -215,6 +215,15 @@ namespace Sora.Entities.Base
             return await ApiInterface.GetOnlineClients(useCache, ConnectionId);
         }
 
+        /// <summary>
+        /// 标记消息已读
+        /// </summary>
+        /// <param name="messageId">消息ID</param>
+        public async ValueTask<ApiStatus> MarkMessageRead(int messageId)
+        {
+            return await ApiInterface.MarkMessageRead(ConnectionId, messageId);
+        }
+
         #endregion
 
         #endregion

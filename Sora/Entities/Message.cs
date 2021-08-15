@@ -75,6 +75,14 @@ namespace Sora.Entities
             return await SoraApi.RecallMessage(MessageId);
         }
 
+        /// <summary>
+        /// 标记此消息已读
+        /// </summary>
+        public async ValueTask<ApiStatus> MarkMessageRead()
+        {
+            return await SoraApi.MarkMessageRead(MessageId);
+        }
+
         #endregion
 
         #region CQ码快捷方法
