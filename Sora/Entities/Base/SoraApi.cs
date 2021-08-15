@@ -210,7 +210,7 @@ namespace Sora.Entities.Base
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="List{T}"/> 在线客户端信息列表</para>
         /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, List<ClientInfo> clients)> GetOnlineClients(bool useCache)
+        public async ValueTask<(ApiStatus apiStatus, List<ClientInfo> clients)> GetOnlineClients(bool useCache = true)
         {
             return await ApiInterface.GetOnlineClients(useCache, ConnectionId);
         }
@@ -670,25 +670,26 @@ namespace Sora.Entities.Base
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="groupList"/> 群组列表</para>
         /// </returns>
-        public async ValueTask<(ApiStatus apiStatus, List<GroupInfo> groupList)> GetGroupList()
+        public async ValueTask<(ApiStatus apiStatus, List<GroupInfo> groupList)> GetGroupList(bool useCache = true)
         {
-            return await ApiInterface.GetGroupList(ConnectionId);
+            return await ApiInterface.GetGroupList(ConnectionId, useCache);
         }
 
         /// <summary>
         /// 获取群成员列表
         /// </summary>
         /// <param name="groupId">群号</param>
+        /// <param name="useCache">是否使用缓存</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="List{T}"/> 群成员列表</para>
         /// </returns>
         public async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
-            long groupId)
+            long groupId, bool useCache = true)
         {
             if (groupId < 100000)
                 throw new ArgumentOutOfRangeException($"{nameof(groupId)} out of range");
-            return await ApiInterface.GetGroupMemberList(ServiceId, ConnectionId, groupId);
+            return await ApiInterface.GetGroupMemberList(ServiceId, ConnectionId, groupId, useCache);
         }
 
         /// <summary>

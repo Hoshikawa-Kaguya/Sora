@@ -31,7 +31,7 @@ namespace Sora.OnebotInterface
         /// 服务ID
         /// </summary>
         private Guid ServiceId { get; }
-        
+
         /// <summary>
         /// 自动标记消息已读
         /// </summary>
@@ -325,7 +325,7 @@ namespace Sora.OnebotInterface
                               $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                     var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
                     //标记消息已读
-                    if(AutoMarkMessageRead)
+                    if (AutoMarkMessageRead)
 #pragma warning disable 4014
                         ApiInterface.MarkMessageRead(connection, groupMsg.MessageId);
 #pragma warning restore 4014
@@ -540,7 +540,8 @@ namespace Sora.OnebotInterface
                 //此事件仅在Go上存在
                 case "group_card":
                 {
-                    OnebotGroupCardUpdateEventArgs groupCardUpdate = messageJson.ToObject<OnebotGroupCardUpdateEventArgs>();
+                    OnebotGroupCardUpdateEventArgs groupCardUpdate =
+                        messageJson.ToObject<OnebotGroupCardUpdateEventArgs>();
                     if (groupCardUpdate == null) break;
                     Log.Debug("Sora",
                               $"Group[{groupCardUpdate.GroupId}] member[{groupCardUpdate.UserId}] card update [{groupCardUpdate.OldCard} => {groupCardUpdate.NewCard}]");
@@ -628,10 +629,10 @@ namespace Sora.OnebotInterface
                         {
                             OnebotMemberTitleUpdatedEventArgs newTitleEvent =
                                 messageJson.ToObject<OnebotMemberTitleUpdatedEventArgs>();
-                            if(newTitleEvent == null) break;
+                            if (newTitleEvent == null) break;
                             Log.Debug("Sora",
                                       $"Group[{newTitleEvent.GroupId} member title change to [{newTitleEvent.NewTitle}]]");
-                            if(OnTitleUpdate == null) break;
+                            if (OnTitleUpdate == null) break;
                             await OnTitleUpdate("Notify",
                                                 new TitleUpdateEventArgs(ServiceId, connection, "title",
                                                                          newTitleEvent));

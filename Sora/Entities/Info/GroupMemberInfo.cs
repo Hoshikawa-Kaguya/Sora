@@ -75,19 +75,25 @@ namespace Sora.Entities.Info
         /// 加群时间戳
         /// </summary>
         [JsonIgnore]
-        public DateTime JoinTime => JoinTimeStamp.ToDateTime();
+        public DateTime JoinTime { get; internal init; }
 
         [JsonProperty(PropertyName = "join_time")]
-        private long JoinTimeStamp { get; set; }
+        private long JoinTimeStamp
+        {
+            init => JoinTime = value.ToDateTime();
+        }
 
         /// <summary>
         /// 最后发言时间戳
         /// </summary>
         [JsonIgnore]
-        public DateTime LastSentTime => LastSentTimeStamp.ToDateTime();
+        public DateTime LastSentTime { get; internal init; }
 
         [JsonProperty(PropertyName = "last_sent_time")]
-        private long LastSentTimeStamp { get; init; }
+        private long LastSentTimeStamp
+        {
+            init => LastSentTime = value.ToDateTime();
+        }
 
         /// <summary>
         /// 成员等级
@@ -125,8 +131,7 @@ namespace Sora.Entities.Info
                       DefaultValueHandling = DefaultValueHandling.Ignore)]
         private long? TitleExpireTimeStamp
         {
-            get => TitleExpireTime?.ToTimeStamp();
-            init => value?.ToDateTime();
+            init => TitleExpireTime = value == 0 ? null : value?.ToDateTime() ?? null;
         }
 
         /// <summary>
@@ -134,6 +139,19 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonProperty(PropertyName = "card_changeable")]
         public bool CardChangeable { get; internal init; }
+
+        /// <summary>
+        /// 禁言截止时间
+        /// </summary>
+        [JsonIgnore]
+        public DateTime? ShutUpTime { get; internal init; }
+
+        [JsonProperty(PropertyName = "shut_up_timestamp", NullValueHandling = NullValueHandling.Ignore,
+                      DefaultValueHandling = DefaultValueHandling.Ignore)]
+        private long? ShutUpTimestamp
+        {
+            init => ShutUpTime = value == 0 ? null : value?.ToDateTime() ?? null;
+        }
 
         internal GroupMemberInfo()
         {

@@ -301,7 +301,7 @@ namespace Sora.Enumeration.ApiType
         /// 删除群文件
         /// </summary>
         [Description("delete_group_file")] DeleteGroupFile,
-        
+
         /// <summary>
         /// 标记消息已读
         /// </summary>
