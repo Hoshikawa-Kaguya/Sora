@@ -9,6 +9,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Sora.Entities.Info.InternalDataInfo;
+using Sora.Entities.Socket;
 using Websocket.Client;
 using YukariToolBox.FormatLog;
 
@@ -161,7 +162,8 @@ namespace Sora.Net
                                               {
                                                   if (info.Type == ReconnectionType.Initial) return;
                                                   Log.Info("Sora", "服务器已自动重连");
-                                                  ConnManager.OpenConnection("Universal", "0", Client, _clientId,
+                                                  ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client),
+                                                                             _clientId,
                                                                              _clientId, Config.ApiTimeOut);
                                               }));
             //开始客户端
@@ -171,7 +173,8 @@ namespace Sora.Net
                 throw new WebSocketClientException("WebSocket client is not running");
             }
 
-            ConnManager.OpenConnection("Universal", "0", Client, _clientId, _clientId, Config.ApiTimeOut);
+            ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client), _clientId, _clientId,
+                                       Config.ApiTimeOut);
             Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
             //启动心跳包超时检查计时器
             HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,

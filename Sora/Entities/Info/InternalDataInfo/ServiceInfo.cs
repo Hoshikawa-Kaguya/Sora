@@ -12,7 +12,7 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// <summary>
         /// 服务ID
         /// </summary>
-        internal readonly Guid ServiceId;
+        private readonly Guid ServiceId;
 
         /// <summary>
         /// 该服务的管理员UID
@@ -39,7 +39,7 @@ namespace Sora.Entities.Info.InternalDataInfo
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ServiceId, SuperUsers);
+            return ServiceId.GetHashCode();
         }
     }
 }

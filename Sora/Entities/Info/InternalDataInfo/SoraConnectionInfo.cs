@@ -1,6 +1,5 @@
 ﻿using System;
-using Fleck;
-using Websocket.Client;
+using Sora.Interfaces;
 
 namespace Sora.Entities.Info.InternalDataInfo
 {
@@ -9,14 +8,15 @@ namespace Sora.Entities.Info.InternalDataInfo
     /// </summary>
     internal struct SoraConnectionInfo
     {
-        internal readonly Guid     ServiceId;
-        internal readonly object   Connection;
-        internal          DateTime LastHeartBeatTime;
-        internal          long     SelfId;
-        internal readonly TimeSpan ApiTimeout;
-        private readonly  int      HashCode;
+        internal readonly Guid        ServiceId;
+        private readonly  Guid        ConnectionId;
+        internal readonly ISoraSocket Connection;
+        internal          DateTime    LastHeartBeatTime;
+        internal          long        SelfId;
+        internal readonly TimeSpan    ApiTimeout;
 
-        internal SoraConnectionInfo(Guid serviceId, object connection, DateTime lastHeartBeatTime, long selfId,
+        internal SoraConnectionInfo(Guid serviceId, Guid connectionId, ISoraSocket connection,
+                                    DateTime lastHeartBeatTime, long selfId,
                                     TimeSpan apiTimeout)
         {
             ServiceId         = serviceId;
@@ -24,18 +24,12 @@ namespace Sora.Entities.Info.InternalDataInfo
             LastHeartBeatTime = lastHeartBeatTime;
             SelfId            = selfId;
             ApiTimeout        = apiTimeout;
-            HashCode = connection switch
-            {
-                IWebSocketConnection serverConnection => System.HashCode.Combine(ServiceId,
-                    serverConnection.ConnectionInfo.Id.GetHashCode()),
-                WebsocketClient client => System.HashCode.Combine(ServiceId, client.GetHashCode()),
-                _ => throw new NotSupportedException("unknown connection type")
-            };
+            ConnectionId      = connectionId;
         }
 
         public override int GetHashCode()
         {
-            return HashCode;
+            return HashCode.Combine(ServiceId, ConnectionId);
         }
     }
 }
