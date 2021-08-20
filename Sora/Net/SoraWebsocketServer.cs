@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.Info.InternalDataInfo;
+using Sora.Entities.Socket;
 using Sora.Interfaces;
 using Sora.OnebotInterface;
 using Sora.OnebotModel;
@@ -177,7 +178,7 @@ namespace Sora.Net
                                 //向客户端发送Ping
                                 socket.SendPing(new byte[] { 1, 2, 5 });
                                 //事件回调
-                                ConnManager.OpenConnection(role, selfId, socket, _serverId,
+                                ConnManager.OpenConnection(role, selfId, new ServerSocket(socket), _serverId,
                                                            socket.ConnectionInfo.Id, Config.ApiTimeOut);
                                 Log.Info("Sora",
                                          $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");

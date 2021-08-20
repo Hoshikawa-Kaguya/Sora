@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Fleck;
 using Sora.Entities.Info.InternalDataInfo;
+using Sora.Enumeration;
 using Sora.EventArgs.WebsocketEvent;
 using Sora.Interfaces;
 using Websocket.Client;
@@ -70,21 +69,20 @@ namespace Sora.Net
         /// </summary>
         /// <param name="serviceId">服务Id</param>
         /// <param name="connectionId">连接标识</param>
-        /// <param name="connectionInfo">连接信息</param>
+        /// <param name="socket">连接信息</param>
         /// <param name="selfId">机器人UID</param>
         /// <param name="apiTimeout">api超时</param>
-        private bool AddConnection(Guid serviceId, Guid connectionId, object connectionInfo,
+        private bool AddConnection(Guid serviceId, Guid connectionId, ISoraSocket socket,
                                    string selfId, TimeSpan apiTimeout)
         {
             //检查是否已存在值
             if (StaticVariable.ConnectionInfos.ContainsKey(connectionId)) return false;
             long.TryParse(selfId, out var uid);
             return StaticVariable.ConnectionInfos.TryAdd(connectionId, new SoraConnectionInfo
-                                                             (serviceId: serviceId,
-                                                              connection: connectionInfo,
-                                                              lastHeartBeatTime: DateTime.Now,
-                                                              selfId: uid,
-                                                              apiTimeout: apiTimeout
+                                                             (serviceId, connectionId,
+                                                              socket,
+                                                              DateTime.Now,
+                                                              uid, apiTimeout
                                                              ));
         }
 
@@ -117,18 +115,8 @@ namespace Sora.Net
 
             try
             {
-                switch (StaticVariable.ConnectionInfos[connectionId].Connection)
-                {
-                    case IWebSocketConnection serverConnection:
-                        serverConnection.Send(message);
-                        return true;
-                    case WebsocketClient client:
-                        client.SendInstant(message);
-                        return true;
-                    default:
-                        Log.Error("ConnectionManager", "unknown error when get Connection instance");
-                        return false;
-                }
+                StaticVariable.ConnectionInfos[connectionId].Connection.Send(message);
+                return true;
             }
             catch (Exception e)
             {
@@ -162,25 +150,12 @@ namespace Sora.Net
             {
                 try
                 {
-                    switch (info.Connection)
-                    {
-                        case IWebSocketConnection serverConnection:
-                            serverConnection.Close();
-                            Log.Error("Sora",
-                                      $"与Onebot客户端[{serverConnection.ConnectionInfo.ClientIpAddress}:{serverConnection.ConnectionInfo.ClientPort}]失去链接(心跳包超时)");
-                            HeartBeatTimeOutEvent(info.SelfId, connection);
-                            break;
-                        case WebsocketClient client:
-                            Log.Error("Sora",
-                                      "与Onebot服务器失去链接(心跳包超时)");
-                            HeartBeatTimeOutEvent(info.SelfId, connection);
-                            //尝试重连
-                            client.Reconnect();
-                            break;
-                        default:
-                            Log.Error("ConnectionManager", "unknown error when get Connection instance");
-                            break;
-                    }
+                    info.Connection.Close();
+                    Log.Error("Sora", $"Socket:[{connection}]心跳包超时，已断开此连接");
+                    HeartBeatTimeOutEvent(info.SelfId, connection);
+                    //客户端尝试重连
+                    if (info.Connection.SocketType == SoraSocketType.Client)
+                        (info.Connection.SocketInstance as WebsocketClient)?.Reconnect();
                 }
                 catch (Exception e)
                 {
@@ -220,28 +195,15 @@ namespace Sora.Net
         /// <param name="serviceId">服务ID</param>
         /// <param name="connId">连接ID</param>
         /// <param name="apiTimeout">api超时</param>
-        internal void OpenConnection(string role, string selfId, object socket, Guid serviceId, Guid connId,
+        internal void OpenConnection(string role, string selfId, ISoraSocket socket, Guid serviceId, Guid connId,
                                      TimeSpan apiTimeout)
         {
             //添加服务器记录
             if (!AddConnection(serviceId, connId, socket, selfId, apiTimeout))
             {
                 //记录添加失败关闭超时的连接
-                switch (socket)
-                {
-                    case IWebSocketConnection serverConn:
-                        serverConn.Close();
-                        Log.Error("Sora", $"处理连接请求时发生问题 无法记录该连接[{serverConn.ConnectionInfo.Id}]");
-                        break;
-                    case WebsocketClient client:
-                        client.Stop(WebSocketCloseStatus.Empty, "cannot add client to list");
-                        Log.Error("Sora", $"处理连接请求时发生问题 无法记录该连接[{connId}]");
-                        break;
-                    default:
-                        Log.Error("ConnectionManager", "unknown error when get Connection instance");
-                        break;
-                }
-
+                socket.Close();
+                Log.Error("Sora", $"处理连接请求时发生问题 无法记录该连接[{connId}]");
                 return;
             }
 

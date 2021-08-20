@@ -2,14 +2,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.WebSockets;
 using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
-using Fleck;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
-using Websocket.Client;
 using YukariToolBox.FormatLog;
 
 namespace Sora
@@ -87,19 +84,7 @@ namespace Sora
                                                 .ToList();
             foreach (var (guid, conn) in removeConnList)
             {
-                switch (conn.Connection)
-                {
-                    case IWebSocketConnection serverConn:
-                        serverConn.Close();
-                        break;
-                    case WebsocketClient client:
-                        client.Stop(WebSocketCloseStatus.Empty, "sora service dispose");
-                        break;
-                    default:
-                        Log.Error("ConnectionManager", "unknown error when destory Connection instance");
-                        break;
-                }
-
+                conn.Connection.Close();
                 ConnectionInfos.TryRemove(guid, out _);
             }
 
