@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Fleck;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.EventArgs.WebsocketEvent;
-using Sora.OnebotModel;
+using Sora.Interfaces;
 using Websocket.Client;
 using YukariToolBox.FormatLog;
 
@@ -56,14 +56,9 @@ namespace Sora.Net
 
         #region 构造函数
 
-        internal ConnectionManager(object config)
+        internal ConnectionManager(ISoraConfig config)
         {
-            HeartBeatTimeOut = config switch
-            {
-                ServerConfig server => server.HeartBeatTimeOut,
-                ClientConfig client => client.HeartBeatTimeOut,
-                _ => throw new NotSupportedException("unsupport config type")
-            };
+            HeartBeatTimeOut = config.HeartBeatTimeOut;
         }
 
         #endregion
