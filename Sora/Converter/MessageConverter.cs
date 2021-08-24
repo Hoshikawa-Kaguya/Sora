@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using Sora.Attributes;
 using Sora.Entities;
 using Sora.Entities.MessageElement;
@@ -25,33 +26,33 @@ namespace Sora.Converter
         /// <returns>消息段列表</returns>
         private static CQCode ParseMessageElement(OnebotMessageElement onebotMessageElement)
         {
-            if (onebotMessageElement.RawData == null || onebotMessageElement.RawData.Count == 0)
-                return new CQCode(CQType.Unknown, null);
-
+            if (onebotMessageElement.RawData == null) return new CQCode(CQType.Unknown, null);
             try
             {
+                var jsonObj = JObject.FromObject(onebotMessageElement.RawData);
+                if(jsonObj.Count == 0) return new CQCode(CQType.Unknown, null);
                 return onebotMessageElement.MsgType switch
                 {
                     CQType.Text =>
-                        new CQCode(CQType.Text, onebotMessageElement.RawData.ToObject<Text>()),
+                        new CQCode(CQType.Text, jsonObj.ToObject<Text>()),
                     CQType.Face =>
-                        new CQCode(CQType.Face, onebotMessageElement.RawData.ToObject<Face>()),
+                        new CQCode(CQType.Face, jsonObj.ToObject<Face>()),
                     CQType.Image =>
-                        new CQCode(CQType.Image, onebotMessageElement.RawData.ToObject<Image>()),
+                        new CQCode(CQType.Image, jsonObj.ToObject<Image>()),
                     CQType.Record =>
-                        new CQCode(CQType.Record, onebotMessageElement.RawData.ToObject<Record>()),
+                        new CQCode(CQType.Record, jsonObj.ToObject<Record>()),
                     CQType.At =>
-                        new CQCode(CQType.At, onebotMessageElement.RawData.ToObject<At>()),
+                        new CQCode(CQType.At, jsonObj.ToObject<At>()),
                     CQType.Share =>
-                        new CQCode(CQType.Share, onebotMessageElement.RawData.ToObject<Share>()),
+                        new CQCode(CQType.Share, jsonObj.ToObject<Share>()),
                     CQType.Reply =>
-                        new CQCode(CQType.Reply, onebotMessageElement.RawData.ToObject<Reply>()),
+                        new CQCode(CQType.Reply, jsonObj.ToObject<Reply>()),
                     CQType.Forward =>
-                        new CQCode(CQType.Forward, onebotMessageElement.RawData.ToObject<Forward>()),
+                        new CQCode(CQType.Forward, jsonObj.ToObject<Forward>()),
                     CQType.Xml =>
-                        new CQCode(CQType.Xml, onebotMessageElement.RawData.ToObject<Code>()),
+                        new CQCode(CQType.Xml, jsonObj.ToObject<Code>()),
                     CQType.Json =>
-                        new CQCode(CQType.Json, onebotMessageElement.RawData.ToObject<Code>()),
+                        new CQCode(CQType.Json, jsonObj.ToObject<Code>()),
 
                     _ => new CQCode(CQType.Unknown, onebotMessageElement.RawData)
                 };

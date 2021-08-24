@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Sora.Converter;
 using Sora.Enumeration;
 
@@ -8,7 +7,7 @@ namespace Sora.OnebotModel.ApiParams
     /// <summary>
     /// Onebot消息段
     /// </summary>
-    internal struct OnebotMessageElement
+    internal readonly struct OnebotMessageElement
     {
         /// <summary>
         /// 消息段类型
@@ -21,6 +20,6 @@ namespace Sora.OnebotModel.ApiParams
         /// 消息段JSON
         /// </summary>
         [JsonProperty(PropertyName = "data")]
-        internal JObject RawData { get; init; }
+        internal object RawData { get; init; }
     }
 }
