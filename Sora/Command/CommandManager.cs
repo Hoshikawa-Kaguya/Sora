@@ -526,10 +526,11 @@ namespace Sora.Command
             if (parameters.First().ParameterType != typeof(GroupMessageEventArgs))
                 throw new NotSupportedException("unsupport parameter type");
 
+            var priority = _groupCommands.Count == 0 ? 0 : _groupCommands.Min(cmd => cmd.Priority) - 1;
+
             //创建指令信息
             return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissonType,
-                                   _groupCommands.Min(cmd => cmd.Priority) - 1,
-                                   regexOptions | RegexOptions.Compiled);
+                                   priority, regexOptions | RegexOptions.Compiled);
         }
 
         /// <summary>
@@ -560,10 +561,11 @@ namespace Sora.Command
             if (parameters.First().ParameterType != typeof(GroupMessageEventArgs))
                 throw new NotSupportedException("unsupport parameter type");
 
+            var priority = _privateCommands.Count == 0 ? 0 : _privateCommands.Min(cmd => cmd.Priority) - 1;
+            
             //创建指令信息
             return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissonType,
-                                   _privateCommands.Min(cmd => cmd.Priority) - 1,
-                                   regexOptions | RegexOptions.Compiled);
+                                   priority, regexOptions | RegexOptions.Compiled);
         }
 
         /// <summary>
