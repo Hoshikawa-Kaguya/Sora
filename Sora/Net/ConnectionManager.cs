@@ -132,18 +132,21 @@ namespace Sora.Net
         /// <summary>
         /// 心跳包超时检查
         /// </summary>
-        internal void HeartBeatCheck(object obj)
+        internal void HeartBeatCheck(object serviceIdObj)
         {
             if (StaticVariable.ConnectionInfos.IsEmpty) return;
-            Log.Debug("HeartBeatCheck", $"Connection count={StaticVariable.ConnectionInfos.Count}");
+            var serviceId = (Guid)serviceIdObj;
+            Log.Debug("HeartBeatCheck", $"service id={serviceId}");
 
             //查找超时连接
-            Dictionary<Guid, SoraConnectionInfo> timeoutDict =
+            var timeoutDict =
                 StaticVariable.ConnectionInfos
-                              .Where(conn =>
-                                         DateTime.Now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
+                              .Where(conn => conn.Value.ServiceId                        == serviceId &&
+                                             DateTime.Now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
                               .ToDictionary(conn => conn.Key,
                                             conn => conn.Value);
+            if(timeoutDict.Count == 0) return;
+            Log.Warning("HeartBeatCheck", $"timeout connection count {timeoutDict.Count}");
 
             //遍历超时的连接
             foreach (var (connection, info) in timeoutDict)

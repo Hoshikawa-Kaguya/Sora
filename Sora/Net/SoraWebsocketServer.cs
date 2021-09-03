@@ -133,7 +133,7 @@ namespace Sora.Net
             Server.Start(SocketConfig);
             Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
             //启动心跳包超时检查计时器
-            HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
+            HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, _serverId,
                                        Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
             return ValueTask.CompletedTask;
         }
