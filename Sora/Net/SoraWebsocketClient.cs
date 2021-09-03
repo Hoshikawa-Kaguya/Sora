@@ -177,7 +177,7 @@ namespace Sora.Net
                                        Config.ApiTimeOut);
             Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
             //启动心跳包超时检查计时器
-            HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, null,
+            HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, _clientId,
                                        Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
         }
 
