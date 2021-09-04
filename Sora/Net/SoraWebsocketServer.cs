@@ -85,7 +85,7 @@ namespace Sora.Net
             //检查参数
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (config.Port == 0)
-                throw new ArgumentOutOfRangeException(nameof(config.Port), "Port out of range");
+                throw new ArgumentOutOfRangeException(nameof(config.Port), "Port 0 is not allowed");
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
             Config      = config;
