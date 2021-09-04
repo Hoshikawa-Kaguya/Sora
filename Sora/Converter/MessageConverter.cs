@@ -30,7 +30,7 @@ namespace Sora.Converter
             try
             {
                 var jsonObj = JObject.FromObject(onebotMessageElement.RawData);
-                if(jsonObj.Count == 0) return new CQCode(CQType.Unknown, null);
+                if (jsonObj.Count == 0) return new CQCode(CQType.Unknown, null);
                 return onebotMessageElement.MsgType switch
                 {
                     CQType.Text =>

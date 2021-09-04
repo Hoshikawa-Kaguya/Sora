@@ -2,14 +2,13 @@ using Newtonsoft.Json.Linq;
 using Sora.Exceptions;
 using Sora.Interfaces;
 using Sora.OnebotInterface;
-using Sora.OnebotModel;
 using System;
 using System.Data;
 using System.Net.WebSockets;
-using System.Threading;
 using System.Threading.Tasks;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Entities.Socket;
+using Sora.Net.Config;
 using Websocket.Client;
 using YukariToolBox.FormatLog;
 
@@ -18,24 +17,19 @@ namespace Sora.Net
     /// <summary>
     /// Sora正向WS链接客户端
     /// </summary>
-    public class SoraWebsocketClient : ISoraService
+    public sealed class SoraWebsocketClient : ISoraService, IDisposable
     {
         #region 属性
 
         /// <summary>
         /// 服务器配置类
         /// </summary>
-        private ClientConfig Config { get; set; }
+        private ClientConfig Config { get; }
 
         /// <summary>
         /// WS客户端
         /// </summary>
-        private WebsocketClient Client { get; set; }
-
-        /// <summary>
-        /// 心跳包检查计时器
-        /// </summary>
-        private Timer HeartBeatTimer { get; set; }
+        private WebsocketClient Client { get; }
 
         /// <summary>
         /// 事件接口
@@ -45,7 +39,7 @@ namespace Sora.Net
         /// <summary>
         /// 服务器连接管理器
         /// </summary>
-        public ConnectionManager ConnManager { get; }
+        public ConnectionManager ConnManager { private set; get; }
 
         #endregion
 
@@ -80,11 +74,9 @@ namespace Sora.Net
             //写入初始化信息
             if (!StaticVariable.ServiceInfos.TryAdd(_clientId, new ServiceInfo(_clientId, config)))
                 throw new DataException("try add service info failed");
-            //初始化连接管理器
-            ConnManager = new ConnectionManager(config);
             //检查参数
             if (config == null) throw new ArgumentNullException(nameof(config));
-            if (config.Port is 0 or > 65535)
+            if (config.Port == 0)
                 throw new ArgumentOutOfRangeException(nameof(config.Port), "Port out of range");
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
@@ -168,6 +160,7 @@ namespace Sora.Net
                                               }));
             //开始客户端
             await Client.Start();
+            ConnManager.StartTimer(_clientId);
             if (!Client.IsRunning || !Client.IsStarted)
             {
                 throw new WebSocketClientException("WebSocket client is not running");
@@ -176,9 +169,6 @@ namespace Sora.Net
             ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client), _clientId, _clientId,
                                        Config.ApiTimeOut);
             Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
-            //启动心跳包超时检查计时器
-            HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, _clientId,
-                                       Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
         }
 
         /// <summary>
@@ -195,8 +185,8 @@ namespace Sora.Net
         public void Dispose()
         {
             StaticVariable.CleanServiceInfo(_clientId);
-            HeartBeatTimer.Dispose();
             Client.Dispose();
+            ConnManager.Dispose();
             GC.SuppressFinalize(this);
         }
 

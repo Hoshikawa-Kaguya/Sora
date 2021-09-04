@@ -562,7 +562,7 @@ namespace Sora.Command
                 throw new NotSupportedException("unsupport parameter type");
 
             var priority = _privateCommands.Count == 0 ? 0 : _privateCommands.Min(cmd => cmd.Priority) - 1;
-            
+
             //创建指令信息
             return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissonType,
                                    priority, regexOptions | RegexOptions.Compiled);

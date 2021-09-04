@@ -84,7 +84,15 @@ namespace Sora
                                                 .ToList();
             foreach (var (guid, conn) in removeConnList)
             {
-                conn.Connection.Close();
+                try
+                {
+                    conn.Connection.Close();
+                }
+                catch (Exception e)
+                {
+                    Log.Error("Sora", $"Close conn error\r\n{Log.ErrorLogBuilder(e)}");
+                }
+
                 ConnectionInfos.TryRemove(guid, out _);
             }
 

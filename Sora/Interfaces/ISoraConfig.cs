@@ -15,7 +15,7 @@ namespace Sora.Interfaces
         /// <summary>
         /// 服务器端口
         /// </summary>
-        uint Port { get; init; }
+        ushort Port { get; init; }
 
         /// <summary>
         /// 鉴权Token

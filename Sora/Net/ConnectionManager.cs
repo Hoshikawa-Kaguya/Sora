@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,11 +15,13 @@ namespace Sora.Net
     /// 服务器连接管理器
     /// 管理服务器链接和心跳包
     /// </summary>
-    public class ConnectionManager
+    public sealed class ConnectionManager : IDisposable
     {
         #region 属性
 
         private TimeSpan HeartBeatTimeOut { get; }
+
+        private Timer HeartBeatTimer { set; get; }
 
         #endregion
 
@@ -45,11 +46,6 @@ namespace Sora.Net
         /// 关闭连接回调
         /// </summary>
         public event ServerAsyncCallBackHandler<ConnectionEventArgs> OnCloseConnectionAsync;
-
-        /// <summary>
-        /// 心跳包超时回调
-        /// </summary>
-        public event ServerAsyncCallBackHandler<ConnectionEventArgs> OnHeartBeatTimeOut;
 
         #endregion
 
@@ -91,18 +87,14 @@ namespace Sora.Net
         /// </summary>
         /// <param name="connectionId">连接标识</param>
         private bool RemoveConnection(Guid connectionId)
-        {
-            return StaticVariable.ConnectionInfos.TryRemove(connectionId, out _);
-        }
+            => StaticVariable.ConnectionInfos.TryRemove(connectionId, out _);
 
         /// <summary>
         /// 检查是否存在连接
         /// </summary>
         /// <param name="connectionId">连接标识</param>
         internal bool ConnectionExitis(Guid connectionId)
-        {
-            return StaticVariable.ConnectionInfos.ContainsKey(connectionId);
-        }
+            => StaticVariable.ConnectionInfos.ContainsKey(connectionId);
 
         #endregion
 
@@ -120,14 +112,20 @@ namespace Sora.Net
             }
             catch (Exception e)
             {
-                Log.Error("Sora", $"Send message to client error\r\n{Log.ErrorLogBuilder(e)}");
+                Log.Error("ConnectionManager", $"Send message to client error\r\n{Log.ErrorLogBuilder(e)}");
                 return false;
             }
         }
 
         #endregion
 
-        #region 心跳包事件
+        #region 心跳包管理
+
+        /// <summary>
+        /// 启动心跳计时器
+        /// </summary>
+        internal void StartTimer(Guid serviceId)
+            => HeartBeatTimer ??= new Timer(HeartBeatCheck, serviceId, HeartBeatTimeOut, HeartBeatTimeOut);
 
         /// <summary>
         /// 心跳包超时检查
@@ -145,31 +143,17 @@ namespace Sora.Net
                                              DateTime.Now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
                               .ToDictionary(conn => conn.Key,
                                             conn => conn.Value);
-            if(timeoutDict.Count == 0) return;
+            if (timeoutDict.Count == 0) return;
             Log.Warning("HeartBeatCheck", $"timeout connection count {timeoutDict.Count}");
 
             //遍历超时的连接
             foreach (var (connection, info) in timeoutDict)
             {
-                try
-                {
-                    info.Connection.Close();
-                    Log.Error("Sora", $"Socket:[{connection}]心跳包超时，已断开此连接");
-                    HeartBeatTimeOutEvent(info.SelfId, connection);
-                    //客户端尝试重连
-                    if (info.Connection.SocketType == SoraSocketType.Client)
-                        (info.Connection.SocketInstance as WebsocketClient)?.Reconnect();
-                }
-                catch (Exception e)
-                {
-                    Log.Error("Sora", "检查心跳包时发生错误(关闭超时连接时发生错误)");
-                    Log.Error("Sora", Log.ErrorLogBuilder(e));
-                }
-
-                if (!StaticVariable.ConnectionInfos.TryRemove(connection, out _))
-                {
-                    Log.Error("Sora", "检查心跳包时发生错误(删除超时连接时发生错误)");
-                }
+                CloseConnection("Universal", info.SelfId, connection);
+                Log.Error("HeartBeatCheck", $"Socket:[{connection}]心跳包超时，已断开此连接");
+                //客户端尝试重连
+                if (info.Connection.SocketType == SoraSocketType.Client)
+                    (info.Connection.SocketInstance as WebsocketClient)?.Reconnect();
             }
         }
 
@@ -206,7 +190,7 @@ namespace Sora.Net
             {
                 //记录添加失败关闭超时的连接
                 socket.Close();
-                Log.Error("Sora", $"处理连接请求时发生问题 无法记录该连接[{connId}]");
+                Log.Error("ConnectionManager", $"处理连接请求时发生问题 无法记录该连接[{connId}]");
                 return;
             }
 
@@ -220,19 +204,26 @@ namespace Sora.Net
         /// </summary>
         /// <param name="role">通道标识</param>
         /// <param name="selfId">事件源</param>
-        /// <param name="id">id</param>
-        internal void CloseConnection(string role, long selfId, Guid id)
+        /// <param name="connId">id</param>
+        internal void CloseConnection(string role, long selfId, Guid connId)
         {
-            if (!RemoveConnection(id))
+            //关闭连接
+            try
             {
-                Log.Fatal("Sora", "Websocket连接被关闭失败");
-                Log.Warning("Sora", "将在5s后自动退出");
-                Thread.Sleep(5000);
-                Environment.Exit(-1);
+                StaticVariable.ConnectionInfos[connId].Connection.Close();
+            }
+            catch (Exception e)
+            {
+                Log.Error("ConnectionManager", "关闭连接失败");
+                Log.Error("ConnectionManager", Log.ErrorLogBuilder(e));
             }
 
+            //移除连接信息
+            if (!RemoveConnection(connId))
+                Log.Error("ConnectionManager", "移除连接信息失败");
+            //触发事件
             if (OnCloseConnectionAsync == null) return;
-            Task.Run(async () => { await OnCloseConnectionAsync(id, new ConnectionEventArgs(role, selfId)); });
+            Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs(role, selfId)); });
         }
 
         internal static void UpdateUid(Guid connectionGuid, long uid)
@@ -241,17 +232,6 @@ namespace Sora.Net
             var newInfo = oldInfo;
             newInfo.SelfId = uid;
             StaticVariable.ConnectionInfos.TryUpdate(connectionGuid, newInfo, oldInfo);
-        }
-
-        /// <summary>
-        /// 心跳包超时事件
-        /// </summary>
-        /// <param name="id">连接标识</param>
-        /// <param name="selfId">事件源</param>
-        private void HeartBeatTimeOutEvent(long selfId, Guid id)
-        {
-            if (OnHeartBeatTimeOut == null) return;
-            Task.Run(async () => { await OnHeartBeatTimeOut(id, new ConnectionEventArgs("unknown", selfId)); });
         }
 
         #endregion
@@ -290,6 +270,27 @@ namespace Sora.Net
 
             timeout = TimeSpan.Zero;
             return false;
+        }
+
+        #endregion
+
+        #region 析构
+
+        /// <summary>
+        /// 析构
+        /// </summary>
+        ~ConnectionManager()
+        {
+            Dispose();
+        }
+
+        /// <summary>
+        /// 清理资源
+        /// </summary>
+        public void Dispose()
+        {
+            HeartBeatTimer?.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         #endregion

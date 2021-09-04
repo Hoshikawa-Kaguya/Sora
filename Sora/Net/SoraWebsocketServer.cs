@@ -7,8 +7,8 @@ using Newtonsoft.Json.Linq;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Entities.Socket;
 using Sora.Interfaces;
+using Sora.Net.Config;
 using Sora.OnebotInterface;
-using Sora.OnebotModel;
 using YukariToolBox.FormatLog;
 using LogLevel = Fleck.LogLevel;
 
@@ -17,24 +17,19 @@ namespace Sora.Net
     /// <summary>
     /// Sora服务器实例
     /// </summary>
-    public sealed class SoraWebsocketServer : ISoraService
+    public sealed class SoraWebsocketServer : ISoraService, IDisposable
     {
         #region 属性
 
         /// <summary>
         /// 服务器配置类
         /// </summary>
-        private ServerConfig Config { get; set; }
+        private ServerConfig Config { get; }
 
         /// <summary>
         /// WS服务器
         /// </summary>
-        private WebSocketServer Server { get; set; }
-
-        /// <summary>
-        /// 心跳包检查计时器
-        /// </summary>
-        private Timer HeartBeatTimer { get; set; }
+        private WebSocketServer Server { get; }
 
         /// <summary>
         /// 事件接口
@@ -44,7 +39,7 @@ namespace Sora.Net
         /// <summary>
         /// 服务器连接管理器
         /// </summary>
-        public ConnectionManager ConnManager { get; }
+        public ConnectionManager ConnManager { private set; get; }
 
         #endregion
 
@@ -89,7 +84,7 @@ namespace Sora.Net
             Log.Info("Sora", $"Sora WebSocket服务器初始化... [{_serverId}]");
             //检查参数
             if (config == null) throw new ArgumentNullException(nameof(config));
-            if (config.Port is 0 or > 65535)
+            if (config.Port == 0)
                 throw new ArgumentOutOfRangeException(nameof(config.Port), "Port out of range");
             //初始化连接管理器
             ConnManager = new ConnectionManager(config);
@@ -121,20 +116,13 @@ namespace Sora.Net
         /// <summary>
         /// 启动 Sora 服务
         /// </summary>
-        public ValueTask StartService() => StartServer();
-
-        /// <summary>
-        /// 启动WS服务端
-        /// </summary>
-        private ValueTask StartServer()
+        public ValueTask StartService()
         {
             if (!_serverReady) return ValueTask.CompletedTask;
             //启动服务器
             Server.Start(SocketConfig);
+            ConnManager.StartTimer(_serverId);
             Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
-            //启动心跳包超时检查计时器
-            HeartBeatTimer = new Timer(ConnManager.HeartBeatCheck, _serverId,
-                                       Config.HeartBeatTimeOut, Config.HeartBeatTimeOut);
             return ValueTask.CompletedTask;
         }
 
@@ -213,8 +201,8 @@ namespace Sora.Net
         public void Dispose()
         {
             StaticVariable.CleanServiceInfo(_serverId);
-            HeartBeatTimer.Dispose();
             Server.Dispose();
+            ConnManager.Dispose();
             GC.SuppressFinalize(this);
         }
 
