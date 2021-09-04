@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Interfaces;
-using Sora.OnebotModel;
+using Sora.Net.Config;
 using YukariToolBox.FormatLog;
 
 namespace Sora.Net

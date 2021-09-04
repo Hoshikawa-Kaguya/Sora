@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Sora.Interfaces;
 
-namespace Sora.OnebotModel
+namespace Sora.Net.Config
 {
     /// <summary>
     /// <para>服务器配置类</para>
@@ -32,7 +32,7 @@ namespace Sora.OnebotModel
         /// <summary>
         /// 反向服务器端口
         /// </summary>
-        public uint Port { get; init; } = 8080;
+        public ushort Port { get; init; } = 8080;
 
         /// <summary>
         /// 鉴权Token

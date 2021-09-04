@@ -1,7 +1,7 @@
 using Sora.Net;
-using Sora.OnebotModel;
 using System.Threading.Tasks;
 using Sora.Enumeration;
+using Sora.Net.Config;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
@@ -27,13 +27,6 @@ service.ConnManager.OnCloseConnectionAsync += (connectionInfo, eventArgs) =>
                                                             $"uid = {eventArgs.SelfId} connectionId = {connectionInfo} type = {eventArgs.Role}");
                                                   return ValueTask.CompletedTask;
                                               };
-//心跳包超时事件
-service.ConnManager.OnHeartBeatTimeOut += (connectionInfo, eventArgs) =>
-                                          {
-                                              Log.Debug("Sora_Test|OnHeartBeatTimeOut",
-                                                        $"Get heart beat time out from[{connectionInfo}] uid[{eventArgs.SelfId}]");
-                                              return ValueTask.CompletedTask;
-                                          };
 //连接成功元事件
 service.Event.OnClientConnect += (type, eventArgs) =>
                                  {
