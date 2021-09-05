@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -146,14 +147,23 @@ namespace Sora.Net
             if (timeoutDict.Count == 0) return;
             Log.Warning("HeartBeatCheck", $"timeout connection count {timeoutDict.Count}");
 
+            var needReconnect = new List<WebsocketClient>();
             //遍历超时的连接
             foreach (var (connection, info) in timeoutDict)
             {
                 CloseConnection("Universal", info.SelfId, connection);
                 Log.Error("HeartBeatCheck", $"Socket:[{connection}]心跳包超时，已断开此连接");
                 //客户端尝试重连
-                if (info.Connection.SocketType == SoraSocketType.Client)
-                    (info.Connection.SocketInstance as WebsocketClient)?.Reconnect();
+                if (info.Connection.SocketType == SoraSocketType.Client &&
+                    info.Connection.SocketInstance is WebsocketClient c)
+                    needReconnect.Add(c);
+            }
+
+            if (needReconnect.Count == 0) return;
+            foreach (var client in needReconnect)
+            {
+                Log.Error("HeartBeatCheck", $"fuck");
+                client.Reconnect();
             }
         }
 
