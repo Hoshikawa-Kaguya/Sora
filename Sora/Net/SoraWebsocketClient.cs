@@ -39,7 +39,7 @@ namespace Sora.Net
         /// <summary>
         /// 服务器连接管理器
         /// </summary>
-        public ConnectionManager ConnManager { private set; get; }
+        public ConnectionManager ConnManager { get; }
 
         #endregion
 
@@ -54,6 +54,11 @@ namespace Sora.Net
         /// 客户端ID
         /// </summary>
         private readonly Guid _clientId = Guid.NewGuid();
+
+        /// <summary>
+        /// 客户端已启动
+        /// </summary>
+        private bool _clientIsRunning;
 
         #endregion
 
@@ -152,11 +157,12 @@ namespace Sora.Net
             Client.ReconnectionHappened
                   .Subscribe(info => Task.Run(() =>
                                               {
-                                                  if (info.Type == ReconnectionType.Initial) return;
-                                                  Log.Info("Sora", "服务器已自动重连");
+                                                  if (info.Type == ReconnectionType.Initial || !_clientIsRunning)
+                                                      return;
+                                                  Log.Info("Sora", $"服务器已自动重连{info.Type}");
                                                   ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client),
-                                                                             _clientId,
-                                                                             _clientId, Config.ApiTimeOut);
+                                                                             _clientId, _clientId,
+                                                                             Config.ApiTimeOut);
                                               }));
             //开始客户端
             await Client.Start();
@@ -169,6 +175,7 @@ namespace Sora.Net
             ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client), _clientId, _clientId,
                                        Config.ApiTimeOut);
             Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
+            _clientIsRunning = true;
         }
 
         /// <summary>
