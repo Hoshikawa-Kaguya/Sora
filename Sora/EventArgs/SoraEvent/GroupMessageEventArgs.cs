@@ -163,9 +163,9 @@ namespace Sora.EventArgs.SoraEvent
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
             if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-                return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps,
-                                                matchType, SourceFlag.Group, regexOptions, null, null,
-                                                SourceGroup));
+                return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
+                                                               matchType, SourceFlag.Group, regexOptions, null, null,
+                                                               SourceGroup) as GroupMessageEventArgs);
             CommandDisableTip();
             return ValueTask.FromResult<GroupMessageEventArgs>(null);
         }
@@ -185,9 +185,10 @@ namespace Sora.EventArgs.SoraEvent
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
             if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-                return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, commandExps,
-                                                matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
-                                                SourceGroup));
+                return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
+                                                               matchType, SourceFlag.Group, regexOptions, timeout,
+                                                               timeoutTask,
+                                                               SourceGroup) as GroupMessageEventArgs);
             CommandDisableTip();
             return ValueTask.FromResult<GroupMessageEventArgs>(null);
         }
@@ -223,9 +224,10 @@ namespace Sora.EventArgs.SoraEvent
                                                                         RegexOptions regexOptions = RegexOptions.None)
         {
             if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-                return ValueTask.FromResult((GroupMessageEventArgs)WaitForNextMessage(Sender, new[] { commandExp },
-                                                matchType, SourceFlag.Group, regexOptions, timeout, timeoutTask,
-                                                SourceGroup));
+                return ValueTask.FromResult(WaitForNextMessage(Sender, new[] { commandExp },
+                                                               matchType, SourceFlag.Group, regexOptions, timeout,
+                                                               timeoutTask,
+                                                               SourceGroup) as GroupMessageEventArgs);
             CommandDisableTip();
             return ValueTask.FromResult<GroupMessageEventArgs>(null);
         }

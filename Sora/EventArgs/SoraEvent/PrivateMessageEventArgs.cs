@@ -122,8 +122,9 @@ namespace Sora.EventArgs.SoraEvent
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
             if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-                return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType,
-                                                SourceFlag.Private, regexOptions, null, null));
+                return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps, matchType,
+                                                               SourceFlag.Private, regexOptions,
+                                                               null, null) as PrivateMessageEventArgs);
             CommandDisableTip();
             return ValueTask.FromResult<PrivateMessageEventArgs>(null);
         }
@@ -143,8 +144,9 @@ namespace Sora.EventArgs.SoraEvent
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
             if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-                return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, commandExps, matchType,
-                                                SourceFlag.Private, regexOptions, timeout, timeoutTask));
+                return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps, matchType,
+                                                               SourceFlag.Private, regexOptions,
+                                                               timeout, timeoutTask) as PrivateMessageEventArgs);
             CommandDisableTip();
             return ValueTask.FromResult<PrivateMessageEventArgs>(null);
         }
@@ -180,9 +182,10 @@ namespace Sora.EventArgs.SoraEvent
                                                                           RegexOptions regexOptions = RegexOptions.None)
         {
             if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-                return ValueTask.FromResult((PrivateMessageEventArgs)WaitForNextMessage(Sender, new[] { commandExp },
+                return ValueTask.FromResult(WaitForNextMessage(Sender, new[] { commandExp },
                                                 matchType,
-                                                SourceFlag.Private, regexOptions, timeout, timeoutTask));
+                                                SourceFlag.Private, regexOptions, 
+                                                timeout, timeoutTask) as PrivateMessageEventArgs);
             CommandDisableTip();
             return ValueTask.FromResult<PrivateMessageEventArgs>(null);
         }
