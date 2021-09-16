@@ -637,7 +637,7 @@ namespace Sora.Entities.Base
 
         #endregion
 
-        #region 账号信息API
+        #region 账号API
 
         /// <summary>
         /// <para>获取登陆QQ的名字</para>
@@ -795,6 +795,29 @@ namespace Sora.Entities.Base
         public async ValueTask<ApiStatus> SetModelShow(string model, string showModel)
         {
             return await ApiInterface.SetModelShow(ConnectionId, model, showModel);
+        }
+
+        /// <summary>
+        /// 获取单向好友列表
+        /// </summary>
+        /// <returns>
+        /// <para><see cref="ApiStatusType"/> API执行状态</para>
+        /// <para><see cref="List{T}"/> 单向好友列表</para>
+        /// <para>T = <see cref="UnidirectionalFriendInfo"/> 单向好友信息</para>
+        /// </returns>
+        public async ValueTask<(ApiStatus apiStatus, List<UnidirectionalFriendInfo> unidirectionalFriendInfos)>
+            GetUnidirectionalFriendList()
+        {
+            return await ApiInterface.GetUnidirectionalFriendList(ConnectionId);
+        }
+
+        /// <summary>
+        /// 删除单向好友
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        public async ValueTask<ApiStatus> DeleteUnidirectionalFriend(long userId)
+        {
+            return await ApiInterface.DeleteUnidirectionalFriend(ConnectionId, userId);
         }
 
         #endregion

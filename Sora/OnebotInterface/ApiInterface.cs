@@ -914,6 +914,24 @@ namespace Sora.OnebotInterface
             return (apiStatus, ret?["data"]?["variants"]?.ToObject<List<Model>>() ?? new List<Model>());
         }
 
+        /// <summary>
+        /// 获取单向好友列表
+        /// </summary>
+        /// <param name="connection">连接标识</param>
+        internal static async ValueTask<(ApiStatus apiStatus, List<UnidirectionalFriendInfo> unidirectionalFriendInfos)>
+            GetUnidirectionalFriendList(Guid connection)
+        {
+            Log.Debug("Sora", "Sending get_unidirectional_friend_list request");
+            var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.GetUnidirectionalFriendList
+            }, connection);
+            Log.Debug("Sora", $"Get get_unidirectional_friend_list response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return (apiStatus,
+                    ret?["data"]?.ToObject<List<UnidirectionalFriendInfo>>() ??
+                    new List<UnidirectionalFriendInfo>());
+        }
+
         #endregion
 
         #endregion
@@ -1575,7 +1593,27 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get mark_msg_as_read response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
-
+        
+        /// <summary>
+        /// 删除单向好友
+        /// </summary>
+        /// <param name="connection">连接标识</param>
+        /// <param name="uid">uid</param>
+        internal static async ValueTask<ApiStatus> DeleteUnidirectionalFriend(Guid connection, long uid)
+        {
+            Log.Debug("Sora", "Sending delete_unidirectional_friend request");
+            var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.DeleteUnidirectionalFriend,
+                ApiParams = new
+                {
+                    user_id = uid
+                }
+            }, connection);
+            Log.Debug("Sora", $"Get delete_unidirectional_friend response {nameof(apiStatus)}={apiStatus.RetCode}");
+            return apiStatus;
+        }
+        
         #endregion
 
         #endregion
