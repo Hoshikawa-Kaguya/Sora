@@ -307,6 +307,18 @@ namespace Sora.Enumeration.ApiType
         /// </summary>
         [Description("mark_msg_as_read")] MarkMsgAsRead,
 
+        /// <summary>
+        /// 获取单向好友列表
+        /// </summary>
+        [Description("get_unidirectional_friend_list")]
+        GetUnidirectionalFriendList,
+
+        /// <summary>
+        /// 获取单向好友列表
+        /// </summary>
+        [Description("delete_unidirectional_friend")]
+        DeleteUnidirectionalFriend,
+
         #endregion
     }
 }

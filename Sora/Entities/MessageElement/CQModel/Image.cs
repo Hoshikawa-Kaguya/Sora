@@ -45,6 +45,14 @@ namespace Sora.Entities.MessageElement.CQModel
         [JsonProperty(PropertyName = "id", NullValueHandling = NullValueHandling.Ignore)]
         public int? Id { get; internal set; }
 
+        /// <summary>
+        /// <para>图片子类型</para>
+        /// <para>此类型暂只做反序列化处理，不做枚举类型处理</para>
+        /// <para>参照：https://github.com/Mrs4s/go-cqhttp/blob/master/docs/cqhttp.md#%E5%9B%BE%E7%89%87</para>
+        /// </summary>
+        [JsonProperty(PropertyName = "subType", NullValueHandling = NullValueHandling.Ignore)]
+        public int? SubType { get; internal set; }
+
         #endregion
     }
 }

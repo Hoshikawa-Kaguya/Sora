@@ -14,7 +14,7 @@ namespace Sora
     /// <summary>
     /// 静态变量存放区
     /// </summary>
-    internal static class StaticVariable
+    public static class StaticVariable
     {
         /// <summary>
         /// 连续对话匹配上下文
@@ -69,6 +69,11 @@ namespace Sora
         /// Key:服务标识符
         /// </summary>
         internal static readonly ConcurrentDictionary<Guid, ServiceInfo> ServiceInfos = new();
+
+        /// <summary>
+        /// 版本号
+        /// </summary>
+        public const string Version = "1.0.0-rc20";
 
         /// <summary>
         /// 清除服务数据
