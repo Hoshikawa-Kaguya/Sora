@@ -3,7 +3,7 @@ namespace Sora.Attributes.Command
     /// <summary>
     /// 私聊指令
     /// </summary>
-    public sealed class PrivateCommand : Command
+    public sealed class PrivateCommand : RegexCommand
     {
         /// <summary>
         /// 构造方法
