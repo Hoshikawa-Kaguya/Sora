@@ -5,7 +5,7 @@ namespace Sora.Attributes.Command
     /// <summary>
     /// 群组指令
     /// </summary>
-    public sealed class GroupCommand : Command
+    public sealed class GroupCommand : RegexCommand
     {
         #region 属性
 

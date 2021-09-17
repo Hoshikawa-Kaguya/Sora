@@ -8,7 +8,7 @@ namespace Sora.Attributes.Command
     /// 指令
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public abstract class Command : Attribute
+    public abstract class RegexCommand : Attribute
     {
         #region 私有字段
 
@@ -58,7 +58,7 @@ namespace Sora.Attributes.Command
         /// <summary>
         /// 构造方法
         /// </summary>
-        protected Command(string[] commands)
+        protected RegexCommand(string[] commands)
         {
             CommandExpressions = commands;
         }
@@ -66,7 +66,7 @@ namespace Sora.Attributes.Command
         /// <summary>
         /// 构造方法
         /// </summary>
-        protected Command()
+        protected RegexCommand()
         {
         }
 

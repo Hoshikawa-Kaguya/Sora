@@ -164,7 +164,7 @@ namespace Sora.Command
         /// <param name="eventArgs">事件参数</param>
         /// <returns>是否继续处理接下来的消息</returns>
         [NeedReview("L317-L374")]
-        internal async ValueTask CommandAdapter(dynamic eventArgs)
+        internal async ValueTask CommandAdapter(BaseSoraEventArgs eventArgs)
         {
             #region 信号量消息处理
 
@@ -237,7 +237,7 @@ namespace Sora.Command
             //当前流程已经处理过wait command了。不再继续处理普通command，否则会一次发两条消息，普通消息留到下一次处理
             if (waitingCommand.Count != 0)
             {
-                ((BaseSoraEventArgs)eventArgs).IsContinueEventChain = false;
+                eventArgs.IsContinueEventChain = false;
                 return;
             }
 
@@ -286,105 +286,7 @@ namespace Sora.Command
 
             //在没有匹配到指令时直接跳转至Event触发
             if (matchedCommand.Count == 0) return;
-
-            //遍历匹配到的每个命令
-            foreach (var commandInfo in matchedCommand)
-            {
-                //若是群，则判断权限
-                if (eventArgs is GroupMessageEventArgs groupEventArgs)
-                {
-                    if (groupEventArgs.SenderInfo.Role < commandInfo.PermissonType)
-                    {
-                        Log.Warning("CommandAdapter",
-                                    $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{commandInfo.MethodInfo.Name}");
-
-                        //权限不足，跳过本命令执行
-                        continue;
-                    }
-                }
-
-                try
-                {
-                    //判断不同的执行方法
-                    switch (commandInfo.InvokeType)
-                    {
-                        //特性指令
-                        case InvokeType.Method:
-                        {
-                            Log.Debug("CommandAdapter",
-                                      $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
-                            Log.Info("CommandAdapter", $"触发指令[{commandInfo.MethodInfo.Name}]");
-                            //尝试执行指令并判断异步方法
-                            var isAsnyc =
-                                commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
-                                                                          false) is not null;
-                            //执行指令方法
-                            if (isAsnyc && commandInfo.MethodInfo.ReturnType != typeof(void))
-                            {
-                                Log.Debug("Command", "invoke async command method");
-                                await commandInfo.MethodInfo
-                                                 .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                         new[] { eventArgs });
-                            }
-                            else
-                            {
-                                Log.Debug("Command", "invoke command method");
-                                commandInfo.MethodInfo
-                                           .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                   new[] { eventArgs });
-                            }
-
-                            break;
-                        }
-                        //动态注册指令
-                        case InvokeType.Action:
-                        {
-                            Log.Debug("CommandAdapter",
-                                      $"trigger command [dynamic command({commandInfo.Priority})]");
-                            Log.Info("CommandAdapter", $"触发指令[dynamic command({commandInfo.Priority})]");
-                            switch (commandInfo.SourceFlag)
-                            {
-                                case SourceFlag.Group:
-                                    await commandInfo.GroupActionBlock.Invoke(eventArgs);
-                                    break;
-                                case SourceFlag.Private:
-                                    await commandInfo.PrivateActionBlock.Invoke(eventArgs);
-                                    break;
-                            }
-
-                            break;
-                        }
-                        default:
-                            Log.Error("CommandAdapter", "Get unknown command type");
-                            break;
-                    }
-
-                    return;
-                }
-                catch (Exception e)
-                {
-                    Log.Error("CommandAdapter", Log.ErrorLogBuilder(e));
-
-                    //描述不为空，才需要打印错误信息
-                    if (!string.IsNullOrEmpty(commandInfo.Desc))
-                    {
-                        switch (eventArgs)
-                        {
-                            case GroupMessageEventArgs groupMessageEvent:
-                            {
-                                await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
-                                break;
-                            }
-                            case PrivateMessageEventArgs privateMessageEvent:
-                            {
-                                await privateMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
+            await InvokeMatchCommand(matchedCommand, eventArgs);
             #endregion
         }
 
@@ -466,9 +368,9 @@ namespace Sora.Command
             Log.Debug("Command", $"Registering command [{method.Name}]");
 
             //处理指令匹配类型
-            var match = (commandAttr as Attributes.Command.Command)?.MatchType ?? MatchType.Full;
+            var match = (commandAttr as RegexCommand)?.MatchType ?? MatchType.Full;
             //处理表达式
-            var matchExp = ParseCommandExps((commandAttr as Attributes.Command.Command)?.CommandExpressions, match);
+            var matchExp = ParseCommandExps((commandAttr as RegexCommand)?.CommandExpressions, match);
             //若无匹配表达式，则创建一个空白的命令信息
             if (matchExp == null)
             {
@@ -485,13 +387,13 @@ namespace Sora.Command
             }
 
             //创建指令信息
-            commandInfo = new CommandInfo((commandAttr as Attributes.Command.Command)?.Description,
+            commandInfo = new CommandInfo((commandAttr as RegexCommand)?.Description,
                                           matchExp,
                                           classType.Name,
                                           method,
                                           (commandAttr as GroupCommand)?.PermissionLevel ?? MemberRoleType.Member,
-                                          (commandAttr as Attributes.Command.Command)?.Priority ?? 0,
-                                          (commandAttr as Attributes.Command.Command)?.RegexOptions ??
+                                          (commandAttr as RegexCommand)?.Priority ?? 0,
+                                          (commandAttr as RegexCommand)?.RegexOptions ??
                                           RegexOptions.None,
                                           method.IsStatic ? null : classType);
 
@@ -601,6 +503,107 @@ namespace Sora.Command
             }
 
             return true;
+        }
+
+        private async ValueTask InvokeMatchCommand(List<CommandInfo> matchedCommands, BaseSoraEventArgs eventArgs)
+        {
+            //遍历匹配到的每个命令
+            foreach (var commandInfo in matchedCommands)
+            {
+                //若是群，则判断权限
+                if (eventArgs is GroupMessageEventArgs groupEventArgs)
+                {
+                    if (groupEventArgs.SenderInfo.Role < commandInfo.PermissonType)
+                    {
+                        Log.Warning("CommandAdapter",
+                                    $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{commandInfo.MethodInfo.Name}");
+
+                        //权限不足，跳过本命令执行
+                        continue;
+                    }
+                }
+
+                try
+                {
+                    //判断不同的执行方法
+                    switch (commandInfo.InvokeType)
+                    {
+                        //特性指令
+                        case InvokeType.Method:
+                        {
+                            Log.Debug("CommandAdapter",
+                                      $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+                            Log.Info("CommandAdapter", $"触发指令[{commandInfo.MethodInfo.Name}]");
+                            //尝试执行指令并判断异步方法
+                            var isAsnyc =
+                                commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
+                                                                          false) is not null;
+                            //执行指令方法
+                            if (isAsnyc && commandInfo.MethodInfo.ReturnType != typeof(void))
+                            {
+                                Log.Debug("Command", "invoke async command method");
+                                await commandInfo.MethodInfo
+                                                 .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
+                                                         new object[] { eventArgs });
+                            }
+                            else
+                            {
+                                Log.Debug("Command", "invoke command method");
+                                commandInfo.MethodInfo
+                                           .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
+                                                   new object[] { eventArgs });
+                            }
+
+                            break;
+                        }
+                        //动态注册指令
+                        case InvokeType.Action:
+                        {
+                            Log.Debug("CommandAdapter",
+                                      $"trigger command [dynamic command({commandInfo.Priority})]");
+                            Log.Info("CommandAdapter", $"触发指令[dynamic command({commandInfo.Priority})]");
+                            switch (commandInfo.SourceFlag)
+                            {
+                                case SourceFlag.Group:
+                                    await commandInfo.GroupActionBlock.Invoke(eventArgs as GroupMessageEventArgs);
+                                    break;
+                                case SourceFlag.Private:
+                                    await commandInfo.PrivateActionBlock.Invoke(eventArgs as PrivateMessageEventArgs);
+                                    break;
+                            }
+
+                            break;
+                        }
+                        default:
+                            Log.Error("CommandAdapter", "Get unknown command type");
+                            break;
+                    }
+
+                    return;
+                }
+                catch (Exception e)
+                {
+                    Log.Error("CommandAdapter", Log.ErrorLogBuilder(e));
+
+                    //描述不为空，才需要打印错误信息
+                    if (!string.IsNullOrEmpty(commandInfo.Desc))
+                    {
+                        switch (eventArgs)
+                        {
+                            case GroupMessageEventArgs groupMessageEvent:
+                            {
+                                await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
+                                break;
+                            }
+                            case PrivateMessageEventArgs privateMessageEvent:
+                            {
+                                await privateMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         #endregion
