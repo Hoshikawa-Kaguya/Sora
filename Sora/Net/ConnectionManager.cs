@@ -31,10 +31,9 @@ namespace Sora.Net
         /// <summary>
         /// 服务器事件回调
         /// </summary>
-        /// <typeparam name="TEventArgs">事件参数</typeparam>
+        /// <typeparam name="TEventArgs">事件参数类型</typeparam>
         /// <param name="sender">Bot Id</param>
         /// <param name="eventArgs">事件参数</param>
-        /// <returns></returns>
         public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(
             Guid sender, TEventArgs eventArgs) where TEventArgs : System.EventArgs;
 
@@ -94,7 +93,7 @@ namespace Sora.Net
         /// 检查是否存在连接
         /// </summary>
         /// <param name="connectionId">连接标识</param>
-        internal bool ConnectionExitis(Guid connectionId)
+        internal bool ConnectionExists(Guid connectionId)
             => StaticVariable.ConnectionInfos.ContainsKey(connectionId);
 
         #endregion

@@ -1,11 +1,11 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 链接分享
     /// </summary>
-    public struct Share
+    public class ShareSegment : BaseSegment
     {
         #region 属性
 

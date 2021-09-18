@@ -1,8 +1,8 @@
 using Sora.Net;
 using System.Threading.Tasks;
+using Sora.Entities.MessageSegment;
 using Sora.Enumeration;
 using Sora.Net.Config;
-using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
 //设置log等级
@@ -47,13 +47,13 @@ service.Event.OnPrivateMessage += async (msgType, eventArgs) => { await eventArg
 //动态向管理器注册指令
 service.Event.CommandManager.RegisterGroupCommand(async eventArgs =>
                                                   {
-                                                      await eventArgs.Reply("坏");
+                                                      await eventArgs.Reply(SegmentBuilder.CQAt(4564) + 2133.ToAt() + 35254.ToAt() + "fuck");
                                                       eventArgs.IsContinueEventChain = false;
                                                   }, new[] { "2" }, MatchType.Full);
 
 #endregion
 
 //启动服务并捕捉错误
-await service.StartService()
-             .RunCatch(e => Log.Error("Sora Service", Log.ErrorLogBuilder(e)));
+await service.StartService();
+             //.RunCatch(e => Log.Error("Sora Service", Log.ErrorLogBuilder(e)));
 await Task.Delay(-1);

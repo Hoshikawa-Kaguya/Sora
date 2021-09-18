@@ -89,7 +89,7 @@ namespace Sora.Net
         /// <summary>
         /// 启动多个服务
         /// </summary>
-        /// <param name="serviceList"></param>
+        /// <param name="serviceList">多服务列表</param>
         public static async ValueTask StartMultiService(this IEnumerable<ISoraService> serviceList)
         {
             foreach (ISoraService soraService in serviceList)

@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// QQ 表情
     /// </summary>
-    public struct Face
+    public class FaceSegment : BaseSegment
     {
         #region 属性
 

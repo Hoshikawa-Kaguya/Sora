@@ -1,14 +1,15 @@
 using System;
 using Newtonsoft.Json.Linq;
+using Sora.Entities.MessageSegment.Segment;
 using Sora.Enumeration;
 using Sora.OnebotModel.ApiParams;
 
-namespace Sora.Entities.MessageElement
+namespace Sora.Entities.MessageSegment
 {
     /// <summary>
     /// 消息段结构体
     /// </summary>
-    public readonly struct CQCode
+    public class CQCode<T> where T : BaseSegment
     {
         #region 属性
 
@@ -20,7 +21,7 @@ namespace Sora.Entities.MessageElement
         /// <summary>
         /// CQ码数据实例
         /// </summary>
-        public object DataObject { get; }
+        public T DataObject { get; }
 
         #endregion
 
@@ -30,8 +31,8 @@ namespace Sora.Entities.MessageElement
         /// 构造CQ码实例
         /// </summary>
         /// <param name="cqType">CQ码类型</param>
-        /// <param name="dataObject"></param>
-        internal CQCode(CQType cqType, object dataObject)
+        /// <param name="dataObject">数据</param>
+        internal CQCode(CQType cqType, T dataObject) 
         {
             MessageType = cqType;
             DataObject  = dataObject;
@@ -50,7 +51,7 @@ namespace Sora.Entities.MessageElement
         /// </returns>
         public Type GetCqCodeDataType()
         {
-            return DataObject.GetType();
+            return typeof(T);
         }
 
         #endregion
@@ -70,16 +71,18 @@ namespace Sora.Entities.MessageElement
         /// <summary>
         /// 等于重载
         /// </summary>
-        public static bool operator ==(CQCode cqCodeL, CQCode cqCodeR)
+        public static bool operator ==(CQCode<T> cqCodeL, CQCode<T> cqCodeR)
         {
-            return cqCodeL.MessageType == cqCodeR.MessageType &&
-                   JToken.DeepEquals(JToken.FromObject(cqCodeL.DataObject), JToken.FromObject(cqCodeR.DataObject));
+            if (cqCodeL is not null && cqCodeR is not null)
+                return cqCodeL.MessageType == cqCodeR.MessageType &&
+                       JToken.DeepEquals(JToken.FromObject(cqCodeL.DataObject), JToken.FromObject(cqCodeR.DataObject));
+            return cqCodeL is null && cqCodeR is null;
         }
 
         /// <summary>
         /// 不等于重载
         /// </summary>
-        public static bool operator !=(CQCode cqCodeL, CQCode cqCodeR)
+        public static bool operator !=(CQCode<T> cqCodeL, CQCode<T> cqCodeR)
         {
             return !(cqCodeL == cqCodeR);
         }
@@ -87,7 +90,7 @@ namespace Sora.Entities.MessageElement
         /// <summary>
         /// +运算重载
         /// </summary>
-        public static MessageBody operator +(CQCode codeR, CQCode codeL)
+        public static MessageBody operator +(CQCode<T> codeR, CQCode<T> codeL)
         {
             var messages = new MessageBody { codeR, codeL };
             return messages;
@@ -96,7 +99,7 @@ namespace Sora.Entities.MessageElement
         /// <summary>
         /// +运算重载
         /// </summary>
-        public static MessageBody operator +(MessageBody message, CQCode codeL)
+        public static MessageBody operator +(MessageBody message, CQCode<T> codeL)
         {
             message.Add(codeL);
             return message;
@@ -105,17 +108,9 @@ namespace Sora.Entities.MessageElement
         /// <summary>
         /// 隐式类型转换
         /// </summary>
-        public static implicit operator MessageBody(CQCode cqCode)
+        public static implicit operator MessageBody(CQCode<T> cqCode)
         {
             return new() { cqCode };
-        }
-
-        /// <summary>
-        /// 隐式类型转换
-        /// </summary>
-        public static implicit operator CQCode(string text)
-        {
-            return CQCodes.CQText(text);
         }
 
         #endregion
@@ -127,7 +122,7 @@ namespace Sora.Entities.MessageElement
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (obj is CQCode cqCode)
+            if (obj is CQCode<T> cqCode)
             {
                 return this == cqCode;
             }

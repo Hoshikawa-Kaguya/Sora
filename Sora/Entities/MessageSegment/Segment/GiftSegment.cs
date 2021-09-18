@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 礼物
-    /// 仅支持Go
+    /// 仅支持GoCQ
     /// </summary>
-    public struct Gift
+    public class GiftSegment : BaseSegment
     {
         /// <summary>
         /// 接收目标

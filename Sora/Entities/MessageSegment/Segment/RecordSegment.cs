@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 语音消息
     /// </summary>
-    public struct Record
+    public class RecordSegment : BaseSegment
     {
         #region 属性
 

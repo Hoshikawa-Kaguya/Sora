@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 接收红包
     /// 仅支持Go
     /// </summary>
-    public struct Redbag
+    public class RedbagSegment : BaseSegment
     {
         /// <summary>
         /// 祝福语/口令

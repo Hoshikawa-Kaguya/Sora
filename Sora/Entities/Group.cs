@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
-using Sora.Entities.MessageElement.CQModel;
+using Sora.Entities.MessageSegment.Segment;
 using Sora.Entities.Info;
-using Sora.Entities.MessageElement;
+using Sora.Entities.MessageSegment;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 
@@ -46,7 +46,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="message">
         ///     <para>消息</para>
-        ///     <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        ///     <para><see cref="List{T}"/>(T = <see cref="CQCode{T}"/>)</para>
         ///     <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <param name="timeout">覆盖原有超时</param>
@@ -205,13 +205,13 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="localFilePath">本地文件路径</param>
         /// <param name="fileName">上传文件名</param>
-        /// <param name="floderId">父目录ID</param>
+        /// <param name="folderId">父目录ID</param>
         /// <returns>API状态</returns>
         public async ValueTask<ApiStatus> UploadGroupFile(string localFilePath, string fileName,
-                                                          string floderId = null)
+                                                          string folderId = null)
         {
             return await SoraApi.UploadGroupFile(Id, localFilePath,
-                                                 fileName, floderId);
+                                                 fileName, folderId);
         }
 
         #endregion

@@ -1,14 +1,14 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// <para>群成员戳一戳</para>
     /// <para>仅发送</para>
-    /// <para>仅支持Go</para>
+    /// <para>仅支持GoCQ</para>
     /// </summary>
-    public struct Poke
+    public class PokeSegment : BaseSegment
     {
         #region 属性
 

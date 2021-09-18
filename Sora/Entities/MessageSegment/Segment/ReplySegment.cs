@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 回复
     /// </summary>
-    public struct Reply
+    public class ReplySegment : BaseSegment
     {
         #region 属性
 
@@ -15,7 +15,7 @@ namespace Sora.Entities.MessageElement.CQModel
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "id")]
-        public int Traget { get; internal set; }
+        public int Target { get; internal set; }
 
         #endregion
     }

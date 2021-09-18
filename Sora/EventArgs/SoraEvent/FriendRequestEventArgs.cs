@@ -25,7 +25,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 当前请求的flag标识
         /// </summary>
-        public string RequsetFlag { get; private set; }
+        public string RequestFlag { get; private set; }
 
         #endregion
 
@@ -44,7 +44,7 @@ namespace Sora.EventArgs.SoraEvent
         {
             Sender      = new User(serviceId, connectionId, friendRequestArgs.UserId);
             Comment     = friendRequestArgs.Comment;
-            RequsetFlag = friendRequestArgs.Flag;
+            RequestFlag = friendRequestArgs.Flag;
         }
 
         #endregion
@@ -57,7 +57,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="remark">设置备注</param>
         public async ValueTask Accept(string remark = null)
         {
-            await SoraApi.SetFriendAddRequest(RequsetFlag, true, remark);
+            await SoraApi.SetFriendAddRequest(RequestFlag, true, remark);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         public async ValueTask Reject()
         {
-            await SoraApi.SetFriendAddRequest(RequsetFlag, false);
+            await SoraApi.SetFriendAddRequest(RequestFlag, false);
         }
 
         #endregion

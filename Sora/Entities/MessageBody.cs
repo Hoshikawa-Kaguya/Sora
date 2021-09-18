@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sora.Entities.MessageElement;
+using Sora.Entities.MessageSegment;
+using Sora.Entities.MessageSegment.Segment;
 using Sora.Enumeration;
 
 namespace Sora.Entities
@@ -9,11 +10,11 @@ namespace Sora.Entities
     /// <summary>
     /// 消息段
     /// </summary>
-    public class MessageBody : IList<CQCode>
+    public class MessageBody : IList<CQCode<BaseSegment>>
     {
         #region 私有字段
 
-        private readonly List<CQCode> _message = new();
+        private readonly List<CQCode<BaseSegment>> _message = new();
 
         #endregion
 
@@ -36,7 +37,7 @@ namespace Sora.Entities
         /// <summary>
         /// 构造消息段列表
         /// </summary>
-        public MessageBody(IEnumerable<CQCode> messages)
+        public MessageBody(List<CQCode<BaseSegment>> messages)
         {
             _message.Clear();
             _message.AddRange(messages);
@@ -56,7 +57,7 @@ namespace Sora.Entities
         /// <summary>
         /// 迭代器
         /// </summary>
-        IEnumerator<CQCode> IEnumerable<CQCode>.GetEnumerator()
+        IEnumerator<CQCode<BaseSegment>> IEnumerable<CQCode<BaseSegment>>.GetEnumerator()
         {
             return _message.GetEnumerator();
         }
@@ -73,9 +74,18 @@ namespace Sora.Entities
         /// 添加消息段
         /// </summary>
         /// <param name="item">消息段</param>
-        public void Add(CQCode item)
+        public void Add(CQCode<BaseSegment> item)
         {
             _message.Add(item);
+        }
+        
+        /// <summary>
+        /// 添加消息段
+        /// </summary>
+        /// <param name="item">消息段</param>
+        public void Add<T>(CQCode<T> item) where T : BaseSegment
+        {
+            Add(item as CQCode<BaseSegment>);
         }
 
         /// <summary>
@@ -84,13 +94,12 @@ namespace Sora.Entities
         /// <param name="text">纯文本消息段</param>
         public void Add(string text)
         {
-            _message.Add(CQCodes.CQText(text));
+            _message.Add(SegmentBuilder.TextToBase(text));
         }
 
         /// <summary>
         /// 清空消息段
         /// </summary>
-        /// <exception cref="NotImplementedException"></exception>
         public void Clear()
         {
             _message.Clear();
@@ -100,7 +109,7 @@ namespace Sora.Entities
         /// 判断包含
         /// </summary>
         /// <param name="item">消息段</param>
-        public bool Contains(CQCode item)
+        public bool Contains(CQCode<BaseSegment> item)
         {
             return _message.Contains(item);
         }
@@ -110,7 +119,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="array">消息段数组</param>
         /// <param name="arrayIndex">索引</param>
-        public void CopyTo(CQCode[] array, int arrayIndex)
+        public void CopyTo(CQCode<BaseSegment>[] array, int arrayIndex)
         {
             _message.CopyTo(array, arrayIndex);
         }
@@ -119,7 +128,7 @@ namespace Sora.Entities
         /// 删除消息段
         /// </summary>
         /// <param name="item">消息段</param>
-        public bool Remove(CQCode item)
+        public bool Remove(CQCode<BaseSegment> item)
         {
             return _message.Remove(item);
         }
@@ -128,7 +137,7 @@ namespace Sora.Entities
         /// 索引查找
         /// </summary>
         /// <param name="item">消息段</param>
-        public int IndexOf(CQCode item)
+        public int IndexOf(CQCode<BaseSegment> item)
         {
             return _message.IndexOf(item);
         }
@@ -138,7 +147,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="index">索引</param>
         /// <param name="item">消息段</param>
-        public void Insert(int index, CQCode item)
+        public void Insert(int index, CQCode<BaseSegment> item)
         {
             _message.Insert(index, item);
         }
@@ -155,7 +164,7 @@ namespace Sora.Entities
         /// <summary>
         /// AddRange
         /// </summary>
-        public void AddRange(IEnumerable<CQCode> cqCodes)
+        public void AddRange(IEnumerable<CQCode<BaseSegment>> cqCodes)
         {
             _message.AddRange(cqCodes);
         }
@@ -163,7 +172,7 @@ namespace Sora.Entities
         /// <summary>
         /// 转普通列表
         /// </summary>
-        public List<CQCode> ToList()
+        public List<CQCode<BaseSegment>> ToList()
         {
             return _message;
         }
@@ -178,7 +187,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="text">纯文本信息</param>
         public void AddText(string text) =>
-            _message.Add(CQCodes.CQText(text));
+            _message.Add(SegmentBuilder.TextToBase(text));
 
         #endregion
 
@@ -190,7 +199,7 @@ namespace Sora.Entities
         /// <param name="index">索引</param>
         /// <exception cref="ArgumentOutOfRangeException">索引超出范围</exception>
         /// <exception cref="NullReferenceException">读取到了空消息段</exception>
-        public CQCode this[int index]
+        public CQCode<BaseSegment> this[int index]
         {
             get
             {
@@ -211,7 +220,7 @@ namespace Sora.Entities
         /// </summary>
         public static MessageBody operator +(MessageBody message, string text)
         {
-            message.Add(CQCodes.CQText(text));
+            message.Add(SegmentBuilder.TextToBase(text));
             return message;
         }
 
@@ -224,7 +233,7 @@ namespace Sora.Entities
         /// </summary>
         public static implicit operator MessageBody(string cqCode)
         {
-            return new() { CQCodes.CQText(cqCode) };
+            return new() { SegmentBuilder.TextToBase(cqCode) };
         }
 
         #endregion

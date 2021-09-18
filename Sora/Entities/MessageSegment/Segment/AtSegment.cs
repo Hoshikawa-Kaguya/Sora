@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// At某人
     /// </summary>
-    public struct At
+    public sealed class AtSegment : BaseSegment
     {
         #region 属性
 
@@ -16,7 +16,7 @@ namespace Sora.Entities.MessageElement.CQModel
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "qq")]
-        public string Traget { get; internal set; }
+        public string Target { get; internal set; }
 
         /// <summary>
         /// 覆盖被AT用户的用户名

@@ -1,6 +1,6 @@
 using Newtonsoft.Json.Linq;
 using Sora.Entities;
-using Sora.Entities.MessageElement.CQModel;
+using Sora.Entities.MessageSegment.Segment;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sora.Attributes;
 using Sora.Converter;
+using Sora.Enumeration;
 using YukariToolBox.FormatLog;
 
 namespace Sora.OnebotInterface
@@ -47,7 +48,9 @@ namespace Sora.OnebotInterface
                     MessageType = MessageType.Private,
                     UserId      = target,
                     //转换消息段列表
-                    Message = messages.Select(msg => msg.ToOnebotMessage()).ToList(),
+                    Message = messages.Where(msg => msg != null && msg.MessageType != CQType.Ignore)
+                                      .Select(msg => msg.ToOnebotMessage())
+                                      .ToList(),
                     GroupId = groupId
                 }
             }, connection, timeout);
@@ -84,7 +87,9 @@ namespace Sora.OnebotInterface
                     MessageType = MessageType.Group,
                     GroupId     = target,
                     //转换消息段列表
-                    Message = messages.Select(msg => msg.ToOnebotMessage()).ToList(),
+                    Message = messages.Where(msg => msg != null && msg.MessageType != CQType.Ignore)
+                                      .Select(msg => msg.ToOnebotMessage())
+                                      .ToList(),
                 }
             }, connection, timeout);
             Log.Debug("Sora", $"Get send_msg(Group) response {nameof(apiStatus)}={apiStatus.RetCode}");
@@ -296,8 +301,7 @@ namespace Sora.OnebotInterface
         /// <param name="serviceId">服务ID</param>
         /// <param name="connection">服务器连接标识</param>
         /// <param name="userId">用户ID</param>
-        /// <param name="useCache"></param>
-        /// <returns></returns>
+        /// <param name="useCache">使用缓存</param>
         internal static async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
             Guid serviceId, Guid connection, long userId, bool useCache)
         {
@@ -1360,11 +1364,11 @@ namespace Sora.OnebotInterface
         /// <param name="groupId">群号</param>
         /// <param name="localFilePath">本地文件路径</param>
         /// <param name="fileName">上传文件名</param>
-        /// <param name="floderId">父目录ID 为<see langword="null"/>时则上传到根目录</param>
+        /// <param name="folderId">父目录ID 为<see langword="null"/>时则上传到根目录</param>
         /// <param name="timeout">超时</param>
         internal static async ValueTask<ApiStatus> UploadGroupFile(Guid connection, long groupId, string localFilePath,
                                                                    string fileName,
-                                                                   string floderId = null, int timeout = 10000)
+                                                                   string folderId = null, int timeout = 10000)
         {
             Log.Debug("Sora", "Sending upload_group_file request");
             var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1375,7 +1379,7 @@ namespace Sora.OnebotInterface
                     group_id = groupId,
                     file     = localFilePath ?? throw new NullReferenceException("localFilePath is null"),
                     name     = fileName      ?? throw new NullReferenceException("fileName is null"),
-                    folder   = floderId      ?? string.Empty
+                    folder   = folderId      ?? string.Empty
                 }
             }, connection, TimeSpan.FromMilliseconds(timeout));
             Log.Debug("Sora", $"Get upload_group_file response {nameof(apiStatus)}={apiStatus.RetCode}");
@@ -1501,16 +1505,16 @@ namespace Sora.OnebotInterface
         /// <param name="connection">链接标识</param>
         /// <param name="groupId">群号</param>
         /// <param name="name">文件夹名</param>
-        /// <param name="floderId">文件夹ID</param>
-        //TODO 测试发现floderId似乎无效，无法创建文件夹套文件夹，待gocq后续完善
+        /// <param name="folderId">文件夹ID</param>
+        //TODO 测试发现folderId似乎无效，无法创建文件夹套文件夹，待gocq后续完善
         internal static async ValueTask<ApiStatus> CreateGroupFileFolder(
-            Guid connection, long groupId, string name, string floderId)
+            Guid connection, long groupId, string name, string folderId)
         {
             Log.Debug("Sora", "Sending create_group_file_folder request");
             var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
                 ApiRequestType = ApiRequestType.CreateGroupFileFolder,
-                ApiParams = string.IsNullOrEmpty(floderId)
+                ApiParams = string.IsNullOrEmpty(folderId)
                     ? new
                     {
                         group_id = groupId,
@@ -1520,7 +1524,7 @@ namespace Sora.OnebotInterface
                     {
                         group_id = groupId,
                         name,
-                        folder_id = floderId
+                        folder_id = folderId
                     }
             }, connection);
             Log.Debug("Sora", $"Get create_group_file_folder response {nameof(apiStatus)}={apiStatus.RetCode}");
@@ -1532,8 +1536,8 @@ namespace Sora.OnebotInterface
         /// </summary>
         /// <param name="connection">链接标识</param>
         /// <param name="groupId">群号</param>
-        /// <param name="floderId">文件夹ID</param>
-        internal static async ValueTask<ApiStatus> DeleteGroupFolder(Guid connection, long groupId, string floderId)
+        /// <param name="folderId">文件夹ID</param>
+        internal static async ValueTask<ApiStatus> DeleteGroupFolder(Guid connection, long groupId, string folderId)
         {
             Log.Debug("Sora", "Sending delete_group_folder request");
             var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1542,7 +1546,7 @@ namespace Sora.OnebotInterface
                 ApiParams = new
                 {
                     group_id  = groupId,
-                    folder_id = floderId
+                    folder_id = folderId
                 }
             }, connection);
             Log.Debug("Sora", $"Get delete_group_folder response {nameof(apiStatus)}={apiStatus.RetCode}");

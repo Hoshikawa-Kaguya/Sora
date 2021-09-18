@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
-using Sora.Entities.MessageElement.CQModel;
+using Sora.Entities.MessageSegment.Segment;
 using Sora.Enumeration;
 
 namespace Sora.Entities
@@ -98,7 +98,7 @@ namespace Sora.Entities
         public IEnumerable<long> GetAllAtList()
         {
             var uidList = MessageBody.Where(cq => cq.MessageType == CQType.At)
-                                     .Select(cq => long.TryParse(((At)cq.DataObject).Traget, out var uid) ? uid : -1)
+                                     .Select(cq => long.TryParse(((AtSegment)cq.DataObject).Target, out var uid) ? uid : -1)
                                      .ToList();
             //去除无法转换的值，如at全体
             uidList.RemoveAll(uid => uid == -1);
@@ -113,7 +113,7 @@ namespace Sora.Entities
         public string GetRecordUrl()
         {
             if (MessageBody.Count != 1 || MessageBody.First().MessageType != CQType.Record) return null;
-            return ((Record)MessageBody.First().DataObject).Url;
+            return ((RecordSegment)MessageBody.First().DataObject).Url;
         }
 
         /// <summary>
@@ -121,12 +121,12 @@ namespace Sora.Entities
         /// </summary>
         /// <returns>
         /// <para>图片信息结构体列表</para>
-        /// <para><see cref="List{T}"/>(T=<see cref="Image"/>)</para>
+        /// <para><see cref="List{T}"/>(T=<see cref="ImageSegment"/>)</para>
         /// </returns>
-        public IEnumerable<Image> GetAllImage()
+        public IEnumerable<ImageSegment> GetAllImage()
         {
             return MessageBody.Where(cq => cq.MessageType == CQType.Image)
-                              .Select(cq => (Image)cq.DataObject)
+                              .Select(cq => (ImageSegment)cq.DataObject)
                               .ToList();
         }
 
@@ -143,7 +143,7 @@ namespace Sora.Entities
         /// </summary>
         public string GetForwardMsgId()
         {
-            return IsForwardMessage() ? ((Forward)MessageBody.First().DataObject).MessageId : null;
+            return IsForwardMessage() ? ((ForwardSegment)MessageBody.First().DataObject).MessageId : null;
         }
 
         #endregion

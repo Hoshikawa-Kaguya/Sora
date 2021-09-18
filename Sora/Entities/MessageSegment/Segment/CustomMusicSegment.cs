@@ -1,11 +1,11 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 自定义音乐分享
     /// </summary>
-    public struct CustomMusic
+    public class CustomMusicSegment : BaseSegment
     {
         [JsonProperty(PropertyName = "type")] internal string ShareType;
 

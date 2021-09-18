@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
-using Sora.Entities.MessageElement;
+using Sora.Entities.MessageSegment;
+using Sora.Entities.MessageSegment.Segment;
 using Sora.Enumeration.ApiType;
 
 namespace Sora.Entities
@@ -27,7 +27,7 @@ namespace Sora.Entities
         /// <summary>
         /// 初始化
         /// </summary>
-        /// <param name="serviceId"></param>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionId">服务器连接标识</param>
         /// <param name="uid">用户ID</param>
         internal User(Guid serviceId, Guid connectionId, long uid) : base(serviceId, connectionId)
@@ -43,9 +43,7 @@ namespace Sora.Entities
         /// 发送群消息
         /// </summary>
         /// <param name="message">
-        /// <para>消息</para>
-        /// <para><see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
+        /// <para>消息<see cref="MessageBody"/></para>
         /// </param>
         /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
@@ -59,7 +57,7 @@ namespace Sora.Entities
         /// <summary>
         /// 获取用户信息
         /// </summary>
-        /// <param name="useCache"></param>
+        /// <param name="useCache">使用缓存</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="UserInfo"/> 群成员信息</para>
@@ -86,10 +84,10 @@ namespace Sora.Entities
         /// 获取At的CQ码
         /// </summary>
         /// <returns>
-        /// <see cref="CQCode"/> AT
+        /// <see cref="CQCode{T}"/> AT
         /// </returns>
-        public CQCode CQCodeAt()
-            => CQCodes.CQAt(Id);
+        public CQCode<AtSegment> CQCodeAt()
+            => SegmentBuilder.CQAt(Id);
 
         #endregion
 
