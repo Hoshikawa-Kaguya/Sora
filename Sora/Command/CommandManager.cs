@@ -108,19 +108,19 @@ namespace Sora.Command
         /// <param name="matchType">匹配类型</param>
         /// <param name="regexOptions">正则匹配选项</param>
         /// <param name="commandBlock">指令委托</param>
-        /// <param name="permissonType">权限等级</param>
+        /// <param name="permissionType">权限等级</param>
         /// <exception cref="NullReferenceException">空参数异常</exception>
         /// <exception cref="NotSupportedException">在遇到不支持的参数类型时抛出</exception>
         [NeedReview("ALL")]
         public void RegisterGroupCommand(Func<GroupMessageEventArgs, ValueTask> commandBlock,
                                          string[] cmdExps, MatchType matchType,
-                                         MemberRoleType permissonType = MemberRoleType.Member,
+                                         MemberRoleType permissionType = MemberRoleType.Member,
                                          RegexOptions regexOptions = RegexOptions.None,
                                          string desc = "")
         {
             //生成指令信息
             if (_groupCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
-                                                                permissonType)))
+                                                                permissionType)))
                 Log.Debug("Command", "Registered group command [dynamic]");
             else
                 throw new NotSupportedException("cannot add new group command");
@@ -137,19 +137,19 @@ namespace Sora.Command
         /// <param name="matchType">匹配类型</param>
         /// <param name="regexOptions">正则匹配选项</param>
         /// <param name="commandBlock">指令委托</param>
-        /// <param name="permissonType">权限等级</param>
+        /// <param name="permissionType">权限等级</param>
         /// <exception cref="NullReferenceException">空参数异常</exception>
         /// <exception cref="NotSupportedException">在遇到不支持的参数类型时抛出</exception>
         [NeedReview("ALL")]
         public void RegisterPrivateCommand(Func<PrivateMessageEventArgs, ValueTask> commandBlock,
                                            string[] cmdExps, MatchType matchType,
-                                           MemberRoleType permissonType = MemberRoleType.Member,
+                                           MemberRoleType permissionType = MemberRoleType.Member,
                                            RegexOptions regexOptions = RegexOptions.None,
                                            string desc = "")
         {
             //生成指令信息
             if (_privateCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
-                                                                  permissonType)))
+                                                                  permissionType)))
                 Log.Debug("Command", "Registered private command [dynamic]");
             else
                 throw new NotSupportedException("cannot add new group command");
@@ -408,14 +408,14 @@ namespace Sora.Command
         /// <param name="matchType">匹配类型</param>
         /// <param name="regexOptions">正则匹配选项</param>
         /// <param name="commandBlock">指令委托</param>
-        /// <param name="permissonType">权限等级</param>
+        /// <param name="permissionType">权限等级</param>
         /// <exception cref="NullReferenceException">空参数异常</exception>
         /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
         [NeedReview("ALL")]
         private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
                                                   RegexOptions regexOptions,
                                                   Func<GroupMessageEventArgs, ValueTask> commandBlock,
-                                                  MemberRoleType permissonType)
+                                                  MemberRoleType permissionType)
         {
             //判断参数合法性
             if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
@@ -431,7 +431,7 @@ namespace Sora.Command
             var priority = _groupCommands.Count == 0 ? 0 : _groupCommands.Min(cmd => cmd.Priority) - 1;
 
             //创建指令信息
-            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissonType,
+            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissionType,
                                    priority, regexOptions | RegexOptions.Compiled);
         }
 
@@ -443,14 +443,14 @@ namespace Sora.Command
         /// <param name="matchType">匹配类型</param>
         /// <param name="regexOptions">正则匹配选项</param>
         /// <param name="commandBlock">指令委托</param>
-        /// <param name="permissonType">权限等级</param>
+        /// <param name="permissionType">权限等级</param>
         /// <exception cref="NullReferenceException">空参数异常</exception>
         /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
         [NeedReview("ALL")]
         private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
                                                   RegexOptions regexOptions,
                                                   Func<PrivateMessageEventArgs, ValueTask> commandBlock,
-                                                  MemberRoleType permissonType)
+                                                  MemberRoleType permissionType)
         {
             //判断参数合法性
             if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
@@ -466,7 +466,7 @@ namespace Sora.Command
             var priority = _privateCommands.Count == 0 ? 0 : _privateCommands.Min(cmd => cmd.Priority) - 1;
 
             //创建指令信息
-            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissonType,
+            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissionType,
                                    priority, regexOptions | RegexOptions.Compiled);
         }
 
@@ -513,7 +513,7 @@ namespace Sora.Command
                 //若是群，则判断权限
                 if (eventArgs is GroupMessageEventArgs groupEventArgs)
                 {
-                    if (groupEventArgs.SenderInfo.Role < commandInfo.PermissonType)
+                    if (groupEventArgs.SenderInfo.Role < commandInfo.PermissionType)
                     {
                         Log.Warning("CommandAdapter",
                                     $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{commandInfo.MethodInfo.Name}");

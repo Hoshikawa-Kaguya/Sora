@@ -2,13 +2,13 @@ using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// <para>Xml与Json集合</para>
     /// <para>可能为<see cref="CQType"/>.<see langword="Json"/>或<see cref="CQType"/>.<see langword="Xml"/></para>
     /// </summary>
-    public struct Code
+    public class CodeSegment : BaseSegment
     {
         #region 属性
 

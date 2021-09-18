@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
 using Newtonsoft.Json;
+using Sora.Enumeration;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// <para>自定义转发节点</para>
@@ -65,7 +66,9 @@ namespace Sora.Entities.MessageElement.CQModel
             MessageId = null;
             Name      = name;
             UserId    = userId.ToString();
-            Messages  = customMessage.Select(msg => msg.ToOnebotMessage()).ToList();
+            Messages = customMessage.Where(msg => msg != null && msg.MessageType != CQType.Ignore)
+                                    .Select(msg => msg.ToOnebotMessage())
+                                    .ToList();
             Time      = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";
         }
 

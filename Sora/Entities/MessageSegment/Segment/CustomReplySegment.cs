@@ -2,12 +2,12 @@
 using Newtonsoft.Json;
 using YukariToolBox.Time;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 自定义回复
     /// </summary>
-    public struct CustomReply
+    public class CustomReplySegment : BaseSegment
     {
         /// <summary>
         /// 自定义回复的信息

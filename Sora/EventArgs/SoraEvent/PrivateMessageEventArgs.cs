@@ -7,7 +7,7 @@ using Sora.Converter;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
-using Sora.Entities.MessageElement;
+using Sora.Entities.MessageSegment;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
@@ -81,7 +81,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="message">
         /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="CQCode"/>/<see cref="List{T}"/>(T = <see cref="CQCode"/>)</para>
+        /// <para>可以为<see cref="string"/>/<see cref="CQCode{T}"/>/<see cref="List{T}"/>(T = <see cref="CQCode{T}"/>)</para>
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <param name="timeout">覆盖原有超时</param>

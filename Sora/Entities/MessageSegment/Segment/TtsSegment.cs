@@ -1,11 +1,11 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
-    /// 纯文本
+    /// 语音转文字（TTS）CQ码
     /// </summary>
-    public struct Text
+    public class TtsSegment : BaseSegment
     {
         #region 属性
 

@@ -1,11 +1,11 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 图片
     /// </summary>
-    public struct Image
+    public class ImageSegment : BaseSegment
     {
         #region 属性
 

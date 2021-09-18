@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 装逼大图
-    /// 仅支持Go
+    /// 仅支持GoCQ
     /// </summary>
-    public struct CardImage
+    public class CardImageSegment : BaseSegment
     {
         /// <summary>
         /// 文件名/绝对路径/URL/base64

@@ -1,11 +1,11 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 合并转发/合并转发节点
     /// </summary>
-    public struct Forward
+    public class ForwardSegment : BaseSegment
     {
         #region 属性
 

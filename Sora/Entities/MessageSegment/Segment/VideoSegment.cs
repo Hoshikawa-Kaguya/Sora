@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 短视频
     /// </summary>
-    public struct Video
+    public class VideoSegment : BaseSegment
     {
         #region 属性
 

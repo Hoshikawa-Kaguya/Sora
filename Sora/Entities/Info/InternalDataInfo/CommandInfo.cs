@@ -40,7 +40,7 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// <summary>
         /// 权限限制
         /// </summary>
-        internal MemberRoleType PermissonType { get; }
+        internal MemberRoleType PermissionType { get; }
 
         /// <summary>
         /// 动态指令委托来源
@@ -85,7 +85,7 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// 指令信息构造(常规指令构建)
         /// </summary>
         internal CommandInfo(string desc, string[] regex, string groupName, MethodInfo method,
-                             MemberRoleType permissonType, int priority, RegexOptions regexOptions,
+                             MemberRoleType permissionType, int priority, RegexOptions regexOptions,
                              Type instanceType = null)
         {
             Desc               = desc;
@@ -93,7 +93,7 @@ namespace Sora.Entities.Info.InternalDataInfo
             GroupName          = groupName;
             MethodInfo         = method;
             InstanceType       = instanceType;
-            PermissonType      = permissonType;
+            PermissionType      = permissionType;
             GroupActionBlock   = null;
             PrivateActionBlock = null;
             Priority           = priority;
@@ -107,7 +107,7 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// </summary>
         internal CommandInfo(string desc, string[] regex, string groupName,
                              Func<GroupMessageEventArgs, ValueTask> actionBlock,
-                             MemberRoleType permissonType, int priority, RegexOptions regexOptions)
+                             MemberRoleType permissionType, int priority, RegexOptions regexOptions)
         {
             Desc               = desc;
             Regex              = regex;
@@ -116,7 +116,7 @@ namespace Sora.Entities.Info.InternalDataInfo
             InstanceType       = null;
             GroupActionBlock   = actionBlock;
             PrivateActionBlock = null;
-            PermissonType      = permissonType;
+            PermissionType      = permissionType;
             Priority           = priority;
             RegexOptions       = regexOptions;
             InvokeType         = InvokeType.Action;
@@ -128,7 +128,7 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// </summary>
         internal CommandInfo(string desc, string[] regex, string groupName,
                              Func<PrivateMessageEventArgs, ValueTask> actionBlock,
-                             MemberRoleType permissonType, int priority, RegexOptions regexOptions)
+                             MemberRoleType permissionType, int priority, RegexOptions regexOptions)
         {
             Desc               = desc;
             Regex              = regex;
@@ -137,7 +137,7 @@ namespace Sora.Entities.Info.InternalDataInfo
             InstanceType       = null;
             GroupActionBlock   = null;
             PrivateActionBlock = actionBlock;
-            PermissonType      = permissonType;
+            PermissionType      = permissionType;
             Priority           = priority;
             RegexOptions       = regexOptions;
             InvokeType         = InvokeType.Action;
@@ -156,11 +156,11 @@ namespace Sora.Entities.Info.InternalDataInfo
                 InvokeType.Method => MethodInfo.Name == another.MethodInfo.Name &&
                                      MethodInfo.GetGenericArguments()
                                                .ArrayEquals(another.MethodInfo.GetGenericArguments()) &&
-                                     Regex.ArrayEquals(another.Regex) && PermissonType == another.PermissonType &&
+                                     Regex.ArrayEquals(another.Regex) && PermissionType == another.PermissionType &&
                                      Priority == another.Priority,
                 InvokeType.Action => GroupActionBlock.Equals(another.GroupActionBlock) &&
                                      PrivateActionBlock.Equals(another.PrivateActionBlock) &&
-                                     Regex.ArrayEquals(another.Regex) && PermissonType == another.PermissonType &&
+                                     Regex.ArrayEquals(another.Regex) && PermissionType == another.PermissionType &&
                                      Priority == another.Priority,
                 _ => throw new NotSupportedException("unknown InvokeType found")
             };

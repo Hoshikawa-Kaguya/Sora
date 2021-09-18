@@ -31,7 +31,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 当前请求的 flag 标识
         /// </summary>
-        public string RequsetFlag { get; private set; }
+        public string RequestFlag { get; private set; }
 
         /// <summary>
         /// 请求子类型
@@ -56,7 +56,7 @@ namespace Sora.EventArgs.SoraEvent
             Sender      = new User(serviceId, connectionId, groupRequestArgs.UserId);
             SourceGroup = new Group(serviceId, connectionId, groupRequestArgs.GroupId);
             Comment     = groupRequestArgs.Comment;
-            RequsetFlag = groupRequestArgs.Flag;
+            RequestFlag = groupRequestArgs.Flag;
             SubType     = groupRequestArgs.GroupRequestType;
         }
 
@@ -69,7 +69,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         public async ValueTask Accept()
         {
-            await SoraApi.SetGroupAddRequest(RequsetFlag, SubType, true);
+            await SoraApi.SetGroupAddRequest(RequestFlag, SubType, true);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <param name="reason">原因</param>
         public async ValueTask Reject(string reason = null)
         {
-            await SoraApi.SetGroupAddRequest(RequsetFlag, SubType, false, reason);
+            await SoraApi.SetGroupAddRequest(RequestFlag, SubType, false, reason);
         }
 
         #endregion

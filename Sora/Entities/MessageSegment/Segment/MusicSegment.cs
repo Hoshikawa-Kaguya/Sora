@@ -2,13 +2,13 @@ using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration.EventParamsType;
 
-namespace Sora.Entities.MessageElement.CQModel
+namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// 音乐分享
     /// 仅发送
     /// </summary>
-    public struct Music
+    public class MusicSegment : BaseSegment
     {
         /// <summary>
         /// 音乐分享类型

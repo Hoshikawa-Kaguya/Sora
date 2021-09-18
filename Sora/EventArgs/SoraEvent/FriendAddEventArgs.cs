@@ -23,7 +23,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 初始化
         /// </summary>
-        /// <param name="serviceId"></param>
+        /// <param name="serviceId">服务ID</param>
         /// <param name="connectionId">服务器链接标识</param>
         /// <param name="eventName">事件名</param>
         /// <param name="friendAddArgs">好友添加事件参数</param>

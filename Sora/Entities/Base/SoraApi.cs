@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Sora.Entities.MessageElement.CQModel;
+using Sora.Entities.MessageSegment.Segment;
 using Sora.Entities.Info;
-using Sora.Entities.MessageElement;
+using Sora.Entities.MessageSegment;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
@@ -39,8 +39,8 @@ namespace Sora.Entities.Base
         /// <summary>
         /// 初始化Api实例
         /// </summary>
-        /// <param name="serviceId"></param>
-        /// <param name="connectionId"></param>
+        /// <param name="serviceId">服务ID</param>
+        /// <param name="connectionId">连接ID</param>
         internal SoraApi(Guid serviceId, Guid connectionId)
         {
             ServiceId    = serviceId;
@@ -58,7 +58,7 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="userId">发送目标群id</param>
         /// <param name="message">消息内容</param>
-        /// <param name="timeout"></param>
+        /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="messageId"/> 消息ID</para>
@@ -123,7 +123,7 @@ namespace Sora.Entities.Base
         /// <summary>
         /// 获取合并转发消息
         /// </summary>
-        /// <param name="forwardId"></param>
+        /// <param name="forwardId">合并转发 ID</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see langword="nodeArray"/> 消息节点列表</para>
@@ -172,7 +172,7 @@ namespace Sora.Entities.Base
         /// <para>获取群消息</para>
         /// <para>只能获取纯文本信息</para>
         /// </summary>
-        /// <param name="messageId"></param>
+        /// <param name="messageId">消息ID</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="Message"/> 消息内容</para>
@@ -426,7 +426,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
-            var (retFileStr, isMatch) = CQCodes.ParseDataStr(imageFile);
+            var (retFileStr, isMatch) = SegmentBuilder.ParseDataStr(imageFile);
             if (!isMatch) throw new NotSupportedException($"not supported file type({imageFile})");
             return await ApiInterface.SetGroupPortrait(ConnectionId, groupId, retFileStr,
                                                        useCache);
@@ -534,14 +534,14 @@ namespace Sora.Entities.Base
         /// <param name="groupId">群号</param>
         /// <param name="localFilePath">本地文件路径</param>
         /// <param name="fileName">上传文件名</param>
-        /// <param name="floderId">父目录ID</param>
+        /// <param name="folderId">父目录ID</param>
         /// <returns>API状态</returns>
         public async ValueTask<ApiStatus> UploadGroupFile(long groupId, string localFilePath, string fileName,
-                                                          string floderId = null)
+                                                          string folderId = null)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             return await ApiInterface.UploadGroupFile(ConnectionId, groupId, localFilePath,
-                                                      fileName, floderId);
+                                                      fileName, folderId);
         }
 
         /// <summary>
@@ -612,11 +612,11 @@ namespace Sora.Entities.Base
         /// 删除群文件文件夹
         /// </summary>
         /// <param name="groupId">群号</param>
-        /// <param name="floderId">文件夹ID</param>
-        public async ValueTask<ApiStatus> DeleteGroupFolder(long groupId, string floderId)
+        /// <param name="folderId">文件夹ID</param>
+        public async ValueTask<ApiStatus> DeleteGroupFolder(long groupId, string folderId)
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
-            return await ApiInterface.DeleteGroupFolder(ConnectionId, groupId, floderId);
+            return await ApiInterface.DeleteGroupFolder(ConnectionId, groupId, folderId);
         }
 
         /// <summary>
@@ -732,7 +732,7 @@ namespace Sora.Entities.Base
         /// <para>注意此API获取的权限等级不是群内权限等级</para>
         /// </summary>
         /// <param name="userId">用户ID</param>
-        /// <param name="useCache"></param>
+        /// <param name="useCache">使用缓存</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>
         /// <para><see cref="UserInfo"/> 群成员信息</para>

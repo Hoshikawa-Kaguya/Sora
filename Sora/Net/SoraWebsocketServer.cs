@@ -175,7 +175,7 @@ namespace Sora.Net
             socket.OnClose = () =>
                              {
                                  //移除原连接信息
-                                 if (ConnManager.ConnectionExitis(socket.ConnectionInfo.Id))
+                                 if (ConnManager.ConnectionExists(socket.ConnectionInfo.Id))
                                      ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
                                                                  socket.ConnectionInfo.Id);
 
