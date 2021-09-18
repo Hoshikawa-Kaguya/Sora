@@ -25,31 +25,31 @@ namespace Sora
         /// <summary>
         /// 数据文本匹配正则
         /// </summary>
-        internal static readonly Dictionary<CQFileType, Regex> FileRegices = new()
+        internal static readonly Dictionary<FileType, Regex> FileRegices = new()
         {
             //绝对路径-linux/osx
             {
-                CQFileType.UnixFile, new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled)
+                FileType.UnixFile, new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled)
             },
             //绝对路径-win
             {
-                CQFileType.WinFile,
+                FileType.WinFile,
                 new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled)
             },
             //base64
             {
-                CQFileType.Base64, new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
+                FileType.Base64, new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
                                              RegexOptions.Compiled)
             },
             //网络图片链接
             {
-                CQFileType.Url,
+                FileType.Url,
                 new
                     Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
                           RegexOptions.Compiled)
             },
             //文件名
-            { CQFileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled) }
+            { FileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled) }
         };
 
         /// <summary>

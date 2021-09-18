@@ -24,37 +24,37 @@ namespace Sora.Converter
         /// </summary>
         /// <param name="onebotMessageElement">消息段</param>
         /// <returns>消息段列表</returns>
-        private static CQCode<BaseSegment> ParseMessageElement(OnebotMessageElement onebotMessageElement)
+        private static SoraSegment<BaseSegment> ParseMessageElement(OnebotMessageElement onebotMessageElement)
         {
-            if (onebotMessageElement.RawData == null) return new CQCode<BaseSegment>(CQType.Unknown, null);
+            if (onebotMessageElement.RawData == null) return new SoraSegment<BaseSegment>(SegmentType.Unknown, null);
             try
             {
                 var jsonObj = JObject.FromObject(onebotMessageElement.RawData);
-                if (jsonObj.Count == 0) return new CQCode<BaseSegment>(CQType.Unknown, null);
+                if (jsonObj.Count == 0) return new SoraSegment<BaseSegment>(SegmentType.Unknown, null);
                 return onebotMessageElement.MsgType switch
                 {
-                    CQType.Text =>
-                        new CQCode<BaseSegment>(CQType.Text, jsonObj.ToObject<TextSegment>()),
-                    CQType.Face =>
-                        new CQCode<BaseSegment>(CQType.Face, jsonObj.ToObject<FaceSegment>()),
-                    CQType.Image =>
-                        new CQCode<BaseSegment>(CQType.Image, jsonObj.ToObject<ImageSegment>()),
-                    CQType.Record =>
-                        new CQCode<BaseSegment>(CQType.Record, jsonObj.ToObject<RecordSegment>()),
-                    CQType.At =>
-                        new CQCode<BaseSegment>(CQType.At, jsonObj.ToObject<AtSegment>()),
-                    CQType.Share =>
-                        new CQCode<BaseSegment>(CQType.Share, jsonObj.ToObject<ShareSegment>()),
-                    CQType.Reply =>
-                        new CQCode<BaseSegment>(CQType.Reply, jsonObj.ToObject<ReplySegment>()),
-                    CQType.Forward =>
-                        new CQCode<BaseSegment>(CQType.Forward, jsonObj.ToObject<ForwardSegment>()),
-                    CQType.Xml =>
-                        new CQCode<BaseSegment>(CQType.Xml, jsonObj.ToObject<CodeSegment>()),
-                    CQType.Json =>
-                        new CQCode<BaseSegment>(CQType.Json, jsonObj.ToObject<CodeSegment>()),
+                    SegmentType.Text =>
+                        new SoraSegment<BaseSegment>(SegmentType.Text, jsonObj.ToObject<TextSegment>()),
+                    SegmentType.Face =>
+                        new SoraSegment<BaseSegment>(SegmentType.Face, jsonObj.ToObject<FaceSegment>()),
+                    SegmentType.Image =>
+                        new SoraSegment<BaseSegment>(SegmentType.Image, jsonObj.ToObject<ImageSegment>()),
+                    SegmentType.Record =>
+                        new SoraSegment<BaseSegment>(SegmentType.Record, jsonObj.ToObject<RecordSegment>()),
+                    SegmentType.At =>
+                        new SoraSegment<BaseSegment>(SegmentType.At, jsonObj.ToObject<AtSegment>()),
+                    SegmentType.Share =>
+                        new SoraSegment<BaseSegment>(SegmentType.Share, jsonObj.ToObject<ShareSegment>()),
+                    SegmentType.Reply =>
+                        new SoraSegment<BaseSegment>(SegmentType.Reply, jsonObj.ToObject<ReplySegment>()),
+                    SegmentType.Forward =>
+                        new SoraSegment<BaseSegment>(SegmentType.Forward, jsonObj.ToObject<ForwardSegment>()),
+                    SegmentType.Xml =>
+                        new SoraSegment<BaseSegment>(SegmentType.Xml, jsonObj.ToObject<CodeSegment>()),
+                    SegmentType.Json =>
+                        new SoraSegment<BaseSegment>(SegmentType.Json, jsonObj.ToObject<CodeSegment>()),
 
-                    _ => new CQCode<BaseSegment>(CQType.Unknown, new UnknownSegment
+                    _ => new SoraSegment<BaseSegment>(SegmentType.Unknown, new UnknownSegment
                     {
                         Content = jsonObj
                     })
@@ -63,8 +63,8 @@ namespace Sora.Converter
             catch (Exception e)
             {
                 Log.Error("Sora", Log.ErrorLogBuilder(e));
-                Log.Error("Sora", $"Json CQ码转换错误 未知CQ码格式，出错CQ码{onebotMessageElement.MsgType},请向框架开发者反应此问题");
-                return new CQCode<BaseSegment>(CQType.Unknown, null);
+                Log.Error("Sora", $"JsonSegment转换错误 未知格式，出错类型[{onebotMessageElement.MsgType}],请向框架开发者反应此问题");
+                return new SoraSegment<BaseSegment>(SegmentType.Unknown, null);
             }
         }
 

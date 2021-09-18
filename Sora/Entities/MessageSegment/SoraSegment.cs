@@ -9,17 +9,17 @@ namespace Sora.Entities.MessageSegment
     /// <summary>
     /// 消息段结构体
     /// </summary>
-    public class CQCode<T> where T : BaseSegment
+    public class SoraSegment<T> where T : BaseSegment
     {
         #region 属性
 
         /// <summary>
-        /// CQ码类型
+        /// 消息段类型
         /// </summary>
-        public CQType MessageType { get; }
+        public SegmentType MessageType { get; }
 
         /// <summary>
-        /// CQ码数据实例
+        /// 数据实例
         /// </summary>
         public T DataObject { get; }
 
@@ -28,13 +28,13 @@ namespace Sora.Entities.MessageSegment
         #region 构造函数
 
         /// <summary>
-        /// 构造CQ码实例
+        /// 构造消息段实例
         /// </summary>
-        /// <param name="cqType">CQ码类型</param>
+        /// <param name="segmentType">消息段类型</param>
         /// <param name="dataObject">数据</param>
-        internal CQCode(CQType cqType, T dataObject) 
+        internal SoraSegment(SegmentType segmentType, T dataObject) 
         {
-            MessageType = cqType;
+            MessageType = segmentType;
             DataObject  = dataObject;
         }
 
@@ -43,20 +43,20 @@ namespace Sora.Entities.MessageSegment
         #region 辅助函数
 
         /// <summary>
-        /// 获取CQ码数据格式类型
-        /// 用于将object转换为可读结构体
+        /// 获取数据类型
+        /// 用于将BaseSegment转换为可读结构体
         /// </summary>
         /// <returns>
         /// 数据结构体类型
         /// </returns>
-        public Type GetCqCodeDataType()
+        public Type GetSegmentType()
         {
             return typeof(T);
         }
 
         #endregion
 
-        #region 获取CQ码内容(仅用于序列化)
+        #region 获取数据内容(仅用于序列化)
 
         internal OnebotMessageElement ToOnebotMessage() => new()
         {
@@ -71,26 +71,26 @@ namespace Sora.Entities.MessageSegment
         /// <summary>
         /// 等于重载
         /// </summary>
-        public static bool operator ==(CQCode<T> cqCodeL, CQCode<T> cqCodeR)
+        public static bool operator ==(SoraSegment<T> soraSegmentL, SoraSegment<T> soraSegmentR)
         {
-            if (cqCodeL is not null && cqCodeR is not null)
-                return cqCodeL.MessageType == cqCodeR.MessageType &&
-                       JToken.DeepEquals(JToken.FromObject(cqCodeL.DataObject), JToken.FromObject(cqCodeR.DataObject));
-            return cqCodeL is null && cqCodeR is null;
+            if (soraSegmentL is not null && soraSegmentR is not null)
+                return soraSegmentL.MessageType == soraSegmentR.MessageType &&
+                       JToken.DeepEquals(JToken.FromObject(soraSegmentL.DataObject), JToken.FromObject(soraSegmentR.DataObject));
+            return soraSegmentL is null && soraSegmentR is null;
         }
 
         /// <summary>
         /// 不等于重载
         /// </summary>
-        public static bool operator !=(CQCode<T> cqCodeL, CQCode<T> cqCodeR)
+        public static bool operator !=(SoraSegment<T> soraSegmentL, SoraSegment<T> soraSegmentR)
         {
-            return !(cqCodeL == cqCodeR);
+            return !(soraSegmentL == soraSegmentR);
         }
 
         /// <summary>
         /// +运算重载
         /// </summary>
-        public static MessageBody operator +(CQCode<T> codeR, CQCode<T> codeL)
+        public static MessageBody operator +(SoraSegment<T> codeR, SoraSegment<T> codeL)
         {
             var messages = new MessageBody { codeR, codeL };
             return messages;
@@ -99,7 +99,7 @@ namespace Sora.Entities.MessageSegment
         /// <summary>
         /// +运算重载
         /// </summary>
-        public static MessageBody operator +(MessageBody message, CQCode<T> codeL)
+        public static MessageBody operator +(MessageBody message, SoraSegment<T> codeL)
         {
             message.Add(codeL);
             return message;
@@ -108,9 +108,9 @@ namespace Sora.Entities.MessageSegment
         /// <summary>
         /// 隐式类型转换
         /// </summary>
-        public static implicit operator MessageBody(CQCode<T> cqCode)
+        public static implicit operator MessageBody(SoraSegment<T> soraSegment)
         {
-            return new() { cqCode };
+            return new() { soraSegment };
         }
 
         #endregion
@@ -122,9 +122,9 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (obj is CQCode<T> cqCode)
+            if (obj is SoraSegment<T> segment)
             {
-                return this == cqCode;
+                return this == segment;
             }
 
             return false;

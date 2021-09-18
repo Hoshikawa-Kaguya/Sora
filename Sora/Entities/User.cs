@@ -78,16 +78,16 @@ namespace Sora.Entities
 
         #endregion
 
-        #region CQ码方法
+        #region 消息段方法
 
         /// <summary>
-        /// 获取At的CQ码
+        /// 获取At消息段
         /// </summary>
         /// <returns>
-        /// <see cref="CQCode{T}"/> AT
+        /// <see cref="SoraSegment{T}"/> AT
         /// </returns>
-        public CQCode<AtSegment> CQCodeAt()
-            => SegmentBuilder.CQAt(Id);
+        public SoraSegment<AtSegment> At()
+            => SegmentBuilder.At(Id);
 
         #endregion
 

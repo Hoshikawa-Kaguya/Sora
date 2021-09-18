@@ -6,7 +6,7 @@ namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
     /// <para>Xml与Json集合</para>
-    /// <para>可能为<see cref="CQType"/>.<see langword="Json"/>或<see cref="CQType"/>.<see langword="Xml"/></para>
+    /// <para>可能为<see cref="SegmentType"/>.<see langword="Json"/>或<see cref="SegmentType"/>.<see langword="Xml"/></para>
     /// </summary>
     public class CodeSegment : BaseSegment
     {
