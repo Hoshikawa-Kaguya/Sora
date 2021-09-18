@@ -78,7 +78,7 @@ namespace Sora.Entities
         {
             _message.Add(item);
         }
-        
+
         /// <summary>
         /// 添加消息段
         /// </summary>

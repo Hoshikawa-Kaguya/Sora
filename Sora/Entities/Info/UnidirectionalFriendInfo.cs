@@ -12,13 +12,13 @@ namespace Sora.Entities.Info
         /// </summary>
         [JsonProperty(PropertyName = "nickname")]
         public string NickName { get; }
-        
+
         /// <summary>
         /// 用户QQ号
         /// </summary>
         [JsonProperty(PropertyName = "user_id")]
         public long UserId { get; }
-        
+
         /// <summary>
         /// 添加途径
         /// </summary>

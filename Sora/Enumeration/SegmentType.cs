@@ -12,7 +12,7 @@ namespace Sora.Enumeration
         /// 未知
         /// </summary>
         Unknown,
-        
+
         /// <summary>
         /// 忽略
         /// </summary>

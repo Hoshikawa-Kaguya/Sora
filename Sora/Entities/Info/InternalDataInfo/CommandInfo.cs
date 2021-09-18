@@ -93,7 +93,7 @@ namespace Sora.Entities.Info.InternalDataInfo
             GroupName          = groupName;
             MethodInfo         = method;
             InstanceType       = instanceType;
-            PermissionType      = permissionType;
+            PermissionType     = permissionType;
             GroupActionBlock   = null;
             PrivateActionBlock = null;
             Priority           = priority;
@@ -116,7 +116,7 @@ namespace Sora.Entities.Info.InternalDataInfo
             InstanceType       = null;
             GroupActionBlock   = actionBlock;
             PrivateActionBlock = null;
-            PermissionType      = permissionType;
+            PermissionType     = permissionType;
             Priority           = priority;
             RegexOptions       = regexOptions;
             InvokeType         = InvokeType.Action;
@@ -137,7 +137,7 @@ namespace Sora.Entities.Info.InternalDataInfo
             InstanceType       = null;
             GroupActionBlock   = null;
             PrivateActionBlock = actionBlock;
-            PermissionType      = permissionType;
+            PermissionType     = permissionType;
             Priority           = priority;
             RegexOptions       = regexOptions;
             InvokeType         = InvokeType.Action;

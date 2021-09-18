@@ -69,7 +69,7 @@ namespace Sora.Entities.MessageSegment.Segment
             Messages = customMessage.Where(msg => msg != null && msg.MessageType != SegmentType.Ignore)
                                     .Select(msg => msg.ToOnebotMessage())
                                     .ToList();
-            Time      = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";
+            Time = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";
         }
 
         /// <summary>
