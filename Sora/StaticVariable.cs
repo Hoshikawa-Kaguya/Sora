@@ -39,7 +39,7 @@ namespace Sora
             //base64
             {
                 FileType.Base64, new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
-                                             RegexOptions.Compiled)
+                                           RegexOptions.Compiled)
             },
             //网络图片链接
             {

@@ -287,6 +287,7 @@ namespace Sora.Command
             //在没有匹配到指令时直接跳转至Event触发
             if (matchedCommand.Count == 0) return;
             await InvokeMatchCommand(matchedCommand, eventArgs);
+
             #endregion
         }
 
@@ -392,7 +393,7 @@ namespace Sora.Command
                                           classType.Name,
                                           method,
                                           (commandAttr as GroupCommand)?.PermissionLevel ?? MemberRoleType.Member,
-                                          (commandAttr as RegexCommand)?.Priority ?? 0,
+                                          (commandAttr as RegexCommand)?.Priority        ?? 0,
                                           (commandAttr as RegexCommand)?.RegexOptions ??
                                           RegexOptions.None,
                                           method.IsStatic ? null : classType);

@@ -100,7 +100,9 @@ namespace Sora.Entities
         {
             var uidList = MessageBody.Where(s => s.MessageType == SegmentType.At)
                                      .Select(s => long.TryParse((s.DataObject as AtSegment)?.Target ?? "0",
-                                                                 out var uid) ? uid : -1)
+                                                                out var uid)
+                                                 ? uid
+                                                 : -1)
                                      .ToList();
             //去除无法转换的值，如at全体
             uidList.RemoveAll(uid => uid == -1);

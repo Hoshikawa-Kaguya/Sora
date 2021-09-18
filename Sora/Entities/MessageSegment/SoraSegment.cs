@@ -32,7 +32,7 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="segmentType">消息段类型</param>
         /// <param name="dataObject">数据</param>
-        internal SoraSegment(SegmentType segmentType, T dataObject) 
+        internal SoraSegment(SegmentType segmentType, T dataObject)
         {
             MessageType = segmentType;
             DataObject  = dataObject;
@@ -75,7 +75,8 @@ namespace Sora.Entities.MessageSegment
         {
             if (soraSegmentL is not null && soraSegmentR is not null)
                 return soraSegmentL.MessageType == soraSegmentR.MessageType &&
-                       JToken.DeepEquals(JToken.FromObject(soraSegmentL.DataObject), JToken.FromObject(soraSegmentR.DataObject));
+                       JToken.DeepEquals(JToken.FromObject(soraSegmentL.DataObject),
+                                         JToken.FromObject(soraSegmentR.DataObject));
             return soraSegmentL is null && soraSegmentR is null;
         }
 

@@ -25,7 +25,7 @@ namespace Sora.Entities.MessageSegment
         {
             return new SoraSegment<BaseSegment>(SegmentType.Text, new TextSegment { Content = msg });
         }
-        
+
         /// <summary>
         /// 纯文本
         /// </summary>
@@ -48,7 +48,7 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<AtSegment>(SegmentType.At,
-                              new AtSegment { Target = uid.ToString() });
+                                              new AtSegment { Target = uid.ToString() });
         }
 
         /// <summary>
@@ -66,11 +66,11 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<AtSegment>(SegmentType.At,
-                                         new AtSegment
-                                         {
-                                             Target = uid.ToString(),
-                                             Name   = name
-                                         });
+                                              new AtSegment
+                                              {
+                                                  Target = uid.ToString(),
+                                                  Name   = name
+                                              });
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<FaceSegment>(SegmentType.Face,
-                                new FaceSegment { Id = id });
+                                                new FaceSegment { Id = id });
         }
 
         /// <summary>
@@ -107,8 +107,9 @@ namespace Sora.Entities.MessageSegment
         /// <param name="useCache">是否使用已缓存的文件</param>
         /// <param name="useProxy">是否通过代理下载文件</param>
         /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
-        public static SoraSegment<RecordSegment> Record(string data, bool isMagic = false, bool useCache = true, bool useProxy = true,
-                                        int? timeout = null)
+        public static SoraSegment<RecordSegment> Record(string data, bool isMagic = false, bool useCache = true,
+                                                        bool useProxy = true,
+                                                        int? timeout = null)
         {
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
@@ -118,14 +119,14 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<RecordSegment>(SegmentType.Record,
-                                new RecordSegment
-                                {
-                                    RecordFile = dataStr,
-                                    Magic      = isMagic ? 1 : null,
-                                    Cache      = useCache ? 1 : null,
-                                    Proxy      = useProxy ? 1 : null,
-                                    Timeout    = timeout
-                                });
+                                                  new RecordSegment
+                                                  {
+                                                      RecordFile = dataStr,
+                                                      Magic      = isMagic ? 1 : null,
+                                                      Cache      = useCache ? 1 : null,
+                                                      Proxy      = useProxy ? 1 : null,
+                                                      Timeout    = timeout
+                                                  });
         }
 
         /// <summary>
@@ -145,13 +146,13 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<ImageSegment>(SegmentType.Image,
-                                            new ImageSegment
-                                            {
-                                                ImgFile     = dataStr,
-                                                ImgType     = null,
-                                                UseCache    = useCache ? 1 : null,
-                                                ThreadCount = threadCount
-                                            });
+                                                 new ImageSegment
+                                                 {
+                                                     ImgFile     = dataStr,
+                                                     ImgType     = null,
+                                                     UseCache    = useCache ? 1 : null,
+                                                     ThreadCount = threadCount
+                                                 });
         }
 
         /// <summary>
@@ -171,13 +172,13 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<ImageSegment>(SegmentType.Image,
-                                            new ImageSegment
-                                            {
-                                                ImgFile     = dataStr,
-                                                ImgType     = "flash",
-                                                UseCache    = useCache ? 1 : null,
-                                                ThreadCount = threadCount
-                                            });
+                                                 new ImageSegment
+                                                 {
+                                                     ImgFile     = dataStr,
+                                                     ImgType     = "flash",
+                                                     UseCache    = useCache ? 1 : null,
+                                                     ThreadCount = threadCount
+                                                 });
         }
 
         /// <summary>
@@ -187,7 +188,8 @@ namespace Sora.Entities.MessageSegment
         /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
         /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
         /// <param name="id">秀图特效id，默认为40000</param>
-        public static SoraSegment<ImageSegment> ShowImage(string data, int id = 40000, bool useCache = true, int? threadCount = null)
+        public static SoraSegment<ImageSegment> ShowImage(string data, int id = 40000, bool useCache = true,
+                                                          int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             var (dataStr, isDataStr) = ParseDataStr(data);
@@ -198,14 +200,14 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<ImageSegment>(SegmentType.Image,
-                                            new ImageSegment
-                                            {
-                                                ImgFile     = dataStr,
-                                                ImgType     = "show",
-                                                UseCache    = useCache ? 1 : null,
-                                                Id          = id,
-                                                ThreadCount = threadCount
-                                            });
+                                                 new ImageSegment
+                                                 {
+                                                     ImgFile     = dataStr,
+                                                     ImgType     = "show",
+                                                     UseCache    = useCache ? 1 : null,
+                                                     Id          = id,
+                                                     ThreadCount = threadCount
+                                                 });
         }
 
         /// <summary>
@@ -215,7 +217,8 @@ namespace Sora.Entities.MessageSegment
         /// <param name="useCache">是否使用已缓存的文件</param>
         /// <param name="useProxy">是否通过代理下载文件</param>
         /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
-        public static SoraSegment<VideoSegment> Video(string data, bool useCache = true, bool useProxy = true, int? timeout = null)
+        public static SoraSegment<VideoSegment> Video(string data, bool useCache = true, bool useProxy = true,
+                                                      int? timeout = null)
         {
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
@@ -225,13 +228,13 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<VideoSegment>(SegmentType.Video,
-                                            new VideoSegment
-                                            {
-                                                VideoFile = dataStr,
-                                                Cache     = useCache ? 1 : null,
-                                                Proxy     = useProxy ? 1 : null,
-                                                Timeout   = timeout
-                                            });
+                                                 new VideoSegment
+                                                 {
+                                                     VideoFile = dataStr,
+                                                     Cache     = useCache ? 1 : null,
+                                                     Proxy     = useProxy ? 1 : null,
+                                                     Timeout   = timeout
+                                                 });
         }
 
         /// <summary>
@@ -257,8 +260,9 @@ namespace Sora.Entities.MessageSegment
         /// <param name="title">标题</param>
         /// <param name="content">内容描述[可选]</param>
         /// <param name="coverImageUrl">分享内容图片[可选]</param>
-        public static SoraSegment<CustomMusicSegment> CustomMusic(string url, string musicUrl, string title, string content = null,
-                                                               string coverImageUrl = null)
+        public static SoraSegment<CustomMusicSegment> CustomMusic(string url, string musicUrl, string title,
+                                                                  string content = null,
+                                                                  string coverImageUrl = null)
         {
             return new(SegmentType.Music,
                        new CustomMusicSegment
@@ -280,9 +284,9 @@ namespace Sora.Entities.MessageSegment
         /// <param name="content">可选，内容描述</param>
         /// <param name="imageUrl">可选，图片 URL</param>
         public static SoraSegment<ShareSegment> Share(string url,
-                                                   string title,
-                                                   string content = null,
-                                                   string imageUrl = null)
+                                                      string title,
+                                                      string content = null,
+                                                      string imageUrl = null)
         {
             return new(SegmentType.Share,
                        new ShareSegment
@@ -330,13 +334,13 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<CustomReplySegment>(SegmentType.Reply,
-                                                  new CustomReplySegment
-                                                  {
-                                                      Text            = text,
-                                                      Uid             = uid,
-                                                      Time            = time,
-                                                      MessageSequence = messageSequence
-                                                  });
+                                                       new CustomReplySegment
+                                                       {
+                                                           Text            = text,
+                                                           Uid             = uid,
+                                                           Time            = time,
+                                                           MessageSequence = messageSequence
+                                                       });
         }
 
         #region Go扩展码
@@ -355,10 +359,10 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<PokeSegment>(SegmentType.Poke,
-                                           new PokeSegment
-                                           {
-                                               Uid = uid
-                                           });
+                                                new PokeSegment
+                                                {
+                                                    Uid = uid
+                                                });
         }
 
         /// <summary>
@@ -369,10 +373,10 @@ namespace Sora.Entities.MessageSegment
         {
             if (string.IsNullOrEmpty(title)) throw new NullReferenceException(nameof(title));
             return new SoraSegment<RedbagSegment>(SegmentType.RedBag,
-                                             new RedbagSegment
-                                             {
-                                                 Title = title
-                                             });
+                                                  new RedbagSegment
+                                                  {
+                                                      Title = title
+                                                  });
         }
 
         /// <summary>
@@ -384,11 +388,11 @@ namespace Sora.Entities.MessageSegment
         {
             if (giftId is < 0 or > 8 || target < 10000) throw new ArgumentOutOfRangeException(nameof(giftId));
             return new SoraSegment<GiftSegment>(SegmentType.Gift,
-                                           new GiftSegment
-                                           {
-                                               Target   = target,
-                                               GiftType = giftId
-                                           });
+                                                new GiftSegment
+                                                {
+                                                    Target   = target,
+                                                    GiftType = giftId
+                                                });
         }
 
         /// <summary>
@@ -399,11 +403,11 @@ namespace Sora.Entities.MessageSegment
         {
             if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
             return new SoraSegment<CodeSegment>(SegmentType.Xml,
-                                           new CodeSegment
-                                           {
-                                               Content = content,
-                                               Resid   = null
-                                           });
+                                                new CodeSegment
+                                                {
+                                                    Content = content,
+                                                    Resid   = null
+                                                });
         }
 
         /// <summary>
@@ -415,11 +419,11 @@ namespace Sora.Entities.MessageSegment
         {
             if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
             return new SoraSegment<CodeSegment>(SegmentType.Json,
-                                           new CodeSegment
-                                           {
-                                               Content = content,
-                                               Resid   = richText ? 1 : null
-                                           });
+                                                new CodeSegment
+                                                {
+                                                    Content = content,
+                                                    Resid   = richText ? 1 : null
+                                                });
         }
 
         /// <summary>
@@ -431,11 +435,11 @@ namespace Sora.Entities.MessageSegment
         {
             if (content == null) throw new NullReferenceException(nameof(content));
             return new SoraSegment<CodeSegment>(SegmentType.Json,
-                                           new CodeSegment
-                                           {
-                                               Content = JsonConvert.SerializeObject(content, Formatting.None),
-                                               Resid   = richText ? 1 : null
-                                           });
+                                                new CodeSegment
+                                                {
+                                                    Content = JsonConvert.SerializeObject(content, Formatting.None),
+                                                    Resid   = richText ? 1 : null
+                                                });
         }
 
         /// <summary>
@@ -449,12 +453,12 @@ namespace Sora.Entities.MessageSegment
         /// <param name="maxWidth">最大 Width</param>
         /// <param name="maxHeight">最大 Height</param>
         public static SoraSegment<CardImageSegment> CardImage(string imageFile,
-                                                           string source = null,
-                                                           string iconUrl = null,
-                                                           long minWidth = 400,
-                                                           long minHeight = 400,
-                                                           long maxWidth = 400,
-                                                           long maxHeight = 400)
+                                                              string source = null,
+                                                              string iconUrl = null,
+                                                              long minWidth = 400,
+                                                              long minHeight = 400,
+                                                              long maxWidth = 400,
+                                                              long maxHeight = 400)
         {
             if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
             var (dataStr, isDataStr) = ParseDataStr(imageFile);
@@ -465,16 +469,16 @@ namespace Sora.Entities.MessageSegment
             }
 
             return new SoraSegment<CardImageSegment>(SegmentType.CardImage,
-                                                new CardImageSegment
-                                                {
-                                                    ImageFile = dataStr,
-                                                    Source    = source,
-                                                    Icon      = iconUrl,
-                                                    MinWidth  = minWidth,
-                                                    MinHeight = minHeight,
-                                                    MaxWidth  = maxWidth,
-                                                    MaxHeight = maxHeight
-                                                });
+                                                     new CardImageSegment
+                                                     {
+                                                         ImageFile = dataStr,
+                                                         Source    = source,
+                                                         Icon      = iconUrl,
+                                                         MinWidth  = minWidth,
+                                                         MinHeight = minHeight,
+                                                         MaxWidth  = maxWidth,
+                                                         MaxHeight = maxHeight
+                                                     });
         }
 
         /// <summary>
@@ -485,10 +489,10 @@ namespace Sora.Entities.MessageSegment
         {
             if (string.IsNullOrEmpty(messageStr)) throw new NullReferenceException(nameof(messageStr));
             return new SoraSegment<TtsSegment>(SegmentType.TTS,
-                                          new TtsSegment
-                                          {
-                                              Content = messageStr
-                                          });
+                                               new TtsSegment
+                                               {
+                                                   Content = messageStr
+                                               });
         }
 
         #endregion

@@ -1597,7 +1597,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get mark_msg_as_read response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
-        
+
         /// <summary>
         /// 删除单向好友
         /// </summary>
@@ -1617,7 +1617,7 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get delete_unidirectional_friend response {nameof(apiStatus)}={apiStatus.RetCode}");
             return apiStatus;
         }
-        
+
         #endregion
 
         #endregion

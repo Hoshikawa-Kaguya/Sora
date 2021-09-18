@@ -183,9 +183,9 @@ namespace Sora.EventArgs.SoraEvent
         {
             if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
                 return ValueTask.FromResult(WaitForNextMessage(Sender, new[] { commandExp },
-                                                matchType,
-                                                SourceFlag.Private, regexOptions, 
-                                                timeout, timeoutTask) as PrivateMessageEventArgs);
+                                                               matchType,
+                                                               SourceFlag.Private, regexOptions,
+                                                               timeout, timeoutTask) as PrivateMessageEventArgs);
             CommandDisableTip();
             return ValueTask.FromResult<PrivateMessageEventArgs>(null);
         }
