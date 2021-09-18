@@ -36,7 +36,7 @@ namespace Sora.OnebotModel.ApiParams
         internal List<OnebotMessageElement> Message { get; set; }
 
         /// <summary>
-        /// 是否忽略CQ码
+        /// 是否忽略消息段
         /// </summary>
         [JsonProperty(PropertyName = "auto_escape")]
         internal bool AutoEscape { get; set; }

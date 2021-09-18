@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
@@ -85,7 +86,7 @@ namespace Sora.Entities
 
         #endregion
 
-        #region CQ码快捷方法
+        #region 快捷方法
 
         /// <summary>
         /// 获取所有At的UID
@@ -97,8 +98,9 @@ namespace Sora.Entities
         /// </returns>
         public IEnumerable<long> GetAllAtList()
         {
-            var uidList = MessageBody.Where(cq => cq.MessageType == CQType.At)
-                                     .Select(cq => long.TryParse(((AtSegment)cq.DataObject).Target, out var uid) ? uid : -1)
+            var uidList = MessageBody.Where(s => s.MessageType == SegmentType.At)
+                                     .Select(s => long.TryParse((s.DataObject as AtSegment)?.Target ?? "0",
+                                                                 out var uid) ? uid : -1)
                                      .ToList();
             //去除无法转换的值，如at全体
             uidList.RemoveAll(uid => uid == -1);
@@ -112,8 +114,8 @@ namespace Sora.Entities
         /// <returns>语音文件url</returns>
         public string GetRecordUrl()
         {
-            if (MessageBody.Count != 1 || MessageBody.First().MessageType != CQType.Record) return null;
-            return ((RecordSegment)MessageBody.First().DataObject).Url;
+            if (MessageBody.Count != 1 || MessageBody.First().MessageType != SegmentType.Record) return null;
+            return (MessageBody.First().DataObject as RecordSegment)?.Url;
         }
 
         /// <summary>
@@ -125,8 +127,8 @@ namespace Sora.Entities
         /// </returns>
         public IEnumerable<ImageSegment> GetAllImage()
         {
-            return MessageBody.Where(cq => cq.MessageType == CQType.Image)
-                              .Select(cq => (ImageSegment)cq.DataObject)
+            return MessageBody.Where(s => s.MessageType == SegmentType.Image)
+                              .Select(s => s.DataObject as ImageSegment)
                               .ToList();
         }
 
@@ -135,7 +137,7 @@ namespace Sora.Entities
         /// </summary>
         public bool IsForwardMessage()
         {
-            return MessageBody.Count == 1 && MessageBody.First().MessageType == CQType.Forward;
+            return MessageBody.Count == 1 && MessageBody.First().MessageType == SegmentType.Forward;
         }
 
         /// <summary>
@@ -143,7 +145,21 @@ namespace Sora.Entities
         /// </summary>
         public string GetForwardMsgId()
         {
-            return IsForwardMessage() ? ((ForwardSegment)MessageBody.First().DataObject).MessageId : null;
+            return IsForwardMessage() ? (MessageBody.First().DataObject as ForwardSegment)?.MessageId : null;
+        }
+
+        /// <summary>
+        /// 截取消息中的文字部分
+        /// </summary>
+        /// <returns></returns>
+        public string GetText()
+        {
+            var text = new StringBuilder();
+            MessageBody.Where(s => s.MessageType == SegmentType.Text)
+                       .Select(s => s.DataObject as TextSegment)
+                       .ToList()
+                       .ForEach(t => text.Append(t?.Content ?? string.Empty));
+            return text.ToString();
         }
 
         #endregion
@@ -152,7 +168,7 @@ namespace Sora.Entities
 
         /// <summary>
         /// <para>转纯文本信息</para>
-        /// <para>注意：CQ码会被转换为onebot的string消息段格式</para>
+        /// <para>注意：s码会被转换为onebot的string消息段格式</para>
         /// </summary>
         public override string ToString()
         {

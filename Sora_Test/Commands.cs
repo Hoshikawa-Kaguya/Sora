@@ -1,6 +1,8 @@
 using Sora.Attributes.Command;
 using Sora.EventArgs.SoraEvent;
 using System.Threading.Tasks;
+using Sora.Entities.MessageSegment.Segment;
+using YukariToolBox.FormatLog;
 
 namespace Sora_Test
 {
@@ -10,6 +12,8 @@ namespace Sora_Test
         [GroupCommand(CommandExpressions = new[] { "1" })]
         public static async ValueTask TestCommand(GroupMessageEventArgs eventArgs)
         {
+            var s = eventArgs.Message.MessageBody[0].DataObject as TextSegment;
+            Log.Info("触发指令", $"txet:{s!.Content}");
             eventArgs.IsContinueEventChain = false;
             await eventArgs.Reply("怪欸");
         }

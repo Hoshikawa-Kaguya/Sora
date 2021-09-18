@@ -74,7 +74,7 @@ namespace Sora.EventArgs.SoraEvent
         {
             IsAnonymousMessage = groupMsgArgs.Anonymous != null;
             IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
-            //将api消息段转换为CQ码
+            //将api消息段转换为sorasegment
             Message = new Message(serviceId, connectionId, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
                                   MessageConverter.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
                                   groupMsgArgs.Font, groupMsgArgs.MessageSequence);
@@ -99,7 +99,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="message">
         /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="CQCode{T}"/>/<see cref="List{T}"/>(T = <see cref="CQCode{T}"/>)</para>
+        /// <para>可以为<see cref="string"/>/<see cref="SoraSegment{T}"/>/<see cref="List{T}"/>(T = <see cref="SoraSegment{T}"/>)</para>
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <param name="timeout">覆盖原有超时</param>

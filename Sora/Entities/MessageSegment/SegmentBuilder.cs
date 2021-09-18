@@ -15,57 +15,57 @@ namespace Sora.Entities.MessageSegment
     /// </summary>
     public static class SegmentBuilder
     {
-        #region CQ码构建方法
+        #region 码构建方法
 
         /// <summary>
         /// 纯文本
         /// </summary>
         /// <param name="msg">文本消息</param>
-        internal static CQCode<BaseSegment> TextToBase(string msg)
+        internal static SoraSegment<BaseSegment> TextToBase(string msg)
         {
-            return new CQCode<BaseSegment>(CQType.Text, new TextSegment { Content = msg });
+            return new SoraSegment<BaseSegment>(SegmentType.Text, new TextSegment { Content = msg });
         }
         
         /// <summary>
         /// 纯文本
         /// </summary>
         /// <param name="msg">文本消息</param>
-        public static CQCode<TextSegment> CQText(string msg)
+        public static SoraSegment<TextSegment> Text(string msg)
         {
-            return new CQCode<TextSegment>(CQType.Text, new TextSegment { Content = msg });
+            return new SoraSegment<TextSegment>(SegmentType.Text, new TextSegment { Content = msg });
         }
 
         /// <summary>
-        /// At CQ码
+        /// At 码
         /// </summary>
         /// <param name="uid">用户uid</param>
-        public static CQCode<AtSegment> CQAt(long uid)
+        public static SoraSegment<AtSegment> At(long uid)
         {
             if (uid < 10000)
             {
-                Log.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
-                return CQIllegal<AtSegment>();
+                Log.Error("SoraSegment|At", $"非法参数，已忽略码[uid超出范围限制({uid})]");
+                return IllegalSegment<AtSegment>();
             }
 
-            return new CQCode<AtSegment>(CQType.At,
+            return new SoraSegment<AtSegment>(SegmentType.At,
                               new AtSegment { Target = uid.ToString() });
         }
 
         /// <summary>
-        /// At CQ码
+        /// At 码
         /// </summary>
         /// <param name="uid">用户uid</param>
         /// <param name="name">当在群中找不到此uid的名称时使用的名字</param>
         // TODO Name参数暂时失效等待测试
-        public static CQCode<AtSegment> CQAt(long uid, string name)
+        public static SoraSegment<AtSegment> At(long uid, string name)
         {
             if (uid < 10000)
             {
-                Log.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
-                return CQIllegal<AtSegment>();
+                Log.Error("SoraSegment|At", $"非法参数，已忽略码[uid超出范围限制({uid})]");
+                return IllegalSegment<AtSegment>();
             }
 
-            return new CQCode<AtSegment>(CQType.At,
+            return new SoraSegment<AtSegment>(SegmentType.At,
                                          new AtSegment
                                          {
                                              Target = uid.ToString(),
@@ -74,50 +74,50 @@ namespace Sora.Entities.MessageSegment
         }
 
         /// <summary>
-        /// At全体 CQ码
+        /// At全体 码
         /// </summary>
-        public static CQCode<AtSegment> CQAtAll()
+        public static SoraSegment<AtSegment> AtAll()
         {
-            return new(CQType.At,
+            return new(SegmentType.At,
                        new AtSegment { Target = "all" });
         }
 
         /// <summary>
-        /// 表情CQ码
+        /// 表情码
         /// </summary>
         /// <param name="id">表情 ID</param>
-        public static CQCode<FaceSegment> CQFace(int id)
+        public static SoraSegment<FaceSegment> Face(int id)
         {
             //检查ID合法性
             if (id is < 0 or > 244)
             {
-                Log.Error("CQCode|CQFace", $"非法参数，已忽略CQ码[id超出范围限制({id})]");
-                return CQIllegal<FaceSegment>();
+                Log.Error("SoraSegment|Face", $"非法参数，已忽略码[id超出范围限制({id})]");
+                return IllegalSegment<FaceSegment>();
             }
 
-            return new CQCode<FaceSegment>(CQType.Face,
+            return new SoraSegment<FaceSegment>(SegmentType.Face,
                                 new FaceSegment { Id = id });
         }
 
         /// <summary>
-        /// 语音CQ码
+        /// 语音码
         /// </summary>
         /// <param name="data">文件名/绝对路径/URL/base64</param>
         /// <param name="isMagic">是否为变声</param>
         /// <param name="useCache">是否使用已缓存的文件</param>
         /// <param name="useProxy">是否通过代理下载文件</param>
         /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
-        public static CQCode<RecordSegment> CQRecord(string data, bool isMagic = false, bool useCache = true, bool useProxy = true,
+        public static SoraSegment<RecordSegment> Record(string data, bool isMagic = false, bool useCache = true, bool useProxy = true,
                                         int? timeout = null)
         {
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                Log.Error("CQCode|CQRecord", $"非法参数({data})，已忽略此CQ码");
-                return CQIllegal<RecordSegment>();
+                Log.Error("SoraSegment|Record", $"非法参数({data})，已忽略此码");
+                return IllegalSegment<RecordSegment>();
             }
 
-            return new CQCode<RecordSegment>(CQType.Record,
+            return new SoraSegment<RecordSegment>(SegmentType.Record,
                                 new RecordSegment
                                 {
                                     RecordFile = dataStr,
@@ -129,22 +129,22 @@ namespace Sora.Entities.MessageSegment
         }
 
         /// <summary>
-        /// 图片CQ码
+        /// 图片码
         /// </summary>
         /// <param name="data">图片名/绝对路径/URL/base64</param>
         /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
         /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
-        public static CQCode<ImageSegment> CQImage(string data, bool useCache = true, int? threadCount = null)
+        public static SoraSegment<ImageSegment> Image(string data, bool useCache = true, int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                Log.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
-                return CQIllegal<ImageSegment>();
+                Log.Error("SoraSegment|Image", $"非法参数({data})，已忽略码");
+                return IllegalSegment<ImageSegment>();
             }
 
-            return new CQCode<ImageSegment>(CQType.Image,
+            return new SoraSegment<ImageSegment>(SegmentType.Image,
                                             new ImageSegment
                                             {
                                                 ImgFile     = dataStr,
@@ -155,22 +155,22 @@ namespace Sora.Entities.MessageSegment
         }
 
         /// <summary>
-        /// 闪照CQ码
+        /// 闪照码
         /// </summary>
         /// <param name="data">图片名/绝对路径/URL/base64</param>
         /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
         /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
-        public static CQCode<ImageSegment> CQFlashImage(string data, bool useCache = true, int? threadCount = null)
+        public static SoraSegment<ImageSegment> FlashImage(string data, bool useCache = true, int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                Log.Error("CQCode|CQImage", $"非法参数({data})，已忽略CQ码");
-                return CQIllegal<ImageSegment>();
+                Log.Error("SoraSegment|Image", $"非法参数({data})，已忽略码");
+                return IllegalSegment<ImageSegment>();
             }
 
-            return new CQCode<ImageSegment>(CQType.Image,
+            return new SoraSegment<ImageSegment>(SegmentType.Image,
                                             new ImageSegment
                                             {
                                                 ImgFile     = dataStr,
@@ -181,23 +181,23 @@ namespace Sora.Entities.MessageSegment
         }
 
         /// <summary>
-        /// 秀图CQ码
+        /// 秀图码
         /// </summary>
         /// <param name="data">图片名/绝对路径/URL/base64</param>
         /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
         /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
         /// <param name="id">秀图特效id，默认为40000</param>
-        public static CQCode<ImageSegment> CQShowImage(string data, int id = 40000, bool useCache = true, int? threadCount = null)
+        public static SoraSegment<ImageSegment> ShowImage(string data, int id = 40000, bool useCache = true, int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                Log.Error("CQCode|CQShowImage", $"非法参数({data})，已忽略CQ码");
-                return CQIllegal<ImageSegment>();
+                Log.Error("SoraSegment|ShowImage", $"非法参数({data})，已忽略码");
+                return IllegalSegment<ImageSegment>();
             }
 
-            return new CQCode<ImageSegment>(CQType.Image,
+            return new SoraSegment<ImageSegment>(SegmentType.Image,
                                             new ImageSegment
                                             {
                                                 ImgFile     = dataStr,
@@ -209,22 +209,22 @@ namespace Sora.Entities.MessageSegment
         }
 
         /// <summary>
-        /// 视频CQ码
+        /// 视频码
         /// </summary>
         /// <param name="data">视频名/绝对路径/URL/base64</param>
         /// <param name="useCache">是否使用已缓存的文件</param>
         /// <param name="useProxy">是否通过代理下载文件</param>
         /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
-        public static CQCode<VideoSegment> CQVideo(string data, bool useCache = true, bool useProxy = true, int? timeout = null)
+        public static SoraSegment<VideoSegment> Video(string data, bool useCache = true, bool useProxy = true, int? timeout = null)
         {
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
-                Log.Error("CQCode|CQVideo", $"非法参数({data})，已忽略CQ码");
-                return CQIllegal<VideoSegment>();
+                Log.Error("SoraSegment|Video", $"非法参数({data})，已忽略码");
+                return IllegalSegment<VideoSegment>();
             }
 
-            return new CQCode<VideoSegment>(CQType.Video,
+            return new SoraSegment<VideoSegment>(SegmentType.Video,
                                             new VideoSegment
                                             {
                                                 VideoFile = dataStr,
@@ -235,13 +235,13 @@ namespace Sora.Entities.MessageSegment
         }
 
         /// <summary>
-        /// 音乐CQ码
+        /// 音乐码
         /// </summary>
         /// <param name="musicType">音乐分享类型</param>
         /// <param name="musicId">音乐Id</param>
-        public static CQCode<MusicSegment> CQMusic(MusicShareType musicType, long musicId)
+        public static SoraSegment<MusicSegment> Music(MusicShareType musicType, long musicId)
         {
-            return new(CQType.Music,
+            return new(SegmentType.Music,
                        new MusicSegment
                        {
                            MusicType = musicType,
@@ -250,17 +250,17 @@ namespace Sora.Entities.MessageSegment
         }
 
         /// <summary>
-        /// 自定义音乐分享CQ码
+        /// 自定义音乐分享码
         /// </summary>
         /// <param name="url">跳转URL</param>
         /// <param name="musicUrl">音乐URL</param>
         /// <param name="title">标题</param>
         /// <param name="content">内容描述[可选]</param>
         /// <param name="coverImageUrl">分享内容图片[可选]</param>
-        public static CQCode<CustomMusicSegment> CQCustomMusic(string url, string musicUrl, string title, string content = null,
+        public static SoraSegment<CustomMusicSegment> CustomMusic(string url, string musicUrl, string title, string content = null,
                                                                string coverImageUrl = null)
         {
-            return new(CQType.Music,
+            return new(SegmentType.Music,
                        new CustomMusicSegment
                        {
                            ShareType     = "custom",
@@ -279,12 +279,12 @@ namespace Sora.Entities.MessageSegment
         /// <param name="title">标题</param>
         /// <param name="content">可选，内容描述</param>
         /// <param name="imageUrl">可选，图片 URL</param>
-        public static CQCode<ShareSegment> CQShare(string url,
+        public static SoraSegment<ShareSegment> Share(string url,
                                                    string title,
                                                    string content = null,
                                                    string imageUrl = null)
         {
-            return new(CQType.Share,
+            return new(SegmentType.Share,
                        new ShareSegment
                        {
                            Url      = url,
@@ -298,9 +298,9 @@ namespace Sora.Entities.MessageSegment
         /// 回复
         /// </summary>
         /// <param name="id">消息id</param>
-        public static CQCode<ReplySegment> CQReply(int id)
+        public static SoraSegment<ReplySegment> Reply(int id)
         {
-            return new(CQType.Reply,
+            return new(SegmentType.Reply,
                        new ReplySegment
                        {
                            Target = id
@@ -314,22 +314,22 @@ namespace Sora.Entities.MessageSegment
         /// <param name="uid">自定义回复时的自定义QQ</param>
         /// <param name="time">自定义回复时的时间</param>
         /// <param name="messageSequence">起始消息序号</param>
-        public static CQCode<CustomReplySegment> CQReply(string text, long uid, DateTime time, long messageSequence)
+        public static SoraSegment<CustomReplySegment> Reply(string text, long uid, DateTime time, long messageSequence)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
             if (messageSequence <= 0)
             {
-                Log.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[messageSequence超出范围限制({messageSequence})]");
-                return CQIllegal<CustomReplySegment>();
+                Log.Error("SoraSegment|At", $"非法参数，已忽略码[messageSequence超出范围限制({messageSequence})]");
+                return IllegalSegment<CustomReplySegment>();
             }
 
             if (uid < 10000)
             {
-                Log.Error("CQCode|CQAt", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
-                return CQIllegal<CustomReplySegment>();
+                Log.Error("SoraSegment|At", $"非法参数，已忽略码[uid超出范围限制({uid})]");
+                return IllegalSegment<CustomReplySegment>();
             }
 
-            return new CQCode<CustomReplySegment>(CQType.Reply,
+            return new SoraSegment<CustomReplySegment>(SegmentType.Reply,
                                                   new CustomReplySegment
                                                   {
                                                       Text            = text,
@@ -339,22 +339,22 @@ namespace Sora.Entities.MessageSegment
                                                   });
         }
 
-        #region GoCQ扩展码
+        #region Go扩展码
 
         /// <summary>
         /// 群成员戳一戳
-        /// 只支持Go-CQHttp
+        /// 只支持Go-Http
         /// </summary>
         /// <param name="uid">ID</param>
-        public static CQCode<PokeSegment> CQPoke(long uid)
+        public static SoraSegment<PokeSegment> Poke(long uid)
         {
             if (uid < 10000)
             {
-                Log.Error("CQCode|CQPoke", $"非法参数，已忽略CQ码[uid超出范围限制({uid})]");
-                return CQIllegal<PokeSegment>();
+                Log.Error("SoraSegment|Poke", $"非法参数，已忽略码[uid超出范围限制({uid})]");
+                return IllegalSegment<PokeSegment>();
             }
 
-            return new CQCode<PokeSegment>(CQType.Poke,
+            return new SoraSegment<PokeSegment>(SegmentType.Poke,
                                            new PokeSegment
                                            {
                                                Uid = uid
@@ -365,10 +365,10 @@ namespace Sora.Entities.MessageSegment
         /// 接收红包
         /// </summary>
         /// <param name="title">祝福语/口令</param>
-        public static CQCode<RedbagSegment> CQRedbag(string title)
+        public static SoraSegment<RedbagSegment> Redbag(string title)
         {
             if (string.IsNullOrEmpty(title)) throw new NullReferenceException(nameof(title));
-            return new CQCode<RedbagSegment>(CQType.RedBag,
+            return new SoraSegment<RedbagSegment>(SegmentType.RedBag,
                                              new RedbagSegment
                                              {
                                                  Title = title
@@ -380,10 +380,10 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="giftId">礼物id</param>
         /// <param name="target">目标uid</param>
-        public static CQCode<GiftSegment> CQGift(int giftId, long target)
+        public static SoraSegment<GiftSegment> Gift(int giftId, long target)
         {
             if (giftId is < 0 or > 8 || target < 10000) throw new ArgumentOutOfRangeException(nameof(giftId));
-            return new CQCode<GiftSegment>(CQType.Gift,
+            return new SoraSegment<GiftSegment>(SegmentType.Gift,
                                            new GiftSegment
                                            {
                                                Target   = target,
@@ -395,10 +395,10 @@ namespace Sora.Entities.MessageSegment
         /// XML 特殊消息
         /// </summary>
         /// <param name="content">xml文本</param>
-        public static CQCode<CodeSegment> CQXml(string content)
+        public static SoraSegment<CodeSegment> Xml(string content)
         {
             if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
-            return new CQCode<CodeSegment>(CQType.Xml,
+            return new SoraSegment<CodeSegment>(SegmentType.Xml,
                                            new CodeSegment
                                            {
                                                Content = content,
@@ -411,10 +411,10 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="content">JSON 文本</param>
         /// <param name="richText">富文本内容</param>
-        public static CQCode<CodeSegment> CQJson(string content, bool richText = false)
+        public static SoraSegment<CodeSegment> Json(string content, bool richText = false)
         {
             if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
-            return new CQCode<CodeSegment>(CQType.Json,
+            return new SoraSegment<CodeSegment>(SegmentType.Json,
                                            new CodeSegment
                                            {
                                                Content = content,
@@ -427,10 +427,10 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="content">JObject实例</param>
         /// <param name="richText">富文本内容</param>
-        public static CQCode<CodeSegment> CQJson(JObject content, bool richText = false)
+        public static SoraSegment<CodeSegment> Json(JObject content, bool richText = false)
         {
             if (content == null) throw new NullReferenceException(nameof(content));
-            return new CQCode<CodeSegment>(CQType.Json,
+            return new SoraSegment<CodeSegment>(SegmentType.Json,
                                            new CodeSegment
                                            {
                                                Content = JsonConvert.SerializeObject(content, Formatting.None),
@@ -448,7 +448,7 @@ namespace Sora.Entities.MessageSegment
         /// <param name="minHeight">最小 Height</param>
         /// <param name="maxWidth">最大 Width</param>
         /// <param name="maxHeight">最大 Height</param>
-        public static CQCode<CardImageSegment> CQCardImage(string imageFile,
+        public static SoraSegment<CardImageSegment> CardImage(string imageFile,
                                                            string source = null,
                                                            string iconUrl = null,
                                                            long minWidth = 400,
@@ -460,11 +460,11 @@ namespace Sora.Entities.MessageSegment
             var (dataStr, isDataStr) = ParseDataStr(imageFile);
             if (!isDataStr)
             {
-                Log.Error("CQCode|CQCardImage", $"非法参数({imageFile})，已忽略CQ码");
-                return CQIllegal<CardImageSegment>();
+                Log.Error("SoraSegment|CardImage", $"非法参数({imageFile})，已忽略码");
+                return IllegalSegment<CardImageSegment>();
             }
 
-            return new CQCode<CardImageSegment>(CQType.CardImage,
+            return new SoraSegment<CardImageSegment>(SegmentType.CardImage,
                                                 new CardImageSegment
                                                 {
                                                     ImageFile = dataStr,
@@ -478,13 +478,13 @@ namespace Sora.Entities.MessageSegment
         }
 
         /// <summary>
-        /// 语音转文字（TTS）CQ码
+        /// 语音转文字（TTS）码
         /// </summary>
         /// <param name="messageStr">要转换的文本信息</param>
-        public static CQCode<TtsSegment> CQTTS(string messageStr)
+        public static SoraSegment<TtsSegment> TTS(string messageStr)
         {
             if (string.IsNullOrEmpty(messageStr)) throw new NullReferenceException(nameof(messageStr));
-            return new CQCode<TtsSegment>(CQType.TTS,
+            return new SoraSegment<TtsSegment>(SegmentType.TTS,
                                           new TtsSegment
                                           {
                                               Content = messageStr
@@ -494,32 +494,32 @@ namespace Sora.Entities.MessageSegment
         #endregion
 
         /// <summary>
-        /// 空CQ码
-        /// <para>当存在非法参数时CQ码将被本函数重置</para>
+        /// 空码
+        /// <para>当存在非法参数时码将被本函数重置</para>
         /// </summary>
-        private static CQCode<T> CQIllegal<T>() where T : BaseSegment =>
-            new(CQType.Ignore, null);
+        private static SoraSegment<T> IllegalSegment<T>() where T : BaseSegment =>
+            new(SegmentType.Ignore, null);
 
         #endregion
 
         #region 扩展构建方法
 
         /// <summary>
-        /// 生成AT CQ码
+        /// 生成AT 码
         /// </summary>
         /// <param name="uid">uid</param>
-        public static CQCode<AtSegment> ToAt(this long uid)
+        public static SoraSegment<AtSegment> ToAt(this long uid)
         {
-            return CQAt(uid);
+            return At(uid);
         }
 
         /// <summary>
-        /// 生成AT CQ码
+        /// 生成AT 码
         /// </summary>
         /// <param name="uid">uid</param>
-        public static CQCode<AtSegment> ToAt(this int uid)
+        public static SoraSegment<AtSegment> ToAt(this int uid)
         {
-            return CQAt(uid);
+            return At(uid);
         }
 
         #endregion
@@ -545,14 +545,14 @@ namespace Sora.Entities.MessageSegment
 
             switch (type)
             {
-                case CQFileType.UnixFile: //linux/osx
+                case FileType.UnixFile: //linux/osx
                     if (Environment.OSVersion.Platform != PlatformID.Unix   &&
                         Environment.OSVersion.Platform != PlatformID.MacOSX &&
                         !File.Exists(dataStr))
                         return (dataStr, false);
                     else
                         return ($"file:///{dataStr}", true);
-                case CQFileType.WinFile: //win
+                case FileType.WinFile: //win
                     if (Environment.OSVersion.Platform == PlatformID.Win32NT && File.Exists(dataStr))
                         return ($"file:///{dataStr}", true);
                     else

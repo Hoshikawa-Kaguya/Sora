@@ -14,7 +14,7 @@ namespace Sora.OnebotModel.ApiParams
         /// </summary>
         [JsonConverter(typeof(EnumDescriptionConverter))]
         [JsonProperty(PropertyName = "type")]
-        internal CQType MsgType { get; init; }
+        internal SegmentType MsgType { get; init; }
 
         /// <summary>
         /// 消息段JSON

@@ -47,7 +47,7 @@ service.Event.OnPrivateMessage += async (msgType, eventArgs) => { await eventArg
 //动态向管理器注册指令
 service.Event.CommandManager.RegisterGroupCommand(async eventArgs =>
                                                   {
-                                                      await eventArgs.Reply(SegmentBuilder.CQAt(4564) + 2133.ToAt() + 35254.ToAt() + "fuck");
+                                                      await eventArgs.Reply(SegmentBuilder.At(4564) + 2133.ToAt() + 35254.ToAt() + "fuck");
                                                       eventArgs.IsContinueEventChain = false;
                                                   }, new[] { "2" }, MatchType.Full);
 

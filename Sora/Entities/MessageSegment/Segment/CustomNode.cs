@@ -66,7 +66,7 @@ namespace Sora.Entities.MessageSegment.Segment
             MessageId = null;
             Name      = name;
             UserId    = userId.ToString();
-            Messages = customMessage.Where(msg => msg != null && msg.MessageType != CQType.Ignore)
+            Messages = customMessage.Where(msg => msg != null && msg.MessageType != SegmentType.Ignore)
                                     .Select(msg => msg.ToOnebotMessage())
                                     .ToList();
             Time      = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";
@@ -77,14 +77,14 @@ namespace Sora.Entities.MessageSegment.Segment
         /// </summary>
         /// <param name="name">发送者名</param>
         /// <param name="userId">发送者ID</param>
-        /// <param name="cqString">CQ码字符串格式</param>
+        /// <param name="message">纯文本消息</param>
         /// <param name="time">消息段转发时间</param>
-        public CustomNode(string name, long userId, string cqString, DateTimeOffset? time = null)
+        public CustomNode(string name, long userId, string message, DateTimeOffset? time = null)
         {
             MessageId = null;
             Name      = name;
             UserId    = userId.ToString();
-            Messages  = cqString;
+            Messages  = message;
             Time      = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";
         }
     }

@@ -3,7 +3,7 @@
 namespace Sora.Entities.MessageSegment.Segment
 {
     /// <summary>
-    /// 语音转文字（TTS）CQ码
+    /// 语音转文字（TTS）
     /// </summary>
     public class TtsSegment : BaseSegment
     {
