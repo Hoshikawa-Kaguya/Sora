@@ -24,37 +24,37 @@ namespace Sora.Converter
         /// </summary>
         /// <param name="onebotMessageElement">消息段</param>
         /// <returns>消息段列表</returns>
-        private static SoraSegment<BaseSegment> ParseMessageElement(OnebotMessageElement onebotMessageElement)
+        private static SegmentData ParseMessageElement(OnebotMessageElement onebotMessageElement)
         {
-            if (onebotMessageElement.RawData == null) return new SoraSegment<BaseSegment>(SegmentType.Unknown, null);
+            if (onebotMessageElement.RawData == null) return new SegmentData(SegmentType.Unknown, null);
             try
             {
                 var jsonObj = JObject.FromObject(onebotMessageElement.RawData);
-                if (jsonObj.Count == 0) return new SoraSegment<BaseSegment>(SegmentType.Unknown, null);
+                if (jsonObj.Count == 0) return new SegmentData(SegmentType.Unknown, null);
                 return onebotMessageElement.MsgType switch
                 {
                     SegmentType.Text =>
-                        new SoraSegment<BaseSegment>(SegmentType.Text, jsonObj.ToObject<TextSegment>()),
+                        new SegmentData(SegmentType.Text, jsonObj.ToObject<TextSegment>()),
                     SegmentType.Face =>
-                        new SoraSegment<BaseSegment>(SegmentType.Face, jsonObj.ToObject<FaceSegment>()),
+                        new SegmentData(SegmentType.Face, jsonObj.ToObject<FaceSegment>()),
                     SegmentType.Image =>
-                        new SoraSegment<BaseSegment>(SegmentType.Image, jsonObj.ToObject<ImageSegment>()),
+                        new SegmentData(SegmentType.Image, jsonObj.ToObject<ImageSegment>()),
                     SegmentType.Record =>
-                        new SoraSegment<BaseSegment>(SegmentType.Record, jsonObj.ToObject<RecordSegment>()),
+                        new SegmentData(SegmentType.Record, jsonObj.ToObject<RecordSegment>()),
                     SegmentType.At =>
-                        new SoraSegment<BaseSegment>(SegmentType.At, jsonObj.ToObject<AtSegment>()),
+                        new SegmentData(SegmentType.At, jsonObj.ToObject<AtSegment>()),
                     SegmentType.Share =>
-                        new SoraSegment<BaseSegment>(SegmentType.Share, jsonObj.ToObject<ShareSegment>()),
+                        new SegmentData(SegmentType.Share, jsonObj.ToObject<ShareSegment>()),
                     SegmentType.Reply =>
-                        new SoraSegment<BaseSegment>(SegmentType.Reply, jsonObj.ToObject<ReplySegment>()),
+                        new SegmentData(SegmentType.Reply, jsonObj.ToObject<ReplySegment>()),
                     SegmentType.Forward =>
-                        new SoraSegment<BaseSegment>(SegmentType.Forward, jsonObj.ToObject<ForwardSegment>()),
+                        new SegmentData(SegmentType.Forward, jsonObj.ToObject<ForwardSegment>()),
                     SegmentType.Xml =>
-                        new SoraSegment<BaseSegment>(SegmentType.Xml, jsonObj.ToObject<CodeSegment>()),
+                        new SegmentData(SegmentType.Xml, jsonObj.ToObject<CodeSegment>()),
                     SegmentType.Json =>
-                        new SoraSegment<BaseSegment>(SegmentType.Json, jsonObj.ToObject<CodeSegment>()),
+                        new SegmentData(SegmentType.Json, jsonObj.ToObject<CodeSegment>()),
 
-                    _ => new SoraSegment<BaseSegment>(SegmentType.Unknown, new UnknownSegment
+                    _ => new SegmentData(SegmentType.Unknown, new UnknownSegment
                     {
                         Content = jsonObj
                     })
@@ -64,7 +64,7 @@ namespace Sora.Converter
             {
                 Log.Error("Sora", Log.ErrorLogBuilder(e));
                 Log.Error("Sora", $"JsonSegment转换错误 未知格式，出错类型[{onebotMessageElement.MsgType}],请向框架开发者反应此问题");
-                return new SoraSegment<BaseSegment>(SegmentType.Unknown, null);
+                return new SegmentData(SegmentType.Unknown, null);
             }
         }
 

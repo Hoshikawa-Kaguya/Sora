@@ -21,34 +21,34 @@ namespace Sora.Entities.MessageSegment
         /// 纯文本
         /// </summary>
         /// <param name="msg">文本消息</param>
-        internal static SoraSegment<BaseSegment> TextToBase(string msg)
+        internal static SegmentData TextToBase(string msg)
         {
-            return new SoraSegment<BaseSegment>(SegmentType.Text, new TextSegment { Content = msg });
+            return new SegmentData(SegmentType.Text, new TextSegment { Content = msg });
         }
 
         /// <summary>
         /// 纯文本
         /// </summary>
         /// <param name="msg">文本消息</param>
-        public static SoraSegment<TextSegment> Text(string msg)
+        public static SegmentData Text(string msg)
         {
-            return new SoraSegment<TextSegment>(SegmentType.Text, new TextSegment { Content = msg });
+            return new SegmentData(SegmentType.Text, new TextSegment { Content = msg });
         }
 
         /// <summary>
         /// At 码
         /// </summary>
         /// <param name="uid">用户uid</param>
-        public static SoraSegment<AtSegment> At(long uid)
+        public static SegmentData At(long uid)
         {
             if (uid < 10000)
             {
                 Log.Error("SoraSegment|At", $"非法参数，已忽略码[uid超出范围限制({uid})]");
-                return IllegalSegment<AtSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<AtSegment>(SegmentType.At,
-                                              new AtSegment { Target = uid.ToString() });
+            return new SegmentData(SegmentType.At,
+                                   new AtSegment { Target = uid.ToString() });
         }
 
         /// <summary>
@@ -57,26 +57,26 @@ namespace Sora.Entities.MessageSegment
         /// <param name="uid">用户uid</param>
         /// <param name="name">当在群中找不到此uid的名称时使用的名字</param>
         // TODO Name参数暂时失效等待测试
-        public static SoraSegment<AtSegment> At(long uid, string name)
+        public static SegmentData At(long uid, string name)
         {
             if (uid < 10000)
             {
                 Log.Error("SoraSegment|At", $"非法参数，已忽略码[uid超出范围限制({uid})]");
-                return IllegalSegment<AtSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<AtSegment>(SegmentType.At,
-                                              new AtSegment
-                                              {
-                                                  Target = uid.ToString(),
-                                                  Name   = name
-                                              });
+            return new SegmentData(SegmentType.At,
+                                   new AtSegment
+                                   {
+                                       Target = uid.ToString(),
+                                       Name   = name
+                                   });
         }
 
         /// <summary>
         /// At全体 码
         /// </summary>
-        public static SoraSegment<AtSegment> AtAll()
+        public static SegmentData AtAll()
         {
             return new(SegmentType.At,
                        new AtSegment { Target = "all" });
@@ -86,17 +86,17 @@ namespace Sora.Entities.MessageSegment
         /// 表情码
         /// </summary>
         /// <param name="id">表情 ID</param>
-        public static SoraSegment<FaceSegment> Face(int id)
+        public static SegmentData Face(int id)
         {
             //检查ID合法性
             if (id is < 0 or > 244)
             {
                 Log.Error("SoraSegment|Face", $"非法参数，已忽略码[id超出范围限制({id})]");
-                return IllegalSegment<FaceSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<FaceSegment>(SegmentType.Face,
-                                                new FaceSegment { Id = id });
+            return new SegmentData(SegmentType.Face,
+                                   new FaceSegment { Id = id });
         }
 
         /// <summary>
@@ -107,26 +107,26 @@ namespace Sora.Entities.MessageSegment
         /// <param name="useCache">是否使用已缓存的文件</param>
         /// <param name="useProxy">是否通过代理下载文件</param>
         /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
-        public static SoraSegment<RecordSegment> Record(string data, bool isMagic = false, bool useCache = true,
-                                                        bool useProxy = true,
-                                                        int? timeout = null)
+        public static SegmentData Record(string data, bool isMagic = false, bool useCache = true,
+                                         bool useProxy = true,
+                                         int? timeout = null)
         {
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("SoraSegment|Record", $"非法参数({data})，已忽略此码");
-                return IllegalSegment<RecordSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<RecordSegment>(SegmentType.Record,
-                                                  new RecordSegment
-                                                  {
-                                                      RecordFile = dataStr,
-                                                      Magic      = isMagic ? 1 : null,
-                                                      Cache      = useCache ? 1 : null,
-                                                      Proxy      = useProxy ? 1 : null,
-                                                      Timeout    = timeout
-                                                  });
+            return new SegmentData(SegmentType.Record,
+                                   new RecordSegment
+                                   {
+                                       RecordFile = dataStr,
+                                       Magic      = isMagic ? 1 : null,
+                                       Cache      = useCache ? 1 : null,
+                                       Proxy      = useProxy ? 1 : null,
+                                       Timeout    = timeout
+                                   });
         }
 
         /// <summary>
@@ -135,24 +135,24 @@ namespace Sora.Entities.MessageSegment
         /// <param name="data">图片名/绝对路径/URL/base64</param>
         /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
         /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
-        public static SoraSegment<ImageSegment> Image(string data, bool useCache = true, int? threadCount = null)
+        public static SegmentData Image(string data, bool useCache = true, int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("SoraSegment|Image", $"非法参数({data})，已忽略码");
-                return IllegalSegment<ImageSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<ImageSegment>(SegmentType.Image,
-                                                 new ImageSegment
-                                                 {
-                                                     ImgFile     = dataStr,
-                                                     ImgType     = null,
-                                                     UseCache    = useCache ? 1 : null,
-                                                     ThreadCount = threadCount
-                                                 });
+            return new SegmentData(SegmentType.Image,
+                                   new ImageSegment
+                                   {
+                                       ImgFile     = dataStr,
+                                       ImgType     = null,
+                                       UseCache    = useCache ? 1 : null,
+                                       ThreadCount = threadCount
+                                   });
         }
 
         /// <summary>
@@ -161,24 +161,24 @@ namespace Sora.Entities.MessageSegment
         /// <param name="data">图片名/绝对路径/URL/base64</param>
         /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
         /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
-        public static SoraSegment<ImageSegment> FlashImage(string data, bool useCache = true, int? threadCount = null)
+        public static SegmentData FlashImage(string data, bool useCache = true, int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("SoraSegment|Image", $"非法参数({data})，已忽略码");
-                return IllegalSegment<ImageSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<ImageSegment>(SegmentType.Image,
-                                                 new ImageSegment
-                                                 {
-                                                     ImgFile     = dataStr,
-                                                     ImgType     = "flash",
-                                                     UseCache    = useCache ? 1 : null,
-                                                     ThreadCount = threadCount
-                                                 });
+            return new SegmentData(SegmentType.Image,
+                                   new ImageSegment
+                                   {
+                                       ImgFile     = dataStr,
+                                       ImgType     = "flash",
+                                       UseCache    = useCache ? 1 : null,
+                                       ThreadCount = threadCount
+                                   });
         }
 
         /// <summary>
@@ -188,26 +188,26 @@ namespace Sora.Entities.MessageSegment
         /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
         /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
         /// <param name="id">秀图特效id，默认为40000</param>
-        public static SoraSegment<ImageSegment> ShowImage(string data, int id = 40000, bool useCache = true,
-                                                          int? threadCount = null)
+        public static SegmentData ShowImage(string data, int id = 40000, bool useCache = true,
+                                            int? threadCount = null)
         {
             if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("SoraSegment|ShowImage", $"非法参数({data})，已忽略码");
-                return IllegalSegment<ImageSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<ImageSegment>(SegmentType.Image,
-                                                 new ImageSegment
-                                                 {
-                                                     ImgFile     = dataStr,
-                                                     ImgType     = "show",
-                                                     UseCache    = useCache ? 1 : null,
-                                                     Id          = id,
-                                                     ThreadCount = threadCount
-                                                 });
+            return new SegmentData(SegmentType.Image,
+                                   new ImageSegment
+                                   {
+                                       ImgFile     = dataStr,
+                                       ImgType     = "show",
+                                       UseCache    = useCache ? 1 : null,
+                                       Id          = id,
+                                       ThreadCount = threadCount
+                                   });
         }
 
         /// <summary>
@@ -217,24 +217,24 @@ namespace Sora.Entities.MessageSegment
         /// <param name="useCache">是否使用已缓存的文件</param>
         /// <param name="useProxy">是否通过代理下载文件</param>
         /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
-        public static SoraSegment<VideoSegment> Video(string data, bool useCache = true, bool useProxy = true,
-                                                      int? timeout = null)
+        public static SegmentData Video(string data, bool useCache = true, bool useProxy = true,
+                                        int? timeout = null)
         {
             var (dataStr, isDataStr) = ParseDataStr(data);
             if (!isDataStr)
             {
                 Log.Error("SoraSegment|Video", $"非法参数({data})，已忽略码");
-                return IllegalSegment<VideoSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<VideoSegment>(SegmentType.Video,
-                                                 new VideoSegment
-                                                 {
-                                                     VideoFile = dataStr,
-                                                     Cache     = useCache ? 1 : null,
-                                                     Proxy     = useProxy ? 1 : null,
-                                                     Timeout   = timeout
-                                                 });
+            return new SegmentData(SegmentType.Video,
+                                   new VideoSegment
+                                   {
+                                       VideoFile = dataStr,
+                                       Cache     = useCache ? 1 : null,
+                                       Proxy     = useProxy ? 1 : null,
+                                       Timeout   = timeout
+                                   });
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="musicType">音乐分享类型</param>
         /// <param name="musicId">音乐Id</param>
-        public static SoraSegment<MusicSegment> Music(MusicShareType musicType, long musicId)
+        public static SegmentData Music(MusicShareType musicType, long musicId)
         {
             return new(SegmentType.Music,
                        new MusicSegment
@@ -260,9 +260,9 @@ namespace Sora.Entities.MessageSegment
         /// <param name="title">标题</param>
         /// <param name="content">内容描述[可选]</param>
         /// <param name="coverImageUrl">分享内容图片[可选]</param>
-        public static SoraSegment<CustomMusicSegment> CustomMusic(string url, string musicUrl, string title,
-                                                                  string content = null,
-                                                                  string coverImageUrl = null)
+        public static SegmentData CustomMusic(string url, string musicUrl, string title,
+                                              string content = null,
+                                              string coverImageUrl = null)
         {
             return new(SegmentType.Music,
                        new CustomMusicSegment
@@ -283,10 +283,10 @@ namespace Sora.Entities.MessageSegment
         /// <param name="title">标题</param>
         /// <param name="content">可选，内容描述</param>
         /// <param name="imageUrl">可选，图片 URL</param>
-        public static SoraSegment<ShareSegment> Share(string url,
-                                                      string title,
-                                                      string content = null,
-                                                      string imageUrl = null)
+        public static SegmentData Share(string url,
+                                        string title,
+                                        string content = null,
+                                        string imageUrl = null)
         {
             return new(SegmentType.Share,
                        new ShareSegment
@@ -302,7 +302,7 @@ namespace Sora.Entities.MessageSegment
         /// 回复
         /// </summary>
         /// <param name="id">消息id</param>
-        public static SoraSegment<ReplySegment> Reply(int id)
+        public static SegmentData Reply(int id)
         {
             return new(SegmentType.Reply,
                        new ReplySegment
@@ -318,29 +318,29 @@ namespace Sora.Entities.MessageSegment
         /// <param name="uid">自定义回复时的自定义QQ</param>
         /// <param name="time">自定义回复时的时间</param>
         /// <param name="messageSequence">起始消息序号</param>
-        public static SoraSegment<CustomReplySegment> Reply(string text, long uid, DateTime time, long messageSequence)
+        public static SegmentData Reply(string text, long uid, DateTime time, long messageSequence)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
             if (messageSequence <= 0)
             {
                 Log.Error("SoraSegment|At", $"非法参数，已忽略码[messageSequence超出范围限制({messageSequence})]");
-                return IllegalSegment<CustomReplySegment>();
+                return IllegalSegment();
             }
 
             if (uid < 10000)
             {
                 Log.Error("SoraSegment|At", $"非法参数，已忽略码[uid超出范围限制({uid})]");
-                return IllegalSegment<CustomReplySegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<CustomReplySegment>(SegmentType.Reply,
-                                                       new CustomReplySegment
-                                                       {
-                                                           Text            = text,
-                                                           Uid             = uid,
-                                                           Time            = time,
-                                                           MessageSequence = messageSequence
-                                                       });
+            return new SegmentData(SegmentType.Reply,
+                                   new CustomReplySegment
+                                   {
+                                       Text            = text,
+                                       Uid             = uid,
+                                       Time            = time,
+                                       MessageSequence = messageSequence
+                                   });
         }
 
         #region Go扩展码
@@ -350,33 +350,33 @@ namespace Sora.Entities.MessageSegment
         /// 只支持Go-Http
         /// </summary>
         /// <param name="uid">ID</param>
-        public static SoraSegment<PokeSegment> Poke(long uid)
+        public static SegmentData Poke(long uid)
         {
             if (uid < 10000)
             {
                 Log.Error("SoraSegment|Poke", $"非法参数，已忽略码[uid超出范围限制({uid})]");
-                return IllegalSegment<PokeSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<PokeSegment>(SegmentType.Poke,
-                                                new PokeSegment
-                                                {
-                                                    Uid = uid
-                                                });
+            return new SegmentData(SegmentType.Poke,
+                                   new PokeSegment
+                                   {
+                                       Uid = uid
+                                   });
         }
 
         /// <summary>
         /// 接收红包
         /// </summary>
         /// <param name="title">祝福语/口令</param>
-        public static SoraSegment<RedbagSegment> Redbag(string title)
+        public static SegmentData Redbag(string title)
         {
             if (string.IsNullOrEmpty(title)) throw new NullReferenceException(nameof(title));
-            return new SoraSegment<RedbagSegment>(SegmentType.RedBag,
-                                                  new RedbagSegment
-                                                  {
-                                                      Title = title
-                                                  });
+            return new SegmentData(SegmentType.RedBag,
+                                   new RedbagSegment
+                                   {
+                                       Title = title
+                                   });
         }
 
         /// <summary>
@@ -384,30 +384,30 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="giftId">礼物id</param>
         /// <param name="target">目标uid</param>
-        public static SoraSegment<GiftSegment> Gift(int giftId, long target)
+        public static SegmentData Gift(int giftId, long target)
         {
             if (giftId is < 0 or > 8 || target < 10000) throw new ArgumentOutOfRangeException(nameof(giftId));
-            return new SoraSegment<GiftSegment>(SegmentType.Gift,
-                                                new GiftSegment
-                                                {
-                                                    Target   = target,
-                                                    GiftType = giftId
-                                                });
+            return new SegmentData(SegmentType.Gift,
+                                   new GiftSegment
+                                   {
+                                       Target   = target,
+                                       GiftType = giftId
+                                   });
         }
 
         /// <summary>
         /// XML 特殊消息
         /// </summary>
         /// <param name="content">xml文本</param>
-        public static SoraSegment<CodeSegment> Xml(string content)
+        public static SegmentData Xml(string content)
         {
             if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
-            return new SoraSegment<CodeSegment>(SegmentType.Xml,
-                                                new CodeSegment
-                                                {
-                                                    Content = content,
-                                                    Resid   = null
-                                                });
+            return new SegmentData(SegmentType.Xml,
+                                   new CodeSegment
+                                   {
+                                       Content = content,
+                                       Resid   = null
+                                   });
         }
 
         /// <summary>
@@ -415,15 +415,15 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="content">JSON 文本</param>
         /// <param name="richText">富文本内容</param>
-        public static SoraSegment<CodeSegment> Json(string content, bool richText = false)
+        public static SegmentData Json(string content, bool richText = false)
         {
             if (string.IsNullOrEmpty(content)) throw new NullReferenceException(nameof(content));
-            return new SoraSegment<CodeSegment>(SegmentType.Json,
-                                                new CodeSegment
-                                                {
-                                                    Content = content,
-                                                    Resid   = richText ? 1 : null
-                                                });
+            return new SegmentData(SegmentType.Json,
+                                   new CodeSegment
+                                   {
+                                       Content = content,
+                                       Resid   = richText ? 1 : null
+                                   });
         }
 
         /// <summary>
@@ -431,15 +431,15 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="content">JObject实例</param>
         /// <param name="richText">富文本内容</param>
-        public static SoraSegment<CodeSegment> Json(JObject content, bool richText = false)
+        public static SegmentData Json(JObject content, bool richText = false)
         {
             if (content == null) throw new NullReferenceException(nameof(content));
-            return new SoraSegment<CodeSegment>(SegmentType.Json,
-                                                new CodeSegment
-                                                {
-                                                    Content = JsonConvert.SerializeObject(content, Formatting.None),
-                                                    Resid   = richText ? 1 : null
-                                                });
+            return new SegmentData(SegmentType.Json,
+                                   new CodeSegment
+                                   {
+                                       Content = JsonConvert.SerializeObject(content, Formatting.None),
+                                       Resid   = richText ? 1 : null
+                                   });
         }
 
         /// <summary>
@@ -452,47 +452,47 @@ namespace Sora.Entities.MessageSegment
         /// <param name="minHeight">最小 Height</param>
         /// <param name="maxWidth">最大 Width</param>
         /// <param name="maxHeight">最大 Height</param>
-        public static SoraSegment<CardImageSegment> CardImage(string imageFile,
-                                                              string source = null,
-                                                              string iconUrl = null,
-                                                              long minWidth = 400,
-                                                              long minHeight = 400,
-                                                              long maxWidth = 400,
-                                                              long maxHeight = 400)
+        public static SegmentData CardImage(string imageFile,
+                                            string source = null,
+                                            string iconUrl = null,
+                                            long minWidth = 400,
+                                            long minHeight = 400,
+                                            long maxWidth = 400,
+                                            long maxHeight = 400)
         {
             if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
             var (dataStr, isDataStr) = ParseDataStr(imageFile);
             if (!isDataStr)
             {
                 Log.Error("SoraSegment|CardImage", $"非法参数({imageFile})，已忽略码");
-                return IllegalSegment<CardImageSegment>();
+                return IllegalSegment();
             }
 
-            return new SoraSegment<CardImageSegment>(SegmentType.CardImage,
-                                                     new CardImageSegment
-                                                     {
-                                                         ImageFile = dataStr,
-                                                         Source    = source,
-                                                         Icon      = iconUrl,
-                                                         MinWidth  = minWidth,
-                                                         MinHeight = minHeight,
-                                                         MaxWidth  = maxWidth,
-                                                         MaxHeight = maxHeight
-                                                     });
+            return new SegmentData(SegmentType.CardImage,
+                                   new CardImageSegment
+                                   {
+                                       ImageFile = dataStr,
+                                       Source    = source,
+                                       Icon      = iconUrl,
+                                       MinWidth  = minWidth,
+                                       MinHeight = minHeight,
+                                       MaxWidth  = maxWidth,
+                                       MaxHeight = maxHeight
+                                   });
         }
 
         /// <summary>
         /// 语音转文字（TTS）码
         /// </summary>
         /// <param name="messageStr">要转换的文本信息</param>
-        public static SoraSegment<TtsSegment> TTS(string messageStr)
+        public static SegmentData TTS(string messageStr)
         {
             if (string.IsNullOrEmpty(messageStr)) throw new NullReferenceException(nameof(messageStr));
-            return new SoraSegment<TtsSegment>(SegmentType.TTS,
-                                               new TtsSegment
-                                               {
-                                                   Content = messageStr
-                                               });
+            return new SegmentData(SegmentType.TTS,
+                                   new TtsSegment
+                                   {
+                                       Content = messageStr
+                                   });
         }
 
         #endregion
@@ -501,7 +501,7 @@ namespace Sora.Entities.MessageSegment
         /// 空码
         /// <para>当存在非法参数时码将被本函数重置</para>
         /// </summary>
-        private static SoraSegment<T> IllegalSegment<T>() where T : BaseSegment =>
+        private static SegmentData IllegalSegment() =>
             new(SegmentType.Ignore, null);
 
         #endregion
@@ -512,7 +512,7 @@ namespace Sora.Entities.MessageSegment
         /// 生成AT 码
         /// </summary>
         /// <param name="uid">uid</param>
-        public static SoraSegment<AtSegment> ToAt(this long uid)
+        public static SegmentData ToAt(this long uid)
         {
             return At(uid);
         }
@@ -521,7 +521,7 @@ namespace Sora.Entities.MessageSegment
         /// 生成AT 码
         /// </summary>
         /// <param name="uid">uid</param>
-        public static SoraSegment<AtSegment> ToAt(this int uid)
+        public static SegmentData ToAt(this int uid)
         {
             return At(uid);
         }

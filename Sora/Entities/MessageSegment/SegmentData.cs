@@ -9,7 +9,7 @@ namespace Sora.Entities.MessageSegment
     /// <summary>
     /// 消息段结构体
     /// </summary>
-    public class SoraSegment<T> where T : BaseSegment
+    public class SegmentData
     {
         #region 属性
 
@@ -19,9 +19,14 @@ namespace Sora.Entities.MessageSegment
         public SegmentType MessageType { get; }
 
         /// <summary>
+        /// 数据类型
+        /// </summary>
+        public Type DataType { get; internal set; }
+
+        /// <summary>
         /// 数据实例
         /// </summary>
-        public T DataObject { get; }
+        public BaseSegment Data { get; }
 
         #endregion
 
@@ -32,10 +37,11 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="segmentType">消息段类型</param>
         /// <param name="dataObject">数据</param>
-        internal SoraSegment(SegmentType segmentType, T dataObject)
+        internal SegmentData(SegmentType segmentType, BaseSegment dataObject)
         {
             MessageType = segmentType;
-            DataObject  = dataObject;
+            Data        = dataObject;
+            DataType    = dataObject.GetType();
         }
 
         #endregion
@@ -50,9 +56,7 @@ namespace Sora.Entities.MessageSegment
         /// 数据结构体类型
         /// </returns>
         public Type GetSegmentType()
-        {
-            return typeof(T);
-        }
+            => DataType;
 
         #endregion
 
@@ -61,7 +65,7 @@ namespace Sora.Entities.MessageSegment
         internal OnebotMessageElement ToOnebotMessage() => new()
         {
             MsgType = MessageType,
-            RawData = JObject.FromObject(DataObject)
+            RawData = JObject.FromObject(Data)
         };
 
         #endregion
@@ -71,47 +75,47 @@ namespace Sora.Entities.MessageSegment
         /// <summary>
         /// 等于重载
         /// </summary>
-        public static bool operator ==(SoraSegment<T> soraSegmentL, SoraSegment<T> soraSegmentR)
+        public static bool operator ==(SegmentData segmentL, SegmentData segmentR)
         {
-            if (soraSegmentL is not null && soraSegmentR is not null)
-                return soraSegmentL.MessageType == soraSegmentR.MessageType &&
-                       JToken.DeepEquals(JToken.FromObject(soraSegmentL.DataObject),
-                                         JToken.FromObject(soraSegmentR.DataObject));
-            return soraSegmentL is null && soraSegmentR is null;
+            if (segmentL is not null && segmentR is not null)
+                return segmentL.MessageType == segmentR.MessageType &&
+                       JToken.DeepEquals(JToken.FromObject(segmentL.Data),
+                                         JToken.FromObject(segmentR.Data));
+            return segmentL is null && segmentR is null;
         }
 
         /// <summary>
         /// 不等于重载
         /// </summary>
-        public static bool operator !=(SoraSegment<T> soraSegmentL, SoraSegment<T> soraSegmentR)
+        public static bool operator !=(SegmentData segmentL, SegmentData segmentR)
         {
-            return !(soraSegmentL == soraSegmentR);
+            return !(segmentL == segmentR);
         }
 
         /// <summary>
         /// +运算重载
         /// </summary>
-        public static MessageBody operator +(SoraSegment<T> codeR, SoraSegment<T> codeL)
+        public static MessageBody operator +(SegmentData segmentR, SegmentData segmentL)
         {
-            var messages = new MessageBody { codeR, codeL };
+            var messages = new MessageBody { segmentR, segmentL };
             return messages;
         }
 
         /// <summary>
         /// +运算重载
         /// </summary>
-        public static MessageBody operator +(MessageBody message, SoraSegment<T> codeL)
+        public static MessageBody operator +(MessageBody message, SegmentData segment)
         {
-            message.Add(codeL);
+            message.Add(segment);
             return message;
         }
 
         /// <summary>
         /// 隐式类型转换
         /// </summary>
-        public static implicit operator MessageBody(SoraSegment<T> soraSegment)
+        public static implicit operator MessageBody(SegmentData segmentData)
         {
-            return new() { soraSegment };
+            return new() { segmentData };
         }
 
         #endregion
@@ -123,7 +127,7 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (obj is SoraSegment<T> segment)
+            if (obj is SegmentData segment)
             {
                 return this == segment;
             }
@@ -136,7 +140,7 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         public override int GetHashCode()
         {
-            return HashCode.Combine(MessageType, DataObject);
+            return HashCode.Combine(MessageType, Data);
         }
 
         #endregion
