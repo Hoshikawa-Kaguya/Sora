@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.MessageSegment.Segment;
 using Sora.Entities.Info;
-using Sora.Entities.MessageSegment;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 
@@ -44,11 +43,7 @@ namespace Sora.Entities
         /// <summary>
         /// 发送群消息
         /// </summary>
-        /// <param name="message">
-        ///     <para>消息</para>
-        ///     <para><see cref="List{T}"/>(T = <see cref="SegmentData"/>)</para>
-        ///     <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
+        /// <param name="message">消息</param>
         /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>

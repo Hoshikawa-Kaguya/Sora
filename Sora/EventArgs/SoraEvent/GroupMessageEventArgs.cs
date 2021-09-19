@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Converter;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.Entities;
 using Sora.Entities.Info;
-using Sora.Entities.MessageSegment;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
@@ -97,11 +95,7 @@ namespace Sora.EventArgs.SoraEvent
         /// <summary>
         /// 快速回复
         /// </summary>
-        /// <param name="message">
-        /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="SegmentData"/>/<see cref="List{T}"/>(T = <see cref="SegmentData"/>)</para>
-        /// <para>其他类型的消息会被强制转换为纯文本</para>
-        /// </param>
+        /// <param name="message">消息</param>
         /// <param name="timeout">覆盖原有超时</param>
         /// <returns>
         /// <para><see cref="ApiStatusType"/> API执行状态</para>

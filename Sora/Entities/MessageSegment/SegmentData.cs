@@ -9,7 +9,7 @@ namespace Sora.Entities.MessageSegment
     /// <summary>
     /// 消息段结构体
     /// </summary>
-    public class SegmentData
+    public readonly struct SegmentData
     {
         #region 属性
 
@@ -21,7 +21,7 @@ namespace Sora.Entities.MessageSegment
         /// <summary>
         /// 数据类型
         /// </summary>
-        public Type DataType { get; internal set; }
+        public Type DataType { get; }
 
         /// <summary>
         /// 数据实例
@@ -41,7 +41,7 @@ namespace Sora.Entities.MessageSegment
         {
             MessageType = segmentType;
             Data        = dataObject;
-            DataType    = dataObject.GetType();
+            DataType    = dataObject?.GetType();
         }
 
         #endregion
@@ -55,8 +55,7 @@ namespace Sora.Entities.MessageSegment
         /// <returns>
         /// 数据结构体类型
         /// </returns>
-        public Type GetSegmentType()
-            => DataType;
+        public new Type GetType() => DataType;
 
         #endregion
 
@@ -77,11 +76,11 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         public static bool operator ==(SegmentData segmentL, SegmentData segmentR)
         {
-            if (segmentL is not null && segmentR is not null)
+            if (segmentL.Data is not null && segmentR.Data is not null)
                 return segmentL.MessageType == segmentR.MessageType &&
                        JToken.DeepEquals(JToken.FromObject(segmentL.Data),
                                          JToken.FromObject(segmentR.Data));
-            return segmentL is null && segmentR is null;
+            return segmentL.Data is null && segmentR.Data is null && segmentL.MessageType == segmentR.MessageType;
         }
 
         /// <summary>
