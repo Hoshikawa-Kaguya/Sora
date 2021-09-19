@@ -48,7 +48,7 @@ namespace Sora.OnebotInterface
                     MessageType = MessageType.Private,
                     UserId      = target,
                     //转换消息段列表
-                    Message = messages.Where(msg => msg != null && msg.MessageType != SegmentType.Ignore)
+                    Message = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
                                       .Select(msg => msg.ToOnebotMessage())
                                       .ToList(),
                     GroupId = groupId
@@ -87,7 +87,7 @@ namespace Sora.OnebotInterface
                     MessageType = MessageType.Group,
                     GroupId     = target,
                     //转换消息段列表
-                    Message = messages.Where(msg => msg != null && msg.MessageType != SegmentType.Ignore)
+                    Message = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
                                       .Select(msg => msg.ToOnebotMessage())
                                       .ToList(),
                 }

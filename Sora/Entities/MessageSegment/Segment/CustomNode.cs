@@ -66,7 +66,7 @@ namespace Sora.Entities.MessageSegment.Segment
             MessageId = null;
             Name      = name;
             UserId    = userId.ToString();
-            Messages = customMessage.Where(msg => msg != null && msg.MessageType != SegmentType.Ignore)
+            Messages = customMessage.Where(msg => msg.MessageType != SegmentType.Ignore)
                                     .Select(msg => msg.ToOnebotMessage())
                                     .ToList();
             Time = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";

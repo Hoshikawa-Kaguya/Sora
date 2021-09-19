@@ -153,7 +153,6 @@ namespace Sora.Entities
         /// <summary>
         /// 截取消息中的文字部分
         /// </summary>
-        /// <returns></returns>
         public string GetText()
         {
             var text = new StringBuilder();

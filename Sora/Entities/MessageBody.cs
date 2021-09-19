@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Sora.Entities.MessageSegment;
 using Sora.Enumeration;
+using YukariToolBox.FormatLog;
 
 namespace Sora.Entities
 {
@@ -38,6 +39,7 @@ namespace Sora.Entities
         /// </summary>
         public MessageBody(List<SegmentData> messages)
         {
+            RemoveIllegalSegment(ref messages);
             _message.Clear();
             _message.AddRange(messages);
         }
@@ -75,7 +77,8 @@ namespace Sora.Entities
         /// <param name="item">消息段</param>
         public void Add(SegmentData item)
         {
-            _message.Add(item);
+            if (SegmentCheck(item))
+                _message.Add(item);
         }
 
         /// <summary>
@@ -139,7 +142,8 @@ namespace Sora.Entities
         /// <param name="item">消息段</param>
         public void Insert(int index, SegmentData item)
         {
-            _message.Insert(index, item);
+            if (SegmentCheck(item))
+                _message.Insert(index, item);
         }
 
         /// <summary>
@@ -154,8 +158,9 @@ namespace Sora.Entities
         /// <summary>
         /// AddRange
         /// </summary>
-        public void AddRange(IEnumerable<SegmentData> segments)
+        public void AddRange(List<SegmentData> segments)
         {
+            RemoveIllegalSegment(ref segments);
             _message.AddRange(segments);
         }
 
@@ -225,6 +230,22 @@ namespace Sora.Entities
         {
             return new() { SegmentBuilder.TextToBase(text) };
         }
+
+        #endregion
+
+        #region 类内部工具
+
+        private static void RemoveIllegalSegment(ref List<SegmentData> segmentDatas)
+        {
+            var iCount = segmentDatas.RemoveAll(s =>
+                                                    s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
+                                                    s.Data is null);
+            if (iCount != 0) Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
+        }
+
+        private static bool SegmentCheck(SegmentData s)
+            => !(s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
+                 s.Data is null);
 
         #endregion
     }
