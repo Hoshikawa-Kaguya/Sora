@@ -81,7 +81,7 @@ namespace Sora.EventArgs.SoraEvent
         /// </summary>
         /// <param name="message">
         /// <para>消息</para>
-        /// <para>可以为<see cref="string"/>/<see cref="SoraSegment{T}"/>/<see cref="List{T}"/>(T = <see cref="SoraSegment{T}"/>)</para>
+        /// <para>可以为<see cref="string"/>/<see cref="SegmentData"/>/<see cref="List{T}"/>(T = <see cref="SegmentData"/>)</para>
         /// <para>其他类型的消息会被强制转换为纯文本</para>
         /// </param>
         /// <param name="timeout">覆盖原有超时</param>

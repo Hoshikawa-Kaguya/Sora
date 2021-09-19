@@ -99,7 +99,7 @@ namespace Sora.Entities
         public IEnumerable<long> GetAllAtList()
         {
             var uidList = MessageBody.Where(s => s.MessageType == SegmentType.At)
-                                     .Select(s => long.TryParse((s.DataObject as AtSegment)?.Target ?? "0",
+                                     .Select(s => long.TryParse((s.Data as AtSegment)?.Target ?? "0",
                                                                 out var uid)
                                                  ? uid
                                                  : -1)
@@ -117,7 +117,7 @@ namespace Sora.Entities
         public string GetRecordUrl()
         {
             if (MessageBody.Count != 1 || MessageBody.First().MessageType != SegmentType.Record) return null;
-            return (MessageBody.First().DataObject as RecordSegment)?.Url;
+            return (MessageBody.First().Data as RecordSegment)?.Url;
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Sora.Entities
         public IEnumerable<ImageSegment> GetAllImage()
         {
             return MessageBody.Where(s => s.MessageType == SegmentType.Image)
-                              .Select(s => s.DataObject as ImageSegment)
+                              .Select(s => s.Data as ImageSegment)
                               .ToList();
         }
 
@@ -147,7 +147,7 @@ namespace Sora.Entities
         /// </summary>
         public string GetForwardMsgId()
         {
-            return IsForwardMessage() ? (MessageBody.First().DataObject as ForwardSegment)?.MessageId : null;
+            return IsForwardMessage() ? (MessageBody.First().Data as ForwardSegment)?.MessageId : null;
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Sora.Entities
         {
             var text = new StringBuilder();
             MessageBody.Where(s => s.MessageType == SegmentType.Text)
-                       .Select(s => s.DataObject as TextSegment)
+                       .Select(s => s.Data as TextSegment)
                        .ToList()
                        .ForEach(t => text.Append(t?.Content ?? string.Empty));
             return text.ToString();

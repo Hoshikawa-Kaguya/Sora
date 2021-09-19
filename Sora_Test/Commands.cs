@@ -12,7 +12,7 @@ namespace Sora_Test
         [GroupCommand(CommandExpressions = new[] { "1" })]
         public static async ValueTask TestCommand(GroupMessageEventArgs eventArgs)
         {
-            var s = eventArgs.Message.MessageBody[0].DataObject as TextSegment;
+            var s = eventArgs.Message.MessageBody[0].Data as TextSegment;
             Log.Info("触发指令", $"txet:{s!.Content}");
             eventArgs.IsContinueEventChain = false;
             await eventArgs.Reply("怪欸");

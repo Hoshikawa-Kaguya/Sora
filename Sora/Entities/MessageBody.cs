@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using Sora.Entities.MessageSegment;
-using Sora.Entities.MessageSegment.Segment;
 using Sora.Enumeration;
 
 namespace Sora.Entities
@@ -10,11 +9,11 @@ namespace Sora.Entities
     /// <summary>
     /// 消息段
     /// </summary>
-    public class MessageBody : IList<SoraSegment<BaseSegment>>
+    public class MessageBody : IList<SegmentData>
     {
         #region 私有字段
 
-        private readonly List<SoraSegment<BaseSegment>> _message = new();
+        private readonly List<SegmentData> _message = new();
 
         #endregion
 
@@ -37,7 +36,7 @@ namespace Sora.Entities
         /// <summary>
         /// 构造消息段列表
         /// </summary>
-        public MessageBody(List<SoraSegment<BaseSegment>> messages)
+        public MessageBody(List<SegmentData> messages)
         {
             _message.Clear();
             _message.AddRange(messages);
@@ -57,7 +56,7 @@ namespace Sora.Entities
         /// <summary>
         /// 迭代器
         /// </summary>
-        IEnumerator<SoraSegment<BaseSegment>> IEnumerable<SoraSegment<BaseSegment>>.GetEnumerator()
+        IEnumerator<SegmentData> IEnumerable<SegmentData>.GetEnumerator()
         {
             return _message.GetEnumerator();
         }
@@ -74,18 +73,9 @@ namespace Sora.Entities
         /// 添加消息段
         /// </summary>
         /// <param name="item">消息段</param>
-        public void Add(SoraSegment<BaseSegment> item)
+        public void Add(SegmentData item)
         {
             _message.Add(item);
-        }
-
-        /// <summary>
-        /// 添加消息段
-        /// </summary>
-        /// <param name="item">消息段</param>
-        public void Add<T>(SoraSegment<T> item) where T : BaseSegment
-        {
-            Add(item as SoraSegment<BaseSegment>);
         }
 
         /// <summary>
@@ -109,7 +99,7 @@ namespace Sora.Entities
         /// 判断包含
         /// </summary>
         /// <param name="item">消息段</param>
-        public bool Contains(SoraSegment<BaseSegment> item)
+        public bool Contains(SegmentData item)
         {
             return _message.Contains(item);
         }
@@ -119,7 +109,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="array">消息段数组</param>
         /// <param name="arrayIndex">索引</param>
-        public void CopyTo(SoraSegment<BaseSegment>[] array, int arrayIndex)
+        public void CopyTo(SegmentData[] array, int arrayIndex)
         {
             _message.CopyTo(array, arrayIndex);
         }
@@ -128,7 +118,7 @@ namespace Sora.Entities
         /// 删除消息段
         /// </summary>
         /// <param name="item">消息段</param>
-        public bool Remove(SoraSegment<BaseSegment> item)
+        public bool Remove(SegmentData item)
         {
             return _message.Remove(item);
         }
@@ -137,7 +127,7 @@ namespace Sora.Entities
         /// 索引查找
         /// </summary>
         /// <param name="item">消息段</param>
-        public int IndexOf(SoraSegment<BaseSegment> item)
+        public int IndexOf(SegmentData item)
         {
             return _message.IndexOf(item);
         }
@@ -147,7 +137,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="index">索引</param>
         /// <param name="item">消息段</param>
-        public void Insert(int index, SoraSegment<BaseSegment> item)
+        public void Insert(int index, SegmentData item)
         {
             _message.Insert(index, item);
         }
@@ -164,7 +154,7 @@ namespace Sora.Entities
         /// <summary>
         /// AddRange
         /// </summary>
-        public void AddRange(IEnumerable<SoraSegment<BaseSegment>> segments)
+        public void AddRange(IEnumerable<SegmentData> segments)
         {
             _message.AddRange(segments);
         }
@@ -172,7 +162,7 @@ namespace Sora.Entities
         /// <summary>
         /// 转普通列表
         /// </summary>
-        public List<SoraSegment<BaseSegment>> ToList()
+        public List<SegmentData> ToList()
         {
             return _message;
         }
@@ -199,7 +189,7 @@ namespace Sora.Entities
         /// <param name="index">索引</param>
         /// <exception cref="ArgumentOutOfRangeException">索引超出范围</exception>
         /// <exception cref="NullReferenceException">读取到了空消息段</exception>
-        public SoraSegment<BaseSegment> this[int index]
+        public SegmentData this[int index]
         {
             get
             {
@@ -209,7 +199,7 @@ namespace Sora.Entities
             }
             set
             {
-                if (value.MessageType == SegmentType.Unknown || value.DataObject == null)
+                if (value.MessageType == SegmentType.Unknown || value.DataType == null)
                     throw new NullReferenceException("message element is null");
                 _message[index] = value;
             }
