@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// 合并转发/合并转发节点

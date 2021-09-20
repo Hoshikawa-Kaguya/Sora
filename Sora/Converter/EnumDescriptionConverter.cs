@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
-using Sora.Enumeration;
 
 namespace Sora.Converter
 {
@@ -43,7 +42,7 @@ namespace Sora.Converter
         }
 
         /// <summary>
-        /// 序列化时执行的转换
+        /// 反序列化时执行的转换
         /// 通过Description获取枚举值
         /// </summary>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
@@ -60,8 +59,8 @@ namespace Sora.Converter
                     return Convert.ChangeType(field.GetValue(-1), objectType);
                 }
             }
-
-            return SegmentType.Unknown;
+            
+            return objectType.IsEnum ? Activator.CreateInstance(objectType) : null;
         }
     }
 }

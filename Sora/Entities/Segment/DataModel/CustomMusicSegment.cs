@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// 自定义音乐分享

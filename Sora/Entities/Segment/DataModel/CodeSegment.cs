@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// <para>Xml与Json集合</para>

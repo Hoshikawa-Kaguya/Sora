@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// <para>群成员戳一戳</para>

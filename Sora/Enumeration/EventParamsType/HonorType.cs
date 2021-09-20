@@ -5,8 +5,14 @@ namespace Sora.Enumeration.EventParamsType
     /// <summary>
     /// 荣誉类型
     /// </summary>
+    [DefaultValue(Unknown)]
     public enum HonorType
     {
+        /// <summary>
+        /// 未知，在转换错误时为此值
+        /// </summary>
+        [Description("")] Unknown,
+        
         /// <summary>
         /// 龙王
         /// </summary>

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
-using Sora.Entities.MessageSegment.Segment;
+using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 
 namespace Sora.Entities

@@ -5,8 +5,15 @@ namespace Sora.Enumeration.ApiType
     /// <summary>
     /// API集合
     /// </summary>
+    [DefaultValue(Unknown)]
     internal enum ApiRequestType
     {
+        /// <summary>
+        /// 未知，在转换类型错误时为此值
+        /// </summary>
+        [Description("")]
+        Unknown,
+        
         #region OnebotAPI
 
         /// <summary>

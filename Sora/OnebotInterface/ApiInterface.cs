@@ -1,6 +1,6 @@
 using Newtonsoft.Json.Linq;
 using Sora.Entities;
-using Sora.Entities.MessageSegment.Segment;
+using Sora.Entities.Segment.DataModel;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
@@ -437,13 +437,13 @@ namespace Sora.OnebotInterface
             if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
                 return (apiStatus, null, null, null, 0, false);
             //处理消息段
-            var rawMessage = ret["data"]?["message"]?.ToObject<List<OnebotMessageElement>>();
+            var rawMessage = ret["data"]?["message"]?.ToObject<List<OnebotSegment>>();
             return (apiStatus,
                     message: new Message(serviceId,
                                          connection,
                                          msgId,
                                          ret["data"]?["raw_message"]?.ToString(),
-                                         (rawMessage ?? new List<OnebotMessageElement>()).ToMessageBody(),
+                                         (rawMessage ?? new List<OnebotSegment>()).ToMessageBody(),
                                          Convert.ToInt64(ret["data"]?["time"] ?? -1),
                                          0,
                                          Convert.ToBoolean(ret["data"]?["group"]           ?? false)

@@ -33,7 +33,7 @@ namespace Sora.OnebotModel.ApiParams
         /// 消息段数组
         /// </summary>
         [JsonProperty(PropertyName = "message")]
-        internal List<OnebotMessageElement> Message { get; set; }
+        internal List<OnebotSegment> Message { get; set; }
 
         /// <summary>
         /// 是否忽略消息段
