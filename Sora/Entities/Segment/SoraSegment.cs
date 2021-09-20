@@ -80,7 +80,8 @@ namespace Sora.Entities.Segment
                 return soraSegmentL.MessageType == soraSegmentR.MessageType &&
                        JToken.DeepEquals(JToken.FromObject(soraSegmentL.Data),
                                          JToken.FromObject(soraSegmentR.Data));
-            return soraSegmentL.Data is null && soraSegmentR.Data is null && soraSegmentL.MessageType == soraSegmentR.MessageType;
+            return soraSegmentL.Data is null && soraSegmentR.Data is null &&
+                   soraSegmentL.MessageType == soraSegmentR.MessageType;
         }
 
         /// <summary>

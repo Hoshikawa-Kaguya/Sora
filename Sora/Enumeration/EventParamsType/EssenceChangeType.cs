@@ -12,10 +12,12 @@ namespace Sora.Enumeration.EventParamsType
         /// 未知，在转换错误时为此值
         /// </summary>
         [Description("")] Unknown,
+
         /// <summary>
         /// 添加
         /// </summary>
         [Description("add")] Add,
+
         /// <summary>
         /// 删除
         /// </summary>

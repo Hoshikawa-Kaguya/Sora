@@ -12,10 +12,12 @@ namespace Sora.Enumeration.EventParamsType
         /// 未知
         /// </summary>
         [Description("")] Unknown,
+
         /// <summary>
         /// 网易云音乐
         /// </summary>
         [Description("163")] Netease,
+
         /// <summary>
         /// QQ 音乐
         /// </summary>

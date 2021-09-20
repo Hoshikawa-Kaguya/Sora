@@ -12,7 +12,7 @@ namespace Sora.Enumeration.EventParamsType
         /// 未知，在转换错误时为此值
         /// </summary>
         [Description("")] Unknown,
-        
+
         /// <summary>
         /// 主动退群
         /// </summary>
