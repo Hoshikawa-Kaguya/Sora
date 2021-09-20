@@ -200,9 +200,9 @@ namespace Sora.OnebotInterface
         internal void Adapter(JObject messageJson, Guid connection)
         {
             if (Log.GetLogLevel() == LogLevel.Debug)
-                Log.Debug("Socket", 
+                Log.Debug("Socket",
                           $"Get json message:{messageJson.ToString(Formatting.None)}");
-            switch (GetJsonValue(messageJson, "post_type"))
+            switch (TryGetJsonValue(messageJson, "post_type"))
             {
                 //元事件类型
                 case "meta_event":
@@ -230,7 +230,7 @@ namespace Sora.OnebotInterface
                     }
                     else
                         Log.Warning("Sora",
-                                    $"Unknown message type:{GetJsonValue(messageJson, "post_type")}\r\njson = {messageJson}");
+                                    $"Unknown message type:{TryGetJsonValue(messageJson, "post_type")}\r\njson = {messageJson}");
 
                     break;
             }
@@ -247,12 +247,12 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void MetaAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetJsonValue(messageJson, "meta_event_type"))
+            switch (TryGetJsonValue(messageJson, "meta_event_type"))
             {
                 //心跳包
                 case "heartbeat":
                 {
-                    OnebotHeartBeatEventArgs heartBeat = messageJson.ToObject<OnebotHeartBeatEventArgs>();
+                    var heartBeat = messageJson.ToObject<OnebotHeartBeatEventArgs>();
                     Log.Debug("Sora", $"Get heartbeat from [{connection}]");
                     //刷新心跳包记录
                     if (heartBeat != null)
@@ -262,7 +262,7 @@ namespace Sora.OnebotInterface
                 //生命周期
                 case "lifecycle":
                 {
-                    OnebotLifeCycleEventArgs lifeCycle = messageJson.ToObject<OnebotLifeCycleEventArgs>();
+                    var lifeCycle = messageJson.ToObject<OnebotLifeCycleEventArgs>();
                     if (lifeCycle != null)
                         Log.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
 
@@ -293,7 +293,7 @@ namespace Sora.OnebotInterface
                     break;
                 }
                 default:
-                    Log.Warning("Sora|Meta Event", $"接收到未知事件[{GetJsonValue(messageJson, "meta_event_type")}]");
+                    Log.Warning("Sora|MetaEvent", $"接收到未知事件[{TryGetJsonValue(messageJson, "meta_event_type")}]");
                     break;
             }
         }
@@ -309,7 +309,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void MessageAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetJsonValue(messageJson, "message_type"))
+            switch (TryGetJsonValue(messageJson, "message_type"))
             {
                 //私聊事件
                 case "private":
@@ -339,7 +339,7 @@ namespace Sora.OnebotInterface
                 //群聊事件
                 case "group":
                 {
-                    OnebotGroupMsgEventArgs groupMsg = messageJson.ToObject<OnebotGroupMsgEventArgs>();
+                    var groupMsg = messageJson.ToObject<OnebotGroupMsgEventArgs>();
                     if (groupMsg == null) break;
                     if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Contains(groupMsg.UserId)) return;
                     Log.Debug("Sora",
@@ -361,7 +361,7 @@ namespace Sora.OnebotInterface
                     break;
                 }
                 default:
-                    Log.Warning("Sora|Message", $"接收到未知事件[{GetJsonValue(messageJson, "message_type")}]");
+                    Log.Warning("Sora|Message", $"接收到未知事件[{TryGetJsonValue(messageJson, "message_type")}]");
                     break;
             }
         }
@@ -377,11 +377,11 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void SelfMessageAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetJsonValue(messageJson, "message_type"))
+            switch (TryGetJsonValue(messageJson, "message_type"))
             {
                 case "group":
                 {
-                    OnebotGroupMsgEventArgs groupMsg = messageJson.ToObject<OnebotGroupMsgEventArgs>();
+                    var groupMsg = messageJson.ToObject<OnebotGroupMsgEventArgs>();
                     if (groupMsg == null) break;
                     Log.Debug("Sora",
                               $"Group self msg[{groupMsg.GroupId}] -> {groupMsg.RawMessage}");
@@ -392,7 +392,7 @@ namespace Sora.OnebotInterface
                     break;
                 }
                 default:
-                    Log.Warning("Sora|Message", $"接收到未知事件[{GetJsonValue(messageJson, "message_type")}]");
+                    Log.Warning("Sora|Message", $"接收到未知事件[{TryGetJsonValue(messageJson, "message_type")}]");
                     break;
             }
         }
@@ -408,12 +408,12 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void RequestAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetJsonValue(messageJson, "request_type"))
+            switch (TryGetJsonValue(messageJson, "request_type"))
             {
                 //好友请求事件
                 case "friend":
                 {
-                    OnebotFriendRequestEventArgs friendRequest = messageJson.ToObject<OnebotFriendRequestEventArgs>();
+                    var friendRequest = messageJson.ToObject<OnebotFriendRequestEventArgs>();
                     if (friendRequest == null) break;
                     Log.Debug("Sora",
                               $"Friend request form [{friendRequest.UserId}] with commont[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
@@ -433,7 +433,7 @@ namespace Sora.OnebotInterface
                         break;
                     }
 
-                    OnebotGroupRequestEventArgs groupRequest = messageJson.ToObject<OnebotGroupRequestEventArgs>();
+                    var groupRequest = messageJson.ToObject<OnebotGroupRequestEventArgs>();
                     if (groupRequest == null) break;
                     Log.Debug("Sora",
                               $"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
@@ -445,7 +445,7 @@ namespace Sora.OnebotInterface
                     break;
                 }
                 default:
-                    Log.Warning("Sora|Request", $"接收到未知事件[{GetJsonValue(messageJson, "request_type")}]");
+                    Log.Warning("Sora|Request", $"接收到未知事件[{TryGetJsonValue(messageJson, "request_type")}]");
                     break;
             }
         }
@@ -461,12 +461,12 @@ namespace Sora.OnebotInterface
         /// <param name="connection">连接GUID</param>
         private async void NoticeAdapter(JObject messageJson, Guid connection)
         {
-            switch (GetJsonValue(messageJson, "notice_type"))
+            switch (TryGetJsonValue(messageJson, "notice_type"))
             {
                 //群文件上传
                 case "group_upload":
                 {
-                    OnebotFileUploadEventArgs fileUpload = messageJson.ToObject<OnebotFileUploadEventArgs>();
+                    var fileUpload = messageJson.ToObject<OnebotFileUploadEventArgs>();
                     if (fileUpload == null) break;
                     Log.Debug("Sora",
                               $"Group notice[Upload file] file[{fileUpload.Upload.Name}] from group[{fileUpload.GroupId}({fileUpload.UserId})]");
@@ -479,7 +479,7 @@ namespace Sora.OnebotInterface
                 //群管理员变动
                 case "group_admin":
                 {
-                    OnebotAdminChangeEventArgs adminChange = messageJson.ToObject<OnebotAdminChangeEventArgs>();
+                    var adminChange = messageJson.ToObject<OnebotAdminChangeEventArgs>();
                     if (adminChange == null) break;
                     Log.Debug("Sora",
                               $"Group amdin change[{adminChange.SubType}] from group[{adminChange.GroupId}] by[{adminChange.UserId}]");
@@ -494,8 +494,7 @@ namespace Sora.OnebotInterface
                 case "group_decrease":
                 case "group_increase":
                 {
-                    OnebotGroupMemberChangeEventArgs groupMemberChange =
-                        messageJson.ToObject<OnebotGroupMemberChangeEventArgs>();
+                    var groupMemberChange = messageJson.ToObject<OnebotGroupMemberChangeEventArgs>();
                     if (groupMemberChange == null) break;
                     Log.Debug("Sora",
                               $"{groupMemberChange.NoticeType} type[{groupMemberChange.SubType}] member {groupMemberChange.GroupId}[{groupMemberChange.UserId}]");
@@ -510,7 +509,7 @@ namespace Sora.OnebotInterface
                 //群禁言
                 case "group_ban":
                 {
-                    OnebotGroupMuteEventArgs groupMute = messageJson.ToObject<OnebotGroupMuteEventArgs>();
+                    var groupMute = messageJson.ToObject<OnebotGroupMuteEventArgs>();
                     if (groupMute == null) break;
                     Log.Debug("Sora",
                               $"Group[{groupMute.GroupId}] {groupMute.ActionType} member[{groupMute.UserId}]{groupMute.Duration}");
@@ -523,7 +522,7 @@ namespace Sora.OnebotInterface
                 //好友添加
                 case "friend_add":
                 {
-                    OnebotFriendAddEventArgs friendAdd = messageJson.ToObject<OnebotFriendAddEventArgs>();
+                    var friendAdd = messageJson.ToObject<OnebotFriendAddEventArgs>();
                     if (friendAdd == null) break;
                     Log.Debug("Sora", $"Friend add user[{friendAdd.UserId}]");
                     //执行回调
@@ -535,7 +534,7 @@ namespace Sora.OnebotInterface
                 //群消息撤回
                 case "group_recall":
                 {
-                    ApiGroupRecallEventArgs groupRecall = messageJson.ToObject<ApiGroupRecallEventArgs>();
+                    var groupRecall = messageJson.ToObject<ApiGroupRecallEventArgs>();
                     if (groupRecall == null) break;
                     Log.Debug("Sora",
                               $"Group[{groupRecall.GroupId}] recall by [{groupRecall.OperatorId}],msg id={groupRecall.MessageId} sender={groupRecall.UserId}");
@@ -548,7 +547,7 @@ namespace Sora.OnebotInterface
                 //好友消息撤回
                 case "friend_recall":
                 {
-                    OnebotFriendRecallEventArgs friendRecall = messageJson.ToObject<OnebotFriendRecallEventArgs>();
+                    var friendRecall = messageJson.ToObject<OnebotFriendRecallEventArgs>();
                     if (friendRecall == null) break;
                     Log.Debug("Sora", $"Friend[{friendRecall.UserId}] recall msg id={friendRecall.MessageId}");
                     //执行回调
@@ -562,7 +561,7 @@ namespace Sora.OnebotInterface
                 //此事件仅在Go上存在
                 case "group_card":
                 {
-                    OnebotGroupCardUpdateEventArgs groupCardUpdate =
+                    var groupCardUpdate =
                         messageJson.ToObject<OnebotGroupCardUpdateEventArgs>();
                     if (groupCardUpdate == null) break;
                     Log.Debug("Sora",
@@ -575,7 +574,7 @@ namespace Sora.OnebotInterface
                 }
                 case "offline_file":
                 {
-                    OnebotOfflineFileEventArgs offlineFile = messageJson.ToObject<OnebotOfflineFileEventArgs>();
+                    var offlineFile = messageJson.ToObject<OnebotOfflineFileEventArgs>();
                     if (offlineFile == null) break;
                     Log.Debug("Sora",
                               $"Get offline file from[{offlineFile.UserId}] file name = {offlineFile.Info.Name}");
@@ -587,7 +586,7 @@ namespace Sora.OnebotInterface
                 }
                 case "client_status":
                 {
-                    OnebotClientStatusEventArgs clientStatus = messageJson.ToObject<OnebotClientStatusEventArgs>();
+                    var clientStatus = messageJson.ToObject<OnebotClientStatusEventArgs>();
                     if (clientStatus == null) break;
                     Log.Debug("Sora",
                               $"Get client status change from[{clientStatus.UserId}] client id = {clientStatus.ClientInfo.AppId}");
@@ -600,7 +599,7 @@ namespace Sora.OnebotInterface
                 }
                 case "essence":
                 {
-                    OnebotEssenceChangeEventArgs essenceChange = messageJson.ToObject<OnebotEssenceChangeEventArgs>();
+                    var essenceChange = messageJson.ToObject<OnebotEssenceChangeEventArgs>();
                     if (essenceChange == null) break;
                     Log.Debug("Sora",
                               $"Get essence change msg_id = {essenceChange.MessageId} type = {essenceChange.EssenceChangeType}");
@@ -611,11 +610,11 @@ namespace Sora.OnebotInterface
                 }
                 //通知类事件
                 case "notify":
-                    switch (GetJsonValue(messageJson, "sub_type"))
+                    switch (TryGetJsonValue(messageJson, "sub_type"))
                     {
                         case "poke": //戳一戳
                         {
-                            OnebotPokeOrLuckyEventArgs pokeEvent = messageJson.ToObject<OnebotPokeOrLuckyEventArgs>();
+                            var pokeEvent = messageJson.ToObject<OnebotPokeOrLuckyEventArgs>();
                             if (pokeEvent == null) break;
                             Log.Debug("Sora",
                                       $"Group[{pokeEvent.GroupId}] poke from [{pokeEvent.UserId}] to [{pokeEvent.TargetId}]");
@@ -626,7 +625,7 @@ namespace Sora.OnebotInterface
                         }
                         case "lucky_king": //运气王
                         {
-                            OnebotPokeOrLuckyEventArgs luckyEvent = messageJson.ToObject<OnebotPokeOrLuckyEventArgs>();
+                            var luckyEvent = messageJson.ToObject<OnebotPokeOrLuckyEventArgs>();
                             if (luckyEvent == null) break;
                             Log.Debug("Sora",
                                       $"Group[{luckyEvent.GroupId}] lucky king user[{luckyEvent.TargetId}]");
@@ -638,7 +637,7 @@ namespace Sora.OnebotInterface
                         }
                         case "honor":
                         {
-                            OnebotHonorEventArgs honorEvent = messageJson.ToObject<OnebotHonorEventArgs>();
+                            var honorEvent = messageJson.ToObject<OnebotHonorEventArgs>();
                             if (honorEvent == null) break;
                             Log.Debug("Sora",
                                       $"Group[{honorEvent.GroupId}] member honor change [{honorEvent.HonorType}]");
@@ -649,8 +648,7 @@ namespace Sora.OnebotInterface
                         }
                         case "title":
                         {
-                            OnebotMemberTitleUpdatedEventArgs newTitleEvent =
-                                messageJson.ToObject<OnebotMemberTitleUpdatedEventArgs>();
+                            var newTitleEvent = messageJson.ToObject<OnebotMemberTitleUpdatedEventArgs>();
                             if (newTitleEvent == null) break;
                             Log.Debug("Sora",
                                       $"Group[{newTitleEvent.GroupId} member title change to [{newTitleEvent.NewTitle}]]");
@@ -661,13 +659,13 @@ namespace Sora.OnebotInterface
                             break;
                         }
                         default:
-                            Log.Warning("Sora|Notify", $"接收到未知事件[{GetJsonValue(messageJson, "sub_type")}]");
+                            Log.Warning("Sora|Notify", $"接收到未知事件[{TryGetJsonValue(messageJson, "sub_type")}]");
                             break;
                     }
 
                     break;
                 default:
-                    Log.Warning("Sora|Notice", $"接收到未知事件[{GetJsonValue(messageJson, "notice_type")}]");
+                    Log.Warning("Sora|Notice", $"接收到未知事件[{TryGetJsonValue(messageJson, "notice_type")}]");
                     break;
             }
         }
@@ -679,7 +677,7 @@ namespace Sora.OnebotInterface
         /// <summary>
         /// 获取json中的值
         /// </summary>
-        private static string GetJsonValue(JObject dataJson, string key)
+        private static string TryGetJsonValue(JObject dataJson, string key)
             => dataJson.TryGetValue(key, out var value) ? value.ToString() : string.Empty;
 
         #endregion
