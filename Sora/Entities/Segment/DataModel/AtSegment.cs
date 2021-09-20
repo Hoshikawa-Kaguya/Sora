@@ -8,6 +8,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public sealed class AtSegment : BaseSegment
     {
+        internal AtSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

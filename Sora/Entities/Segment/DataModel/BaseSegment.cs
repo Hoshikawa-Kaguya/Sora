@@ -5,5 +5,8 @@
     /// </summary>
     public abstract class BaseSegment
     {
+        internal BaseSegment()
+        {
+        }
     }
 }

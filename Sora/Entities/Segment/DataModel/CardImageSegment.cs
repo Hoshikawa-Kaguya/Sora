@@ -8,6 +8,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class CardImageSegment : BaseSegment
     {
+        internal CardImageSegment()
+        {
+        }
+
         /// <summary>
         /// 文件名/绝对路径/URL/base64
         /// </summary>

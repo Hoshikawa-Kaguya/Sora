@@ -8,6 +8,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class GiftSegment : BaseSegment
     {
+        internal GiftSegment()
+        {
+        }
+
         /// <summary>
         /// 接收目标
         /// </summary>

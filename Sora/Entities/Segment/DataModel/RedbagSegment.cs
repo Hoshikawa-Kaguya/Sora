@@ -8,6 +8,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class RedbagSegment : BaseSegment
     {
+        internal RedbagSegment()
+        {
+        }
+
         /// <summary>
         /// 祝福语/口令
         /// </summary>

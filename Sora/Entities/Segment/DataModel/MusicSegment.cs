@@ -10,6 +10,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class MusicSegment : BaseSegment
     {
+        internal MusicSegment()
+        {
+        }
+
         /// <summary>
         /// 音乐分享类型
         /// </summary>
