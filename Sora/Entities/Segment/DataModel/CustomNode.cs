@@ -3,7 +3,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Sora.Enumeration;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// <para>自定义转发节点</para>

@@ -1,30 +1,23 @@
 using Newtonsoft.Json;
 using Sora.Converter;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
-    /// 语音消息
+    /// 短视频
     /// </summary>
-    public class RecordSegment : BaseSegment
+    public class VideoSegment : BaseSegment
     {
         #region 属性
 
         /// <summary>
-        /// 文件名/绝对路径/URL/base64
+        /// 视频文件名
         /// </summary>
         [JsonProperty(PropertyName = "file")]
-        public string RecordFile { get; internal set; }
+        public string VideoFile { get; internal set; }
 
         /// <summary>
-        /// 表示变声
-        /// </summary>
-        [JsonConverter(typeof(StringConverter))]
-        [JsonProperty(PropertyName = "magic")]
-        public int? Magic { get; internal set; }
-
-        /// <summary>
-        /// 语音 URL
+        /// 视频 URL
         /// </summary>
         [JsonProperty(PropertyName = "url", NullValueHandling = NullValueHandling.Ignore)]
         public string Url { get; internal set; }
@@ -37,7 +30,7 @@ namespace Sora.Entities.MessageSegment.Segment
         public int? Cache { get; internal set; }
 
         /// <summary>
-        /// 是否使用代理
+        /// 是否使用已缓存的文件
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "proxy", NullValueHandling = NullValueHandling.Ignore)]

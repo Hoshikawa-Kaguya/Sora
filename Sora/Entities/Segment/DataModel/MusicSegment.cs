@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration.EventParamsType;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// 音乐分享

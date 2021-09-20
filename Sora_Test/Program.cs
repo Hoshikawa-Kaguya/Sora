@@ -1,6 +1,6 @@
 using Sora.Net;
 using System.Threading.Tasks;
-using Sora.Entities.MessageSegment;
+using Sora.Entities.Segment;
 using Sora.Enumeration;
 using Sora.Net.Config;
 using YukariToolBox.FormatLog;

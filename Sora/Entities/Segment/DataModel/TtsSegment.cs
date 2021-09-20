@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// 语音转文字（TTS）

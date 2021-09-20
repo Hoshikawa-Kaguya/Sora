@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
-using Sora.Entities.MessageSegment;
+using Sora.Entities.Segment;
 using Sora.Enumeration.ApiType;
 
 namespace Sora.Entities
@@ -83,9 +83,9 @@ namespace Sora.Entities
         /// 获取At消息段
         /// </summary>
         /// <returns>
-        /// <see cref="SegmentData"/> AT
+        /// <see cref="SoraSegment"/> AT
         /// </returns>
-        public SegmentData At()
+        public SoraSegment At()
             => SegmentBuilder.At(Id);
 
         #endregion

@@ -5,8 +5,14 @@ namespace Sora.Enumeration.EventParamsType
     /// <summary>
     /// 群成员变动类型
     /// </summary>
+    [DefaultValue(Unknown)]
     public enum MemberChangeType
     {
+        /// <summary>
+        /// 未知，在转换错误时为此值
+        /// </summary>
+        [Description("")] Unknown,
+        
         /// <summary>
         /// 主动退群
         /// </summary>

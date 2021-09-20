@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Sora.OnebotModel.ApiParams;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// 自定义合并转发节点
@@ -27,7 +27,7 @@ namespace Sora.Entities.MessageSegment.Segment
         /// 原始消息内容
         /// </summary>
         [JsonProperty(PropertyName = "content")]
-        internal List<OnebotMessageElement> MessageList { get; set; }
+        internal List<OnebotSegment> MessageList { get; set; }
 
         /// <summary>
         /// 消息内容

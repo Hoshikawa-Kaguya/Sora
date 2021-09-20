@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using YukariToolBox.Time;
 
-namespace Sora.Entities.MessageSegment.Segment
+namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// 自定义回复

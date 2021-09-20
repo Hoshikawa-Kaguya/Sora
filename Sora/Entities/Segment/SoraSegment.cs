@@ -1,15 +1,15 @@
 using System;
 using Newtonsoft.Json.Linq;
-using Sora.Entities.MessageSegment.Segment;
+using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.OnebotModel.ApiParams;
 
-namespace Sora.Entities.MessageSegment
+namespace Sora.Entities.Segment
 {
     /// <summary>
     /// 消息段结构体
     /// </summary>
-    public readonly struct SegmentData
+    public readonly struct SoraSegment
     {
         #region 属性
 
@@ -37,7 +37,7 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         /// <param name="segmentType">消息段类型</param>
         /// <param name="dataObject">数据</param>
-        internal SegmentData(SegmentType segmentType, BaseSegment dataObject)
+        internal SoraSegment(SegmentType segmentType, BaseSegment dataObject)
         {
             MessageType = segmentType;
             Data        = dataObject;
@@ -61,7 +61,7 @@ namespace Sora.Entities.MessageSegment
 
         #region 获取数据内容(仅用于序列化)
 
-        internal OnebotMessageElement ToOnebotMessage() => new()
+        internal OnebotSegment ToOnebotMessage() => new()
         {
             MsgType = MessageType,
             RawData = JObject.FromObject(Data)
@@ -74,47 +74,47 @@ namespace Sora.Entities.MessageSegment
         /// <summary>
         /// 等于重载
         /// </summary>
-        public static bool operator ==(SegmentData segmentL, SegmentData segmentR)
+        public static bool operator ==(SoraSegment soraSegmentL, SoraSegment soraSegmentR)
         {
-            if (segmentL.Data is not null && segmentR.Data is not null)
-                return segmentL.MessageType == segmentR.MessageType &&
-                       JToken.DeepEquals(JToken.FromObject(segmentL.Data),
-                                         JToken.FromObject(segmentR.Data));
-            return segmentL.Data is null && segmentR.Data is null && segmentL.MessageType == segmentR.MessageType;
+            if (soraSegmentL.Data is not null && soraSegmentR.Data is not null)
+                return soraSegmentL.MessageType == soraSegmentR.MessageType &&
+                       JToken.DeepEquals(JToken.FromObject(soraSegmentL.Data),
+                                         JToken.FromObject(soraSegmentR.Data));
+            return soraSegmentL.Data is null && soraSegmentR.Data is null && soraSegmentL.MessageType == soraSegmentR.MessageType;
         }
 
         /// <summary>
         /// 不等于重载
         /// </summary>
-        public static bool operator !=(SegmentData segmentL, SegmentData segmentR)
+        public static bool operator !=(SoraSegment soraSegmentL, SoraSegment soraSegmentR)
         {
-            return !(segmentL == segmentR);
+            return !(soraSegmentL == soraSegmentR);
         }
 
         /// <summary>
         /// +运算重载
         /// </summary>
-        public static MessageBody operator +(SegmentData segmentR, SegmentData segmentL)
+        public static MessageBody operator +(SoraSegment soraSegmentR, SoraSegment soraSegmentL)
         {
-            var messages = new MessageBody { segmentR, segmentL };
+            var messages = new MessageBody { soraSegmentR, soraSegmentL };
             return messages;
         }
 
         /// <summary>
         /// +运算重载
         /// </summary>
-        public static MessageBody operator +(MessageBody message, SegmentData segment)
+        public static MessageBody operator +(MessageBody message, SoraSegment soraSegment)
         {
-            message.Add(segment);
+            message.Add(soraSegment);
             return message;
         }
 
         /// <summary>
         /// 隐式类型转换
         /// </summary>
-        public static implicit operator MessageBody(SegmentData segmentData)
+        public static implicit operator MessageBody(SoraSegment soraSegment)
         {
-            return new() { segmentData };
+            return new() { soraSegment };
         }
 
         #endregion
@@ -126,7 +126,7 @@ namespace Sora.Entities.MessageSegment
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (obj is SegmentData segment)
+            if (obj is SoraSegment segment)
             {
                 return this == segment;
             }

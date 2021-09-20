@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sora.Entities.MessageSegment;
+using Sora.Entities.Segment;
 using Sora.Enumeration;
 using YukariToolBox.FormatLog;
 
@@ -10,11 +10,11 @@ namespace Sora.Entities
     /// <summary>
     /// 消息段
     /// </summary>
-    public class MessageBody : IList<SegmentData>
+    public class MessageBody : IList<SoraSegment>
     {
         #region 私有字段
 
-        private readonly List<SegmentData> _message = new();
+        private readonly List<SoraSegment> _message = new();
 
         #endregion
 
@@ -37,7 +37,7 @@ namespace Sora.Entities
         /// <summary>
         /// 构造消息段列表
         /// </summary>
-        public MessageBody(List<SegmentData> messages)
+        public MessageBody(List<SoraSegment> messages)
         {
             RemoveIllegalSegment(ref messages);
             _message.Clear();
@@ -58,7 +58,7 @@ namespace Sora.Entities
         /// <summary>
         /// 迭代器
         /// </summary>
-        IEnumerator<SegmentData> IEnumerable<SegmentData>.GetEnumerator()
+        IEnumerator<SoraSegment> IEnumerable<SoraSegment>.GetEnumerator()
         {
             return _message.GetEnumerator();
         }
@@ -75,7 +75,7 @@ namespace Sora.Entities
         /// 添加消息段
         /// </summary>
         /// <param name="item">消息段</param>
-        public void Add(SegmentData item)
+        public void Add(SoraSegment item)
         {
             if (SegmentCheck(item))
                 _message.Add(item);
@@ -102,7 +102,7 @@ namespace Sora.Entities
         /// 判断包含
         /// </summary>
         /// <param name="item">消息段</param>
-        public bool Contains(SegmentData item)
+        public bool Contains(SoraSegment item)
         {
             return _message.Contains(item);
         }
@@ -112,7 +112,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="array">消息段数组</param>
         /// <param name="arrayIndex">索引</param>
-        public void CopyTo(SegmentData[] array, int arrayIndex)
+        public void CopyTo(SoraSegment[] array, int arrayIndex)
         {
             _message.CopyTo(array, arrayIndex);
         }
@@ -121,7 +121,7 @@ namespace Sora.Entities
         /// 删除消息段
         /// </summary>
         /// <param name="item">消息段</param>
-        public bool Remove(SegmentData item)
+        public bool Remove(SoraSegment item)
         {
             return _message.Remove(item);
         }
@@ -130,7 +130,7 @@ namespace Sora.Entities
         /// 索引查找
         /// </summary>
         /// <param name="item">消息段</param>
-        public int IndexOf(SegmentData item)
+        public int IndexOf(SoraSegment item)
         {
             return _message.IndexOf(item);
         }
@@ -140,7 +140,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="index">索引</param>
         /// <param name="item">消息段</param>
-        public void Insert(int index, SegmentData item)
+        public void Insert(int index, SoraSegment item)
         {
             if (SegmentCheck(item))
                 _message.Insert(index, item);
@@ -158,7 +158,7 @@ namespace Sora.Entities
         /// <summary>
         /// AddRange
         /// </summary>
-        public void AddRange(List<SegmentData> segments)
+        public void AddRange(List<SoraSegment> segments)
         {
             RemoveIllegalSegment(ref segments);
             _message.AddRange(segments);
@@ -167,7 +167,7 @@ namespace Sora.Entities
         /// <summary>
         /// 转普通列表
         /// </summary>
-        public List<SegmentData> ToList()
+        public List<SoraSegment> ToList()
         {
             return _message;
         }
@@ -194,7 +194,7 @@ namespace Sora.Entities
         /// <param name="index">索引</param>
         /// <exception cref="ArgumentOutOfRangeException">索引超出范围</exception>
         /// <exception cref="NullReferenceException">读取到了空消息段</exception>
-        public SegmentData this[int index]
+        public SoraSegment this[int index]
         {
             get
             {
@@ -235,7 +235,7 @@ namespace Sora.Entities
 
         #region 类内部工具
 
-        private static void RemoveIllegalSegment(ref List<SegmentData> segmentDatas)
+        private static void RemoveIllegalSegment(ref List<SoraSegment> segmentDatas)
         {
             var iCount = segmentDatas.RemoveAll(s =>
                                                     s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
@@ -243,7 +243,7 @@ namespace Sora.Entities
             if (iCount != 0) Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
         }
 
-        private static bool SegmentCheck(SegmentData s)
+        private static bool SegmentCheck(SoraSegment s)
             => !(s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
                  s.Data is null);
 
