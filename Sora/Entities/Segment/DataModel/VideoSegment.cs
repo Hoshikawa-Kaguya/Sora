@@ -8,6 +8,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class VideoSegment : BaseSegment
     {
+        internal VideoSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

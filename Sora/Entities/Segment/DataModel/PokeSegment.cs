@@ -10,6 +10,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class PokeSegment : BaseSegment
     {
+        internal PokeSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

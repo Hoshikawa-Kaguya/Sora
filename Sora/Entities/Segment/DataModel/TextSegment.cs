@@ -7,6 +7,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class TextSegment : BaseSegment
     {
+        internal TextSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

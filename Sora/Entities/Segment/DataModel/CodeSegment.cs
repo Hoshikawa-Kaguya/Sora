@@ -10,6 +10,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class CodeSegment : BaseSegment
     {
+        internal CodeSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

@@ -8,6 +8,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class ReplySegment : BaseSegment
     {
+        internal ReplySegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

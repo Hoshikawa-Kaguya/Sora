@@ -7,6 +7,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class ImageSegment : BaseSegment
     {
+        internal ImageSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

@@ -7,6 +7,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class UnknownSegment : BaseSegment
     {
+        internal UnknownSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

@@ -7,6 +7,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class CustomMusicSegment : BaseSegment
     {
+        internal CustomMusicSegment()
+        {
+        }
+
         [JsonProperty(PropertyName = "type")] internal string ShareType;
 
         /// <summary>

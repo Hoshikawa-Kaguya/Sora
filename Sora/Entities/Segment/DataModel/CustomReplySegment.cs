@@ -9,6 +9,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class CustomReplySegment : BaseSegment
     {
+        internal CustomReplySegment()
+        {
+        }
+
         /// <summary>
         /// 自定义回复的信息
         /// </summary>

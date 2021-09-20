@@ -8,6 +8,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class FaceSegment : BaseSegment
     {
+        internal FaceSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

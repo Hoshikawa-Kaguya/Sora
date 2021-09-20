@@ -7,6 +7,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class TtsSegment : BaseSegment
     {
+        internal TtsSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>

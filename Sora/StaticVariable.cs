@@ -84,7 +84,7 @@ namespace Sora
 
             Log.Debug("Sora", "Service info cleanup finished");
         }
-        
+
         /// <summary>
         /// 数据文本匹配正则
         /// </summary>

@@ -7,6 +7,10 @@ namespace Sora.Entities.Segment.DataModel
     /// </summary>
     public class ShareSegment : BaseSegment
     {
+        internal ShareSegment()
+        {
+        }
+
         #region 属性
 
         /// <summary>
