@@ -55,7 +55,7 @@ namespace Sora.Entities.Segment
         /// <returns>
         /// 数据结构体类型
         /// </returns>
-        public new Type GetType() => DataType;
+        public Type GetCqCodeDataType() => DataType;
 
         #endregion
 
