@@ -9,6 +9,7 @@ using Sora.OnebotModel.OnebotEvent.RequestEvent;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Sora.Enumeration.ApiType;
 using YukariToolBox.FormatLog;
 
@@ -198,6 +199,9 @@ namespace Sora.OnebotInterface
         /// <param name="connection">客户端链接接口</param>
         internal void Adapter(JObject messageJson, Guid connection)
         {
+            if (Log.GetLogLevel() == LogLevel.Debug)
+                Log.Debug("Socket", 
+                          $"Get json message:{messageJson.ToString(Formatting.None)}");
             switch (GetJsonValue(messageJson, "post_type"))
             {
                 //元事件类型
