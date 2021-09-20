@@ -57,7 +57,7 @@ namespace Sora.EventArgs.SoraEvent
         {
             //将api消息段转换为sorasegment
             Message = new Message(serviceId, connectionId, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
-                                  MessageConverter.Parse(privateMsgArgs.MessageList),
+                                  privateMsgArgs.MessageList.ToMessageBody(),
                                   privateMsgArgs.Time, privateMsgArgs.Font, null);
             Sender             = new User(serviceId, connectionId, privateMsgArgs.UserId);
             IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;

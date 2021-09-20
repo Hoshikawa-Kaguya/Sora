@@ -74,7 +74,7 @@ namespace Sora.EventArgs.SoraEvent
             IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
             //将api消息段转换为sorasegment
             Message = new Message(serviceId, connectionId, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
-                                  MessageConverter.Parse(groupMsgArgs.MessageList), groupMsgArgs.Time,
+                                  groupMsgArgs.MessageList.ToMessageBody(), groupMsgArgs.Time,
                                   groupMsgArgs.Font, groupMsgArgs.MessageSequence);
             Sender      = new User(serviceId, connectionId, groupMsgArgs.UserId);
             SourceGroup = new Group(serviceId, connectionId, groupMsgArgs.GroupId);

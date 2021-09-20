@@ -73,7 +73,7 @@ namespace Sora.Converter
         /// </summary>
         /// <param name="messages">消息段数组</param>
         [Reviewed("nidbCN", "2021-03-24 19:49")]
-        internal static MessageBody Parse(List<OnebotMessageElement> messages)
+        internal static MessageBody ToMessageBody(this List<OnebotMessageElement> messages)
         {
             Log.Debug("Sora", "Parsing msg list");
             if (messages == null || messages.Count == 0) return new MessageBody();

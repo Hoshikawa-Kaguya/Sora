@@ -443,7 +443,7 @@ namespace Sora.OnebotInterface
                                          connection,
                                          msgId,
                                          ret["data"]?["raw_message"]?.ToString(),
-                                         MessageConverter.Parse(rawMessage    ?? new List<OnebotMessageElement>()),
+                                         (rawMessage ?? new List<OnebotMessageElement>()).ToMessageBody(),
                                          Convert.ToInt64(ret["data"]?["time"] ?? -1),
                                          0,
                                          Convert.ToBoolean(ret["data"]?["group"]           ?? false)

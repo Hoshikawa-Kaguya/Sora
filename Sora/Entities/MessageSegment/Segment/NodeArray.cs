@@ -22,7 +22,7 @@ namespace Sora.Entities.MessageSegment.Segment
         /// </summary>
         public void ParseNode()
         {
-            NodeMsgList.ForEach(node => node.MessageBody = MessageConverter.Parse(node.MessageList));
+            NodeMsgList.ForEach(node => node.MessageBody = node.MessageList.ToMessageBody());
         }
 
         #endregion
