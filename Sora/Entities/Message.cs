@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
+using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 
@@ -228,6 +229,22 @@ namespace Sora.Entities
         public override int GetHashCode()
         {
             return HashCode.Combine(MessageId, RawText, MessageBody, Time, Font, MessageSequence);
+        }
+
+        #endregion
+
+        #region 索引器
+
+        /// <summary>
+        /// 索引器
+        /// </summary>
+        /// <param name="index">索引</param>
+        /// <exception cref="ArgumentOutOfRangeException">索引超出范围</exception>
+        /// <exception cref="NullReferenceException">读取到了空消息段</exception>
+        public SoraSegment this[int index]
+        {
+            get => MessageBody[index];
+            internal set => MessageBody[index] = value;
         }
 
         #endregion
