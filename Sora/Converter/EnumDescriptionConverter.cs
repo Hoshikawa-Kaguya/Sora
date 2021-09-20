@@ -59,7 +59,7 @@ namespace Sora.Converter
                     return Convert.ChangeType(field.GetValue(-1), objectType);
                 }
             }
-            
+
             return objectType.IsEnum ? Activator.CreateInstance(objectType) : null;
         }
     }

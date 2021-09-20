@@ -11,9 +11,8 @@ namespace Sora.Enumeration.ApiType
         /// <summary>
         /// 未知，在转换类型错误时为此值
         /// </summary>
-        [Description("")]
-        Unknown,
-        
+        [Description("")] Unknown,
+
         #region OnebotAPI
 
         /// <summary>
