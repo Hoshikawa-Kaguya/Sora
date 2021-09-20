@@ -23,36 +23,6 @@ namespace Sora
         internal static readonly ConcurrentDictionary<Guid, WaitingInfo> WaitingDict = new();
 
         /// <summary>
-        /// 数据文本匹配正则
-        /// </summary>
-        internal static readonly Dictionary<FileType, Regex> FileRegices = new()
-        {
-            //绝对路径-linux/osx
-            {
-                FileType.UnixFile, new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled)
-            },
-            //绝对路径-win
-            {
-                FileType.WinFile,
-                new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled)
-            },
-            //base64
-            {
-                FileType.Base64, new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
-                                           RegexOptions.Compiled)
-            },
-            //网络图片链接
-            {
-                FileType.Url,
-                new
-                    Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
-                          RegexOptions.Compiled)
-            },
-            //文件名
-            { FileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled) }
-        };
-
-        /// <summary>
         /// API响应被观察对象
         /// 结构:Tuple[echo标识符,响应json]
         /// </summary>
@@ -85,8 +55,9 @@ namespace Sora
             //清空服务信息
             ServiceInfos.TryRemove(serviceId, out _);
             //清空连接信息
-            var removeConnList = ConnectionInfos.Where(i => i.Value.ServiceId == serviceId)
-                                                .ToList();
+            var removeConnList =
+                ConnectionInfos.Where(i => i.Value.ServiceId == serviceId)
+                               .ToList();
             foreach (var (guid, conn) in removeConnList)
             {
                 try
@@ -102,8 +73,9 @@ namespace Sora
             }
 
             //清空等待信息
-            var removeWaitList = WaitingDict.Where(i => i.Value.ServiceId == serviceId)
-                                            .ToList();
+            var removeWaitList =
+                WaitingDict.Where(i => i.Value.ServiceId == serviceId)
+                           .ToList();
             foreach (var (guid, waitingInfo) in removeWaitList)
             {
                 waitingInfo.Semaphore.Set();
@@ -112,5 +84,35 @@ namespace Sora
 
             Log.Debug("Sora", "Service info cleanup finished");
         }
+        
+        /// <summary>
+        /// 数据文本匹配正则
+        /// </summary>
+        internal static readonly Dictionary<FileType, Regex> FileRegices = new()
+        {
+            //绝对路径-linux/osx
+            {
+                FileType.UnixFile, new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled)
+            },
+            //绝对路径-win
+            {
+                FileType.WinFile,
+                new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled)
+            },
+            //base64
+            {
+                FileType.Base64, new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
+                                           RegexOptions.Compiled)
+            },
+            //网络图片链接
+            {
+                FileType.Url,
+                new
+                    Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
+                          RegexOptions.Compiled)
+            },
+            //文件名
+            { FileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled) }
+        };
     }
 }
