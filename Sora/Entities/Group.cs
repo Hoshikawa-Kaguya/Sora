@@ -99,7 +99,7 @@ namespace Sora.Entities
         /// 但好像不能用的样子
         /// </summary>
         /// <param name="nodeList">
-        /// 节点(<see cref="Node"/>)消息段列表
+        /// 节点(<see cref="CustomNode"/>)消息段列表
         /// </param>
         public async ValueTask<ApiStatus> SendGroupForwardMsg(IEnumerable<CustomNode> nodeList)
         {

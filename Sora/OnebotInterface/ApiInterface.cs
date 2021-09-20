@@ -490,7 +490,7 @@ namespace Sora.OnebotInterface
         /// <param name="connection">服务器连接标识</param>
         /// <param name="msgId">合并转发 ID</param>
         /// <returns>ApiResponseCollection</returns>
-        internal static async ValueTask<(ApiStatus apiStatus, NodeArray nodeArray)> GetForwardMessage(
+        internal static async ValueTask<(ApiStatus apiStatus, List<Node> nodeArray)> GetForwardMessage(
             Guid connection, string msgId)
         {
             if (string.IsNullOrEmpty(msgId)) throw new NullReferenceException(nameof(msgId));
@@ -507,8 +507,8 @@ namespace Sora.OnebotInterface
             Log.Debug("Sora", $"Get get_forward_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
             if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, null);
             //转换消息类型
-            var messageList = ret?["data"]?.ToObject<NodeArray>() ?? new NodeArray();
-            messageList.ParseNode();
+            var messageList = ret?["data"]?["messages"]?.ToObject<List<Node>>() ?? new List<Node>();
+            messageList.ForEach(node => node.MessageBody = node.MessageList.ToMessageBody());
             return (apiStatus, messageList);
         }
 

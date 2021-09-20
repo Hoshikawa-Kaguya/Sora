@@ -7,7 +7,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 自定义合并转发节点
     /// </summary>
-    public struct Node
+    public class Node
     {
         #region 属性
 
