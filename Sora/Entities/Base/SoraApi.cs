@@ -132,7 +132,7 @@ namespace Sora.Entities.Base
         {
             if (string.IsNullOrEmpty(forwardId)) throw new NullReferenceException(nameof(forwardId));
             var (apiStatus, nodeArray) = await ApiInterface.GetForwardMessage(ConnectionId, forwardId);
-            return (apiStatus, nodeArray.NodeMsgList);
+            return (apiStatus, nodeArray);
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace Sora.Entities.Base
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="nodeList">
-        /// 节点(<see cref="Node"/>)消息段列表
+        /// 节点(<see cref="CustomNode"/>)消息段列表
         /// </param>
         public async ValueTask<ApiStatus> SendGroupForwardMsg(long groupId, IEnumerable<CustomNode> nodeList)
         {
