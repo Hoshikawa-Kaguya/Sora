@@ -480,7 +480,7 @@ namespace Sora.Entities.Base
         }
 
         /// <summary>
-        /// 获取群根目录文件列表
+        /// 获取群子目录文件列表
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="foldId">文件夹ID</param>
