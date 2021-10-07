@@ -134,7 +134,7 @@ namespace Sora.Entities
         }
 
         /// <summary>
-        /// 获取群根目录文件列表
+        /// 获取群子目录文件列表
         /// </summary>
         /// <param name="foldId">文件夹ID</param>
         /// <returns>
