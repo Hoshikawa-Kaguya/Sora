@@ -43,7 +43,7 @@ namespace Sora
         /// <summary>
         /// 版本号
         /// </summary>
-        public const string Version = "1.0.0-rc23";
+        public const string Version = "1.0.0-rc24";
 
         /// <summary>
         /// 清除服务数据
