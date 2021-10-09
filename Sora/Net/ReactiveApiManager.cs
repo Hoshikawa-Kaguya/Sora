@@ -85,7 +85,7 @@ namespace Sora.Net
                 return (SocketSendError(), null);
 
             //等待客户端返回调用结果
-            var response = await apiTask.ConfigureAwait(false);
+            var response = await apiTask;
             //检查API返回
             if (response != null && response.Count != 0)
             {

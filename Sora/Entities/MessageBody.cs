@@ -163,6 +163,23 @@ namespace Sora.Entities
             RemoveIllegalSegment(ref segments);
             _message.AddRange(segments);
         }
+        
+        /// <summary>
+        /// AddRange
+        /// </summary>
+        public void AddRange(MessageBody segments)
+        {
+            RemoveIllegalSegment(ref segments);
+            _message.AddRange(segments);
+        }
+
+        /// <summary>
+        /// RemoveAll
+        /// </summary>
+        public int RemoveAll(Predicate<SoraSegment> match)
+        {
+            return _message.RemoveAll(match);
+        }
 
         /// <summary>
         /// 转普通列表
@@ -218,6 +235,15 @@ namespace Sora.Entities
             message.Add(SegmentBuilder.TextToBase(text));
             return message;
         }
+        
+        /// <summary>
+        /// 运算重载
+        /// </summary>
+        public static MessageBody operator +(MessageBody messageL, MessageBody messageR)
+        {
+            messageL.AddRange(messageR);
+            return messageL;
+        }
 
         #endregion
 
@@ -234,6 +260,14 @@ namespace Sora.Entities
         #endregion
 
         #region 类内部工具
+        
+        private static void RemoveIllegalSegment(ref MessageBody segmentDatas)
+        {
+            var iCount = segmentDatas.RemoveAll(s =>
+                                                    s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
+                                                    s.Data is null);
+            if (iCount != 0) Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
+        }
 
         private static void RemoveIllegalSegment(ref List<SoraSegment> segmentDatas)
         {

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Sora.Entities.Info
 {
@@ -11,18 +11,18 @@ namespace Sora.Entities.Info
         /// 昵称
         /// </summary>
         [JsonProperty(PropertyName = "nickname")]
-        public string NickName { get; }
+        public string NickName { get; internal init; }
 
         /// <summary>
         /// 用户QQ号
         /// </summary>
         [JsonProperty(PropertyName = "user_id")]
-        public long UserId { get; }
+        public long UserId { get; internal init; }
 
         /// <summary>
         /// 添加途径
         /// </summary>
         [JsonProperty(PropertyName = "source")]
-        public string Source { get; }
+        public string Source { get; internal init; }
     }
 }

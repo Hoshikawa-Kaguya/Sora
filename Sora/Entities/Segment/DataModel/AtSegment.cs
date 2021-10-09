@@ -16,7 +16,7 @@ namespace Sora.Entities.Segment.DataModel
 
         /// <summary>
         /// At目标UID
-        /// 为<see langword="null"/>时为At全体
+        /// 为<see langword="all"/>时为At全体
         /// </summary>
         [JsonConverter(typeof(StringConverter))]
         [JsonProperty(PropertyName = "qq")]
