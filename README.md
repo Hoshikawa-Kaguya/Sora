@@ -28,6 +28,8 @@
 
 > 本框架只支持Array的上报格式
 
+> 目前框架的协议版本是v11
+
 查看框架的说明文档 [Docs](https://sora-docs.yukari.one/) [更新日志](https://sora-docs.yukari.one/updatelog/)
 
 文档目前只有简单的向导和自动生成API文档
