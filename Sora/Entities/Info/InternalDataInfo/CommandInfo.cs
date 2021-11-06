@@ -77,6 +77,11 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// </summary>
         internal InvokeType InvokeType { get; }
 
+        /// <summary>
+        /// 指令执行异常处理
+        /// </summary>
+        internal Action<Exception> ExceptionHandler { get; }
+
         #endregion
 
         #region 构造方法
@@ -85,8 +90,8 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// 指令信息构造(常规指令构建)
         /// </summary>
         internal CommandInfo(string desc, string[] regex, string groupName, MethodInfo method,
-                             MemberRoleType permissionType, int priority, RegexOptions regexOptions,
-                             Type instanceType = null)
+                             MemberRoleType permissionType, int priority, RegexOptions regexOptions, 
+                             Action<Exception> exceptionHandler, Type instanceType = null)
         {
             Desc               = desc;
             Regex              = regex;
@@ -100,13 +105,14 @@ namespace Sora.Entities.Info.InternalDataInfo
             RegexOptions       = regexOptions;
             InvokeType         = InvokeType.Method;
             SourceFlag         = null;
+            ExceptionHandler   = exceptionHandler;
         }
 
         /// <summary>
         /// 指令信息构造(动态指令构建)
         /// </summary>
         internal CommandInfo(string desc, string[] regex, string groupName,
-                             Func<GroupMessageEventArgs, ValueTask> actionBlock,
+                             Func<GroupMessageEventArgs, ValueTask> actionBlock, Action<Exception> exceptionHandler,
                              MemberRoleType permissionType, int priority, RegexOptions regexOptions)
         {
             Desc               = desc;
@@ -120,6 +126,7 @@ namespace Sora.Entities.Info.InternalDataInfo
             Priority           = priority;
             RegexOptions       = regexOptions;
             InvokeType         = InvokeType.Action;
+            ExceptionHandler   = exceptionHandler;
             SourceFlag         = Enumeration.SourceFlag.Group;
         }
 
@@ -127,7 +134,7 @@ namespace Sora.Entities.Info.InternalDataInfo
         /// 指令信息构造(动态指令构建)
         /// </summary>
         internal CommandInfo(string desc, string[] regex, string groupName,
-                             Func<PrivateMessageEventArgs, ValueTask> actionBlock,
+                             Func<PrivateMessageEventArgs, ValueTask> actionBlock, Action<Exception> exceptionHandler,
                              MemberRoleType permissionType, int priority, RegexOptions regexOptions)
         {
             Desc               = desc;
@@ -141,6 +148,7 @@ namespace Sora.Entities.Info.InternalDataInfo
             Priority           = priority;
             RegexOptions       = regexOptions;
             InvokeType         = InvokeType.Action;
+            ExceptionHandler   = exceptionHandler;
             SourceFlag         = Enumeration.SourceFlag.Private;
         }
 

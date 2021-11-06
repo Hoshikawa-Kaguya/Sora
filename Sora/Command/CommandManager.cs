@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,7 +77,7 @@ namespace Sora.Command
             //生成指令信息
             foreach (var (classType, methodInfos) in cmdGroups)
             {
-                foreach (MethodInfo methodInfo in methodInfos)
+                foreach (var methodInfo in methodInfos)
                 {
                     switch (GenerateCommandInfo(methodInfo, classType, out var commandInfo))
                     {
@@ -103,6 +104,7 @@ namespace Sora.Command
         /// <summary>
         /// 动态创建指令
         /// </summary>
+        /// <param name="exceptionHandler">异常处理</param>
         /// <param name="desc">指令描述</param>
         /// <param name="cmdExps">指令表达式</param>
         /// <param name="matchType">匹配类型</param>
@@ -116,11 +118,11 @@ namespace Sora.Command
                                          string[] cmdExps, MatchType matchType,
                                          MemberRoleType permissionType = MemberRoleType.Member,
                                          RegexOptions regexOptions = RegexOptions.None,
-                                         string desc = "")
+                                         Action<Exception> exceptionHandler = null, string desc = "")
         {
             //生成指令信息
             if (_groupCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
-                                                                permissionType)))
+                                                                permissionType, exceptionHandler)))
                 Log.Debug("Command", "Registered group command [dynamic]");
             else
                 throw new NotSupportedException("cannot add new group command");
@@ -132,6 +134,7 @@ namespace Sora.Command
         /// <summary>
         /// 动态创建指令
         /// </summary>
+        /// <param name="exceptionHandler">异常处理</param>
         /// <param name="desc">指令描述</param>
         /// <param name="cmdExps">指令表达式</param>
         /// <param name="matchType">匹配类型</param>
@@ -145,11 +148,11 @@ namespace Sora.Command
                                            string[] cmdExps, MatchType matchType,
                                            MemberRoleType permissionType = MemberRoleType.Member,
                                            RegexOptions regexOptions = RegexOptions.None,
-                                           string desc = "")
+                                           Action<Exception> exceptionHandler = null, string desc = "")
         {
             //生成指令信息
             if (_privateCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
-                                                                  permissionType)))
+                                                                  permissionType, exceptionHandler)))
                 Log.Debug("Command", "Registered private command [dynamic]");
             else
                 throw new NotSupportedException("cannot add new group command");
@@ -396,6 +399,7 @@ namespace Sora.Command
                                           (commandAttr as RegexCommand)?.Priority        ?? 0,
                                           (commandAttr as RegexCommand)?.RegexOptions ??
                                           RegexOptions.None,
+                                          (commandAttr as RegexCommand)?.ExceptionHandler,
                                           method.IsStatic ? null : classType);
 
             return commandAttr;
@@ -410,13 +414,14 @@ namespace Sora.Command
         /// <param name="regexOptions">正则匹配选项</param>
         /// <param name="commandBlock">指令委托</param>
         /// <param name="permissionType">权限等级</param>
+        /// <param name="exceptionHandler">异常处理</param>
         /// <exception cref="NullReferenceException">空参数异常</exception>
         /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
         [NeedReview("ALL")]
         private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
                                                   RegexOptions regexOptions,
                                                   Func<GroupMessageEventArgs, ValueTask> commandBlock,
-                                                  MemberRoleType permissionType)
+                                                  MemberRoleType permissionType, Action<Exception> exceptionHandler)
         {
             //判断参数合法性
             if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
@@ -432,7 +437,7 @@ namespace Sora.Command
             var priority = _groupCommands.Count == 0 ? 0 : _groupCommands.Min(cmd => cmd.Priority) - 1;
 
             //创建指令信息
-            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissionType,
+            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, exceptionHandler, permissionType,
                                    priority, regexOptions | RegexOptions.Compiled);
         }
 
@@ -445,13 +450,14 @@ namespace Sora.Command
         /// <param name="regexOptions">正则匹配选项</param>
         /// <param name="commandBlock">指令委托</param>
         /// <param name="permissionType">权限等级</param>
+        /// <param name="exceptionHandler">异常处理</param>
         /// <exception cref="NullReferenceException">空参数异常</exception>
         /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
         [NeedReview("ALL")]
         private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
                                                   RegexOptions regexOptions,
                                                   Func<PrivateMessageEventArgs, ValueTask> commandBlock,
-                                                  MemberRoleType permissionType)
+                                                  MemberRoleType permissionType, Action<Exception> exceptionHandler)
         {
             //判断参数合法性
             if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
@@ -467,7 +473,7 @@ namespace Sora.Command
             var priority = _privateCommands.Count == 0 ? 0 : _privateCommands.Min(cmd => cmd.Priority) - 1;
 
             //创建指令信息
-            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, permissionType,
+            return new CommandInfo(desc, matchExp, "dynamic", commandBlock, exceptionHandler, permissionType,
                                    priority, regexOptions | RegexOptions.Compiled);
         }
 
@@ -545,14 +551,14 @@ namespace Sora.Command
                                 Log.Debug("Command", "invoke async command method");
                                 await commandInfo.MethodInfo
                                                  .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                         new object[] { eventArgs });
+                                                         new object[] {eventArgs});
                             }
                             else
                             {
                                 Log.Debug("Command", "invoke command method");
                                 commandInfo.MethodInfo
                                            .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                   new object[] { eventArgs });
+                                                   new object[] {eventArgs});
                             }
 
                             break;
@@ -584,25 +590,34 @@ namespace Sora.Command
                 }
                 catch (Exception e)
                 {
-                    Log.Error("CommandAdapter", Log.ErrorLogBuilder(e));
+                    var errLog = Log.ErrorLogBuilder(e);
+                    Log.Error("CommandAdapter", errLog);
 
-                    //描述不为空，才需要打印错误信息
+                    var msg = new StringBuilder();
+                    msg.AppendLine("指令执行错误");
                     if (!string.IsNullOrEmpty(commandInfo.Desc))
+                        msg.AppendLine($"Description：{commandInfo.Desc}");
+                    msg.AppendLine(Log.ErrorLogBuilder(e));
+
+
+                    switch (eventArgs)
                     {
-                        switch (eventArgs)
+                        case GroupMessageEventArgs groupMessageArgs:
                         {
-                            case GroupMessageEventArgs groupMessageEvent:
-                            {
-                                await groupMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
-                                break;
-                            }
-                            case PrivateMessageEventArgs privateMessageEvent:
-                            {
-                                await privateMessageEvent.Reply($"指令执行错误\n{commandInfo.Desc}");
-                                break;
-                            }
+                            await groupMessageArgs.Reply(msg.ToString());
+                            break;
+                        }
+                        case PrivateMessageEventArgs privateMessageArgs:
+                        {
+                            await privateMessageArgs.Reply(msg.ToString());
+                            break;
                         }
                     }
+
+                    //检查是否有异常处理
+                    if (commandInfo.ExceptionHandler is not null)
+                        commandInfo.ExceptionHandler(e);
+                    else throw;
                 }
             }
         }
