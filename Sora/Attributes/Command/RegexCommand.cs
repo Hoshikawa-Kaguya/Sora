@@ -51,6 +51,11 @@ namespace Sora.Attributes.Command
         /// </summary>
         public RegexOptions RegexOptions { get; init; } = RegexOptions.None;
 
+        /// <summary>
+        /// 指令执行异常处理
+        /// </summary>
+        public readonly Action<Exception> ExceptionHandler = null;
+
         #endregion
 
         #region 构造方法
