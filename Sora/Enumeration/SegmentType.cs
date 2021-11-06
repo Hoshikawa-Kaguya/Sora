@@ -74,7 +74,7 @@ namespace Sora.Enumeration
 
         #endregion
 
-        #region Go扩展消息段
+        #region GoCQ扩展消息段
 
         /// <summary>
         /// 群戳一戳

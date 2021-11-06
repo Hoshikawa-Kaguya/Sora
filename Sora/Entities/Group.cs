@@ -92,7 +92,7 @@ namespace Sora.Entities
             long userId, bool useCache = true)
             => await SoraApi.GetGroupMemberInfo(Id, userId, useCache);
 
-        #region Go扩展
+        #region GoCQ扩展
 
         /// <summary>
         /// 发送合并转发(群)
@@ -323,7 +323,7 @@ namespace Sora.Entities
             return await SoraApi.KickGroupMember(Id, userId, rejectRequest);
         }
 
-        #region Go扩展
+        #region GoCQ扩展
 
         /// <summary>
         /// 设置群名

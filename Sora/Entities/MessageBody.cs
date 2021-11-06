@@ -87,7 +87,7 @@ namespace Sora.Entities
         /// <param name="text">纯文本消息段</param>
         public void Add(string text)
         {
-            _message.Add(SegmentBuilder.TextToBase(text));
+            _message.Add(SoraSegment.Text(text));
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace Sora.Entities
             RemoveIllegalSegment(ref segments);
             _message.AddRange(segments);
         }
-        
+
         /// <summary>
         /// AddRange
         /// </summary>
@@ -199,7 +199,7 @@ namespace Sora.Entities
         /// </summary>
         /// <param name="text">纯文本信息</param>
         public void AddText(string text) =>
-            _message.Add(SegmentBuilder.TextToBase(text));
+            _message.Add(SoraSegment.Text(text));
 
         #endregion
 
@@ -232,10 +232,19 @@ namespace Sora.Entities
         /// </summary>
         public static MessageBody operator +(MessageBody message, string text)
         {
-            message.Add(SegmentBuilder.TextToBase(text));
+            message.Add(SoraSegment.Text(text));
             return message;
         }
-        
+
+        /// <summary>
+        /// 运算重载
+        /// </summary>
+        public static MessageBody operator +(string text, MessageBody message)
+        {
+            message.Insert(0, SoraSegment.Text(text));
+            return message;
+        }
+
         /// <summary>
         /// 运算重载
         /// </summary>
@@ -254,13 +263,13 @@ namespace Sora.Entities
         /// </summary>
         public static implicit operator MessageBody(string text)
         {
-            return new() { SegmentBuilder.TextToBase(text) };
+            return new() {SoraSegment.Text(text)};
         }
 
         #endregion
 
         #region 类内部工具
-        
+
         private static void RemoveIllegalSegment(ref MessageBody segmentDatas)
         {
             var iCount = segmentDatas.RemoveAll(s =>

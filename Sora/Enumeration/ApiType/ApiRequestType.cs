@@ -140,7 +140,7 @@ namespace Sora.Enumeration.ApiType
 
         #endregion
 
-        #region GoAPI
+        #region GoCQ API
 
         /// <summary>
         /// 获取图片信息

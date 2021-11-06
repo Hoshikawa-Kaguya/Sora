@@ -1,6 +1,7 @@
 using Sora.Attributes.Command;
 using Sora.EventArgs.SoraEvent;
 using System.Threading.Tasks;
+using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using YukariToolBox.FormatLog;
 
@@ -15,7 +16,7 @@ namespace Sora_Test
             var s = eventArgs.Message.MessageBody[0].Data as TextSegment;
             Log.Info("触发指令", $"txet:{s!.Content}");
             eventArgs.IsContinueEventChain = false;
-            await eventArgs.Reply("怪欸");
+            await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "怪欸");
         }
     }
 }

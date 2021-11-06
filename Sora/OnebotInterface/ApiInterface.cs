@@ -78,6 +78,9 @@ namespace Sora.OnebotInterface
         {
             Log.Debug("Sora", "Sending send_msg(Group) request");
             if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
+            var msglist = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
+                                  .Select(msg => msg.ToOnebotMessage())
+                                  .ToList();
             //发送信息
             var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
             {
@@ -87,9 +90,7 @@ namespace Sora.OnebotInterface
                     MessageType = MessageType.Group,
                     GroupId     = target,
                     //转换消息段列表
-                    Message = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
-                                      .Select(msg => msg.ToOnebotMessage())
-                                      .ToList(),
+                    Message = msglist,
                 }
             }, connection, timeout);
             Log.Debug("Sora", $"Get send_msg(Group) response {nameof(apiStatus)}={apiStatus.RetCode}");
@@ -385,7 +386,7 @@ namespace Sora.OnebotInterface
                     JObject.FromObject((ret["data"]?["stat"] ?? ret["data"]) ?? new JObject()));
         }
 
-        #region Go API
+        #region GoCQ API
 
         /// <summary>
         /// 获取图片信息
@@ -854,7 +855,7 @@ namespace Sora.OnebotInterface
                 }
             }, connection);
             Log.Debug("Sora", $"Get check_url_safely response {nameof(apiStatus)}={apiStatus.RetCode}");
-            return (apiStatus, (SecurityLevelType)Convert.ToInt32(ret?["data"]?["level"] ?? 1));
+            return (apiStatus, (SecurityLevelType) Convert.ToInt32(ret?["data"]?["level"] ?? 1));
         }
 
         /// <summary>
@@ -1257,7 +1258,7 @@ namespace Sora.OnebotInterface
             return apiStatus;
         }
 
-        #region Go API
+        #region GoCQ API
 
         /// <summary>
         /// 设置群名
