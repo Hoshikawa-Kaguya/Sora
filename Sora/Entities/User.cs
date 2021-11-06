@@ -86,7 +86,7 @@ namespace Sora.Entities
         /// <see cref="SoraSegment"/> AT
         /// </returns>
         public SoraSegment At()
-            => SegmentBuilder.At(Id);
+            => SoraSegment.At(Id);
 
         #endregion
 

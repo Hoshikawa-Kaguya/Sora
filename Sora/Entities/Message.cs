@@ -170,7 +170,7 @@ namespace Sora.Entities
 
         /// <summary>
         /// <para>转纯文本信息</para>
-        /// <para>注意：s码会被转换为onebot的string消息段格式</para>
+        /// <para>注意：消息段会被转换为onebot的string消息段格式</para>
         /// </summary>
         public override string ToString()
         {

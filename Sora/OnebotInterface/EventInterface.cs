@@ -558,7 +558,7 @@ namespace Sora.OnebotInterface
                     break;
                 }
                 //群名片变更
-                //此事件仅在Go上存在
+                //仅支持GoCQ
                 case "group_card":
                 {
                     var groupCardUpdate =

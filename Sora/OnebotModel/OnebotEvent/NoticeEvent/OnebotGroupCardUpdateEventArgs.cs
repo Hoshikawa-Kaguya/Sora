@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 namespace Sora.OnebotModel.OnebotEvent.NoticeEvent
 {
     /// <summary>
-    /// Go扩展事件
+    /// GoCQ扩展事件
     /// 群成员名片变更事件
     /// </summary>
     internal sealed class OnebotGroupCardUpdateEventArgs : BaseNoticeEventArgs

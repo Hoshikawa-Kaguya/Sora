@@ -52,7 +52,7 @@ namespace Sora.Entities.Info
 
         /// <summary>
         /// <para>来源群号</para>
-        /// <para>仅支持gocq</para>
+        /// <para>仅支持GoCQ</para>
         /// </summary>
         [JsonProperty(PropertyName = "group_id", NullValueHandling = NullValueHandling.Ignore,
                       DefaultValueHandling = DefaultValueHandling.Ignore)]

@@ -4,7 +4,7 @@ namespace Sora.Entities.Segment.DataModel
 {
     /// <summary>
     /// 接收红包
-    /// 仅支持Go
+    /// 仅支持GoCQ
     /// </summary>
     public class RedbagSegment : BaseSegment
     {

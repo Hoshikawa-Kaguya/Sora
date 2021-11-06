@@ -118,7 +118,7 @@ namespace Sora.Entities.Base
             return await ApiInterface.RecallMsg(ConnectionId, messageId);
         }
 
-        #region GoAPI
+        #region GoCQ API
 
         /// <summary>
         /// 获取合并转发消息
@@ -402,7 +402,7 @@ namespace Sora.Entities.Base
             return await ApiInterface.SetGroupLeave(ConnectionId, groupId, true);
         }
 
-        #region GoAPI
+        #region GoCQ API
 
         /// <summary>
         /// 设置群名
@@ -426,7 +426,7 @@ namespace Sora.Entities.Base
         {
             if (groupId < 100000) throw new ArgumentOutOfRangeException(nameof(groupId));
             if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
-            var (retFileStr, isMatch) = SegmentBuilder.ParseDataStr(imageFile);
+            var (retFileStr, isMatch) = SegmentHelper.ParseDataStr(imageFile);
             if (!isMatch) throw new NotSupportedException($"not supported file type({imageFile})");
             return await ApiInterface.SetGroupPortrait(ConnectionId, groupId, retFileStr,
                                                        useCache);
@@ -930,7 +930,7 @@ namespace Sora.Entities.Base
 
         #region 辅助API
 
-        #region GoAPI
+        #region GoCQ API
 
         /// <summary>
         /// 获取中文分词
