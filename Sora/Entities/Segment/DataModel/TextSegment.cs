@@ -5,7 +5,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 纯文本
     /// </summary>
-    public class TextSegment : BaseSegment
+    public sealed record TextSegment : BaseSegment
     {
         internal TextSegment()
         {

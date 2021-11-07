@@ -6,7 +6,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// At某人
     /// </summary>
-    public sealed class AtSegment : BaseSegment
+    public sealed record AtSegment : BaseSegment
     {
         internal AtSegment()
         {

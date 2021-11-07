@@ -5,7 +5,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 合并转发/合并转发节点
     /// </summary>
-    public class ForwardSegment : BaseSegment
+    public sealed record ForwardSegment : BaseSegment
     {
         internal ForwardSegment()
         {

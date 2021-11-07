@@ -5,7 +5,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 图片
     /// </summary>
-    public class ImageSegment : BaseSegment
+    public sealed record ImageSegment : BaseSegment
     {
         internal ImageSegment()
         {

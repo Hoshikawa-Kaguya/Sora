@@ -5,7 +5,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 链接分享
     /// </summary>
-    public class ShareSegment : BaseSegment
+    public sealed record ShareSegment : BaseSegment
     {
         internal ShareSegment()
         {

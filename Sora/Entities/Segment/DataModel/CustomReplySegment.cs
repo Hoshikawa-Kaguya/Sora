@@ -7,7 +7,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 自定义回复
     /// </summary>
-    public class CustomReplySegment : BaseSegment
+    public sealed record CustomReplySegment : BaseSegment
     {
         internal CustomReplySegment()
         {

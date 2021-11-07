@@ -8,7 +8,7 @@ namespace Sora.Entities.Segment.DataModel
     /// 音乐分享
     /// 仅发送
     /// </summary>
-    public class MusicSegment : BaseSegment
+    public sealed record MusicSegment : BaseSegment
     {
         internal MusicSegment()
         {
