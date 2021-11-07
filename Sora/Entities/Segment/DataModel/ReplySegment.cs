@@ -6,7 +6,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 回复
     /// </summary>
-    public class ReplySegment : BaseSegment
+    public sealed record ReplySegment : BaseSegment
     {
         internal ReplySegment()
         {

@@ -6,7 +6,7 @@ namespace Sora.Entities.Segment.DataModel
     /// 接收红包
     /// 仅支持GoCQ
     /// </summary>
-    public class RedbagSegment : BaseSegment
+    public sealed record RedbagSegment : BaseSegment
     {
         internal RedbagSegment()
         {

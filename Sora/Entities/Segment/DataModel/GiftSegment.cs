@@ -6,7 +6,7 @@ namespace Sora.Entities.Segment.DataModel
     /// 礼物
     /// 仅支持GoCQ
     /// </summary>
-    public class GiftSegment : BaseSegment
+    public sealed record GiftSegment : BaseSegment
     {
         internal GiftSegment()
         {

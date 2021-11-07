@@ -5,7 +5,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 未知消息段
     /// </summary>
-    public class UnknownSegment : BaseSegment
+    public sealed record UnknownSegment : BaseSegment
     {
         internal UnknownSegment()
         {

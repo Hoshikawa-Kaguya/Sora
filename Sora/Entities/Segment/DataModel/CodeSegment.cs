@@ -8,7 +8,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <para>Xml与Json集合</para>
     /// <para>可能为<see cref="SegmentType"/>.<see langword="Json"/>或<see cref="SegmentType"/>.<see langword="Xml"/></para>
     /// </summary>
-    public class CodeSegment : BaseSegment
+    public sealed record CodeSegment : BaseSegment
     {
         internal CodeSegment()
         {

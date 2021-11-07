@@ -5,7 +5,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 自定义音乐分享
     /// </summary>
-    public class CustomMusicSegment : BaseSegment
+    public sealed record CustomMusicSegment : BaseSegment
     {
         internal CustomMusicSegment()
         {

@@ -6,7 +6,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 短视频
     /// </summary>
-    public class VideoSegment : BaseSegment
+    public sealed record VideoSegment : BaseSegment
     {
         internal VideoSegment()
         {

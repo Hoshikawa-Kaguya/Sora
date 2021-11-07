@@ -6,7 +6,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// QQ 表情
     /// </summary>
-    public class FaceSegment : BaseSegment
+    public sealed record FaceSegment : BaseSegment
     {
         internal FaceSegment()
         {

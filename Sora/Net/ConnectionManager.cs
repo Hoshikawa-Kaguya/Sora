@@ -151,19 +151,15 @@ namespace Sora.Net
             foreach (var (connection, info) in timeoutDict)
             {
                 CloseConnection("Universal", info.SelfId, connection);
-                Log.Error("HeartBeatCheck", $"Socket:[{connection}]心跳包超时，已断开此连接");
+                Log.Error("HeartBeatCheck", $"Socket:[{connection}]connection time out，disconnect");
                 //客户端尝试重连
                 if (info.Connection.SocketType == SoraSocketType.Client &&
                     info.Connection.SocketInstance is WebsocketClient c)
                     needReconnect.Add(c);
             }
 
-            if (needReconnect.Count == 0) return;
-            foreach (var client in needReconnect)
-            {
-                Log.Error("HeartBeatCheck", $"fuck");
-                client.Reconnect();
-            }
+            if (needReconnect.Count != 0)
+                needReconnect.ForEach(conn => conn.Reconnect());
         }
 
         /// <summary>
@@ -199,7 +195,7 @@ namespace Sora.Net
             {
                 //记录添加失败关闭超时的连接
                 socket.Close();
-                Log.Error("ConnectionManager", $"处理连接请求时发生问题 无法记录该连接[{connId}]");
+                Log.Error("ConnectionManager", $"Cannot record connection[{connId}]");
                 return;
             }
 
@@ -223,13 +219,13 @@ namespace Sora.Net
             }
             catch (Exception e)
             {
-                Log.Error("ConnectionManager", "关闭连接失败");
+                Log.Error("ConnectionManager", "Close connection failed");
                 Log.Error("ConnectionManager", Log.ErrorLogBuilder(e));
             }
 
             //移除连接信息
             if (!RemoveConnection(connId))
-                Log.Error("ConnectionManager", "移除连接信息失败");
+                Log.Error("ConnectionManager", "Remove connection record failed");
             //触发事件
             if (OnCloseConnectionAsync == null) return;
             Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs(role, selfId)); });

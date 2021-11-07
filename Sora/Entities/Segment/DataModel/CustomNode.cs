@@ -9,7 +9,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <para>自定义转发节点</para>
     /// <para>仅用于发送</para>
     /// </summary>
-    public class CustomNode
+    public sealed record CustomNode
     {
         /// <summary>
         /// 转发消息Id
@@ -55,7 +55,7 @@ namespace Sora.Entities.Segment.DataModel
         }
 
         /// <summary>
-        /// 构造自定义节点
+        /// 构造自定义节点q
         /// </summary>
         /// <param name="name">发送者名</param>
         /// <param name="userId">发送者ID</param>

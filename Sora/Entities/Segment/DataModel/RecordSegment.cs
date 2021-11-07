@@ -6,7 +6,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 语音消息
     /// </summary>
-    public class RecordSegment : BaseSegment
+    public sealed record RecordSegment : BaseSegment
     {
         internal RecordSegment()
         {

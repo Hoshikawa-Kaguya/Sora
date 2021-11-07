@@ -6,7 +6,7 @@ namespace Sora.Entities.Segment.DataModel
     /// 装逼大图
     /// 仅支持GoCQ
     /// </summary>
-    public class CardImageSegment : BaseSegment
+    public sealed record CardImageSegment : BaseSegment
     {
         internal CardImageSegment()
         {

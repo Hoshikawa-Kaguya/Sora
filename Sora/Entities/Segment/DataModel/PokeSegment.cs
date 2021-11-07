@@ -8,7 +8,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <para>仅发送</para>
     /// <para>仅支持GoCQ</para>
     /// </summary>
-    public class PokeSegment : BaseSegment
+    public sealed record PokeSegment : BaseSegment
     {
         internal PokeSegment()
         {

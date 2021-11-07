@@ -5,7 +5,7 @@ namespace Sora.Entities.Segment.DataModel
     /// <summary>
     /// 语音转文字（TTS）
     /// </summary>
-    public class TtsSegment : BaseSegment
+    public sealed record TtsSegment : BaseSegment
     {
         internal TtsSegment()
         {
