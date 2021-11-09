@@ -4,7 +4,7 @@
 	<br>
 	Sora
 	<h4 align="center">
-        一个基于<a href="https://github.com/howmanybots/onebot">OneBot</a>协议的 <a href="https://dotnet.microsoft.com/download/dotnet/5.0">C#/.Net 5</a> 异步机器人开发框架
+        一个基于<a href="https://github.com/howmanybots/onebot">OneBot</a>协议的 <a href="https://dotnet.microsoft.com/download/dotnet/6.0">C#/.Net 6</a> 异步机器人开发框架
 	</h4>
 	<h4 align="center">
 	<a href="https://www.nuget.org/packages/Sora/">
@@ -25,6 +25,9 @@
 </h1>
 
 ## 文档
+
+> 对.Net5的支持在1.0.0-rc26之后的版本将会停止，1.0将会发布单独的.Net5版本
+> 之后的开发将会转为.Net6，由于.Net6为LTS的.Net版本，之后将会在.Net6的生命周期内使用.Net6进行开发
 
 > 本框架只支持Array的上报格式
 
