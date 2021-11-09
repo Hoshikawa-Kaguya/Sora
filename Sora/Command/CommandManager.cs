@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
 using Sora.Entities.Info.InternalDataInfo;
+using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Helpers;
 
@@ -604,12 +605,12 @@ namespace Sora.Command
                     {
                         case GroupMessageEventArgs groupMessageArgs:
                         {
-                            await groupMessageArgs.Reply(msg.ToString());
+                            await groupMessageArgs.Reply(msg.ToString()).RunCatch(err => throw err);
                             break;
                         }
                         case PrivateMessageEventArgs privateMessageArgs:
                         {
-                            await privateMessageArgs.Reply(msg.ToString());
+                            await privateMessageArgs.Reply(msg.ToString()).RunCatch(err => throw err);
                             break;
                         }
                     }
