@@ -50,7 +50,7 @@ service.Event.CommandManager.RegisterGroupCommand(async eventArgs =>
                                                       await eventArgs.Reply(SoraSegment.At(4564) + 2133.ToAt() +
                                                                             "fuck");
                                                       eventArgs.IsContinueEventChain = false;
-                                                  }, new[] { "2" }, MatchType.Full);
+                                                  }, new[] {"2"}, MatchType.Full);
 
 #endregion
 
