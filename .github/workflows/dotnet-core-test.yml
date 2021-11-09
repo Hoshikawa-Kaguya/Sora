@@ -2,9 +2,9 @@ name: .NET Core
 
 on:
   push:
-    branches: [ master,dev ]
+    branches: [ master ]
   pull_request:
-    branches: [ master,dev ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.x.x'
+        dotnet-version: '6.x.x'
     - name: Install dependencies
       run: dotnet restore
     - name: Build
