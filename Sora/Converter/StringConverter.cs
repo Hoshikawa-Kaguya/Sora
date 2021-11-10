@@ -1,26 +1,28 @@
 using System;
 using Newtonsoft.Json;
 
-namespace Sora.Converter
+namespace Sora.Converter;
+
+internal class StringConverter : JsonConverter
 {
-    internal class StringConverter : JsonConverter
+    public override bool CanRead => false;
+
+    public override bool CanWrite => true;
+
+    public override bool CanConvert(Type objectType)
     {
-        public override bool CanRead => false;
+        return true;
+    }
 
-        public override bool CanWrite => true;
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    {
+        writer.WriteValue(value.ToString());
+    }
 
-        public override bool CanConvert(Type objectType) => true;
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            writer.WriteValue(value.ToString());
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
-                                        JsonSerializer serializer)
-        {
-            //此方法不可能调用，不做实现
-            return null;
-        }
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+                                    JsonSerializer serializer)
+    {
+        //此方法不可能调用，不做实现
+        return null;
     }
 }

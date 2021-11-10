@@ -17,6 +17,6 @@ public static class Commands
         Log.Info("触发指令", $"txet:{s!.Content}");
         eventArgs.IsContinueEventChain = false;
         //throw new Exception("shit");
-        await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "怪欸");
+        await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "怪欸" + SoraSegment.At(12));
     }
 }

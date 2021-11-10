@@ -1,18 +1,17 @@
-﻿namespace Sora.Enumeration
+﻿namespace Sora.Enumeration;
+
+/// <summary>
+/// 消息来源类型
+/// </summary>
+public enum SourceFlag
 {
     /// <summary>
-    /// 消息来源类型
+    /// 群聊
     /// </summary>
-    public enum SourceFlag
-    {
-        /// <summary>
-        /// 群聊
-        /// </summary>
-        Group,
+    Group,
 
-        /// <summary>
-        /// 私聊
-        /// </summary>
-        Private
-    }
+    /// <summary>
+    /// 私聊
+    /// </summary>
+    Private
 }

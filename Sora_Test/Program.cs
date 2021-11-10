@@ -14,21 +14,21 @@ var service = SoraServiceFactory.CreateService(new ServerConfig());
 #region 事件处理
 
 //连接事件
-service.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
+service.ConnManager.OnOpenConnectionAsync += (connectionId, eventArgs) =>
                                              {
                                                  Log.Debug("Sora_Test|OnOpenConnectionAsync",
-                                                           $"connectionId = {connectionInfo} type = {eventArgs.Role}");
+                                                           $"connectionId = {connectionId} type = {eventArgs.Role}");
                                                  return ValueTask.CompletedTask;
                                              };
 //连接关闭事件
-service.ConnManager.OnCloseConnectionAsync += (connectionInfo, eventArgs) =>
+service.ConnManager.OnCloseConnectionAsync += (connectionId, eventArgs) =>
                                               {
                                                   Log.Debug("Sora_Test|OnCloseConnectionAsync",
-                                                            $"uid = {eventArgs.SelfId} connectionId = {connectionInfo} type = {eventArgs.Role}");
+                                                            $"uid = {eventArgs.SelfId} connectionId = {connectionId} type = {eventArgs.Role}");
                                                   return ValueTask.CompletedTask;
                                               };
 //连接成功元事件
-service.Event.OnClientConnect += (type, eventArgs) =>
+service.Event.OnClientConnect += (_, eventArgs) =>
                                  {
                                      Log.Debug("Sora_Test|OnClientConnect",
                                                $"uid = {eventArgs.LoginUid}");
@@ -36,21 +36,22 @@ service.Event.OnClientConnect += (type, eventArgs) =>
                                  };
 
 //群聊消息事件
-service.Event.OnGroupMessage += async (msgType, eventArgs) => { await eventArgs.Reply("好耶"); };
-service.Event.OnSelfMessage += (type, eventArgs) =>
+service.Event.OnGroupMessage += async (_, eventArgs) => { await eventArgs.Reply("好耶"); };
+service.Event.OnSelfMessage += (_, eventArgs) =>
                                {
                                    Log.Info("test", $"self msg {eventArgs.Message.MessageId}");
                                    return ValueTask.CompletedTask;
                                };
 //私聊消息事件
-service.Event.OnPrivateMessage += async (msgType, eventArgs) => { await eventArgs.Reply("好耶"); };
+service.Event.OnPrivateMessage += async (_, eventArgs) => { await eventArgs.Reply("好耶"); };
 //动态向管理器注册指令
-service.Event.CommandManager.RegisterGroupCommand(async eventArgs =>
+service.Event.CommandManager.RegisterGroupCommand(new[] {"2"},
+                                                  async eventArgs =>
                                                   {
                                                       await eventArgs.Reply(SoraSegment.At(4564) + 2133.ToAt() +
                                                                             "fuck");
                                                       eventArgs.IsContinueEventChain = false;
-                                                  }, new[] {"2"}, MatchType.Full);
+                                                  }, MatchType.Full);
 
 #endregion
 

@@ -1,23 +1,28 @@
-﻿namespace Sora.Enumeration
+﻿using System.ComponentModel;
+
+namespace Sora.Enumeration;
+
+/// <summary>
+/// 性别
+/// </summary>
+[DefaultValue(Unknown)]
+public enum Sex
 {
     /// <summary>
-    /// 性别
+    /// 男
     /// </summary>
-    public enum Sex
-    {
-        /// <summary>
-        /// 男
-        /// </summary>
-        Male,
+    [Description("")] 
+    Male,
 
-        /// <summary>
-        /// 女
-        /// </summary>
-        Female,
+    /// <summary>
+    /// 女
+    /// </summary>
+    [Description("")]
+    Female,
 
-        /// <summary>
-        /// 未知
-        /// </summary>
-        Unknown
-    }
+    /// <summary>
+    /// 未知
+    /// </summary>
+    [Description("")]
+    Unknown
 }

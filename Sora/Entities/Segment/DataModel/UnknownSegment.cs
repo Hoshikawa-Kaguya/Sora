@@ -1,23 +1,22 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace Sora.Entities.Segment.DataModel
+namespace Sora.Entities.Segment.DataModel;
+
+/// <summary>
+/// 未知消息段
+/// </summary>
+public sealed record UnknownSegment : BaseSegment
 {
-    /// <summary>
-    /// 未知消息段
-    /// </summary>
-    public sealed record UnknownSegment : BaseSegment
+    internal UnknownSegment()
     {
-        internal UnknownSegment()
-        {
-        }
-
-        #region 属性
-
-        /// <summary>
-        /// 纯文本内容
-        /// </summary>
-        public JObject Content { get; internal set; }
-
-        #endregion
     }
+
+    #region 属性
+
+    /// <summary>
+    /// 纯文本内容
+    /// </summary>
+    public JObject Content { get; internal set; }
+
+    #endregion
 }

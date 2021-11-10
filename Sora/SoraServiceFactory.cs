@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading.Tasks;
 using Sora.Interfaces;
 using Sora.Net;
@@ -34,7 +34,8 @@ public static class SoraServiceFactory
             Log.Info("Sora", $"框架版本:{StaticVariable.Version}");
             Log.Debug("Sora", "开发交流群：1081190562");
             Log.Debug("System", Environment.OSVersion);
-            Regex.CacheSize += 5;
+            Log.Debug("Runtime", Environment.Version);
+            Log.Info("OnebotProtocolVersion", "11");
             _haveStartupLog =  true;
         }
 
@@ -55,10 +56,7 @@ public static class SoraServiceFactory
     public static List<ISoraService> CreateMultiService(IEnumerable<ISoraConfig> configList,
                                                         Action<Exception> crashAction = null)
     {
-        List<ISoraService> createdService = new();
-        foreach (var soraConfig in configList) createdService.Add(CreateService(soraConfig, crashAction));
-
-        return createdService;
+        return configList.Select(soraConfig => CreateService(soraConfig, crashAction)).ToList();
     }
 
     /// <summary>
@@ -70,7 +68,7 @@ public static class SoraServiceFactory
     public static List<ISoraService> CreateMultiService(ISoraConfig config,
                                                         Action<Exception> crashAction = null)
     {
-        List<ISoraService> createdService = new()
+        var createdService = new List<ISoraService>()
         {
             CreateService(config, crashAction)
         };
