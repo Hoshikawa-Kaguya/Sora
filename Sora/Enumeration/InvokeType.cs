@@ -1,21 +1,20 @@
 ﻿using System.ComponentModel;
 
-namespace Sora.Enumeration
+namespace Sora.Enumeration;
+
+/// <summary>
+/// 指令执行类型
+/// </summary>
+[DefaultValue(Method)]
+internal enum InvokeType
 {
     /// <summary>
-    /// 指令执行类型
+    /// Method
     /// </summary>
-    [DefaultValue(Method)]
-    internal enum InvokeType
-    {
-        /// <summary>
-        /// Method
-        /// </summary>
-        Method,
+    Method,
 
-        /// <summary>
-        /// Action
-        /// </summary>
-        Action
-    }
+    /// <summary>
+    /// Action
+    /// </summary>
+    Action
 }

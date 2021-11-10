@@ -2,11 +2,11 @@
 
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Version>1.0.0-rc.26</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <Description>.Net 5异步机器人框架</Description>
+        <Description>.Net 6异步Onebot机器人框架</Description>
         <Copyright>Copyright © 2020-2021 Yukari316</Copyright>
         <PackageProjectUrl>https://github.com/Yukari316/Sora</PackageProjectUrl>
         <Authors>Yukari316</Authors>

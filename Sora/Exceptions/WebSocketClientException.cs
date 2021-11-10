@@ -1,31 +1,30 @@
 using System;
 
-namespace Sora.Exceptions
+namespace Sora.Exceptions;
+
+/// <summary>
+/// WebSocket客户端错误
+/// </summary>
+public class WebSocketClientException : Exception
 {
     /// <summary>
-    /// WebSocket客户端错误
+    /// 初始化
     /// </summary>
-    public class WebSocketClientException : Exception
+    public WebSocketClientException() : base("Server is running")
     {
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        public WebSocketClientException() : base("Server is running")
-        {
-        }
+    }
 
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        public WebSocketClientException(string message) : base(message)
-        {
-        }
+    /// <summary>
+    /// 初始化
+    /// </summary>
+    public WebSocketClientException(string message) : base(message)
+    {
+    }
 
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        public WebSocketClientException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+    /// <summary>
+    /// 初始化
+    /// </summary>
+    public WebSocketClientException(string message, Exception innerException) : base(message, innerException)
+    {
     }
 }

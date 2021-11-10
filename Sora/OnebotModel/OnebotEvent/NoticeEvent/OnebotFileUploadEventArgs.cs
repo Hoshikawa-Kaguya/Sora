@@ -1,23 +1,22 @@
 using Newtonsoft.Json;
 using Sora.Entities.Info;
 
-namespace Sora.OnebotModel.OnebotEvent.NoticeEvent
+namespace Sora.OnebotModel.OnebotEvent.NoticeEvent;
+
+/// <summary>
+/// 群文件上传事件
+/// </summary>
+internal sealed class OnebotFileUploadEventArgs : BaseNoticeEventArgs
 {
     /// <summary>
-    /// 群文件上传事件
+    /// 群号
     /// </summary>
-    internal sealed class OnebotFileUploadEventArgs : BaseNoticeEventArgs
-    {
-        /// <summary>
-        /// 群号
-        /// </summary>
-        [JsonProperty(PropertyName = "group_id")]
-        internal long GroupId { get; set; }
+    [JsonProperty(PropertyName = "group_id")]
+    internal long GroupId { get; set; }
 
-        /// <summary>
-        /// 上传的文件信息
-        /// </summary>
-        [JsonProperty(PropertyName = "file")]
-        internal UploadFileInfo Upload { get; set; }
-    }
+    /// <summary>
+    /// 上传的文件信息
+    /// </summary>
+    [JsonProperty(PropertyName = "file")]
+    internal UploadFileInfo Upload { get; set; }
 }

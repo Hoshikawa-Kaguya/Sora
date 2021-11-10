@@ -1,12 +1,11 @@
-﻿namespace Sora.Entities.Segment.DataModel
+﻿namespace Sora.Entities.Segment.DataModel;
+
+/// <summary>
+/// 消息段基类，做占位和限制范围用
+/// </summary>
+public abstract record BaseSegment
 {
-    /// <summary>
-    /// 消息段基类，做占位和限制范围用
-    /// </summary>
-    public abstract record BaseSegment
+    internal BaseSegment()
     {
-        internal BaseSegment()
-        {
-        }
     }
 }
