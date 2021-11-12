@@ -1,5 +1,5 @@
-﻿using System;
-using Sora.Interfaces;
+﻿using Sora.Interfaces;
+using System;
 
 namespace Sora.Entities.Info.InternalDataInfo;
 

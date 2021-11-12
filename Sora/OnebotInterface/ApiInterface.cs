@@ -1,7 +1,10 @@
 using Newtonsoft.Json.Linq;
+using Sora.Attributes;
+using Sora.Converter;
 using Sora.Entities;
-using Sora.Entities.Segment.DataModel;
 using Sora.Entities.Info;
+using Sora.Entities.Segment.DataModel;
+using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
@@ -12,9 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Sora.Attributes;
-using Sora.Converter;
-using Sora.Enumeration;
 using YukariToolBox.FormatLog;
 
 namespace Sora.OnebotInterface;
@@ -846,28 +846,6 @@ internal static class ApiInterface
         }, connection);
         Log.Debug("Sora", $"Get check_url_safely response {nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus, (SecurityLevelType) Convert.ToInt32(ret?["data"]?["level"] ?? 1));
-    }
-
-    /// <summary>
-    /// 获取vip信息
-    /// </summary>
-    /// <param name="connection">链接标识</param>
-    /// <param name="userId">需要检查的链接</param>
-    [Obsolete]
-    internal static async ValueTask<(ApiStatus apiStatus, VipInfo securityLevel)> GetVipInfo(
-        Guid connection, long userId)
-    {
-        Log.Debug("Sora", "Sending _get_vip_info request");
-        var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType._GetVipInfo,
-            ApiParams = new
-            {
-                user_id = userId
-            }
-        }, connection);
-        Log.Debug("Sora", $"Get _get_vip_info response {nameof(apiStatus)}={apiStatus.RetCode}");
-        return (apiStatus, ret?["data"]?.ToObject<VipInfo>() ?? new VipInfo());
     }
 
     /// <summary>

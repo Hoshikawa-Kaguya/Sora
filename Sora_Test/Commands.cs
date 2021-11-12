@@ -1,8 +1,8 @@
 using Sora.Attributes.Command;
-using Sora.EventArgs.SoraEvent;
-using System.Threading.Tasks;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
+using Sora.EventArgs.SoraEvent;
+using System.Threading.Tasks;
 using YukariToolBox.FormatLog;
 
 namespace Sora_Test;

@@ -1,9 +1,9 @@
-using System;
-using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
 using Sora.Entities.Segment;
 using Sora.Enumeration.ApiType;
+using System;
+using System.Threading.Tasks;
 
 namespace Sora.Entities;
 

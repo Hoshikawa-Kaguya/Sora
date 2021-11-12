@@ -1,6 +1,6 @@
+using Sora.Enumeration;
 using System;
 using System.Text.RegularExpressions;
-using Sora.Enumeration;
 
 namespace Sora.Attributes.Command;
 

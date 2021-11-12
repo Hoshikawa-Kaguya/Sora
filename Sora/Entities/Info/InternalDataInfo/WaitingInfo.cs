@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Sora.Enumeration;
+using System;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Sora.Enumeration;
 using YukariToolBox.Extensions;
 
 namespace Sora.Entities.Info.InternalDataInfo;

@@ -1,10 +1,10 @@
 using Newtonsoft.Json;
+using Sora.Attributes;
+using Sora.Entities.Info.InternalDataInfo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
-using Sora.Attributes;
-using Sora.Entities.Info.InternalDataInfo;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
