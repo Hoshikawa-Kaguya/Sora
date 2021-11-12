@@ -1,5 +1,5 @@
-using System;
 using Newtonsoft.Json;
+using System;
 using YukariToolBox.Time;
 
 namespace Sora.Entities.Info;

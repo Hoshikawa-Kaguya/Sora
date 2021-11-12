@@ -1,10 +1,10 @@
-using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.ApiParams;
+using System;
 using YukariToolBox.FormatLog;
 
 namespace Sora.Entities.Segment;

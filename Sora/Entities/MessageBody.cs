@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Sora.Entities.Segment;
+using Sora.Enumeration;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sora.Entities.Segment;
-using Sora.Enumeration;
 using YukariToolBox.FormatLog;
 
 namespace Sora.Entities;

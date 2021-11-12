@@ -50,9 +50,9 @@
         <PackageReference Include="Fleck" Version="1.2.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
-        <PackageReference Include="System.Threading.Channels" Version="5.0.0" />
-        <PackageReference Include="Websocket.Client" Version="4.3.32" />
-        <PackageReference Include="YukariToolBox" Version="1.1.4" />
+        <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
+        <PackageReference Include="Websocket.Client" Version="4.3.38" />
+        <PackageReference Include="YukariToolBox" Version="2.0.0" />
     </ItemGroup>
 
 </Project>

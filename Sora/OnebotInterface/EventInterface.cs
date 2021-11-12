@@ -1,5 +1,7 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Command;
+using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
@@ -9,8 +11,6 @@ using Sora.OnebotModel.OnebotEvent.RequestEvent;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Sora.Enumeration.ApiType;
 using YukariToolBox.FormatLog;
 
 namespace Sora.OnebotInterface;
