@@ -259,3 +259,6 @@ Lib/
 /GO
 /GO2
 Sora/Sora.xml
+
+#vscode
+.vscode/
