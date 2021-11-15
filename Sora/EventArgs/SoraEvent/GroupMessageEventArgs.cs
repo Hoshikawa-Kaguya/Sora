@@ -8,7 +8,7 @@ using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 using Group = Sora.Entities.Group;
 
 namespace Sora.EventArgs.SoraEvent;

@@ -4,6 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -14,7 +15,7 @@
       <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
-    <ItemGroup>
+	<ItemGroup>
         <ProjectReference Include="..\Sora\Sora.csproj" />
     </ItemGroup>
 

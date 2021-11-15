@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Websocket.Client;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace Sora.Net;
 

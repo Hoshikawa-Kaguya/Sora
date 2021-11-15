@@ -3,7 +3,7 @@ using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.EventArgs.SoraEvent;
 using System.Threading.Tasks;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace Sora_Test;
 
@@ -17,6 +17,6 @@ public static class Commands
         Log.Info("触发指令", $"txet:{s!.Content}");
         eventArgs.IsContinueEventChain = false;
         //throw new Exception("shit");
-        await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "怪欸" + SoraSegment.At(12));
+        await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "怪欸");
     }
 }

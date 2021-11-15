@@ -5,7 +5,7 @@ using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.ApiParams;
 using System;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace Sora.Entities.Segment;
 

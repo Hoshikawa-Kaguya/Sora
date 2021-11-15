@@ -5,11 +5,11 @@ using Sora.Entities.Socket;
 using Sora.Interfaces;
 using Sora.Net.Config;
 using Sora.OnebotInterface;
+using Sora.Util;
 using System;
 using System.Data;
-using System.Threading;
 using System.Threading.Tasks;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 using LogLevel = Fleck.LogLevel;
 
 namespace Sora.Net;
@@ -71,10 +71,9 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         //检查端口占用
         if (Helper.IsPortInUse(config.Port))
         {
-            Log.Fatal("Sora", $"端口{config.Port}已被占用，请更换其他端口");
-            Log.Warning("Sora", "将在5s后自动退出");
-            Thread.Sleep(5000);
-            Environment.Exit(0);
+            var e = new InvalidOperationException($"端口{config.Port}已被占用，请更换其他端口");
+            Log.Fatal(e, "Sora", $"端口{config.Port}已被占用，请更换其他端口", config);
+            throw e;
         }
 
         //写入初始化信息

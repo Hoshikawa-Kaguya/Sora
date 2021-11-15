@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace Sora;
 
@@ -33,8 +33,8 @@ public static class SoraServiceFactory
         {
             Log.Info("Sora", $"框架版本:{StaticVariable.Version}");
             Log.Debug("Sora", "开发交流群：1081190562");
-            Log.Debug("System", Environment.OSVersion);
-            Log.Debug("Runtime", Environment.Version);
+            Log.Debug("System", Environment.OSVersion.ToString());
+            Log.Debug("Runtime", Environment.Version.ToString());
             Log.Info("OnebotProtocolVersion", "11");
             _haveStartupLog =  true;
         }

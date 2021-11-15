@@ -1,14 +1,15 @@
-using Newtonsoft.Json;
-using Sora.Attributes;
-using Sora.Entities.Info.InternalDataInfo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
-using YukariToolBox.Extensions;
-using YukariToolBox.FormatLog;
+using System.Reflection;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using Sora.Attributes;
+using Sora.Entities.Info.InternalDataInfo;
+using YukariToolBox.LightLog;
 
-namespace Sora;
+namespace Sora.Util;
 
 /// <summary>
 /// 通用帮助类
@@ -64,6 +65,61 @@ public static class Helper
     {
         return IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
                                  .Any(ipEndPoint => ipEndPoint.Port == port);
+    }
+
+    #endregion
+
+    #region 小工具
+
+    /// <summary>
+    /// 数组元素完全相等判断（引用类型）
+    /// </summary>
+    /// <param name="arr1">要判断的数组1</param>
+    /// <param name="arr2">要判断的数组2</param>
+    /// <typeparam name="T">数组中的元素类型</typeparam>
+    /// <returns>2个数组是否全等</returns>
+    public static bool ArrayEquals<T>(this T[] arr1, T[] arr2) where T : class
+    {
+        if (arr1?.Length != arr2?.Length
+         || arr1 is null     && arr2 is not null
+         || arr1 is not null && arr2 is null)
+            return false;
+
+        if (arr1 is null && arr2 is null) return true;
+
+        for (var i = 0; i < arr1?.Length; i++)
+            if (arr2 is not null && !(arr1[i] is null && arr2[i] is null))
+            {
+                if (arr1[i] is null || arr2[i] is null) return false;
+
+                if (!arr1[i].Equals(arr2[i])) return false;
+            }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 创建实例
+    /// </summary>
+    /// <typeparam name="T">类型</typeparam>
+    /// <returns>实例</returns>
+    public static T CreateInstance<T>()
+    {
+        return (T) typeof(T).CreateInstance();
+    }
+
+    /// <summary>
+    /// 创建实例
+    /// </summary>
+    /// <param name="type">类型</param>
+    /// <returns>实例</returns>
+    public static object CreateInstance(this Type type)
+    {
+        var constructor = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+                              .FirstOrDefault(con => con.GetParameters().Length == 0);
+
+
+        return constructor?.Invoke(null) ?? FormatterServices.GetUninitializedObject(type);
     }
 
     #endregion
