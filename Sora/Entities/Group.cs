@@ -1,11 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Sora.Entities;
 

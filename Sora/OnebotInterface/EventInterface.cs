@@ -1,3 +1,6 @@
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Command;
@@ -8,9 +11,6 @@ using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.OnebotModel.OnebotEvent.MetaEvent;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
 using YukariToolBox.LightLog;
 
 namespace Sora.OnebotInterface;

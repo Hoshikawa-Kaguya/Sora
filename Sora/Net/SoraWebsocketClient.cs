@@ -1,3 +1,7 @@
+using System;
+using System.Data;
+using System.Net.WebSockets;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Entities.Socket;
@@ -6,10 +10,6 @@ using Sora.Interfaces;
 using Sora.Net.Config;
 using Sora.OnebotInterface;
 using Sora.Util;
-using System;
-using System.Data;
-using System.Net.WebSockets;
-using System.Threading.Tasks;
 using Websocket.Client;
 using YukariToolBox.LightLog;
 

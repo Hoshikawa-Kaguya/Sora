@@ -1,9 +1,9 @@
+using System;
 using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.Util;
-using System;
 
 namespace Sora.Entities.Info;
 

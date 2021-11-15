@@ -1,8 +1,8 @@
+using System.Linq;
+using System.Reflection;
 using Sora.Attributes;
 using Sora.Attributes.Command;
 using Sora.EventArgs.SoraEvent;
-using System.Linq;
-using System.Reflection;
 
 namespace Sora.Command;
 

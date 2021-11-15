@@ -1,7 +1,7 @@
+using System;
 using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration.ApiType;
-using System;
 
 namespace Sora.OnebotModel.ApiParams;
 

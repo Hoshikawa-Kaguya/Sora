@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Sora.Converter;
 using Sora.Enumeration.EventParamsType;
-using System.Collections.Generic;
 
 namespace Sora.OnebotModel.ApiParams;
 

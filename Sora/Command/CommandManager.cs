@@ -1,9 +1,3 @@
-using Sora.Attributes;
-using Sora.Attributes.Command;
-using Sora.Entities.Info.InternalDataInfo;
-using Sora.Enumeration;
-using Sora.Enumeration.EventParamsType;
-using Sora.EventArgs.SoraEvent;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +7,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Sora.Attributes;
+using Sora.Attributes.Command;
+using Sora.Entities.Info.InternalDataInfo;
+using Sora.Enumeration;
+using Sora.Enumeration.EventParamsType;
+using Sora.EventArgs.SoraEvent;
 using Sora.Util;
 using YukariToolBox.LightLog;
 

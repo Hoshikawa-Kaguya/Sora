@@ -1,6 +1,6 @@
-﻿using Sora.Enumeration;
+﻿using System.Net.WebSockets;
+using Sora.Enumeration;
 using Sora.Interfaces;
-using System.Net.WebSockets;
 using Websocket.Client;
 
 namespace Sora.Entities.Socket;

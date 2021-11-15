@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Sora.OnebotModel.ApiParams;
-using System.Collections.Generic;
 
 namespace Sora.Entities.Segment.DataModel;
 
