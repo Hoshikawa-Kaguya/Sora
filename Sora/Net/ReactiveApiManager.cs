@@ -4,12 +4,12 @@ using Sora.Attributes;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.OnebotModel.ApiParams;
+using Sora.Util;
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using YukariToolBox.Extensions;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace Sora.Net;
 

@@ -5,12 +5,13 @@ using Sora.Exceptions;
 using Sora.Interfaces;
 using Sora.Net.Config;
 using Sora.OnebotInterface;
+using Sora.Util;
 using System;
 using System.Data;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Websocket.Client;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace Sora.Net;
 

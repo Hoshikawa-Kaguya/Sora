@@ -2,11 +2,11 @@ using Sora.Attributes;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
+using Sora.Util;
 using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using YukariToolBox.Extensions;
 
 namespace Sora.Entities.Info.InternalDataInfo;
 

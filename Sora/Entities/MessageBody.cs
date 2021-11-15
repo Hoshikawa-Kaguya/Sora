@@ -3,7 +3,7 @@ using Sora.Enumeration;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace Sora.Entities;
 

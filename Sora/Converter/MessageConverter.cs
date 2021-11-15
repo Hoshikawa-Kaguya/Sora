@@ -8,7 +8,7 @@ using Sora.OnebotModel.ApiParams;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace Sora.Converter;
 
