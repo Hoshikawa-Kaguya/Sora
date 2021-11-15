@@ -43,7 +43,7 @@ public static class StaticVariable
     /// <summary>
     /// 版本号
     /// </summary>
-    public const string Version = "1.0.0-rc26";
+    public const string Version = "1.0.0-rc29";
 
     /// <summary>
     /// 清除服务数据
