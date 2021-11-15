@@ -1,7 +1,7 @@
-﻿using Sora.Enumeration;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
+using Sora.Enumeration;
 
 namespace Sora.Entities.Segment;
 

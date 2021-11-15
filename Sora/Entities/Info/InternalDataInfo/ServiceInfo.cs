@@ -1,6 +1,6 @@
-﻿using Sora.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Sora.Interfaces;
 
 namespace Sora.Entities.Info.InternalDataInfo;
 

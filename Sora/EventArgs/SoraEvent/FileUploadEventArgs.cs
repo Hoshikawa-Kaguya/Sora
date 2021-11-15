@@ -1,7 +1,7 @@
+using System;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
-using System;
 
 namespace Sora.EventArgs.SoraEvent;
 

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using Sora.Attributes;
 using Sora.Entities;
@@ -5,9 +8,6 @@ using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.OnebotModel.ApiParams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using YukariToolBox.LightLog;
 
 namespace Sora.Converter;

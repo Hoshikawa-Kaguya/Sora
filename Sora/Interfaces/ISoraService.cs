@@ -1,6 +1,6 @@
+using System.Threading.Tasks;
 using Sora.Net;
 using Sora.OnebotInterface;
-using System.Threading.Tasks;
 
 namespace Sora.Interfaces;
 

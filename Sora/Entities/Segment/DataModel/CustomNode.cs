@@ -1,7 +1,7 @@
-using Newtonsoft.Json;
-using Sora.Enumeration;
 using System;
 using System.Linq;
+using Newtonsoft.Json;
+using Sora.Enumeration;
 
 namespace Sora.Entities.Segment.DataModel;
 

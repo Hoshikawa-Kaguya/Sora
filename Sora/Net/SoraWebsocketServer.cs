@@ -1,3 +1,6 @@
+using System;
+using System.Data;
+using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.Info.InternalDataInfo;
@@ -6,9 +9,6 @@ using Sora.Interfaces;
 using Sora.Net.Config;
 using Sora.OnebotInterface;
 using Sora.Util;
-using System;
-using System.Data;
-using System.Threading.Tasks;
 using YukariToolBox.LightLog;
 using LogLevel = Fleck.LogLevel;
 

@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.Info;
 using Sora.Entities.Segment;
@@ -7,10 +11,6 @@ using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
 using Sora.OnebotInterface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Sora.Entities.Base;
 
