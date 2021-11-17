@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Sora.Entities.Segment;
+using Sora.Enumeration;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sora.Entities.Segment;
-using Sora.Enumeration;
+using System.Text.RegularExpressions;
 using YukariToolBox.LightLog;
 
 namespace Sora.Entities;
@@ -229,7 +230,7 @@ public class MessageBody : IList<SoraSegment>
         {
             if (value.MessageType == SegmentType.Unknown || value.DataType == null)
                 throw new NullReferenceException("message element is null");
-            if(value.MessageType == SegmentType.Ignore)
+            if (value.MessageType == SegmentType.Ignore)
                 throw new NullReferenceException(nameof(value));
             _message[index] = value;
         }
@@ -271,7 +272,7 @@ public class MessageBody : IList<SoraSegment>
     /// </summary>
     public static implicit operator MessageBody(string text)
     {
-        return new MessageBody {SoraSegment.Text(text)};
+        return new MessageBody { SoraSegment.Text(text) };
     }
 
     #endregion
@@ -298,6 +299,20 @@ public class MessageBody : IList<SoraSegment>
     {
         return !(s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
                  s.Data is null);
+    }
+
+    /// <summary>
+    /// 延时初始化正则表达式
+    /// </summary>
+    /// <returns></returns>
+    private static Regex[] InitializeRegex()
+    {
+        // 此处延时加载, 以提升运行速度
+        return new Regex[]
+        {
+                new Regex(@"\[CQ:([A-Za-z]*)(?:(,[^\[\]]+))?\]", RegexOptions.Compiled),    // 匹配CQ码
+                new Regex(@",([A-Za-z]+)=([^,\[\]]+)", RegexOptions.Compiled)               // 匹配键值对
+        };
     }
 
     #endregion
