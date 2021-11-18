@@ -312,6 +312,7 @@ public class MessageBody : IList<SoraSegment>
             segments.Add(SoraSegment.Text(text[i]));
             segments.Add(ToSoraSegment(code[i].Value));
         }
+        segments.Add(SoraSegment.Text(text[code.Count()]));
         return segments;
     }
 
