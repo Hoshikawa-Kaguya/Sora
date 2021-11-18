@@ -1,8 +1,14 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Sora.Entities.Segment;
+using Sora.Entities.Segment.DataModel;
+using Sora.Enumeration;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sora.Entities.Segment;
-using Sora.Enumeration;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using YukariToolBox.LightLog;
 
 namespace Sora.Entities;
@@ -15,6 +21,8 @@ public class MessageBody : IList<SoraSegment>
     #region 私有字段
 
     private readonly List<SoraSegment> _message = new();
+
+    private static readonly Regex[] regices = InitializeRegex();
 
     #endregion
 
@@ -207,6 +215,16 @@ public class MessageBody : IList<SoraSegment>
         _message.Add(SoraSegment.Text(text));
     }
 
+    /// <summary>
+    /// 将含有CQ码的字符串反序列化成MessageBody对象
+    /// </summary>
+    /// <param name="str">包含CQ码的字符串</param>
+    /// <returns>生成的MessageBody对象</returns>
+    public static MessageBody GetMessageBody(string str)
+    {
+        return new MessageBody(ToSoraSegments(str));
+    }
+
     #endregion
 
     #region 运算重载
@@ -229,7 +247,7 @@ public class MessageBody : IList<SoraSegment>
         {
             if (value.MessageType == SegmentType.Unknown || value.DataType == null)
                 throw new NullReferenceException("message element is null");
-            if(value.MessageType == SegmentType.Ignore)
+            if (value.MessageType == SegmentType.Ignore)
                 throw new NullReferenceException(nameof(value));
             _message[index] = value;
         }
@@ -271,12 +289,72 @@ public class MessageBody : IList<SoraSegment>
     /// </summary>
     public static implicit operator MessageBody(string text)
     {
-        return new MessageBody {SoraSegment.Text(text)};
+        return new MessageBody() { SoraSegment.Text(text) };
     }
 
     #endregion
 
     #region 类内部工具
+
+    /// <summary>
+    /// 将字符串反序列化为SoraSegment集合
+    /// </summary>
+    /// <param name="str">需要进行反序列化的字符串</param>
+    /// <returns>SoraSegment集合</returns>
+    private static List<SoraSegment> ToSoraSegments(string str)
+    {
+        // 分离为文本数组和CQ码数组
+        string[] text = regices[0].Replace(str, "\0").Split('\0');
+        Match[] code = regices[0].Matches(str).ToArray();
+        List<SoraSegment> segments = new List<SoraSegment>();
+        for (int i = 0; i < code.Length; i++)
+        {
+            segments.Add(SoraSegment.Text(text[i]));
+            segments.Add(ToSoraSegment(code[i].Value));
+        }
+        segments.Add(SoraSegment.Text(text[code.Count()]));
+        return segments;
+    }
+
+    /// <summary>
+    /// 将CQ码反序列化为SoraSegment对象
+    /// </summary>
+    /// <param name="str">CQ码字符串</param>
+    /// <returns>生成的SoraSegment对象</returns>
+    private static SoraSegment ToSoraSegment(string str)
+    {
+        SegmentType segmentType;
+        Match match = regices[0].Match(str);
+        if (!match.Success) throw new Exception("无法解析所传入的字符串, 字符串非CQ码格式!");
+        if (!Enum.TryParse<SegmentType>(match.Groups[1].Value, true, out segmentType))
+            segmentType = SegmentType.Unknown;
+        MatchCollection collection = regices[1].Matches(match.Groups[2].Value);
+        StringBuilder sb = new();
+        sb.Append('{');
+        foreach (Match code in collection)
+        {
+            sb.Append("\"");
+            sb.Append(code.Groups[1].Value);
+            sb.Append("\":\"");
+            sb.Append(code.Groups[2].Value);
+            sb.Append("\",");
+        }
+        sb.Append('}');
+        return segmentType switch
+        {
+            SegmentType.Text => new SoraSegment(SegmentType.Text, JsonConvert.DeserializeObject<TextSegment>(sb.ToString())),
+            SegmentType.Face => new SoraSegment(SegmentType.Face, JsonConvert.DeserializeObject<FaceSegment>(sb.ToString())),
+            SegmentType.Image => new SoraSegment(SegmentType.Image, JsonConvert.DeserializeObject<ImageSegment>(sb.ToString())),
+            SegmentType.Record => new SoraSegment(SegmentType.Record, JsonConvert.DeserializeObject<RecordSegment>(sb.ToString())),
+            SegmentType.At => new SoraSegment(SegmentType.At, JsonConvert.DeserializeObject<AtSegment>(sb.ToString())),
+            SegmentType.Share => new SoraSegment(SegmentType.Share, JsonConvert.DeserializeObject<ShareSegment>(sb.ToString())),
+            SegmentType.Reply => new SoraSegment(SegmentType.Reply, JsonConvert.DeserializeObject<ReplySegment>(sb.ToString())),
+            SegmentType.Forward => new SoraSegment(SegmentType.Forward, JsonConvert.DeserializeObject<ForwardSegment>(sb.ToString())),
+            SegmentType.Xml => new SoraSegment(SegmentType.Xml, JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
+            SegmentType.Json => new SoraSegment(SegmentType.Json, JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
+            _ => new SoraSegment(SegmentType.Unknown, null)
+        };
+    }
 
     private static void RemoveIllegalSegment(ref MessageBody segmentDatas)
     {
@@ -298,6 +376,20 @@ public class MessageBody : IList<SoraSegment>
     {
         return !(s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
                  s.Data is null);
+    }
+
+    /// <summary>
+    /// 延时初始化正则表达式
+    /// </summary>
+    /// <returns></returns>
+    private static Regex[] InitializeRegex()
+    {
+        // 此处延时加载, 以提升运行速度
+        return new Regex[]
+        {
+                new Regex(@"\[CQ:([A-Za-z]*)(?:(,[^\[\]]+))?\]", RegexOptions.Compiled),    // 匹配CQ码
+                new Regex(@",([A-Za-z]+)=([^,\[\]]+)", RegexOptions.Compiled)               // 匹配键值对
+        };
     }
 
     #endregion
