@@ -516,23 +516,6 @@ public readonly struct SoraSegment
     }
 
     /// <summary>
-    /// <para>发送免费礼物 消息段</para>
-    /// <para>只支持GoCQ</para>
-    /// </summary>
-    /// <param name="giftId">礼物id</param>
-    /// <param name="target">目标uid</param>
-    public static SoraSegment Gift(int giftId, long target)
-    {
-        if (giftId is < 0 or > 8 || target < 10000) throw new ArgumentOutOfRangeException(nameof(giftId));
-        return new SoraSegment(SegmentType.Gift,
-                               new GiftSegment
-                               {
-                                   Target   = target,
-                                   GiftType = giftId
-                               });
-    }
-
-    /// <summary>
     /// XML 特殊消息
     /// </summary>
     /// <param name="content">xml文本</param>

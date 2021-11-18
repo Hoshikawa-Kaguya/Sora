@@ -97,11 +97,6 @@ public enum SegmentType
     [Description("redbag")] RedBag,
 
     /// <summary>
-    /// 免费礼物发送
-    /// </summary>
-    [Description("gift")] Gift,
-
-    /// <summary>
     /// 装逼大图
     /// </summary>
     [Description("cardimage")] CardImage,
