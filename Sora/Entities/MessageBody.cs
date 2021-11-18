@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
@@ -289,7 +288,7 @@ public class MessageBody : IList<SoraSegment>
     /// </summary>
     public static implicit operator MessageBody(string text)
     {
-        return new MessageBody() { SoraSegment.Text(text) };
+        return new MessageBody() {SoraSegment.Text(text)};
     }
 
     #endregion
@@ -304,15 +303,16 @@ public class MessageBody : IList<SoraSegment>
     private static List<SoraSegment> ToSoraSegments(string str)
     {
         // 分离为文本数组和CQ码数组
-        string[] text = regices[0].Replace(str, "\0").Split('\0');
-        Match[] code = regices[0].Matches(str).ToArray();
-        List<SoraSegment> segments = new List<SoraSegment>();
-        for (int i = 0; i < code.Length; i++)
+        string[] text     = regices[0].Replace(str, "\0").Split('\0');
+        Match[]  code     = regices[0].Matches(str).ToArray();
+        var      segments = new List<SoraSegment>();
+        for (var i = 0; i < code.Length; i++)
         {
             segments.Add(SoraSegment.Text(text[i]));
             segments.Add(ToSoraSegment(code[i].Value));
         }
-        segments.Add(SoraSegment.Text(text[code.Count()]));
+
+        segments.Add(SoraSegment.Text(text[code.Length]));
         return segments;
     }
 
@@ -323,13 +323,12 @@ public class MessageBody : IList<SoraSegment>
     /// <returns>生成的SoraSegment对象</returns>
     private static SoraSegment ToSoraSegment(string str)
     {
-        SegmentType segmentType;
-        Match match = regices[0].Match(str);
+        var match = regices[0].Match(str);
         if (!match.Success) throw new Exception("无法解析所传入的字符串, 字符串非CQ码格式!");
-        if (!Enum.TryParse<SegmentType>(match.Groups[1].Value, true, out segmentType))
+        if (!Enum.TryParse<SegmentType>(match.Groups[1].Value, true, out var segmentType))
             segmentType = SegmentType.Unknown;
-        MatchCollection collection = regices[1].Matches(match.Groups[2].Value);
-        StringBuilder sb = new();
+        var collection = regices[1].Matches(match.Groups[2].Value);
+        var sb         = new StringBuilder();
         sb.Append('{');
         foreach (Match code in collection)
         {
@@ -339,19 +338,29 @@ public class MessageBody : IList<SoraSegment>
             sb.Append(code.Groups[2].Value);
             sb.Append("\",");
         }
+
         sb.Append('}');
         return segmentType switch
         {
-            SegmentType.Text => new SoraSegment(SegmentType.Text, JsonConvert.DeserializeObject<TextSegment>(sb.ToString())),
-            SegmentType.Face => new SoraSegment(SegmentType.Face, JsonConvert.DeserializeObject<FaceSegment>(sb.ToString())),
-            SegmentType.Image => new SoraSegment(SegmentType.Image, JsonConvert.DeserializeObject<ImageSegment>(sb.ToString())),
-            SegmentType.Record => new SoraSegment(SegmentType.Record, JsonConvert.DeserializeObject<RecordSegment>(sb.ToString())),
+            SegmentType.Text => new SoraSegment(SegmentType.Text,
+                                                JsonConvert.DeserializeObject<TextSegment>(sb.ToString())),
+            SegmentType.Face => new SoraSegment(SegmentType.Face,
+                                                JsonConvert.DeserializeObject<FaceSegment>(sb.ToString())),
+            SegmentType.Image => new SoraSegment(SegmentType.Image,
+                                                 JsonConvert.DeserializeObject<ImageSegment>(sb.ToString())),
+            SegmentType.Record => new SoraSegment(SegmentType.Record,
+                                                  JsonConvert.DeserializeObject<RecordSegment>(sb.ToString())),
             SegmentType.At => new SoraSegment(SegmentType.At, JsonConvert.DeserializeObject<AtSegment>(sb.ToString())),
-            SegmentType.Share => new SoraSegment(SegmentType.Share, JsonConvert.DeserializeObject<ShareSegment>(sb.ToString())),
-            SegmentType.Reply => new SoraSegment(SegmentType.Reply, JsonConvert.DeserializeObject<ReplySegment>(sb.ToString())),
-            SegmentType.Forward => new SoraSegment(SegmentType.Forward, JsonConvert.DeserializeObject<ForwardSegment>(sb.ToString())),
-            SegmentType.Xml => new SoraSegment(SegmentType.Xml, JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
-            SegmentType.Json => new SoraSegment(SegmentType.Json, JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
+            SegmentType.Share => new SoraSegment(SegmentType.Share,
+                                                 JsonConvert.DeserializeObject<ShareSegment>(sb.ToString())),
+            SegmentType.Reply => new SoraSegment(SegmentType.Reply,
+                                                 JsonConvert.DeserializeObject<ReplySegment>(sb.ToString())),
+            SegmentType.Forward => new SoraSegment(SegmentType.Forward,
+                                                   JsonConvert.DeserializeObject<ForwardSegment>(sb.ToString())),
+            SegmentType.Xml => new SoraSegment(SegmentType.Xml,
+                                               JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
+            SegmentType.Json => new SoraSegment(SegmentType.Json,
+                                                JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
             _ => new SoraSegment(SegmentType.Unknown, null)
         };
     }
@@ -387,8 +396,8 @@ public class MessageBody : IList<SoraSegment>
         // 此处延时加载, 以提升运行速度
         return new Regex[]
         {
-                new Regex(@"\[CQ:([A-Za-z]*)(?:(,[^\[\]]+))?\]", RegexOptions.Compiled),    // 匹配CQ码
-                new Regex(@",([A-Za-z]+)=([^,\[\]]+)", RegexOptions.Compiled)               // 匹配键值对
+            new(@"\[CQ:([A-Za-z]*)(?:(,[^\[\]]+))?\]", RegexOptions.Compiled), // 匹配CQ码
+            new(@",([A-Za-z]+)=([^,\[\]]+)", RegexOptions.Compiled)            // 匹配键值对
         };
     }
 
