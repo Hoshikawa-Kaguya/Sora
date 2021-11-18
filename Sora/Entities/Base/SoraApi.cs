@@ -62,9 +62,9 @@ public sealed class SoraApi
     #region 消息API
 
     /// <summary>
-    /// 发送群聊消息
+    /// 发送私聊消息
     /// </summary>
-    /// <param name="userId">发送目标群id</param>
+    /// <param name="userId">发送目标用户id</param>
     /// <param name="message">消息内容</param>
     /// <param name="timeout">覆盖原有超时</param>
     /// <returns>
