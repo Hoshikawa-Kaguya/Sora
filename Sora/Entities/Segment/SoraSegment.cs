@@ -184,6 +184,18 @@ public readonly struct SoraSegment
 
     #endregion
 
+    #region 隐式转换
+
+    /// <summary>
+    /// 隐式类型转换
+    /// </summary>
+    public static implicit operator SoraSegment(string text)
+    {
+        return SoraSegment.Text(text);
+    }
+
+    #endregion
+
     #region 消息段生成/处理
 
     /// <summary>
