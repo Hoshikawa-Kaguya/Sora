@@ -288,7 +288,7 @@ public class MessageBody : IList<SoraSegment>
     /// </summary>
     public static implicit operator MessageBody(string text)
     {
-        return new MessageBody() {SoraSegment.Text(text)};
+        return new MessageBody() { SoraSegment.Text(text) };
     }
 
     #endregion
@@ -303,16 +303,16 @@ public class MessageBody : IList<SoraSegment>
     private static List<SoraSegment> ToSoraSegments(string str)
     {
         // 分离为文本数组和CQ码数组
-        string[] text     = regices[0].Replace(str, "\0").Split('\0');
-        Match[]  code     = regices[0].Matches(str).ToArray();
-        var      segments = new List<SoraSegment>();
+        string[] text = regices[0].Replace(str, "\0").Split('\0');
+        Match[] code = regices[0].Matches(str).ToArray();
+        var segments = new List<SoraSegment>();
         for (var i = 0; i < code.Length; i++)
         {
-            segments.Add(SoraSegment.Text(text[i]));
+            if (text[i].Length > 0) segments.Add(SoraSegment.Text(text[i]));
             segments.Add(ToSoraSegment(code[i].Value));
         }
 
-        segments.Add(SoraSegment.Text(text[code.Length]));
+        if (text[code.Length].Length > 0) segments.Add(SoraSegment.Text(text[code.Length]));
         return segments;
     }
 
@@ -324,15 +324,14 @@ public class MessageBody : IList<SoraSegment>
     private static SoraSegment ToSoraSegment(string str)
     {
         var match = regices[0].Match(str);
-        if (!match.Success) throw new Exception("无法解析所传入的字符串, 字符串非CQ码格式!");
         if (!Enum.TryParse<SegmentType>(match.Groups[1].Value, true, out var segmentType))
             segmentType = SegmentType.Unknown;
         var collection = regices[1].Matches(match.Groups[2].Value);
-        var sb         = new StringBuilder();
+        var sb = new StringBuilder();
         sb.Append('{');
         foreach (Match code in collection)
         {
-            sb.Append("\"");
+            sb.Append('"');
             sb.Append(code.Groups[1].Value);
             sb.Append("\":\"");
             sb.Append(code.Groups[2].Value);
