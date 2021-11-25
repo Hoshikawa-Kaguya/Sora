@@ -38,7 +38,7 @@ internal static class ReactiveApiManager
     /// <param name="connectionId">服务器连接标识符</param>
     /// <param name="timeout">覆盖原有超时,在不为空时有效</param>
     /// <returns>API返回</returns>
-    [Reviewed("XiaoHe321", "2021-04-13 23:00")]
+    [NeedReview("ALL")]
     internal static async ValueTask<(ApiStatus, JObject)> SendApiRequest(
         ApiRequest apiRequest, Guid connectionId, TimeSpan? timeout = null)
     {
@@ -58,7 +58,7 @@ internal static class ReactiveApiManager
         }
 
         //错误数据
-        (bool isTimeout, Exception exception) err = (false, null);
+        (var isTimeout, Exception exception) = (false, null);
         //向客户端发送请求数据
         var apiTask = StaticVariable.ApiSubject
                                     .Where(request => request.Item1 == apiRequest.Echo)
@@ -68,10 +68,10 @@ internal static class ReactiveApiManager
                                     .ToTask()
                                     .RunCatch(e =>
                                               {
-                                                  err.isTimeout = e is TimeoutException;
-                                                  err.exception = e;
+                                                  isTimeout = e is TimeoutException;
+                                                  exception = e;
                                                   //在错误为超时时不打印log
-                                                  if (!err.isTimeout)
+                                                  if (!isTimeout)
                                                       Log.Error("Sora|ReactiveApiManager",
                                                                 $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
                                                   return new JObject();
@@ -90,14 +90,14 @@ internal static class ReactiveApiManager
         if (response != null && response.Count != 0) return (GetApiStatus(response), response);
 
         //空响应
-        if (err.exception == null) return (NullResponse(), null);
+        if (exception == null) return (NullResponse(), null);
         //观察者抛出异常
-        if (err.isTimeout)
+        if (isTimeout)
             Log.Error("Sora|ReactiveApiManager",
                       $"api time out[msg echo:{apiRequest.Echo}]");
-        return err.isTimeout
+        return isTimeout
             ? (TimeOut(), null)
-            : (ObservableError(Log.ErrorLogBuilder(err.exception)), null);
+            : (ObservableError(Log.ErrorLogBuilder(exception)), null);
     }
 
     #endregion
