@@ -67,11 +67,9 @@ public class CommandManager
         var cmdGroups = assembly.GetExportedTypes()
                                 //获取指令组
                                 .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
-                                .Select(type => (type,
-                                                 type.GetMethods()
-                                                     .Where(method => method.CheckMethodLegality())
-                                                     .ToArray())
-                                       )
+                                .Select(type => (type, type.GetMethods()
+                                                           .Where(method => method.CheckMethodLegality())
+                                                           .ToArray()))
                                 .ToDictionary(methods => methods.type, methods => methods.Item2.ToArray());
 
         //生成指令信息

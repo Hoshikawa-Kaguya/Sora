@@ -1,13 +1,14 @@
-﻿using Newtonsoft.Json;
-using Sora.Entities.Segment;
-using Sora.Entities.Segment.DataModel;
-using Sora.Enumeration;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Sora.Attributes;
+using Sora.Entities.Segment;
+using Sora.Entities.Segment.DataModel;
+using Sora.Enumeration;
 using YukariToolBox.LightLog;
 
 namespace Sora.Entities;
@@ -21,7 +22,7 @@ public class MessageBody : IList<SoraSegment>
 
     private readonly List<SoraSegment> _message = new();
 
-    private static readonly Regex[] regices = InitializeRegex();
+    private static readonly Regex[] _regices = InitializeRegex();
 
     #endregion
 
@@ -288,7 +289,7 @@ public class MessageBody : IList<SoraSegment>
     /// </summary>
     public static implicit operator MessageBody(string text)
     {
-        return new MessageBody() { SoraSegment.Text(text) };
+        return new MessageBody() {SoraSegment.Text(text)};
     }
 
     #endregion
@@ -300,12 +301,13 @@ public class MessageBody : IList<SoraSegment>
     /// </summary>
     /// <param name="str">需要进行反序列化的字符串</param>
     /// <returns>SoraSegment集合</returns>
+    [NeedReview("ALL")]
     private static List<SoraSegment> ToSoraSegments(string str)
     {
         // 分离为文本数组和CQ码数组
-        string[] text = regices[0].Replace(str, "\0").Split('\0');
-        Match[] code = regices[0].Matches(str).ToArray();
-        var segments = new List<SoraSegment>();
+        string[] text     = _regices[0].Replace(str, "\0").Split('\0');
+        Match[]  code     = _regices[0].Matches(str).ToArray();
+        var      segments = new List<SoraSegment>();
         for (var i = 0; i < code.Length; i++)
         {
             if (text[i].Length > 0) segments.Add(SoraSegment.Text(text[i]));
@@ -321,13 +323,14 @@ public class MessageBody : IList<SoraSegment>
     /// </summary>
     /// <param name="str">CQ码字符串</param>
     /// <returns>生成的SoraSegment对象</returns>
+    [NeedReview("ALL")]
     private static SoraSegment ToSoraSegment(string str)
     {
-        var match = regices[0].Match(str);
+        var match = _regices[0].Match(str);
         if (!Enum.TryParse<SegmentType>(match.Groups[1].Value, true, out var segmentType))
             segmentType = SegmentType.Unknown;
-        var collection = regices[1].Matches(match.Groups[2].Value);
-        var sb = new StringBuilder();
+        var collection = _regices[1].Matches(match.Groups[2].Value);
+        var sb         = new StringBuilder();
         sb.Append('{');
         foreach (Match code in collection)
         {
