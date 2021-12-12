@@ -83,7 +83,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 发送消息的id</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> Reply(
         MessageBody message, TimeSpan? timeout = null)
     {
         return await SoraApi.SendPrivateMessage(Sender.Id, message, timeout);
@@ -96,7 +96,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 发送消息的id</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> Repeat()
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> Repeat()
     {
         return await SoraApi.SendPrivateMessage(Sender.Id, Message.MessageBody);
     }
@@ -116,9 +116,9 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
                                                                       RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps, matchType,
-                                                           SourceFlag.Private, regexOptions,
-                                                           null, null) as PrivateMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, commandExps, matchType,
+                                                               SourceFlag.Private, regexOptions,
+                                                               null, null) as PrivateMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
@@ -138,9 +138,9 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
                                                                       RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps, matchType,
-                                                           SourceFlag.Private, regexOptions,
-                                                           timeout, timeoutTask) as PrivateMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, commandExps, matchType,
+                                                               SourceFlag.Private, regexOptions,
+                                                               timeout, timeoutTask) as PrivateMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
@@ -176,10 +176,10 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
                                                                       RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextMessage(Sender, new[] {commandExp},
-                                                           matchType,
-                                                           SourceFlag.Private, regexOptions,
-                                                           timeout, timeoutTask) as PrivateMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, new[] {commandExp},
+                                                               matchType,
+                                                               SourceFlag.Private, regexOptions,
+                                                               timeout, timeoutTask) as PrivateMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }

@@ -11,10 +11,7 @@ Log.LogConfiguration
    .SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
-var service = SoraServiceFactory.CreateService(new ServerConfig
-{
-    GuildBlockUsers = new []{144115218677530315}
-});
+var service = SoraServiceFactory.CreateService(new ServerConfig());
 
 #region 事件处理
 

@@ -34,7 +34,7 @@ internal static class ApiInterface
     /// <returns>
     /// message id
     /// </returns>
-    internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
+    internal static async ValueTask<(ApiStatus apiStatus, string messageId)> SendPrivateMessage(
         Guid connection, long target, MessageBody messages, long? groupId, TimeSpan? timeout)
     {
         Log.Debug("Sora", "Sending send_msg(Private) request");
@@ -55,12 +55,9 @@ internal static class ApiInterface
             }
         }, connection, timeout);
         Log.Debug("Sora", $"Get send_msg(Private) response {nameof(apiStatus)}={apiStatus.RetCode}");
-        if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, -1);
-        var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
-            ? messageCode
-            : -1;
+        if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, "-1");
         Log.Debug("Sora", $"msg send -> private[{target}]");
-        return (apiStatus, msgCode);
+        return (apiStatus, ret?["data"]?["message_id"]?.ToString());
     }
 
     /// <summary>
@@ -73,7 +70,7 @@ internal static class ApiInterface
     /// <returns>
     /// ApiResponseCollection
     /// </returns>
-    internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
+    internal static async ValueTask<(ApiStatus apiStatus, string messageId)> SendGroupMessage(
         Guid connection, long target, MessageBody messages, TimeSpan? timeout)
     {
         Log.Debug("Sora", "Sending send_msg(Group) request");
@@ -94,12 +91,9 @@ internal static class ApiInterface
             }
         }, connection, timeout);
         Log.Debug("Sora", $"Get send_msg(Group) response {nameof(apiStatus)}={apiStatus.RetCode}");
-        if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, -1);
-        var msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out var messageCode)
-            ? messageCode
-            : -1;
+        if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, "-1");
         Log.Debug("Sora", $"msg send -> group[{target}]");
-        return (apiStatus, msgCode);
+        return (apiStatus, ret?["data"]?["message_id"]?.ToString());
     }
 
     /// <summary>
@@ -418,7 +412,7 @@ internal static class ApiInterface
         ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup, int
             realId, bool
             isGroupMsg)> GetMessage(
-            Guid serviceId, Guid connection, int msgId)
+            Guid serviceId, Guid connection, string msgId)
     {
         Log.Debug("Sora", "Sending get_msg request");
         var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -915,7 +909,7 @@ internal static class ApiInterface
     /// </summary>
     /// <param name="connection">服务器连接标识</param>
     /// <param name="msgId">消息id</param>
-    internal static async ValueTask<ApiStatus> RecallMsg(Guid connection, int msgId)
+    internal static async ValueTask<ApiStatus> RecallMsg(Guid connection, string msgId)
     {
         Log.Debug("Sora", "Sending delete_msg request");
         var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1551,7 +1545,7 @@ internal static class ApiInterface
     /// </summary>
     /// <param name="connection">连接标识</param>
     /// <param name="msgId">消息ID</param>
-    internal static async ValueTask<ApiStatus> MarkMessageRead(Guid connection, int msgId)
+    internal static async ValueTask<ApiStatus> MarkMessageRead(Guid connection, string msgId)
     {
         Log.Debug("Sora", "Sending mark_msg_as_read request");
         var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1571,7 +1565,7 @@ internal static class ApiInterface
     /// </summary>
     /// <param name="connection">连接标识</param>
     /// <param name="msgId">消息ID</param>
-    internal static async void MarkMessageReadAsync(Guid connection, int msgId)
+    internal static async void MarkMessageReadAsync(Guid connection, string msgId)
     {
         Log.Debug("Sora", "Sending mark_msg_as_read request");
         var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest

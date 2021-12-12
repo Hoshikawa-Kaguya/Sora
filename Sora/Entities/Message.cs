@@ -21,7 +21,7 @@ public sealed class Message : BaseModel
     /// <summary>
     /// 消息ID
     /// </summary>
-    public int MessageId { get; }
+    public string MessageId { get; }
 
     /// <summary>
     /// 纯文本信息
@@ -53,7 +53,7 @@ public sealed class Message : BaseModel
 
     #region 构造函数
 
-    internal Message(Guid serviceId, Guid connectionId, int msgId, string text, MessageBody messageBody,
+    internal Message(Guid serviceId, Guid connectionId, string msgId, string text, MessageBody messageBody,
                      long time, int font, long? messageSequence) :
         base(serviceId, connectionId)
     {

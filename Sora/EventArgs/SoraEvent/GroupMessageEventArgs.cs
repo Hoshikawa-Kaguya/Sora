@@ -101,7 +101,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 发送消息的id</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(MessageBody message,
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> Reply(MessageBody message,
                                                                        TimeSpan? timeout = null)
     {
         return await SoraApi.SendGroupMessage(SourceGroup.Id, message, timeout);
@@ -114,7 +114,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 发送消息的id</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> Repeat()
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> Repeat()
     {
         return await SoraApi.SendGroupMessage(SourceGroup.Id, Message.MessageBody);
     }
@@ -157,9 +157,9 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
-                                                           matchType, SourceFlag.Group, regexOptions, null, null,
-                                                           SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, commandExps,
+                                                               matchType, SourceFlag.Group, regexOptions, null, null,
+                                                               SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
@@ -179,10 +179,10 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
-                                                           matchType, SourceFlag.Group, regexOptions, timeout,
-                                                           timeoutTask,
-                                                           SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, commandExps,
+                                                               matchType, SourceFlag.Group, regexOptions, timeout,
+                                                               timeoutTask,
+                                                               SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
@@ -218,10 +218,10 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextMessage(Sender, new[] {commandExp},
-                                                           matchType, SourceFlag.Group, regexOptions, timeout,
-                                                           timeoutTask,
-                                                           SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, new[] {commandExp},
+                                                               matchType, SourceFlag.Group, regexOptions, timeout,
+                                                               timeoutTask,
+                                                               SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }

@@ -14,7 +14,7 @@ internal abstract class BaseEventArgs
     internal long Time { get; set; }
 
     /// <summary>
-    /// 收到事件的机器人 QQ 号
+    /// 收到事件的机器人 UID
     /// </summary>
     [JsonProperty(PropertyName = "self_id", NullValueHandling = NullValueHandling.Ignore)]
     internal long SelfID { get; set; }

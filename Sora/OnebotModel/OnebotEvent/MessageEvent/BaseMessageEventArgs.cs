@@ -25,7 +25,7 @@ internal abstract class BaseMessageEventArgs : BaseEventArgs
     /// 消息 ID
     /// </summary>
     [JsonProperty(PropertyName = "message_id")]
-    internal int MessageId { get; set; }
+    internal string MessageId { get; set; }
 
     /// <summary>
     /// 发送者 QQ 号

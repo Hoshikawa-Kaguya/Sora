@@ -49,7 +49,7 @@ public sealed class User : BaseModel
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> SendPrivateMessage(
         MessageBody message, TimeSpan? timeout = null)
     {
         return await SoraApi.SendPrivateMessage(Id, message, timeout);

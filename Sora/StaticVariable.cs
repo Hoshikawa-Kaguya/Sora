@@ -20,7 +20,7 @@ public static class StaticVariable
     /// 连续对话匹配上下文
     /// Key:当前对话标识符
     /// </summary>
-    internal static readonly ConcurrentDictionary<Guid, WaitingInfo> WaitingDict = new();
+    internal static readonly ConcurrentDictionary<Guid, BaseMessageWaitingInfo> WaitingDict = new();
 
     /// <summary>
     /// API响应被观察对象

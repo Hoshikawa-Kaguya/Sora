@@ -71,7 +71,7 @@ public sealed class SoraApi
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> SendPrivateMessage(
         long userId, MessageBody message, TimeSpan? timeout = null)
     {
         if (userId        < MinUserId) throw new ArgumentOutOfRangeException(nameof(userId));
@@ -90,7 +90,7 @@ public sealed class SoraApi
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendTemporaryMessage(
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> SendTemporaryMessage(
         long userId, long groupId, MessageBody message, TimeSpan? timeout = null)
     {
         if (userId        < MinUserId) throw new ArgumentOutOfRangeException(nameof(userId));
@@ -109,7 +109,7 @@ public sealed class SoraApi
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> SendGroupMessage(
         long groupId, MessageBody message, TimeSpan? timeout = null)
     {
         if (groupId       < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
@@ -121,7 +121,7 @@ public sealed class SoraApi
     /// 撤回消息
     /// </summary>
     /// <param name="messageId">消息ID</param>
-    public async ValueTask<ApiStatus> RecallMessage(int messageId)
+    public async ValueTask<ApiStatus> RecallMessage(string messageId)
     {
         return await ApiInterface.RecallMsg(ConnectionId, messageId);
     }
@@ -189,7 +189,7 @@ public sealed class SoraApi
     /// </returns>
     public async
         ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup,
-            int realId, bool isGroupMsg)> GetMessage(int messageId)
+            int realId, bool isGroupMsg)> GetMessage(string messageId)
     {
         return await ApiInterface.GetMessage(ServiceId, ConnectionId, messageId);
     }
@@ -227,7 +227,7 @@ public sealed class SoraApi
     /// 标记消息已读
     /// </summary>
     /// <param name="messageId">消息ID</param>
-    public async ValueTask<ApiStatus> MarkMessageRead(int messageId)
+    public async ValueTask<ApiStatus> MarkMessageRead(string messageId)
     {
         return await ApiInterface.MarkMessageRead(ConnectionId, messageId);
     }

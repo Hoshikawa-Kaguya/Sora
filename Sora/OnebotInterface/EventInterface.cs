@@ -96,6 +96,11 @@ public class EventInterface
     public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnGroupMessage;
 
     /// <summary>
+    /// 频道消息事件
+    /// </summary>
+    public event EventAsyncCallBackHandler<GuildMessageEventArgs> OnGuildMessage;
+
+    /// <summary>
     /// 登录账号发送消息事件
     /// </summary>
     public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnSelfMessage;
@@ -356,13 +361,20 @@ public class EventInterface
                 await OnGroupMessage("Message", eventArgs);
                 break;
             }
+            //TODO gocq暂时还不支持频道私聊
             case "guild":
             {
                 var guildMsg = messageJson.ToObject<GocqGuildMessageEventArgs>();
                 if (guildMsg == null) break;
                 if (StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Contains(guildMsg.UserId)) return;
-
-                Log.Debug("test", messageJson.ToString());
+                Log.Debug("Sora", GuildMessageLog(guildMsg));
+                var eventArgs = new GuildMessageEventArgs(ServiceId, connection, "group", guildMsg);
+                //TODO 指令匹配
+                // if (!eventArgs.IsContinueEventChain)
+                //     break;
+                //执行回调
+                if (OnGuildMessage == null) break;
+                await OnGuildMessage("Message", eventArgs);
                 break;
             }
             default:
@@ -685,6 +697,15 @@ public class EventInterface
     private static string TryGetJsonValue(JObject dataJson, string key)
     {
         return dataJson.TryGetValue(key, out var value) ? value.ToString() : string.Empty;
+    }
+
+    #endregion
+
+    #region 长Log相关的构建
+
+    private static string GuildMessageLog(GocqGuildMessageEventArgs eventArgs)
+    {
+        return $"Guild msg[{eventArgs.GuildId}(cid:{eventArgs.ChannelId})] <- User {eventArgs.SenderInfo.Nick}[{eventArgs.UserId}]";
     }
 
     #endregion
