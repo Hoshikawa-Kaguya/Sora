@@ -68,12 +68,12 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="socket">连接信息</param>
     /// <param name="selfId">机器人UID</param>
     /// <param name="apiTimeout">api超时</param>
-    private bool AddConnection(Guid serviceId, Guid connectionId, ISoraSocket socket,
-                               string selfId, TimeSpan apiTimeout)
+    private static bool AddConnection(Guid serviceId, Guid connectionId, ISoraSocket socket,
+                                      string selfId, TimeSpan apiTimeout)
     {
         //检查是否已存在值
         if (StaticVariable.ConnectionInfos.ContainsKey(connectionId)) return false;
-        long.TryParse(selfId, out var uid);
+        if (!long.TryParse(selfId, out var uid)) Log.Error("ConnectionManager", "非法selfid，已忽略");
         return StaticVariable.ConnectionInfos.TryAdd(connectionId, new SoraConnectionInfo
                                                          (serviceId, connectionId,
                                                           socket,
@@ -86,7 +86,7 @@ public sealed class ConnectionManager : IDisposable
     /// 移除服务器连接记录
     /// </summary>
     /// <param name="connectionId">连接标识</param>
-    private bool RemoveConnection(Guid connectionId)
+    private static bool RemoveConnection(Guid connectionId)
     {
         return StaticVariable.ConnectionInfos.TryRemove(connectionId, out _);
     }
@@ -95,7 +95,7 @@ public sealed class ConnectionManager : IDisposable
     /// 检查是否存在连接
     /// </summary>
     /// <param name="connectionId">连接标识</param>
-    internal bool ConnectionExists(Guid connectionId)
+    internal static bool ConnectionExists(Guid connectionId)
     {
         return StaticVariable.ConnectionInfos.ContainsKey(connectionId);
     }
@@ -206,7 +206,7 @@ public sealed class ConnectionManager : IDisposable
         }
 
         if (OnOpenConnectionAsync == null) return;
-        long.TryParse(selfId, out var uid);
+        if (!long.TryParse(selfId, out var uid)) Log.Error("ConnectionManager", "非法selfid，已忽略");
         Task.Run(async () => { await OnOpenConnectionAsync(connId, new ConnectionEventArgs(role, uid)); });
     }
 

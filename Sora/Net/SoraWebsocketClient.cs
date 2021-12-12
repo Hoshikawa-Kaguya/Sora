@@ -145,7 +145,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
                                           {
                                               ConnectionManager.GetLoginUid(_clientId, out var uid);
                                               //移除原连接信息
-                                              if (ConnManager.ConnectionExists(_clientId))
+                                              if (ConnectionManager.ConnectionExists(_clientId))
                                                   ConnManager.CloseConnection("Universal", uid, _clientId);
 
                                               if (info.Exception != null)

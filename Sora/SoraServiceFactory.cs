@@ -15,7 +15,17 @@ namespace Sora;
 /// </summary>
 public static class SoraServiceFactory
 {
-    private static bool _haveStartupLog;
+    /// <summary>
+    /// 初始消息
+    /// </summary>
+    static SoraServiceFactory()
+    {
+        Log.Info("Sora", $"框架版本:{StaticVariable.Version}");
+        Log.Debug("Sora", "开发交流群：1081190562");
+        Log.Debug("System", Environment.OSVersion.ToString());
+        Log.Debug("Runtime", Environment.Version.ToString());
+        Log.Info("OnebotProtocolVersion", "11");
+    }
 
     /// <summary>
     /// 创建一个Sora服务
@@ -28,17 +38,6 @@ public static class SoraServiceFactory
     /// <exception cref="ArgumentException">配置文件类型错误</exception>
     public static ISoraService CreateService(ISoraConfig config, Action<Exception> crashAction = null)
     {
-        //如果已经启动过初始化则不显示初始化log
-        if (!_haveStartupLog)
-        {
-            Log.Info("Sora", $"框架版本:{StaticVariable.Version}");
-            Log.Debug("Sora", "开发交流群：1081190562");
-            Log.Debug("System", Environment.OSVersion.ToString());
-            Log.Debug("Runtime", Environment.Version.ToString());
-            Log.Info("OnebotProtocolVersion", "11");
-            _haveStartupLog =  true;
-        }
-
         return config switch
         {
             ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
@@ -68,7 +67,7 @@ public static class SoraServiceFactory
     public static List<ISoraService> CreateMultiService(ISoraConfig config,
                                                         Action<Exception> crashAction = null)
     {
-        var createdService = new List<ISoraService>()
+        var createdService = new List<ISoraService>
         {
             CreateService(config, crashAction)
         };

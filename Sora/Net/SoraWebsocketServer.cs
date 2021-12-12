@@ -172,7 +172,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         socket.OnClose = () =>
                          {
                              //移除原连接信息
-                             if (ConnManager.ConnectionExists(socket.ConnectionInfo.Id))
+                             if (ConnectionManager.ConnectionExists(socket.ConnectionInfo.Id))
                                  ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
                                                              socket.ConnectionInfo.Id);
 
