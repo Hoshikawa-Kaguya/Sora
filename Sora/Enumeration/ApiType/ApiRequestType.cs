@@ -323,7 +323,8 @@ internal enum ApiRequestType
     /// <summary>
     /// 主动删除好友
     /// </summary>
-    [Description("delete_friend")] DeleteFriend,
+    [Description("delete_friend")] 
+    DeleteFriend,
 
     /// <summary>
     /// 获取好友在线机型展示信息
@@ -372,6 +373,12 @@ internal enum ApiRequestType
     /// </summary>
     [Description("delete_unidirectional_friend")]
     DeleteUnidirectionalFriend,
+
+    /// <summary>
+    /// 发送信息到子频道
+    /// </summary>
+    [Description("send_guild_channel_msg")]
+    SendGuildChannelMsg
 
     #endregion
 }

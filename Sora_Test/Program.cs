@@ -44,6 +44,12 @@ service.Event.OnSelfMessage += (_, eventArgs) =>
                                    Log.Info("test", $"self msg {eventArgs.Message.MessageId}");
                                    return ValueTask.CompletedTask;
                                };
+//频道消息事件
+service.Event.OnGuildMessage += async (type, eventArgs) =>
+                                {
+                                    await eventArgs.SoraApi.SendGuildMessage(eventArgs.SourceGuild,
+                                                                             eventArgs.SourceChannel, "哇哦");
+                                };
 //私聊消息事件
 service.Event.OnPrivateMessage += async (_, eventArgs) => { await eventArgs.Reply("好耶"); };
 //动态向管理器注册指令

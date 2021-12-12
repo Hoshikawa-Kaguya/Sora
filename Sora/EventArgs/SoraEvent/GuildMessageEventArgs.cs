@@ -1,5 +1,7 @@
 ﻿using System;
+using Sora.Converter;
 using Sora.Entities;
+using Sora.Entities.Info;
 using Sora.OnebotModel.ExtraEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -16,6 +18,31 @@ public class GuildMessageEventArgs : BaseSoraEventArgs
     /// </summary>
     public Message Message { get; }
 
+    /// <summary>
+    /// 消息发送者实例
+    /// </summary>
+    public GuildUser Sender { get; }
+
+    /// <summary>
+    /// 发送者信息
+    /// </summary>
+    public GuildSenderInfo SenderInfo { get; }
+
+    /// <summary>
+    /// 源频道
+    /// </summary>
+    public Guild SourceGuild { get; }
+
+    /// <summary>
+    /// 源子频道
+    /// </summary>
+    public Channel SourceChannel { get; }
+
+    /// <summary>
+    /// 登陆账号的频道ID
+    /// </summary>
+    public long SelfGuildId { get; }
+
     #endregion
 
     /// <summary>
@@ -29,6 +56,12 @@ public class GuildMessageEventArgs : BaseSoraEventArgs
                                    GocqGuildMessageEventArgs guildMsgArgs) :
         base(serviceId, connectionId, eventName, guildMsgArgs.SelfID, guildMsgArgs.Time)
     {
-        //Message = 
+        Message = new Message(serviceId, connectionId, guildMsgArgs.MessageId, string.Empty,
+                              guildMsgArgs.MessageList.ToMessageBody(), guildMsgArgs.Time, 0, null);
+        Sender        = new GuildUser(serviceId, connectionId, guildMsgArgs.UserId);
+        SenderInfo    = guildMsgArgs.SenderInfo;
+        SourceGuild   = new Guild(serviceId, connectionId, guildMsgArgs.GuildId);
+        SourceChannel = new Channel(serviceId, connectionId, guildMsgArgs.ChannelId);
+        SelfGuildId   = guildMsgArgs.SelfTinyId;
     }
 }

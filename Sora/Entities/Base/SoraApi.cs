@@ -82,7 +82,7 @@ public sealed class SoraApi
     /// <summary>
     /// 发起群临时会话（私聊）
     /// </summary>
-    /// <param name="userId">发送目标群id</param>
+    /// <param name="userId">发送目标用户id</param>
     /// <param name="groupId">群号</param>
     /// <param name="message">消息内容</param>
     /// <param name="timeout">覆盖原有超时</param>
@@ -115,6 +115,24 @@ public sealed class SoraApi
         if (groupId       < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
         if (message.Count == 0) throw new NullReferenceException(nameof(message));
         return await ApiInterface.SendGroupMessage(ConnectionId, groupId, message, timeout);
+    }
+
+    /// <summary>
+    /// 发起群临时会话（私聊）
+    /// </summary>
+    /// <param name="guildId">频道ID</param>
+    /// <param name="channelId">子频道ID</param>
+    /// <param name="message">消息内容</param>
+    /// <param name="timeout">覆盖原有超时</param>
+    /// <returns>
+    /// <para><see cref="ApiStatusType"/> API执行状态</para>
+    /// <para><see langword="messageId"/> 消息ID</para>
+    /// </returns>
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> SendGuildMessage(
+        long guildId, long channelId, MessageBody message, TimeSpan? timeout = null)
+    {
+        if (message.Count == 0) throw new NullReferenceException(nameof(message));
+        return await ApiInterface.SendGuildMessage(ConnectionId, guildId, channelId, message, timeout);
     }
 
     /// <summary>

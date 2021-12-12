@@ -106,6 +106,11 @@ public class EventInterface
     public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnSelfMessage;
 
     /// <summary>
+    /// 登录账号发送频道消息事件
+    /// </summary>
+    public event EventAsyncCallBackHandler<GuildMessageEventArgs> OnSelfGuildMessage; 
+
+    /// <summary>
     /// 私聊事件
     /// </summary>
     public event EventAsyncCallBackHandler<PrivateMessageEventArgs> OnPrivateMessage;
@@ -369,12 +374,18 @@ public class EventInterface
                 if (StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Contains(guildMsg.UserId)) return;
                 Log.Debug("Sora", GuildMessageLog(guildMsg));
                 var eventArgs = new GuildMessageEventArgs(ServiceId, connection, "group", guildMsg);
+                //自己发送的消息
+                if (eventArgs.SenderInfo.UserId == eventArgs.SelfGuildId)
+                {
+                    if (OnSelfGuildMessage == null) break;
+                    await OnSelfGuildMessage("GuildMessage", eventArgs);
+                }
                 //TODO 指令匹配
                 // if (!eventArgs.IsContinueEventChain)
                 //     break;
                 //执行回调
                 if (OnGuildMessage == null) break;
-                await OnGuildMessage("Message", eventArgs);
+                await OnGuildMessage("GuildMessage", eventArgs);
                 break;
             }
             default:

@@ -35,6 +35,7 @@ internal struct SendMessageParams
     [JsonProperty(PropertyName = "message")]
     internal List<OnebotSegment> Message { get; set; }
 
+    //TODO 未使用的字段
     /// <summary>
     /// 是否忽略消息段
     /// </summary>

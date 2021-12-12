@@ -10,7 +10,7 @@ using Sora.EventArgs.SoraEvent;
 namespace Sora.Entities;
 
 /// <summary>
-/// 群组类
+/// 群组实例
 /// </summary>
 public sealed class Group : BaseModel
 {

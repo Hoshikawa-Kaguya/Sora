@@ -26,7 +26,7 @@ internal static class ApiInterface
     /// <summary>
     /// 发送私聊消息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="target">发送目标uid</param>
     /// <param name="messages">发送的信息</param>
     /// <param name="groupId">临时会话来源群，非临时会话时为<see langword="null"/></param>
@@ -39,6 +39,9 @@ internal static class ApiInterface
     {
         Log.Debug("Sora", "Sending send_msg(Private) request");
         if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
+        var msglist = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
+                              .Select(msg => msg.ToOnebotMessage())
+                              .ToList();
         //发送信息
         var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
         {
@@ -47,11 +50,8 @@ internal static class ApiInterface
             {
                 MessageType = MessageType.Private,
                 UserId      = target,
-                //转换消息段列表
-                Message = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
-                                  .Select(msg => msg.ToOnebotMessage())
-                                  .ToList(),
-                GroupId = groupId
+                Message     = msglist,
+                GroupId     = groupId
             }
         }, connection, timeout);
         Log.Debug("Sora", $"Get send_msg(Private) response {nameof(apiStatus)}={apiStatus.RetCode}");
@@ -63,7 +63,7 @@ internal static class ApiInterface
     /// <summary>
     /// 发送群聊消息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="target">发送目标gid</param>
     /// <param name="messages">发送的信息</param>
     /// <param name="timeout">覆盖原有超时</param>
@@ -86,8 +86,7 @@ internal static class ApiInterface
             {
                 MessageType = MessageType.Group,
                 GroupId     = target,
-                //转换消息段列表
-                Message = msglist
+                Message     = msglist
             }
         }, connection, timeout);
         Log.Debug("Sora", $"Get send_msg(Group) response {nameof(apiStatus)}={apiStatus.RetCode}");
@@ -97,9 +96,45 @@ internal static class ApiInterface
     }
 
     /// <summary>
+    /// 发送频道消息
+    /// </summary>
+    /// <param name="connection">连接标识</param>
+    /// <param name="targetGid">频道ID</param>
+    /// <param name="targetCid">子频道ID</param>
+    /// <param name="messages">消息内容</param>
+    /// <param name="timeout">覆盖原有超时</param>
+    /// <returns>
+    /// ApiResponseCollection
+    /// </returns>
+    internal static async ValueTask<(ApiStatus apiStatus, string messageId)> SendGuildMessage(
+        Guid connection, long targetGid, long targetCid, MessageBody messages, TimeSpan? timeout)
+    {
+        Log.Debug("Sora", "Sending send_guild_channel_msg request");
+        if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
+        var msglist = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
+                              .Select(msg => msg.ToOnebotMessage())
+                              .ToList();
+        //发送信息
+        var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.SendGuildChannelMsg,
+            ApiParams = new
+            {
+                guild_id   = targetGid,
+                channel_id = targetCid,
+                message    = msglist
+            }
+        }, connection, timeout);
+        Log.Debug("Sora", $"Get send_guild_channel_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
+        if (apiStatus.RetCode != ApiStatusType.OK) return (apiStatus, "-1");
+        Log.Debug("Sora", $"msg send -> guild[{targetGid}({targetCid})]");
+        return (apiStatus, ret?["data"]?["message_id"]?.ToString());
+    }
+
+    /// <summary>
     /// 获取登陆账号信息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <returns>ApiResponseCollection</returns>
     [Reviewed("nidbCN", "2021-03-24 20:38")]
     internal static async ValueTask<(ApiStatus apiStatus, long userId, string nick)> GetLoginInfo(Guid connection)
@@ -122,7 +157,7 @@ internal static class ApiInterface
     /// <summary>
     /// 获取版本信息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     [Reviewed("nidbCN", "2021-03-24 20:39")]
     internal static async ValueTask<(ApiStatus apiStatus, string clientType, string clientVer)> GetClientInfo(
         Guid connection)
@@ -143,7 +178,7 @@ internal static class ApiInterface
     /// 获取好友列表
     /// </summary>
     /// <param name="serviceId">服务ID</param>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <returns>好友信息列表</returns>
     [Reviewed("nidbCN", "2021-03-24 20:40")]
     internal static async ValueTask<(ApiStatus apiStatus, List<FriendInfo> friendList)> GetFriendList(
@@ -175,7 +210,7 @@ internal static class ApiInterface
     /// <summary>
     /// 获取群组列表
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="useCache">使用缓存</param>
     /// <returns>群组信息列表</returns>
     [Reviewed("nidbCN", "2021-03-24 20:44")]
@@ -203,7 +238,7 @@ internal static class ApiInterface
     /// 获取群成员列表
     /// </summary>
     /// <param name="serviceId">服务ID</param>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="useCache">使用缓存</param>
     [Reviewed("nidbCN", "2021-03-24 20:49")]
@@ -234,7 +269,7 @@ internal static class ApiInterface
     /// <summary>
     /// 获取群信息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="useCache">是否使用缓存</param>
     [Reviewed("nidbCN", "2021-03-24 20:55")]
@@ -259,7 +294,7 @@ internal static class ApiInterface
     /// <summary>
     /// 获取群成员信息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="serviceId">服务ID</param>
     /// <param name="groupId">群号</param>
     /// <param name="userId">用户ID</param>
@@ -293,7 +328,7 @@ internal static class ApiInterface
     /// 可以为好友或陌生人
     /// </summary>
     /// <param name="serviceId">服务ID</param>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="userId">用户ID</param>
     /// <param name="useCache">使用缓存</param>
     internal static async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
@@ -326,7 +361,7 @@ internal static class ApiInterface
     /// <summary>
     /// 检查是否可以发送图片
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     internal static async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendImage(Guid connection)
     {
         Log.Debug("Sora", "Sending can_send_image request");
@@ -342,7 +377,7 @@ internal static class ApiInterface
     /// <summary>
     /// 检查是否可以发送语音
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     internal static async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendRecord(Guid connection)
     {
         Log.Debug("Sora", "Sending can_send_record request");
@@ -358,7 +393,7 @@ internal static class ApiInterface
     /// <summary>
     /// 获取客户端状态
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     internal static async ValueTask<(ApiStatus apiStatus, bool online, bool good, JObject statData)> GetStatus(
         Guid connection)
     {
@@ -380,7 +415,7 @@ internal static class ApiInterface
     /// <summary>
     /// 获取图片信息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="cacheFileName">缓存文件名</param>
     internal static async ValueTask<(ApiStatus apiStatus, int size, string fileName, string url)> GetImage(
         Guid connection, string cacheFileName)
@@ -406,7 +441,7 @@ internal static class ApiInterface
     /// 获取消息
     /// </summary>
     /// <param name="serviceId">服务ID</param>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="msgId">消息ID</param>
     internal static async
         ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup, int
@@ -452,7 +487,7 @@ internal static class ApiInterface
     /// <summary>
     /// 获取中文分词
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="text">内容</param>
     /// <returns>词组列表</returns>
     internal static async ValueTask<(ApiStatus apiStatus, List<string> slicesList)> GetWordSlices(
@@ -476,7 +511,7 @@ internal static class ApiInterface
     /// <summary>
     /// 获取合并转发消息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="msgId">合并转发 ID</param>
     /// <returns>ApiResponseCollection</returns>
     internal static async ValueTask<(ApiStatus apiStatus, List<Node> nodeArray)> GetForwardMessage(
@@ -504,7 +539,7 @@ internal static class ApiInterface
     /// <summary>
     /// 获取群系统消息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <returns>消息列表</returns>
     internal static async
         ValueTask<(ApiStatus apiStatus, List<GroupRequestInfo> joinList, List<GroupRequestInfo> invitedList)>
@@ -907,7 +942,7 @@ internal static class ApiInterface
     /// <summary>
     /// 撤回消息
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="msgId">消息id</param>
     internal static async ValueTask<ApiStatus> RecallMsg(Guid connection, string msgId)
     {
@@ -927,7 +962,7 @@ internal static class ApiInterface
     /// <summary>
     /// 处理加好友请求
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="flag">请求flag</param>
     /// <param name="approve">是否同意</param>
     /// <param name="remark">好友备注</param>
@@ -953,7 +988,7 @@ internal static class ApiInterface
     /// <summary>
     /// 处理加群请求/邀请
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="flag">请求flag</param>
     /// <param name="requestType">请求类型</param>
     /// <param name="approve">是否同意</param>
@@ -983,7 +1018,7 @@ internal static class ApiInterface
     /// <summary>
     /// 设置群名片
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="userId">用户id</param>
     /// <param name="card">新名片</param>
@@ -1007,7 +1042,7 @@ internal static class ApiInterface
     /// <summary>
     /// 设置群组专属头衔
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="userId">用户id</param>
     /// <param name="title">头衔</param>
@@ -1033,7 +1068,7 @@ internal static class ApiInterface
     /// <summary>
     /// 群组踢人
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="userId">用户id</param>
     /// <param name="rejectRequest">拒绝此人的加群请求</param>
@@ -1058,7 +1093,7 @@ internal static class ApiInterface
     /// <summary>
     /// 群组单人禁言
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="userId">用户id</param>
     /// <param name="duration">禁言时长(s)</param>
@@ -1083,7 +1118,7 @@ internal static class ApiInterface
     /// <summary>
     /// 群组全员禁言
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="enable">是否禁言</param>
     internal static async ValueTask<ApiStatus> SetGroupWholeBan(Guid connection, long groupId, bool enable)
@@ -1105,7 +1140,7 @@ internal static class ApiInterface
     /// <summary>
     /// 群组匿名用户禁言
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="anonymous">匿名用户对象</param>
     /// <param name="duration">禁言时长, 单位秒</param>
@@ -1130,7 +1165,7 @@ internal static class ApiInterface
     /// <summary>
     /// 群组匿名用户禁言
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="anonymousFlag">匿名用户flag</param>
     /// <param name="duration">禁言时长, 单位秒</param>
@@ -1155,7 +1190,7 @@ internal static class ApiInterface
     /// <summary>
     /// 设置群管理员
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="userId">成员id</param>
     /// <param name="groupId">群号</param>
     /// <param name="enable">设置或取消</param>
@@ -1180,7 +1215,7 @@ internal static class ApiInterface
     /// <summary>
     /// 退出/解散群
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="dismiss">是否解散</param>
     internal static async ValueTask<ApiStatus> SetGroupLeave(Guid connection, long groupId, bool dismiss)
@@ -1202,7 +1237,7 @@ internal static class ApiInterface
     /// <summary>
     /// 重启客户端
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="delay">延迟(ms)</param>
     internal static async ValueTask<ApiStatus> Restart(Guid connection, int delay)
     {
@@ -1224,7 +1259,7 @@ internal static class ApiInterface
     /// <summary>
     /// 设置群名
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="name">新群名</param>
     internal static async ValueTask<ApiStatus> SetGroupName(Guid connection, long groupId, string name)
@@ -1247,7 +1282,7 @@ internal static class ApiInterface
     /// <summary>
     /// 设置群头像
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="file">图片文件</param>
     /// <param name="useCache">是否使用缓存</param>
@@ -1273,7 +1308,7 @@ internal static class ApiInterface
     /// <summary>
     /// 发送合并转发(群)
     /// </summary>
-    /// <param name="connection">服务器连接标识</param>
+    /// <param name="connection">连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="msgList">消息段数组</param>
     internal static async ValueTask<ApiStatus> SendGroupForwardMsg(Guid connection, long groupId,

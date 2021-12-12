@@ -14,13 +14,13 @@ internal abstract class BaseGuildEventArgs : BaseEventArgs
     internal long GuildId { get; set; }
 
     /// <summary>
-    /// 频道ID
+    /// 子频道ID
     /// </summary>
     [JsonProperty(PropertyName = "channel_id")]
     internal long ChannelId { get; set; }
 
     /// <summary>
-    /// 子频道ID
+    /// 发送者ID
     /// </summary>
     [JsonProperty(PropertyName = "user_id")]
     internal long UserId { get; set; }

@@ -8,7 +8,7 @@ using Sora.Enumeration.ApiType;
 namespace Sora.Entities;
 
 /// <summary>
-/// 用户类
+/// 用户实例
 /// </summary>
 public sealed class User : BaseModel
 {
