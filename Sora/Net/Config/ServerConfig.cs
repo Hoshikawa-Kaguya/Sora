@@ -13,14 +13,24 @@ public sealed class ServerConfig : ISoraConfig
     #region 私有字段
 
     /// <summary>
-    /// 机器人管理员UID
+    /// 机器人群管理员UID
     /// </summary>
-    private readonly long[] _superUsers;
+    private readonly long[] _groupSuperUsers;
 
     /// <summary>
-    /// 屏蔽用户
+    /// 屏蔽用户群消息
     /// </summary>
-    private readonly long[] _blockUsers;
+    private readonly long[] _gourpBlockUsers;
+
+    /// <summary>
+    /// 机器人频道管理员UID
+    /// </summary>
+    private readonly long[] _guildSuperUsers;
+
+    /// <summary>
+    /// 屏蔽用户频道消息
+    /// </summary>
+    private readonly long[] _guildBlockUsers;
 
     #endregion
 
@@ -45,30 +55,55 @@ public sealed class ServerConfig : ISoraConfig
     public string UniversalPath { get; init; } = string.Empty;
 
     /// <summary>
-    /// 机器人管理员UID
+    /// 机器人群管理员UID
     /// </summary>
-    public long[] SuperUsers
+    public long[] GroupSuperUsers
     {
-        get => _superUsers ?? Array.Empty<long>();
+        get => _groupSuperUsers ?? Array.Empty<long>();
         init
         {
             if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");
-            _superUsers = value;
+            _groupSuperUsers = value;
         }
     }
 
     /// <summary>
-    /// 不处理来自数组中UID的消息(群聊/私聊)
+    /// 不处理来自数组中UID的群消息(群聊/私聊)
     /// </summary>
-    public long[] BlockUsers
+    public long[] GroupBlockUsers
     {
-        get => _blockUsers ?? Array.Empty<long>();
+        get => _gourpBlockUsers ?? Array.Empty<long>();
         init
         {
             if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");
-            _blockUsers = value;
+            _gourpBlockUsers = value;
         }
     }
+
+    /// <summary>
+    /// 机器人频道管理员UID
+    /// </summary>
+    public long[] GuildSuperUsers
+    {
+        get => _guildSuperUsers ?? Array.Empty<long>();
+        init
+        {
+            if (value.Any(uid => uid <= 0)) throw new ArgumentException("tiny_id cannot empty");
+            _guildSuperUsers = value;
+        }
+    }
+
+    /// <summary>
+    /// 不处理来自数组中UID的频道消息(群聊/私聊)
+    /// </summary>
+    public long[] GuildBlockUsers
+    {
+        get => _guildBlockUsers ?? Array.Empty<long>();
+        init
+        {
+            if (value.Any(uid => uid <= 0)) throw new ArgumentException("tiny_id cannot empty");
+            _guildBlockUsers = value;
+        }}
 
     /// <summary>
     /// <para>心跳包超时设置(秒)</para>

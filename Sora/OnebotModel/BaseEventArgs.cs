@@ -1,11 +1,11 @@
 using Newtonsoft.Json;
 
-namespace Sora.OnebotModel.OnebotEvent;
+namespace Sora.OnebotModel;
 
 /// <summary>
 /// OneBot事件基类
 /// </summary>
-internal abstract class BaseApiEventArgs
+internal abstract class BaseEventArgs
 {
     /// <summary>
     /// 事件发生的时间戳

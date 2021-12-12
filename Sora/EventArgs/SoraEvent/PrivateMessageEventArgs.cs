@@ -64,7 +64,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
 
         //检查服务管理员权限
         var privateSenderInfo = privateMsgArgs.SenderInfo;
-        if (privateSenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+        if (privateSenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].GroupSuperUsers
                                                            .Any(id => id == privateSenderInfo.UserId))
             privateSenderInfo.Role = MemberRoleType.SuperUser;
         SenderInfo = privateSenderInfo;

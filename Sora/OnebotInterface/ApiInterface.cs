@@ -169,7 +169,7 @@ internal static class ApiInterface
             Remark = token["remark"]?.ToString()   ?? string.Empty,
             Nick   = token["nickname"]?.ToString() ?? string.Empty,
             Role = Convert.ToInt64(token["user_id"] ?? -1) != -1 && StaticVariable.ServiceInfos[serviceId]
-                .SuperUsers
+                .GroupSuperUsers
                 .Contains(Convert.ToInt64(token["user_id"]))
                 ? MemberRoleType.SuperUser
                 : MemberRoleType.Member
@@ -230,7 +230,7 @@ internal static class ApiInterface
         //处理返回群成员列表
         var memberList = ret["data"]?.ToObject<List<GroupMemberInfo>>() ?? new List<GroupMemberInfo>();
         //检查最高级管理员权限
-        foreach (var t in memberList.Where(t => StaticVariable.ServiceInfos[serviceId].SuperUsers
+        foreach (var t in memberList.Where(t => StaticVariable.ServiceInfos[serviceId].GroupSuperUsers
                                                               .Contains(t.UserId)))
             t.Role = MemberRoleType.SuperUser;
 
@@ -288,7 +288,7 @@ internal static class ApiInterface
         if (apiStatus.RetCode != ApiStatusType.OK || ret?["data"] == null)
             return (apiStatus, new GroupMemberInfo());
         var memberInfo = ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo();
-        if (memberInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+        if (memberInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].GroupSuperUsers
                                                     .Contains(memberInfo.UserId))
             memberInfo.Role = MemberRoleType.SuperUser;
         return (apiStatus, memberInfo);
@@ -321,7 +321,7 @@ internal static class ApiInterface
         //检查服务管理员权限
         var info = ret["data"]?.ToObject<UserInfo>() ?? new UserInfo();
         if (info.UserId is not 0 or -1)
-            info.Role = info.UserId != -1 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+            info.Role = info.UserId != -1 && StaticVariable.ServiceInfos[serviceId].GroupSuperUsers
                                                            .Contains(info.UserId)
                 ? MemberRoleType.SuperUser
                 : MemberRoleType.Member;

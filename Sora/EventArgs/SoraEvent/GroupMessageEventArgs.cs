@@ -82,7 +82,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
 
         //检查服务管理员权限
         var groupSenderInfo = groupMsgArgs.SenderInfo;
-        if (groupSenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].SuperUsers
+        if (groupSenderInfo.UserId != 0 && StaticVariable.ServiceInfos[serviceId].GroupSuperUsers
                                                          .Contains(groupSenderInfo.UserId))
             groupSenderInfo.Role = MemberRoleType.SuperUser;
         SenderInfo = groupSenderInfo;

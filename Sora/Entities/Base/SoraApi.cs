@@ -1031,40 +1031,77 @@ public sealed class SoraApi
     }
 
     /// <summary>
-    /// 屏蔽用户
+    /// 屏蔽用户频道消息
     /// 在当前服务实例内不再处理其消息
     /// </summary>
     /// <param name="userId">用户ID</param>
-    public bool BlockUser(long userId)
+    public bool BlockGuildUser(long userId)
     {
-        return StaticVariable.ServiceInfos[ServiceId].BlockUsers.Add(userId);
+        return StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Add(userId);
     }
 
     /// <summary>
-    /// 对用户解除屏蔽
+    /// 对用户解除频道消息屏蔽
     /// </summary>
     /// <param name="userId">用户ID</param>
-    public bool RemoveBlock(long userId)
+    public bool RemoveGuildBlock(long userId)
     {
-        return StaticVariable.ServiceInfos[ServiceId].BlockUsers.Remove(userId);
+        return StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Remove(userId);
     }
 
     /// <summary>
-    /// 添加机器人管理员
+    /// 添加机器人管理员(频道)
     /// </summary>
     /// <param name="userId">用户ID</param>
-    public bool AddSuperUser(long userId)
+    public bool AddGuildSuperUser(long userId)
     {
-        return StaticVariable.ServiceInfos[ServiceId].SuperUsers.Add(userId);
+        return StaticVariable.ServiceInfos[ServiceId].GuildSuperUsers.Add(userId);
     }
 
     /// <summary>
-    /// 解除机器人管理员
+    /// 解除机器人群管理员(频道)
     /// </summary>
     /// <param name="userId">用户ID</param>
-    public bool RemoveSuperUser(long userId)
+    public bool RemoveGuildSuperUser(long userId)
     {
-        return StaticVariable.ServiceInfos[ServiceId].SuperUsers.Remove(userId);
+        return StaticVariable.ServiceInfos[ServiceId].GuildSuperUsers.Remove(userId);
+    }
+
+    /// <summary>
+    /// 屏蔽用户群消息
+    /// 在当前服务实例内不再处理其消息
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    public bool BlockGroupUser(long userId)
+    {
+        return StaticVariable.ServiceInfos[ServiceId].GroupBlockUsers.Add(userId);
+    }
+
+    /// <summary>
+    /// 对用户解除群消息屏蔽
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    public bool RemoveGroupBlock(long userId)
+    {
+        return StaticVariable.ServiceInfos[ServiceId].GroupBlockUsers.Remove(userId);
+    }
+
+    /// <summary>
+    /// 添加机器人管理员(群)
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    public bool AddGroupSuperUser(long userId)
+    {
+        return StaticVariable.ServiceInfos[ServiceId].GroupSuperUsers.Add(userId);
+    }
+
+    /// <summary>
+    /// 解除机器人群管理员(群)
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    public bool RemoveGroupSuperUser(long userId)
+    {
+        return StaticVariable.ServiceInfos[ServiceId].GroupSuperUsers.Remove(userId);
     }
 
     #endregion

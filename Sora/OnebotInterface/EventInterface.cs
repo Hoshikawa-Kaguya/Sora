@@ -7,6 +7,7 @@ using Sora.Command;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
+using Sora.OnebotModel.ExtraEvent;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.OnebotModel.OnebotEvent.MetaEvent;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
@@ -316,7 +317,7 @@ public class EventInterface
                 var privateMsg = messageJson.ToObject<OnebotPrivateMsgEventArgs>();
                 if (privateMsg == null) break;
                 //检查屏蔽用户
-                if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Contains(privateMsg.UserId)) return;
+                if (StaticVariable.ServiceInfos[ServiceId].GroupBlockUsers.Contains(privateMsg.UserId)) return;
                 Log.Debug("Sora",
                           $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                 var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
@@ -338,7 +339,7 @@ public class EventInterface
             {
                 var groupMsg = messageJson.ToObject<OnebotGroupMsgEventArgs>();
                 if (groupMsg == null) break;
-                if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Contains(groupMsg.UserId)) return;
+                if (StaticVariable.ServiceInfos[ServiceId].GroupBlockUsers.Contains(groupMsg.UserId)) return;
                 Log.Debug("Sora",
                           $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                 var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
@@ -353,6 +354,15 @@ public class EventInterface
                 //执行回调
                 if (OnGroupMessage == null) break;
                 await OnGroupMessage("Message", eventArgs);
+                break;
+            }
+            case "guild":
+            {
+                var guildMsg = messageJson.ToObject<GocqGuildMessageEventArgs>();
+                if (guildMsg == null) break;
+                if (StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Contains(guildMsg.UserId)) return;
+
+                Log.Debug("test", messageJson.ToString());
                 break;
             }
             default:
