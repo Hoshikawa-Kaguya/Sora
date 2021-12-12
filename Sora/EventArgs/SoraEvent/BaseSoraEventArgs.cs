@@ -37,11 +37,6 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     public long LoginUid { get; private set; }
 
     /// <summary>
-    /// 事件产生时间戳
-    /// </summary>
-    private long TimeStamp { get; set; }
-
-    /// <summary>
     /// <para>是否在处理本次事件后再次触发其他事件，默认为触发</para>
     /// <para>如:处理Command后可以将此值设置为<see langword="false"/>来阻止后续的事件触发，为<see langword="true"/>时则会触发其他相匹配的指令和事件</para>
     /// <para>如果出现了不同表达式同时被触发且优先级相同的情况，则这几个指令的执行顺序将是不确定的，请避免这种情况的发生</para>
@@ -70,7 +65,6 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         SoraApi              = new SoraApi(serviceId, connectionId);
         EventName            = eventName;
         LoginUid             = loginUid;
-        TimeStamp            = time;
         Time                 = time.ToDateTime();
         IsContinueEventChain = true;
         SessionId            = Guid.Empty;
@@ -83,13 +77,13 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 等待下一条消息触发
     /// </summary>
-    internal object WaitForNextMessage(long sourceUid, string[] commandExps, MatchType matchType,
+    internal object WaitForNextBaseMessage(long sourceUid, string[] commandExps, MatchType matchType,
                                        SourceFlag sourceFlag, RegexOptions regexOptions,
                                        TimeSpan? timeout, Func<ValueTask> timeoutTask, long sourceGroup = 0)
     {
         //生成指令上下文
         var waitInfo =
-            CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, sourceFlag,
+            CommandManager.GenWaitingCommandInfoForBaseMessage(sourceUid, sourceGroup, commandExps, matchType, sourceFlag,
                                                  regexOptions, SoraApi.ConnectionId, SoraApi.ServiceId);
         //检查是否为初始指令重复触发
         if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
@@ -110,6 +104,8 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         if (!receiveSignal && timeoutTask != null) Task.Run(timeoutTask.Invoke);
         return retEventArgs;
     }
+
+    //TODO 频道的连续对话
 
     #endregion
 }

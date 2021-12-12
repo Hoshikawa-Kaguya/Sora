@@ -174,7 +174,7 @@ public class CommandManager
         #region 信号量消息处理
 
         //处理消息段
-        Dictionary<Guid, WaitingInfo> waitingCommand;
+        Dictionary<Guid, BaseMessageWaitingInfo> waitingCommand;
         switch (eventArgs)
         {
             case GroupMessageEventArgs groupMessageEvent:
@@ -331,7 +331,7 @@ public class CommandManager
     /// <param name="connectionId">连接标识</param>
     /// <param name="serviceId">服务标识</param>
     /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
-    internal static WaitingInfo GenWaitingCommandInfo(
+    internal static BaseMessageWaitingInfo GenWaitingCommandInfoForBaseMessage(
         long sourceUid, long sourceGroup, string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
         RegexOptions regexOptions, Guid connectionId, Guid serviceId)
     {
@@ -348,13 +348,13 @@ public class CommandManager
             _ => throw new NotSupportedException("unknown matchtype")
         };
 
-        return new WaitingInfo(new AutoResetEvent(false),
-                               matchExp,
-                               serviceId: serviceId,
-                               connectionId: connectionId,
-                               source: (sourceUid, sourceGroup),
-                               sourceFlag: sourceFlag,
-                               regexOptions: regexOptions);
+        return new BaseMessageWaitingInfo(new AutoResetEvent(false),
+                                    matchExp,
+                                    serviceId: serviceId,
+                                    connectionId: connectionId,
+                                    source: (sourceUid, sourceGroup),
+                                    sourceFlag: sourceFlag,
+                                    regexOptions: regexOptions);
     }
 
     /// <summary>

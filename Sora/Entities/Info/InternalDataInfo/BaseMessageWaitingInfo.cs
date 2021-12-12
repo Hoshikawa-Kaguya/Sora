@@ -9,7 +9,7 @@ namespace Sora.Entities.Info.InternalDataInfo;
 /// <summary>
 /// 连续对话上下文
 /// </summary>
-internal struct WaitingInfo
+internal struct BaseMessageWaitingInfo
 {
     internal readonly AutoResetEvent   Semaphore;
     internal readonly string[]         CommandExpressions;
@@ -23,7 +23,7 @@ internal struct WaitingInfo
     /// <summary>
     /// 构造方法
     /// </summary>
-    internal WaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId, Guid serviceId,
+    internal BaseMessageWaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId, Guid serviceId,
                          (long u, long g) source, RegexOptions regexOptions, SourceFlag sourceFlag)
     {
         Semaphore          = semaphore;
@@ -39,7 +39,7 @@ internal struct WaitingInfo
     /// <summary>
     /// 比价是否为同一消息来源
     /// </summary>
-    internal bool IsSameSource(WaitingInfo info)
+    internal bool IsSameSource(BaseMessageWaitingInfo info)
     {
         return info.SourceFlag   == SourceFlag
             && info.Source       == Source
