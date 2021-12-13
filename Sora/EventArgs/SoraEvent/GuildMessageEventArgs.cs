@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Converter;
 using Sora.Entities;
 using Sora.Entities.Info;
+using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.OnebotModel.ExtraEvent;
 using Sora.Util;
@@ -94,6 +96,84 @@ public class GuildMessageEventArgs : BaseSoraEventArgs
                                                                           TimeSpan? timeout = null)
     {
         return await SoraApi.SendGuildMessage(SourceGuild.Id, SourceChannel.Id, message, timeout);
+    }
+
+    #endregion
+
+    #region 连续对话
+
+    /// <summary>
+    /// 等待下一条消息触发
+    /// </summary>
+    /// <param name="commandExps">指令表达式</param>
+    /// <param name="matchType">匹配类型</param>
+    /// <param name="regexOptions">正则匹配选项</param>
+    /// <returns>触发后的事件参数</returns>
+    public ValueTask<GuildMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
+                                                                    RegexOptions regexOptions = RegexOptions.None)
+    {
+        if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+            return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Guild,
+                                                           regexOptions, null, null) as GuildMessageEventArgs);
+        Helper.CommandDisableTip();
+        return ValueTask.FromResult<GuildMessageEventArgs>(null);
+    }
+
+    /// <summary>
+    /// 等待下一条消息触发
+    /// </summary>
+    /// <param name="commandExps">指令表达式</param>
+    /// <param name="matchType">匹配类型</param>
+    /// <param name="regexOptions">正则匹配选项</param>
+    /// <param name="timeout">超时</param>
+    /// <param name="timeoutTask">超时后执行的动作</param>
+    /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
+    public ValueTask<GuildMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
+                                                                    TimeSpan timeout,
+                                                                    Func<ValueTask> timeoutTask = null,
+                                                                    RegexOptions regexOptions = RegexOptions.None)
+    {
+        if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+            return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Guild,
+                                                           regexOptions, timeout, timeoutTask) as GuildMessageEventArgs);
+        Helper.CommandDisableTip();
+        return ValueTask.FromResult<GuildMessageEventArgs>(null);
+    }
+
+    /// <summary>
+    /// 等待下一条消息触发
+    /// </summary>
+    /// <param name="commandExp">指令表达式</param>
+    /// <param name="matchType">匹配类型</param>
+    /// <param name="regexOptions">正则匹配选项</param>
+    /// <returns>触发后的事件参数</returns>
+    public ValueTask<GuildMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
+                                                                    RegexOptions regexOptions = RegexOptions.None)
+    {
+        if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+            return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
+        Helper.CommandDisableTip();
+        return ValueTask.FromResult<GuildMessageEventArgs>(null);
+    }
+
+    /// <summary>
+    /// 等待下一条消息触发
+    /// </summary>
+    /// <param name="commandExp">指令表达式</param>
+    /// <param name="matchType">匹配类型</param>
+    /// <param name="regexOptions">正则匹配选项</param>
+    /// <param name="timeout">超时</param>
+    /// <param name="timeoutTask">超时后执行的动作</param>
+    /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
+    public ValueTask<GuildMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
+                                                                    TimeSpan timeout,
+                                                                    Func<ValueTask> timeoutTask = null,
+                                                                    RegexOptions regexOptions = RegexOptions.None)
+    {
+        if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
+            return WaitForNextMessageAsync(new[] {commandExp}, matchType, timeout, timeoutTask, regexOptions);
+        Helper.CommandDisableTip();
+        return ValueTask.FromResult<GuildMessageEventArgs>(null);
     }
 
     #endregion

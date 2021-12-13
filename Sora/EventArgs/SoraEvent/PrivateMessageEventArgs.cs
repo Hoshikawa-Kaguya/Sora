@@ -9,7 +9,7 @@ using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
-using YukariToolBox.LightLog;
+using Sora.Util;
 
 namespace Sora.EventArgs.SoraEvent;
 
@@ -23,7 +23,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
     /// <summary>
     /// 消息内容
     /// </summary>
-    public Message Message { get; }
+    public Message Messages { get; }
 
     /// <summary>
     /// 消息发送者实例
@@ -60,7 +60,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
                })
     {
         //将api消息段转换为sorasegment
-        Message = new Message(serviceId, connectionId, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
+        Messages = new Message(serviceId, connectionId, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
                               privateMsgArgs.MessageList.ToMessageBody(),
                               privateMsgArgs.Time, privateMsgArgs.Font, null);
         Sender             = new User(serviceId, connectionId, privateMsgArgs.UserId);
@@ -102,7 +102,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, string messageId)> Repeat()
     {
-        return await SoraApi.SendPrivateMessage(Sender.Id, Message.MessageBody);
+        return await SoraApi.SendPrivateMessage(Sender.Id, Messages.MessageBody);
     }
 
     #endregion
@@ -122,7 +122,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Private,
                                                            regexOptions, null, null) as PrivateMessageEventArgs);
-        CommandDisableTip();
+        Helper.CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
 
@@ -144,7 +144,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
             return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Private,
                                                            regexOptions, timeout, timeoutTask) as
                                             PrivateMessageEventArgs);
-        CommandDisableTip();
+        Helper.CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
 
@@ -160,7 +160,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
             return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
-        CommandDisableTip();
+        Helper.CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
 
@@ -180,17 +180,8 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
             return WaitForNextMessageAsync(new[] {commandExp}, matchType, timeout, timeoutTask, regexOptions);
-        CommandDisableTip();
+        Helper.CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
-    }
-
-    #endregion
-
-    #region 私有方法
-
-    private void CommandDisableTip()
-    {
-        Log.Error("非法操作", "指令服务已被禁用，无法执行连续对话操作");
     }
 
     #endregion

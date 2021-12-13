@@ -8,7 +8,7 @@ using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
-using YukariToolBox.LightLog;
+using Sora.Util;
 using Group = Sora.Entities.Group;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -23,7 +23,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <summary>
     /// 消息内容
     /// </summary>
-    public Message Message { get; }
+    public Message Messages { get; }
 
     /// <summary>
     /// 是否来源于匿名群成员
@@ -78,7 +78,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
         IsAnonymousMessage = groupMsgArgs.Anonymous != null;
         IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
         //将api消息段转换为sorasegment
-        Message = new Message(serviceId, connectionId, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
+        Messages = new Message(serviceId, connectionId, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
                               groupMsgArgs.MessageList.ToMessageBody(), groupMsgArgs.Time,
                               groupMsgArgs.Font, groupMsgArgs.MessageSequence);
         Sender      = new User(serviceId, connectionId, groupMsgArgs.UserId);
@@ -121,7 +121,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, string messageId)> Repeat()
     {
-        return await SoraApi.SendGroupMessage(SourceGroup.Id, Message.MessageBody);
+        return await SoraApi.SendGroupMessage(SourceGroup.Id, Messages.MessageBody);
     }
 
     /// <summary>
@@ -130,7 +130,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// </summary>
     public async ValueTask RecallSourceMessage()
     {
-        await SoraApi.RecallMessage(Message.MessageId);
+        await SoraApi.RecallMessage(Messages.MessageId);
     }
 
     /// <summary>
@@ -164,7 +164,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Group,
                                                            regexOptions, null, null) as GroupMessageEventArgs);
-        CommandDisableTip();
+        Helper.CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
 
@@ -185,7 +185,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Group,
                                                            regexOptions, timeout, timeoutTask) as GroupMessageEventArgs);
-        CommandDisableTip();
+        Helper.CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
 
@@ -201,7 +201,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
             return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
-        CommandDisableTip();
+        Helper.CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
 
@@ -221,17 +221,8 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
             return WaitForNextMessageAsync(new[] {commandExp}, matchType, timeout, timeoutTask, regexOptions);
-        CommandDisableTip();
+        Helper.CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
-    }
-
-    #endregion
-
-    #region 私有方法
-
-    private static void CommandDisableTip()
-    {
-        Log.Error("非法操作", "指令服务已被禁用，无法执行连续对话操作");
     }
 
     #endregion

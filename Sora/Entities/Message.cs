@@ -225,7 +225,7 @@ public sealed class Message : BaseModel
     /// </summary>
     public override int GetHashCode()
     {
-        return HashCode.Combine(MessageId, RawText, MessageBody, Time, Font, MessageSequence);
+        return HashCode.Combine(MessageId, MessageBody, Time, Font, MessageSequence);
     }
 
     #endregion

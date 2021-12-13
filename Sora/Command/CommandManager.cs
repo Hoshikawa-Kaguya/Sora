@@ -142,7 +142,36 @@ public class CommandManager
         Regex.CacheSize += 1;
     }
 
-    //TODO 频道动态指令
+    //TODO 不知道gocq什么时候能从message获取成员权限
+    /// <summary>
+    /// 动态创建指令
+    /// </summary>
+    /// <param name="exceptionHandler">异常处理</param>
+    /// <param name="desc">指令描述</param>
+    /// <param name="cmdExps">指令表达式</param>
+    /// <param name="matchType">匹配类型</param>
+    /// <param name="regexOptions">正则匹配选项</param>
+    /// <param name="commandBlock">指令委托</param>
+    /// <exception cref="NullReferenceException">空参数异常</exception>
+    /// <exception cref="NotSupportedException">在遇到不支持的参数类型时抛出</exception>
+    public void RegisterGuildCommand(string[] cmdExps,
+                                     Func<GuildMessageEventArgs, ValueTask> commandBlock,
+                                     MatchType matchType,
+                                     //MemberRoleType permissionType = MemberRoleType.Member,
+                                     RegexOptions regexOptions = RegexOptions.None,
+                                     Action<Exception> exceptionHandler = null,
+                                     string desc = "")
+    {
+        //生成指令信息
+        if (_guildCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
+                                                            MemberRoleType.Member, exceptionHandler)))
+            Log.Debug("Command", "Registered group command [dynamic]");
+        else
+            throw new NotSupportedException("cannot add new group command");
+
+        //增加正则缓存大小
+        Regex.CacheSize += 1;
+    }
 
     /// <summary>
     /// 动态创建指令
@@ -197,7 +226,7 @@ public class CommandManager
                                                .Where(command =>
                                                           IsWaitingCommand(SourceFlag.Group, command.Value,
                                                                            groupMessageEvent,
-                                                                           groupMessageEvent.Message))
+                                                                           groupMessageEvent.Messages))
                                                .ToDictionary(i => i.Key, i => i.Value);
                 break;
             }
@@ -207,14 +236,18 @@ public class CommandManager
                                                .Where(command =>
                                                           IsWaitingCommand(SourceFlag.Private, command.Value,
                                                                            privateMessageEvent,
-                                                                           privateMessageEvent.Message))
+                                                                           privateMessageEvent.Messages))
                                                .ToDictionary(i => i.Key, i => i.Value);
                 break;
             }
             case GuildMessageEventArgs guildMessageEvent:
             {
-                //TODO 频道连续对话
-                waitingCommand = new Dictionary<Guid, CommandWaitingInfo>();
+                waitingCommand = StaticVariable.WaitingDict
+                                               .Where(command =>
+                                                          IsWaitingCommand(SourceFlag.Guild, command.Value,
+                                                                           guildMessageEvent,
+                                                                           guildMessageEvent.Messages))
+                                               .ToDictionary(i => i.Key, i => i.Value);
                 break;
             }
             default:
@@ -244,17 +277,17 @@ public class CommandManager
         #region 常规指令处理
 
         //检查指令池
-        if (_groupCommands.Count == 0 && _privateCommands.Count == 0) return;
+        if (_groupCommands.Count == 0 && _privateCommands.Count == 0 && _guildCommands.Count== 0) return;
 
         List<CommandInfo> matchedCommand =
             eventArgs switch
             {
                 GroupMessageEventArgs groupMessageEvent =>
-                    _groupCommands.Where(command => IsMatchedCommand(groupMessageEvent.Message, command))
+                    _groupCommands.Where(command => IsMatchedCommand(groupMessageEvent.Messages, command))
                                   .OrderByDescending(p => p.Priority)
                                   .ToList(),
                 PrivateMessageEventArgs privateMessageEvent =>
-                    _privateCommands.Where(command => IsMatchedCommand(privateMessageEvent.Message, command))
+                    _privateCommands.Where(command => IsMatchedCommand(privateMessageEvent.Messages, command))
                                     .OrderByDescending(p => p.Priority)
                                     .ToList(),
                 GuildMessageEventArgs guildMessageEvent => 
@@ -317,9 +350,9 @@ public class CommandManager
                 //判断来自同一个连接
              && waitingInfo.ConnectionId == eventArgs.SoraApi.ConnectionId
                 //判断来着同一个群
-             && waitingInfo.Source.GroupId == eventArgs.EventSource.GroupId
+             && waitingInfo.Source.GroupId == eventArgs.Source.GroupId
                 //判断来自同一人
-             && waitingInfo.Source.UserId == eventArgs.EventSource.UserId
+             && waitingInfo.Source.UserId == eventArgs.Source.UserId
                 //匹配
              && IsMatchedCommand(message, waitingInfo),
             SourceFlag.Private =>
@@ -327,10 +360,21 @@ public class CommandManager
                 //判断来自同一个连接
              && waitingInfo.ConnectionId == eventArgs.SoraApi.ConnectionId
                 //判断来自同一人
-             && waitingInfo.Source.UserId == eventArgs.EventSource.UserId
+             && waitingInfo.Source.UserId == eventArgs.Source.UserId
                 //匹配
              && IsMatchedCommand(message, waitingInfo),
-            SourceFlag.Guild => throw new NotImplementedException(),
+            SourceFlag.Guild =>
+                waitingInfo.SourceFlag == SourceFlag.Guild
+                //判断来自同一个连接
+             && waitingInfo.ConnectionId == eventArgs.SoraApi.ConnectionId
+                //判断来着同一个频道
+             && waitingInfo.Source.GuildId == eventArgs.Source.GuildId
+                //判断来自同一个子频道
+             && waitingInfo.Source.ChannelId == eventArgs.Source.ChannelId
+                //判断来自同一个人
+             && waitingInfo.Source.UserGuildId == eventArgs.Source.UserGuildId
+                //匹配
+             && IsMatchedCommand(message, waitingInfo),
             _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
         };
     }
@@ -456,7 +500,7 @@ public class CommandManager
     }
 
     /// <summary>
-    /// 生成动态指令信息
+    /// 生成动态指令信息(群聊)
     /// </summary>
     /// <param name="desc">指令描述</param>
     /// <param name="cmdExps">指令表达式</param>
@@ -492,7 +536,7 @@ public class CommandManager
     }
 
     /// <summary>
-    /// 生成动态指令信息
+    /// 生成动态指令信息(私聊)
     /// </summary>
     /// <param name="desc">指令描述</param>
     /// <param name="cmdExps">指令表达式</param>
@@ -521,6 +565,42 @@ public class CommandManager
             throw new NotSupportedException("unsupport parameter type");
 
         var priority = _privateCommands.Count == 0 ? 0 : _privateCommands.Min(cmd => cmd.Priority) - 1;
+
+        //创建指令信息
+        return new CommandInfo(desc, matchExp, "dynamic", commandBlock, exceptionHandler, permissionType,
+                               priority, regexOptions | RegexOptions.Compiled);
+    }
+
+    /// <summary>
+    /// 生成动态指令信息(私聊)
+    /// </summary>
+    /// <param name="desc">指令描述</param>
+    /// <param name="cmdExps">指令表达式</param>
+    /// <param name="matchType">匹配类型</param>
+    /// <param name="regexOptions">正则匹配选项</param>
+    /// <param name="commandBlock">指令委托</param>
+    /// <param name="permissionType">权限等级</param>
+    /// <param name="exceptionHandler">异常处理</param>
+    /// <exception cref="NullReferenceException">空参数异常</exception>
+    /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
+    [NeedReview("ALL")]
+    private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
+                                              RegexOptions regexOptions,
+                                              Func<GuildMessageEventArgs, ValueTask> commandBlock,
+                                              MemberRoleType permissionType, Action<Exception> exceptionHandler)
+    {
+        //判断参数合法性
+        if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
+        var parameters = commandBlock.Method.GetParameters();
+        if (parameters.Length != 1) throw new NotSupportedException("unsupport parameter count");
+        //处理表达式
+        var matchExp = ParseCommandExps(cmdExps, matchType);
+
+        //判断指令响应源
+        if (parameters.First().ParameterType != typeof(GuildMessageEventArgs))
+            throw new NotSupportedException("unsupport parameter type");
+
+        var priority = _guildCommands.Count == 0 ? 0 : _guildCommands.Min(cmd => cmd.Priority) - 1;
 
         //创建指令信息
         return new CommandInfo(desc, matchExp, "dynamic", commandBlock, exceptionHandler, permissionType,
@@ -625,7 +705,9 @@ public class CommandManager
                             case SourceFlag.Private:
                                 await commandInfo.PrivateActionBlock.Invoke(eventArgs as PrivateMessageEventArgs);
                                 break;
-                            //TODO 频道动态指令
+                            case SourceFlag.Guild:
+                                await commandInfo.GuildActionBlock.Invoke(eventArgs as GuildMessageEventArgs);
+                                break;
                         }
 
                         break;

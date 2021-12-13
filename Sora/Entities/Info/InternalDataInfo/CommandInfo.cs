@@ -55,6 +55,11 @@ internal readonly struct CommandInfo
     /// <summary>
     /// 动态指令委托
     /// </summary>
+    internal Func<GuildMessageEventArgs, ValueTask> GuildActionBlock { get; }
+
+    /// <summary>
+    /// 动态指令委托
+    /// </summary>
     internal Func<PrivateMessageEventArgs, ValueTask> PrivateActionBlock { get; }
 
     /// <summary>
@@ -100,6 +105,7 @@ internal readonly struct CommandInfo
         InstanceType       = instanceType;
         PermissionType     = permissionType;
         GroupActionBlock   = null;
+        GuildActionBlock   = null;
         PrivateActionBlock = null;
         Priority           = priority;
         RegexOptions       = regexOptions;
@@ -109,7 +115,7 @@ internal readonly struct CommandInfo
     }
 
     /// <summary>
-    /// 指令信息构造(动态指令构建)
+    /// 群聊指令信息构造(动态指令构建)
     /// </summary>
     internal CommandInfo(string desc, string[] regex, string groupName,
                          Func<GroupMessageEventArgs, ValueTask> actionBlock, Action<Exception> exceptionHandler,
@@ -121,6 +127,7 @@ internal readonly struct CommandInfo
         MethodInfo         = null;
         InstanceType       = null;
         GroupActionBlock   = actionBlock;
+        GuildActionBlock   = null;
         PrivateActionBlock = null;
         PermissionType     = permissionType;
         Priority           = priority;
@@ -131,7 +138,7 @@ internal readonly struct CommandInfo
     }
 
     /// <summary>
-    /// 指令信息构造(动态指令构建)
+    /// 私聊指令信息构造(动态指令构建)
     /// </summary>
     internal CommandInfo(string desc, string[] regex, string groupName,
                          Func<PrivateMessageEventArgs, ValueTask> actionBlock, Action<Exception> exceptionHandler,
@@ -143,6 +150,7 @@ internal readonly struct CommandInfo
         MethodInfo         = null;
         InstanceType       = null;
         GroupActionBlock   = null;
+        GuildActionBlock   = null;
         PrivateActionBlock = actionBlock;
         PermissionType     = permissionType;
         Priority           = priority;
@@ -150,6 +158,29 @@ internal readonly struct CommandInfo
         InvokeType         = InvokeType.Action;
         ExceptionHandler   = exceptionHandler;
         SourceFlag         = Enumeration.SourceFlag.Private;
+    }
+
+    /// <summary>
+    /// 频道指令信息构造(动态指令构建)
+    /// </summary>
+    internal CommandInfo(string desc, string[] regex, string groupName,
+                         Func<GuildMessageEventArgs, ValueTask> actionBlock, Action<Exception> exceptionHandler,
+                         MemberRoleType permissionType, int priority, RegexOptions regexOptions)
+    {
+        Desc               = desc;
+        Regex              = regex;
+        GroupName          = groupName;
+        MethodInfo         = null;
+        InstanceType       = null;
+        GroupActionBlock   = null;
+        GuildActionBlock   = actionBlock;
+        PrivateActionBlock = null;
+        PermissionType     = permissionType;
+        Priority           = priority;
+        RegexOptions       = regexOptions;
+        InvokeType         = InvokeType.Action;
+        ExceptionHandler   = exceptionHandler;
+        SourceFlag         = Enumeration.SourceFlag.Guild;
     }
 
     #endregion

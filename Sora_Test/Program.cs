@@ -1,8 +1,7 @@
+using System.Threading.Tasks;
 using Sora;
-using Sora.Entities.Segment;
 using Sora.Enumeration;
 using Sora.Net.Config;
-using System.Threading.Tasks;
 using YukariToolBox.LightLog;
 
 //设置log等级
@@ -41,7 +40,7 @@ service.Event.OnClientConnect += (_, eventArgs) =>
 service.Event.OnGroupMessage += async (_, eventArgs) => { await eventArgs.Reply("好耶"); };
 service.Event.OnSelfMessage += (_, eventArgs) =>
                                {
-                                   Log.Info("test", $"self msg {eventArgs.Message.MessageId}");
+                                   Log.Info("test", $"self msg {eventArgs.Messages.MessageId}");
                                    return ValueTask.CompletedTask;
                                };
 //频道消息事件
@@ -56,9 +55,7 @@ service.Event.OnPrivateMessage += async (_, eventArgs) => { await eventArgs.Repl
 service.Event.CommandManager.RegisterGroupCommand(new[] {"2"},
                                                   async eventArgs =>
                                                   {
-                                                      await eventArgs.Reply(SoraSegment.At(4564) + 2133.ToAt() +
-                                                                            "fuck");
-                                                      eventArgs.IsContinueEventChain = false;
+                                                      await eventArgs.Reply("哇哦");
                                                   }, MatchType.Full);
 
 #endregion

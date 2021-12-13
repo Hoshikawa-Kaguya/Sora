@@ -52,7 +52,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 消息来源
     /// </summary>
-    public EventSource EventSource { get; }
+    public EventSource Source { get; }
 
     #endregion
 
@@ -76,7 +76,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         Time                 = time.ToDateTime();
         IsContinueEventChain = true;
         SessionId            = Guid.Empty;
-        EventSource    = source;
+        Source    = source;
     }
 
     #endregion
@@ -92,7 +92,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     {
         //生成指令上下文
         var waitInfo =
-            CommandManager.GenWaitingCommandInfo(EventSource, commandExps, matchType,
+            CommandManager.GenWaitingCommandInfo(Source, commandExps, matchType,
                                                  sourceFlag, regexOptions,
                                                  SoraApi.ConnectionId, SoraApi.ServiceId);
         //检查是否为初始指令重复触发
@@ -114,8 +114,6 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         if (!receiveSignal && timeoutTask != null) Task.Run(timeoutTask.Invoke);
         return retEventArgs;
     }
-
-    //TODO 频道的连续对话
 
     #endregion
 }

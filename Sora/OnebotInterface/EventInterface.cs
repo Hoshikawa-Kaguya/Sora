@@ -380,7 +380,6 @@ public class EventInterface
                     if (OnSelfGuildMessage == null) break;
                     await OnSelfGuildMessage("GuildMessage", eventArgs);
                 }
-                //TODO 指令匹配
                 if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager)
                     await CommandManager.CommandAdapter(eventArgs);
                 if (!eventArgs.IsContinueEventChain)

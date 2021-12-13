@@ -34,6 +34,18 @@ public static class Helper
 
     #endregion
 
+    #region 指令禁用提示
+
+    /// <summary>
+    /// 在控制台提示已经禁用了指令服务
+    /// </summary>
+    internal static void CommandDisableTip()
+    {
+        Log.Error("非法操作", "指令服务已被禁用，无法执行连续对话操作");
+    }
+
+    #endregion
+
     #region 指令实例相关
 
     /// <summary>
