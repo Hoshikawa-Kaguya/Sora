@@ -68,7 +68,12 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <param name="groupMsgArgs">群消息事件参数</param>
     internal GroupMessageEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                    OnebotGroupMsgEventArgs groupMsgArgs)
-        : base(serviceId, connectionId, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time)
+        : base(serviceId, connectionId, eventName, groupMsgArgs.SelfID, groupMsgArgs.Time,
+               new EventSource
+               {
+                   GroupId = groupMsgArgs.GroupId,
+                   UserId  = groupMsgArgs.UserId
+               })
     {
         IsAnonymousMessage = groupMsgArgs.Anonymous != null;
         IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
@@ -157,9 +162,8 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, commandExps,
-                                                               matchType, SourceFlag.Group, regexOptions, null, null,
-                                                               SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Group,
+                                                           regexOptions, null, null) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
@@ -179,10 +183,8 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, commandExps,
-                                                               matchType, SourceFlag.Group, regexOptions, timeout,
-                                                               timeoutTask,
-                                                               SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Group,
+                                                           regexOptions, timeout, timeoutTask) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
@@ -218,10 +220,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, new[] {commandExp},
-                                                               matchType, SourceFlag.Group, regexOptions, timeout,
-                                                               timeoutTask,
-                                                               SourceGroup) as GroupMessageEventArgs);
+            return WaitForNextMessageAsync(new[] {commandExp}, matchType, timeout, timeoutTask, regexOptions);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }

@@ -44,7 +44,12 @@ public sealed class GroupRecallEventArgs : BaseSoraEventArgs
     /// <param name="groupRecallArgs">群聊撤回事件参数</param>
     internal GroupRecallEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                   ApiGroupRecallEventArgs groupRecallArgs) :
-        base(serviceId, connectionId, eventName, groupRecallArgs.SelfID, groupRecallArgs.Time)
+        base(serviceId, connectionId, eventName, groupRecallArgs.SelfID, groupRecallArgs.Time,
+             new EventSource
+             {
+                 GroupId = groupRecallArgs.GroupId,
+                 UserId  = groupRecallArgs.UserId
+             })
     {
         MessageSender = new User(serviceId, connectionId, groupRecallArgs.UserId);
         //执行者和发送者可能是同一人

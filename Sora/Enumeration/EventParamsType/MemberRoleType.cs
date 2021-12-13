@@ -5,6 +5,7 @@ namespace Sora.Enumeration.EventParamsType;
 /// <summary>
 /// 成员权限等级
 /// </summary>
+//TODO 等待频道权限完善
 [DefaultValue(Unknown)]
 public enum MemberRoleType
 {

@@ -1,4 +1,5 @@
 using System;
+using Sora.Entities;
 
 namespace Sora.EventArgs.SoraEvent;
 
@@ -35,7 +36,11 @@ public sealed class ConnectEventArgs : BaseSoraEventArgs
     /// <param name="time">连接时间</param>
     internal ConnectEventArgs(Guid serviceId, Guid connectionId, string eventName, long loginUid,
                               string clientType, string clientVersion, long time) :
-        base(serviceId, connectionId, eventName, loginUid, time)
+        base(serviceId, connectionId, eventName, loginUid, time,
+             new EventSource
+             {
+                 UserId  = loginUid
+             })
     {
         ClientType        = clientType;
         ClientVersionCode = clientVersion;

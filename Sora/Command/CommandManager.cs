@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
 using Sora.Attributes.Command;
+using Sora.Entities;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
@@ -37,6 +38,8 @@ public class CommandManager
     private readonly List<CommandInfo> _groupCommands = new();
 
     private readonly List<CommandInfo> _privateCommands = new();
+
+    private readonly List<CommandInfo> _guildCommands = new();
 
     private readonly Dictionary<Type, dynamic> _instanceDict = new();
 
@@ -75,6 +78,7 @@ public class CommandManager
         //生成指令信息
         foreach (var (classType, methodInfos) in cmdGroups)
         foreach (var methodInfo in methodInfos)
+        {
             switch (GenerateCommandInfo(methodInfo, classType, out var commandInfo))
             {
                 case GroupCommand:
@@ -89,13 +93,20 @@ public class CommandManager
                     else
                         Log.Warning("CommandManager", "Command exists");
                     break;
+                case GuildCommand:
+                    if(_guildCommands.AddOrExist(commandInfo))
+                        Log.Debug("Command", $"Registered guild command [{methodInfo.Name}]");
+                    else
+                        Log.Warning("CommandManager", "Command exists");
+                    break;
                 default:
                     Log.Warning("Command", "未知的指令类型");
                     break;
             }
+        }
 
         //增加正则缓存大小
-        Regex.CacheSize  += _privateCommands.Count + _groupCommands.Count;
+        Regex.CacheSize  += _privateCommands.Count + _groupCommands.Count + _guildCommands.Count;
         ServiceIsRunning =  true;
     }
 
@@ -130,6 +141,8 @@ public class CommandManager
         //增加正则缓存大小
         Regex.CacheSize += 1;
     }
+
+    //TODO 频道动态指令
 
     /// <summary>
     /// 动态创建指令
@@ -174,7 +187,7 @@ public class CommandManager
         #region 信号量消息处理
 
         //处理消息段
-        Dictionary<Guid, BaseMessageWaitingInfo> waitingCommand;
+        Dictionary<Guid, CommandWaitingInfo> waitingCommand;
         switch (eventArgs)
         {
             case GroupMessageEventArgs groupMessageEvent:
@@ -182,23 +195,9 @@ public class CommandManager
                 //注意可能匹配到多个的情况，下同
                 waitingCommand = StaticVariable.WaitingDict
                                                .Where(command =>
-                                                          //判断发起源
-                                                          command.Value.SourceFlag == SourceFlag.Group
-                                                          //判断来自同一个连接
-                                                       && command.Value.ConnectionId ==
-                                                          groupMessageEvent.SoraApi.ConnectionId
-                                                          //判断来着同一个群
-                                                       && command.Value.Source.g == groupMessageEvent.SourceGroup
-                                                          //判断来自同一人
-                                                       && command.Value.Source.u == groupMessageEvent.Sender
-                                                          //匹配
-                                                       && command.Value.CommandExpressions.Any(regex =>
-                                                              Regex
-                                                                  .IsMatch(groupMessageEvent.Message.RawText,
-                                                                           regex,
-                                                                           RegexOptions.Compiled |
-                                                                           command.Value
-                                                                               .RegexOptions)))
+                                                          IsWaitingCommand(SourceFlag.Group, command.Value,
+                                                                           groupMessageEvent,
+                                                                           groupMessageEvent.Message))
                                                .ToDictionary(i => i.Key, i => i.Value);
                 break;
             }
@@ -206,22 +205,16 @@ public class CommandManager
             {
                 waitingCommand = StaticVariable.WaitingDict
                                                .Where(command =>
-                                                          //判断发起源
-                                                          command.Value.SourceFlag == SourceFlag.Private
-                                                          //判断来自同一个连接
-                                                       && command.Value.ConnectionId ==
-                                                          privateMessageEvent.SoraApi.ConnectionId
-                                                          //判断来自同一人
-                                                       && command.Value.Source.u == privateMessageEvent.Sender
-                                                          //匹配指令
-                                                       && command.Value.CommandExpressions.Any(regex =>
-                                                              Regex
-                                                                  .IsMatch(privateMessageEvent.Message.RawText,
-                                                                           regex,
-                                                                           RegexOptions.Compiled |
-                                                                           command.Value
-                                                                               .RegexOptions)))
+                                                          IsWaitingCommand(SourceFlag.Private, command.Value,
+                                                                           privateMessageEvent,
+                                                                           privateMessageEvent.Message))
                                                .ToDictionary(i => i.Key, i => i.Value);
+                break;
+            }
+            case GuildMessageEventArgs guildMessageEvent:
+            {
+                //TODO 频道连续对话
+                waitingCommand = new Dictionary<Guid, CommandWaitingInfo>();
                 break;
             }
             default:
@@ -253,40 +246,27 @@ public class CommandManager
         //检查指令池
         if (_groupCommands.Count == 0 && _privateCommands.Count == 0) return;
 
-        List<CommandInfo> matchedCommand;
-        switch (eventArgs)
-        {
-            case GroupMessageEventArgs groupMessageEvent:
+        List<CommandInfo> matchedCommand =
+            eventArgs switch
             {
-                //注意可能匹配到多个的情况，下同
-                matchedCommand =
-                    _groupCommands.Where(command => command.Regex.Any(regex =>
-                                                                          Regex
-                                                                              .IsMatch(groupMessageEvent.Message.RawText,
-                                                                                  regex,
-                                                                                  RegexOptions.Compiled |
-                                                                                  command.RegexOptions)))
+                GroupMessageEventArgs groupMessageEvent =>
+                    _groupCommands.Where(command => IsMatchedCommand(groupMessageEvent.Message, command))
                                   .OrderByDescending(p => p.Priority)
-                                  .ToList();
-                break;
-            }
-            case PrivateMessageEventArgs privateMessageEvent:
-            {
-                matchedCommand =
-                    _privateCommands.Where(command => command.Regex.Any(regex =>
-                                                                            Regex
-                                                                                .IsMatch(privateMessageEvent.Message.RawText,
-                                                                                    regex,
-                                                                                    RegexOptions.Compiled |
-                                                                                    command.RegexOptions)))
+                                  .ToList(),
+                PrivateMessageEventArgs privateMessageEvent =>
+                    _privateCommands.Where(command => IsMatchedCommand(privateMessageEvent.Message, command))
                                     .OrderByDescending(p => p.Priority)
-                                    .ToList();
-
-                break;
-            }
-            default:
-                Log.Error("CommandAdapter", "cannot parse eventArgs");
-                return;
+                                    .ToList(),
+                GuildMessageEventArgs guildMessageEvent => 
+                    _guildCommands.Where(command => IsMatchedCommand(guildMessageEvent.Messages, command))
+                                    .OrderByDescending(p => p.Priority)
+                                    .ToList(),
+                _ => null
+            };
+        if (matchedCommand is null)
+        {
+            Log.Error("CommandAdapter", "cannot parse eventArgs");
+            return;
         }
 
         //在没有匹配到指令时直接跳转至Event触发
@@ -317,13 +297,80 @@ public class CommandManager
 
     #endregion
 
+    #region 指令匹配判断
+
+    /// <summary>
+    /// 指令是否为连续对话并在等待
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="source"></param>
+    /// <param name="waitingInfo"></param>
+    /// <param name="eventArgs"></param>
+    private static bool IsWaitingCommand(SourceFlag source, CommandWaitingInfo waitingInfo,
+                                         BaseSoraEventArgs eventArgs,
+                                         Message message)
+    {
+        return source switch
+        {
+            SourceFlag.Group =>
+                waitingInfo.SourceFlag == SourceFlag.Group
+                //判断来自同一个连接
+             && waitingInfo.ConnectionId == eventArgs.SoraApi.ConnectionId
+                //判断来着同一个群
+             && waitingInfo.Source.GroupId == eventArgs.EventSource.GroupId
+                //判断来自同一人
+             && waitingInfo.Source.UserId == eventArgs.EventSource.UserId
+                //匹配
+             && IsMatchedCommand(message, waitingInfo),
+            SourceFlag.Private =>
+                waitingInfo.SourceFlag == SourceFlag.Private
+                //判断来自同一个连接
+             && waitingInfo.ConnectionId == eventArgs.SoraApi.ConnectionId
+                //判断来自同一人
+             && waitingInfo.Source.UserId == eventArgs.EventSource.UserId
+                //匹配
+             && IsMatchedCommand(message, waitingInfo),
+            SourceFlag.Guild => throw new NotImplementedException(),
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+        };
+    }
+
+    /// <summary>
+    /// 匹配指令正则(连续对话指令)
+    /// </summary>
+    /// <param name="message">消息内容</param>
+    /// <param name="command">指令信息</param>
+    private static bool IsMatchedCommand(Message message, CommandWaitingInfo command)
+    {
+        return command.CommandExpressions.Any(regex =>
+                                                  Regex.IsMatch(message.RawText,
+                                                                regex,
+                                                                RegexOptions.Compiled |
+                                                                command.RegexOptions));
+    }
+
+    /// <summary>
+    /// 匹配指令正则(普通指令)
+    /// </summary>
+    /// <param name="message">消息内容</param>
+    /// <param name="command">指令信息</param>
+    private static bool IsMatchedCommand(Message message, CommandInfo command)
+    {
+        return command.Regex.Any(regex =>
+                                     Regex.IsMatch(message.RawText,
+                                                   regex,
+                                                   RegexOptions.Compiled |
+                                                   command.RegexOptions));
+    }
+
+    #endregion
+
     #region 私有管理方法
 
     /// <summary>
     /// 生成连续对话上下文
     /// </summary>
-    /// <param name="sourceUid">消息源UID</param>
-    /// <param name="sourceGroup">消息源GID</param>
+    /// <param name="source">消息源</param>
     /// <param name="cmdExps">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
     /// <param name="sourceFlag">来源标识</param>
@@ -331,8 +378,8 @@ public class CommandManager
     /// <param name="connectionId">连接标识</param>
     /// <param name="serviceId">服务标识</param>
     /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
-    internal static BaseMessageWaitingInfo GenWaitingCommandInfoForBaseMessage(
-        long sourceUid, long sourceGroup, string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
+    internal static CommandWaitingInfo GenWaitingCommandInfo(
+        EventSource source, string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
         RegexOptions regexOptions, Guid connectionId, Guid serviceId)
     {
         if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
@@ -348,13 +395,13 @@ public class CommandManager
             _ => throw new NotSupportedException("unknown matchtype")
         };
 
-        return new BaseMessageWaitingInfo(new AutoResetEvent(false),
-                                    matchExp,
-                                    serviceId: serviceId,
-                                    connectionId: connectionId,
-                                    source: (sourceUid, sourceGroup),
-                                    sourceFlag: sourceFlag,
-                                    regexOptions: regexOptions);
+        return new CommandWaitingInfo(new AutoResetEvent(false),
+                                      matchExp,
+                                      serviceId: serviceId,
+                                      connectionId: connectionId,
+                                      source: source,
+                                      sourceFlag: sourceFlag,
+                                      regexOptions: regexOptions);
     }
 
     /// <summary>
@@ -368,6 +415,7 @@ public class CommandManager
         //获取指令属性
         var commandAttr =
             method.GetCustomAttribute(typeof(GroupCommand)) ??
+            method.GetCustomAttribute(typeof(GuildCommand)) ??
             method.GetCustomAttribute(typeof(PrivateCommand)) ??
             throw new NullReferenceException("command attribute is null with unknown reason");
 
@@ -577,6 +625,7 @@ public class CommandManager
                             case SourceFlag.Private:
                                 await commandInfo.PrivateActionBlock.Invoke(eventArgs as PrivateMessageEventArgs);
                                 break;
+                            //TODO 频道动态指令
                         }
 
                         break;

@@ -40,7 +40,11 @@ public sealed class FriendRequestEventArgs : BaseSoraEventArgs
     /// <param name="friendRequestArgs">好友申请事件参数</param>
     internal FriendRequestEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                     OnebotFriendRequestEventArgs friendRequestArgs) :
-        base(serviceId, connectionId, eventName, friendRequestArgs.SelfID, friendRequestArgs.Time)
+        base(serviceId, connectionId, eventName, friendRequestArgs.SelfID, friendRequestArgs.Time,
+             new EventSource
+             {
+                 UserId  = friendRequestArgs.UserId
+             })
     {
         Sender      = new User(serviceId, connectionId, friendRequestArgs.UserId);
         Comment     = friendRequestArgs.Comment;

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Command;
+using Sora.Entities;
 using Sora.Entities.Base;
 using Sora.Enumeration;
 using Sora.Util;
@@ -48,6 +49,11 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// </summary>
     private Guid SessionId { get; set; }
 
+    /// <summary>
+    /// 消息来源
+    /// </summary>
+    public EventSource EventSource { get; }
+
     #endregion
 
     #region 构造函数
@@ -60,7 +66,9 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <param name="eventName">事件名</param>
     /// <param name="loginUid">当前使用的QQ号</param>
     /// <param name="time">连接时间</param>
-    internal BaseSoraEventArgs(Guid serviceId, Guid connectionId, string eventName, long loginUid, long time)
+    /// <param name="source">消息源</param>
+    internal BaseSoraEventArgs(Guid serviceId, Guid connectionId, string eventName, long loginUid, long time,
+                               EventSource source)
     {
         SoraApi              = new SoraApi(serviceId, connectionId);
         EventName            = eventName;
@@ -68,6 +76,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         Time                 = time.ToDateTime();
         IsContinueEventChain = true;
         SessionId            = Guid.Empty;
+        EventSource    = source;
     }
 
     #endregion
@@ -77,14 +86,15 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 等待下一条消息触发
     /// </summary>
-    internal object WaitForNextBaseMessage(long sourceUid, string[] commandExps, MatchType matchType,
+    internal object WaitForNextMessage(string[] commandExps, MatchType matchType,
                                        SourceFlag sourceFlag, RegexOptions regexOptions,
-                                       TimeSpan? timeout, Func<ValueTask> timeoutTask, long sourceGroup = 0)
+                                       TimeSpan? timeout, Func<ValueTask> timeoutTask)
     {
         //生成指令上下文
         var waitInfo =
-            CommandManager.GenWaitingCommandInfoForBaseMessage(sourceUid, sourceGroup, commandExps, matchType, sourceFlag,
-                                                 regexOptions, SoraApi.ConnectionId, SoraApi.ServiceId);
+            CommandManager.GenWaitingCommandInfo(EventSource, commandExps, matchType,
+                                                 sourceFlag, regexOptions,
+                                                 SoraApi.ConnectionId, SoraApi.ServiceId);
         //检查是否为初始指令重复触发
         if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
             return null;

@@ -1503,7 +1503,6 @@ internal static class ApiInterface
     /// <param name="groupId">群号</param>
     /// <param name="name">文件夹名</param>
     /// <param name="folderId">文件夹ID</param>
-    //TODO 测试发现folderId似乎无效，无法创建文件夹套文件夹，待gocq后续完善
     internal static async ValueTask<ApiStatus> CreateGroupFileFolder(
         Guid connection, long groupId, string name, string folderId)
     {

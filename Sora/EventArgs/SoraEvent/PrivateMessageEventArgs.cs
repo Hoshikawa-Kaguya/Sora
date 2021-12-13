@@ -53,7 +53,11 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
     /// <param name="privateMsgArgs">私聊消息事件参数</param>
     internal PrivateMessageEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                      OnebotPrivateMsgEventArgs privateMsgArgs)
-        : base(serviceId, connectionId, eventName, privateMsgArgs.SelfID, privateMsgArgs.Time)
+        : base(serviceId, connectionId, eventName, privateMsgArgs.SelfID, privateMsgArgs.Time,
+               new EventSource
+               {
+                   UserId = privateMsgArgs.UserId
+               })
     {
         //将api消息段转换为sorasegment
         Message = new Message(serviceId, connectionId, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
@@ -116,9 +120,8 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
                                                                       RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, commandExps, matchType,
-                                                               SourceFlag.Private, regexOptions,
-                                                               null, null) as PrivateMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Private,
+                                                           regexOptions, null, null) as PrivateMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
@@ -138,9 +141,9 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
                                                                       RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, commandExps, matchType,
-                                                               SourceFlag.Private, regexOptions,
-                                                               timeout, timeoutTask) as PrivateMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Private,
+                                                           regexOptions, timeout, timeoutTask) as
+                                            PrivateMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
@@ -176,10 +179,7 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
                                                                       RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextBaseMessage(Sender, new[] {commandExp},
-                                                               matchType,
-                                                               SourceFlag.Private, regexOptions,
-                                                               timeout, timeoutTask) as PrivateMessageEventArgs);
+            return WaitForNextMessageAsync(new[] {commandExp}, matchType, timeout, timeoutTask, regexOptions);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }

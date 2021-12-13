@@ -39,7 +39,12 @@ public sealed class GroupPokeEventArgs : BaseSoraEventArgs
     /// <param name="pokeEventArgs">戳一戳事件参数</param>
     internal GroupPokeEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                 OnebotPokeOrLuckyEventArgs pokeEventArgs) :
-        base(serviceId, connectionId, eventName, pokeEventArgs.SelfID, pokeEventArgs.Time)
+        base(serviceId, connectionId, eventName, pokeEventArgs.SelfID, pokeEventArgs.Time,
+             new EventSource
+             {
+                 GroupId = pokeEventArgs.GroupId,
+                 UserId  = pokeEventArgs.UserId
+             })
     {
         SendUser    = new User(serviceId, connectionId, pokeEventArgs.UserId);
         TargetUser  = new User(serviceId, connectionId, pokeEventArgs.TargetId);

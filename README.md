@@ -1,27 +1,27 @@
 <h1 align="center">
-	<br>
-	<img width="200" src="Sora/icon.png" alt="LOGO">
-	<br>
-	Sora
-	<h4 align="center">
+    <br>
+    <img width="200" src="Sora/icon.png" alt="LOGO">
+    <br>
+    Sora
+    <h4 align="center">
         一个基于<a href="https://github.com/howmanybots/onebot">OneBot</a>协议的 <a href="https://dotnet.microsoft.com/download/dotnet/6.0">C#/.Net 6</a> 异步机器人开发框架
-	</h4>
-	<h4 align="center">
-	<a href="https://www.nuget.org/packages/Sora/">
-		<img src="https://img.shields.io/nuget/vpre/Sora?style=flat-square&color=ff69b4" alt="nuget">
-	</a>
-	<a href="https://github.com/howmanybots/onebot">
-		<img src="https://img.shields.io/badge/OneBot-v11-black?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAABwCAMAAADxPgR5AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF////29vbr6+vAAAAk1hCcwAAAAR0Uk5T////AEAqqfQAAAKcSURBVHja7NrbctswDATQXfD//zlpO7FlmwAWIOnOtNaTM5JwDMa8E+PNFz7g3waJ24fviyDPgfhz8fHP39cBcBL9KoJbQUxjA2iYqHL3FAnvzhL4GtVNUcoSZe6eSHizBcK5LL7dBr2AUZlev1ARRHCljzRALIEog6H3U6bCIyqIZdAT0eBuJYaGiJaHSjmkYIZd+qSGWAQnIaz2OArVnX6vrItQvbhZJtVGB5qX9wKqCMkb9W7aexfCO/rwQRBzsDIsYx4AOz0nhAtWu7bqkEQBO0Pr+Ftjt5fFCUEbm0Sbgdu8WSgJ5NgH2iu46R/o1UcBXJsFusWF/QUaz3RwJMEgngfaGGdSxJkE/Yg4lOBryBiMwvAhZrVMUUvwqU7F05b5WLaUIN4M4hRocQQRnEedgsn7TZB3UCpRrIJwQfqvGwsg18EnI2uSVNC8t+0QmMXogvbPg/xk+Mnw/6kW/rraUlvqgmFreAA09xW5t0AFlHrQZ3CsgvZm0FbHNKyBmheBKIF2cCA8A600aHPmFtRB1XvMsJAiza7LpPog0UJwccKdzw8rdf8MyN2ePYF896LC5hTzdZqxb6VNXInaupARLDNBWgI8spq4T0Qb5H4vWfPmHo8OyB1ito+AysNNz0oglj1U955sjUN9d41LnrX2D/u7eRwxyOaOpfyevCWbTgDEoilsOnu7zsKhjRCsnD/QzhdkYLBLXjiK4f3UWmcx2M7PO21CKVTH84638NTplt6JIQH0ZwCNuiWAfvuLhdrcOYPVO9eW3A67l7hZtgaY9GZo9AFc6cryjoeFBIWeU+npnk/nLE0OxCHL1eQsc1IciehjpJv5mqCsjeopaH6r15/MrxNnVhu7tmcslay2gO2Z1QfcfX0JMACG41/u0RrI9QAAAABJRU5ErkJggg==" alt="onebot">
-	</a>
-	<a href="https://www.apache.org/licenses/LICENSE-2.0">
-		<img src="https://img.shields.io/github/license/Yukari316/Sora?style=flat-square&color=blueviolet" alt="license">
-	</a>
-	<img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
-	<img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=flat-square" alt="workflow">
-	<a href="https://github.com/Mrs4s/go-cqhttp">
-		<img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--beta7--fix2-blue?style=flat-square" alt="gocq-ver">
-	</a>
-	</h4>
+    </h4>
+    <h4 align="center">
+    <a href="https://www.nuget.org/packages/Sora/">
+        <img src="https://img.shields.io/nuget/vpre/Sora?style=flat-square&color=ff69b4" alt="nuget">
+    </a>
+    <a href="https://github.com/howmanybots/onebot">
+        <img src="https://img.shields.io/badge/OneBot-v11-black?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAABwCAMAAADxPgR5AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF////29vbr6+vAAAAk1hCcwAAAAR0Uk5T////AEAqqfQAAAKcSURBVHja7NrbctswDATQXfD//zlpO7FlmwAWIOnOtNaTM5JwDMa8E+PNFz7g3waJ24fviyDPgfhz8fHP39cBcBL9KoJbQUxjA2iYqHL3FAnvzhL4GtVNUcoSZe6eSHizBcK5LL7dBr2AUZlev1ARRHCljzRALIEog6H3U6bCIyqIZdAT0eBuJYaGiJaHSjmkYIZd+qSGWAQnIaz2OArVnX6vrItQvbhZJtVGB5qX9wKqCMkb9W7aexfCO/rwQRBzsDIsYx4AOz0nhAtWu7bqkEQBO0Pr+Ftjt5fFCUEbm0Sbgdu8WSgJ5NgH2iu46R/o1UcBXJsFusWF/QUaz3RwJMEgngfaGGdSxJkE/Yg4lOBryBiMwvAhZrVMUUvwqU7F05b5WLaUIN4M4hRocQQRnEedgsn7TZB3UCpRrIJwQfqvGwsg18EnI2uSVNC8t+0QmMXogvbPg/xk+Mnw/6kW/rraUlvqgmFreAA09xW5t0AFlHrQZ3CsgvZm0FbHNKyBmheBKIF2cCA8A600aHPmFtRB1XvMsJAiza7LpPog0UJwccKdzw8rdf8MyN2ePYF896LC5hTzdZqxb6VNXInaupARLDNBWgI8spq4T0Qb5H4vWfPmHo8OyB1ito+AysNNz0oglj1U955sjUN9d41LnrX2D/u7eRwxyOaOpfyevCWbTgDEoilsOnu7zsKhjRCsnD/QzhdkYLBLXjiK4f3UWmcx2M7PO21CKVTH84638NTplt6JIQH0ZwCNuiWAfvuLhdrcOYPVO9eW3A67l7hZtgaY9GZo9AFc6cryjoeFBIWeU+npnk/nLE0OxCHL1eQsc1IciehjpJv5mqCsjeopaH6r15/MrxNnVhu7tmcslay2gO2Z1QfcfX0JMACG41/u0RrI9QAAAABJRU5ErkJggg==" alt="onebot">
+    </a>
+    <a href="https://www.apache.org/licenses/LICENSE-2.0">
+        <img src="https://img.shields.io/github/license/Yukari316/Sora?style=flat-square&color=blueviolet" alt="license">
+    </a>
+    <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
+    <img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=flat-square" alt="workflow">
+    <a href="https://github.com/Mrs4s/go-cqhttp">
+        <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--beta7--fix2-blue?style=flat-square" alt="gocq-ver">
+    </a>
+    </h4>
 </h1>
 
 ## 文档
@@ -47,7 +47,6 @@
 
 - 正向Websocket
 - 反向Websocket
-
 
 </details>
 
@@ -114,7 +113,7 @@ ISSUE 目前只接受bug的提交和新功能的建议
 如果有使用问题或者不确定的问题请使用[Discussions](https://github.com/Yukari316/Sora/discussions)
 
 > 请注意, 开发者并没有**义务**回复您的问题. 您应该具备基本的提问技巧。
->
+> 
 > 如果不知道该怎么样提问，那么请在提问前阅读 [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)
 
 以下ISSUE会被直接关闭
@@ -140,6 +139,8 @@ Sora这个名字来源于日语中"空"的罗马音
 [Mrs4s](https://github.com/Mrs4s) | [wdvxdr1123](https://github.com/wdvxdr1123)  在使用[go-cqhttp](https://github.com/Mrs4s/go-cqhttp)调试时提供了帮助
 
 [Kengxxiao](https://github.com/Kengxxiao) | [ExerciseBook](https://github.com/ExerciseBook)  对框架做出了改进
+
+[ExerciseBook](https://github.com/ExerciseBook) | [qingyu-sama](https://github.com/qingyu-sama) 提供了CQ码的序列化和反序列化
 
 ### 使用到的开源库
 

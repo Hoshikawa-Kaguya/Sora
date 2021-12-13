@@ -9,22 +9,22 @@ namespace Sora.Entities.Info.InternalDataInfo;
 /// <summary>
 /// 连续对话上下文
 /// </summary>
-internal struct BaseMessageWaitingInfo
+internal struct CommandWaitingInfo
 {
-    internal readonly AutoResetEvent   Semaphore;
-    internal readonly string[]         CommandExpressions;
-    internal          object           EventArgs;
-    internal readonly Guid             ConnectionId;
-    internal readonly Guid             ServiceId;
-    internal readonly RegexOptions     RegexOptions;
-    internal readonly (long u, long g) Source;
-    internal readonly SourceFlag       SourceFlag;
+    internal readonly AutoResetEvent Semaphore;
+    internal readonly string[]       CommandExpressions;
+    internal          object         EventArgs;
+    internal readonly Guid           ConnectionId;
+    internal readonly Guid           ServiceId;
+    internal readonly RegexOptions   RegexOptions;
+    internal readonly EventSource    Source;
+    internal readonly SourceFlag     SourceFlag;
 
     /// <summary>
     /// 构造方法
     /// </summary>
-    internal BaseMessageWaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId, Guid serviceId,
-                         (long u, long g) source, RegexOptions regexOptions, SourceFlag sourceFlag)
+    internal CommandWaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId, Guid serviceId,
+                                EventSource source, RegexOptions regexOptions, SourceFlag sourceFlag)
     {
         Semaphore          = semaphore;
         CommandExpressions = commandExpressions;
@@ -39,16 +39,16 @@ internal struct BaseMessageWaitingInfo
     /// <summary>
     /// 比价是否为同一消息来源
     /// </summary>
-    internal bool IsSameSource(BaseMessageWaitingInfo info)
+    internal bool IsSameSource(CommandWaitingInfo info)
     {
         return info.SourceFlag   == SourceFlag
-            && info.Source       == Source
             && info.ConnectionId == ConnectionId
+            && info.Source       == Source
             && info.CommandExpressions.ArrayEquals(CommandExpressions);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Semaphore, CommandExpressions, ConnectionId, Source.u, Source.g);
+        return HashCode.Combine(Semaphore, CommandExpressions, ConnectionId, Source);
     }
 }

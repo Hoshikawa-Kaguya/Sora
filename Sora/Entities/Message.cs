@@ -26,7 +26,7 @@ public sealed class Message : BaseModel
     /// <summary>
     /// 纯文本信息
     /// </summary>
-    public string RawText { get; }
+    public string RawText { get; internal set; }
 
     /// <summary>
     /// 消息段列表

@@ -30,7 +30,12 @@ public class TitleUpdateEventArgs : BaseSoraEventArgs
 
     internal TitleUpdateEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                   OnebotMemberTitleUpdatedEventArgs eventArgs) :
-        base(serviceId, connectionId, eventName, eventArgs.SelfID, eventArgs.Time)
+        base(serviceId, connectionId, eventName, eventArgs.SelfID, eventArgs.Time,
+             new EventSource
+             {
+                 GroupId = eventArgs.GroupId,
+                 UserId  = eventArgs.UserId
+             })
     {
         TargetUser = new User(serviceId, connectionId, eventArgs.UserId);
         NewTitle   = eventArgs.NewTitle;

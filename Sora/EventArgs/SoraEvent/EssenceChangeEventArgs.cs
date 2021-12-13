@@ -43,7 +43,12 @@ public class EssenceChangeEventArgs : BaseSoraEventArgs
 
     internal EssenceChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                     OnebotEssenceChangeEventArgs essenceChangeEvent) :
-        base(serviceId, connectionId, eventName, essenceChangeEvent.SelfID, essenceChangeEvent.Time)
+        base(serviceId, connectionId, eventName, essenceChangeEvent.SelfID, essenceChangeEvent.Time,
+             new EventSource
+             {
+                 GroupId = essenceChangeEvent.GroupId,
+                 UserId  = essenceChangeEvent.UserId
+             })
     {
         MessageId         = essenceChangeEvent.MessageId;
         Operator          = new User(serviceId, connectionId, essenceChangeEvent.OperatorId);

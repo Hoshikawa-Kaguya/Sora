@@ -13,5 +13,10 @@ public enum SourceFlag
     /// <summary>
     /// 私聊
     /// </summary>
-    Private
+    Private,
+
+    /// <summary>
+    /// 频道
+    /// </summary>
+    Guild
 }

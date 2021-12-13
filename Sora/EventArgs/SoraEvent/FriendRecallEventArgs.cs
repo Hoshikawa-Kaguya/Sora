@@ -14,12 +14,12 @@ public sealed class FriendRecallEventArgs : BaseSoraEventArgs
     /// <summary>
     /// 消息发送者
     /// </summary>
-    public User Sender { get; private set; }
+    public User Sender { get; }
 
     /// <summary>
     /// 被撤回的消息ID
     /// </summary>
-    public int MessageId { get; private set; }
+    public int MessageId { get; }
 
     #endregion
 
@@ -34,7 +34,11 @@ public sealed class FriendRecallEventArgs : BaseSoraEventArgs
     /// <param name="friendRecallArgs">私聊消息撤回事件参数</param>
     internal FriendRecallEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                    OnebotFriendRecallEventArgs friendRecallArgs) :
-        base(serviceId, connectionId, eventName, friendRecallArgs.SelfID, friendRecallArgs.Time)
+        base(serviceId, connectionId, eventName, friendRecallArgs.SelfID, friendRecallArgs.Time,
+             new EventSource
+             {
+                 UserId  = friendRecallArgs.UserId
+             })
     {
         Sender    = new User(serviceId, connectionId, friendRecallArgs.UserId);
         MessageId = friendRecallArgs.MessageId;

@@ -14,7 +14,7 @@ public sealed class FriendAddEventArgs : BaseSoraEventArgs
     /// <summary>
     /// 新好友
     /// </summary>
-    public User NewFriend { get; private set; }
+    public User NewFriend { get; }
 
     #endregion
 
@@ -29,7 +29,11 @@ public sealed class FriendAddEventArgs : BaseSoraEventArgs
     /// <param name="friendAddArgs">好友添加事件参数</param>
     internal FriendAddEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                 OnebotFriendAddEventArgs friendAddArgs) :
-        base(serviceId, connectionId, eventName, friendAddArgs.SelfID, friendAddArgs.Time)
+        base(serviceId, connectionId, eventName, friendAddArgs.SelfID, friendAddArgs.Time,
+             new EventSource
+             {
+                 UserId  = friendAddArgs.UserId
+             })
     {
         NewFriend = new User(serviceId, connectionId, friendAddArgs.UserId);
     }
