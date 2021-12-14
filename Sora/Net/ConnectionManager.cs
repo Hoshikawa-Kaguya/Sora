@@ -38,7 +38,8 @@ public sealed class ConnectionManager : IDisposable
         Guid connectionId, TEventArgs eventArgs) where TEventArgs : System.EventArgs;
 
     /// <summary>
-    /// 打开连接回调
+    /// <para>打开连接回调</para>
+    /// <para>注意:正向ws在链接开启时不会获取到SelfId</para>
     /// </summary>
     public event ServerAsyncCallBackHandler<ConnectionEventArgs> OnOpenConnectionAsync;
 
@@ -66,19 +67,19 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="serviceId">服务Id</param>
     /// <param name="connectionId">连接标识</param>
     /// <param name="socket">连接信息</param>
-    /// <param name="selfId">机器人UID</param>
     /// <param name="apiTimeout">api超时</param>
     private static bool AddConnection(Guid serviceId, Guid connectionId, ISoraSocket socket,
-                                      string selfId, TimeSpan apiTimeout)
+                                      TimeSpan apiTimeout)
     {
         //检查是否已存在值
         if (StaticVariable.ConnectionInfos.ContainsKey(connectionId)) return false;
-        if (!long.TryParse(selfId, out var uid)) Log.Error("ConnectionManager", "非法selfid，已忽略");
+        //selfId均在第一次链接开启时留空，并在meta事件触发后更新
         return StaticVariable.ConnectionInfos.TryAdd(connectionId, new SoraConnectionInfo
                                                          (serviceId, connectionId,
                                                           socket,
                                                           DateTime.Now,
-                                                          uid, apiTimeout
+                                                          0, 0,
+                                                          apiTimeout
                                                          ));
     }
 
@@ -197,7 +198,7 @@ public sealed class ConnectionManager : IDisposable
                                  TimeSpan apiTimeout)
     {
         //添加服务器记录
-        if (!AddConnection(serviceId, connId, socket, selfId, apiTimeout))
+        if (!AddConnection(serviceId, connId, socket, apiTimeout))
         {
             //记录添加失败关闭超时的连接
             socket.Close();
