@@ -36,7 +36,7 @@ public class Guild : BaseModel
     #region 转换方法
 
     /// <summary>
-    /// 定义将 <see cref="User"/> 对象转换为 <see cref="long"/>
+    /// 定义将 <see cref="User"/> 对象转换为 <see cref="ulong"/>
     /// </summary>
     /// <param name="value">转换的 <see cref="User"/> 对象</param>
     public static implicit operator ulong(Guild value)

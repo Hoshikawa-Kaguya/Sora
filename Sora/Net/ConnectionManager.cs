@@ -238,7 +238,7 @@ public sealed class ConnectionManager : IDisposable
         Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs(role, selfId)); });
     }
 
-    internal static void UpdateIds(Guid connectionGuid, long uid, long gUid)
+    internal static void UpdateIds(Guid connectionGuid, long uid, ulong gUid)
     {
         SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
         SoraConnectionInfo newInfo = oldInfo;
@@ -264,7 +264,7 @@ public sealed class ConnectionManager : IDisposable
             userId = StaticVariable.ConnectionInfos[connectionGuid].SelfId;
             return true;
         }
-        userId = -1;
+        userId = default;
         return false;
     }
 
@@ -273,14 +273,14 @@ public sealed class ConnectionManager : IDisposable
     /// </summary>
     /// <param name="connectionGuid">连接标识</param>
     /// <param name="userGuildId">UID</param>
-    internal static bool GetLoginGuildUid(Guid connectionGuid, out long userGuildId)
+    internal static bool GetLoginGuildUid(Guid connectionGuid, out ulong userGuildId)
     {
         if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid))
         {
             userGuildId = StaticVariable.ConnectionInfos[connectionGuid].SelfGuildId;
             return true;
         }
-        userGuildId = -1;
+        userGuildId = default;
         return false;
     }
 

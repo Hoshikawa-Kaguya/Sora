@@ -717,6 +717,18 @@ public sealed class SoraApi
     }
 
     /// <summary>
+    /// 获取群组列表
+    /// </summary>
+    /// <returns>
+    /// <para><see cref="ApiStatusType"/> API执行状态</para>
+    /// <para><see langword="groupList"/> 群组列表</para>
+    /// </returns>
+    public async ValueTask<(ApiStatus apiStatus, List<GuildInfo> groupList)> GetGuildList()
+    {
+        return await ApiInterface.GetGuildList(ConnectionId);
+    }
+
+    /// <summary>
     /// 获取群成员列表
     /// </summary>
     /// <param name="groupId">群号</param>

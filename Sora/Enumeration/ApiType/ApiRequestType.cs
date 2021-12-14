@@ -386,5 +386,11 @@ internal enum ApiRequestType
     [Description("get_guild_service_profile")]
     GetGuildServiceProfile,
 
+    /// <summary>
+    /// 获取频道列表
+    /// </summary>
+    [Description("get_guild_list")]
+    GetGuildList,
+
     #endregion
 }

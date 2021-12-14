@@ -97,16 +97,16 @@ public sealed class Message : BaseModel
     /// <para>At的uid列表</para>
     /// <para><see cref="List{T}"/>(T=<see cref="long"/>)</para>
     /// </returns>
-    public IEnumerable<long> GetAllAtList()
+    public IEnumerable<ulong> GetAllAtList()
     {
         var uidList = MessageBody.Where(s => s.MessageType == SegmentType.At)
                                  .Select(s => ulong.TryParse((s.Data as AtSegment)?.Target ?? "0",
-                                                            out ulong uid)
+                                                             out ulong uid)
                                              ? uid
                                              : 0)
                                  .ToList();
         //去除无法转换的值，如at全体
-        uidList.RemoveAll(uid => uid == -1);
+        uidList.RemoveAll(uid => uid == 0);
         return uidList;
     }
 

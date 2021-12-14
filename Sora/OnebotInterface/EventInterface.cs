@@ -300,7 +300,6 @@ public class EventInterface
                 ConnectionManager.UpdateIds(connection, uid, gUid);
 
                 Log.Info("Sora", $"已连接到{clientType},版本:{clientVer}");
-
                 if (OnClientConnect == null) break;
                 //执行回调
                 await OnClientConnect("Meta Event",
@@ -378,7 +377,7 @@ public class EventInterface
             {
                 var guildMsg = messageJson.ToObject<GocqGuildMessageEventArgs>();
                 if (guildMsg == null) break;
-                if (StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Contains(guildMsg.UserId)) return;
+                if (StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Contains(guildMsg.UserGuildId)) return;
                 var eventArgs = new GuildMessageEventArgs(ServiceId, connection, "group", guildMsg);
                 //自己发送的消息
                 if (eventArgs.SenderInfo.UserId == eventArgs.SelfGuildId)
@@ -725,7 +724,7 @@ public class EventInterface
 
     private static string GuildMessageLog(GocqGuildMessageEventArgs eventArgs)
     {
-        return $"Guild msg[{eventArgs.GuildId}(cid:{eventArgs.ChannelId})] <- User {eventArgs.SenderInfo.Nick}[{eventArgs.UserId}]";
+        return $"Guild msg[{eventArgs.GuildId}(cid:{eventArgs.ChannelId})] <- User {eventArgs.SenderInfo.Nick}[{eventArgs.UserGuildId}]";
     }
 
     #endregion

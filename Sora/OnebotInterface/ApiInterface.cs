@@ -952,6 +952,22 @@ internal static class ApiInterface
                 ulong.TryParse(ret["data"]?["tiny_id"]?.ToString() ?? "0", out ulong uid) ? uid : 0);
     }
 
+    /// <summary>
+    /// 获取登陆账号的频道列表
+    /// </summary>
+    /// <param name="connection">链接标识</param>
+    internal static async ValueTask<(ApiStatus apiStatus, List<GuildInfo> guildInfos)>
+        GetGuildList(Guid connection)
+    {
+        Log.Debug("Sora", "Sending get_guild_service_profile request");
+        var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.GetGuildList
+        }, connection);
+        Log.Debug("Sora", $"Get get_guild_service_profile response {nameof(apiStatus)}={apiStatus.RetCode}");
+        return (apiStatus, ret["data"]?.ToObject<List<GuildInfo>>() ?? new List<GuildInfo>());
+    }
+
     #endregion
 
     #endregion
