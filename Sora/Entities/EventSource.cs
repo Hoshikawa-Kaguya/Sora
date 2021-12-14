@@ -6,27 +6,27 @@
 public record EventSource
 {
     /// <summary>
-    /// 用户ID
+    /// 事件源用户ID
     /// </summary>
     public long? UserId { get; internal init; }
 
     /// <summary>
-    /// 频道用户ID
+    /// 事件源频道用户ID
     /// </summary>
-    public long? UserGuildId { get; internal init; }
+    public ulong? UserGuildId { get; internal init; }
 
     /// <summary>
-    /// 群ID
+    /// 事件源群ID
     /// </summary>
     public long? GroupId { get; internal init; }
 
     /// <summary>
-    /// 频道ID
+    /// 事件源频道ID
     /// </summary>
-    public long? GuildId { get; internal init; }
+    public ulong? GuildId { get; internal init; }
 
     /// <summary>
-    /// 子频道ID
+    /// 事件源子频道ID
     /// </summary>
-    public long? ChannelId { get; internal init; }
+    public ulong? ChannelId { get; internal init; }
 }

@@ -14,7 +14,7 @@ public class GuildUser : BaseModel
     /// <summary>
     /// 当前实例的用户ID
     /// </summary>
-    public long Id { get; }
+    public ulong Id { get; }
 
     #endregion
 
@@ -26,7 +26,7 @@ public class GuildUser : BaseModel
     /// <param name="serviceId">服务ID</param>
     /// <param name="connectionId">服务器连接标识</param>
     /// <param name="uid">用户ID</param>
-    internal GuildUser(Guid serviceId, Guid connectionId, long uid) : base(serviceId, connectionId)
+    internal GuildUser(Guid serviceId, Guid connectionId, ulong uid) : base(serviceId, connectionId)
     {
         Id = uid;
     }
@@ -36,10 +36,10 @@ public class GuildUser : BaseModel
     #region 转换方法
 
     /// <summary>
-    /// 定义将 <see cref="User"/> 对象转换为 <see cref="long"/>
+    /// 定义将 <see cref="User"/> 对象转换为 <see cref="ulong"/>
     /// </summary>
     /// <param name="value">转换的 <see cref="User"/> 对象</param>
-    public static implicit operator long(GuildUser value)
+    public static implicit operator ulong(GuildUser value)
     {
         return value.Id;
     }

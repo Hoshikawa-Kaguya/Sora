@@ -11,19 +11,19 @@ internal abstract class BaseGuildEventArgs : BaseEventArgs
     /// 频道ID
     /// </summary>
     [JsonProperty(PropertyName = "guild_id")]
-    internal long GuildId { get; set; }
+    internal ulong GuildId { get; set; }
 
     /// <summary>
     /// 子频道ID
     /// </summary>
     [JsonProperty(PropertyName = "channel_id")]
-    internal long ChannelId { get; set; }
+    internal ulong ChannelId { get; set; }
 
     /// <summary>
     /// 发送者ID
     /// </summary>
     [JsonProperty(PropertyName = "user_id")]
-    internal long UserId { get; set; }
+    internal ulong UserGuildId { get; set; }
 
     /// <summary>
     /// <para>操作者/发送者用户ID</para>
@@ -31,5 +31,5 @@ internal abstract class BaseGuildEventArgs : BaseEventArgs
     /// <para>与QQ号并不通用</para>
     /// </summary>
     [JsonProperty(PropertyName = "self_tiny_id")]
-    internal long SelfTinyId { get; set; }
+    internal ulong SelfGuildId { get; set; }
 }

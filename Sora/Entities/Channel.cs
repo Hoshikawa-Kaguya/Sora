@@ -15,7 +15,7 @@ public class Channel : Guild
     /// <summary>
     /// 子频道ID
     /// </summary>
-    public long ChannelId { get; }
+    public ulong ChannelId { get; }
 
     #endregion
 
@@ -28,7 +28,7 @@ public class Channel : Guild
     /// <param name="connectionId">服务器连接标识</param>
     /// <param name="cid">子频道ID</param>
     /// <param name="gid">频道ID</param>
-    internal Channel(Guid serviceId, Guid connectionId, long cid, long gid) : base(serviceId, connectionId, gid)
+    internal Channel(Guid serviceId, Guid connectionId, ulong cid, ulong gid) : base(serviceId, connectionId, gid)
     {
         ChannelId = cid;
     }
@@ -53,10 +53,10 @@ public class Channel : Guild
     #region 转换方法
 
     /// <summary>
-    /// 定义将 <see cref="User"/> 对象转换为 <see cref="long"/>
+    /// 定义将 <see cref="User"/> 对象转换为 <see cref="ulong"/>
     /// </summary>
     /// <param name="value">转换的 <see cref="User"/> 对象</param>
-    public static implicit operator long(Channel value)
+    public static implicit operator ulong(Channel value)
     {
         return value.ChannelId;
     }

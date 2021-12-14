@@ -107,7 +107,7 @@ internal static class ApiInterface
     /// ApiResponseCollection
     /// </returns>
     internal static async ValueTask<(ApiStatus apiStatus, string messageId)> SendGuildMessage(
-        Guid connection, long targetGid, long targetCid, MessageBody messages, TimeSpan? timeout)
+        Guid connection, ulong targetGid, ulong targetCid, MessageBody messages, TimeSpan? timeout)
     {
         Log.Debug("Sora", "Sending send_guild_channel_msg request");
         if (messages == null || messages.Count == 0) throw new NullReferenceException(nameof(messages));
@@ -937,7 +937,7 @@ internal static class ApiInterface
     /// 获取登陆账号的频道信息
     /// </summary>
     /// <param name="connection">链接标识</param>
-    internal static async ValueTask<(ApiStatus apiStatus, string avatarUrl, string guildNick, long guildUid)> 
+    internal static async ValueTask<(ApiStatus apiStatus, string avatarUrl, string guildNick, ulong guildUid)> 
         GetSelfGuildProfile(Guid connection)
     {
         Log.Debug("Sora", "Sending get_guild_service_profile request");
@@ -949,7 +949,7 @@ internal static class ApiInterface
         return (apiStatus,
                 ret["data"]?["avatar_url"]?.ToString() ?? string.Empty,
                 ret["data"]?["nickname"]?.ToString()   ?? string.Empty,
-                long.TryParse(ret["data"]?["tiny_id"]?.ToString() ?? "0", out long uid) ? uid : -1);
+                ulong.TryParse(ret["data"]?["tiny_id"]?.ToString() ?? "0", out ulong uid) ? uid : 0);
     }
 
     #endregion

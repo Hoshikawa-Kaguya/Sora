@@ -46,7 +46,7 @@ public class GuildMessageEventArgs : BaseSoraEventArgs
     /// <summary>
     /// 登陆账号的频道ID
     /// </summary>
-    public long SelfGuildId { get; }
+    public ulong SelfGuildId { get; }
 
     #endregion
 
@@ -66,17 +66,17 @@ public class GuildMessageEventArgs : BaseSoraEventArgs
              {
                  GuildId     = guildMsgArgs.GuildId,
                  ChannelId   = guildMsgArgs.ChannelId,
-                 UserGuildId = guildMsgArgs.UserId
+                 UserGuildId = guildMsgArgs.UserGuildId
              })
     {
         Messages = new Message(serviceId, connectionId, guildMsgArgs.MessageId, string.Empty,
                               guildMsgArgs.MessageList.ToMessageBody(), guildMsgArgs.Time, 0, null);
         Messages.RawText = Messages.MessageBody.Serialize();
-        Sender           = new GuildUser(serviceId, connectionId, guildMsgArgs.UserId);
+        Sender           = new GuildUser(serviceId, connectionId, guildMsgArgs.UserGuildId);
         SenderInfo       = guildMsgArgs.SenderInfo;
         SourceGuild      = new Guild(serviceId, connectionId, guildMsgArgs.GuildId);
         SourceChannel    = new Channel(serviceId, connectionId, guildMsgArgs.ChannelId, guildMsgArgs.GuildId);
-        SelfGuildId      = guildMsgArgs.SelfTinyId;
+        SelfGuildId      = guildMsgArgs.SelfGuildId;
     }
 
     #endregion

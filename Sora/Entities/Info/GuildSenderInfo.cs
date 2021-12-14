@@ -17,5 +17,5 @@ public struct GuildSenderInfo
     /// 发送者ID
     /// </summary>
     [JsonProperty(PropertyName = "user_id")]
-    public long UserId { get; internal set;}
+    public ulong UserId { get; internal set;}
 }

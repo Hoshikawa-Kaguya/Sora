@@ -129,7 +129,7 @@ public sealed class SoraApi
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, string messageId)> SendGuildMessage(
-        long guildId, long channelId, MessageBody message, TimeSpan? timeout = null)
+        ulong guildId, ulong channelId, MessageBody message, TimeSpan? timeout = null)
     {
         if (message is null || message.Count == 0) throw new NullReferenceException(nameof(message));
         return await ApiInterface.SendGuildMessage(ConnectionId, guildId, channelId, message, timeout);
@@ -1045,18 +1045,18 @@ public sealed class SoraApi
     /// </summary>
     public long GetLoginUserId()
     {
-        if (ConnectionManager.GetLoginUid(ConnectionId, out var uid)) return uid;
-        return -1;
+        if (ConnectionManager.GetLoginUid(ConnectionId, out long uid)) return uid;
+        return default;
     }
 
     /// <summary>
     /// <para>获取登录账号的频道id</para>
     /// <para>使用正向ws链接时此方法在触发lifecycle事件前失效</para>
     /// </summary>
-    public long GetLoginUserGuildId()
+    public ulong GetLoginUserGuildId()
     {
-        if (ConnectionManager.GetLoginGuildUid(ConnectionId, out var uid)) return uid;
-        return -1;
+        if (ConnectionManager.GetLoginGuildUid(ConnectionId, out ulong uid)) return uid;
+        return default;
     }
 
     /// <summary>
@@ -1064,7 +1064,7 @@ public sealed class SoraApi
     /// 在当前服务实例内不再处理其消息
     /// </summary>
     /// <param name="userId">用户ID</param>
-    public bool BlockGuildUser(long userId)
+    public bool BlockGuildUser(ulong userId)
     {
         return StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Add(userId);
     }
@@ -1073,7 +1073,7 @@ public sealed class SoraApi
     /// 对用户解除频道消息屏蔽
     /// </summary>
     /// <param name="userId">用户ID</param>
-    public bool RemoveGuildBlock(long userId)
+    public bool RemoveGuildBlock(ulong userId)
     {
         return StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Remove(userId);
     }
@@ -1082,7 +1082,7 @@ public sealed class SoraApi
     /// 添加机器人管理员(频道)
     /// </summary>
     /// <param name="userId">用户ID</param>
-    public bool AddGuildSuperUser(long userId)
+    public bool AddGuildSuperUser(ulong userId)
     {
         return StaticVariable.ServiceInfos[ServiceId].GuildSuperUsers.Add(userId);
     }
@@ -1091,7 +1091,7 @@ public sealed class SoraApi
     /// 解除机器人群管理员(频道)
     /// </summary>
     /// <param name="userId">用户ID</param>
-    public bool RemoveGuildSuperUser(long userId)
+    public bool RemoveGuildSuperUser(ulong userId)
     {
         return StaticVariable.ServiceInfos[ServiceId].GuildSuperUsers.Remove(userId);
     }

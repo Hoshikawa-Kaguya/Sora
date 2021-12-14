@@ -25,12 +25,12 @@ public class ClientConfig : ISoraConfig
     /// <summary>
     /// 机器人频道管理员UID
     /// </summary>
-    private readonly long[] _guildSuperUsers;
+    private readonly ulong[] _guildSuperUsers;
 
     /// <summary>
     /// 屏蔽用户频道消息
     /// </summary>
-    private readonly long[] _guildBlockUsers;
+    private readonly ulong[] _guildBlockUsers;
 
     #endregion
 
@@ -83,9 +83,9 @@ public class ClientConfig : ISoraConfig
     /// <summary>
     /// 机器人频道管理员UID
     /// </summary>
-    public long[] GuildSuperUsers
+    public ulong[] GuildSuperUsers
     {
-        get => _guildSuperUsers ?? Array.Empty<long>();
+        get => _guildSuperUsers ?? Array.Empty<ulong>();
         init
         {
             if (value.Any(uid => uid <= 0)) throw new ArgumentException("tiny_id cannot empty");
@@ -96,9 +96,9 @@ public class ClientConfig : ISoraConfig
     /// <summary>
     /// 不处理来自数组中UID的频道消息(群聊/私聊)
     /// </summary>
-    public long[] GuildBlockUsers
+    public ulong[] GuildBlockUsers
     {
-        get => _guildBlockUsers ?? Array.Empty<long>();
+        get => _guildBlockUsers ?? Array.Empty<ulong>();
         init
         {
             if (value.Any(uid => uid <= 0)) throw new ArgumentException("tiny_id cannot empty");

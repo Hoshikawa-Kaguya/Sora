@@ -1,7 +1,6 @@
 using System.Text;
 using System.Threading.Tasks;
 using Sora.Attributes.Command;
-using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;

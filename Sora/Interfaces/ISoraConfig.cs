@@ -52,12 +52,12 @@ public interface ISoraConfig
     /// <summary>
     /// 机器人管理员UID
     /// </summary>
-    long[] GuildSuperUsers { get; init; }
+    ulong[] GuildSuperUsers { get; init; }
 
     /// <summary>
     /// 不处理来自数组中UID的消息(群聊/私聊)
     /// </summary>
-    long[] GuildBlockUsers { get; init; }
+    ulong[] GuildBlockUsers { get; init; }
 
     /// <summary>
     /// <para>是否启用Sora自带的指令系统</para>
