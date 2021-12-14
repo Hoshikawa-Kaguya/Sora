@@ -7,7 +7,7 @@ namespace Sora.Entities;
 /// <summary>
 /// 频道成员
 /// </summary>
-public class GuildUser : BaseModel
+public sealed class GuildUser : BaseModel
 {
     #region 属性
 

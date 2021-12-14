@@ -8,7 +8,7 @@ namespace Sora.Entities;
 /// <summary>
 /// 子频道实例
 /// </summary>
-public class Channel : Guild
+public sealed class Channel : Guild
 {
     #region 属性
 

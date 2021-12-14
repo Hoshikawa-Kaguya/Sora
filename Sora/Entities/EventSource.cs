@@ -3,7 +3,7 @@
 /// <summary>
 /// 消息来源信息
 /// </summary>
-public record EventSource
+public sealed record EventSource
 {
     /// <summary>
     /// 事件源用户ID

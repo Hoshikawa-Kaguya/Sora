@@ -14,7 +14,7 @@ namespace Sora.EventArgs.SoraEvent;
 /// <summary>
 /// 频道消息事件参数
 /// </summary>
-public class GuildMessageEventArgs : BaseSoraEventArgs
+public sealed class GuildMessageEventArgs : BaseSoraEventArgs
 {
     #region 属性
 

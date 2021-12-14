@@ -339,7 +339,7 @@ public class EventInterface
                 var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
                 //标记消息已读
                 if (AutoMarkMessageRead)
-                    ApiInterface.MarkMessageReadAsync(connection, privateMsg.MessageId);
+                    ApiInterface.InternalMarkMessageRead(connection, privateMsg.MessageId);
                 //处理指令
                 if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager)
                     await CommandManager.CommandAdapter(eventArgs);
@@ -361,7 +361,7 @@ public class EventInterface
                 var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
                 //标记消息已读
                 if (AutoMarkMessageRead)
-                    ApiInterface.MarkMessageReadAsync(connection, groupMsg.MessageId);
+                    ApiInterface.InternalMarkMessageRead(connection, groupMsg.MessageId);
                 //处理指令
                 if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager)
                     await CommandManager.CommandAdapter(eventArgs);

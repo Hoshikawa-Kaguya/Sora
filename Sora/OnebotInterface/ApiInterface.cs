@@ -1634,18 +1634,24 @@ internal static class ApiInterface
     /// </summary>
     /// <param name="connection">连接标识</param>
     /// <param name="msgId">消息ID</param>
-    internal static async void MarkMessageReadAsync(Guid connection, string msgId)
+    internal static void InternalMarkMessageRead(Guid connection, string msgId)
     {
-        Log.Debug("Sora", "Sending mark_msg_as_read request");
-        var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.MarkMsgAsRead,
-            ApiParams = new
-            {
-                message_id = msgId
-            }
-        }, connection);
-        Log.Debug("Sora", $"Get mark_msg_as_read response {nameof(apiStatus)}={apiStatus.RetCode}");
+        Task.Run(async () =>
+                 {
+                     Log.Debug("Sora", "Auto mark message read request send");
+                     var (apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+                     {
+                         ApiRequestType = ApiRequestType.MarkMsgAsRead,
+                         ApiParams = new
+                         {
+                             message_id = msgId
+                         }
+                     }, connection);
+                     Log.Debug("Sora",
+                               apiStatus.RetCode == ApiStatusType.OK
+                                   ? "Auto mark message read sucess"
+                                   : "Auto mark message read failed");
+                 });
     }
 
     /// <summary>

@@ -6,7 +6,7 @@ namespace Sora.Entities;
 /// <summary>
 /// OCR识别结果
 /// </summary>
-public struct TextDetection
+public sealed record TextDetection
 {
     /// <summary>
     /// 文本
