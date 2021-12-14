@@ -167,7 +167,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
                                           }));
         //开始客户端
         await Client.Start();
-        ConnManager.StartTimer(_clientId);
+        ConnManager.StartHeartTimer(_clientId);
         if (!Client.IsRunning || !Client.IsStarted)
             throw new WebSocketClientException("WebSocket client is not running");
 

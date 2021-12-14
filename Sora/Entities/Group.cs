@@ -49,8 +49,8 @@ public sealed class Group : BaseModel
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, string messageId)> SendGroupMessage(MessageBody message,
-        TimeSpan? timeout = null)
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> SendGroupMessage(
+        MessageBody message, TimeSpan? timeout = null)
     {
         return await SoraApi.SendGroupMessage(Id, message, timeout);
     }

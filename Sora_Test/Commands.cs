@@ -1,3 +1,4 @@
+using System.Text;
 using System.Threading.Tasks;
 using Sora.Attributes.Command;
 using Sora.Entities.Segment;
@@ -17,6 +18,10 @@ public static class Commands
         Log.Info("触发指令", $"text:{s!.Content}");
         eventArgs.IsContinueEventChain = false;
         //throw new Exception("shit");
-        await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "怪欸");
+        var sb = new StringBuilder();
+        sb.AppendLine("debug info");
+        sb.AppendLine($"uid:{eventArgs.SoraApi.GetLoginUserId()}");
+        sb.AppendLine($"guid:{eventArgs.SoraApi.GetLoginUserGuildId()}");
+        await eventArgs.SourceChannel.SendChannelMessage(sb.ToString());
     }
 }

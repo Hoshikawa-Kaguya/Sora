@@ -290,7 +290,14 @@ public class EventInterface
                     break;
                 }
 
-                ConnectionManager.UpdateUid(connection, uid);
+                var (guildInfoApiStatus, _, _, gUid) = await ApiInterface.GetSelfGuildProfile(connection);
+                if (guildInfoApiStatus.RetCode != ApiStatusType.OK) //检查返回值
+                {
+                    Log.Error("Sora", $"获取guild_uid失败(retcode={guildInfoApiStatus})");
+                    break;
+                }
+
+                ConnectionManager.UpdateIds(connection, uid, gUid);
 
                 Log.Info("Sora", $"已连接到{clientType},版本:{clientVer}");
 
@@ -372,14 +379,15 @@ public class EventInterface
                 var guildMsg = messageJson.ToObject<GocqGuildMessageEventArgs>();
                 if (guildMsg == null) break;
                 if (StaticVariable.ServiceInfos[ServiceId].GuildBlockUsers.Contains(guildMsg.UserId)) return;
-                Log.Debug("Sora", GuildMessageLog(guildMsg));
                 var eventArgs = new GuildMessageEventArgs(ServiceId, connection, "group", guildMsg);
                 //自己发送的消息
                 if (eventArgs.SenderInfo.UserId == eventArgs.SelfGuildId)
                 {
                     if (OnSelfGuildMessage == null) break;
                     await OnSelfGuildMessage("GuildMessage", eventArgs);
+                    break;
                 }
+                Log.Debug("Sora", GuildMessageLog(guildMsg));
                 if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager)
                     await CommandManager.CommandAdapter(eventArgs);
                 if (!eventArgs.IsContinueEventChain)

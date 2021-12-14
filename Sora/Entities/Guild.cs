@@ -14,7 +14,7 @@ public class Guild : BaseModel
     /// <summary>
     /// 频道ID
     /// </summary>
-    public long Id { get; }
+    public long GuildId { get; }
 
     #endregion
 
@@ -28,7 +28,7 @@ public class Guild : BaseModel
     /// <param name="gid">频道ID</param>
     internal Guild(Guid serviceId, Guid connectionId, long gid) : base(serviceId, connectionId)
     {
-        Id = gid;
+        GuildId = gid;
     }
 
     #endregion
@@ -41,7 +41,7 @@ public class Guild : BaseModel
     /// <param name="value">转换的 <see cref="User"/> 对象</param>
     public static implicit operator long(Guild value)
     {
-        return value.Id;
+        return value.GuildId;
     }
 
     /// <summary>

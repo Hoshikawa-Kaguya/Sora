@@ -129,7 +129,7 @@ public sealed class ConnectionManager : IDisposable
     /// <summary>
     /// 启动心跳计时器
     /// </summary>
-    internal void StartTimer(Guid serviceId)
+    internal void StartHeartTimer(Guid serviceId)
     {
         HeartBeatTimer ??= new Timer(HeartBeatCheck, serviceId, HeartBeatTimeOut, HeartBeatTimeOut);
     }
@@ -238,12 +238,14 @@ public sealed class ConnectionManager : IDisposable
         Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs(role, selfId)); });
     }
 
-    internal static void UpdateUid(Guid connectionGuid, long uid)
+    internal static void UpdateIds(Guid connectionGuid, long uid, long gUid)
     {
-        var oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
-        var newInfo = oldInfo;
-        newInfo.SelfId = uid;
+        SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
+        SoraConnectionInfo newInfo = oldInfo;
+        newInfo.SelfId      = uid;
+        newInfo.SelfGuildId = gUid;
         StaticVariable.ConnectionInfos.TryUpdate(connectionGuid, newInfo, oldInfo);
+        Thread.Sleep(2000);
     }
 
     #endregion
@@ -262,8 +264,23 @@ public sealed class ConnectionManager : IDisposable
             userId = StaticVariable.ConnectionInfos[connectionGuid].SelfId;
             return true;
         }
-
         userId = -1;
+        return false;
+    }
+
+    /// <summary>
+    /// 获取当前登录连接的账号频道ID
+    /// </summary>
+    /// <param name="connectionGuid">连接标识</param>
+    /// <param name="userGuildId">UID</param>
+    internal static bool GetLoginGuildUid(Guid connectionGuid, out long userGuildId)
+    {
+        if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid))
+        {
+            userGuildId = StaticVariable.ConnectionInfos[connectionGuid].SelfGuildId;
+            return true;
+        }
+        userGuildId = -1;
         return false;
     }
 

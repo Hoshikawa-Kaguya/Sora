@@ -75,7 +75,7 @@ public sealed class SoraApi
         long userId, MessageBody message, TimeSpan? timeout = null)
     {
         if (userId        < MinUserId) throw new ArgumentOutOfRangeException(nameof(userId));
-        if (message.Count == 0) throw new NullReferenceException(nameof(message));
+        if (message is null || message.Count == 0) throw new NullReferenceException(nameof(message));
         return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message, null, timeout);
     }
 
@@ -95,7 +95,7 @@ public sealed class SoraApi
     {
         if (userId        < MinUserId) throw new ArgumentOutOfRangeException(nameof(userId));
         if (groupId       < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
-        if (message.Count == 0) throw new NullReferenceException(nameof(message));
+        if (message is null || message.Count == 0) throw new NullReferenceException(nameof(message));
         return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message, groupId, timeout);
     }
 
@@ -112,8 +112,8 @@ public sealed class SoraApi
     public async ValueTask<(ApiStatus apiStatus, string messageId)> SendGroupMessage(
         long groupId, MessageBody message, TimeSpan? timeout = null)
     {
-        if (groupId       < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
-        if (message.Count == 0) throw new NullReferenceException(nameof(message));
+        if (groupId              < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
+        if (message is null || message.Count == 0) throw new NullReferenceException(nameof(message));
         return await ApiInterface.SendGroupMessage(ConnectionId, groupId, message, timeout);
     }
 
@@ -131,7 +131,7 @@ public sealed class SoraApi
     public async ValueTask<(ApiStatus apiStatus, string messageId)> SendGuildMessage(
         long guildId, long channelId, MessageBody message, TimeSpan? timeout = null)
     {
-        if (message.Count == 0) throw new NullReferenceException(nameof(message));
+        if (message is null || message.Count == 0) throw new NullReferenceException(nameof(message));
         return await ApiInterface.SendGuildMessage(ConnectionId, guildId, channelId, message, timeout);
     }
 
@@ -141,6 +141,7 @@ public sealed class SoraApi
     /// <param name="messageId">消息ID</param>
     public async ValueTask<ApiStatus> RecallMessage(string messageId)
     {
+        if (string.IsNullOrEmpty(messageId)) throw new NullReferenceException("messageId is empty");
         return await ApiInterface.RecallMsg(ConnectionId, messageId);
     }
 
@@ -1045,6 +1046,16 @@ public sealed class SoraApi
     public long GetLoginUserId()
     {
         if (ConnectionManager.GetLoginUid(ConnectionId, out var uid)) return uid;
+        return -1;
+    }
+
+    /// <summary>
+    /// <para>获取登录账号的频道id</para>
+    /// <para>使用正向ws链接时此方法在触发lifecycle事件前失效</para>
+    /// </summary>
+    public long GetLoginUserGuildId()
+    {
+        if (ConnectionManager.GetLoginGuildUid(ConnectionId, out var uid)) return uid;
         return -1;
     }
 

@@ -933,6 +933,25 @@ internal static class ApiInterface
                 ret?["data"]?.ToObject<List<UnidirectionalFriendInfo>>() ?? new List<UnidirectionalFriendInfo>());
     }
 
+    /// <summary>
+    /// 获取登陆账号的频道信息
+    /// </summary>
+    /// <param name="connection">链接标识</param>
+    internal static async ValueTask<(ApiStatus apiStatus, string avatarUrl, string guildNick, long guildUid)> 
+        GetSelfGuildProfile(Guid connection)
+    {
+        Log.Debug("Sora", "Sending get_guild_service_profile request");
+        var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.GetGuildServiceProfile
+        }, connection);
+        Log.Debug("Sora", $"Get get_guild_service_profile response {nameof(apiStatus)}={apiStatus.RetCode}");
+        return (apiStatus,
+                ret["data"]?["avatar_url"]?.ToString() ?? string.Empty,
+                ret["data"]?["nickname"]?.ToString()   ?? string.Empty,
+                long.TryParse(ret["data"]?["tiny_id"]?.ToString() ?? "0", out long uid) ? uid : -1);
+    }
+
     #endregion
 
     #endregion

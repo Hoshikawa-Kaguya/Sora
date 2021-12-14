@@ -378,7 +378,13 @@ internal enum ApiRequestType
     /// 发送信息到子频道
     /// </summary>
     [Description("send_guild_channel_msg")]
-    SendGuildChannelMsg
+    SendGuildChannelMsg,
+
+    /// <summary>
+    /// 获取登陆账号的频道信息
+    /// </summary>
+    [Description("get_guild_service_profile")]
+    GetGuildServiceProfile,
 
     #endregion
 }

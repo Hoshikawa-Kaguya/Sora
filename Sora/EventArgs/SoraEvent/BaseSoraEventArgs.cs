@@ -76,7 +76,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         Time                 = time.ToDateTime();
         IsContinueEventChain = true;
         SessionId            = Guid.Empty;
-        Source    = source;
+        Source               = source;
     }
 
     #endregion

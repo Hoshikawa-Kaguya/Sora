@@ -75,7 +75,7 @@ public class GuildMessageEventArgs : BaseSoraEventArgs
         Sender           = new GuildUser(serviceId, connectionId, guildMsgArgs.UserId);
         SenderInfo       = guildMsgArgs.SenderInfo;
         SourceGuild      = new Guild(serviceId, connectionId, guildMsgArgs.GuildId);
-        SourceChannel    = new Channel(serviceId, connectionId, guildMsgArgs.ChannelId);
+        SourceChannel    = new Channel(serviceId, connectionId, guildMsgArgs.ChannelId, guildMsgArgs.GuildId);
         SelfGuildId      = guildMsgArgs.SelfTinyId;
     }
 
@@ -95,7 +95,7 @@ public class GuildMessageEventArgs : BaseSoraEventArgs
     public async ValueTask<(ApiStatus apiStatus, string messageId)> Reply(MessageBody message,
                                                                           TimeSpan? timeout = null)
     {
-        return await SoraApi.SendGuildMessage(SourceGuild.Id, SourceChannel.Id, message, timeout);
+        return await SoraApi.SendGuildMessage(SourceGuild.GuildId, SourceChannel.ChannelId, message, timeout);
     }
 
     #endregion

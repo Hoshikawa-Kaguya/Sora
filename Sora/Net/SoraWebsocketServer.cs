@@ -120,7 +120,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         if (!_serverReady) return ValueTask.CompletedTask;
         //启动服务器
         Server.Start(SocketConfig);
-        ConnManager.StartTimer(_serverId);
+        ConnManager.StartHeartTimer(_serverId);
         Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
         return ValueTask.CompletedTask;
     }

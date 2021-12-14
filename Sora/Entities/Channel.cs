@@ -1,5 +1,6 @@
 ﻿using System;
-using Sora.Entities.Base;
+using System.Threading.Tasks;
+using Sora.Entities.Info;
 
 namespace Sora.Entities;
 
@@ -7,14 +8,14 @@ namespace Sora.Entities;
 /// <summary>
 /// 子频道实例
 /// </summary>
-public class Channel : BaseModel
+public class Channel : Guild
 {
     #region 属性
 
     /// <summary>
     /// 子频道ID
     /// </summary>
-    public long Id { get; }
+    public long ChannelId { get; }
 
     #endregion
 
@@ -26,9 +27,25 @@ public class Channel : BaseModel
     /// <param name="serviceId">服务ID</param>
     /// <param name="connectionId">服务器连接标识</param>
     /// <param name="cid">子频道ID</param>
-    internal Channel(Guid serviceId, Guid connectionId, long cid) : base(serviceId, connectionId)
+    /// <param name="gid">频道ID</param>
+    internal Channel(Guid serviceId, Guid connectionId, long cid, long gid) : base(serviceId, connectionId, gid)
     {
-        Id = cid;
+        ChannelId = cid;
+    }
+
+    #endregion
+
+    #region 消息方法
+
+    /// <summary>
+    /// 发送子频道消息
+    /// </summary>
+    /// <param name="message">消息内容</param>
+    /// <param name="timeout">覆盖原有超时</param>
+    public async ValueTask<(ApiStatus apiStatus, string messageId)> SendChannelMessage(
+        MessageBody message, TimeSpan? timeout = null)
+    {
+        return await SoraApi.SendGuildMessage(GuildId, ChannelId, message, timeout);
     }
 
     #endregion
@@ -41,7 +58,7 @@ public class Channel : BaseModel
     /// <param name="value">转换的 <see cref="User"/> 对象</param>
     public static implicit operator long(Channel value)
     {
-        return value.Id;
+        return value.ChannelId;
     }
 
     /// <summary>
