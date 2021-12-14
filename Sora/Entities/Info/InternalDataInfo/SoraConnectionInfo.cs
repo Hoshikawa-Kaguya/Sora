@@ -13,16 +13,18 @@ internal struct SoraConnectionInfo
     internal readonly ISoraSocket Connection;
     internal          DateTime    LastHeartBeatTime;
     internal          long        SelfId;
+    internal          long        SelfGuildId;
     internal readonly TimeSpan    ApiTimeout;
 
     internal SoraConnectionInfo(Guid serviceId, Guid connectionId, ISoraSocket connection,
-                                DateTime lastHeartBeatTime, long selfId,
+                                DateTime lastHeartBeatTime, long selfId, long selfGuildId,
                                 TimeSpan apiTimeout)
     {
         ServiceId         = serviceId;
         Connection        = connection;
         LastHeartBeatTime = lastHeartBeatTime;
         SelfId            = selfId;
+        SelfGuildId       = selfGuildId;
         ApiTimeout        = apiTimeout;
         ConnectionId      = connectionId;
     }
