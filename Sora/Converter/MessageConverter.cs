@@ -29,7 +29,7 @@ internal static class MessageConverter
         if (onebotSegment.RawData == null) return new SoraSegment(SegmentType.Unknown, null);
         try
         {
-            var jsonObj = JObject.FromObject(onebotSegment.RawData);
+            JObject jsonObj = JObject.FromObject(onebotSegment.RawData);
             if (jsonObj.Count == 0) return new SoraSegment(SegmentType.Unknown, null);
             return onebotSegment.MsgType switch
             {

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json;
 
 namespace Sora.Converter;
@@ -28,7 +29,7 @@ internal class EnumDescriptionConverter : JsonConverter
             return;
         }
 
-        var fieldInfo = value.GetType().GetField(value.ToString()!);
+        FieldInfo fieldInfo = value.GetType().GetField(value.ToString()!);
         if (fieldInfo == null)
         {
             writer.WriteValue("");
@@ -47,8 +48,8 @@ internal class EnumDescriptionConverter : JsonConverter
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
                                     JsonSerializer serializer)
     {
-        var fields    = objectType.GetFields();
-        var readValue = reader.Value?.ToString() ?? string.Empty;
+        FieldInfo[] fields    = objectType.GetFields();
+        string      readValue = reader.Value?.ToString() ?? string.Empty;
         foreach (var field in fields)
         {
             object[] objects = field.GetCustomAttributes(typeof(DescriptionAttribute), false);

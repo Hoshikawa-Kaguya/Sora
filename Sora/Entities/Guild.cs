@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Sora.Entities.Base;
+using Sora.Entities.Info;
 
 namespace Sora.Entities;
 
@@ -29,6 +32,28 @@ public class Guild : BaseModel
     internal Guild(Guid serviceId, Guid connectionId, ulong gid) : base(serviceId, connectionId)
     {
         GuildId = gid;
+    }
+
+    #endregion
+
+    #region 管理方法
+
+    /// <summary>
+    /// 通过访客获取频道元数据
+    /// </summary>
+    public async ValueTask<(ApiStatus apiStatus, GuildMetaInfo guildMetaInfo)> 
+        GetGuildMetaByGuest()
+    {
+        return await SoraApi.GetGuildMetaByGuest(GuildId);
+    }
+
+    /// <summary>
+    /// 获取子频道列表
+    /// </summary>
+    public async ValueTask<(ApiStatus apiStatus, List<ChannelInfo> channelList)> 
+        GetGuildChannelList()
+    {
+        return await SoraApi.GetGuildChannelList(GuildId);
     }
 
     #endregion

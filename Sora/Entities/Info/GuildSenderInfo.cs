@@ -2,6 +2,7 @@
 
 namespace Sora.Entities.Info;
 
+//TODO superuser判定
 /// <summary>
 /// 频道消息发送者
 /// </summary>

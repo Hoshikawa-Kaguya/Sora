@@ -937,7 +937,7 @@ internal static class ApiInterface
     /// 获取登陆账号的频道信息
     /// </summary>
     /// <param name="connection">链接标识</param>
-    internal static async ValueTask<(ApiStatus apiStatus, string avatarUrl, string guildNick, ulong guildUid)> 
+    internal static async ValueTask<(ApiStatus apiStatus, string avatarUrl, string guildNick, ulong guildUid)>
         GetSelfGuildProfile(Guid connection)
     {
         Log.Debug("Sora", "Sending get_guild_service_profile request");
@@ -967,6 +967,78 @@ internal static class ApiInterface
         Log.Debug("Sora", $"Get get_guild_service_profile response {nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus, ret["data"]?.ToObject<List<GuildInfo>>() ?? new List<GuildInfo>());
     }
+
+    /// <summary>
+    /// 通过访客获取频道元数据
+    /// </summary>
+    /// <param name="connection">链接标识</param>
+    /// <param name="gId">频道ID</param>
+    internal static async ValueTask<(ApiStatus apiStatus, GuildMetaInfo guildMetaInfos)>
+        GetGuildMetaByGuest(Guid connection, ulong gId)
+    {
+        Log.Debug("Sora", "Sending get_guild_meta_by_guest request");
+        var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.GetGuildMetaByGuest,
+            ApiParams = new
+            {
+                guild_id = gId
+            }
+        }, connection);
+        Log.Debug("Sora", $"Get get_guild_meta_by_guest response {nameof(apiStatus)}={apiStatus.RetCode}");
+        return (apiStatus, ret["data"]?.ToObject<GuildMetaInfo>() ?? new GuildMetaInfo());
+    }
+
+    /// <summary>
+    /// 获取子频道列表
+    /// </summary>
+    /// <param name="connection">链接标识</param>
+    /// <param name="gId">频道ID</param>
+    /// <param name="useCache">是否使用缓存</param>
+    internal static async ValueTask<(ApiStatus apiStatus, List<ChannelInfo> channelList)>
+        GetGuildChannelList(Guid connection, ulong gId, bool useCache = true)
+    {
+        Log.Debug("Sora", "Sending get_guild_channel_list request");
+        var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.GetGuildChannelList,
+            ApiParams = new
+            {
+                guild_id = gId,
+                no_cache = !useCache
+            }
+        }, connection);
+        Log.Debug("Sora", $"Get get_guild_channel_list response {nameof(apiStatus)}={apiStatus.RetCode}");
+        return (apiStatus, ret["data"]?.ToObject<List<ChannelInfo>>() ?? null);
+    }
+
+    //TODO 暂时失效的API
+    // /// <summary>
+    // /// 获取频道成员列表
+    // /// </summary>
+    // /// <param name="connection">链接标识</param>
+    // /// <param name="gId">频道ID</param>
+    // internal static async ValueTask<(ApiStatus apiStatus,
+    //         List<GuildMemberInfo> memberList,
+    //         List<GuildMemberInfo> botList,
+    //         List<GuildMemberInfo> adminList)>
+    //     GetGuildMembers(Guid connection, ulong gId)
+    // {
+    //     Log.Debug("Sora", "Sending get_guild_members request");
+    //     var (apiStatus, ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+    //     {
+    //         ApiRequestType = ApiRequestType.GetGuildMembers,
+    //         ApiParams = new
+    //         {
+    //             guild_id = gId
+    //         }
+    //     }, connection);
+    //     Log.Debug("Sora", $"Get get_guild_members response {nameof(apiStatus)}={apiStatus.RetCode}");
+    //     return (apiStatus,
+    //             ret["data"]?["members"]?.ToObject<List<GuildMemberInfo>>() ?? null,
+    //             ret["data"]?["bots"]?.ToObject<List<GuildMemberInfo>>()    ?? null,
+    //             ret["data"]?["admins"]?.ToObject<List<GuildMemberInfo>>()  ?? null);
+    // }
 
     #endregion
 

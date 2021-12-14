@@ -678,6 +678,31 @@ public sealed class SoraApi
 
     #endregion
 
+    #region 频道管理方法
+
+    /// <summary>
+    /// 通过访客获取频道元数据
+    /// </summary>
+    /// <param name="guildId">频道ID</param>
+    public async ValueTask<(ApiStatus apiStatus, GuildMetaInfo guildMetaInfo)> 
+        GetGuildMetaByGuest(ulong guildId)
+    {
+        return await ApiInterface.GetGuildMetaByGuest(ConnectionId, guildId);
+    }
+
+    /// <summary>
+    /// 获取子频道列表
+    /// </summary>
+    /// <param name="guildId">频道ID</param>
+    /// <param name="useCache">是否使用缓存</param>
+    public async ValueTask<(ApiStatus apiStatus, List<ChannelInfo> channelList)> 
+        GetGuildChannelList(ulong guildId, bool useCache = true)
+    {
+        return await ApiInterface.GetGuildChannelList(ConnectionId, guildId);
+    }
+
+    #endregion
+
     #region 账号API
 
     /// <summary>

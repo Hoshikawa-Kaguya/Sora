@@ -392,5 +392,23 @@ internal enum ApiRequestType
     [Description("get_guild_list")]
     GetGuildList,
 
+    /// <summary>
+    /// 通过访客获取频道元数据
+    /// </summary>
+    [Description("get_guild_meta_by_guest")]
+    GetGuildMetaByGuest,
+
+    /// <summary>
+    /// 获取子频道列表
+    /// </summary>
+    [Description("get_guild_channel_list")]
+    GetGuildChannelList,
+
+    /// <summary>
+    /// 获取频道成员列表
+    /// </summary>
+    [Description("get_guild_members")]
+    GetGuildMembers,
+
     #endregion
 }
