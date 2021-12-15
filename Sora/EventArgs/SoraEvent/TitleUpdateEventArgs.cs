@@ -7,7 +7,7 @@ namespace Sora.EventArgs.SoraEvent;
 /// <summary>
 /// 群成员头衔更新事件
 /// </summary>
-public class TitleUpdateEventArgs : BaseSoraEventArgs
+public sealed class TitleUpdateEventArgs : BaseSoraEventArgs
 {
     #region 属性
 

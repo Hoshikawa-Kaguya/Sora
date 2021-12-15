@@ -8,7 +8,7 @@ namespace Sora.EventArgs.SoraEvent;
 /// <summary>
 /// 接收到离线文件事件参数
 /// </summary>
-public class OfflineFileEventArgs : BaseSoraEventArgs
+public sealed class OfflineFileEventArgs : BaseSoraEventArgs
 {
     #region 属性
 

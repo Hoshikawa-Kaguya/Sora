@@ -7,7 +7,7 @@ namespace Sora.EventArgs.SoraEvent;
 /// <summary>
 /// 其他客户端在线状态变更事件参数
 /// </summary>
-public class ClientStatusChangeEventArgs : BaseSoraEventArgs
+public sealed class ClientStatusChangeEventArgs : BaseSoraEventArgs
 {
     #region 属性
 
