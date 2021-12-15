@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
-        <Version>1.0.0-rc.35</Version>
+        <Version>1.0.0-extra</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <Description>.Net 6异步Onebot机器人框架</Description>
@@ -14,7 +14,7 @@
         <PackageIcon>icon.png</PackageIcon>
         <LangVersion>preview</LangVersion>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-        <Title>Sora</Title>
+        <Title>Sora-Extra-Guild</Title>
         <Nullable>warnings</Nullable>
     </PropertyGroup>
 
