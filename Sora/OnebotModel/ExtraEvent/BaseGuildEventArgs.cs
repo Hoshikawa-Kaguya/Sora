@@ -22,6 +22,7 @@ internal abstract class BaseGuildEventArgs : BaseEventArgs
     /// <summary>
     /// 发送者ID
     /// </summary>
+    //频道ID必须为UserGuildId以区分命名
     [JsonProperty(PropertyName = "user_id")]
     internal ulong UserGuildId { get; set; }
 

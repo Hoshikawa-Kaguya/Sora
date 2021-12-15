@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Command;
+using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
@@ -199,6 +200,26 @@ public class EventInterface
     /// 精华消息变动事件
     /// </summary>
     public event EventAsyncCallBackHandler<EssenceChangeEventArgs> OnEssenceChange;
+
+    /// <summary>
+    /// 频道消息表情贴更新
+    /// </summary>
+    public event EventAsyncCallBackHandler<GuildReactionsUpdatedEventArgs> OnReactionsUpdated;
+
+    /// <summary>
+    /// 子频道信息更新
+    /// </summary>
+    public event EventAsyncCallBackHandler<ChannelInfoUpdateEventArgs> OnChannelInfoUpdate;
+
+    /// <summary>
+    /// 子频道创建
+    /// </summary>
+    public event EventAsyncCallBackHandler<ChannelChangeEventArgs> OnChannelCreated;
+
+    /// <summary>
+    /// 子频道删除
+    /// </summary>
+    public event EventAsyncCallBackHandler<ChannelChangeEventArgs> OnChannelDestroyed;
 
     #endregion
 
@@ -642,6 +663,54 @@ public class EventInterface
                 if (OnEssenceChange == null) break;
                 await OnEssenceChange("Notice",
                                       new EssenceChangeEventArgs(ServiceId, connection, "essence", essenceChange));
+                break;
+            }
+            case "message_reactions_updated":
+            {
+                var reactionsUpdated = messageJson.ToObject<GocqReactionsUpdatedEventArgs>();
+                if (reactionsUpdated == null) break;
+                Log.Debug("Sora",
+                          $"Get reactions updated msg_id = {reactionsUpdated.MessageId}");
+                if (OnReactionsUpdated == null) break;
+                await OnReactionsUpdated("Notice",
+                                         new GuildReactionsUpdatedEventArgs(ServiceId, connection, "essence",
+                                                                            reactionsUpdated));
+                break;
+            }
+            case "channel_updated":
+            {
+                var channelUpdate = messageJson.ToObject<GocqChannelInfoUpdateEventArgs>();
+                if (channelUpdate == null) break;
+                Log.Debug("Sora",
+                          $"Get channel updated channel_id = {channelUpdate.ChannelId}");
+                if(OnChannelInfoUpdate == null) break;
+                await OnChannelInfoUpdate("Notice",
+                                          new ChannelInfoUpdateEventArgs(ServiceId, connection, "essence",
+                                                                         channelUpdate));
+                break;
+            }
+            case "channel_created":
+            {
+                var channelUpdate = messageJson.ToObject<GocqChannelCreatedOrDestroyedEventArgs>();
+                if (channelUpdate == null) break;
+                Log.Debug("Sora",
+                          $"Get channel updated channel_id = {channelUpdate.ChannelId}");
+                if(OnChannelCreated == null) break;
+                await OnChannelCreated("Notice",
+                                       new ChannelChangeEventArgs(ServiceId, connection, "essence",
+                                                                  channelUpdate, ChannelChangeType.Create));
+                break;
+            }
+            case "channel_destroyed":
+            {
+                var channelUpdate = messageJson.ToObject<GocqChannelCreatedOrDestroyedEventArgs>();
+                if (channelUpdate == null) break;
+                Log.Debug("Sora",
+                          $"Get channel updated channel_id = {channelUpdate.ChannelId}");
+                if(OnChannelDestroyed == null) break;
+                await OnChannelDestroyed("Notice",
+                                         new ChannelChangeEventArgs(ServiceId, connection, "essence",
+                                                                    channelUpdate, ChannelChangeType.Destroyed));
                 break;
             }
             //通知类事件
