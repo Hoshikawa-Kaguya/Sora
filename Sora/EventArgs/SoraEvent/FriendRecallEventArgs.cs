@@ -37,7 +37,7 @@ public sealed class FriendRecallEventArgs : BaseSoraEventArgs
         base(serviceId, connectionId, eventName, friendRecallArgs.SelfID, friendRecallArgs.Time,
              new EventSource
              {
-                 UserId  = friendRecallArgs.UserId
+                 UserId = friendRecallArgs.UserId
              })
     {
         Sender    = new User(serviceId, connectionId, friendRecallArgs.UserId);

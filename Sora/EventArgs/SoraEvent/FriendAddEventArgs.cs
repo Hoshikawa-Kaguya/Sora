@@ -32,7 +32,7 @@ public sealed class FriendAddEventArgs : BaseSoraEventArgs
         base(serviceId, connectionId, eventName, friendAddArgs.SelfID, friendAddArgs.Time,
              new EventSource
              {
-                 UserId  = friendAddArgs.UserId
+                 UserId = friendAddArgs.UserId
              })
     {
         NewFriend = new User(serviceId, connectionId, friendAddArgs.UserId);

@@ -79,8 +79,8 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
         IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
         //将api消息段转换为sorasegment
         Messages = new Message(serviceId, connectionId, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
-                              groupMsgArgs.MessageList.ToMessageBody(), groupMsgArgs.Time,
-                              groupMsgArgs.Font, groupMsgArgs.MessageSequence);
+                               groupMsgArgs.MessageList.ToMessageBody(), groupMsgArgs.Time,
+                               groupMsgArgs.Font, groupMsgArgs.MessageSequence);
         Sender      = new User(serviceId, connectionId, groupMsgArgs.UserId);
         SourceGroup = new Group(serviceId, connectionId, groupMsgArgs.GroupId);
         Anonymous   = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
@@ -107,7 +107,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <para><see langword="messageId"/> 发送消息的id</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, string messageId)> Reply(MessageBody message,
-                                                                       TimeSpan? timeout = null)
+                                                                          TimeSpan? timeout = null)
     {
         return await SoraApi.SendGroupMessage(SourceGroup.Id, message, timeout);
     }
@@ -184,7 +184,8 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Group,
-                                                           regexOptions, timeout, timeoutTask) as GroupMessageEventArgs);
+                                                           regexOptions, timeout,
+                                                           timeoutTask) as GroupMessageEventArgs);
         Helper.CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }

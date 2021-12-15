@@ -70,7 +70,7 @@ public sealed class GuildMessageEventArgs : BaseSoraEventArgs
              })
     {
         Messages = new Message(serviceId, connectionId, guildMsgArgs.MessageId, string.Empty,
-                              guildMsgArgs.MessageList.ToMessageBody(), guildMsgArgs.Time, 0, null);
+                               guildMsgArgs.MessageList.ToMessageBody(), guildMsgArgs.Time, 0, null);
         Messages.RawText = Messages.MessageBody.Serialize();
         Sender           = new GuildUser(serviceId, connectionId, guildMsgArgs.UserGuildId);
         SenderInfo       = guildMsgArgs.SenderInfo;
@@ -135,7 +135,8 @@ public sealed class GuildMessageEventArgs : BaseSoraEventArgs
     {
         if (StaticVariable.ServiceInfos[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(commandExps, matchType, SourceFlag.Guild,
-                                                           regexOptions, timeout, timeoutTask) as GuildMessageEventArgs);
+                                                           regexOptions, timeout,
+                                                           timeoutTask) as GuildMessageEventArgs);
         Helper.CommandDisableTip();
         return ValueTask.FromResult<GuildMessageEventArgs>(null);
     }

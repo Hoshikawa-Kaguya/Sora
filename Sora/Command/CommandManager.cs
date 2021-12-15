@@ -78,7 +78,6 @@ public class CommandManager
         //生成指令信息
         foreach (var (classType, methodInfos) in cmdGroups)
         foreach (var methodInfo in methodInfos)
-        {
             switch (GenerateCommandInfo(methodInfo, classType, out var commandInfo))
             {
                 case GroupCommand:
@@ -94,7 +93,7 @@ public class CommandManager
                         Log.Warning("CommandManager", "Command exists");
                     break;
                 case GuildCommand:
-                    if(_guildCommands.AddOrExist(commandInfo))
+                    if (_guildCommands.AddOrExist(commandInfo))
                         Log.Debug("Command", $"Registered guild command [{methodInfo.Name}]");
                     else
                         Log.Warning("CommandManager", "Command exists");
@@ -103,7 +102,6 @@ public class CommandManager
                     Log.Warning("Command", "未知的指令类型");
                     break;
             }
-        }
 
         //增加正则缓存大小
         Regex.CacheSize  += _privateCommands.Count + _groupCommands.Count + _guildCommands.Count;
@@ -277,7 +275,7 @@ public class CommandManager
         #region 常规指令处理
 
         //检查指令池
-        if (_groupCommands.Count == 0 && _privateCommands.Count == 0 && _guildCommands.Count== 0) return;
+        if (_groupCommands.Count == 0 && _privateCommands.Count == 0 && _guildCommands.Count == 0) return;
 
         List<CommandInfo> matchedCommand =
             eventArgs switch
@@ -290,10 +288,10 @@ public class CommandManager
                     _privateCommands.Where(command => IsMatchedCommand(privateMessageEvent.Messages, command))
                                     .OrderByDescending(p => p.Priority)
                                     .ToList(),
-                GuildMessageEventArgs guildMessageEvent => 
+                GuildMessageEventArgs guildMessageEvent =>
                     _guildCommands.Where(command => IsMatchedCommand(guildMessageEvent.Messages, command))
-                                    .OrderByDescending(p => p.Priority)
-                                    .ToList(),
+                                  .OrderByDescending(p => p.Priority)
+                                  .ToList(),
                 _ => null
             };
         if (matchedCommand is null)

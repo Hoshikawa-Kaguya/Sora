@@ -28,7 +28,7 @@ public sealed class ClientStatusChangeEventArgs : BaseSoraEventArgs
 
     internal ClientStatusChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                          OnebotClientStatusEventArgs clientStatus) :
-        base(serviceId, connectionId, eventName, clientStatus.SelfID, clientStatus.Time, 
+        base(serviceId, connectionId, eventName, clientStatus.SelfID, clientStatus.Time,
              new EventSource
              {
                  UserId = clientStatus.UserId

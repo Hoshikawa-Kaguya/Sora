@@ -103,7 +103,8 @@ public sealed class ServerConfig : ISoraConfig
         {
             if (value.Any(uid => uid <= 0)) throw new ArgumentException("tiny_id cannot empty");
             _guildBlockUsers = value;
-        }}
+        }
+    }
 
     /// <summary>
     /// <para>心跳包超时设置(秒)</para>

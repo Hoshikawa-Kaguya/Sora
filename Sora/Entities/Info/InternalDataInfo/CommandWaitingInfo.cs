@@ -23,7 +23,8 @@ internal struct CommandWaitingInfo
     /// <summary>
     /// 构造方法
     /// </summary>
-    internal CommandWaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId, Guid serviceId,
+    internal CommandWaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId,
+                                Guid serviceId,
                                 EventSource source, RegexOptions regexOptions, SourceFlag sourceFlag)
     {
         Semaphore          = semaphore;

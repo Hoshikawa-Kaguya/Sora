@@ -51,7 +51,7 @@ public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
     /// <param name="groupRequestArgs">加群申请事件参数</param>
     internal AddGroupRequestEventArgs(Guid serviceId, Guid connectionId, string eventName,
                                       OnebotGroupRequestEventArgs groupRequestArgs) :
-        base(serviceId, connectionId, eventName, groupRequestArgs.SelfID, groupRequestArgs.Time, 
+        base(serviceId, connectionId, eventName, groupRequestArgs.SelfID, groupRequestArgs.Time,
              new EventSource
              {
                  GroupId = groupRequestArgs.GroupId,

@@ -61,8 +61,8 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
     {
         //将api消息段转换为sorasegment
         Messages = new Message(serviceId, connectionId, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
-                              privateMsgArgs.MessageList.ToMessageBody(),
-                              privateMsgArgs.Time, privateMsgArgs.Font, null);
+                               privateMsgArgs.MessageList.ToMessageBody(),
+                               privateMsgArgs.Time, privateMsgArgs.Font, null);
         Sender             = new User(serviceId, connectionId, privateMsgArgs.UserId);
         IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
 

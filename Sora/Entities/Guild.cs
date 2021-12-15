@@ -41,7 +41,7 @@ public class Guild : BaseModel
     /// <summary>
     /// 通过访客获取频道元数据
     /// </summary>
-    public async ValueTask<(ApiStatus apiStatus, GuildMetaInfo guildMetaInfo)> 
+    public async ValueTask<(ApiStatus apiStatus, GuildMetaInfo guildMetaInfo)>
         GetGuildMetaByGuest()
     {
         return await SoraApi.GetGuildMetaByGuest(GuildId);
@@ -50,7 +50,7 @@ public class Guild : BaseModel
     /// <summary>
     /// 获取子频道列表
     /// </summary>
-    public async ValueTask<(ApiStatus apiStatus, List<ChannelInfo> channelList)> 
+    public async ValueTask<(ApiStatus apiStatus, List<ChannelInfo> channelList)>
         GetGuildChannelList()
     {
         return await SoraApi.GetGuildChannelList(GuildId);

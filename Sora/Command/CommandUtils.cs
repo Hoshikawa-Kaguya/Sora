@@ -33,11 +33,11 @@ internal static class CommandUtils
                                                       !para.IsOut);
 
         var isGuildCommandLegality = method.IsDefined(typeof(GuildCommand), false) &&
-                                       method.GetParameters().Length == 1              &&
-                                       method.GetParameters()
-                                             .Any(para =>
-                                                      para.ParameterType == typeof(GuildMessageEventArgs) &&
-                                                      !para.IsOut);
+                                     method.GetParameters().Length == 1            &&
+                                     method.GetParameters()
+                                           .Any(para =>
+                                                    para.ParameterType == typeof(GuildMessageEventArgs) &&
+                                                    !para.IsOut);
 
         return isGroupCommandLegality || isPrivateCommandLegality || isGuildCommandLegality;
     }

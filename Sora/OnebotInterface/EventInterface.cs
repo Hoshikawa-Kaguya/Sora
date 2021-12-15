@@ -109,7 +109,7 @@ public class EventInterface
     /// <summary>
     /// 登录账号发送频道消息事件
     /// </summary>
-    public event EventAsyncCallBackHandler<GuildMessageEventArgs> OnSelfGuildMessage; 
+    public event EventAsyncCallBackHandler<GuildMessageEventArgs> OnSelfGuildMessage;
 
     /// <summary>
     /// 私聊事件
@@ -407,6 +407,7 @@ public class EventInterface
                     await OnSelfGuildMessage("GuildMessage", eventArgs);
                     break;
                 }
+
                 Log.Debug("Sora", GuildMessageLog(guildMsg));
                 if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager)
                     await CommandManager.CommandAdapter(eventArgs);
@@ -683,7 +684,7 @@ public class EventInterface
                 if (channelUpdate == null) break;
                 Log.Debug("Sora",
                           $"Get channel updated channel_id = {channelUpdate.ChannelId}");
-                if(OnChannelInfoUpdate == null) break;
+                if (OnChannelInfoUpdate == null) break;
                 await OnChannelInfoUpdate("Notice",
                                           new ChannelInfoUpdateEventArgs(ServiceId, connection, "essence",
                                                                          channelUpdate));
@@ -695,7 +696,7 @@ public class EventInterface
                 if (channelUpdate == null) break;
                 Log.Debug("Sora",
                           $"Get channel updated channel_id = {channelUpdate.ChannelId}");
-                if(OnChannelCreated == null) break;
+                if (OnChannelCreated == null) break;
                 await OnChannelCreated("Notice",
                                        new ChannelChangeEventArgs(ServiceId, connection, "essence",
                                                                   channelUpdate, ChannelChangeType.Create));
@@ -707,7 +708,7 @@ public class EventInterface
                 if (channelUpdate == null) break;
                 Log.Debug("Sora",
                           $"Get channel updated channel_id = {channelUpdate.ChannelId}");
-                if(OnChannelDestroyed == null) break;
+                if (OnChannelDestroyed == null) break;
                 await OnChannelDestroyed("Notice",
                                          new ChannelChangeEventArgs(ServiceId, connection, "essence",
                                                                     channelUpdate, ChannelChangeType.Destroyed));
@@ -793,7 +794,8 @@ public class EventInterface
 
     private static string GuildMessageLog(GocqGuildMessageEventArgs eventArgs)
     {
-        return $"Guild msg[{eventArgs.GuildId}(cid:{eventArgs.ChannelId})] <- User {eventArgs.SenderInfo.Nick}[{eventArgs.UserGuildId}]";
+        return
+            $"Guild msg[{eventArgs.GuildId}(cid:{eventArgs.ChannelId})] <- User {eventArgs.SenderInfo.Nick}[{eventArgs.UserGuildId}]";
     }
 
     #endregion

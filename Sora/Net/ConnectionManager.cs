@@ -264,6 +264,7 @@ public sealed class ConnectionManager : IDisposable
             userId = StaticVariable.ConnectionInfos[connectionGuid].SelfId;
             return true;
         }
+
         userId = default;
         return false;
     }
@@ -280,6 +281,7 @@ public sealed class ConnectionManager : IDisposable
             userGuildId = StaticVariable.ConnectionInfos[connectionGuid].SelfGuildId;
             return true;
         }
+
         userGuildId = default;
         return false;
     }

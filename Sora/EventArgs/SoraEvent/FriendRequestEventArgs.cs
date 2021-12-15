@@ -43,7 +43,7 @@ public sealed class FriendRequestEventArgs : BaseSoraEventArgs
         base(serviceId, connectionId, eventName, friendRequestArgs.SelfID, friendRequestArgs.Time,
              new EventSource
              {
-                 UserId  = friendRequestArgs.UserId
+                 UserId = friendRequestArgs.UserId
              })
     {
         Sender      = new User(serviceId, connectionId, friendRequestArgs.UserId);

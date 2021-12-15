@@ -39,7 +39,7 @@ public sealed class ConnectEventArgs : BaseSoraEventArgs
         base(serviceId, connectionId, eventName, loginUid, time,
              new EventSource
              {
-                 UserId  = loginUid
+                 UserId = loginUid
              })
     {
         ClientType        = clientType;

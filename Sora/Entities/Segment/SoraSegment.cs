@@ -69,7 +69,7 @@ public readonly struct SoraSegment
 
     internal OnebotSegment ToOnebotMessage()
     {
-        return new()
+        return new OnebotSegment
         {
             MsgType = MessageType,
             RawData = JObject.FromObject(Data)
@@ -191,7 +191,7 @@ public readonly struct SoraSegment
     /// </summary>
     public static implicit operator SoraSegment(string text)
     {
-        return SoraSegment.Text(text);
+        return Text(text);
     }
 
     #endregion

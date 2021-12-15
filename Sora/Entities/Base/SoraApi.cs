@@ -74,7 +74,7 @@ public sealed class SoraApi
     public async ValueTask<(ApiStatus apiStatus, string messageId)> SendPrivateMessage(
         long userId, MessageBody message, TimeSpan? timeout = null)
     {
-        if (userId        < MinUserId) throw new ArgumentOutOfRangeException(nameof(userId));
+        if (userId < MinUserId) throw new ArgumentOutOfRangeException(nameof(userId));
         if (message is null || message.Count == 0) throw new NullReferenceException(nameof(message));
         return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message, null, timeout);
     }
@@ -93,8 +93,8 @@ public sealed class SoraApi
     public async ValueTask<(ApiStatus apiStatus, string messageId)> SendTemporaryMessage(
         long userId, long groupId, MessageBody message, TimeSpan? timeout = null)
     {
-        if (userId        < MinUserId) throw new ArgumentOutOfRangeException(nameof(userId));
-        if (groupId       < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
+        if (userId  < MinUserId) throw new ArgumentOutOfRangeException(nameof(userId));
+        if (groupId < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
         if (message is null || message.Count == 0) throw new NullReferenceException(nameof(message));
         return await ApiInterface.SendPrivateMessage(ConnectionId, userId, message, groupId, timeout);
     }
@@ -112,7 +112,7 @@ public sealed class SoraApi
     public async ValueTask<(ApiStatus apiStatus, string messageId)> SendGroupMessage(
         long groupId, MessageBody message, TimeSpan? timeout = null)
     {
-        if (groupId              < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
+        if (groupId < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
         if (message is null || message.Count == 0) throw new NullReferenceException(nameof(message));
         return await ApiInterface.SendGroupMessage(ConnectionId, groupId, message, timeout);
     }
@@ -684,7 +684,7 @@ public sealed class SoraApi
     /// 通过访客获取频道元数据
     /// </summary>
     /// <param name="guildId">频道ID</param>
-    public async ValueTask<(ApiStatus apiStatus, GuildMetaInfo guildMetaInfo)> 
+    public async ValueTask<(ApiStatus apiStatus, GuildMetaInfo guildMetaInfo)>
         GetGuildMetaByGuest(ulong guildId)
     {
         return await ApiInterface.GetGuildMetaByGuest(ConnectionId, guildId);
@@ -695,7 +695,7 @@ public sealed class SoraApi
     /// </summary>
     /// <param name="guildId">频道ID</param>
     /// <param name="useCache">是否使用缓存</param>
-    public async ValueTask<(ApiStatus apiStatus, List<ChannelInfo> channelList)> 
+    public async ValueTask<(ApiStatus apiStatus, List<ChannelInfo> channelList)>
         GetGuildChannelList(ulong guildId, bool useCache = true)
     {
         return await ApiInterface.GetGuildChannelList(ConnectionId, guildId);

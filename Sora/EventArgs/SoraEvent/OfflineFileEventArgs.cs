@@ -38,7 +38,7 @@ public sealed class OfflineFileEventArgs : BaseSoraEventArgs
         base(serviceId, connectionId, eventName, offlineFileArgs.SelfID, offlineFileArgs.Time,
              new EventSource
              {
-                 UserId  = offlineFileArgs.UserId
+                 UserId = offlineFileArgs.UserId
              })
     {
         Sender          = new User(serviceId, connectionId, offlineFileArgs.UserId);
