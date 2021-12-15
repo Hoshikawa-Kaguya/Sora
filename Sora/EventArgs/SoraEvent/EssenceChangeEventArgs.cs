@@ -8,7 +8,7 @@ namespace Sora.EventArgs.SoraEvent;
 /// <summary>
 /// 精华消息变动事件参数
 /// </summary>
-public class EssenceChangeEventArgs : BaseSoraEventArgs
+public sealed class EssenceChangeEventArgs : BaseSoraEventArgs
 {
     #region 属性
 

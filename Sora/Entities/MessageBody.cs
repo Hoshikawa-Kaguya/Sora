@@ -16,7 +16,7 @@ namespace Sora.Entities;
 /// <summary>
 /// 消息段
 /// </summary>
-public class MessageBody : IList<SoraSegment>
+public sealed class MessageBody : IList<SoraSegment>
 {
     #region 私有字段
 
