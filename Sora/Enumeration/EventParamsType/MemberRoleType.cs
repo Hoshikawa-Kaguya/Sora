@@ -11,25 +11,25 @@ public enum MemberRoleType
     /// <summary>
     /// 未知
     /// </summary>
-    [Description("")] 
+    [Description("")]
     Unknown = 0,
 
     /// <summary>
     /// 成员
     /// </summary>
-    [Description("member")] 
+    [Description("member")]
     Member = 1,
 
     /// <summary>
     /// 管理员
     /// </summary>
-    [Description("admin")] 
+    [Description("admin")]
     Admin = 2,
 
     /// <summary>
     /// 群主
     /// </summary>
-    [Description("owner")] 
+    [Description("owner")]
     Owner = 3,
 
     /// <summary>

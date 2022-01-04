@@ -115,8 +115,8 @@ public static class Helper
     /// <returns>实例</returns>
     public static object CreateInstance(this Type type)
     {
-        var constructor = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
-                              .FirstOrDefault(con => con.GetParameters().Length == 0);
+        ConstructorInfo constructor = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+                                          .FirstOrDefault(con => con.GetParameters().Length == 0);
 
 
         return constructor?.Invoke(null) ?? FormatterServices.GetUninitializedObject(type);

@@ -69,17 +69,17 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="socket">连接信息</param>
     /// <param name="apiTimeout">api超时</param>
     private static bool AddConnection(Guid serviceId, Guid connectionId, ISoraSocket socket,
-                                      TimeSpan apiTimeout)
+        TimeSpan                           apiTimeout)
     {
         //检查是否已存在值
         if (StaticVariable.ConnectionInfos.ContainsKey(connectionId)) return false;
         //selfId均在第一次链接开启时留空，并在meta事件触发后更新
         return StaticVariable.ConnectionInfos.TryAdd(connectionId, new SoraConnectionInfo
-                                                         (serviceId, connectionId,
-                                                          socket,
-                                                          DateTime.Now,
-                                                          apiTimeout
-                                                         ));
+        (serviceId,
+            socket,
+            DateTime.Now,
+            apiTimeout
+        ));
     }
 
     /// <summary>
@@ -143,18 +143,18 @@ public sealed class ConnectionManager : IDisposable
         Log.Debug("HeartBeatCheck", $"service id={serviceId}");
 
         //查找超时连接
-        var timeoutDict =
+        Dictionary<Guid, SoraConnectionInfo> timeoutDict =
             StaticVariable.ConnectionInfos
                           .Where(conn => conn.Value.ServiceId                        == serviceId &&
                                          DateTime.Now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
                           .ToDictionary(conn => conn.Key,
-                                        conn => conn.Value);
+                               conn => conn.Value);
         if (timeoutDict.Count == 0) return;
         Log.Warning("HeartBeatCheck", $"timeout connection count {timeoutDict.Count}");
 
         var needReconnect = new List<WebsocketClient>();
         //遍历超时的连接
-        foreach (var (connection, info) in timeoutDict)
+        foreach ((Guid connection, SoraConnectionInfo info) in timeoutDict)
         {
             CloseConnection("Universal", info.SelfId, connection);
             Log.Error("HeartBeatCheck", $"Socket:[{connection}]connection time out，disconnect");
@@ -174,8 +174,8 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="connectionGuid">连接标识</param>
     internal static void HeartBeatUpdate(Guid connectionGuid)
     {
-        var oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
-        var newInfo = oldInfo;
+        SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
+        SoraConnectionInfo newInfo = oldInfo;
         newInfo.LastHeartBeatTime = DateTime.Now;
         StaticVariable.ConnectionInfos.TryUpdate(connectionGuid, newInfo, oldInfo);
     }
@@ -194,7 +194,7 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="connId">连接ID</param>
     /// <param name="apiTimeout">api超时</param>
     internal void OpenConnection(string role, string selfId, ISoraSocket socket, Guid serviceId, Guid connId,
-                                 TimeSpan apiTimeout)
+        TimeSpan                        apiTimeout)
     {
         //添加服务器记录
         if (!AddConnection(serviceId, connId, socket, apiTimeout))
@@ -206,7 +206,7 @@ public sealed class ConnectionManager : IDisposable
         }
 
         if (OnOpenConnectionAsync == null) return;
-        if (!long.TryParse(selfId, out var uid)) Log.Error("ConnectionManager", "非法selfid，已忽略");
+        if (!long.TryParse(selfId, out long uid)) Log.Error("ConnectionManager", "非法selfid，已忽略");
         Task.Run(async () => { await OnOpenConnectionAsync(connId, new ConnectionEventArgs(role, uid)); });
     }
 
@@ -239,8 +239,8 @@ public sealed class ConnectionManager : IDisposable
 
     internal static void UpdateUid(Guid connectionGuid, long uid)
     {
-        var oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
-        var newInfo = oldInfo;
+        SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
+        SoraConnectionInfo newInfo = oldInfo;
         newInfo.SelfId = uid;
         StaticVariable.ConnectionInfos.TryUpdate(connectionGuid, newInfo, oldInfo);
     }

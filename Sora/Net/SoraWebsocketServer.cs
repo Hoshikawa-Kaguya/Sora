@@ -77,8 +77,8 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         }
 
         //写入初始化信息
-        if (!StaticVariable.ServiceInfos.TryAdd(_serverId, new ServiceInfo(_serverId, config)))
-            throw new DataException("try add service info failed");
+        if (!StaticVariable.ServiceConfigs.TryAdd(_serverId, new ServiceConfig(config)))
+            throw new DataException("try add service config failed");
         _serverReady = false;
         Log.Info("Sora", $"Sora WebSocket服务器初始化... [{_serverId}]");
         //检查参数
@@ -99,12 +99,12 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         };
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
-                                                      {
-                                                          if (crashAction == null)
-                                                              Helper.FriendlyException(args);
-                                                          else
-                                                              crashAction(args.ExceptionObject as Exception);
-                                                      };
+        {
+            if (crashAction == null)
+                Helper.FriendlyException(args);
+            else
+                crashAction(args.ExceptionObject as Exception);
+        };
         _serverReady = true;
     }
 
@@ -129,59 +129,59 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     {
         //接收事件处理
         //获取请求头数据
-        if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID", out var selfId) || //bot UID
-            !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role", out var role)) //Client Type
+        if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID", out string selfId) || //bot UID
+            !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role", out string role)) //Client Type
             return;
 
         //请求路径检查
-        var isLost = role switch
+        bool isLost = role switch
         {
             "Universal" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath.Trim('/')),
-            _ => true
+            _           => true
         };
         if (isLost)
         {
             socket.Close();
             Log.Warning("Sora",
-                        $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
+                $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
             return;
         }
 
         //打开连接
         socket.OnOpen = () =>
-                        {
-                            //获取Token
-                            if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",
-                                                                          out var headerValue))
-                            {
-                                var token = headerValue.Split(' ')[1];
-                                Log.Debug("Server", $"get token = {token}");
-                                //验证Token
-                                if (!token.Equals(Config.AccessToken)) return;
-                            }
+        {
+            //获取Token
+            if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",
+                    out string headerValue))
+            {
+                string token = headerValue.Split(' ')[1];
+                Log.Debug("Server", $"get token = {token}");
+                //验证Token
+                if (!token.Equals(Config.AccessToken)) return;
+            }
 
-                            //向客户端发送Ping
-                            socket.SendPing(new byte[] {1, 2, 5});
-                            //事件回调
-                            ConnManager.OpenConnection(role, selfId, new ServerSocket(socket), _serverId,
-                                                       socket.ConnectionInfo.Id, Config.ApiTimeOut);
-                            Log.Info("Sora",
-                                     $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
-                        };
+            //向客户端发送Ping
+            socket.SendPing(new byte[] {1, 2, 5});
+            //事件回调
+            ConnManager.OpenConnection(role, selfId, new ServerSocket(socket), _serverId,
+                socket.ConnectionInfo.Id, Config.ApiTimeOut);
+            Log.Info("Sora",
+                $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
+        };
         //关闭连接
         socket.OnClose = () =>
-                         {
-                             //移除原连接信息
-                             if (ConnectionManager.ConnectionExists(socket.ConnectionInfo.Id))
-                                 ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
-                                                             socket.ConnectionInfo.Id);
+        {
+            //移除原连接信息
+            if (ConnectionManager.ConnectionExists(socket.ConnectionInfo.Id))
+                ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
+                    socket.ConnectionInfo.Id);
 
-                             Log.Info("Sora",
-                                      $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
-                         };
+            Log.Info("Sora",
+                $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
+        };
         //上报接收
         socket.OnMessage = message =>
-                               Task.Run(() => Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id));
+            Task.Run(() => Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id));
     }
 
     /// <summary>
@@ -197,7 +197,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     /// </summary>
     public void Dispose()
     {
-        StaticVariable.CleanServiceInfo(_serverId);
+        StaticVariable.DisposeService(_serverId);
         Server.Dispose();
         ConnManager.Dispose();
         GC.SuppressFinalize(this);

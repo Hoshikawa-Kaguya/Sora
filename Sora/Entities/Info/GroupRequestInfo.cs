@@ -12,13 +12,13 @@ public readonly struct GroupRequestInfo
     /// 请求ID
     /// </summary>
     [JsonProperty(PropertyName = "request_id")]
-    public long ID { get; internal init; }
+    public long Id { get; internal init; }
 
     /// <summary>
     /// 请求源UID
     /// </summary>
     [JsonProperty(PropertyName = "invitor_uin")]
-    public long UserID { get; internal init; }
+    public long UserId { get; internal init; }
 
     /// <summary>
     /// 请求源用户名

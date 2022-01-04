@@ -11,7 +11,7 @@ public enum ApiStatusType
     /// <summary>
     /// API执行成功
     /// </summary>
-    OK = 0,
+    Ok = 0,
 
     /// <summary>
     /// API执行失败

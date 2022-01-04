@@ -52,7 +52,7 @@ public readonly struct GroupInfo
     /// 群创建时间
     /// </summary>
     [JsonProperty(PropertyName = "group_create_time", NullValueHandling = NullValueHandling.Ignore,
-                  DefaultValueHandling = DefaultValueHandling.Ignore)]
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
     private long? GroupCreateTimeStamp
     {
         get => (GroupCreateTime ?? DateTime.MinValue).ToTimeStamp();

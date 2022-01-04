@@ -23,8 +23,8 @@ internal struct WaitingInfo
     /// <summary>
     /// 构造方法
     /// </summary>
-    internal WaitingInfo(AutoResetEvent semaphore, string[] commandExpressions, Guid connectionId, Guid serviceId,
-                         (long u, long g) source, RegexOptions regexOptions, SourceFlag sourceFlag)
+    internal WaitingInfo(AutoResetEvent semaphore, string[]     commandExpressions, Guid connectionId, Guid serviceId,
+        (long u, long g)                source,    RegexOptions regexOptions,       SourceFlag sourceFlag)
     {
         Semaphore          = semaphore;
         CommandExpressions = commandExpressions;

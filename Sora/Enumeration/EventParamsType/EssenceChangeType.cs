@@ -11,7 +11,7 @@ public enum EssenceChangeType
     /// <summary>
     /// 未知，在转换错误时为此值
     /// </summary>
-    [Description("")] 
+    [Description("")]
     Unknown,
 
     /// <summary>

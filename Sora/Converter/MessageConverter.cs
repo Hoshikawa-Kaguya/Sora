@@ -29,21 +29,21 @@ internal static class MessageConverter
         if (onebotSegment.RawData == null) return new SoraSegment(SegmentType.Unknown, null);
         try
         {
-            var jsonObj = JObject.FromObject(onebotSegment.RawData);
+            JObject jsonObj = JObject.FromObject(onebotSegment.RawData);
             if (jsonObj.Count == 0) return new SoraSegment(SegmentType.Unknown, null);
             return onebotSegment.MsgType switch
             {
-                SegmentType.Text => new SoraSegment(SegmentType.Text, jsonObj.ToObject<TextSegment>()),
-                SegmentType.Face => new SoraSegment(SegmentType.Face, jsonObj.ToObject<FaceSegment>()),
-                SegmentType.Image => new SoraSegment(SegmentType.Image, jsonObj.ToObject<ImageSegment>()),
-                SegmentType.Record => new SoraSegment(SegmentType.Record, jsonObj.ToObject<RecordSegment>()),
-                SegmentType.At => new SoraSegment(SegmentType.At, jsonObj.ToObject<AtSegment>()),
-                SegmentType.Share => new SoraSegment(SegmentType.Share, jsonObj.ToObject<ShareSegment>()),
-                SegmentType.Reply => new SoraSegment(SegmentType.Reply, jsonObj.ToObject<ReplySegment>()),
+                SegmentType.Text    => new SoraSegment(SegmentType.Text, jsonObj.ToObject<TextSegment>()),
+                SegmentType.Face    => new SoraSegment(SegmentType.Face, jsonObj.ToObject<FaceSegment>()),
+                SegmentType.Image   => new SoraSegment(SegmentType.Image, jsonObj.ToObject<ImageSegment>()),
+                SegmentType.Record  => new SoraSegment(SegmentType.Record, jsonObj.ToObject<RecordSegment>()),
+                SegmentType.At      => new SoraSegment(SegmentType.At, jsonObj.ToObject<AtSegment>()),
+                SegmentType.Share   => new SoraSegment(SegmentType.Share, jsonObj.ToObject<ShareSegment>()),
+                SegmentType.Reply   => new SoraSegment(SegmentType.Reply, jsonObj.ToObject<ReplySegment>()),
                 SegmentType.Forward => new SoraSegment(SegmentType.Forward, jsonObj.ToObject<ForwardSegment>()),
-                SegmentType.Xml => new SoraSegment(SegmentType.Xml, jsonObj.ToObject<CodeSegment>()),
-                SegmentType.Json => new SoraSegment(SegmentType.Json, jsonObj.ToObject<CodeSegment>()),
-                _ => new SoraSegment(SegmentType.Unknown, new UnknownSegment {Content = jsonObj})
+                SegmentType.Xml     => new SoraSegment(SegmentType.Xml, jsonObj.ToObject<CodeSegment>()),
+                SegmentType.Json    => new SoraSegment(SegmentType.Json, jsonObj.ToObject<CodeSegment>()),
+                _                   => new SoraSegment(SegmentType.Unknown, new UnknownSegment {Content = jsonObj})
             };
         }
         catch (Exception e)
@@ -63,7 +63,7 @@ internal static class MessageConverter
     {
         Log.Debug("Sora", "Parsing msg list");
         if (messages == null || messages.Count == 0) return new MessageBody();
-        var retMsg = messages.Select(ParseMessageElement).ToList();
+        List<SoraSegment> retMsg = messages.Select(ParseMessageElement).ToList();
 
         Log.Debug("Sora", $"Get msg len={retMsg.Count}");
         return new MessageBody(retMsg);

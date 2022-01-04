@@ -4,8 +4,12 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Command;
 using Sora.Entities.Base;
+using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
 using Sora.Util;
+
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Local
 
 namespace Sora.EventArgs.SoraEvent;
 
@@ -39,7 +43,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 事件产生时间戳
     /// </summary>
-    private long TimeStamp { get; set; }
+    internal long TimeStamp { get; set; }
 
     /// <summary>
     /// <para>是否在处理本次事件后再次触发其他事件，默认为触发</para>
@@ -47,11 +51,6 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <para>如果出现了不同表达式同时被触发且优先级相同的情况，则这几个指令的执行顺序将是不确定的，请避免这种情况的发生</para>
     /// </summary>
     public bool IsContinueEventChain { get; set; }
-
-    /// <summary>
-    /// 连续对话的ID
-    /// </summary>
-    private Guid SessionId { get; set; }
 
     #endregion
 
@@ -73,7 +72,6 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         TimeStamp            = time;
         Time                 = time.ToDateTime();
         IsContinueEventChain = true;
-        SessionId            = Guid.Empty;
     }
 
     #endregion
@@ -83,28 +81,28 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 等待下一条消息触发
     /// </summary>
-    internal object WaitForNextMessage(long sourceUid, string[] commandExps, MatchType matchType,
-                                       SourceFlag sourceFlag, RegexOptions regexOptions,
-                                       TimeSpan? timeout, Func<ValueTask> timeoutTask, long sourceGroup = 0)
+    internal object WaitForNextMessage(long sourceUid,  string[]        commandExps, MatchType matchType,
+        SourceFlag                          sourceFlag, RegexOptions    regexOptions,
+        TimeSpan?                           timeout,    Func<ValueTask> timeoutTask, long sourceGroup = 0)
     {
         //生成指令上下文
-        var waitInfo =
+        WaitingInfo waitInfo =
             CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, sourceFlag,
-                                                 regexOptions, SoraApi.ConnectionId, SoraApi.ServiceId);
+                regexOptions, SoraApi.ConnectionId, SoraApi.ServiceId);
         //检查是否为初始指令重复触发
         if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
             return null;
         //连续指令不再触发后续事件
         IsContinueEventChain = false;
         var sessionId = Guid.NewGuid();
-        SessionId = sessionId;
         //添加上下文并等待信号量
         StaticVariable.WaitingDict.TryAdd(sessionId, waitInfo);
-        var receiveSignal = //是否正常接受到触发信号
+        //是否正常接受到触发信号
+        bool receiveSignal = 
             //等待信号量
             StaticVariable.WaitingDict[sessionId].Semaphore.WaitOne(timeout ?? TimeSpan.FromMilliseconds(-1));
         //取出匹配指令的事件参数并删除上一次的上下文
-        var retEventArgs = receiveSignal ? StaticVariable.WaitingDict[sessionId].EventArgs : null;
+        object retEventArgs = receiveSignal ? StaticVariable.WaitingDict[sessionId].EventArgs : null;
         StaticVariable.WaitingDict.TryRemove(sessionId, out _);
         //在超时时执行超时任务
         if (!receiveSignal && timeoutTask != null) Task.Run(timeoutTask.Invoke);

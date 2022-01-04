@@ -43,8 +43,8 @@ public sealed class GroupCardUpdateEventArgs : BaseSoraEventArgs
     /// <param name="eventName">事件名</param>
     /// <param name="groupCardUpdateArgs">群名片更新事件参数</param>
     internal GroupCardUpdateEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                      OnebotGroupCardUpdateEventArgs groupCardUpdateArgs) :
-        base(serviceId, connectionId, eventName, groupCardUpdateArgs.SelfID, groupCardUpdateArgs.Time)
+        OnebotGroupCardUpdateEventArgs     groupCardUpdateArgs) :
+        base(serviceId, connectionId, eventName, groupCardUpdateArgs.SelfId, groupCardUpdateArgs.Time)
     {
         User        = new User(serviceId, connectionId, groupCardUpdateArgs.UserId);
         SourceGroup = new Group(serviceId, connectionId, groupCardUpdateArgs.GroupId);

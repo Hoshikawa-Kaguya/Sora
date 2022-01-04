@@ -50,7 +50,7 @@ public sealed class Group : BaseModel
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(MessageBody message,
-        TimeSpan? timeout = null)
+        TimeSpan?                                                                             timeout = null)
     {
         return await SoraApi.SendGroupMessage(Id, message, timeout);
     }
@@ -211,10 +211,10 @@ public sealed class Group : BaseModel
     /// <param name="folderId">父目录ID</param>
     /// <returns>API状态</returns>
     public async ValueTask<ApiStatus> UploadGroupFile(string localFilePath, string fileName,
-                                                      string folderId = null)
+        string                                               folderId = null)
     {
         return await SoraApi.UploadGroupFile(Id, localFilePath,
-                                             fileName, folderId);
+            fileName, folderId);
     }
 
     #endregion

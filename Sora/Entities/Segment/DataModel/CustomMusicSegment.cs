@@ -11,7 +11,8 @@ public sealed record CustomMusicSegment : BaseSegment
     {
     }
 
-    [JsonProperty(PropertyName = "type")] internal string ShareType;
+    [JsonProperty(PropertyName = "type")]
+    internal string ShareType;
 
     /// <summary>
     /// 跳转URL

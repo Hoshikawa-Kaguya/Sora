@@ -64,18 +64,21 @@ public class CommandManager
         if (assembly == null) return;
 
         //查找所有的指令集
-        var cmdGroups = assembly.GetExportedTypes()
-                                //获取指令组
-                                .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
-                                .Select(type => (type, type.GetMethods()
-                                                           .Where(method => method.CheckMethodLegality())
-                                                           .ToArray()))
-                                .ToDictionary(methods => methods.type, methods => methods.Item2.ToArray());
+        Dictionary<Type, MethodInfo[]> cmdGroups = assembly.GetExportedTypes()
+                                                            //获取指令组
+                                                           .Where(type =>
+                                                                type.IsDefined(typeof(CommandGroup), false) &&
+                                                                type.IsClass)
+                                                           .Select(type => (type, type.GetMethods()
+                                                               .Where(method => method.CheckMethodLegality())
+                                                               .ToArray()))
+                                                           .ToDictionary(methods => methods.type,
+                                                                methods => methods.Item2.ToArray());
 
         //生成指令信息
-        foreach (var (classType, methodInfos) in cmdGroups)
-        foreach (var methodInfo in methodInfos)
-            switch (GenerateCommandInfo(methodInfo, classType, out var commandInfo))
+        foreach ((Type classType, MethodInfo[] methodInfos) in cmdGroups)
+        foreach (MethodInfo methodInfo in methodInfos)
+            switch (GenerateCommandInfo(methodInfo, classType, out CommandInfo commandInfo))
             {
                 case GroupCommand:
                     if (_groupCommands.AddOrExist(commandInfo))
@@ -112,17 +115,17 @@ public class CommandManager
     /// <exception cref="NullReferenceException">空参数异常</exception>
     /// <exception cref="NotSupportedException">在遇到不支持的参数类型时抛出</exception>
     [NeedReview("ALL")]
-    public void RegisterGroupCommand(string[] cmdExps,
-                                     Func<GroupMessageEventArgs, ValueTask> commandBlock,
-                                     MatchType matchType,
-                                     MemberRoleType permissionType = MemberRoleType.Member,
-                                     RegexOptions regexOptions = RegexOptions.None,
-                                     Action<Exception> exceptionHandler = null,
-                                     string desc = "")
+    public void RegisterGroupCommand(string[]  cmdExps,
+        Func<GroupMessageEventArgs, ValueTask> commandBlock,
+        MatchType                              matchType,
+        MemberRoleType                         permissionType   = MemberRoleType.Member,
+        RegexOptions                           regexOptions     = RegexOptions.None,
+        Action<Exception>                      exceptionHandler = null,
+        string                                 desc             = "")
     {
         //生成指令信息
         if (_groupCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
-                                                            permissionType, exceptionHandler)))
+                permissionType, exceptionHandler)))
             Log.Debug("Command", "Registered group command [dynamic]");
         else
             throw new NotSupportedException("cannot add new group command");
@@ -144,17 +147,17 @@ public class CommandManager
     /// <exception cref="NullReferenceException">空参数异常</exception>
     /// <exception cref="NotSupportedException">在遇到不支持的参数类型时抛出</exception>
     [NeedReview("ALL")]
-    public void RegisterPrivateCommand(string[] cmdExps,
-                                       Func<PrivateMessageEventArgs, ValueTask> commandBlock,
-                                       MatchType matchType,
-                                       MemberRoleType permissionType = MemberRoleType.Member,
-                                       RegexOptions regexOptions = RegexOptions.None,
-                                       Action<Exception> exceptionHandler = null,
-                                       string desc = "")
+    public void RegisterPrivateCommand(string[]  cmdExps,
+        Func<PrivateMessageEventArgs, ValueTask> commandBlock,
+        MatchType                                matchType,
+        MemberRoleType                           permissionType   = MemberRoleType.Member,
+        RegexOptions                             regexOptions     = RegexOptions.None,
+        Action<Exception>                        exceptionHandler = null,
+        string                                   desc             = "")
     {
         //生成指令信息
         if (_privateCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
-                                                              permissionType, exceptionHandler)))
+                permissionType, exceptionHandler)))
             Log.Debug("Command", "Registered private command [dynamic]");
         else
             throw new NotSupportedException("cannot add new group command");
@@ -182,23 +185,23 @@ public class CommandManager
                 //注意可能匹配到多个的情况，下同
                 waitingCommand = StaticVariable.WaitingDict
                                                .Where(command =>
-                                                          //判断发起源
-                                                          command.Value.SourceFlag == SourceFlag.Group
-                                                          //判断来自同一个连接
-                                                       && command.Value.ConnectionId ==
-                                                          groupMessageEvent.SoraApi.ConnectionId
-                                                          //判断来着同一个群
-                                                       && command.Value.Source.g == groupMessageEvent.SourceGroup
-                                                          //判断来自同一人
-                                                       && command.Value.Source.u == groupMessageEvent.Sender
-                                                          //匹配
-                                                       && command.Value.CommandExpressions.Any(regex =>
-                                                              Regex
-                                                                  .IsMatch(groupMessageEvent.Message.RawText,
-                                                                           regex,
-                                                                           RegexOptions.Compiled |
-                                                                           command.Value
-                                                                               .RegexOptions)))
+                                                    //判断发起源
+                                                    command.Value.SourceFlag == SourceFlag.Group
+                                                    //判断来自同一个连接
+                                                 && command.Value.ConnectionId ==
+                                                    groupMessageEvent.SoraApi.ConnectionId
+                                                    //判断来着同一个群
+                                                 && command.Value.Source.g == groupMessageEvent.SourceGroup
+                                                    //判断来自同一人
+                                                 && command.Value.Source.u == groupMessageEvent.Sender
+                                                    //匹配
+                                                 && command.Value.CommandExpressions.Any(regex =>
+                                                        Regex
+                                                           .IsMatch(groupMessageEvent.Message.RawText,
+                                                                regex,
+                                                                RegexOptions.Compiled |
+                                                                command.Value
+                                                                       .RegexOptions)))
                                                .ToDictionary(i => i.Key, i => i.Value);
                 break;
             }
@@ -206,21 +209,21 @@ public class CommandManager
             {
                 waitingCommand = StaticVariable.WaitingDict
                                                .Where(command =>
-                                                          //判断发起源
-                                                          command.Value.SourceFlag == SourceFlag.Private
-                                                          //判断来自同一个连接
-                                                       && command.Value.ConnectionId ==
-                                                          privateMessageEvent.SoraApi.ConnectionId
-                                                          //判断来自同一人
-                                                       && command.Value.Source.u == privateMessageEvent.Sender
-                                                          //匹配指令
-                                                       && command.Value.CommandExpressions.Any(regex =>
-                                                              Regex
-                                                                  .IsMatch(privateMessageEvent.Message.RawText,
-                                                                           regex,
-                                                                           RegexOptions.Compiled |
-                                                                           command.Value
-                                                                               .RegexOptions)))
+                                                    //判断发起源
+                                                    command.Value.SourceFlag == SourceFlag.Private
+                                                    //判断来自同一个连接
+                                                 && command.Value.ConnectionId ==
+                                                    privateMessageEvent.SoraApi.ConnectionId
+                                                    //判断来自同一人
+                                                 && command.Value.Source.u == privateMessageEvent.Sender
+                                                    //匹配指令
+                                                 && command.Value.CommandExpressions.Any(regex =>
+                                                        Regex
+                                                           .IsMatch(privateMessageEvent.Message.RawText,
+                                                                regex,
+                                                                RegexOptions.Compiled |
+                                                                command.Value
+                                                                       .RegexOptions)))
                                                .ToDictionary(i => i.Key, i => i.Value);
                 break;
             }
@@ -229,11 +232,11 @@ public class CommandManager
                 return;
         }
 
-        foreach (var (key, _) in waitingCommand)
+        foreach ((Guid key, WaitingInfo _) in waitingCommand)
         {
             //更新等待列表，设置为当前的eventArgs
-            var oldInfo = StaticVariable.WaitingDict[key];
-            var newInfo = oldInfo;
+            WaitingInfo oldInfo = StaticVariable.WaitingDict[key];
+            WaitingInfo newInfo = oldInfo;
             newInfo.EventArgs = eventArgs;
             StaticVariable.WaitingDict.TryUpdate(key, newInfo, oldInfo);
             StaticVariable.WaitingDict[key].Semaphore.Set();
@@ -261,11 +264,11 @@ public class CommandManager
                 //注意可能匹配到多个的情况，下同
                 matchedCommand =
                     _groupCommands.Where(command => command.Regex.Any(regex =>
-                                                                          Regex
-                                                                              .IsMatch(groupMessageEvent.Message.RawText,
-                                                                                  regex,
-                                                                                  RegexOptions.Compiled |
-                                                                                  command.RegexOptions)))
+                                       Regex
+                                          .IsMatch(groupMessageEvent.Message.RawText,
+                                               regex,
+                                               RegexOptions.Compiled |
+                                               command.RegexOptions)))
                                   .OrderByDescending(p => p.Priority)
                                   .ToList();
                 break;
@@ -274,11 +277,11 @@ public class CommandManager
             {
                 matchedCommand =
                     _privateCommands.Where(command => command.Regex.Any(regex =>
-                                                                            Regex
-                                                                                .IsMatch(privateMessageEvent.Message.RawText,
-                                                                                    regex,
-                                                                                    RegexOptions.Compiled |
-                                                                                    command.RegexOptions)))
+                                         Regex
+                                            .IsMatch(privateMessageEvent.Message.RawText,
+                                                 regex,
+                                                 RegexOptions.Compiled |
+                                                 command.RegexOptions)))
                                     .OrderByDescending(p => p.Priority)
                                     .ToList();
 
@@ -332,29 +335,29 @@ public class CommandManager
     /// <param name="serviceId">服务标识</param>
     /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
     internal static WaitingInfo GenWaitingCommandInfo(
-        long sourceUid, long sourceGroup, string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
-        RegexOptions regexOptions, Guid connectionId, Guid serviceId)
+        long         sourceUid,    long sourceGroup,  string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
+        RegexOptions regexOptions, Guid connectionId, Guid     serviceId)
     {
         if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
-        var matchExp = matchType switch
+        string[] matchExp = matchType switch
         {
             MatchType.Full => cmdExps
-                              .Select(command => $"^{command}$")
-                              .ToArray(),
+                             .Select(command => $"^{command}$")
+                             .ToArray(),
             MatchType.Regex => cmdExps,
             MatchType.KeyWord => cmdExps
-                                 .Select(command => $"[{command}]+")
-                                 .ToArray(),
+                                .Select(command => $"[{command}]+")
+                                .ToArray(),
             _ => throw new NotSupportedException("unknown matchtype")
         };
 
         return new WaitingInfo(new AutoResetEvent(false),
-                               matchExp,
-                               serviceId: serviceId,
-                               connectionId: connectionId,
-                               source: (sourceUid, sourceGroup),
-                               sourceFlag: sourceFlag,
-                               regexOptions: regexOptions);
+            matchExp,
+            serviceId: serviceId,
+            connectionId: connectionId,
+            source: (sourceUid, sourceGroup),
+            sourceFlag: sourceFlag,
+            regexOptions: regexOptions);
     }
 
     /// <summary>
@@ -366,7 +369,7 @@ public class CommandManager
     private Attribute GenerateCommandInfo(MethodInfo method, Type classType, out CommandInfo commandInfo)
     {
         //获取指令属性
-        var commandAttr =
+        Attribute commandAttr =
             method.GetCustomAttribute(typeof(GroupCommand)) ??
             method.GetCustomAttribute(typeof(PrivateCommand)) ??
             throw new NullReferenceException("command attribute is null with unknown reason");
@@ -374,9 +377,9 @@ public class CommandManager
         Log.Debug("Command", $"Registering command [{method.Name}]");
 
         //处理指令匹配类型
-        var match = (commandAttr as RegexCommand)?.MatchType ?? MatchType.Full;
+        MatchType match = (commandAttr as RegexCommand)?.MatchType ?? MatchType.Full;
         //处理表达式
-        var matchExp = ParseCommandExps((commandAttr as RegexCommand)?.CommandExpressions, match);
+        string[] matchExp = ParseCommandExps((commandAttr as RegexCommand)?.CommandExpressions, match);
         //若无匹配表达式，则创建一个空白的命令信息
         if (matchExp == null)
         {
@@ -394,15 +397,15 @@ public class CommandManager
 
         //创建指令信息
         commandInfo = new CommandInfo((commandAttr as RegexCommand)?.Description,
-                                      matchExp,
-                                      classType.Name,
-                                      method,
-                                      (commandAttr as GroupCommand)?.PermissionLevel ?? MemberRoleType.Member,
-                                      (commandAttr as RegexCommand)?.Priority        ?? 0,
-                                      (commandAttr as RegexCommand)?.RegexOptions ??
-                                      RegexOptions.None,
-                                      (commandAttr as RegexCommand)?.ExceptionHandler,
-                                      method.IsStatic ? null : classType);
+            matchExp,
+            classType.Name,
+            method,
+            (commandAttr as GroupCommand)?.PermissionLevel ?? MemberRoleType.Member,
+            (commandAttr as RegexCommand)?.Priority        ?? 0,
+            (commandAttr as RegexCommand)?.RegexOptions ??
+            RegexOptions.None,
+            (commandAttr as RegexCommand)?.ExceptionHandler,
+            method.IsStatic ? null : classType);
 
         return commandAttr;
     }
@@ -421,26 +424,26 @@ public class CommandManager
     /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
     [NeedReview("ALL")]
     private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
-                                              RegexOptions regexOptions,
-                                              Func<GroupMessageEventArgs, ValueTask> commandBlock,
-                                              MemberRoleType permissionType, Action<Exception> exceptionHandler)
+        RegexOptions                                 regexOptions,
+        Func<GroupMessageEventArgs, ValueTask>       commandBlock,
+        MemberRoleType                               permissionType, Action<Exception> exceptionHandler)
     {
         //判断参数合法性
         if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
-        var parameters = commandBlock.Method.GetParameters();
+        ParameterInfo[] parameters = commandBlock.Method.GetParameters();
         if (parameters.Length != 1) throw new NotSupportedException("unsupport parameter count");
         //处理表达式
-        var matchExp = ParseCommandExps(cmdExps, matchType);
+        string[] matchExp = ParseCommandExps(cmdExps, matchType);
 
         //判断指令响应源
         if (parameters.First().ParameterType != typeof(GroupMessageEventArgs))
             throw new NotSupportedException("unsupport parameter type");
 
-        var priority = _groupCommands.Count == 0 ? 0 : _groupCommands.Min(cmd => cmd.Priority) - 1;
+        int priority = _groupCommands.Count == 0 ? 0 : _groupCommands.Min(cmd => cmd.Priority) - 1;
 
         //创建指令信息
         return new CommandInfo(desc, matchExp, "dynamic", commandBlock, exceptionHandler, permissionType,
-                               priority, regexOptions | RegexOptions.Compiled);
+            priority, regexOptions | RegexOptions.Compiled);
     }
 
     /// <summary>
@@ -457,26 +460,26 @@ public class CommandManager
     /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
     [NeedReview("ALL")]
     private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
-                                              RegexOptions regexOptions,
-                                              Func<PrivateMessageEventArgs, ValueTask> commandBlock,
-                                              MemberRoleType permissionType, Action<Exception> exceptionHandler)
+        RegexOptions                                 regexOptions,
+        Func<PrivateMessageEventArgs, ValueTask>     commandBlock,
+        MemberRoleType                               permissionType, Action<Exception> exceptionHandler)
     {
         //判断参数合法性
         if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
-        var parameters = commandBlock.Method.GetParameters();
+        ParameterInfo[] parameters = commandBlock.Method.GetParameters();
         if (parameters.Length != 1) throw new NotSupportedException("unsupport parameter count");
         //处理表达式
-        var matchExp = ParseCommandExps(cmdExps, matchType);
+        string[] matchExp = ParseCommandExps(cmdExps, matchType);
 
         //判断指令响应源
         if (parameters.First().ParameterType != typeof(GroupMessageEventArgs))
             throw new NotSupportedException("unsupport parameter type");
 
-        var priority = _privateCommands.Count == 0 ? 0 : _privateCommands.Min(cmd => cmd.Priority) - 1;
+        int priority = _privateCommands.Count == 0 ? 0 : _privateCommands.Min(cmd => cmd.Priority) - 1;
 
         //创建指令信息
         return new CommandInfo(desc, matchExp, "dynamic", commandBlock, exceptionHandler, permissionType,
-                               priority, regexOptions | RegexOptions.Compiled);
+            priority, regexOptions | RegexOptions.Compiled);
     }
 
     /// <summary>
@@ -498,12 +501,12 @@ public class CommandManager
         try
         {
             //创建实例
-            var instance = classType.CreateInstance();
+            object instance = classType.CreateInstance();
 
             //添加实例
             _instanceDict
-                .Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
-                     instance);
+               .Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
+                    instance);
         }
         catch (Exception e)
         {
@@ -517,14 +520,14 @@ public class CommandManager
     private async ValueTask InvokeMatchCommand(List<CommandInfo> matchedCommands, BaseSoraEventArgs eventArgs)
     {
         //遍历匹配到的每个命令
-        foreach (var commandInfo in matchedCommands)
+        foreach (CommandInfo commandInfo in matchedCommands)
         {
             //若是群，则判断权限
             if (eventArgs is GroupMessageEventArgs groupEventArgs)
                 if (groupEventArgs.SenderInfo.Role < commandInfo.PermissionType)
                 {
                     Log.Warning("CommandAdapter",
-                                $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{commandInfo.MethodInfo.Name}");
+                        $"成员{groupEventArgs.SenderInfo.UserId}正在尝试执行指令{commandInfo.MethodInfo.Name}");
 
                     //权限不足，跳过本命令执行
                     continue;
@@ -539,26 +542,32 @@ public class CommandManager
                     case InvokeType.Method:
                     {
                         Log.Debug("CommandAdapter",
-                                  $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+                            $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
                         Log.Info("CommandAdapter", $"触发指令[{commandInfo.MethodInfo.Name}]");
                         //尝试执行指令并判断异步方法
-                        var isAsnyc =
+                        bool isAsnyc =
                             commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
-                                                                      false) is not null;
+                                false) is not null;
                         //执行指令方法
                         if (isAsnyc && commandInfo.MethodInfo.ReturnType != typeof(void))
                         {
                             Log.Debug("Command", "invoke async command method");
                             await commandInfo.MethodInfo
-                                             .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                                     new object[] {eventArgs});
+                                             .Invoke(
+                                                  commandInfo.InstanceType == null
+                                                      ? null
+                                                      : _instanceDict[commandInfo.InstanceType],
+                                                  new object[] {eventArgs});
                         }
                         else
                         {
                             Log.Debug("Command", "invoke command method");
                             commandInfo.MethodInfo
-                                       .Invoke(commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                                               new object[] {eventArgs});
+                                       .Invoke(
+                                            commandInfo.InstanceType == null
+                                                ? null
+                                                : _instanceDict[commandInfo.InstanceType],
+                                            new object[] {eventArgs});
                         }
 
                         break;
@@ -567,7 +576,7 @@ public class CommandManager
                     case InvokeType.Action:
                     {
                         Log.Debug("CommandAdapter",
-                                  $"trigger command [dynamic command({commandInfo.Priority})]");
+                            $"trigger command [dynamic command({commandInfo.Priority})]");
                         Log.Info("CommandAdapter", $"触发指令[dynamic command({commandInfo.Priority})]");
                         switch (commandInfo.SourceFlag)
                         {
@@ -590,7 +599,7 @@ public class CommandManager
             }
             catch (Exception e)
             {
-                var errLog = Log.ErrorLogBuilder(e);
+                string errLog = Log.ErrorLogBuilder(e);
                 Log.Error("CommandAdapter", errLog);
 
                 var msg = new StringBuilder();
@@ -635,12 +644,12 @@ public class CommandManager
         return matchType switch
         {
             MatchType.Full => cmdExps
-                              .Select(command => $"^{command}$")
-                              .ToArray(),
+                             .Select(command => $"^{command}$")
+                             .ToArray(),
             MatchType.Regex => cmdExps,
             MatchType.KeyWord => cmdExps
-                                 .Select(command => $"[{command}]+")
-                                 .ToArray(),
+                                .Select(command => $"[{command}]+")
+                                .ToArray(),
             _ => throw new NotSupportedException("unknown matchtype")
         };
     }

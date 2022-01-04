@@ -11,7 +11,7 @@ public enum Sex
     /// <summary>
     /// 男
     /// </summary>
-    [Description("")] 
+    [Description("")]
     Male,
 
     /// <summary>

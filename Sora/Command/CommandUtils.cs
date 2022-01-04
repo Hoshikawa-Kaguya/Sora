@@ -18,19 +18,19 @@ internal static class CommandUtils
     [Reviewed("XiaoHe321", "2021-03-28 20:45")]
     internal static bool CheckMethodLegality(this MethodInfo method)
     {
-        var isGroupCommandLegality = method.IsDefined(typeof(GroupCommand), false) &&
-                                     method.GetParameters().Length == 1            &&
-                                     method.GetParameters()
-                                           .Any(para =>
-                                                    para.ParameterType == typeof(GroupMessageEventArgs) &&
-                                                    !para.IsOut);
+        bool isGroupCommandLegality = method.IsDefined(typeof(GroupCommand), false) &&
+                                      method.GetParameters().Length == 1            &&
+                                      method.GetParameters()
+                                            .Any(para =>
+                                                 para.ParameterType == typeof(GroupMessageEventArgs) &&
+                                                 !para.IsOut);
 
-        var isPrivateCommandLegality = method.IsDefined(typeof(PrivateCommand), false) &&
-                                       method.GetParameters().Length == 1              &&
-                                       method.GetParameters()
-                                             .Any(para =>
-                                                      para.ParameterType == typeof(PrivateMessageEventArgs) &&
-                                                      !para.IsOut);
+        bool isPrivateCommandLegality = method.IsDefined(typeof(PrivateCommand), false) &&
+                                        method.GetParameters().Length == 1              &&
+                                        method.GetParameters()
+                                              .Any(para =>
+                                                   para.ParameterType == typeof(PrivateMessageEventArgs) &&
+                                                   !para.IsOut);
 
         return isGroupCommandLegality || isPrivateCommandLegality;
     }

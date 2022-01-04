@@ -11,18 +11,18 @@ public enum AdminChangeType
     /// <summary>
     /// 未知，在转换错误时为此值
     /// </summary>
-    [Description("")] 
+    [Description("")]
     Unknown,
 
     /// <summary>
     /// 设置
     /// </summary>
-    [Description("set")] 
+    [Description("set")]
     Set,
 
     /// <summary>
     /// 取消
     /// </summary>
-    [Description("unset")] 
+    [Description("unset")]
     UnSet
 }

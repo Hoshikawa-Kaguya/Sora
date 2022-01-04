@@ -12,11 +12,6 @@ public sealed class TitleUpdateEventArgs : BaseSoraEventArgs
     #region 属性
 
     /// <summary>
-    /// 红包发送者
-    /// </summary>
-    public User SendUser { get; private set; }
-
-    /// <summary>
     /// 运气王
     /// </summary>
     public User TargetUser { get; private set; }
@@ -28,9 +23,9 @@ public sealed class TitleUpdateEventArgs : BaseSoraEventArgs
 
     #endregion
 
-    internal TitleUpdateEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                  OnebotMemberTitleUpdatedEventArgs eventArgs) :
-        base(serviceId, connectionId, eventName, eventArgs.SelfID, eventArgs.Time)
+    internal TitleUpdateEventArgs(Guid    serviceId, Guid connectionId, string eventName,
+        OnebotMemberTitleUpdatedEventArgs eventArgs) :
+        base(serviceId, connectionId, eventName, eventArgs.SelfId, eventArgs.Time)
     {
         TargetUser = new User(serviceId, connectionId, eventArgs.UserId);
         NewTitle   = eventArgs.NewTitle;
