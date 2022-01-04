@@ -66,8 +66,8 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="groupMsgArgs">群消息事件参数</param>
-    internal GroupMessageEventArgs(Guid serviceId, Guid connectionId, string eventName,
-        OnebotGroupMsgEventArgs         groupMsgArgs)
+    internal GroupMessageEventArgs(Guid                    serviceId, Guid connectionId, string eventName,
+                                   OnebotGroupMsgEventArgs groupMsgArgs)
         : base(serviceId, connectionId, eventName, groupMsgArgs.SelfId, groupMsgArgs.Time)
     {
         IsAnonymousMessage = groupMsgArgs.Anonymous != null;
@@ -102,7 +102,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <para><see langword="messageId"/> 发送消息的id</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(MessageBody message,
-        TimeSpan?                                                                  timeout = null)
+                                                                       TimeSpan?   timeout = null)
     {
         return await SoraApi.SendGroupMessage(SourceGroup.Id, message, timeout);
     }
@@ -153,8 +153,8 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <param name="matchType">匹配类型</param>
     /// <param name="regexOptions">正则匹配选项</param>
     /// <returns>触发后的事件参数</returns>
-    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
-        RegexOptions                                                         regexOptions = RegexOptions.None)
+    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[]     commandExps, MatchType matchType,
+                                                                    RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
@@ -173,10 +173,10 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <param name="timeout">超时</param>
     /// <param name="timeoutTask">超时后执行的动作</param>
     /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
-    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[] commandExps, MatchType matchType,
-        TimeSpan                                                             timeout,
-        Func<ValueTask>                                                      timeoutTask  = null,
-        RegexOptions                                                         regexOptions = RegexOptions.None)
+    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[]        commandExps, MatchType matchType,
+                                                                    TimeSpan        timeout,
+                                                                    Func<ValueTask> timeoutTask  = null,
+                                                                    RegexOptions    regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
@@ -194,8 +194,8 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <param name="matchType">匹配类型</param>
     /// <param name="regexOptions">正则匹配选项</param>
     /// <returns>触发后的事件参数</returns>
-    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
-        RegexOptions                                                       regexOptions = RegexOptions.None)
+    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string       commandExp, MatchType matchType,
+                                                                    RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
             return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
@@ -212,10 +212,10 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <param name="timeout">超时</param>
     /// <param name="timeoutTask">超时后执行的动作</param>
     /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
-    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string commandExp, MatchType matchType,
-        TimeSpan                                                           timeout,
-        Func<ValueTask>                                                    timeoutTask  = null,
-        RegexOptions                                                       regexOptions = RegexOptions.None)
+    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string          commandExp, MatchType matchType,
+                                                                    TimeSpan        timeout,
+                                                                    Func<ValueTask> timeoutTask  = null,
+                                                                    RegexOptions    regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(Sender, new[] {commandExp},

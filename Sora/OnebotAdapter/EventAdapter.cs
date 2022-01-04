@@ -14,13 +14,13 @@ using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
 using YukariToolBox.LightLog;
 
-namespace Sora.OnebotInterface;
+namespace Sora.OnebotAdapter;
 
 /// <summary>
 /// Onebot事件接口
 /// 判断和分发基类事件
 /// </summary>
-public class EventInterface
+public class EventAdapter
 {
     #region 私有字段
 
@@ -54,7 +54,7 @@ public class EventInterface
 
     #region 构造方法
 
-    internal EventInterface(Guid serviceId)
+    internal EventAdapter(Guid serviceId)
     {
         ServiceId = serviceId;
         CommandManager = StaticVariable.ServiceConfigs[serviceId].EnableSoraCommandManager
@@ -261,14 +261,14 @@ public class EventInterface
                     Log.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
 
                 (ApiStatus infoApiStatus, string clientType, string clientVer) =
-                    await ApiInterface.GetClientInfo(connection);
+                    await ApiAdapter.GetClientInfo(connection);
                 if (infoApiStatus.RetCode != ApiStatusType.Ok) //检查返回值
                 {
                     Log.Error("Sora", $"获取onebot版本失败(retcode={infoApiStatus})");
                     break;
                 }
 
-                (ApiStatus loginInfoApiStatus, long uid, _) = await ApiInterface.GetLoginInfo(connection);
+                (ApiStatus loginInfoApiStatus, long uid, _) = await ApiAdapter.GetLoginInfo(connection);
                 if (loginInfoApiStatus.RetCode != ApiStatusType.Ok) //检查返回值
                 {
                     Log.Error("Sora", $"获取uid失败(retcode={loginInfoApiStatus})");
@@ -318,7 +318,7 @@ public class EventInterface
                 var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
                 //标记消息已读
                 if (StaticVariable.ServiceConfigs[ServiceId].AutoMarkMessageRead)
-                    ApiInterface.InternalMarkMessageRead(connection, privateMsg.MessageId);
+                    ApiAdapter.InternalMarkMessageRead(connection, privateMsg.MessageId);
                 //处理指令
                 if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager)
                     await CommandManager.CommandAdapter(eventArgs);
@@ -340,7 +340,7 @@ public class EventInterface
                 var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
                 //标记消息已读
                 if (StaticVariable.ServiceConfigs[ServiceId].AutoMarkMessageRead)
-                    ApiInterface.InternalMarkMessageRead(connection, groupMsg.MessageId);
+                    ApiAdapter.InternalMarkMessageRead(connection, groupMsg.MessageId);
                 //处理指令
                 if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager)
                     await CommandManager.CommandAdapter(eventArgs);

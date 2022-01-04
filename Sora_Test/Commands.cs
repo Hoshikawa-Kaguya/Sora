@@ -14,7 +14,7 @@ public static class Commands
     public static async ValueTask TestCommand(GroupMessageEventArgs eventArgs)
     {
         var s = eventArgs.Message.MessageBody[0].Data as TextSegment;
-        Log.Info("触发指令", $"txet:{s!.Content}");
+        Log.Info("触发指令", $"text:{s!.Content}");
         eventArgs.IsContinueEventChain = false;
         //throw new Exception("shit");
         await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "怪欸");

@@ -25,8 +25,8 @@ public sealed class ClientStatusChangeEventArgs : BaseSoraEventArgs
 
     #region 构造方法
 
-    internal ClientStatusChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
-        OnebotClientStatusEventArgs           clientStatus) :
+    internal ClientStatusChangeEventArgs(Guid                        serviceId, Guid connectionId, string eventName,
+                                         OnebotClientStatusEventArgs clientStatus) :
         base(serviceId, connectionId, eventName, clientStatus.SelfId, clientStatus.Time)
     {
         Client = clientStatus.ClientInfo;

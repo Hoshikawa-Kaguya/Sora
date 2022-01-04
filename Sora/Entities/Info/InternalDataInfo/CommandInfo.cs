@@ -89,9 +89,9 @@ internal readonly struct CommandInfo
     /// <summary>
     /// 指令信息构造(常规指令构建)
     /// </summary>
-    internal CommandInfo(string desc,             string[] regex,    string       groupName, MethodInfo method,
-        MemberRoleType          permissionType,   int      priority, RegexOptions regexOptions,
-        Action<Exception>       exceptionHandler, Type     instanceType = null)
+    internal CommandInfo(string            desc,             string[] regex,    string groupName, MethodInfo method,
+                         MemberRoleType    permissionType,   int      priority, RegexOptions regexOptions,
+                         Action<Exception> exceptionHandler, Type     instanceType = null)
     {
         Desc               = desc;
         Regex              = regex;
@@ -111,9 +111,9 @@ internal readonly struct CommandInfo
     /// <summary>
     /// 指令信息构造(动态指令构建)
     /// </summary>
-    internal CommandInfo(string                desc,           string[]          regex, string groupName,
-        Func<GroupMessageEventArgs, ValueTask> actionBlock,    Action<Exception> exceptionHandler,
-        MemberRoleType                         permissionType, int               priority, RegexOptions regexOptions)
+    internal CommandInfo(string                                 desc,           string[] regex, string groupName,
+                         Func<GroupMessageEventArgs, ValueTask> actionBlock,    Action<Exception> exceptionHandler,
+                         MemberRoleType                         permissionType, int priority, RegexOptions regexOptions)
     {
         Desc               = desc;
         Regex              = regex;
@@ -133,9 +133,9 @@ internal readonly struct CommandInfo
     /// <summary>
     /// 指令信息构造(动态指令构建)
     /// </summary>
-    internal CommandInfo(string                  desc,           string[]          regex, string groupName,
-        Func<PrivateMessageEventArgs, ValueTask> actionBlock,    Action<Exception> exceptionHandler,
-        MemberRoleType                           permissionType, int               priority, RegexOptions regexOptions)
+    internal CommandInfo(string desc, string[] regex, string groupName,
+                         Func<PrivateMessageEventArgs, ValueTask> actionBlock, Action<Exception> exceptionHandler,
+                         MemberRoleType permissionType, int priority, RegexOptions regexOptions)
     {
         Desc               = desc;
         Regex              = regex;

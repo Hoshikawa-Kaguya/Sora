@@ -37,8 +37,8 @@ public sealed class LuckyKingEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="luckyKingEventArgs">运气王事件参数</param>
-    internal LuckyKingEventArgs(Guid serviceId, Guid connectionId, string eventName,
-        OnebotPokeOrLuckyEventArgs   luckyKingEventArgs) :
+    internal LuckyKingEventArgs(Guid                       serviceId, Guid connectionId, string eventName,
+                                OnebotPokeOrLuckyEventArgs luckyKingEventArgs) :
         base(serviceId, connectionId, eventName, luckyKingEventArgs.SelfId, luckyKingEventArgs.Time)
     {
         SendUser    = new User(serviceId, connectionId, luckyKingEventArgs.UserId);

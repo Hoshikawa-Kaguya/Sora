@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using Sora.Net;
-using Sora.OnebotInterface;
+using Sora.OnebotAdapter;
 
 namespace Sora.Interfaces;
 
@@ -12,7 +12,7 @@ public interface ISoraService
     /// <summary>
     /// 事件接口    
     /// </summary>
-    EventInterface Event { get; }
+    EventAdapter Event { get; }
 
     /// <summary>
     /// 服务器连接管理器

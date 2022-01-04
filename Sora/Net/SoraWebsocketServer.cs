@@ -7,7 +7,7 @@ using Sora.Entities.Info.InternalDataInfo;
 using Sora.Entities.Socket;
 using Sora.Interfaces;
 using Sora.Net.Config;
-using Sora.OnebotInterface;
+using Sora.OnebotAdapter;
 using Sora.Util;
 using YukariToolBox.LightLog;
 using LogLevel = Fleck.LogLevel;
@@ -34,7 +34,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     /// <summary>
     /// 事件接口
     /// </summary>
-    public EventInterface Event { get; }
+    public EventAdapter Event { get; }
 
     /// <summary>
     /// 服务器连接管理器
@@ -89,7 +89,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         ConnManager = new ConnectionManager(config);
         Config      = config;
         //实例化事件接口
-        Event = new EventInterface(_serverId);
+        Event = new EventAdapter(_serverId);
         //禁用原log
         FleckLog.Level = (LogLevel) 4;
         Server = new WebSocketServer($"ws://{config.Host}:{config.Port}")

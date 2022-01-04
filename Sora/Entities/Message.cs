@@ -54,7 +54,7 @@ public sealed class Message : BaseModel
     #region 构造函数
 
     internal Message(Guid serviceId, Guid connectionId, int   msgId, string text, MessageBody messageBody,
-        long              time,      int  font,         long? messageSequence) :
+                     long time,      int  font,         long? messageSequence) :
         base(serviceId, connectionId)
     {
         MessageId       = msgId;

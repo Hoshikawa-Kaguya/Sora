@@ -81,9 +81,9 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 等待下一条消息触发
     /// </summary>
-    internal object WaitForNextMessage(long sourceUid,  string[]        commandExps, MatchType matchType,
-        SourceFlag                          sourceFlag, RegexOptions    regexOptions,
-        TimeSpan?                           timeout,    Func<ValueTask> timeoutTask, long sourceGroup = 0)
+    internal object WaitForNextMessage(long       sourceUid,  string[]        commandExps, MatchType matchType,
+                                       SourceFlag sourceFlag, RegexOptions    regexOptions,
+                                       TimeSpan?  timeout,    Func<ValueTask> timeoutTask, long sourceGroup = 0)
     {
         //生成指令上下文
         WaitingInfo waitInfo =
@@ -98,7 +98,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         //添加上下文并等待信号量
         StaticVariable.WaitingDict.TryAdd(sessionId, waitInfo);
         //是否正常接受到触发信号
-        bool receiveSignal = 
+        bool receiveSignal =
             //等待信号量
             StaticVariable.WaitingDict[sessionId].Semaphore.WaitOne(timeout ?? TimeSpan.FromMilliseconds(-1));
         //取出匹配指令的事件参数并删除上一次的上下文

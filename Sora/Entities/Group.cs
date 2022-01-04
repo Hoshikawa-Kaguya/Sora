@@ -211,7 +211,7 @@ public sealed class Group : BaseModel
     /// <param name="folderId">父目录ID</param>
     /// <returns>API状态</returns>
     public async ValueTask<ApiStatus> UploadGroupFile(string localFilePath, string fileName,
-        string                                               folderId = null)
+                                                      string folderId = null)
     {
         return await SoraApi.UploadGroupFile(Id, localFilePath,
             fileName, folderId);

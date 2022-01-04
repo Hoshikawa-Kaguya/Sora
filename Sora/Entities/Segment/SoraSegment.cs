@@ -262,8 +262,8 @@ public readonly struct SoraSegment
     /// <param name="useProxy">是否通过代理下载文件</param>
     /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
     public static SoraSegment Record(string data, bool isMagic = false, bool useCache = true,
-        bool                                useProxy = true,
-        int?                                timeout  = null)
+                                     bool   useProxy = true,
+                                     int?   timeout  = null)
     {
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
         if (!isDataStr)
@@ -343,7 +343,7 @@ public readonly struct SoraSegment
     /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
     /// <param name="id">秀图特效id，默认为40000</param>
     public static SoraSegment ShowImage(string data, int id = 40000, bool useCache = true,
-        int?                                   threadCount = null)
+                                        int?   threadCount = null)
     {
         if (string.IsNullOrEmpty(data)) throw new NullReferenceException(nameof(data));
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
@@ -372,7 +372,7 @@ public readonly struct SoraSegment
     /// <param name="useProxy">是否通过代理下载文件</param>
     /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
     public static SoraSegment Video(string data, bool useCache = true, bool useProxy = true,
-        int?                               timeout = null)
+                                    int?   timeout = null)
     {
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
         if (!isDataStr)
@@ -415,8 +415,8 @@ public readonly struct SoraSegment
     /// <param name="content">内容描述[可选]</param>
     /// <param name="coverImageUrl">分享内容图片[可选]</param>
     public static SoraSegment CustomMusic(string url, string musicUrl, string title,
-        string                                   content       = null,
-        string                                   coverImageUrl = null)
+                                          string content       = null,
+                                          string coverImageUrl = null)
     {
         if (url is null) throw new ArgumentNullException(nameof(url));
         if (musicUrl is null) throw new ArgumentNullException(nameof(musicUrl));
@@ -442,9 +442,9 @@ public readonly struct SoraSegment
     /// <param name="content">可选，内容描述</param>
     /// <param name="imageUrl">可选，图片 URL</param>
     public static SoraSegment Share(string url,
-        string                             title,
-        string                             content  = null,
-        string                             imageUrl = null)
+                                    string title,
+                                    string content  = null,
+                                    string imageUrl = null)
     {
         if (url is null) throw new ArgumentNullException(nameof(url));
         if (title is null) throw new ArgumentNullException(nameof(title));
@@ -585,12 +585,12 @@ public readonly struct SoraSegment
     /// <param name="maxWidth">最大 Width</param>
     /// <param name="maxHeight">最大 Height</param>
     public static SoraSegment CardImage(string imageFile,
-        string                                 source    = null,
-        string                                 iconUrl   = null,
-        long                                   minWidth  = 400,
-        long                                   minHeight = 400,
-        long                                   maxWidth  = 400,
-        long                                   maxHeight = 400)
+                                        string source    = null,
+                                        string iconUrl   = null,
+                                        long   minWidth  = 400,
+                                        long   minHeight = 400,
+                                        long   maxWidth  = 400,
+                                        long   maxHeight = 400)
     {
         if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(imageFile);
