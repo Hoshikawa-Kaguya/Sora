@@ -11,18 +11,18 @@ public enum MusicShareType
     /// <summary>
     /// 未知
     /// </summary>
-    [Description("")] 
+    [Description("")]
     Unknown,
 
     /// <summary>
     /// 网易云音乐
     /// </summary>
-    [Description("163")] 
+    [Description("163")]
     Netease,
 
     /// <summary>
     /// QQ 音乐
     /// </summary>
-    [Description("qq")] 
+    [Description("qq")]
     QQMusic
 }

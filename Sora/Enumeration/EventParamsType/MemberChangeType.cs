@@ -11,19 +11,19 @@ public enum MemberChangeType
     /// <summary>
     /// 未知，在转换错误时为此值
     /// </summary>
-    [Description("")] 
+    [Description("")]
     Unknown,
 
     /// <summary>
     /// 主动退群
     /// </summary>
-    [Description("leave")] 
+    [Description("leave")]
     Leave,
 
     /// <summary>
     /// 成员被踢
     /// </summary>
-    [Description("kick")] 
+    [Description("kick")]
     Kick,
 
     /// <summary>
@@ -41,6 +41,6 @@ public enum MemberChangeType
     /// <summary>
     /// 管理员邀请入群
     /// </summary>
-    [Description("invite")] 
+    [Description("invite")]
     Invite
 }

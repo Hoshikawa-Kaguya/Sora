@@ -60,32 +60,32 @@ internal static class ReactiveApiManager
         //错误数据
         (var isTimeout, Exception exception) = (false, null);
         //向客户端发送请求数据
-        var apiTask = StaticVariable.ApiSubject
-                                    .Where(request => request.Item1 == apiRequest.Echo)
-                                    .Select(request => request.Item2)
-                                    .Take(1)
-                                    .Timeout(currentTimeout)
-                                    .ToTask()
-                                    .RunCatch(e =>
-                                              {
-                                                  isTimeout = e is TimeoutException;
-                                                  exception = e;
-                                                  //在错误为超时时不打印log
-                                                  if (!isTimeout)
-                                                      Log.Error("Sora|ReactiveApiManager",
-                                                                $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
-                                                  return new JObject();
-                                              });
+        Task<JObject> apiTask = StaticVariable.ApiSubject
+                                              .Where(request => request.Item1 == apiRequest.Echo)
+                                              .Select(request => request.Item2)
+                                              .Take(1)
+                                              .Timeout(currentTimeout)
+                                              .ToTask()
+                                              .RunCatch(e =>
+                                               {
+                                                   isTimeout = e is TimeoutException;
+                                                   exception = e;
+                                                   //在错误为超时时不打印log
+                                                   if (!isTimeout)
+                                                       Log.Error("Sora|ReactiveApiManager",
+                                                           $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
+                                                   return new JObject();
+                                               });
 
         //这里的错误最终将抛给开发者
         //发送消息
         if (!ConnectionManager
-                .SendMessage(connectionId, JsonConvert.SerializeObject(apiRequest, Formatting.None)))
+               .SendMessage(connectionId, JsonConvert.SerializeObject(apiRequest, Formatting.None)))
             //API消息发送失败
             return (SocketSendError(), null);
 
         //等待客户端返回调用结果
-        var response = await apiTask;
+        JObject response = await apiTask;
         //检查API返回
         if (response != null && response.Count != 0) return (GetApiStatus(response), response);
 
@@ -94,7 +94,7 @@ internal static class ReactiveApiManager
         //观察者抛出异常
         if (isTimeout)
             Log.Error("Sora|ReactiveApiManager",
-                      $"api time out[msg echo:{apiRequest.Echo}]");
+                $"api time out[msg echo:{apiRequest.Echo}]");
         return isTimeout
             ? (TimeOut(), null)
             : (ObservableError(Log.ErrorLogBuilder(exception)), null);
@@ -114,7 +114,8 @@ internal static class ReactiveApiManager
     {
         return new ApiStatus
         {
-            RetCode = Enum.TryParse<ApiStatusType>(msg["retcode"]?.ToString() ?? string.Empty, out var messageCode)
+            RetCode = Enum.TryParse(msg["retcode"]?.ToString() ?? string.Empty,
+                out ApiStatusType messageCode)
                 ? messageCode
                 : ApiStatusType.UnknownStatus,
             ApiMessage = msg["msg"] == null && msg["wording"] == null

@@ -11,7 +11,7 @@ public enum GroupRequestType
     /// <summary>
     /// 未知，在转换错误时为此值
     /// </summary>
-    [Description("")] 
+    [Description("")]
     Unknown,
 
     /// <summary>
@@ -23,6 +23,6 @@ public enum GroupRequestType
     /// <summary>
     /// 加群邀请
     /// </summary>
-    [Description("invite")] 
+    [Description("invite")]
     Invite
 }

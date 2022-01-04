@@ -34,8 +34,8 @@ public sealed class OfflineFileEventArgs : BaseSoraEventArgs
     /// <param name="eventName">事件名</param>
     /// <param name="offlineFileArgs">离线文件事件参数</param>
     internal OfflineFileEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                  OnebotOfflineFileEventArgs offlineFileArgs) :
-        base(serviceId, connectionId, eventName, offlineFileArgs.SelfID, offlineFileArgs.Time)
+        OnebotOfflineFileEventArgs     offlineFileArgs) :
+        base(serviceId, connectionId, eventName, offlineFileArgs.SelfId, offlineFileArgs.Time)
     {
         Sender          = new User(serviceId, connectionId, offlineFileArgs.UserId);
         OfflineFileInfo = offlineFileArgs.Info;

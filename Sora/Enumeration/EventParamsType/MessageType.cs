@@ -17,7 +17,7 @@ public enum MessageType
     /// <summary>
     /// 私聊消息
     /// </summary>
-    [Description("private")] 
+    [Description("private")]
     Private,
 
     /// <summary>

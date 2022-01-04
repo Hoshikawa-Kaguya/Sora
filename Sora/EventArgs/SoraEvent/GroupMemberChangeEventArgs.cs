@@ -44,8 +44,8 @@ public sealed class GroupMemberChangeEventArgs : BaseSoraEventArgs
     /// <param name="eventName">事件名</param>
     /// <param name="groupMemberChangeArgs">群成员数量变更参数</param>
     internal GroupMemberChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                        OnebotGroupMemberChangeEventArgs groupMemberChangeArgs) :
-        base(serviceId, connectionId, eventName, groupMemberChangeArgs.SelfID, groupMemberChangeArgs.Time)
+        OnebotGroupMemberChangeEventArgs     groupMemberChangeArgs) :
+        base(serviceId, connectionId, eventName, groupMemberChangeArgs.SelfId, groupMemberChangeArgs.Time)
     {
         ChangedUser = new User(serviceId, connectionId, groupMemberChangeArgs.UserId);
         //执行者和变动成员可能为同一人

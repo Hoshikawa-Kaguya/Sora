@@ -52,9 +52,9 @@ public class GroupMemberInfo
         {
             return SexStr switch
             {
-                "male" => Sex.Male,
+                "male"   => Sex.Male,
                 "female" => Sex.Female,
-                _ => Sex.Unknown
+                _        => Sex.Unknown
             };
         }
     }
@@ -128,7 +128,7 @@ public class GroupMemberInfo
     public DateTime? TitleExpireTime { get; internal init; }
 
     [JsonProperty(PropertyName = "title_expire_time", NullValueHandling = NullValueHandling.Ignore,
-                  DefaultValueHandling = DefaultValueHandling.Ignore)]
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
     private long? TitleExpireTimeStamp
     {
         init => TitleExpireTime = value == 0 ? null : value?.ToDateTime() ?? null;
@@ -147,7 +147,7 @@ public class GroupMemberInfo
     public DateTime? ShutUpTime { get; internal init; }
 
     [JsonProperty(PropertyName = "shut_up_timestamp", NullValueHandling = NullValueHandling.Ignore,
-                  DefaultValueHandling = DefaultValueHandling.Ignore)]
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
     private long? ShutUpTimestamp
     {
         init => ShutUpTime = value == 0 ? null : value?.ToDateTime() ?? null;

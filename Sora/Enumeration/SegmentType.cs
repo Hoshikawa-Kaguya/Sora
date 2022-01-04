@@ -23,54 +23,64 @@ public enum SegmentType
     /// <summary>
     /// 纯文本
     /// </summary>
-    [Description("text")] Text,
+    [Description("text")]
+    Text,
 
     /// <summary>
     /// QQ 表情
     /// </summary>
-    [Description("face")] Face,
+    [Description("face")]
+    Face,
 
     /// <summary>
     /// 图片
     /// </summary>
-    [Description("image")] Image,
+    [Description("image")]
+    Image,
 
     /// <summary>
     /// 语音
     /// </summary>
-    [Description("record")] Record,
+    [Description("record")]
+    Record,
 
     /// <summary>
     /// 短视频
     /// </summary>
-    [Description("video")] Video,
+    [Description("video")]
+    Video,
 
     /// <summary>	
     /// <para>音乐分享</para>	
     /// <para>只能发送</para>	
     /// </summary>	
-    [Description("music")] Music,
+    [Description("music")]
+    Music,
 
     /// <summary>
     /// @某人
     /// </summary>
-    [Description("at")] At,
+    [Description("at")]
+    At,
 
     /// <summary>
     /// 链接分享
     /// </summary>
-    [Description("share")] Share,
+    [Description("share")]
+    Share,
 
     /// <summary>
     /// 回复
     /// </summary>
-    [Description("reply")] Reply,
+    [Description("reply")]
+    Reply,
 
     /// <summary>
     /// <para>合并转发</para>
     /// <para>只能接收</para>
     /// </summary>
-    [Description("forward")] Forward,
+    [Description("forward")]
+    Forward,
 
     #endregion
 
@@ -79,32 +89,38 @@ public enum SegmentType
     /// <summary>
     /// 群戳一戳
     /// </summary>
-    [Description("poke")] Poke,
+    [Description("poke")]
+    Poke,
 
     /// <summary>
     /// XML 消息
     /// </summary>
-    [Description("xml")] Xml,
+    [Description("xml")]
+    Xml,
 
     /// <summary>
     /// JSON 消息
     /// </summary>
-    [Description("json")] Json,
+    [Description("json")]
+    Json,
 
     /// <summary>
     /// 接收红包
     /// </summary>
-    [Description("redbag")] RedBag,
+    [Description("redbag")]
+    RedBag,
 
     /// <summary>
     /// 装逼大图
     /// </summary>
-    [Description("cardimage")] CardImage,
+    [Description("cardimage")]
+    CardImage,
 
     /// <summary>
     /// 文本转语音
     /// </summary>
-    [Description("tts")] TTS
+    [Description("tts")]
+    TTS
 
     #endregion
 }

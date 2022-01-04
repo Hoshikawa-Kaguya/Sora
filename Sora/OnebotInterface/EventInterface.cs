@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Command;
+using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
@@ -37,7 +38,7 @@ public class EventInterface
         private init => _commandManager = value;
         get
         {
-            if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager) return _commandManager;
+            if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager) return _commandManager;
             var e = new InvalidOperationException("在禁用指令管理器后尝试调用管理器，请在开启指令服务后再调用此实例");
             Log.Fatal(e, "非法操作", "指令服务已被禁用");
             throw e;
@@ -62,7 +63,7 @@ public class EventInterface
     {
         ServiceId           = serviceId;
         AutoMarkMessageRead = autoMarkMessageRead;
-        CommandManager = StaticVariable.ServiceInfos[serviceId].EnableSoraCommandManager
+        CommandManager = StaticVariable.ServiceConfigs[serviceId].EnableSoraCommandManager
             ? new CommandManager(Assembly.GetEntryAssembly())
             : null;
     }
@@ -202,7 +203,7 @@ public class EventInterface
     {
         if (Log.GetLogLevel() == LogLevel.Debug)
             Log.Debug("Socket",
-                      $"Get json message:{messageJson.ToString(Formatting.None)}");
+                $"Get json message:{messageJson.ToString(Formatting.None)}");
         switch (TryGetJsonValue(messageJson, "post_type"))
         {
             //元事件类型
@@ -223,13 +224,13 @@ public class EventInterface
                 break;
             default:
                 //尝试从响应中获取标识符
-                if (messageJson.TryGetValue("echo", out var echoJson) &&
-                    Guid.TryParse(echoJson.ToString(), out var echo))
+                if (messageJson.TryGetValue("echo", out JToken echoJson) &&
+                    Guid.TryParse(echoJson.ToString(), out Guid echo))
                     //取出返回值中的数据
                     ReactiveApiManager.GetResponse(echo, messageJson);
                 else
                     Log.Warning("Sora",
-                                $"Unknown message type:{TryGetJsonValue(messageJson, "post_type")}\r\njson = {messageJson}");
+                        $"Unknown message type:{TryGetJsonValue(messageJson, "post_type")}\r\njson = {messageJson}");
 
                 break;
         }
@@ -265,15 +266,16 @@ public class EventInterface
                 if (lifeCycle != null)
                     Log.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
 
-                var (infoApiStatus, clientType, clientVer) = await ApiInterface.GetClientInfo(connection);
-                if (infoApiStatus.RetCode != ApiStatusType.OK) //检查返回值
+                (ApiStatus infoApiStatus, string clientType, string clientVer) =
+                    await ApiInterface.GetClientInfo(connection);
+                if (infoApiStatus.RetCode != ApiStatusType.Ok) //检查返回值
                 {
                     Log.Error("Sora", $"获取onebot版本失败(retcode={infoApiStatus})");
                     break;
                 }
 
-                var (loginInfoApiStatus, uid, _) = await ApiInterface.GetLoginInfo(connection);
-                if (loginInfoApiStatus.RetCode != ApiStatusType.OK) //检查返回值
+                (ApiStatus loginInfoApiStatus, long uid, _) = await ApiInterface.GetLoginInfo(connection);
+                if (loginInfoApiStatus.RetCode != ApiStatusType.Ok) //检查返回值
                 {
                     Log.Error("Sora", $"获取uid失败(retcode={loginInfoApiStatus})");
                     break;
@@ -286,9 +288,9 @@ public class EventInterface
                 if (OnClientConnect == null) break;
                 //执行回调
                 await OnClientConnect("Meta Event",
-                                      new ConnectEventArgs(ServiceId, connection, "lifecycle",
-                                                           lifeCycle?.SelfID ?? -1, clientType, clientVer,
-                                                           lifeCycle?.Time   ?? 0));
+                    new ConnectEventArgs(ServiceId, connection, "lifecycle",
+                        lifeCycle?.SelfId ?? -1, clientType, clientVer,
+                        lifeCycle?.Time   ?? 0));
                 break;
             }
             default:
@@ -316,15 +318,15 @@ public class EventInterface
                 var privateMsg = messageJson.ToObject<OnebotPrivateMsgEventArgs>();
                 if (privateMsg == null) break;
                 //检查屏蔽用户
-                if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Contains(privateMsg.UserId)) return;
+                if (StaticVariable.ServiceConfigs[ServiceId].BlockUsers.Contains(privateMsg.UserId)) return;
                 Log.Debug("Sora",
-                          $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
+                    $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                 var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
                 //标记消息已读
                 if (AutoMarkMessageRead)
                     ApiInterface.InternalMarkMessageRead(connection, privateMsg.MessageId);
                 //处理指令
-                if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager)
+                if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager)
                     await CommandManager.CommandAdapter(eventArgs);
                 if (!eventArgs.IsContinueEventChain)
                     break;
@@ -338,15 +340,15 @@ public class EventInterface
             {
                 var groupMsg = messageJson.ToObject<OnebotGroupMsgEventArgs>();
                 if (groupMsg == null) break;
-                if (StaticVariable.ServiceInfos[ServiceId].BlockUsers.Contains(groupMsg.UserId)) return;
+                if (StaticVariable.ServiceConfigs[ServiceId].BlockUsers.Contains(groupMsg.UserId)) return;
                 Log.Debug("Sora",
-                          $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
+                    $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                 var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
                 //标记消息已读
                 if (AutoMarkMessageRead)
                     ApiInterface.InternalMarkMessageRead(connection, groupMsg.MessageId);
                 //处理指令
-                if (StaticVariable.ServiceInfos[ServiceId].EnableSoraCommandManager)
+                if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager)
                     await CommandManager.CommandAdapter(eventArgs);
                 if (!eventArgs.IsContinueEventChain)
                     break;
@@ -379,11 +381,11 @@ public class EventInterface
                 var groupMsg = messageJson.ToObject<OnebotGroupMsgEventArgs>();
                 if (groupMsg == null) break;
                 Log.Debug("Sora",
-                          $"Group self msg[{groupMsg.GroupId}] -> {groupMsg.RawMessage}");
+                    $"Group self msg[{groupMsg.GroupId}] -> {groupMsg.RawMessage}");
                 //执行回调
                 if (OnSelfMessage == null) break;
                 await OnSelfMessage("Message",
-                                    new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg));
+                    new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg));
                 break;
             }
             default:
@@ -411,18 +413,18 @@ public class EventInterface
                 var friendRequest = messageJson.ToObject<OnebotFriendRequestEventArgs>();
                 if (friendRequest == null) break;
                 Log.Debug("Sora",
-                          $"Friend request form [{friendRequest.UserId}] with commont[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
+                    $"Friend request form [{friendRequest.UserId}] with comment[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
                 //执行回调
                 if (OnFriendRequest == null) break;
                 await OnFriendRequest("Request",
-                                      new FriendRequestEventArgs(ServiceId, connection, "request|friend",
-                                                                 friendRequest));
+                    new FriendRequestEventArgs(ServiceId, connection, "request|friend",
+                        friendRequest));
                 break;
             }
             //群组请求事件
             case "group":
             {
-                if (messageJson.TryGetValue("sub_type", out var sub) && sub.ToString().Equals("notice"))
+                if (messageJson.TryGetValue("sub_type", out JToken sub) && sub.ToString().Equals("notice"))
                 {
                     Log.Warning("Sora", "收到notice消息类型，不解析此类型消息");
                     break;
@@ -431,12 +433,12 @@ public class EventInterface
                 var groupRequest = messageJson.ToObject<OnebotGroupRequestEventArgs>();
                 if (groupRequest == null) break;
                 Log.Debug("Sora",
-                          $"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
+                    $"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
                 //执行回调
                 if (OnGroupRequest == null) break;
                 await OnGroupRequest("Request",
-                                     new AddGroupRequestEventArgs(ServiceId, connection, "request|group",
-                                                                  groupRequest));
+                    new AddGroupRequestEventArgs(ServiceId, connection, "request|group",
+                        groupRequest));
                 break;
             }
             default:
@@ -464,11 +466,11 @@ public class EventInterface
                 var fileUpload = messageJson.ToObject<OnebotFileUploadEventArgs>();
                 if (fileUpload == null) break;
                 Log.Debug("Sora",
-                          $"Group notice[Upload file] file[{fileUpload.Upload.Name}] from group[{fileUpload.GroupId}({fileUpload.UserId})]");
+                    $"Group notice[Upload file] file[{fileUpload.Upload.Name}] from group[{fileUpload.GroupId}({fileUpload.UserId})]");
                 //执行回调
                 if (OnFileUpload == null) break;
                 await OnFileUpload("Notice",
-                                   new FileUploadEventArgs(ServiceId, connection, "group_upload", fileUpload));
+                    new FileUploadEventArgs(ServiceId, connection, "group_upload", fileUpload));
                 break;
             }
             //群管理员变动
@@ -477,12 +479,12 @@ public class EventInterface
                 var adminChange = messageJson.ToObject<OnebotAdminChangeEventArgs>();
                 if (adminChange == null) break;
                 Log.Debug("Sora",
-                          $"Group amdin change[{adminChange.SubType}] from group[{adminChange.GroupId}] by[{adminChange.UserId}]");
+                    $"Group admin change[{adminChange.SubType}] from group[{adminChange.GroupId}] by[{adminChange.UserId}]");
                 //执行回调
                 if (OnGroupAdminChange == null) break;
                 await OnGroupAdminChange("Notice",
-                                         new GroupAdminChangeEventArgs(ServiceId, connection, "group_upload",
-                                                                       adminChange));
+                    new GroupAdminChangeEventArgs(ServiceId, connection, "group_upload",
+                        adminChange));
                 break;
             }
             //群成员变动
@@ -492,13 +494,13 @@ public class EventInterface
                 var groupMemberChange = messageJson.ToObject<OnebotGroupMemberChangeEventArgs>();
                 if (groupMemberChange == null) break;
                 Log.Debug("Sora",
-                          $"{groupMemberChange.NoticeType} type[{groupMemberChange.SubType}] member {groupMemberChange.GroupId}[{groupMemberChange.UserId}]");
+                    $"{groupMemberChange.NoticeType} type[{groupMemberChange.SubType}] member {groupMemberChange.GroupId}[{groupMemberChange.UserId}]");
                 //执行回调
                 if (OnGroupMemberChange == null) break;
                 await OnGroupMemberChange("Notice",
-                                          new GroupMemberChangeEventArgs(ServiceId, connection,
-                                                                         "group_member_change",
-                                                                         groupMemberChange));
+                    new GroupMemberChangeEventArgs(ServiceId, connection,
+                        "group_member_change",
+                        groupMemberChange));
                 break;
             }
             //群禁言
@@ -507,11 +509,11 @@ public class EventInterface
                 var groupMute = messageJson.ToObject<OnebotGroupMuteEventArgs>();
                 if (groupMute == null) break;
                 Log.Debug("Sora",
-                          $"Group[{groupMute.GroupId}] {groupMute.ActionType} member[{groupMute.UserId}]{groupMute.Duration}");
+                    $"Group[{groupMute.GroupId}] {groupMute.ActionType} member[{groupMute.UserId}]{groupMute.Duration}");
                 //执行回调
                 if (OnGroupMemberMute == null) break;
                 await OnGroupMemberMute("Notice",
-                                        new GroupMuteEventArgs(ServiceId, connection, "group_ban", groupMute));
+                    new GroupMuteEventArgs(ServiceId, connection, "group_ban", groupMute));
                 break;
             }
             //好友添加
@@ -523,7 +525,7 @@ public class EventInterface
                 //执行回调
                 if (OnFriendAdd == null) break;
                 await OnFriendAdd("Notice",
-                                  new FriendAddEventArgs(ServiceId, connection, "friend_add", friendAdd));
+                    new FriendAddEventArgs(ServiceId, connection, "friend_add", friendAdd));
                 break;
             }
             //群消息撤回
@@ -532,11 +534,11 @@ public class EventInterface
                 var groupRecall = messageJson.ToObject<ApiGroupRecallEventArgs>();
                 if (groupRecall == null) break;
                 Log.Debug("Sora",
-                          $"Group[{groupRecall.GroupId}] recall by [{groupRecall.OperatorId}],msg id={groupRecall.MessageId} sender={groupRecall.UserId}");
+                    $"Group[{groupRecall.GroupId}] recall by [{groupRecall.OperatorId}],msg id={groupRecall.MessageId} sender={groupRecall.UserId}");
                 //执行回调
                 if (OnGroupRecall == null) break;
                 await OnGroupRecall("Notice",
-                                    new GroupRecallEventArgs(ServiceId, connection, "group_recall", groupRecall));
+                    new GroupRecallEventArgs(ServiceId, connection, "group_recall", groupRecall));
                 break;
             }
             //好友消息撤回
@@ -548,8 +550,8 @@ public class EventInterface
                 //执行回调
                 if (OnFriendRecall == null) break;
                 await OnFriendRecall("Notice",
-                                     new FriendRecallEventArgs(ServiceId, connection, "friend_recall",
-                                                               friendRecall));
+                    new FriendRecallEventArgs(ServiceId, connection, "friend_recall",
+                        friendRecall));
                 break;
             }
             //群名片变更
@@ -560,11 +562,11 @@ public class EventInterface
                     messageJson.ToObject<OnebotGroupCardUpdateEventArgs>();
                 if (groupCardUpdate == null) break;
                 Log.Debug("Sora",
-                          $"Group[{groupCardUpdate.GroupId}] member[{groupCardUpdate.UserId}] card update [{groupCardUpdate.OldCard} => {groupCardUpdate.NewCard}]");
+                    $"Group[{groupCardUpdate.GroupId}] member[{groupCardUpdate.UserId}] card update [{groupCardUpdate.OldCard} => {groupCardUpdate.NewCard}]");
                 if (OnGroupCardUpdate == null) break;
                 await OnGroupCardUpdate("Notice",
-                                        new GroupCardUpdateEventArgs(ServiceId, connection, "group_card",
-                                                                     groupCardUpdate));
+                    new GroupCardUpdateEventArgs(ServiceId, connection, "group_card",
+                        groupCardUpdate));
                 break;
             }
             case "offline_file":
@@ -572,11 +574,11 @@ public class EventInterface
                 var offlineFile = messageJson.ToObject<OnebotOfflineFileEventArgs>();
                 if (offlineFile == null) break;
                 Log.Debug("Sora",
-                          $"Get offline file from[{offlineFile.UserId}] file name = {offlineFile.Info.Name}");
+                    $"Get offline file from[{offlineFile.UserId}] file name = {offlineFile.Info.Name}");
                 if (OnOfflineFileEvent == null) break;
                 await OnOfflineFileEvent("Notice",
-                                         new OfflineFileEventArgs(ServiceId, connection, "offline_file",
-                                                                  offlineFile));
+                    new OfflineFileEventArgs(ServiceId, connection, "offline_file",
+                        offlineFile));
                 break;
             }
             case "client_status":
@@ -584,12 +586,12 @@ public class EventInterface
                 var clientStatus = messageJson.ToObject<OnebotClientStatusEventArgs>();
                 if (clientStatus == null) break;
                 Log.Debug("Sora",
-                          $"Get client status change from[{clientStatus.UserId}] client id = {clientStatus.ClientInfo.AppId}");
+                    $"Get client status change from[{clientStatus.UserId}] client id = {clientStatus.ClientInfo.AppId}");
                 if (OnClientStatusChangeEvent == null) break;
                 await OnClientStatusChangeEvent("Notice",
-                                                new ClientStatusChangeEventArgs(ServiceId, connection,
-                                                                                    "client_status",
-                                                                                    clientStatus));
+                    new ClientStatusChangeEventArgs(ServiceId, connection,
+                        "client_status",
+                        clientStatus));
                 break;
             }
             case "essence":
@@ -597,10 +599,10 @@ public class EventInterface
                 var essenceChange = messageJson.ToObject<OnebotEssenceChangeEventArgs>();
                 if (essenceChange == null) break;
                 Log.Debug("Sora",
-                          $"Get essence change msg_id = {essenceChange.MessageId} type = {essenceChange.EssenceChangeType}");
+                    $"Get essence change msg_id = {essenceChange.MessageId} type = {essenceChange.EssenceChangeType}");
                 if (OnEssenceChange == null) break;
                 await OnEssenceChange("Notice",
-                                      new EssenceChangeEventArgs(ServiceId, connection, "essence", essenceChange));
+                    new EssenceChangeEventArgs(ServiceId, connection, "essence", essenceChange));
                 break;
             }
             //通知类事件
@@ -612,10 +614,10 @@ public class EventInterface
                         var pokeEvent = messageJson.ToObject<OnebotPokeOrLuckyEventArgs>();
                         if (pokeEvent == null) break;
                         Log.Debug("Sora",
-                                  $"Group[{pokeEvent.GroupId}] poke from [{pokeEvent.UserId}] to [{pokeEvent.TargetId}]");
+                            $"Group[{pokeEvent.GroupId}] poke from [{pokeEvent.UserId}] to [{pokeEvent.TargetId}]");
                         if (OnGroupPoke == null) break;
                         await OnGroupPoke("Notify",
-                                          new GroupPokeEventArgs(ServiceId, connection, "poke", pokeEvent));
+                            new GroupPokeEventArgs(ServiceId, connection, "poke", pokeEvent));
                         break;
                     }
                     case "lucky_king": //运气王
@@ -623,11 +625,11 @@ public class EventInterface
                         var luckyEvent = messageJson.ToObject<OnebotPokeOrLuckyEventArgs>();
                         if (luckyEvent == null) break;
                         Log.Debug("Sora",
-                                  $"Group[{luckyEvent.GroupId}] lucky king user[{luckyEvent.TargetId}]");
+                            $"Group[{luckyEvent.GroupId}] lucky king user[{luckyEvent.TargetId}]");
                         if (OnLuckyKingEvent == null) break;
                         await OnLuckyKingEvent("Notify",
-                                               new LuckyKingEventArgs(ServiceId, connection, "lucky_king",
-                                                                      luckyEvent));
+                            new LuckyKingEventArgs(ServiceId, connection, "lucky_king",
+                                luckyEvent));
                         break;
                     }
                     case "honor":
@@ -635,10 +637,10 @@ public class EventInterface
                         var honorEvent = messageJson.ToObject<OnebotHonorEventArgs>();
                         if (honorEvent == null) break;
                         Log.Debug("Sora",
-                                  $"Group[{honorEvent.GroupId}] member honor change [{honorEvent.HonorType}]");
+                            $"Group[{honorEvent.GroupId}] member honor change [{honorEvent.HonorType}]");
                         if (OnHonorEvent == null) break;
                         await OnHonorEvent("Notify",
-                                           new HonorEventArgs(ServiceId, connection, "honor", honorEvent));
+                            new HonorEventArgs(ServiceId, connection, "honor", honorEvent));
                         break;
                     }
                     case "title":
@@ -646,11 +648,11 @@ public class EventInterface
                         var newTitleEvent = messageJson.ToObject<OnebotMemberTitleUpdatedEventArgs>();
                         if (newTitleEvent == null) break;
                         Log.Debug("Sora",
-                                  $"Group[{newTitleEvent.GroupId} member title change to [{newTitleEvent.NewTitle}]]");
+                            $"Group[{newTitleEvent.GroupId} member title change to [{newTitleEvent.NewTitle}]]");
                         if (OnTitleUpdate == null) break;
                         await OnTitleUpdate("Notify",
-                                            new TitleUpdateEventArgs(ServiceId, connection, "title",
-                                                                     newTitleEvent));
+                            new TitleUpdateEventArgs(ServiceId, connection, "title",
+                                newTitleEvent));
                         break;
                     }
                     default:
@@ -674,7 +676,7 @@ public class EventInterface
     /// </summary>
     private static string TryGetJsonValue(JObject dataJson, string key)
     {
-        return dataJson.TryGetValue(key, out var value) ? value.ToString() : string.Empty;
+        return dataJson.TryGetValue(key, out JToken value) ? value.ToString() : string.Empty;
     }
 
     #endregion

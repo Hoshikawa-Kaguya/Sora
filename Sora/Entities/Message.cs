@@ -53,8 +53,8 @@ public sealed class Message : BaseModel
 
     #region 构造函数
 
-    internal Message(Guid serviceId, Guid connectionId, int msgId, string text, MessageBody messageBody,
-                     long time, int font, long? messageSequence) :
+    internal Message(Guid serviceId, Guid connectionId, int   msgId, string text, MessageBody messageBody,
+        long              time,      int  font,         long? messageSequence) :
         base(serviceId, connectionId)
     {
         MessageId       = msgId;
@@ -99,12 +99,12 @@ public sealed class Message : BaseModel
     /// </returns>
     public IEnumerable<long> GetAllAtList()
     {
-        var uidList = MessageBody.Where(s => s.MessageType == SegmentType.At)
-                                 .Select(s => long.TryParse((s.Data as AtSegment)?.Target ?? "0",
-                                                            out var uid)
+        List<long> uidList = MessageBody.Where(s => s.MessageType == SegmentType.At)
+                                        .Select(s => long.TryParse((s.Data as AtSegment)?.Target ?? "0",
+                                             out long uid)
                                              ? uid
                                              : -1)
-                                 .ToList();
+                                        .ToList();
         //去除无法转换的值，如at全体
         uidList.RemoveAll(uid => uid == -1);
         return uidList;

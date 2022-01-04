@@ -42,8 +42,8 @@ public sealed class EssenceChangeEventArgs : BaseSoraEventArgs
     #region 构造函数
 
     internal EssenceChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                    OnebotEssenceChangeEventArgs essenceChangeEvent) :
-        base(serviceId, connectionId, eventName, essenceChangeEvent.SelfID, essenceChangeEvent.Time)
+        OnebotEssenceChangeEventArgs     essenceChangeEvent) :
+        base(serviceId, connectionId, eventName, essenceChangeEvent.SelfId, essenceChangeEvent.Time)
     {
         MessageId         = essenceChangeEvent.MessageId;
         Operator          = new User(serviceId, connectionId, essenceChangeEvent.OperatorId);

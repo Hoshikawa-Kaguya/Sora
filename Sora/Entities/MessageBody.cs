@@ -22,7 +22,7 @@ public sealed class MessageBody : IList<SoraSegment>
 
     private readonly List<SoraSegment> _message = new();
 
-    private static readonly Regex[] _regices = InitializeRegex();
+    private static readonly Regex[] Regices = InitializeRegex();
 
     #endregion
 
@@ -305,8 +305,8 @@ public sealed class MessageBody : IList<SoraSegment>
     private static List<SoraSegment> ToSoraSegments(string str)
     {
         // 分离为文本数组和CQ码数组
-        string[] text     = _regices[0].Replace(str, "\0").Split('\0');
-        Match[]  code     = _regices[0].Matches(str).ToArray();
+        string[] text     = Regices[0].Replace(str, "\0").Split('\0');
+        Match[]  code     = Regices[0].Matches(str).ToArray();
         var      segments = new List<SoraSegment>();
         for (var i = 0; i < code.Length; i++)
         {
@@ -326,11 +326,11 @@ public sealed class MessageBody : IList<SoraSegment>
     [NeedReview("ALL")]
     private static SoraSegment ToSoraSegment(string str)
     {
-        var match = _regices[0].Match(str);
-        if (!Enum.TryParse<SegmentType>(match.Groups[1].Value, true, out var segmentType))
+        Match match = Regices[0].Match(str);
+        if (!Enum.TryParse(match.Groups[1].Value, true, out SegmentType segmentType))
             segmentType = SegmentType.Unknown;
-        var collection = _regices[1].Matches(match.Groups[2].Value);
-        var sb         = new StringBuilder();
+        MatchCollection collection = Regices[1].Matches(match.Groups[2].Value);
+        var             sb         = new StringBuilder();
         sb.Append('{');
         foreach (Match code in collection)
         {
@@ -345,41 +345,41 @@ public sealed class MessageBody : IList<SoraSegment>
         return segmentType switch
         {
             SegmentType.Text => new SoraSegment(SegmentType.Text,
-                                                JsonConvert.DeserializeObject<TextSegment>(sb.ToString())),
+                JsonConvert.DeserializeObject<TextSegment>(sb.ToString())),
             SegmentType.Face => new SoraSegment(SegmentType.Face,
-                                                JsonConvert.DeserializeObject<FaceSegment>(sb.ToString())),
+                JsonConvert.DeserializeObject<FaceSegment>(sb.ToString())),
             SegmentType.Image => new SoraSegment(SegmentType.Image,
-                                                 JsonConvert.DeserializeObject<ImageSegment>(sb.ToString())),
+                JsonConvert.DeserializeObject<ImageSegment>(sb.ToString())),
             SegmentType.Record => new SoraSegment(SegmentType.Record,
-                                                  JsonConvert.DeserializeObject<RecordSegment>(sb.ToString())),
+                JsonConvert.DeserializeObject<RecordSegment>(sb.ToString())),
             SegmentType.At => new SoraSegment(SegmentType.At, JsonConvert.DeserializeObject<AtSegment>(sb.ToString())),
             SegmentType.Share => new SoraSegment(SegmentType.Share,
-                                                 JsonConvert.DeserializeObject<ShareSegment>(sb.ToString())),
+                JsonConvert.DeserializeObject<ShareSegment>(sb.ToString())),
             SegmentType.Reply => new SoraSegment(SegmentType.Reply,
-                                                 JsonConvert.DeserializeObject<ReplySegment>(sb.ToString())),
+                JsonConvert.DeserializeObject<ReplySegment>(sb.ToString())),
             SegmentType.Forward => new SoraSegment(SegmentType.Forward,
-                                                   JsonConvert.DeserializeObject<ForwardSegment>(sb.ToString())),
+                JsonConvert.DeserializeObject<ForwardSegment>(sb.ToString())),
             SegmentType.Xml => new SoraSegment(SegmentType.Xml,
-                                               JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
+                JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
             SegmentType.Json => new SoraSegment(SegmentType.Json,
-                                                JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
+                JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
             _ => new SoraSegment(SegmentType.Unknown, null)
         };
     }
 
     private static void RemoveIllegalSegment(ref MessageBody segmentDatas)
     {
-        var iCount = segmentDatas.RemoveAll(s =>
-                                                s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
-                                                s.Data is null);
+        int iCount = segmentDatas.RemoveAll(s =>
+            s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
+            s.Data is null);
         if (iCount != 0) Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
     }
 
     private static void RemoveIllegalSegment(ref List<SoraSegment> segmentDatas)
     {
-        var iCount = segmentDatas.RemoveAll(s =>
-                                                s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
-                                                s.Data is null);
+        int iCount = segmentDatas.RemoveAll(s =>
+            s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
+            s.Data is null);
         if (iCount != 0) Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
     }
 

@@ -49,7 +49,7 @@ public static class SegmentHelper
         //当字符串太长时跳过正则检查
         if (dataStr.Length > 1000) return (dataStr, true);
 
-        var type = StaticVariable.FileRegices.Single(i => i.Value.IsMatch(dataStr)).Key;
+        FileType type = StaticVariable.FileRegices.Single(i => i.Value.IsMatch(dataStr)).Key;
 
         switch (type)
         {

@@ -17,7 +17,7 @@ public enum MuteActionType
     /// <summary>
     /// 开启
     /// </summary>
-    [Description("ban")] 
+    [Description("ban")]
     Enable,
 
     /// <summary>

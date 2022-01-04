@@ -39,8 +39,8 @@ public sealed class FileUploadEventArgs : BaseSoraEventArgs
     /// <param name="eventName">事件名</param>
     /// <param name="fileUploadArgs">文件上传事件参数</param>
     internal FileUploadEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                 OnebotFileUploadEventArgs fileUploadArgs) :
-        base(serviceId, connectionId, eventName, fileUploadArgs.SelfID, fileUploadArgs.Time)
+        OnebotFileUploadEventArgs     fileUploadArgs) :
+        base(serviceId, connectionId, eventName, fileUploadArgs.SelfId, fileUploadArgs.Time)
     {
         SourceGroup = new Group(serviceId, connectionId, fileUploadArgs.GroupId);
         Sender      = new User(serviceId, connectionId, fileUploadArgs.UserId);

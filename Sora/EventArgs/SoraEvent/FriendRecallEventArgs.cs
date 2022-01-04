@@ -33,8 +33,8 @@ public sealed class FriendRecallEventArgs : BaseSoraEventArgs
     /// <param name="eventName">事件名</param>
     /// <param name="friendRecallArgs">私聊消息撤回事件参数</param>
     internal FriendRecallEventArgs(Guid serviceId, Guid connectionId, string eventName,
-                                   OnebotFriendRecallEventArgs friendRecallArgs) :
-        base(serviceId, connectionId, eventName, friendRecallArgs.SelfID, friendRecallArgs.Time)
+        OnebotFriendRecallEventArgs     friendRecallArgs) :
+        base(serviceId, connectionId, eventName, friendRecallArgs.SelfId, friendRecallArgs.Time)
     {
         Sender    = new User(serviceId, connectionId, friendRecallArgs.UserId);
         MessageId = friendRecallArgs.MessageId;

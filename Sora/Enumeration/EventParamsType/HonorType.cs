@@ -17,7 +17,7 @@ public enum HonorType
     /// <summary>
     /// 龙王
     /// </summary>
-    [Description("talkative")] 
+    [Description("talkative")]
     Talkative,
 
     /// <summary>
@@ -29,6 +29,6 @@ public enum HonorType
     /// <summary>
     /// 快乐源泉
     /// </summary>
-    [Description("emotion")] 
+    [Description("emotion")]
     Emotion
 }

@@ -139,7 +139,7 @@ public sealed class SoraApi
     public async ValueTask<(ApiStatus apiStatus, List<Node> nodeArray)> GetForwardMessage(string forwardId)
     {
         if (string.IsNullOrEmpty(forwardId)) throw new NullReferenceException(nameof(forwardId));
-        var (apiStatus, nodeArray) = await ApiInterface.GetForwardMessage(ConnectionId, forwardId);
+        (ApiStatus apiStatus, List<Node> nodeArray) = await ApiInterface.GetForwardMessage(ConnectionId, forwardId);
         return (apiStatus, nodeArray);
     }
 
@@ -344,7 +344,7 @@ public sealed class SoraApi
     /// <param name="anonymousFlag">匿名用户Flag</param>
     /// <param name="duration">禁言时长, 单位秒</param>
     public async ValueTask<ApiStatus> EnableGroupAnonymousMute(long groupId, string anonymousFlag,
-                                                               long duration)
+        long                                                        duration)
     {
         if (groupId < MinGroupId)
             throw new ArgumentOutOfRangeException(nameof(groupId), $"out of range [{groupId}]");
@@ -449,7 +449,7 @@ public sealed class SoraApi
     {
         if (groupId < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
         if (string.IsNullOrEmpty(imageFile)) throw new NullReferenceException(nameof(imageFile));
-        var (retFileStr, isMatch) = SegmentHelper.ParseDataStr(imageFile);
+        (string retFileStr, bool isMatch) = SegmentHelper.ParseDataStr(imageFile);
         if (!isMatch) throw new NotSupportedException($"not supported file type({imageFile})");
         return await ApiInterface.SetGroupPortrait(ConnectionId, groupId, retFileStr, useCache);
     }
@@ -559,11 +559,11 @@ public sealed class SoraApi
     /// <param name="folderId">父目录ID</param>
     /// <returns>API状态</returns>
     public async ValueTask<ApiStatus> UploadGroupFile(long groupId, string localFilePath, string fileName,
-                                                      string folderId = null)
+        string                                             folderId = null)
     {
         if (groupId < MinGroupId) throw new ArgumentOutOfRangeException(nameof(groupId));
         return await ApiInterface.UploadGroupFile(ConnectionId, groupId, localFilePath,
-                                                  fileName, folderId);
+            fileName, folderId);
     }
 
     /// <summary>
@@ -915,7 +915,7 @@ public sealed class SoraApi
     /// <param name="approve">是否同意</param>
     /// <param name="remark">好友备注</param>
     public async ValueTask<ApiStatus> SetFriendAddRequest(string flag, bool approve,
-                                                          string remark = null)
+        string                                                   remark = null)
     {
         if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
         return await ApiInterface.SetFriendAddRequest(ConnectionId, flag, approve, remark);
@@ -929,9 +929,9 @@ public sealed class SoraApi
     /// <param name="approve">是否同意</param>
     /// <param name="reason">拒绝理由</param>
     public async ValueTask<ApiStatus> SetGroupAddRequest(string flag,
-                                                         GroupRequestType requestType,
-                                                         bool approve,
-                                                         string reason = null)
+        GroupRequestType                                        requestType,
+        bool                                                    approve,
+        string                                                  reason = null)
     {
         if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
         return await ApiInterface.SetGroupAddRequest(ConnectionId, flag, requestType, approve, reason);
@@ -968,7 +968,7 @@ public sealed class SoraApi
     /// <returns>文件绝对路径</returns>
     public async ValueTask<(ApiStatus apiStatus, string filePath)> DownloadFile(
         string url, int threadCount, Dictionary<string, string> customHeader = null,
-        int timeout = 10000)
+        int    timeout = 10000)
     {
         if (string.IsNullOrEmpty(url)) throw new NullReferenceException(nameof(url));
         if (threadCount < 1)
@@ -1026,7 +1026,7 @@ public sealed class SoraApi
     /// </summary>
     public long GetLoginUserId()
     {
-        if (ConnectionManager.GetLoginUid(ConnectionId, out var uid)) return uid;
+        if (ConnectionManager.GetLoginUid(ConnectionId, out long uid)) return uid;
         return -1;
     }
 
@@ -1037,7 +1037,7 @@ public sealed class SoraApi
     /// <param name="userId">用户ID</param>
     public bool BlockUser(long userId)
     {
-        return StaticVariable.ServiceInfos[ServiceId].BlockUsers.Add(userId);
+        return StaticVariable.ServiceConfigs[ServiceId].BlockUsers.Add(userId);
     }
 
     /// <summary>
@@ -1046,7 +1046,7 @@ public sealed class SoraApi
     /// <param name="userId">用户ID</param>
     public bool RemoveBlock(long userId)
     {
-        return StaticVariable.ServiceInfos[ServiceId].BlockUsers.Remove(userId);
+        return StaticVariable.ServiceConfigs[ServiceId].BlockUsers.Remove(userId);
     }
 
     /// <summary>
@@ -1055,7 +1055,7 @@ public sealed class SoraApi
     /// <param name="userId">用户ID</param>
     public bool AddSuperUser(long userId)
     {
-        return StaticVariable.ServiceInfos[ServiceId].SuperUsers.Add(userId);
+        return StaticVariable.ServiceConfigs[ServiceId].SuperUsers.Add(userId);
     }
 
     /// <summary>
@@ -1064,7 +1064,7 @@ public sealed class SoraApi
     /// <param name="userId">用户ID</param>
     public bool RemoveSuperUser(long userId)
     {
-        return StaticVariable.ServiceInfos[ServiceId].SuperUsers.Remove(userId);
+        return StaticVariable.ServiceConfigs[ServiceId].SuperUsers.Remove(userId);
     }
 
     #endregion

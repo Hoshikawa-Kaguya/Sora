@@ -38,7 +38,7 @@ public static class StaticVariable
     /// 服务信息
     /// Key:服务标识符
     /// </summary>
-    internal static readonly ConcurrentDictionary<Guid, ServiceInfo> ServiceInfos = new();
+    internal static readonly ConcurrentDictionary<Guid, ServiceConfig> ServiceConfigs = new();
 
     /// <summary>
     /// 版本号
@@ -49,11 +49,11 @@ public static class StaticVariable
     /// 清除服务数据
     /// </summary>
     /// <param name="serviceId">服务标识</param>
-    internal static void CleanServiceInfo(Guid serviceId)
+    internal static void DisposeService(Guid serviceId)
     {
-        Log.Debug("Sora", "Detect service dispose, cleanup service info...");
+        Log.Debug("Sora", "Detect service dispose, cleanup service config...");
         //清空服务信息
-        ServiceInfos.TryRemove(serviceId, out _);
+        ServiceConfigs.TryRemove(serviceId, out _);
         //清空连接信息
         var removeConnList =
             ConnectionInfos.Where(i => i.Value.ServiceId == serviceId)
@@ -61,7 +61,7 @@ public static class StaticVariable
         foreach (var (guid, conn) in removeConnList)
         {
             try
-            {
+            { 
                 conn.Connection.Close();
             }
             catch (Exception e)
@@ -82,7 +82,7 @@ public static class StaticVariable
             WaitingDict.TryRemove(guid, out _);
         }
 
-        Log.Debug("Sora", "Service info cleanup finished");
+        Log.Debug("Sora", "Service config cleanup finished");
     }
 
     /// <summary>

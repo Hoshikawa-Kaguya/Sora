@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -24,9 +25,9 @@ public static class CQCodeUtil
     /// <returns></returns>
     public static string Serialize(this MessageBody msg)
     {
-        var ret                                 = "";
-        foreach (SoraSegment msgSeg in msg) ret += msgSeg.Serialize();
+        var ret = "";
 
+        foreach (SoraSegment msgSeg in msg) ret += msgSeg.Serialize();
         return ret;
     }
 
@@ -42,9 +43,9 @@ public static class CQCodeUtil
         var ret = new StringBuilder();
         ret.Append("[CQ:");
 
-        var messageTypeFieldInfo = msg.MessageType.GetType().GetField(msg.MessageType.ToString());
+        FieldInfo messageTypeFieldInfo = msg.MessageType.GetType().GetField(msg.MessageType.ToString());
         if (messageTypeFieldInfo == null) return "";
-        DescriptionAttribute[] attributes =
+        var attributes =
             (DescriptionAttribute[]) messageTypeFieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
         if (attributes.Length < 1) return "";
 
@@ -52,19 +53,20 @@ public static class CQCodeUtil
         ret.Append(description);
 
 
-        var data       = msg.Data;
-        var dataType   = data.GetType();
-        var dataFields = dataType.GetProperties();
+        BaseSegment    data       = msg.Data;
+        Type           dataType   = data.GetType();
+        PropertyInfo[] dataFields = dataType.GetProperties();
 
-        foreach (var field in dataFields)
+        foreach (PropertyInfo field in dataFields)
         {
-            var jsonPropertyArr = field.GetCustomAttributes<JsonPropertyAttribute>(true).ToList();
+            List<JsonPropertyAttribute> jsonPropertyArr =
+                field.GetCustomAttributes<JsonPropertyAttribute>(true).ToList();
             if (jsonPropertyArr.Count != 1) continue;
-            var jsonProperty = jsonPropertyArr.First();
-            var key          = jsonProperty.PropertyName;
-            var propData     = field.GetValue(data);
+            JsonPropertyAttribute jsonProperty = jsonPropertyArr.First();
+            string                key          = jsonProperty.PropertyName;
+            object                propData     = field.GetValue(data);
             if (string.IsNullOrWhiteSpace(key) || propData == null) continue;
-            var value = (propData.ToString() ?? "").CQCodeEncode(true);
+            string value = (propData.ToString() ?? "").CQCodeEncode(true);
             ret.Append(',').Append(key).Append('=').Append(value);
         }
 
@@ -81,17 +83,17 @@ public static class CQCodeUtil
     public static string CQCodeEncode(this string msg, bool comma = false)
     {
         var ret = new StringBuilder(255);
-        foreach (var t in msg)
+        foreach (char t in msg)
             ret.Append(
-                       t switch
-                       {
-                           '&' => "&amp;",
-                           '[' => "&#91;",
-                           ']' => "&#93;",
-                           ',' => comma ? "&#44;" : ",",
-                           _ => t
-                       }
-                      );
+                t switch
+                {
+                    '&' => "&amp;",
+                    '[' => "&#91;",
+                    ']' => "&#93;",
+                    ',' => comma ? "&#44;" : ",",
+                    _   => t
+                }
+            );
 
         return ret.ToString();
     }
@@ -100,7 +102,7 @@ public static class CQCodeUtil
     /// <summary>
     /// 需要被反转义的内容
     /// </summary>
-    private static readonly string[] _decodeTarget =
+    private static readonly string[] DecodeTarget =
     {
         "&amp;", "&#91;", "&#93;", "&#44;"
     };
@@ -121,16 +123,16 @@ public static class CQCodeUtil
             // & a   m   p    ;
             if (msg[i] == '&')
             {
-                if (i + 4 <= msg.Length && _decodeTarget.Contains(msg[new Range(i, i + 5)]))
+                if (i + 4 <= msg.Length && DecodeTarget.Contains(msg[new Range(i, i + 5)]))
                 {
-                    var t = msg[new Range(i, i + 5)];
-                    var unEscaped = t switch
+                    string t = msg[new Range(i, i + 5)];
+                    char unEscaped = t switch
                     {
                         "&amp;" => '&',
                         "&#91;" => '[',
                         "&#93;" => ']',
                         "&#44;" => ',',
-                        _ => throw new ArgumentOutOfRangeException() // unreachable
+                        _       => throw new ArgumentOutOfRangeException() // unreachable
                     };
 
                     ret.Append(msg[new Range(last, i)]);

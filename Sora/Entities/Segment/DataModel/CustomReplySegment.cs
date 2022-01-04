@@ -25,7 +25,7 @@ public sealed record CustomReplySegment : BaseSegment
     [JsonProperty(PropertyName = "qq")]
     public long Uid { get; internal set; }
 
-    [JsonProperty(PropertyName = "time")] 
+    [JsonProperty(PropertyName = "time")]
     private long TimeStamp { get; set; }
 
     /// <summary>
