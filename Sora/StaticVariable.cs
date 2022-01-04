@@ -55,13 +55,13 @@ public static class StaticVariable
         //清空服务信息
         ServiceConfigs.TryRemove(serviceId, out _);
         //清空连接信息
-        var removeConnList =
+        List<KeyValuePair<Guid, SoraConnectionInfo>> removeConnList =
             ConnectionInfos.Where(i => i.Value.ServiceId == serviceId)
                            .ToList();
-        foreach (var (guid, conn) in removeConnList)
+        foreach ((Guid guid, SoraConnectionInfo conn) in removeConnList)
         {
             try
-            { 
+            {
                 conn.Connection.Close();
             }
             catch (Exception e)
@@ -73,10 +73,10 @@ public static class StaticVariable
         }
 
         //清空等待信息
-        var removeWaitList =
+        List<KeyValuePair<Guid, WaitingInfo>> removeWaitList =
             WaitingDict.Where(i => i.Value.ServiceId == serviceId)
                        .ToList();
-        foreach (var (guid, waitingInfo) in removeWaitList)
+        foreach ((Guid guid, WaitingInfo waitingInfo) in removeWaitList)
         {
             waitingInfo.Semaphore.Set();
             WaitingDict.TryRemove(guid, out _);
@@ -102,14 +102,14 @@ public static class StaticVariable
         //base64
         {
             FileType.Base64, new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
-                                       RegexOptions.Compiled)
+                RegexOptions.Compiled)
         },
         //网络图片链接
         {
             FileType.Url,
             new
                 Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
-                      RegexOptions.Compiled)
+                    RegexOptions.Compiled)
         },
         //文件名
         {FileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled)}
