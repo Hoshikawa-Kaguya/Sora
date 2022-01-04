@@ -68,8 +68,8 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="connectionId">连接标识</param>
     /// <param name="socket">连接信息</param>
     /// <param name="apiTimeout">api超时</param>
-    private static bool AddConnection(Guid serviceId, Guid connectionId, ISoraSocket socket,
-        TimeSpan                           apiTimeout)
+    private static bool AddConnection(Guid     serviceId, Guid connectionId, ISoraSocket socket,
+                                      TimeSpan apiTimeout)
     {
         //检查是否已存在值
         if (StaticVariable.ConnectionInfos.ContainsKey(connectionId)) return false;
@@ -193,8 +193,8 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="serviceId">服务ID</param>
     /// <param name="connId">连接ID</param>
     /// <param name="apiTimeout">api超时</param>
-    internal void OpenConnection(string role, string selfId, ISoraSocket socket, Guid serviceId, Guid connId,
-        TimeSpan                        apiTimeout)
+    internal void OpenConnection(string   role, string selfId, ISoraSocket socket, Guid serviceId, Guid connId,
+                                 TimeSpan apiTimeout)
     {
         //添加服务器记录
         if (!AddConnection(serviceId, connId, socket, apiTimeout))

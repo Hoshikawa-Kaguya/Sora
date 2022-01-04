@@ -14,8 +14,8 @@ internal struct SoraConnectionInfo
     internal          long        SelfId;
     internal readonly TimeSpan    ApiTimeout;
 
-    internal SoraConnectionInfo(Guid serviceId,         ISoraSocket connection,
-        DateTime                     lastHeartBeatTime, TimeSpan    apiTimeout)
+    internal SoraConnectionInfo(Guid     serviceId,         ISoraSocket connection,
+                                DateTime lastHeartBeatTime, TimeSpan    apiTimeout)
     {
         ServiceId         = serviceId;
         Connection        = connection;

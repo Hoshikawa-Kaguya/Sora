@@ -8,7 +8,7 @@ using Sora.Entities.Socket;
 using Sora.Exceptions;
 using Sora.Interfaces;
 using Sora.Net.Config;
-using Sora.OnebotInterface;
+using Sora.OnebotAdapter;
 using Sora.Util;
 using Websocket.Client;
 using YukariToolBox.LightLog;
@@ -35,7 +35,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     /// <summary>
     /// 事件接口
     /// </summary>
-    public EventInterface Event { get; }
+    public EventAdapter Event { get; }
 
     /// <summary>
     /// 服务器连接管理器
@@ -88,7 +88,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
         ConnManager = new ConnectionManager(config);
         Config      = config;
         //实例化事件接口
-        Event = new EventInterface(_clientId);
+        Event = new EventAdapter(_clientId);
         //处理连接路径
         string serverPath = string.IsNullOrEmpty(config.UniversalPath)
             ? $"ws://{config.Host}:{config.Port}"

@@ -33,8 +33,8 @@ public sealed class ConnectEventArgs : BaseSoraEventArgs
     /// <param name="clientType">当前客户端类型</param>
     /// <param name="clientVersion">当前客户端版本</param>
     /// <param name="time">连接时间</param>
-    internal ConnectEventArgs(Guid serviceId,  Guid   connectionId,  string eventName, long loginUid,
-        string                     clientType, string clientVersion, long   time) :
+    internal ConnectEventArgs(Guid   serviceId,  Guid   connectionId,  string eventName, long loginUid,
+                              string clientType, string clientVersion, long   time) :
         base(serviceId, connectionId, eventName, loginUid, time)
     {
         ClientType        = clientType;

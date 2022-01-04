@@ -47,7 +47,7 @@ internal static class ReactiveApiManager
         {
             if (!ConnectionManager.GetApiTimeout(connectionId, out currentTimeout))
             {
-                Log.Error("Sora|ReactiveApiManager", "Cannot get api timout");
+                Log.Error("Sora|ReactiveApiManager", "Cannot get api timeout");
                 currentTimeout = TimeSpan.FromSeconds(5);
             }
         }
@@ -58,7 +58,9 @@ internal static class ReactiveApiManager
         }
 
         //错误数据
-        (var isTimeout, Exception exception) = (false, null);
+        (bool isTimeout, Exception exception) = (false, null);
+        //序列化请求
+        string msg = JsonConvert.SerializeObject(apiRequest, Formatting.None);
         //向客户端发送请求数据
         Task<JObject> apiTask = StaticVariable.ApiSubject
                                               .Where(request => request.Item1 == apiRequest.Echo)
@@ -79,8 +81,7 @@ internal static class ReactiveApiManager
 
         //这里的错误最终将抛给开发者
         //发送消息
-        if (!ConnectionManager
-               .SendMessage(connectionId, JsonConvert.SerializeObject(apiRequest, Formatting.None)))
+        if (!ConnectionManager.SendMessage(connectionId, msg))
             //API消息发送失败
             return (SocketSendError(), null);
 

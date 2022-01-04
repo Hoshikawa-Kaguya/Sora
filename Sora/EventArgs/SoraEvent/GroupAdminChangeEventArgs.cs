@@ -38,8 +38,8 @@ public sealed class GroupAdminChangeEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="adminChangeArgs">管理员变动事件参数</param>
-    internal GroupAdminChangeEventArgs(Guid serviceId, Guid connectionId, string eventName,
-        OnebotAdminChangeEventArgs          adminChangeArgs) :
+    internal GroupAdminChangeEventArgs(Guid                       serviceId, Guid connectionId, string eventName,
+                                       OnebotAdminChangeEventArgs adminChangeArgs) :
         base(serviceId, connectionId, eventName, adminChangeArgs.SelfId, adminChangeArgs.Time)
     {
         SourceGroup = new Group(serviceId, connectionId, adminChangeArgs.GroupId);

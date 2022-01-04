@@ -115,13 +115,13 @@ public class CommandManager
     /// <exception cref="NullReferenceException">空参数异常</exception>
     /// <exception cref="NotSupportedException">在遇到不支持的参数类型时抛出</exception>
     [NeedReview("ALL")]
-    public void RegisterGroupCommand(string[]  cmdExps,
-        Func<GroupMessageEventArgs, ValueTask> commandBlock,
-        MatchType                              matchType,
-        MemberRoleType                         permissionType   = MemberRoleType.Member,
-        RegexOptions                           regexOptions     = RegexOptions.None,
-        Action<Exception>                      exceptionHandler = null,
-        string                                 desc             = "")
+    public void RegisterGroupCommand(string[]                               cmdExps,
+                                     Func<GroupMessageEventArgs, ValueTask> commandBlock,
+                                     MatchType                              matchType,
+                                     MemberRoleType                         permissionType   = MemberRoleType.Member,
+                                     RegexOptions                           regexOptions     = RegexOptions.None,
+                                     Action<Exception>                      exceptionHandler = null,
+                                     string                                 desc             = "")
     {
         //生成指令信息
         if (_groupCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
@@ -147,13 +147,13 @@ public class CommandManager
     /// <exception cref="NullReferenceException">空参数异常</exception>
     /// <exception cref="NotSupportedException">在遇到不支持的参数类型时抛出</exception>
     [NeedReview("ALL")]
-    public void RegisterPrivateCommand(string[]  cmdExps,
-        Func<PrivateMessageEventArgs, ValueTask> commandBlock,
-        MatchType                                matchType,
-        MemberRoleType                           permissionType   = MemberRoleType.Member,
-        RegexOptions                             regexOptions     = RegexOptions.None,
-        Action<Exception>                        exceptionHandler = null,
-        string                                   desc             = "")
+    public void RegisterPrivateCommand(string[]                                 cmdExps,
+                                       Func<PrivateMessageEventArgs, ValueTask> commandBlock,
+                                       MatchType                                matchType,
+                                       MemberRoleType                           permissionType = MemberRoleType.Member,
+                                       RegexOptions                             regexOptions = RegexOptions.None,
+                                       Action<Exception>                        exceptionHandler = null,
+                                       string                                   desc = "")
     {
         //生成指令信息
         if (_privateCommands.AddOrExist(GenDynamicCommandInfo(desc, cmdExps, matchType, regexOptions, commandBlock,
@@ -424,9 +424,9 @@ public class CommandManager
     /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
     [NeedReview("ALL")]
     private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
-        RegexOptions                                 regexOptions,
-        Func<GroupMessageEventArgs, ValueTask>       commandBlock,
-        MemberRoleType                               permissionType, Action<Exception> exceptionHandler)
+                                              RegexOptions regexOptions,
+                                              Func<GroupMessageEventArgs, ValueTask> commandBlock,
+                                              MemberRoleType permissionType, Action<Exception> exceptionHandler)
     {
         //判断参数合法性
         if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
@@ -460,9 +460,9 @@ public class CommandManager
     /// <exception cref="NotSupportedException">在遇到不支持的参数类型是抛出</exception>
     [NeedReview("ALL")]
     private CommandInfo GenDynamicCommandInfo(string desc, string[] cmdExps, MatchType matchType,
-        RegexOptions                                 regexOptions,
-        Func<PrivateMessageEventArgs, ValueTask>     commandBlock,
-        MemberRoleType                               permissionType, Action<Exception> exceptionHandler)
+                                              RegexOptions regexOptions,
+                                              Func<PrivateMessageEventArgs, ValueTask> commandBlock,
+                                              MemberRoleType permissionType, Action<Exception> exceptionHandler)
     {
         //判断参数合法性
         if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");

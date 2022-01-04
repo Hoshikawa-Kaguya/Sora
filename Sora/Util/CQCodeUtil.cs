@@ -77,10 +77,10 @@ public static class CQCodeUtil
 
     #region 反序列化
 
-    private static readonly Regex CQRegex = 
+    private static readonly Regex CQRegex =
         new(@"\[CQ:([A-Za-z]*)(?:(,[^\[\]]+))?\]", RegexOptions.Compiled);
 
-    private static readonly Regex CQKeyValueRegex = 
+    private static readonly Regex CQKeyValueRegex =
         new(@",([A-Za-z]+)=([^,\[\]]+)", RegexOptions.Compiled);
 
     /// <summary>

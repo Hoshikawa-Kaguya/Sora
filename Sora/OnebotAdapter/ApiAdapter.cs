@@ -17,9 +17,9 @@ using Sora.OnebotModel.ApiParams;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using YukariToolBox.LightLog;
 
-namespace Sora.OnebotInterface;
+namespace Sora.OnebotAdapter;
 
-internal static class ApiInterface
+internal static class ApiAdapter
 {
     #region API请求
 
@@ -938,8 +938,8 @@ internal static class ApiInterface
     /// <param name="flag">请求flag</param>
     /// <param name="approve">是否同意</param>
     /// <param name="remark">好友备注</param>
-    internal static async ValueTask<ApiStatus> SetFriendAddRequest(Guid connection, string flag, bool approve,
-        string                                                          remark = null)
+    internal static async ValueTask<ApiStatus> SetFriendAddRequest(Guid   connection, string flag, bool approve,
+                                                                   string remark = null)
     {
         if (string.IsNullOrEmpty(flag)) throw new NullReferenceException(nameof(flag));
         Log.Debug("Sora", "Sending set_friend_add_request request");
@@ -965,11 +965,11 @@ internal static class ApiInterface
     /// <param name="requestType">请求类型</param>
     /// <param name="approve">是否同意</param>
     /// <param name="reason">好友备注</param>
-    internal static async ValueTask<ApiStatus> SetGroupAddRequest(Guid connection,
-        string                                                         flag,
-        GroupRequestType                                               requestType,
-        bool                                                           approve,
-        string                                                         reason = null)
+    internal static async ValueTask<ApiStatus> SetGroupAddRequest(Guid             connection,
+                                                                  string           flag,
+                                                                  GroupRequestType requestType,
+                                                                  bool             approve,
+                                                                  string           reason = null)
     {
         Log.Debug("Sora", "Sending set_group_add_request request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1018,8 +1018,8 @@ internal static class ApiInterface
     /// <param name="groupId">群号</param>
     /// <param name="userId">用户id</param>
     /// <param name="title">头衔</param>
-    internal static async ValueTask<ApiStatus> SetGroupSpecialTitle(Guid connection, long groupId, long userId,
-        string                                                           title)
+    internal static async ValueTask<ApiStatus> SetGroupSpecialTitle(Guid   connection, long groupId, long userId,
+                                                                    string title)
     {
         Log.Debug("Sora", "Sending set_group_special_title request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1045,7 +1045,7 @@ internal static class ApiInterface
     /// <param name="userId">用户id</param>
     /// <param name="rejectRequest">拒绝此人的加群请求</param>
     internal static async ValueTask<ApiStatus> KickGroupMember(Guid connection, long groupId, long userId,
-        bool                                                        rejectRequest)
+                                                               bool rejectRequest)
     {
         Log.Debug("Sora", "Sending set_group_kick request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1070,7 +1070,7 @@ internal static class ApiInterface
     /// <param name="userId">用户id</param>
     /// <param name="duration">禁言时长(s)</param>
     internal static async ValueTask<ApiStatus> SetGroupBan(Guid connection, long groupId, long userId,
-        long                                                    duration)
+                                                           long duration)
     {
         Log.Debug("Sora", "Sending set_group_ban request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1117,7 +1117,7 @@ internal static class ApiInterface
     /// <param name="anonymous">匿名用户对象</param>
     /// <param name="duration">禁言时长, 单位秒</param>
     internal static async ValueTask<ApiStatus> SetAnonymousBan(Guid connection, long groupId, Anonymous anonymous,
-        long                                                        duration)
+                                                               long duration)
     {
         Log.Debug("Sora", "Sending set_group_anonymous_ban request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1142,7 +1142,7 @@ internal static class ApiInterface
     /// <param name="anonymousFlag">匿名用户flag</param>
     /// <param name="duration">禁言时长, 单位秒</param>
     internal static async ValueTask<ApiStatus> SetAnonymousBan(Guid connection, long groupId, string anonymousFlag,
-        long                                                        duration)
+                                                               long duration)
     {
         Log.Debug("Sora", "Sending set_group_anonymous_ban request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1167,7 +1167,7 @@ internal static class ApiInterface
     /// <param name="groupId">群号</param>
     /// <param name="enable">设置或取消</param>
     internal static async ValueTask<ApiStatus> SetGroupAdmin(Guid connection, long userId, long groupId,
-        bool                                                      enable)
+                                                             bool enable)
     {
         Log.Debug("Sora", "Sending set_group_admin request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1259,7 +1259,7 @@ internal static class ApiInterface
     /// <param name="file">图片文件</param>
     /// <param name="useCache">是否使用缓存</param>
     internal static async ValueTask<ApiStatus> SetGroupPortrait(Guid connection, long groupId, string file,
-        bool                                                         useCache)
+                                                                bool useCache)
     {
         if (string.IsNullOrEmpty(file)) throw new NullReferenceException(nameof(file));
         Log.Debug("Sora", "Sending set_group_portrait request");
@@ -1283,8 +1283,8 @@ internal static class ApiInterface
     /// <param name="connection">服务器连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="msgList">消息段数组</param>
-    internal static async ValueTask<ApiStatus> SendGroupForwardMsg(Guid connection, long groupId,
-        IEnumerable<CustomNode>                                         msgList)
+    internal static async ValueTask<ApiStatus> SendGroupForwardMsg(Guid                    connection, long groupId,
+                                                                   IEnumerable<CustomNode> msgList)
     {
         //将消息段转换为数组
         CustomNode[] customNodes = msgList as CustomNode[] ?? msgList.ToArray();
@@ -1335,9 +1335,9 @@ internal static class ApiInterface
     /// <param name="fileName">上传文件名</param>
     /// <param name="folderId">父目录ID 为<see langword="null"/>时则上传到根目录</param>
     /// <param name="timeout">超时</param>
-    internal static async ValueTask<ApiStatus> UploadGroupFile(Guid connection, long groupId, string localFilePath,
-        string                                                      fileName,
-        string                                                      folderId = null, int timeout = 10000)
+    internal static async ValueTask<ApiStatus> UploadGroupFile(Guid   connection, long groupId, string localFilePath,
+                                                               string fileName,
+                                                               string folderId = null, int timeout = 10000)
     {
         Log.Debug("Sora", "Sending upload_group_file request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1402,8 +1402,8 @@ internal static class ApiInterface
     /// <param name="groupId">群号</param>
     /// <param name="content">公告内容</param>
     /// <param name="image">图片</param>
-    internal static async ValueTask<ApiStatus> SendGroupNotice(Guid connection, long groupId, string content,
-        string                                                      image)
+    internal static async ValueTask<ApiStatus> SendGroupNotice(Guid   connection, long groupId, string content,
+                                                               string image)
     {
         Log.Debug("Sora", "Sending _send_group_notice request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1530,7 +1530,7 @@ internal static class ApiInterface
     /// <param name="fileId">文件ID</param>
     /// <param name="busId">文件类型</param>
     internal static async ValueTask<ApiStatus> DeleteGroupFile(Guid connection, long groupId, string fileId,
-        int                                                         busId)
+                                                               int  busId)
     {
         Log.Debug("Sora", "Sending delete_group_file request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest

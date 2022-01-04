@@ -42,8 +42,8 @@ public sealed class GroupMuteEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="groupMuteArgs">群禁言事件参数</param>
-    internal GroupMuteEventArgs(Guid serviceId, Guid connectionId, string eventName,
-        OnebotGroupMuteEventArgs     groupMuteArgs) :
+    internal GroupMuteEventArgs(Guid                     serviceId, Guid connectionId, string eventName,
+                                OnebotGroupMuteEventArgs groupMuteArgs) :
         base(serviceId, connectionId, eventName, groupMuteArgs.SelfId, groupMuteArgs.Time)
     {
         User        = new User(serviceId, connectionId, groupMuteArgs.UserId);
