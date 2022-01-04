@@ -56,6 +56,11 @@ public interface ISoraConfig
     bool EnableSoraCommandManager { get; init; }
 
     /// <summary>
+    /// <para>是否显示websocket接收到的源消息</para>
+    /// </summary>
+    bool EnableSocketMessage { get; init; }
+
+    /// <summary>
     /// <para>在触发事件后自动向ob端标记消息已读</para>
     /// <para>仅支持gocq-1.0-beta6以上版本</para>
     /// </summary>

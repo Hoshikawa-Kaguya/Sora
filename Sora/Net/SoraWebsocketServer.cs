@@ -89,7 +89,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         ConnManager = new ConnectionManager(config);
         Config      = config;
         //实例化事件接口
-        Event = new EventInterface(_serverId, config.AutoMarkMessageRead);
+        Event = new EventInterface(_serverId);
         //禁用原log
         FleckLog.Level = (LogLevel) 4;
         Server = new WebSocketServer($"ws://{config.Host}:{config.Port}")

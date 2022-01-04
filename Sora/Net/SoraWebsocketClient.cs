@@ -88,7 +88,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
         ConnManager = new ConnectionManager(config);
         Config      = config;
         //实例化事件接口
-        Event = new EventInterface(_clientId, config.AutoMarkMessageRead);
+        Event = new EventInterface(_clientId);
         //处理连接路径
         string serverPath = string.IsNullOrEmpty(config.UniversalPath)
             ? $"ws://{config.Host}:{config.Port}"

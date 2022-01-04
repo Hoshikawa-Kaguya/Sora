@@ -50,19 +50,13 @@ public class EventInterface
     /// </summary>
     private Guid ServiceId { get; }
 
-    /// <summary>
-    /// 自动标记消息已读
-    /// </summary>
-    private bool AutoMarkMessageRead { get; }
-
     #endregion
 
     #region 构造方法
 
-    internal EventInterface(Guid serviceId, bool autoMarkMessageRead)
+    internal EventInterface(Guid serviceId)
     {
-        ServiceId           = serviceId;
-        AutoMarkMessageRead = autoMarkMessageRead;
+        ServiceId = serviceId;
         CommandManager = StaticVariable.ServiceConfigs[serviceId].EnableSoraCommandManager
             ? new CommandManager(Assembly.GetEntryAssembly())
             : null;
@@ -201,7 +195,7 @@ public class EventInterface
     /// <param name="connection">客户端链接接口</param>
     internal void Adapter(JObject messageJson, Guid connection)
     {
-        if (Log.GetLogLevel() == LogLevel.Debug)
+        if (StaticVariable.ServiceConfigs[ServiceId].EnableSocketMessage)
             Log.Debug("Socket",
                 $"Get json message:{messageJson.ToString(Formatting.None)}");
         switch (TryGetJsonValue(messageJson, "post_type"))
@@ -323,7 +317,7 @@ public class EventInterface
                     $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                 var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
                 //标记消息已读
-                if (AutoMarkMessageRead)
+                if (StaticVariable.ServiceConfigs[ServiceId].AutoMarkMessageRead)
                     ApiInterface.InternalMarkMessageRead(connection, privateMsg.MessageId);
                 //处理指令
                 if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager)
@@ -345,7 +339,7 @@ public class EventInterface
                     $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                 var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
                 //标记消息已读
-                if (AutoMarkMessageRead)
+                if (StaticVariable.ServiceConfigs[ServiceId].AutoMarkMessageRead)
                     ApiInterface.InternalMarkMessageRead(connection, groupMsg.MessageId);
                 //处理指令
                 if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager)

@@ -42,7 +42,7 @@ public static class SoraServiceFactory
         {
             ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
             ServerConfig s2 => new SoraWebsocketServer(s2, crashAction),
-            _ => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
+            _               => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
         };
     }
 
@@ -53,7 +53,7 @@ public static class SoraServiceFactory
     /// <param name="crashAction">发生未处理异常时的统一回调</param>
     /// <returns>Sora 服务实例列表</returns>
     public static List<ISoraService> CreateMultiService(IEnumerable<ISoraConfig> configList,
-                                                        Action<Exception> crashAction = null)
+                                                        Action<Exception>        crashAction = null)
     {
         return configList.Select(soraConfig => CreateService(soraConfig, crashAction)).ToList();
     }
@@ -64,7 +64,7 @@ public static class SoraServiceFactory
     /// <param name="config">服务配置</param>
     /// <param name="crashAction">发生未处理异常时的统一回调</param>
     /// <returns>Sora 服务实例列表</returns>
-    public static List<ISoraService> CreateMultiService(ISoraConfig config,
+    public static List<ISoraService> CreateMultiService(ISoraConfig       config,
                                                         Action<Exception> crashAction = null)
     {
         var createdService = new List<ISoraService>
@@ -87,6 +87,6 @@ public static class SoraServiceFactoryExtension
     /// <param name="serviceList">多服务列表</param>
     public static async ValueTask StartMultiService(this IEnumerable<ISoraService> serviceList)
     {
-        foreach (var soraService in serviceList) await soraService.StartService();
+        foreach (ISoraService soraService in serviceList) await soraService.StartService();
     }
 }
