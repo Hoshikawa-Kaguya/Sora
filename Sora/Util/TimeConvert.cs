@@ -7,7 +7,7 @@ namespace Sora.Util;
 /// </summary>
 public static class TimeConvert
 {
-    private static readonly DateTime UnixStartTime = new(1970, 1, 1, 8, 0, 0, 0);
+    private static readonly DateTime _unixStartTime = new(1970, 1, 1, 8, 0, 0, 0);
 
     /// <summary>
     /// DateTime转时间戳
@@ -17,8 +17,8 @@ public static class TimeConvert
     public static long ToTimeStamp(this DateTime date, bool isMilliSeconds = false)
     {
         return isMilliSeconds
-            ? (long) (date - UnixStartTime).TotalMilliseconds
-            : (long) (date - UnixStartTime).TotalSeconds;
+            ? (long) (date - _unixStartTime).TotalMilliseconds
+            : (long) (date - _unixStartTime).TotalSeconds;
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ public static class TimeConvert
     public static DateTime ToDateTime(this long timeStamp, bool isMilliSeconds = false)
     {
         return isMilliSeconds
-            ? UnixStartTime.AddMilliseconds(timeStamp)
-            : UnixStartTime.AddSeconds(timeStamp);
+            ? _unixStartTime.AddMilliseconds(timeStamp)
+            : _unixStartTime.AddSeconds(timeStamp);
     }
 }

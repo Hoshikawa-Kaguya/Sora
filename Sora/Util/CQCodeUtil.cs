@@ -77,10 +77,10 @@ public static class CQCodeUtil
 
     #region 反序列化
 
-    private static readonly Regex CQRegex =
+    private static readonly Regex _cqRegex =
         new(@"\[CQ:([A-Za-z]*)(?:(,[^\[\]]+))?\]", RegexOptions.Compiled);
 
-    private static readonly Regex CQKeyValueRegex =
+    private static readonly Regex _cqKeyValueRegex =
         new(@",([A-Za-z]+)=([^,\[\]]+)", RegexOptions.Compiled);
 
     /// <summary>
@@ -91,8 +91,8 @@ public static class CQCodeUtil
     public static MessageBody DeserializeMessage(string cqMsgStr)
     {
         // 分离为文本数组和CQ码数组
-        string[] text     = CQRegex.Replace(cqMsgStr, "\0").Split('\0');
-        Match[]  code     = CQRegex.Matches(cqMsgStr).ToArray();
+        string[] text     = _cqRegex.Replace(cqMsgStr, "\0").Split('\0');
+        Match[]  code     = _cqRegex.Matches(cqMsgStr).ToArray();
         var      segments = new List<SoraSegment>();
         for (var i = 0; i < code.Length; i++)
         {
@@ -111,10 +111,10 @@ public static class CQCodeUtil
     /// <returns>生成的SoraSegment对象</returns>
     public static SoraSegment DeserializeCqCode(string str)
     {
-        Match match = CQRegex.Match(str);
+        Match match = _cqRegex.Match(str);
         if (!Enum.TryParse(match.Groups[1].Value, true, out SegmentType segmentType))
             segmentType = SegmentType.Unknown;
-        MatchCollection collection = CQKeyValueRegex.Matches(match.Groups[2].Value);
+        MatchCollection collection = _cqKeyValueRegex.Matches(match.Groups[2].Value);
 
         var sb = new StringBuilder();
         sb.Append('{');
@@ -185,7 +185,7 @@ public static class CQCodeUtil
     /// <summary>
     /// 需要被反转义的内容
     /// </summary>
-    private static readonly string[] DecodeTarget =
+    private static readonly string[] _decodeTarget =
     {
         "&amp;", "&#91;", "&#93;", "&#44;"
     };
@@ -206,7 +206,7 @@ public static class CQCodeUtil
             // & a   m   p    ;
             if (msg[i] == '&')
             {
-                if (i + 4 <= msg.Length && DecodeTarget.Contains(msg[new Range(i, i + 5)]))
+                if (i + 4 <= msg.Length && _decodeTarget.Contains(msg[new Range(i, i + 5)]))
                 {
                     string t = msg[new Range(i, i + 5)];
                     char unEscaped = t switch
