@@ -20,7 +20,7 @@ public static class SoraServiceFactory
     /// </summary>
     static SoraServiceFactory()
     {
-        Log.Info("Sora", $"框架版本:{StaticVariable.Version}");
+        Log.Info("Sora", $"框架版本:{StaticVariable.VERSION}");
         Log.Debug("Sora", "开发交流群：1081190562");
         Log.Debug("System", Environment.OSVersion.ToString());
         Log.Debug("Runtime", Environment.Version.ToString());
