@@ -51,8 +51,8 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
-        <PackageReference Include="Websocket.Client" Version="4.3.38" />
-        <PackageReference Include="YukariToolBox.LightLog" Version="3.0.8" />
+        <PackageReference Include="Websocket.Client" Version="4.4.43" />
+        <PackageReference Include="YukariToolBox.LightLog" Version="3.0.9" />
     </ItemGroup>
 
 </Project>
