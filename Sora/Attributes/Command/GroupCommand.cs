@@ -15,6 +15,11 @@ public sealed class GroupCommand : RegexCommand
     /// </summary>
     public MemberRoleType PermissionLevel { get; init; } = MemberRoleType.Member;
 
+    /// <summary>
+    /// 指令响应的群组限制
+    /// </summary>
+    public long? SourceGroupId { get; init; } = null;
+
     #endregion
 
     #region 构造方法

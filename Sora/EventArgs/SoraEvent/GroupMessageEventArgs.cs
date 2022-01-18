@@ -68,7 +68,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <param name="groupMsgArgs">群消息事件参数</param>
     internal GroupMessageEventArgs(Guid                    serviceId, Guid connectionId, string eventName,
                                    OnebotGroupMsgEventArgs groupMsgArgs)
-        : base(serviceId, connectionId, eventName, groupMsgArgs.SelfId, groupMsgArgs.Time)
+        : base(serviceId, connectionId, eventName, groupMsgArgs.SelfId, groupMsgArgs.Time, SourceFlag.Group)
     {
         IsAnonymousMessage = groupMsgArgs.Anonymous != null;
         IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
@@ -158,7 +158,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
-                matchType, SourceFlag.Group, regexOptions, null, null,
+                matchType, regexOptions, null, null,
                 SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
@@ -180,7 +180,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
-                matchType, SourceFlag.Group, regexOptions, timeout,
+                matchType, regexOptions, timeout,
                 timeoutTask,
                 SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
@@ -219,7 +219,7 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
             return ValueTask.FromResult(WaitForNextMessage(Sender, new[] {commandExp},
-                matchType, SourceFlag.Group, regexOptions, timeout,
+                matchType, regexOptions, timeout,
                 timeoutTask,
                 SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();

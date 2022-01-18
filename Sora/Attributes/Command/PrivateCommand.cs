@@ -6,6 +6,11 @@ namespace Sora.Attributes.Command;
 public sealed class PrivateCommand : RegexCommand
 {
     /// <summary>
+    /// 指令响应的群组限制
+    /// </summary>
+    public long? SourceGroupId { get; init; } = null;
+
+    /// <summary>
     /// 构造方法
     /// </summary>
     /// <param name="command">

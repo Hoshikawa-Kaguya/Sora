@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -39,7 +40,7 @@ public sealed class LuckyKingEventArgs : BaseSoraEventArgs
     /// <param name="luckyKingEventArgs">运气王事件参数</param>
     internal LuckyKingEventArgs(Guid                       serviceId, Guid connectionId, string eventName,
                                 OnebotPokeOrLuckyEventArgs luckyKingEventArgs) :
-        base(serviceId, connectionId, eventName, luckyKingEventArgs.SelfId, luckyKingEventArgs.Time)
+        base(serviceId, connectionId, eventName, luckyKingEventArgs.SelfId, luckyKingEventArgs.Time, SourceFlag.Group)
     {
         SendUser    = new User(serviceId, connectionId, luckyKingEventArgs.UserId);
         TargetUser  = new User(serviceId, connectionId, luckyKingEventArgs.TargetId);

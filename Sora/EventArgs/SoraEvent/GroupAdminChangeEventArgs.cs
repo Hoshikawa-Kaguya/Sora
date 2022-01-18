@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
@@ -40,7 +41,7 @@ public sealed class GroupAdminChangeEventArgs : BaseSoraEventArgs
     /// <param name="adminChangeArgs">管理员变动事件参数</param>
     internal GroupAdminChangeEventArgs(Guid                       serviceId, Guid connectionId, string eventName,
                                        OnebotAdminChangeEventArgs adminChangeArgs) :
-        base(serviceId, connectionId, eventName, adminChangeArgs.SelfId, adminChangeArgs.Time)
+        base(serviceId, connectionId, eventName, adminChangeArgs.SelfId, adminChangeArgs.Time, SourceFlag.Group)
     {
         SourceGroup = new Group(serviceId, connectionId, adminChangeArgs.GroupId);
         Sender      = new User(serviceId, connectionId, adminChangeArgs.UserId);

@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -44,7 +45,7 @@ public sealed class GroupRecallEventArgs : BaseSoraEventArgs
     /// <param name="groupRecallArgs">群聊撤回事件参数</param>
     internal GroupRecallEventArgs(Guid                    serviceId, Guid connectionId, string eventName,
                                   ApiGroupRecallEventArgs groupRecallArgs) :
-        base(serviceId, connectionId, eventName, groupRecallArgs.SelfId, groupRecallArgs.Time)
+        base(serviceId, connectionId, eventName, groupRecallArgs.SelfId, groupRecallArgs.Time, SourceFlag.Group)
     {
         MessageSender = new User(serviceId, connectionId, groupRecallArgs.UserId);
         //执行者和发送者可能是同一人

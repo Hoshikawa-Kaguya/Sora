@@ -1,6 +1,7 @@
 using System;
 using Sora.Entities;
 using Sora.Entities.Info;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -35,7 +36,7 @@ public sealed class OfflineFileEventArgs : BaseSoraEventArgs
     /// <param name="offlineFileArgs">离线文件事件参数</param>
     internal OfflineFileEventArgs(Guid                       serviceId, Guid connectionId, string eventName,
                                   OnebotOfflineFileEventArgs offlineFileArgs) :
-        base(serviceId, connectionId, eventName, offlineFileArgs.SelfId, offlineFileArgs.Time)
+        base(serviceId, connectionId, eventName, offlineFileArgs.SelfId, offlineFileArgs.Time, SourceFlag.Private)
     {
         Sender          = new User(serviceId, connectionId, offlineFileArgs.UserId);
         OfflineFileInfo = offlineFileArgs.Info;

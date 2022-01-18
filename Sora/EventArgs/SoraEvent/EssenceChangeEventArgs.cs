@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
@@ -43,7 +44,7 @@ public sealed class EssenceChangeEventArgs : BaseSoraEventArgs
 
     internal EssenceChangeEventArgs(Guid                         serviceId, Guid connectionId, string eventName,
                                     OnebotEssenceChangeEventArgs essenceChangeEvent) :
-        base(serviceId, connectionId, eventName, essenceChangeEvent.SelfId, essenceChangeEvent.Time)
+        base(serviceId, connectionId, eventName, essenceChangeEvent.SelfId, essenceChangeEvent.Time, SourceFlag.Group)
     {
         MessageId         = essenceChangeEvent.MessageId;
         Operator          = new User(serviceId, connectionId, essenceChangeEvent.OperatorId);

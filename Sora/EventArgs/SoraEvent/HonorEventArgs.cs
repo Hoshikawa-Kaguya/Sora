@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
@@ -40,7 +41,7 @@ public sealed class HonorEventArgs : BaseSoraEventArgs
     /// <param name="honorEventArgs">荣誉变更事件参数</param>
     internal HonorEventArgs(Guid                 serviceId, Guid connectionId, string eventName,
                             OnebotHonorEventArgs honorEventArgs) :
-        base(serviceId, connectionId, eventName, honorEventArgs.SelfId, honorEventArgs.Time)
+        base(serviceId, connectionId, eventName, honorEventArgs.SelfId, honorEventArgs.Time, SourceFlag.Group)
     {
         TargetUser  = new User(serviceId, connectionId, honorEventArgs.UserId);
         SourceGroup = new Group(serviceId, connectionId, honorEventArgs.GroupId);

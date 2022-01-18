@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -40,7 +41,7 @@ public sealed class FriendRequestEventArgs : BaseSoraEventArgs
     /// <param name="friendRequestArgs">好友申请事件参数</param>
     internal FriendRequestEventArgs(Guid                         serviceId, Guid connectionId, string eventName,
                                     OnebotFriendRequestEventArgs friendRequestArgs) :
-        base(serviceId, connectionId, eventName, friendRequestArgs.SelfId, friendRequestArgs.Time)
+        base(serviceId, connectionId, eventName, friendRequestArgs.SelfId, friendRequestArgs.Time, SourceFlag.Private)
     {
         Sender      = new User(serviceId, connectionId, friendRequestArgs.UserId);
         Comment     = friendRequestArgs.Comment;

@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
@@ -45,7 +46,7 @@ public sealed class GroupMemberChangeEventArgs : BaseSoraEventArgs
     /// <param name="groupMemberChangeArgs">群成员数量变更参数</param>
     internal GroupMemberChangeEventArgs(Guid                             serviceId, Guid connectionId, string eventName,
                                         OnebotGroupMemberChangeEventArgs groupMemberChangeArgs) :
-        base(serviceId, connectionId, eventName, groupMemberChangeArgs.SelfId, groupMemberChangeArgs.Time)
+        base(serviceId, connectionId, eventName, groupMemberChangeArgs.SelfId, groupMemberChangeArgs.Time, SourceFlag.Group)
     {
         ChangedUser = new User(serviceId, connectionId, groupMemberChangeArgs.UserId);
         //执行者和变动成员可能为同一人

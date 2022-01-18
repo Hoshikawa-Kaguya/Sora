@@ -1,6 +1,7 @@
 using System;
 using Sora.Entities;
 using Sora.Entities.Info;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -40,7 +41,7 @@ public sealed class FileUploadEventArgs : BaseSoraEventArgs
     /// <param name="fileUploadArgs">文件上传事件参数</param>
     internal FileUploadEventArgs(Guid                      serviceId, Guid connectionId, string eventName,
                                  OnebotFileUploadEventArgs fileUploadArgs) :
-        base(serviceId, connectionId, eventName, fileUploadArgs.SelfId, fileUploadArgs.Time)
+        base(serviceId, connectionId, eventName, fileUploadArgs.SelfId, fileUploadArgs.Time, SourceFlag.Group)
     {
         SourceGroup = new Group(serviceId, connectionId, fileUploadArgs.GroupId);
         Sender      = new User(serviceId, connectionId, fileUploadArgs.UserId);

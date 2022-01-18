@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -29,7 +30,7 @@ public sealed class FriendAddEventArgs : BaseSoraEventArgs
     /// <param name="friendAddArgs">好友添加事件参数</param>
     internal FriendAddEventArgs(Guid                     serviceId, Guid connectionId, string eventName,
                                 OnebotFriendAddEventArgs friendAddArgs) :
-        base(serviceId, connectionId, eventName, friendAddArgs.SelfId, friendAddArgs.Time)
+        base(serviceId, connectionId, eventName, friendAddArgs.SelfId, friendAddArgs.Time, SourceFlag.Private)
     {
         NewFriend = new User(serviceId, connectionId, friendAddArgs.UserId);
     }
