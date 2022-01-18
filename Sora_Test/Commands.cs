@@ -10,7 +10,10 @@ namespace Sora_Test;
 [CommandGroup]
 public static class Commands
 {
-    [GroupCommand(CommandExpressions = new[] {"1"}, Description = "死了啦都你害的啦")]
+    [RegexCommand(
+        CommandExpressions = new[] {"1"}, 
+        Description = "死了啦都你害的啦",
+        SourceType = SourceFlag.Group)]
     public static async ValueTask TestCommand(GroupMessageEventArgs eventArgs)
     {
         var s = eventArgs.Message.MessageBody[0].Data as TextSegment;

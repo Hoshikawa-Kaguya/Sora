@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Sora;
-using Sora.Enumeration;
 using Sora.Interfaces;
 using Sora.Net.Config;
 using YukariToolBox.LightLog;
@@ -47,12 +46,12 @@ service.Event.OnSelfMessage += (_, eventArgs) =>
 //私聊消息事件
 service.Event.OnPrivateMessage += async (_, eventArgs) => { await eventArgs.Reply("好耶"); };
 //动态向管理器注册指令
-service.Event.CommandManager.RegisterGroupCommand(new[] {"2"},
-    async eventArgs =>
-    {
-        await eventArgs.Reply("哇哦");
-        eventArgs.IsContinueEventChain = false;
-    }, MatchType.Full);
+// service.Event.CommandManager.RegisterGroupCommand(new[] {"2"},
+//     async eventArgs =>
+//     {
+//         await eventArgs.Reply("哇哦");
+//         eventArgs.IsContinueEventChain = false;
+//     }, MatchType.Full);
 
 #endregion
 

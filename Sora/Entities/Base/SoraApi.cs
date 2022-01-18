@@ -183,12 +183,12 @@ public sealed class SoraApi
     /// <param name="messageId">消息ID</param>
     /// <returns>
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
-    /// <para><see cref="Message"/> 消息内容</para>
+    /// <para><see cref="MessageContext"/> 消息内容</para>
     /// <para><see cref="User"/> 发送者</para>
     /// <para><see cref="Group"/> 消息来源群，如果不是群消息则为<see langword="null"/></para>
     /// </returns>
     public async
-        ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup,
+        ValueTask<(ApiStatus apiStatus, MessageContext message, User sender, Group sourceGroup,
             int realId, bool isGroupMsg)> GetMessage(int messageId)
     {
         return await ApiAdapter.GetMessage(ServiceId, ConnectionId, messageId);

@@ -14,7 +14,7 @@ namespace Sora.Entities;
 /// <summary>
 /// 消息类
 /// </summary>
-public sealed class Message : BaseModel
+public sealed class MessageContext : BaseModel
 {
     #region 属性
 
@@ -53,7 +53,7 @@ public sealed class Message : BaseModel
 
     #region 构造函数
 
-    internal Message(Guid serviceId, Guid connectionId, int   msgId, string text, MessageBody messageBody,
+    internal MessageContext(Guid serviceId, Guid connectionId, int   msgId, string text, MessageBody messageBody,
                      long time,      int  font,         long? messageSequence) :
         base(serviceId, connectionId)
     {
@@ -184,7 +184,7 @@ public sealed class Message : BaseModel
     /// <summary>
     /// 等于重载
     /// </summary>
-    public static bool operator ==(Message msgL, Message msgR)
+    public static bool operator ==(MessageContext msgL, MessageContext msgR)
     {
         if (msgL is null && msgR is null) return true;
 
@@ -201,7 +201,7 @@ public sealed class Message : BaseModel
     /// <summary>
     /// 不等于重载
     /// </summary>
-    public static bool operator !=(Message msgL, Message msgR)
+    public static bool operator !=(MessageContext msgL, MessageContext msgR)
     {
         return !(msgL == msgR);
     }
@@ -215,7 +215,7 @@ public sealed class Message : BaseModel
     /// </summary>
     public override bool Equals(object obj)
     {
-        if (obj is Message msg) return this == msg;
+        if (obj is MessageContext msg) return this == msg;
 
         return false;
     }
