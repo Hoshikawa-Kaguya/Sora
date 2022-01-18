@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -34,7 +35,7 @@ public sealed class FriendRecallEventArgs : BaseSoraEventArgs
     /// <param name="friendRecallArgs">私聊消息撤回事件参数</param>
     internal FriendRecallEventArgs(Guid                        serviceId, Guid connectionId, string eventName,
                                    OnebotFriendRecallEventArgs friendRecallArgs) :
-        base(serviceId, connectionId, eventName, friendRecallArgs.SelfId, friendRecallArgs.Time)
+        base(serviceId, connectionId, eventName, friendRecallArgs.SelfId, friendRecallArgs.Time, SourceFlag.Private)
     {
         Sender    = new User(serviceId, connectionId, friendRecallArgs.UserId);
         MessageId = friendRecallArgs.MessageId;

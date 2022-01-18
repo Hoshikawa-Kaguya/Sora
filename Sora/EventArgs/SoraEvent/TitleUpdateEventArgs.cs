@@ -1,5 +1,6 @@
 ﻿using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -25,7 +26,7 @@ public sealed class TitleUpdateEventArgs : BaseSoraEventArgs
 
     internal TitleUpdateEventArgs(Guid                              serviceId, Guid connectionId, string eventName,
                                   OnebotMemberTitleUpdatedEventArgs eventArgs) :
-        base(serviceId, connectionId, eventName, eventArgs.SelfId, eventArgs.Time)
+        base(serviceId, connectionId, eventName, eventArgs.SelfId, eventArgs.Time, SourceFlag.Group)
     {
         TargetUser = new User(serviceId, connectionId, eventArgs.UserId);
         NewTitle   = eventArgs.NewTitle;

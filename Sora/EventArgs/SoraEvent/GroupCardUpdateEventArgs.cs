@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -44,7 +45,7 @@ public sealed class GroupCardUpdateEventArgs : BaseSoraEventArgs
     /// <param name="groupCardUpdateArgs">群名片更新事件参数</param>
     internal GroupCardUpdateEventArgs(Guid                           serviceId, Guid connectionId, string eventName,
                                       OnebotGroupCardUpdateEventArgs groupCardUpdateArgs) :
-        base(serviceId, connectionId, eventName, groupCardUpdateArgs.SelfId, groupCardUpdateArgs.Time)
+        base(serviceId, connectionId, eventName, groupCardUpdateArgs.SelfId, groupCardUpdateArgs.Time, SourceFlag.Group)
     {
         User        = new User(serviceId, connectionId, groupCardUpdateArgs.UserId);
         SourceGroup = new Group(serviceId, connectionId, groupCardUpdateArgs.GroupId);

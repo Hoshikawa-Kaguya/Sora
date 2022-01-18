@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities.Info;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -25,9 +26,11 @@ public sealed class ClientStatusChangeEventArgs : BaseSoraEventArgs
 
     #region 构造方法
 
-    internal ClientStatusChangeEventArgs(Guid                        serviceId, Guid connectionId, string eventName,
+    internal ClientStatusChangeEventArgs(Guid                        serviceId,
+                                         Guid                        connectionId,
+                                         string                      eventName,
                                          OnebotClientStatusEventArgs clientStatus) :
-        base(serviceId, connectionId, eventName, clientStatus.SelfId, clientStatus.Time)
+        base(serviceId, connectionId, eventName, clientStatus.SelfId, clientStatus.Time, SourceFlag.System)
     {
         Client = clientStatus.ClientInfo;
         Online = clientStatus.Online;

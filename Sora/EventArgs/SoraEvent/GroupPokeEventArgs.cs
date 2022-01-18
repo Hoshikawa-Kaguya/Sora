@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -39,7 +40,7 @@ public sealed class GroupPokeEventArgs : BaseSoraEventArgs
     /// <param name="pokeEventArgs">戳一戳事件参数</param>
     internal GroupPokeEventArgs(Guid                       serviceId, Guid connectionId, string eventName,
                                 OnebotPokeOrLuckyEventArgs pokeEventArgs) :
-        base(serviceId, connectionId, eventName, pokeEventArgs.SelfId, pokeEventArgs.Time)
+        base(serviceId, connectionId, eventName, pokeEventArgs.SelfId, pokeEventArgs.Time, SourceFlag.Group)
     {
         SendUser    = new User(serviceId, connectionId, pokeEventArgs.UserId);
         TargetUser  = new User(serviceId, connectionId, pokeEventArgs.TargetId);

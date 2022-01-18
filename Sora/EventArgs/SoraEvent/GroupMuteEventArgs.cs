@@ -1,5 +1,6 @@
 using System;
 using Sora.Entities;
+using Sora.Enumeration;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -44,7 +45,7 @@ public sealed class GroupMuteEventArgs : BaseSoraEventArgs
     /// <param name="groupMuteArgs">群禁言事件参数</param>
     internal GroupMuteEventArgs(Guid                     serviceId, Guid connectionId, string eventName,
                                 OnebotGroupMuteEventArgs groupMuteArgs) :
-        base(serviceId, connectionId, eventName, groupMuteArgs.SelfId, groupMuteArgs.Time)
+        base(serviceId, connectionId, eventName, groupMuteArgs.SelfId, groupMuteArgs.Time, SourceFlag.Group)
     {
         User        = new User(serviceId, connectionId, groupMuteArgs.UserId);
         Operator    = new User(serviceId, connectionId, groupMuteArgs.OperatorId);
