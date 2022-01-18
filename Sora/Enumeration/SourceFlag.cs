@@ -1,17 +1,25 @@
-﻿namespace Sora.Enumeration;
+﻿using System;
+
+namespace Sora.Enumeration;
 
 /// <summary>
-/// 消息来源类型
+/// 事件来源类型
 /// </summary>
+[Flags]
 public enum SourceFlag
 {
     /// <summary>
-    /// 群聊
+    /// 群组
     /// </summary>
-    Group,
+    Group = 1 << 0,
 
     /// <summary>
-    /// 私聊
+    /// 用户
     /// </summary>
-    Private
+    Private = 1 << 1,
+
+    /// <summary>
+    /// 系统消息
+    /// </summary>
+    System = 1 << 2
 }
