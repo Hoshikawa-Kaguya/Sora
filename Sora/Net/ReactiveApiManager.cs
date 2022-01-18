@@ -27,7 +27,7 @@ internal static class ReactiveApiManager
     /// <param name="response">响应json</param>
     internal static void GetResponse(Guid echo, JObject response)
     {
-        Log.Debug("Sora|ReactiveApiManager", $"Get api response {response.ToString(Formatting.None)}");
+        Log.Debug("Sora", $"Get api response {response.ToString(Formatting.None)}");
         StaticVariable.ApiSubject.OnNext(new Tuple<Guid, JObject>(echo, response));
     }
 
@@ -47,13 +47,13 @@ internal static class ReactiveApiManager
         {
             if (!ConnectionManager.GetApiTimeout(connectionId, out currentTimeout))
             {
-                Log.Error("Sora|ReactiveApiManager", "Cannot get api timeout");
+                Log.Error("Sora", "Cannot get api timeout");
                 currentTimeout = TimeSpan.FromSeconds(5);
             }
         }
         else
         {
-            Log.Debug("Sora|ReactiveApiManager", $"timeout covered to {timeout.Value.TotalMilliseconds} ms");
+            Log.Debug("Sora", $"timeout covered to {timeout.Value.TotalMilliseconds} ms");
             currentTimeout = (TimeSpan) timeout;
         }
 
@@ -74,7 +74,7 @@ internal static class ReactiveApiManager
                                                    exception = e;
                                                    //在错误为超时时不打印log
                                                    if (!isTimeout)
-                                                       Log.Error("Sora|ReactiveApiManager",
+                                                       Log.Error("Sora",
                                                            $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
                                                    return new JObject();
                                                });
@@ -94,7 +94,7 @@ internal static class ReactiveApiManager
         if (exception == null) return (NullResponse(), null);
         //观察者抛出异常
         if (isTimeout)
-            Log.Error("Sora|ReactiveApiManager",
+            Log.Error("Sora",
                 $"api time out[msg echo:{apiRequest.Echo}]");
         return isTimeout
             ? (TimeOut(), null)

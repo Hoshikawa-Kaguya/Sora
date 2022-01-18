@@ -24,7 +24,7 @@ public static class SoraServiceFactory
         Log.Debug("Sora", "开发交流群：1081190562");
         Log.Debug("System", Environment.OSVersion.ToString());
         Log.Debug("Runtime", Environment.Version.ToString());
-        Log.Info("OnebotProtocolVersion", "11");
+        Log.Info("OnebotProtocolVersion", StaticVariable.ONEBOT_PROTOCOL);
     }
 
     /// <summary>
