@@ -37,13 +37,13 @@ public static class Helper
     #region 指令实例相关
 
     /// <summary>
-    /// 对列表进行添加 CommandInfo 元素，或如果存在该项的话，忽略
+    /// 对列表进行添加 RegexCommandInfo 元素，或如果存在该项的话，忽略
     /// </summary>
     /// <param name="list">要添加元素的列表</param>
     /// <param name="data">要添加的元素</param>
     /// <returns>是否成功添加，若已存在则返回false。</returns>
     [Reviewed("nidbCN", "2021-03-24 19:39")]
-    internal static bool AddOrExist(this List<CommandInfo> list, CommandInfo data)
+    internal static bool AddOrExist(this List<RegexCommandInfo> list, RegexCommandInfo data)
     {
         if (list.Any(i => i.Equals(data))) return false;
         //当有指令表达式相同且优先级相同时，抛出错误

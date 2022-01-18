@@ -9,6 +9,11 @@ namespace Sora.Enumeration;
 public enum SourceFlag
 {
     /// <summary>
+    /// 空
+    /// </summary>
+    None = 0,
+
+    /// <summary>
     /// 群组
     /// </summary>
     Group = 1 << 0,

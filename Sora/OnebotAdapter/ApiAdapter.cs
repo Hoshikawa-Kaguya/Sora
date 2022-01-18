@@ -416,7 +416,7 @@ internal static class ApiAdapter
     /// <param name="connection">服务器连接标识</param>
     /// <param name="msgId">消息ID</param>
     internal static async
-        ValueTask<(ApiStatus apiStatus, Message message, User sender, Group sourceGroup, int
+        ValueTask<(ApiStatus apiStatus, MessageContext message, User sender, Group sourceGroup, int
             realId, bool
             isGroupMsg)> GetMessage(
             Guid serviceId, Guid connection, int msgId)
@@ -436,7 +436,7 @@ internal static class ApiAdapter
         //处理消息段
         var rawMessage = ret["data"]?["message"]?.ToObject<List<OnebotSegment>>();
         return (apiStatus,
-            message: new Message(serviceId,
+            message: new MessageContext(serviceId,
                 connection,
                 msgId,
                 ret["data"]?["raw_message"]?.ToString(),

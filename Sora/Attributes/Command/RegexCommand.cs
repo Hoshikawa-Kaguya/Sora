@@ -1,6 +1,7 @@
 using System;
 using System.Text.RegularExpressions;
 using Sora.Enumeration;
+using Sora.Enumeration.EventParamsType;
 
 namespace Sora.Attributes.Command;
 
@@ -8,7 +9,7 @@ namespace Sora.Attributes.Command;
 /// 指令
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public abstract class RegexCommand : Attribute
+public sealed class RegexCommand : Attribute
 {
     #region 私有字段
 
@@ -25,9 +26,33 @@ public abstract class RegexCommand : Attribute
     /// </summary>
     public string[] CommandExpressions
     {
-        get => _commandExpressions ?? throw new NullReferenceException("CommandExpression cannot be null");
+        get => _commandExpressions ?? null;
         init => _commandExpressions = value ?? throw new NullReferenceException("CommandExpression cannot be null");
     }
+
+    //TODO
+    /// <summary>
+    /// 指令响应的特定群组
+    /// </summary>
+    public long[] SourceGroups { get; init; } = Array.Empty<long>();
+
+    //TODO
+    /// <summary>
+    /// 指令响应的特定用户
+    /// </summary>
+    public long[] SourceUsers { get; init; } = Array.Empty<long>();
+
+    /// <summary>
+    /// 指令响应的源
+    /// </summary>
+    public SourceFlag SourceType { get; init; } = SourceFlag.None;
+
+    /// <summary>
+    /// <para>权限限制</para>
+    /// <para>私聊和群聊的默认值<see cref="MemberRoleType.Member"/></para>
+    /// <para>当用户被设置SuperUser时值为<see cref="MemberRoleType.SuperUser"/></para>
+    /// </summary>
+    public MemberRoleType PermissionLevel { get; init; } = MemberRoleType.Member;
 
     /// <summary>
     /// <para>指令描述</para>
@@ -63,7 +88,7 @@ public abstract class RegexCommand : Attribute
     /// <summary>
     /// 构造方法
     /// </summary>
-    protected RegexCommand(string[] commands)
+    public RegexCommand(string[] commands)
     {
         CommandExpressions = commands;
         Regex.CacheSize++;
@@ -72,7 +97,7 @@ public abstract class RegexCommand : Attribute
     /// <summary>
     /// 构造方法
     /// </summary>
-    protected RegexCommand()
+    public RegexCommand()
     {
         Regex.CacheSize++;
     }

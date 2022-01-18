@@ -1,7 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Sora.Converter;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration;
@@ -16,14 +15,9 @@ namespace Sora.EventArgs.SoraEvent;
 /// <summary>
 /// 群消息事件参数
 /// </summary>
-public sealed class GroupMessageEventArgs : BaseSoraEventArgs
+public sealed class GroupMessageEventArgs : BaseMessageEventArgs
 {
     #region 属性
-
-    /// <summary>
-    /// 消息内容
-    /// </summary>
-    public Message Message { get; }
 
     /// <summary>
     /// 是否来源于匿名群成员
@@ -34,11 +28,6 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// 是否为Bot账号所发送的消息
     /// </summary>
     public bool IsSelfMessage { get; }
-
-    /// <summary>
-    /// 消息发送者实例
-    /// </summary>
-    public User Sender { get; }
 
     /// <summary>
     /// 发送者信息
@@ -68,17 +57,12 @@ public sealed class GroupMessageEventArgs : BaseSoraEventArgs
     /// <param name="groupMsgArgs">群消息事件参数</param>
     internal GroupMessageEventArgs(Guid                    serviceId, Guid connectionId, string eventName,
                                    OnebotGroupMsgEventArgs groupMsgArgs)
-        : base(serviceId, connectionId, eventName, groupMsgArgs.SelfId, groupMsgArgs.Time, SourceFlag.Group)
+        : base(serviceId, connectionId, eventName, groupMsgArgs)
     {
         IsAnonymousMessage = groupMsgArgs.Anonymous != null;
         IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
-        //将api消息段转换为sorasegment
-        Message = new Message(serviceId, connectionId, groupMsgArgs.MessageId, groupMsgArgs.RawMessage,
-            groupMsgArgs.MessageList.ToMessageBody(), groupMsgArgs.Time,
-            groupMsgArgs.Font, groupMsgArgs.MessageSequence);
-        Sender      = new User(serviceId, connectionId, groupMsgArgs.UserId);
-        SourceGroup = new Group(serviceId, connectionId, groupMsgArgs.GroupId);
-        Anonymous   = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
+        SourceGroup        = new Group(serviceId, connectionId, groupMsgArgs.GroupId);
+        Anonymous          = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
 
         //检查服务管理员权限
         GroupSenderInfo groupSenderInfo = groupMsgArgs.SenderInfo;

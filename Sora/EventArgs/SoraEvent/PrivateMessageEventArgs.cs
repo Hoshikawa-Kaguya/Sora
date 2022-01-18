@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Sora.Converter;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration;
@@ -16,19 +15,9 @@ namespace Sora.EventArgs.SoraEvent;
 /// <summary>
 /// 私聊消息事件参数
 /// </summary>
-public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
+public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
 {
     #region 属性
-
-    /// <summary>
-    /// 消息内容
-    /// </summary>
-    public Message Message { get; }
-
-    /// <summary>
-    /// 消息发送者实例
-    /// </summary>
-    public User Sender { get; }
 
     /// <summary>
     /// 发送者信息
@@ -53,13 +42,8 @@ public sealed class PrivateMessageEventArgs : BaseSoraEventArgs
     /// <param name="privateMsgArgs">私聊消息事件参数</param>
     internal PrivateMessageEventArgs(Guid                      serviceId, Guid connectionId, string eventName,
                                      OnebotPrivateMsgEventArgs privateMsgArgs)
-        : base(serviceId, connectionId, eventName, privateMsgArgs.SelfId, privateMsgArgs.Time, SourceFlag.Private)
+        : base(serviceId, connectionId, eventName, privateMsgArgs)
     {
-        //将api消息段转换为sorasegment
-        Message = new Message(serviceId, connectionId, privateMsgArgs.MessageId, privateMsgArgs.RawMessage,
-            privateMsgArgs.MessageList.ToMessageBody(),
-            privateMsgArgs.Time, privateMsgArgs.Font, null);
-        Sender             = new User(serviceId, connectionId, privateMsgArgs.UserId);
         IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
 
         //检查服务管理员权限
