@@ -95,7 +95,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     {
         //生成指令上下文
         WaitingInfo waitInfo =
-            CommandManager.GenWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, SourceType,
+            CommandManager.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, SourceType,
                 regexOptions, SoraApi.ConnectionId, SoraApi.ServiceId);
         //检查是否为初始指令重复触发
         if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
