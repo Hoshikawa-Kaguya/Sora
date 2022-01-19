@@ -5,7 +5,7 @@ namespace Sora.Exceptions;
 /// <summary>
 /// WebSocket客户端错误
 /// </summary>
-public class WebSocketClientException : Exception
+public sealed class WebSocketClientException : Exception
 {
     /// <summary>
     /// 初始化

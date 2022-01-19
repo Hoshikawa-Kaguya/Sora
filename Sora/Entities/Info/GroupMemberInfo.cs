@@ -10,7 +10,7 @@ namespace Sora.Entities.Info;
 /// <summary>
 /// 群成员信息
 /// </summary>
-public class GroupMemberInfo
+public sealed class GroupMemberInfo
 {
     /// <summary>
     /// 群号

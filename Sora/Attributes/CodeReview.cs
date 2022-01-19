@@ -19,7 +19,7 @@ namespace Sora.Attributes;
 /// 代码审核特性类
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class Reviewed : Attribute
+public sealed class Reviewed : Attribute
 {
     /// <summary>
     /// 审核者
@@ -47,7 +47,7 @@ public class Reviewed : Attribute
 /// 需要审查特性类
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class NeedReview : Attribute
+public sealed class NeedReview : Attribute
 {
     /// <summary>
     /// 修改的位置(行号或ALL)

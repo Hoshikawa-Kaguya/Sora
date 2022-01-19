@@ -6,6 +6,6 @@ namespace Sora.Attributes.Command;
 /// 指令组
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class CommandGroup : Attribute
+public sealed class CommandGroup : Attribute
 {
 }

@@ -7,7 +7,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent;
 /// <summary>
 /// 精华消息变动事件
 /// </summary>
-internal class OnebotEssenceChangeEventArgs : BaseNoticeEventArgs
+internal sealed class OnebotEssenceChangeEventArgs : BaseNoticeEventArgs
 {
     /// <summary>
     /// 群号
