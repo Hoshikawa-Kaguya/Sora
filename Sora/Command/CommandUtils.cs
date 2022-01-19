@@ -62,5 +62,10 @@ internal static class CommandUtils
         return isGroupCommandLegality || isPrivateCommandLegality;
     }
 
+    public static bool IsEmpty(this long[] arr)
+    {
+        return arr is null || arr.Length == 0;
+    }
+
     #endregion
 }

@@ -1,11 +1,9 @@
 using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Sora.Attributes;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
-using Sora.EventArgs.SoraEvent;
 using Sora.Util;
 
 namespace Sora.Entities.Info.InternalDataInfo;
@@ -17,65 +15,18 @@ internal readonly struct RegexCommandInfo
 {
     #region 属性
 
-    /// <summary>
-    /// 指令描述
-    /// </summary>
-    internal string Desc { get; }
-
-    /// <summary>
-    /// 匹配指令的正则
-    /// </summary>
-    internal string[] Regex { get; }
-
-    /// <summary>
-    /// 指令组名
-    /// </summary>
-    internal string GroupName { get; }
-
-    /// <summary>
-    /// 指令回调方法
-    /// </summary>
-    internal MethodInfo MethodInfo { get; }
-
-    /// <summary>
-    /// 权限限制
-    /// </summary>
-    internal MemberRoleType PermissionType { get; }
-
-    /// <summary>
-    /// 动态指令委托来源
-    /// </summary>
-    internal SourceFlag SourceFlag { get; }
-
-    /// <summary>
-    /// 动态指令委托
-    /// </summary>
-    internal Func<GroupMessageEventArgs, ValueTask> GroupActionBlock { get; }
-
-    /// <summary>
-    /// 动态指令委托
-    /// </summary>
-    internal Func<PrivateMessageEventArgs, ValueTask> PrivateActionBlock { get; }
-
-    /// <summary>
-    /// 执行实例
-    /// </summary>
-    internal Type InstanceType { get; }
-
-    /// <summary>
-    /// 优先级
-    /// </summary>
-    internal int Priority { get; }
-
-    /// <summary>
-    /// 正则匹配选项
-    /// </summary>
-    internal RegexOptions RegexOptions { get; }
-
-    /// <summary>
-    /// 指令执行异常处理
-    /// </summary>
-    internal Action<Exception> ExceptionHandler { get; }
+    internal readonly string            Desc;             //注释
+    internal readonly string[]          Regex;            //正则表达式
+    internal readonly string            GroupName;        //指令组名
+    internal readonly MethodInfo        MethodInfo;       //指令执行的方法
+    internal readonly MemberRoleType    PermissionType;   //指令执行权限
+    internal readonly SourceFlag        SourceFlag;       //指令匹配源类型
+    internal readonly Type              InstanceType;     //指令所在实例类型
+    internal readonly int               Priority;         //优先级
+    internal readonly RegexOptions      RegexOptions;     //正则设置
+    internal readonly Action<Exception> ExceptionHandler; //异常回调
+    internal readonly long[]            SourceGroups;     //群组限制
+    internal readonly long[]            SourceUsers;      //用户限制
 
     #endregion
 
@@ -84,22 +35,23 @@ internal readonly struct RegexCommandInfo
     /// <summary>
     /// 指令信息构造(常规指令构建)
     /// </summary>
-    internal RegexCommandInfo(string    desc,           string[] regex,    string       groupName,    MethodInfo method,
-                         MemberRoleType permissionType, int      priority, RegexOptions regexOptions, SourceFlag source,
-                         Action<Exception> exceptionHandler, Type     instanceType = null)
+    internal RegexCommandInfo(
+        string            desc,             string[] regex,        string       groupName,    MethodInfo method,
+        MemberRoleType    permissionType,   int      priority,     RegexOptions regexOptions, SourceFlag source,
+        Action<Exception> exceptionHandler, long[]   sourceGroups, long[]       sourceUsers,  Type instanceType = null)
     {
-        Desc               = desc;
-        Regex              = regex;
-        GroupName          = groupName;
-        MethodInfo         = method;
-        InstanceType       = instanceType;
-        PermissionType     = permissionType;
-        GroupActionBlock   = null;
-        PrivateActionBlock = null;
-        Priority           = priority;
-        RegexOptions       = regexOptions;
-        SourceFlag         = source;
-        ExceptionHandler   = exceptionHandler;
+        Desc             = desc;
+        Regex            = regex;
+        GroupName        = groupName;
+        MethodInfo       = method;
+        InstanceType     = instanceType;
+        PermissionType   = permissionType;
+        Priority         = priority;
+        RegexOptions     = regexOptions;
+        SourceFlag       = source;
+        SourceGroups     = sourceGroups;
+        SourceUsers      = sourceUsers;
+        ExceptionHandler = exceptionHandler;
     }
 
     #endregion

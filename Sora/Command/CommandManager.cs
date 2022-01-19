@@ -49,7 +49,7 @@ public class CommandManager
 
     #endregion
 
-    #region 公有管理方法
+    #region 指令执行和注册
 
     /// <summary>
     /// 自动注册所有指令
@@ -61,16 +61,14 @@ public class CommandManager
         if (assembly == null) return;
 
         //查找所有的指令集
-        Dictionary<Type, MethodInfo[]> cmdGroups = assembly.GetExportedTypes()
-                                                            //获取指令组
-                                                           .Where(type =>
-                                                                type.IsDefined(typeof(CommandGroup), false) &&
-                                                                type.IsClass)
-                                                           .Select(type => (type, type.GetMethods()
-                                                               .Where(method => method.CheckMethodLegality())
-                                                               .ToArray()))
-                                                           .ToDictionary(methods => methods.type,
-                                                                methods => methods.Item2.ToArray());
+        Dictionary<Type, MethodInfo[]> cmdGroups =
+            assembly.GetExportedTypes()
+                     //获取指令组
+                    .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
+                    .Select(type => (type, type.GetMethods()
+                                               .Where(method => method.CheckMethodLegality())
+                                               .ToArray()))
+                    .ToDictionary(methods => methods.type, methods => methods.Item2.ToArray());
 
         foreach ((Type classType, MethodInfo[] methodInfos) in cmdGroups)
         foreach (MethodInfo methodInfo in methodInfos)
@@ -104,7 +102,7 @@ public class CommandManager
         Dictionary<Guid, WaitingInfo> waitingCommand =
             StaticVariable.WaitingDict
                           .Where(command =>
-                               CheckWaitingCommand(command, eventArgs))
+                               WaitingCommandMatch(command, eventArgs))
                           .ToDictionary(
                                i => i.Key,
                                i => i.Value);
@@ -134,15 +132,7 @@ public class CommandManager
         if (_regexCommands.Count == 0) return;
 
         List<RegexCommandInfo> matchedCommand =
-            _regexCommands.Where(command =>
-                               //判断同一源
-                               command.SourceFlag == eventArgs.SourceType &&
-                               //判断正则表达式
-                               command.Regex.Any(regex =>
-                                   Regex.IsMatch(eventArgs.Message.RawText,
-                                       regex,
-                                       RegexOptions.Compiled |
-                                       command.RegexOptions)))
+            _regexCommands.Where(command => RegexCommandMatch(command, eventArgs))
                           .OrderByDescending(p => p.Priority)
                           .ToList();
 
@@ -171,158 +161,6 @@ public class CommandManager
 
         instance = default;
         return false;
-    }
-
-    #endregion
-
-    #region 私有管理方法
-
-    /// <summary>
-    /// 生成连续对话上下文
-    /// </summary>
-    /// <param name="sourceUid">消息源UID</param>
-    /// <param name="sourceGroup">消息源GID</param>
-    /// <param name="cmdExps">指令表达式</param>
-    /// <param name="matchType">匹配类型</param>
-    /// <param name="sourceFlag">来源标识</param>
-    /// <param name="regexOptions">正则匹配选项</param>
-    /// <param name="connectionId">连接标识</param>
-    /// <param name="serviceId">服务标识</param>
-    /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
-    internal static WaitingInfo GenWaitingCommandInfo(
-        long         sourceUid,    long sourceGroup,  string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
-        RegexOptions regexOptions, Guid connectionId, Guid     serviceId)
-    {
-        if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
-        string[] matchExp = matchType switch
-        {
-            MatchType.Full => cmdExps
-                             .Select(command => $"^{command}$")
-                             .ToArray(),
-            MatchType.Regex => cmdExps,
-            MatchType.KeyWord => cmdExps
-                                .Select(command => $"[{command}]+")
-                                .ToArray(),
-            _ => throw new NotSupportedException("unknown matchtype")
-        };
-
-        return new WaitingInfo(new AutoResetEvent(false),
-            matchExp,
-            serviceId: serviceId,
-            connectionId: connectionId,
-            source: (sourceUid, sourceGroup),
-            sourceFlag: sourceFlag,
-            regexOptions: regexOptions);
-    }
-
-    /// <summary>
-    /// 生成指令信息
-    /// </summary>
-    /// <param name="method">指令method</param>
-    /// <param name="classType">所在实例类型</param>
-    /// <param name="regexCommandInfo">指令信息</param>
-    private bool GenerateCommandInfo(MethodInfo method, Type classType, out RegexCommandInfo regexCommandInfo)
-    {
-        //获取指令属性
-        RegexCommand commandAttr =
-            method.GetCustomAttribute(typeof(RegexCommand)) as RegexCommand ??
-            throw new NullReferenceException("command attribute is null with unknown reason");
-
-        Log.Debug("Command", $"Registering command [{method.Name}]");
-
-        //处理指令匹配类型
-        MatchType match = commandAttr.MatchType;
-        //处理表达式
-        string[] matchExp = ParseCommandExps(commandAttr.CommandExpressions, match);
-
-        //检查和创建实例
-        //若创建实例失败且方法不是静态的，则返回空白命令信息
-        if (!method.IsStatic && !CheckAndCreateInstance(classType))
-        {
-            regexCommandInfo = Helper.CreateInstance<RegexCommandInfo>();
-            return false;
-        }
-
-        //创建指令信息
-        regexCommandInfo = new RegexCommandInfo(
-            commandAttr.Description,
-            matchExp,
-            classType.Name,
-            method,
-            commandAttr.PermissionLevel,
-            commandAttr.Priority,
-            commandAttr.RegexOptions,
-            commandAttr.SourceType,
-            commandAttr.ExceptionHandler,
-            method.IsStatic ? null : classType);
-
-        return true;
-    }
-
-    //TODO 动态指令重写
-
-    private bool CheckWaitingCommand(KeyValuePair<Guid, WaitingInfo> command,
-                                     BaseMessageEventArgs            eventArgs)
-    {
-        return eventArgs.SourceType switch
-        {
-            SourceFlag.Group =>
-                //判断发起源
-                command.Value.SourceFlag == SourceFlag.Group
-                //判断来自同一个连接
-             && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
-                //判断来着同一个群
-             && command.Value.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
-                //判断来自同一人
-             && command.Value.Source.u == eventArgs.Sender
-                //匹配
-             && command.Value.CommandExpressions.Any(regex => Regex.IsMatch(eventArgs.Message.RawText, regex,
-                    RegexOptions.Compiled | command.Value.RegexOptions)),
-            SourceFlag.Private => command.Value.SourceFlag == SourceFlag.Private
-                //判断来自同一个连接
-             && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
-                //判断来自同一人
-             && command.Value.Source.u == eventArgs.Sender
-                //匹配指令
-             && command.Value.CommandExpressions.Any(regex => Regex.IsMatch(eventArgs.Message.RawText, regex,
-                    RegexOptions.Compiled | command.Value.RegexOptions)),
-            _ => false
-        };
-    }
-
-    /// <summary>
-    /// 检查实例的存在和生成
-    /// </summary>
-    [Reviewed("XiaoHe321", "2021-03-16 21:07")]
-    private bool CheckAndCreateInstance(Type classType)
-    {
-        //获取类属性
-        if (!classType?.IsClass ?? true)
-        {
-            Log.Error("Command", "method reflected objcet is not a class");
-            return false;
-        }
-
-        //检查是否已创建过实例
-        if (_instanceDict.Any(ins => ins.Key == classType)) return true;
-
-        try
-        {
-            //创建实例
-            object instance = classType.CreateInstance();
-
-            //添加实例
-            _instanceDict
-               .Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
-                    instance);
-        }
-        catch (Exception e)
-        {
-            Log.Error("Command", $"cannot create instance with error:{Log.ErrorLogBuilder(e)}");
-            return false;
-        }
-
-        return true;
     }
 
     private async ValueTask InvokeCommandMethod(List<RegexCommandInfo> matchedCommands, BaseSoraEventArgs eventArgs)
@@ -406,6 +244,206 @@ public class CommandManager
                 else throw;
             }
         }
+    }
+
+    #endregion
+
+    #region 指令检查和匹配
+
+    //TODO 动态指令重写
+
+    private bool WaitingCommandMatch(KeyValuePair<Guid, WaitingInfo> command,
+                                     BaseMessageEventArgs            eventArgs)
+    {
+        return eventArgs.SourceType switch
+        {
+            SourceFlag.Group =>
+                //判断发起源
+                command.Value.SourceFlag == SourceFlag.Group
+                //判断来自同一个连接
+             && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
+                //判断来着同一个群
+             && command.Value.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
+                //判断来自同一人
+             && command.Value.Source.u == eventArgs.Sender
+                //匹配
+             && command.Value.CommandExpressions.Any(regex => Regex.IsMatch(eventArgs.Message.RawText, regex,
+                    RegexOptions.Compiled | command.Value.RegexOptions)),
+            SourceFlag.Private => command.Value.SourceFlag == SourceFlag.Private
+                //判断来自同一个连接
+             && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
+                //判断来自同一人
+             && command.Value.Source.u == eventArgs.Sender
+                //匹配指令
+             && command.Value.CommandExpressions.Any(regex => Regex.IsMatch(eventArgs.Message.RawText, regex,
+                    RegexOptions.Compiled | command.Value.RegexOptions)),
+            _ => false
+        };
+    }
+
+    private bool RegexCommandMatch(RegexCommandInfo     command,
+                                   BaseMessageEventArgs eventArgs)
+    {
+        bool sourceMatch = true;
+        switch (command.SourceFlag)
+        {
+            case SourceFlag.Group:
+                var e = eventArgs as GroupMessageEventArgs ??
+                    throw new NullReferenceException("event args is null with unknown reason");
+                //检查来源群
+                if (command.SourceGroups.Length != 0)
+                    sourceMatch &= command.SourceGroups.Any(gid => gid == e.SourceGroup);
+                //检查来源用户
+                if (command.SourceUsers.Length != 0)
+                    sourceMatch &= command.SourceUsers.Any(uid => uid == e.Sender);
+                break;
+            case SourceFlag.Private:
+                //检查来源用户
+                if (command.SourceUsers.Length != 0)
+                    sourceMatch &= command.SourceUsers.Any(uid => uid == eventArgs.Sender);
+                break;
+            default:
+                return false;
+        }
+
+        bool isMatch =
+            command.SourceFlag == eventArgs.SourceType && //判断同一源
+            command.Regex.Any(regex => sourceMatch &&
+                Regex.IsMatch( //判断正则表达式
+                    eventArgs.Message.RawText,
+                    regex,
+                    RegexOptions.Compiled | command.RegexOptions));
+
+        string groupName = string.IsNullOrEmpty(command.GroupName)
+            ? string.Empty
+            : $"({command.GroupName})";
+
+        if (isMatch)
+            Log.Debug("CommandMatch", $"match to command [{groupName}{command.MethodInfo.Name}]");
+        return isMatch;
+    }
+
+    /// <summary>
+    /// 检查实例的存在和生成
+    /// </summary>
+    [Reviewed("XiaoHe321", "2021-03-16 21:07")]
+    private bool CheckAndCreateInstance(Type classType)
+    {
+        //获取类属性
+        if (!classType?.IsClass ?? true)
+        {
+            Log.Error("Command", "method reflected objcet is not a class");
+            return false;
+        }
+
+        //检查是否已创建过实例
+        if (_instanceDict.Any(ins => ins.Key == classType)) return true;
+
+        try
+        {
+            //创建实例
+            object instance = classType.CreateInstance();
+
+            //添加实例
+            _instanceDict
+               .Add(classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
+                    instance);
+        }
+        catch (Exception e)
+        {
+            Log.Error("Command", $"cannot create instance with error:{Log.ErrorLogBuilder(e)}");
+            return false;
+        }
+
+        return true;
+    }
+
+    #endregion
+
+    #region 指令信息初始化
+
+    /// <summary>
+    /// 生成连续对话上下文
+    /// </summary>
+    /// <param name="sourceUid">消息源UID</param>
+    /// <param name="sourceGroup">消息源GID</param>
+    /// <param name="cmdExps">指令表达式</param>
+    /// <param name="matchType">匹配类型</param>
+    /// <param name="sourceFlag">来源标识</param>
+    /// <param name="regexOptions">正则匹配选项</param>
+    /// <param name="connectionId">连接标识</param>
+    /// <param name="serviceId">服务标识</param>
+    /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
+    internal static WaitingInfo GenerateWaitingCommandInfo(
+        long         sourceUid,    long sourceGroup,  string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
+        RegexOptions regexOptions, Guid connectionId, Guid     serviceId)
+    {
+        if (cmdExps == null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
+        string[] matchExp = matchType switch
+        {
+            MatchType.Full => cmdExps
+                             .Select(command => $"^{command}$")
+                             .ToArray(),
+            MatchType.Regex => cmdExps,
+            MatchType.KeyWord => cmdExps
+                                .Select(command => $"[{command}]+")
+                                .ToArray(),
+            _ => throw new NotSupportedException("unknown matchtype")
+        };
+
+        return new WaitingInfo(new AutoResetEvent(false),
+            matchExp,
+            serviceId: serviceId,
+            connectionId: connectionId,
+            source: (sourceUid, sourceGroup),
+            sourceFlag: sourceFlag,
+            regexOptions: regexOptions);
+    }
+
+    /// <summary>
+    /// 生成指令信息
+    /// </summary>
+    /// <param name="method">指令method</param>
+    /// <param name="classType">所在实例类型</param>
+    /// <param name="regexCommandInfo">指令信息</param>
+    private bool GenerateCommandInfo(MethodInfo method, Type classType, out RegexCommandInfo regexCommandInfo)
+    {
+        //获取指令属性
+        RegexCommand commandAttr =
+            method.GetCustomAttribute(typeof(RegexCommand)) as RegexCommand ??
+            throw new NullReferenceException("command attribute is null with unknown reason");
+
+        Log.Debug("Command", $"Registering command [{method.Name}]");
+
+        //处理指令匹配类型
+        MatchType match = commandAttr.MatchType;
+        //处理表达式
+        string[] matchExp = ParseCommandExps(commandAttr.CommandExpressions, match);
+
+        //检查和创建实例
+        //若创建实例失败且方法不是静态的，则返回空白命令信息
+        if (!method.IsStatic && !CheckAndCreateInstance(classType))
+        {
+            regexCommandInfo = Helper.CreateInstance<RegexCommandInfo>();
+            return false;
+        }
+
+        //创建指令信息
+        regexCommandInfo = new RegexCommandInfo(
+            commandAttr.Description,
+            matchExp,
+            classType.Name,
+            method,
+            commandAttr.PermissionLevel,
+            commandAttr.Priority,
+            commandAttr.RegexOptions,
+            commandAttr.SourceType,
+            commandAttr.ExceptionHandler,
+            commandAttr.SourceGroups.IsEmpty() ? Array.Empty<long>() : commandAttr.SourceGroups,
+            commandAttr.SourceUsers.IsEmpty() ? Array.Empty<long>() : commandAttr.SourceUsers,
+            method.IsStatic ? null : classType);
+
+        return true;
     }
 
     #endregion

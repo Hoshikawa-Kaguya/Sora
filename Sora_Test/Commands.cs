@@ -11,7 +11,7 @@ namespace Sora_Test;
 public static class Commands
 {
     [RegexCommand(
-        CommandExpressions = new[] {"1"}, 
+        CommandExpressions = new[] {"1"},
         Description = "死了啦都你害的啦",
         SourceType = SourceFlag.Group)]
     public static async ValueTask TestCommand(GroupMessageEventArgs eventArgs)
@@ -19,7 +19,7 @@ public static class Commands
         var s = eventArgs.Message.MessageBody[0].Data as TextSegment;
         Log.Info("触发指令", $"text:{s!.Content}");
         eventArgs.IsContinueEventChain = false;
-        await eventArgs.Reply($"{eventArgs.SourceType}[{(int)eventArgs.SourceType}]");
+        await eventArgs.Reply($"{eventArgs.SourceType}[{(int) eventArgs.SourceType}]");
         var c = 1;
         await eventArgs.Reply($"{c}");
         for (int i = 0; i < 5; i++)

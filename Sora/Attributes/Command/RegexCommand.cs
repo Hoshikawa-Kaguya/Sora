@@ -30,15 +30,13 @@ public sealed class RegexCommand : Attribute
         init => _commandExpressions = value ?? throw new NullReferenceException("CommandExpression cannot be null");
     }
 
-    //TODO
     /// <summary>
-    /// 指令响应的特定群组
+    /// 限制指令响应的群组
     /// </summary>
     public long[] SourceGroups { get; init; } = Array.Empty<long>();
 
-    //TODO
     /// <summary>
-    /// 指令响应的特定用户
+    /// 限制指令响应的用户
     /// </summary>
     public long[] SourceUsers { get; init; } = Array.Empty<long>();
 
@@ -84,15 +82,6 @@ public sealed class RegexCommand : Attribute
     #endregion
 
     #region 构造方法
-
-    /// <summary>
-    /// 构造方法
-    /// </summary>
-    public RegexCommand(string[] commands)
-    {
-        CommandExpressions = commands;
-        Regex.CacheSize++;
-    }
 
     /// <summary>
     /// 构造方法
