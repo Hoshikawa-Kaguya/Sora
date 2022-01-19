@@ -6,7 +6,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent;
 /// <summary>
 /// 离线文件事件
 /// </summary>
-internal class OnebotOfflineFileEventArgs : BaseNoticeEventArgs
+internal sealed class OnebotOfflineFileEventArgs : BaseNoticeEventArgs
 {
     /// <summary>
     /// 离线文件信息

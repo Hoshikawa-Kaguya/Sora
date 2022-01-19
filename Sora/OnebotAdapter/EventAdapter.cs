@@ -20,7 +20,7 @@ namespace Sora.OnebotAdapter;
 /// Onebot事件接口
 /// 判断和分发基类事件
 /// </summary>
-public class EventAdapter
+public sealed class EventAdapter
 {
     #region 私有字段
 

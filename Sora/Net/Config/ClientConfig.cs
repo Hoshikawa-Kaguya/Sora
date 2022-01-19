@@ -8,7 +8,8 @@ namespace Sora.Net.Config;
 /// <para>客户端配置类</para>
 /// <para>所有设置项都有默认值一般不需要配置</para>
 /// </summary>
-public class ClientConfig : ISoraConfig
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed class ClientConfig : ISoraConfig
 {
     #region 私有字段
 

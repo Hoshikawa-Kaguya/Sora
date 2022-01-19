@@ -20,7 +20,7 @@ namespace Sora.Command;
 /// <summary>
 /// 特性指令管理器
 /// </summary>
-public class CommandManager
+public sealed class CommandManager
 {
     #region 属性
 
@@ -49,7 +49,7 @@ public class CommandManager
 
     #endregion
 
-    #region 指令执行和注册
+    #region 指令注册
 
     /// <summary>
     /// 自动注册所有指令
@@ -87,12 +87,16 @@ public class CommandManager
         ServiceIsRunning =  true;
     }
 
+    #endregion
+
+    #region 指令执行
+
     /// <summary>
-    /// 处理聊天指令的单次处理器
+    /// 处理聊天指令
     /// </summary>
     /// <param name="eventArgs">事件参数</param>
     /// <returns>是否继续处理接下来的消息</returns>
-    [NeedReview("L317-L374")]
+    [NeedReview("ALL")]
     internal async ValueTask CommandAdapter(BaseMessageEventArgs eventArgs)
     {
         #region 信号量消息处理
@@ -139,34 +143,13 @@ public class CommandManager
 
         //在没有匹配到指令时直接跳转至Event触发
         if (matchedCommand.Count == 0) return;
-        await InvokeCommandMethod(matchedCommand, eventArgs);
 
         #endregion
-    }
 
-    /// <summary>
-    /// 获取已注册过的实例
-    /// </summary>
-    /// <param name="instance">实例</param>
-    /// <typeparam name="T">Type</typeparam>
-    /// <returns>获取是否成功</returns>
-    [Reviewed("XiaoHe321", "2021-03-28 20:45")]
-    public bool GetInstance<T>(out T instance)
-    {
-        if (_instanceDict.Any(type => type.Key == typeof(T)) && _instanceDict[typeof(T)] is T outVal)
-        {
-            instance = outVal;
-            return true;
-        }
+        #region 指令执行
 
-        instance = default;
-        return false;
-    }
-
-    private async ValueTask InvokeCommandMethod(List<RegexCommandInfo> matchedCommands, BaseSoraEventArgs eventArgs)
-    {
         //遍历匹配到的每个命令
-        foreach (RegexCommandInfo commandInfo in matchedCommands)
+        foreach (RegexCommandInfo commandInfo in matchedCommand)
         {
             //若是群，则判断权限
             if (eventArgs is GroupMessageEventArgs groupEventArgs)
@@ -197,7 +180,7 @@ public class CommandManager
                                           commandInfo.InstanceType == null
                                               ? null
                                               : _instanceDict[commandInfo.InstanceType],
-                                          new object[] {eventArgs});
+                                          new object[] { eventArgs });
                 }
                 else
                 {
@@ -207,7 +190,7 @@ public class CommandManager
                                     commandInfo.InstanceType == null
                                         ? null
                                         : _instanceDict[commandInfo.InstanceType],
-                                    new object[] {eventArgs});
+                                    new object[] { eventArgs });
                 }
 
                 return;
@@ -244,6 +227,8 @@ public class CommandManager
                 else throw;
             }
         }
+
+        #endregion
     }
 
     #endregion
@@ -252,6 +237,7 @@ public class CommandManager
 
     //TODO 动态指令重写
 
+    [NeedReview("ALL")]
     private bool WaitingCommandMatch(KeyValuePair<Guid, WaitingInfo> command,
                                      BaseMessageEventArgs            eventArgs)
     {
@@ -281,6 +267,7 @@ public class CommandManager
         };
     }
 
+    [NeedReview("ALL")]
     private bool RegexCommandMatch(RegexCommandInfo     command,
                                    BaseMessageEventArgs eventArgs)
     {
@@ -374,6 +361,7 @@ public class CommandManager
     /// <param name="connectionId">连接标识</param>
     /// <param name="serviceId">服务标识</param>
     /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
+    [NeedReview("ALL")]
     internal static WaitingInfo GenerateWaitingCommandInfo(
         long         sourceUid,    long sourceGroup,  string[] cmdExps, MatchType matchType, SourceFlag sourceFlag,
         RegexOptions regexOptions, Guid connectionId, Guid     serviceId)
@@ -406,6 +394,7 @@ public class CommandManager
     /// <param name="method">指令method</param>
     /// <param name="classType">所在实例类型</param>
     /// <param name="regexCommandInfo">指令信息</param>
+    [NeedReview("ALL")]
     private bool GenerateCommandInfo(MethodInfo method, Type classType, out RegexCommandInfo regexCommandInfo)
     {
         //获取指令属性
@@ -448,7 +437,7 @@ public class CommandManager
 
     #endregion
 
-    #region 指令表达式处理
+    #region 通用工具
 
     /// <summary>
     /// 处理指令正则表达式
@@ -467,6 +456,25 @@ public class CommandManager
                                 .ToArray(),
             _ => throw new NotSupportedException("unknown matchtype")
         };
+    }
+
+    /// <summary>
+    /// 获取已注册过的实例
+    /// </summary>
+    /// <param name="instance">实例</param>
+    /// <typeparam name="T">Type</typeparam>
+    /// <returns>获取是否成功</returns>
+    [Reviewed("XiaoHe321", "2021-03-28 20:45")]
+    public bool GetInstance<T>(out T instance)
+    {
+        if (_instanceDict.Any(type => type.Key == typeof(T)) && _instanceDict[typeof(T)] is T outVal)
+        {
+            instance = outVal;
+            return true;
+        }
+
+        instance = default;
+        return false;
     }
 
     #endregion
