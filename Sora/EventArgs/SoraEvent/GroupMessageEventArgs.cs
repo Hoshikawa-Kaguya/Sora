@@ -60,7 +60,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
         : base(serviceId, connectionId, eventName, groupMsgArgs)
     {
         IsAnonymousMessage = groupMsgArgs.Anonymous != null;
-        IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
+        IsSelfMessage      = groupMsgArgs.SenderInfo.UserId == groupMsgArgs.SelfId;
         SourceGroup        = new Group(serviceId, connectionId, groupMsgArgs.GroupId);
         Anonymous          = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
 
