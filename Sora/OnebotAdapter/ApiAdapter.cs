@@ -872,7 +872,7 @@ internal static class ApiAdapter
     /// </summary>
     /// <param name="connection">链接标识</param>
     /// <param name="model">型号</param>
-    internal static async ValueTask<(ApiStatus apiStatus, List<Model> models)> GetModelShow(
+    internal static async ValueTask<(ApiStatus apiStatus, List<ModelInfo> models)> GetModelShow(
         Guid connection, string model)
     {
         Log.Debug("Sora", "Sending _get_model_show request");
@@ -885,7 +885,7 @@ internal static class ApiAdapter
             }
         }, connection);
         Log.Debug("Sora", $"Get _get_model_show response {nameof(apiStatus)}={apiStatus.RetCode}");
-        return (apiStatus, ret?["data"]?["variants"]?.ToObject<List<Model>>() ?? new List<Model>());
+        return (apiStatus, ret?["data"]?["variants"]?.ToObject<List<ModelInfo>>() ?? new List<ModelInfo>());
     }
 
     /// <summary>

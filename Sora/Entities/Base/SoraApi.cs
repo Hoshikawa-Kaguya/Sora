@@ -794,7 +794,7 @@ public sealed class SoraApi
     /// 获取在线机型
     /// </summary>
     /// <param name="model">型号</param>
-    public async ValueTask<(ApiStatus apiStatus, List<Model> models)> GetModelShow(string model)
+    public async ValueTask<(ApiStatus apiStatus, List<ModelInfo> models)> GetModelShow(string model)
     {
         return await ApiAdapter.GetModelShow(ConnectionId, model);
     }
