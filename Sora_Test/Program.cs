@@ -38,13 +38,18 @@ service.Event.OnClientConnect += (_, eventArgs) =>
 
 //群聊消息事件
 service.Event.OnGroupMessage += async (_, eventArgs) => { await eventArgs.Reply("好耶"); };
-service.Event.OnSelfMessage += (_, eventArgs) =>
+service.Event.OnSelfGroupMessage += (_, eventArgs) =>
 {
-    Log.Info("test", $"self msg {eventArgs.Message.MessageId}");
+    Log.Warning("test", $"self group msg {eventArgs.Message.MessageId}[{eventArgs.IsSelfMessage}]");
     return ValueTask.CompletedTask;
 };
 //私聊消息事件
 service.Event.OnPrivateMessage += async (_, eventArgs) => { await eventArgs.Reply("好耶"); };
+service.Event.OnSelfPrivateMessage += (_, eventArgs) =>
+{
+    Log.Warning("test", $"self private msg {eventArgs.Message.MessageId}[{eventArgs.IsSelfMessage}]");
+    return ValueTask.CompletedTask;
+};
 //动态向管理器注册指令
 // service.Event.CommandManager.RegisterGroupCommand(new[] {"2"},
 //     async eventArgs =>

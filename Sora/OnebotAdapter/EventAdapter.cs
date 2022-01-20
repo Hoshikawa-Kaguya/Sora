@@ -90,9 +90,14 @@ public sealed class EventAdapter
     public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnGroupMessage;
 
     /// <summary>
-    /// 登录账号发送消息事件
+    /// bot发送群消息事件
     /// </summary>
-    public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnSelfMessage;
+    public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnSelfGroupMessage;
+
+    /// <summary>
+    /// bot发送私聊消息事件
+    /// </summary>
+    public event EventAsyncCallBackHandler<PrivateMessageEventArgs> OnSelfPrivateMessage;
 
     /// <summary>
     /// 私聊事件
@@ -377,9 +382,21 @@ public sealed class EventAdapter
                 Log.Debug("Sora",
                     $"Group self msg[{groupMsg.GroupId}] -> {groupMsg.RawMessage}");
                 //执行回调
-                if (OnSelfMessage == null) break;
-                await OnSelfMessage("Message",
-                    new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg));
+                if (OnSelfGroupMessage == null) break;
+                await OnSelfGroupMessage("Message",
+                    new GroupMessageEventArgs(ServiceId, connection, "group_self", groupMsg));
+                break;
+            }
+            case "private":
+            {
+                var privateMsg = messageJson.ToObject<OnebotPrivateMsgEventArgs>();
+                if (privateMsg == null) break;
+                Log.Debug("Sora",
+                    $"Group self msg[{privateMsg.UserId}] -> {privateMsg.RawMessage}");
+                //执行回调
+                    if (OnSelfPrivateMessage == null) break;
+                await OnSelfPrivateMessage("Message",
+                    new PrivateMessageEventArgs(ServiceId, connection, "private_self", privateMsg));
                 break;
             }
             default:

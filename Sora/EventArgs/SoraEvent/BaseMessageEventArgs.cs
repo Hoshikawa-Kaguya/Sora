@@ -23,6 +23,11 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     /// </summary>
     public User Sender { get; }
 
+    /// <summary>
+    /// 是否为Bot账号所发送的消息
+    /// </summary>
+    public bool IsSelfMessage { get; }
+
     #endregion
 
     internal BaseMessageEventArgs(Guid                      serviceId, Guid connectionId, string eventName,
@@ -33,7 +38,8 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
         Message = new MessageContext(serviceId, connectionId, msg.MessageId, msg.RawMessage,
             msg.MessageList.ToMessageBody(),
             msg.Time, msg.Font, null);
-        Sender = new User(serviceId, connectionId, msg.UserId);
+        Sender        = new User(serviceId, connectionId, msg.UserId);
+        IsSelfMessage = msg.SenderInfo.UserId == msg.SelfId;
     }
 
     internal BaseMessageEventArgs(Guid                    serviceId, Guid connectionId, string eventName,
@@ -44,6 +50,7 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
         Message = new MessageContext(serviceId, connectionId, msg.MessageId, msg.RawMessage,
             msg.MessageList.ToMessageBody(),
             msg.Time, msg.Font, null);
-        Sender = new User(serviceId, connectionId, msg.UserId);
+        Sender        = new User(serviceId, connectionId, msg.UserId);
+        IsSelfMessage = msg.SenderInfo.UserId == msg.SelfId;
     }
 }

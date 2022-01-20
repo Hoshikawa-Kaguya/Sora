@@ -77,7 +77,7 @@ public sealed class CommandManager
             if (!GenerateCommandInfo(methodInfo, classType, out RegexCommandInfo commandInfo)) continue;
             //添加指令信息
             if (_regexCommands.AddOrExist(commandInfo))
-                Log.Debug("Command", $"Registered {commandInfo.SourceFlag} command [{methodInfo.Name}]");
+                Log.Debug("Command", $"Registered {commandInfo.SourceType} command [{methodInfo.Name}]");
             else
                 Log.Warning("CommandManager", "Command exists");
         }
@@ -272,7 +272,7 @@ public sealed class CommandManager
                                    BaseMessageEventArgs eventArgs)
     {
         bool sourceMatch = true;
-        switch (command.SourceFlag)
+        switch (eventArgs.SourceType)
         {
             case SourceFlag.Group:
                 var e = eventArgs as GroupMessageEventArgs ??
@@ -294,7 +294,7 @@ public sealed class CommandManager
         }
 
         bool isMatch =
-            command.SourceFlag == eventArgs.SourceType && //判断同一源
+            command.SourceType == eventArgs.SourceType && //判断同一源
             command.Regex.Any(regex => sourceMatch &&
                 Regex.IsMatch( //判断正则表达式
                     eventArgs.Message.RawText,
