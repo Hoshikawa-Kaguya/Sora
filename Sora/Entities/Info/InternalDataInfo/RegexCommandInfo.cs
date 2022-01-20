@@ -20,7 +20,7 @@ internal readonly struct RegexCommandInfo
     internal readonly string            GroupName;        //指令组名
     internal readonly MethodInfo        MethodInfo;       //指令执行的方法
     internal readonly MemberRoleType    PermissionType;   //指令执行权限
-    internal readonly SourceFlag        SourceFlag;       //指令匹配源类型
+    internal readonly SourceFlag        SourceType;       //指令匹配源类型
     internal readonly Type              InstanceType;     //指令所在实例类型
     internal readonly int               Priority;         //优先级
     internal readonly RegexOptions      RegexOptions;     //正则设置
@@ -48,7 +48,7 @@ internal readonly struct RegexCommandInfo
         PermissionType   = permissionType;
         Priority         = priority;
         RegexOptions     = regexOptions;
-        SourceFlag       = source;
+        SourceType       = source;
         SourceGroups     = sourceGroups;
         SourceUsers      = sourceUsers;
         ExceptionHandler = exceptionHandler;

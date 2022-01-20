@@ -25,11 +25,6 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     public bool IsAnonymousMessage { get; }
 
     /// <summary>
-    /// 是否为Bot账号所发送的消息
-    /// </summary>
-    public bool IsSelfMessage { get; }
-
-    /// <summary>
     /// 发送者信息
     /// </summary>
     public GroupSenderInfo SenderInfo { get; }
@@ -60,7 +55,6 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
         : base(serviceId, connectionId, eventName, groupMsgArgs)
     {
         IsAnonymousMessage = groupMsgArgs.Anonymous != null;
-        IsSelfMessage      = groupMsgArgs.MessageType.Equals("group_self");
         SourceGroup        = new Group(serviceId, connectionId, groupMsgArgs.GroupId);
         Anonymous          = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
 
