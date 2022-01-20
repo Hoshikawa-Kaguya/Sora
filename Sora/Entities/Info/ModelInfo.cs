@@ -5,7 +5,7 @@ namespace Sora.Entities.Info;
 /// <summary>
 /// 型号信息
 /// </summary>
-public struct Model
+public struct ModelInfo
 {
     /// <summary>
     /// 型号
