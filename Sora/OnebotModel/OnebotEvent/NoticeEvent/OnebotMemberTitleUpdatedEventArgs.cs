@@ -5,7 +5,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent;
 /// <summary>
 /// 群成员头衔变更事件
 /// </summary>
-internal sealed class OnebotMemberTitleUpdatedEventArgs : BaseNotifyEventArgs
+internal sealed class OnebotMemberTitleUpdatedEventArgs : BaseObNotifyEventArgs
 {
     /// <summary>
     /// 新头衔

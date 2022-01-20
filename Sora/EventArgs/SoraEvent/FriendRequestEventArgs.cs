@@ -38,14 +38,14 @@ public sealed class FriendRequestEventArgs : BaseSoraEventArgs
     /// <param name="serviceId">服务ID</param>
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
-    /// <param name="friendRequestArgs">好友申请事件参数</param>
+    /// <param name="friendObRequestArgs">好友申请事件参数</param>
     internal FriendRequestEventArgs(Guid                         serviceId, Guid connectionId, string eventName,
-                                    OnebotFriendRequestEventArgs friendRequestArgs) :
-        base(serviceId, connectionId, eventName, friendRequestArgs.SelfId, friendRequestArgs.Time, SourceFlag.Private)
+                                    OnebotFriendObRequestEventArgs friendObRequestArgs) :
+        base(serviceId, connectionId, eventName, friendObRequestArgs.SelfId, friendObRequestArgs.Time, SourceFlag.Private)
     {
-        Sender      = new User(serviceId, connectionId, friendRequestArgs.UserId);
-        Comment     = friendRequestArgs.Comment;
-        RequestFlag = friendRequestArgs.Flag;
+        Sender      = new User(serviceId, connectionId, friendObRequestArgs.UserId);
+        Comment     = friendObRequestArgs.Comment;
+        RequestFlag = friendObRequestArgs.Flag;
     }
 
     #endregion

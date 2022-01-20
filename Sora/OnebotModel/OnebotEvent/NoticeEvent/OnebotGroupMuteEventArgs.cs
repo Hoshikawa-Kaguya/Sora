@@ -7,7 +7,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent;
 /// <summary>
 /// 群禁言事件
 /// </summary>
-internal sealed class OnebotGroupMuteEventArgs : BaseNoticeEventArgs
+internal sealed class OnebotGroupMuteEventArgs : BaseObNoticeEventArgs
 {
     /// <summary>
     /// 事件子类型

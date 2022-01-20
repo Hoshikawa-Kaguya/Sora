@@ -6,7 +6,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent;
 /// GoCQ扩展事件
 /// 群成员名片变更事件
 /// </summary>
-internal sealed class OnebotGroupCardUpdateEventArgs : BaseNoticeEventArgs
+internal sealed class OnebotGroupCardUpdateEventArgs : BaseObNoticeEventArgs
 {
     /// <summary>
     /// 群号

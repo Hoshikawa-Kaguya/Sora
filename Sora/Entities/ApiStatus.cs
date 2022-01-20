@@ -1,6 +1,6 @@
 ﻿using Sora.Enumeration.ApiType;
 
-namespace Sora.Entities.Info;
+namespace Sora.Entities;
 
 /// <summary>
 /// API执行状态

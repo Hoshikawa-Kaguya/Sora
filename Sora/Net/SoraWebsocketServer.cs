@@ -3,7 +3,6 @@ using System.Data;
 using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
-using Sora.Entities.Info.InternalDataInfo;
 using Sora.Entities.Socket;
 using Sora.Interfaces;
 using Sora.Net.Config;

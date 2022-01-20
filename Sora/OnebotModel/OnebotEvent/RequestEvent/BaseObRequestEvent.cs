@@ -7,7 +7,7 @@ namespace Sora.OnebotModel.OnebotEvent.RequestEvent;
 /// <summary>
 /// 请求事件基类
 /// </summary>
-internal abstract class BaseRequestEvent : BaseApiEventArgs
+internal abstract class BaseObRequestEvent : BaseObApiEventArgs
 {
     /// <summary>
     /// 请求类型

@@ -1,12 +1,10 @@
 using System;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
-using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using YukariToolBox.LightLog;
 
@@ -42,15 +40,11 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// <param name="privateMsgArgs">私聊消息事件参数</param>
     internal PrivateMessageEventArgs(Guid                      serviceId, Guid connectionId, string eventName,
                                      OnebotPrivateMsgEventArgs privateMsgArgs)
-        : base(serviceId, connectionId, eventName, privateMsgArgs)
+        : base(serviceId, connectionId, eventName, privateMsgArgs, SourceFlag.Private)
     {
         IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
 
-        //检查服务管理员权限
         PrivateSenderInfo privateSenderInfo = privateMsgArgs.SenderInfo;
-        if (privateSenderInfo.UserId != 0 && StaticVariable.ServiceConfigs[serviceId].SuperUsers
-                                                           .Any(id => id == privateSenderInfo.UserId))
-            privateSenderInfo.Role = MemberRoleType.SuperUser;
         SenderInfo = privateSenderInfo;
     }
 

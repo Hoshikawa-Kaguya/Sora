@@ -1,10 +1,8 @@
 using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Sora.Attributes;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
-using Sora.Util;
 
 namespace Sora.Entities.Info.InternalDataInfo;
 

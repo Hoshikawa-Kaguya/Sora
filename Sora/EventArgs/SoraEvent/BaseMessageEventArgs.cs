@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Sora.Converter;
 using Sora.Entities;
 using Sora.Enumeration;
@@ -28,29 +29,24 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     /// </summary>
     public bool IsSelfMessage { get; }
 
+    /// <summary>
+    /// 是否为机器人管理员
+    /// </summary>
+    public bool IsSuperUser { get; }
+
     #endregion
 
-    internal BaseMessageEventArgs(Guid                      serviceId, Guid connectionId, string eventName,
-                                  OnebotPrivateMsgEventArgs msg) :
-        base(serviceId, connectionId, eventName, msg.SelfId, msg.Time, SourceFlag.Private)
+    internal BaseMessageEventArgs(Guid                   serviceId, Guid connectionId, string eventName,
+                                  BaseObMessageEventArgs msg, SourceFlag source) :
+        base(serviceId, connectionId, eventName, msg.SelfId, msg.Time, source)
     {
         //将api消息段转换为sorasegment
         Message = new MessageContext(serviceId, connectionId, msg.MessageId, msg.RawMessage,
             msg.MessageList.ToMessageBody(),
             msg.Time, msg.Font, null);
         Sender        = new User(serviceId, connectionId, msg.UserId);
-        IsSelfMessage = msg.SenderInfo.UserId == msg.SelfId;
-    }
-
-    internal BaseMessageEventArgs(Guid                    serviceId, Guid connectionId, string eventName,
-                                  OnebotGroupMsgEventArgs msg) :
-        base(serviceId, connectionId, eventName, msg.SelfId, msg.Time, SourceFlag.Group)
-    {
-        //将api消息段转换为sorasegment
-        Message = new MessageContext(serviceId, connectionId, msg.MessageId, msg.RawMessage,
-            msg.MessageList.ToMessageBody(),
-            msg.Time, msg.Font, null);
-        Sender        = new User(serviceId, connectionId, msg.UserId);
-        IsSelfMessage = msg.SenderInfo.UserId == msg.SelfId;
+        IsSelfMessage = msg.UserId == msg.SelfId;
+        IsSuperUser = msg.UserId is not 0 or -1 &&
+            StaticVariable.ServiceConfigs[serviceId].SuperUsers.Any(id => id == msg.UserId);
     }
 }

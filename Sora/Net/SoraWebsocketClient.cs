@@ -3,7 +3,6 @@ using System.Data;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Sora.Entities.Info.InternalDataInfo;
 using Sora.Entities.Socket;
 using Sora.Exceptions;
 using Sora.Interfaces;

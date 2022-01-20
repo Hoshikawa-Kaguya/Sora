@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Command;
-using Sora.Entities.Info;
+using Sora.Entities;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
@@ -421,7 +421,7 @@ public sealed class EventAdapter
             //好友请求事件
             case "friend":
             {
-                var friendRequest = messageJson.ToObject<OnebotFriendRequestEventArgs>();
+                var friendRequest = messageJson.ToObject<OnebotFriendObRequestEventArgs>();
                 if (friendRequest == null) break;
                 Log.Debug("Sora",
                     $"Friend request form [{friendRequest.UserId}] with comment[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
@@ -441,7 +441,7 @@ public sealed class EventAdapter
                     break;
                 }
 
-                var groupRequest = messageJson.ToObject<OnebotGroupRequestEventArgs>();
+                var groupRequest = messageJson.ToObject<OnebotGroupObRequestEventArgs>();
                 if (groupRequest == null) break;
                 Log.Debug("Sora",
                     $"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");

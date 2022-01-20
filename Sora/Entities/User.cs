@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
@@ -19,6 +20,11 @@ public sealed class User : BaseModel
     /// </summary>
     public long Id { get; }
 
+    /// <summary>
+    /// 是否为机器人管理员
+    /// </summary>
+    public bool IsSuperUser { get; }
+
     #endregion
 
     #region 构造函数
@@ -31,7 +37,9 @@ public sealed class User : BaseModel
     /// <param name="uid">用户ID</param>
     internal User(Guid serviceId, Guid connectionId, long uid) : base(serviceId, connectionId)
     {
-        Id = uid;
+        Id          = uid;
+        IsSuperUser = Id is not 0 or -1 &&
+            StaticVariable.ServiceConfigs[serviceId].SuperUsers.Any(id => id == Id);
     }
 
     #endregion

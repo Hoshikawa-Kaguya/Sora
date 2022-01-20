@@ -6,7 +6,7 @@ namespace Sora.OnebotModel.OnebotEvent.MessageEvent;
 /// <summary>
 /// 私聊消息事件
 /// </summary>
-internal sealed class OnebotPrivateMsgEventArgs : BaseMessageEventArgs
+internal sealed class OnebotPrivateMsgEventArgs : BaseObMessageEventArgs
 {
     /// <summary>
     /// 发送人信息
