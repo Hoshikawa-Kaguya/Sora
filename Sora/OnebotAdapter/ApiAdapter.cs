@@ -163,18 +163,14 @@ internal static class ApiAdapter
         Log.Debug("Sora", $"Get get_friend_list response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null) return (apiStatus, null);
         //处理返回的好友信息
-        List<FriendInfo> friendInfos = ret["data"]?.Select(token => new FriendInfo
-        {
-            UserId = Convert.ToInt64(token["user_id"] ?? -1),
-            Remark = token["remark"]?.ToString()   ?? string.Empty,
-            Nick   = token["nickname"]?.ToString() ?? string.Empty,
-            Role = Convert.ToInt64(token["user_id"] ?? -1) != -1 && StaticVariable.ServiceConfigs[serviceId]
-               .SuperUsers
-               .Contains(Convert.ToInt64(token["user_id"]))
-                ? MemberRoleType.SuperUser
-                : MemberRoleType.Member
-        }).ToList();
-
+        List<FriendInfo> friendInfos = ret["data"]?.ToObject<List<FriendInfo>>() ?? new List<FriendInfo>();
+        //检查机器人管理员权限
+        friendInfos.ForEach(t =>
+            {
+                t.IsSuperUser = t.UserId is not 0 or -1 &&
+                    StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
+            }
+        );
         return (apiStatus, friendInfos);
     }
 
@@ -200,7 +196,7 @@ internal static class ApiAdapter
         Log.Debug("Sora", $"Get get_group_list response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null) return (apiStatus, null);
         //处理返回群组列表
-        List<GroupInfo> groupList = ret["data"]?.Select(token => token.ToObject<GroupInfo>()).ToList();
+        List<GroupInfo> groupList = ret["data"]?.ToObject<List<GroupInfo>>() ?? new List<GroupInfo>();
 
         return (apiStatus, groupList);
     }
@@ -230,10 +226,13 @@ internal static class ApiAdapter
         //处理返回群成员列表
         List<GroupMemberInfo> memberList =
             ret["data"]?.ToObject<List<GroupMemberInfo>>() ?? new List<GroupMemberInfo>();
-        //检查最高级管理员权限
-        foreach (GroupMemberInfo t in memberList.Where(t => StaticVariable.ServiceConfigs[serviceId].SuperUsers
-                                                                          .Contains(t.UserId)))
-            t.Role = MemberRoleType.SuperUser;
+        //检查机器人管理员权限
+        memberList.ForEach(t =>
+            {
+                t.IsSuperUser = t.UserId is not 0 or -1 &&
+                    StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
+            }
+        );
 
         return (apiStatus, memberList);
     }
@@ -289,9 +288,9 @@ internal static class ApiAdapter
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, new GroupMemberInfo());
         GroupMemberInfo memberInfo = ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo();
-        if (memberInfo.UserId != 0 && StaticVariable.ServiceConfigs[serviceId].SuperUsers
-                                                    .Contains(memberInfo.UserId))
-            memberInfo.Role = MemberRoleType.SuperUser;
+        //检查服务管理员权限
+        memberInfo.IsSuperUser = memberInfo.UserId is not 0 or -1 &&
+            StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(memberInfo.UserId);
         return (apiStatus, memberInfo);
     }
 
@@ -319,13 +318,10 @@ internal static class ApiAdapter
         Log.Debug("Sora", $"Get get_stranger_info response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, new UserInfo(), string.Empty);
-        //检查服务管理员权限
         UserInfo info = ret["data"]?.ToObject<UserInfo>() ?? new UserInfo();
-        if (info.UserId is not 0 or -1)
-            info.Role = info.UserId != -1 && StaticVariable.ServiceConfigs[serviceId].SuperUsers
-                                                           .Contains(info.UserId)
-                ? MemberRoleType.SuperUser
-                : MemberRoleType.Member;
+        //检查服务管理员权限
+        info.IsSuperUser = info.UserId is not 0 or -1 &&
+            StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(info.UserId);
 
         return (apiStatus, info, ret["data"]?["qid"]?.ToString());
     }

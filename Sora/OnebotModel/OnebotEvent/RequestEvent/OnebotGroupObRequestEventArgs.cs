@@ -7,7 +7,7 @@ namespace Sora.OnebotModel.OnebotEvent.RequestEvent;
 /// <summary>
 /// 群聊邀请/入群请求事件
 /// </summary>
-internal sealed class OnebotGroupRequestEventArgs : BaseRequestEvent
+internal sealed class OnebotGroupObRequestEventArgs : BaseObRequestEvent
 {
     /// <summary>
     /// 请求子类型

@@ -47,8 +47,7 @@ public sealed class RegexCommand : Attribute
 
     /// <summary>
     /// <para>权限限制</para>
-    /// <para>私聊和群聊的默认值<see cref="MemberRoleType.Member"/></para>
-    /// <para>当用户被设置SuperUser时值为<see cref="MemberRoleType.SuperUser"/></para>
+    /// <para>此为QQ群聊权限，私聊时无效</para>
     /// </summary>
     public MemberRoleType PermissionLevel { get; init; } = MemberRoleType.Member;
 

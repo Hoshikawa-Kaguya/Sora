@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Sora;
 using Sora.Interfaces;
@@ -10,7 +11,14 @@ Log.LogConfiguration
    .SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
-ISoraService? service = SoraServiceFactory.CreateService(new ServerConfig {EnableSocketMessage = false});
+ISoraService? service = SoraServiceFactory.CreateService(new ServerConfig
+{
+    EnableSocketMessage = false, 
+    SuperUsers = new []{ 0L },
+#if DEBUG
+    HeartBeatTimeOut = TimeSpan.FromHours(3)
+#endif
+});
 
 #region 事件处理
 

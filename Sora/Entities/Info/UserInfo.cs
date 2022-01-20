@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Sora.Enumeration.EventParamsType;
 
 namespace Sora.Entities.Info;
 
@@ -20,7 +19,7 @@ public struct UserInfo
     /// 权限等级
     /// </summary>
     [JsonIgnore]
-    public MemberRoleType Role { get; internal set; }
+    public bool IsSuperUser { get; internal set; }
 
     /// <summary>
     /// 昵称

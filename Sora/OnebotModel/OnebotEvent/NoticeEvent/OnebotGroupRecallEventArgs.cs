@@ -5,7 +5,7 @@ namespace Sora.OnebotModel.OnebotEvent.NoticeEvent;
 /// <summary>
 /// 群消息撤回事件
 /// </summary>
-internal sealed class ApiGroupRecallEventArgs : BaseNoticeEventArgs
+internal sealed class ApiGroupRecallEventArgs : BaseObNoticeEventArgs
 {
     /// <summary>
     /// 群号

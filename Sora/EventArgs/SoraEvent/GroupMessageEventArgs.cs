@@ -5,7 +5,6 @@ using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
-using Sora.Enumeration.EventParamsType;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using YukariToolBox.LightLog;
 using Group = Sora.Entities.Group;
@@ -52,17 +51,13 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     /// <param name="groupMsgArgs">群消息事件参数</param>
     internal GroupMessageEventArgs(Guid                    serviceId, Guid connectionId, string eventName,
                                    OnebotGroupMsgEventArgs groupMsgArgs)
-        : base(serviceId, connectionId, eventName, groupMsgArgs)
+        : base(serviceId, connectionId, eventName, groupMsgArgs, SourceFlag.Group)
     {
         IsAnonymousMessage = groupMsgArgs.Anonymous != null;
         SourceGroup        = new Group(serviceId, connectionId, groupMsgArgs.GroupId);
         Anonymous          = IsAnonymousMessage ? groupMsgArgs.Anonymous : null;
 
-        //检查服务管理员权限
         GroupSenderInfo groupSenderInfo = groupMsgArgs.SenderInfo;
-        if (groupSenderInfo.UserId != 0 && StaticVariable.ServiceConfigs[serviceId].SuperUsers
-                                                         .Contains(groupSenderInfo.UserId))
-            groupSenderInfo.Role = MemberRoleType.SuperUser;
         SenderInfo = groupSenderInfo;
     }
 

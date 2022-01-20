@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using Sora.Interfaces;
 
-namespace Sora.Entities.Info.InternalDataInfo;
+namespace Sora.Net.Config;
 
 /// <summary>
 /// Sora服务数据结构体
 /// </summary>
-internal readonly struct ServiceConfig
+internal record ServiceConfig
 {
     internal readonly HashSet<long> SuperUsers;
     internal readonly HashSet<long> BlockUsers;

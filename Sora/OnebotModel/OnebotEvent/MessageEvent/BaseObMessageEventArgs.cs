@@ -7,7 +7,7 @@ namespace Sora.OnebotModel.OnebotEvent.MessageEvent;
 /// <summary>
 /// 消息事件基类
 /// </summary>
-internal abstract class BaseMessageEventArgs : BaseApiEventArgs
+internal abstract class BaseObMessageEventArgs : BaseObApiEventArgs
 {
     /// <summary>
     /// 消息类型

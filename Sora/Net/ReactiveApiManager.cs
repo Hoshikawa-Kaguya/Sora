@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Attributes;
-using Sora.Entities.Info;
+using Sora.Entities;
 using Sora.Enumeration.ApiType;
 using Sora.OnebotModel.ApiParams;
 using Sora.Util;

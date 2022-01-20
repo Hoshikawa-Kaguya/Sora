@@ -31,9 +31,4 @@ public enum MemberRoleType
     /// </summary>
     [Description("owner")]
     Owner = 3,
-
-    /// <summary>
-    /// 该服务的管理员
-    /// </summary>
-    SuperUser = 4
 }

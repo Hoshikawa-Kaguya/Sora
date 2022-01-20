@@ -10,7 +10,7 @@ namespace Sora.Entities.Info;
 /// <summary>
 /// 群成员信息
 /// </summary>
-public sealed class GroupMemberInfo
+public sealed record GroupMemberInfo
 {
     /// <summary>
     /// 群号
@@ -106,7 +106,13 @@ public sealed class GroupMemberInfo
     /// </summary>
     [JsonConverter(typeof(EnumDescriptionConverter))]
     [JsonProperty(PropertyName = "role")]
-    public MemberRoleType Role { get; internal set; }
+    public MemberRoleType Role { get; internal init; }
+
+    /// <summary>
+    /// 是否为机器人管理员
+    /// </summary>
+    [JsonIgnore]
+    public bool IsSuperUser { get; internal set; } = false;
 
     /// <summary>
     /// 是否不良记录成员
@@ -151,9 +157,5 @@ public sealed class GroupMemberInfo
     private long? ShutUpTimestamp
     {
         init => ShutUpTime = value == 0 ? null : value?.ToDateTime() ?? null;
-    }
-
-    internal GroupMemberInfo()
-    {
     }
 }

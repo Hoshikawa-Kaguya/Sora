@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
+using Sora.Net.Config;
 using YukariToolBox.LightLog;
 
 namespace Sora;
