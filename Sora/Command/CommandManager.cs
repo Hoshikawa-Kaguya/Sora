@@ -192,8 +192,8 @@ public sealed class CommandManager
                                         : _instanceDict[commandInfo.InstanceType],
                                     new object[] { eventArgs });
                 }
-
-                return;
+                //检测事件触发中断标志
+                if(!eventArgs.IsContinueEventChain) break;
             }
             catch (Exception e)
             {

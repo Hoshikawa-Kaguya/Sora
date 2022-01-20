@@ -1,3 +1,4 @@
+using System;
 using Sora.Attributes.Command;
 using Sora.Entities.Segment.DataModel;
 using Sora.EventArgs.SoraEvent;
@@ -13,12 +14,27 @@ public static class Commands
     [RegexCommand(
         CommandExpressions = new[] {"1"},
         Description = "死了啦都你害的啦",
-        SourceType = SourceFlag.Group)]
-    public static async ValueTask TestCommand(GroupMessageEventArgs eventArgs)
+        SourceType = SourceFlag.Group,
+        Priority = 10)]
+    public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
     {
+        eventArgs.IsContinueEventChain = false;
+
         var s = eventArgs.Message.MessageBody[0].Data as TextSegment;
         Log.Info("触发指令", $"text:{s!.Content}");
+        await eventArgs.Reply($"哇哦");
+    }
+
+    [RegexCommand(
+        CommandExpressions = new[] {"2"},
+        Description = "死了啦都你害的啦",
+        SourceType = SourceFlag.Group)]
+    public static async ValueTask TestCommand2(GroupMessageEventArgs eventArgs)
+    {
         eventArgs.IsContinueEventChain = false;
+
+        var s = eventArgs.Message.MessageBody[0].Data as TextSegment;
+        Log.Info("触发指令", $"text:{s!.Content}");
         await eventArgs.Reply($"{eventArgs.SourceType}[{(int) eventArgs.SourceType}]");
         var c = 1;
         await eventArgs.Reply($"{c}");

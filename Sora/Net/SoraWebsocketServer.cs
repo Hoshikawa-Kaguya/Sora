@@ -39,7 +39,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     /// <summary>
     /// 服务器连接管理器
     /// </summary>
-    public ConnectionManager ConnManager { private set; get; }
+    public ConnectionManager ConnManager { get; }
 
     #endregion
 

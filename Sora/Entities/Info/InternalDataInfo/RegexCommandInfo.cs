@@ -11,10 +11,8 @@ namespace Sora.Entities.Info.InternalDataInfo;
 /// <summary>
 /// 指令信息
 /// </summary>
-internal readonly struct RegexCommandInfo
+internal sealed record RegexCommandInfo
 {
-    #region 属性
-
     internal readonly string            Desc;             //注释
     internal readonly string[]          Regex;            //正则表达式
     internal readonly string            GroupName;        //指令组名
@@ -27,10 +25,6 @@ internal readonly struct RegexCommandInfo
     internal readonly Action<Exception> ExceptionHandler; //异常回调
     internal readonly long[]            SourceGroups;     //群组限制
     internal readonly long[]            SourceUsers;      //用户限制
-
-    #endregion
-
-    #region 构造方法
 
     /// <summary>
     /// 指令信息构造(常规指令构建)
@@ -54,15 +48,8 @@ internal readonly struct RegexCommandInfo
         ExceptionHandler = exceptionHandler;
     }
 
-    #endregion
-
-    [NeedReview("ALL")]
-    internal bool Equals(RegexCommandInfo another)
+    internal RegexCommandInfo()
     {
-        return MethodInfo.Name == another.MethodInfo.Name &&
-            MethodInfo.GetGenericArguments()
-                      .ArrayEquals(another.MethodInfo.GetGenericArguments()) &&
-            Regex.ArrayEquals(another.Regex) && PermissionType == another.PermissionType &&
-            Priority == another.Priority;
+
     }
 }
