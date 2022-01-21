@@ -14,7 +14,7 @@ namespace Sora_Test;
 [CommandGroup]
 public static class Commands
 {
-    [RegexCommand(
+    [SoraCommand(
         CommandExpressions = new[] {"1"},
         Description = "死了啦都你害的啦",
         SourceType = SourceFlag.Group,
@@ -28,7 +28,7 @@ public static class Commands
         await eventArgs.Reply($"哇哦");
     }
 
-    [RegexCommand(
+    [SoraCommand(
         CommandExpressions = new[] {"2"},
         Description = "死了啦都你害的啦",
         SourceType = SourceFlag.Group)]

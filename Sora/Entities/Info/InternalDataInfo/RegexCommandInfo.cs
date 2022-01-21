@@ -9,20 +9,11 @@ namespace Sora.Entities.Info.InternalDataInfo;
 /// <summary>
 /// 指令信息
 /// </summary>
-internal sealed record RegexCommandInfo
+internal sealed record RegexCommandInfo : BaseCommandInfo
 {
-    internal readonly string            Desc;             //注释
-    internal readonly string[]          Regex;            //正则表达式
-    internal readonly string            GroupName;        //指令组名
-    internal readonly MethodInfo        MethodInfo;       //指令执行的方法
-    internal readonly MemberRoleType    PermissionType;   //指令执行权限
-    internal readonly SourceFlag        SourceType;       //指令匹配源类型
-    internal readonly Type              InstanceType;     //指令所在实例类型
-    internal readonly int               Priority;         //优先级
-    internal readonly RegexOptions      RegexOptions;     //正则设置
-    internal readonly Action<Exception> ExceptionHandler; //异常回调
-    internal readonly long[]            SourceGroups;     //群组限制
-    internal readonly long[]            SourceUsers;      //用户限制
+    internal readonly string     GroupName;    //指令组名
+    internal readonly MethodInfo MethodInfo;   //指令执行的方法
+    internal readonly Type       InstanceType; //指令所在实例类型
 
     /// <summary>
     /// 指令信息构造(常规指令构建)
@@ -31,23 +22,10 @@ internal sealed record RegexCommandInfo
         string            desc,             string[] regex,        string       groupName,    MethodInfo method,
         MemberRoleType    permissionType,   int      priority,     RegexOptions regexOptions, SourceFlag source,
         Action<Exception> exceptionHandler, long[]   sourceGroups, long[]       sourceUsers,  Type instanceType = null)
+        : base(desc, regex, permissionType, priority, regexOptions, source, exceptionHandler, sourceGroups, sourceUsers)
     {
-        Desc             = desc;
-        Regex            = regex;
-        GroupName        = groupName;
-        MethodInfo       = method;
-        InstanceType     = instanceType;
-        PermissionType   = permissionType;
-        Priority         = priority;
-        RegexOptions     = regexOptions;
-        SourceType       = source;
-        SourceGroups     = sourceGroups;
-        SourceUsers      = sourceUsers;
-        ExceptionHandler = exceptionHandler;
-    }
-
-    internal RegexCommandInfo()
-    {
-
+        GroupName    = groupName;
+        MethodInfo   = method;
+        InstanceType = instanceType;
     }
 }

@@ -21,8 +21,8 @@ internal static class CommandUtils
     internal static bool CheckMethodLegality(this MethodInfo method)
     {
         //获取指令属性
-        RegexCommand commandAttr =
-            method.GetCustomAttribute(typeof(RegexCommand)) as RegexCommand ??
+        SoraCommand commandAttr =
+            method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand ??
             null;
 
         if (commandAttr is null) return false;
@@ -42,7 +42,7 @@ internal static class CommandUtils
         }
 
         bool isGroupCommandLegality =
-            method.IsDefined(typeof(RegexCommand), false)     &&
+            method.IsDefined(typeof(SoraCommand), false)     &&
             method.GetParameters().Length == 1                &&
             commandAttr.SourceType        == SourceFlag.Group &&
             method.GetParameters()
@@ -51,7 +51,7 @@ internal static class CommandUtils
                        !para.IsOut);
 
         bool isPrivateCommandLegality =
-            method.IsDefined(typeof(RegexCommand), false)       &&
+            method.IsDefined(typeof(SoraCommand), false)       &&
             method.GetParameters().Length == 1                  &&
             commandAttr.SourceType        == SourceFlag.Private &&
             method.GetParameters()
