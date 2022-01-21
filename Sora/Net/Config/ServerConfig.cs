@@ -78,7 +78,7 @@ public sealed class ServerConfig : ISoraConfig
 
     /// <summary>
     /// <para>客户端API调用超时设置(毫秒)</para>
-    /// <para>默认为1000无需修改</para>
+    /// <para>默认为5000ms无需修改</para>
     /// </summary>
     public TimeSpan ApiTimeOut { get; init; } = TimeSpan.FromMilliseconds(5000);
 
@@ -98,4 +98,9 @@ public sealed class ServerConfig : ISoraConfig
     /// <para>仅支持gocq-1.0-beta6以上版本</para>
     /// </summary>
     public bool AutoMarkMessageRead { get; init; } = true;
+
+    /// <summary>
+    /// 是否抛出指令执行时的错误
+    /// </summary>
+    public bool ThrowCommandException { get; init; } = true;
 }

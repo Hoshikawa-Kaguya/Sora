@@ -13,11 +13,8 @@ Log.LogConfiguration
 //实例化Sora服务
 ISoraService? service = SoraServiceFactory.CreateService(new ServerConfig
 {
-    EnableSocketMessage = false, 
-    SuperUsers = new []{ 0L },
-#if DEBUG
-    HeartBeatTimeOut = TimeSpan.FromHours(3)
-#endif
+    EnableSocketMessage = false,
+    ThrowCommandException = false,
 });
 
 #region 事件处理

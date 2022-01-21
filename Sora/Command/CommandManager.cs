@@ -9,9 +9,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
 using Sora.Attributes.Command;
+using Sora.Entities;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
+using Sora.OnebotAdapter;
 using Sora.Util;
 using YukariToolBox.LightLog;
 
@@ -29,6 +31,11 @@ public sealed class CommandManager
     /// </summary>
     public bool ServiceIsRunning { get; private set; }
 
+    /// <summary>
+    /// 抛出指令错误
+    /// </summary>
+    private bool ThrowCommandErr { get; }
+
     #endregion
 
     #region 私有字段
@@ -41,9 +48,10 @@ public sealed class CommandManager
 
     #region 构造方法
 
-    internal CommandManager(Assembly assembly)
+    internal CommandManager(Assembly assembly, bool throwErr)
     {
         ServiceIsRunning = false;
+        ThrowCommandErr  = throwErr;
         MappingCommands(assembly);
     }
 
@@ -165,8 +173,9 @@ public sealed class CommandManager
             try
             {
                 Log.Debug("CommandAdapter",
-                    $"trigger command [{commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
-                Log.Info("CommandAdapter", $"触发指令[{commandInfo.MethodInfo.Name}]");
+                    $"trigger command [({commandInfo.GroupName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+                Log.Info("CommandAdapter",
+                    $"触发指令[({commandInfo.GroupName}){commandInfo.MethodInfo.Name}]");
                 //尝试执行指令并判断异步方法
                 bool isAsync =
                     commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
@@ -180,7 +189,7 @@ public sealed class CommandManager
                                           commandInfo.InstanceType == null
                                               ? null
                                               : _instanceDict[commandInfo.InstanceType],
-                                          new object[] { eventArgs });
+                                          new object[] {eventArgs});
                 }
                 else
                 {
@@ -190,41 +199,50 @@ public sealed class CommandManager
                                     commandInfo.InstanceType == null
                                         ? null
                                         : _instanceDict[commandInfo.InstanceType],
-                                    new object[] { eventArgs });
+                                    new object[] {eventArgs});
                 }
+
                 //检测事件触发中断标志
-                if(!eventArgs.IsContinueEventChain) break;
+                if (!eventArgs.IsContinueEventChain) break;
             }
-            catch (Exception e)
+            catch (Exception err)
             {
-                string errLog = Log.ErrorLogBuilder(e);
+                string errLog = Log.ErrorLogBuilder(err);
                 Log.Error("CommandAdapter", errLog);
 
                 var msg = new StringBuilder();
                 msg.AppendLine("指令执行错误");
                 if (!string.IsNullOrEmpty(commandInfo.Desc))
                     msg.AppendLine($"Description：{commandInfo.Desc}");
-                msg.Append(Log.ErrorLogBuilder(e));
+                msg.Append(Log.ErrorLogBuilder(err));
 
 
-                switch (eventArgs)
+                switch (eventArgs.SourceType)
                 {
-                    case GroupMessageEventArgs groupMessageArgs:
-                    {
-                        await groupMessageArgs.Reply(msg.ToString()).RunCatch(err => throw err);
+                    case SourceFlag.Group:
+                        if (eventArgs is not GroupMessageEventArgs e) break;
+                        await ApiAdapter.SendGroupMessage(eventArgs.ConnId, e.SourceGroup, msg.ToString(), null)
+                                        .RunCatch(er =>
+                                         {
+                                             Log.Error(er, "err cmd", "报错信息发送失败");
+                                             return (new ApiStatus(), 0);
+                                         });
                         break;
-                    }
-                    case PrivateMessageEventArgs privateMessageArgs:
-                    {
-                        await privateMessageArgs.Reply(msg.ToString()).RunCatch(err => throw err);
+                    case SourceFlag.Private:
+                        await ApiAdapter.SendPrivateMessage(eventArgs.ConnId, eventArgs.Sender,
+                                             msg.ToString(), null, null)
+                                        .RunCatch(er =>
+                                         {
+                                             Log.Error(er, "err cmd", "报错信息发送失败");
+                                             return (new ApiStatus(), 0);
+                                         });
                         break;
-                    }
                 }
 
                 //检查是否有异常处理
                 if (commandInfo.ExceptionHandler is not null)
-                    commandInfo.ExceptionHandler(e);
-                else throw;
+                    commandInfo.ExceptionHandler(err);
+                else if(ThrowCommandErr) throw;
             }
         }
 
@@ -293,21 +311,13 @@ public sealed class CommandManager
                 return false;
         }
 
-        bool isMatch =
+        return
             command.SourceType == eventArgs.SourceType && //判断同一源
             command.Regex.Any(regex => sourceMatch &&
-                Regex.IsMatch( //判断正则表达式
-                    eventArgs.Message.RawText,
+                //判断正则表达式
+                Regex.IsMatch(eventArgs.Message.RawText,
                     regex,
                     RegexOptions.Compiled | command.RegexOptions));
-
-        string groupName = string.IsNullOrEmpty(command.GroupName)
-            ? string.Empty
-            : $"({command.GroupName})";
-
-        if (isMatch)
-            Log.Debug("CommandMatch", $"match to command [{groupName}{command.MethodInfo.Name}]");
-        return isMatch;
     }
 
     /// <summary>

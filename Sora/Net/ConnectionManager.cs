@@ -140,13 +140,15 @@ public sealed class ConnectionManager : IDisposable
     {
         if (StaticVariable.ConnectionInfos.IsEmpty) return;
         var serviceId = (Guid) serviceIdObj;
-        Log.Debug("HeartBeatCheck", $"service id={serviceId}");
+        Log.Debug("HeartBeatCheck", $"service id={serviceId}({StaticVariable.ConnectionInfos.Count})");
 
         //查找超时连接
+        DateTime now = DateTime.Now;
         Dictionary<Guid, SoraConnectionInfo> timeoutDict =
             StaticVariable.ConnectionInfos
-                          .Where(conn => conn.Value.ServiceId                        == serviceId &&
-                                         DateTime.Now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
+                          .Where(conn =>
+                               conn.Value.ServiceId               == serviceId &&
+                               now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
                           .ToDictionary(conn => conn.Key,
                                conn => conn.Value);
         if (timeoutDict.Count == 0) return;
@@ -157,7 +159,9 @@ public sealed class ConnectionManager : IDisposable
         foreach ((Guid connection, SoraConnectionInfo info) in timeoutDict)
         {
             CloseConnection("Universal", info.SelfId, connection);
-            Log.Error("HeartBeatCheck", $"Socket:[{connection}]connection time out，disconnect");
+            double t = (now - info.LastHeartBeatTime).TotalMilliseconds;
+            Log.Error("HeartBeatCheck", 
+                $"Socket:[{connection}]connection time out({t}ms)，disconnect");
             //客户端尝试重连
             if (info.Connection.SocketType == SoraSocketType.Client &&
                 info.Connection.SocketInstance is WebsocketClient c)

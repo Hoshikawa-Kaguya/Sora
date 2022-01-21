@@ -76,28 +76,27 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     {
         _clientReady = false;
         Log.Info("Sora", $"Sora WebSocket客户端初始化... [{_clientId}]");
+        Config = config ?? throw new ArgumentNullException(nameof(config));
         //写入初始化信息
         if (!StaticVariable.ServiceConfigs.TryAdd(_clientId, new ServiceConfig(config)))
             throw new DataException("try add service config failed");
         //检查参数
-        if (config == null) throw new ArgumentNullException(nameof(config));
-        if (config.Port == 0)
-            throw new ArgumentOutOfRangeException(nameof(config.Port), "Port 0 is not allowed");
+        if (Config.Port == 0)
+            throw new ArgumentOutOfRangeException(nameof(Config.Port), "Port 0 is not allowed");
         //初始化连接管理器
-        ConnManager = new ConnectionManager(config);
-        Config      = config;
+        ConnManager = new ConnectionManager(Config);
         //实例化事件接口
-        Event = new EventAdapter(_clientId);
+        Event = new EventAdapter(_clientId, Config.ThrowCommandException);
         //处理连接路径
-        string serverPath = string.IsNullOrEmpty(config.UniversalPath)
-            ? $"ws://{config.Host}:{config.Port}"
-            : $"ws://{config.Host}:{config.Port}/{config.UniversalPath.Trim('/')}/";
+        string serverPath = string.IsNullOrEmpty(Config.UniversalPath)
+            ? $"ws://{Config.Host}:{Config.Port}"
+            : $"ws://{Config.Host}:{Config.Port}/{Config.UniversalPath.Trim('/')}/";
         Log.Debug("Sora", $"Onebot服务器地址:{serverPath}");
         Client =
             new WebsocketClient(new Uri(serverPath), CreateSocket)
             {
-                ReconnectTimeout      = config.ReconnectTimeOut,
-                ErrorReconnectTimeout = config.ReconnectTimeOut
+                ReconnectTimeout      = Config.ReconnectTimeOut,
+                ErrorReconnectTimeout = Config.ReconnectTimeOut
             };
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
