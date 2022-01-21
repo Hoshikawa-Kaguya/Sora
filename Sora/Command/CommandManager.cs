@@ -408,8 +408,8 @@ public sealed class CommandManager
     private bool GenerateCommandInfo(MethodInfo method, Type classType, out RegexCommandInfo regexCommandInfo)
     {
         //获取指令属性
-        RegexCommand commandAttr =
-            method.GetCustomAttribute(typeof(RegexCommand)) as RegexCommand ??
+        SoraCommand commandAttr =
+            method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand ??
             throw new NullReferenceException("command attribute is null with unknown reason");
 
         Log.Debug("Command", $"Registering command [{method.Name}]");

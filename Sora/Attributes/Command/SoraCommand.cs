@@ -9,7 +9,7 @@ namespace Sora.Attributes.Command;
 /// 指令
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class RegexCommand : Attribute
+public sealed class SoraCommand : Attribute
 {
     #region 私有字段
 
@@ -85,7 +85,7 @@ public sealed class RegexCommand : Attribute
     /// <summary>
     /// 构造方法
     /// </summary>
-    public RegexCommand()
+    public SoraCommand()
     {
         Regex.CacheSize++;
     }
