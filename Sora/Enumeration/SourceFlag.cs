@@ -23,5 +23,5 @@ public enum SourceFlag
     /// <summary>
     /// 系统消息
     /// </summary>
-    System = 3,
+    System = 3
 }

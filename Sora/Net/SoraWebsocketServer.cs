@@ -77,6 +77,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
             Log.Fatal(e, "Sora", $"端口{Config.Port}已被占用，请更换其他端口", Config);
             throw e;
         }
+
         //写入初始化信息
         if (!StaticVariable.ServiceConfigs.TryAdd(_serverId, new ServiceConfig(Config)))
             throw new DataException("try add service config failed");

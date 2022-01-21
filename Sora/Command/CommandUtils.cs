@@ -41,7 +41,7 @@ internal static class CommandUtils
             return false;
         }
 
-        bool preCheck = 
+        bool preCheck =
             method.IsDefined(typeof(SoraCommand), false) &&
             method.GetParameters().Length == 1;
 

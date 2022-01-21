@@ -136,7 +136,9 @@ public sealed class CommandManager
 
         //添加指令信息
         if (_dynamicCommands.AddOrExist(commandInfo))
+        {
             Log.Debug("Command", $"Registered {commandInfo.SourceType} dynamic command [{commandInfo.CommandId}]");
+        }
         else
         {
             Log.Warning("CommandManager", "Command exists");
@@ -178,7 +180,9 @@ public sealed class CommandManager
 
         //添加指令信息
         if (_dynamicCommands.AddOrExist(commandInfo))
+        {
             Log.Debug("Command", $"Registered {commandInfo.SourceType} dynamic command [{commandInfo.CommandId}]");
+        }
         else
         {
             Log.Warning("CommandManager", "Command exists");

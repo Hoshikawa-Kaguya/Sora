@@ -37,7 +37,7 @@ public sealed class User : BaseModel
     /// <param name="uid">用户ID</param>
     internal User(Guid serviceId, Guid connectionId, long uid) : base(serviceId, connectionId)
     {
-        Id          = uid;
+        Id = uid;
         IsSuperUser = Id is not 0 or -1 &&
             StaticVariable.ServiceConfigs[serviceId].SuperUsers.Any(id => id == Id);
     }

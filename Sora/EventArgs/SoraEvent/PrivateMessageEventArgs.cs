@@ -111,7 +111,7 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// <param name="timeout">超时</param>
     /// <param name="timeoutTask">超时后执行的动作</param>
     /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
-    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string[]       commandExps, MatchType matchType,
+    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string[]        commandExps, MatchType matchType,
                                                                       TimeSpan        timeout,
                                                                       Func<ValueTask> timeoutTask  = null,
                                                                       RegexOptions    regexOptions = RegexOptions.None)

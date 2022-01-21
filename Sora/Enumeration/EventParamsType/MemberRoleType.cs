@@ -30,5 +30,5 @@ public enum MemberRoleType
     /// 群主
     /// </summary>
     [Description("owner")]
-    Owner = 3,
+    Owner = 3
 }

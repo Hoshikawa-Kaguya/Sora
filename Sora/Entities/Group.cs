@@ -394,7 +394,7 @@ public sealed class Group : BaseModel
         if (groupL is null && groupR is null) return true;
 
         return groupL is not null && groupR is not null && groupL.Id == groupR.Id &&
-               groupL.SoraApi                                        == groupR.SoraApi;
+            groupL.SoraApi                                           == groupR.SoraApi;
     }
 
     /// <summary>

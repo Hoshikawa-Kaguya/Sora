@@ -87,10 +87,10 @@ public readonly struct SoraSegment
     {
         if (soraSegmentL.Data is not null && soraSegmentR.Data is not null)
             return soraSegmentL.MessageType == soraSegmentR.MessageType &&
-                   JToken.DeepEquals(JToken.FromObject(soraSegmentL.Data),
-                       JToken.FromObject(soraSegmentR.Data));
+                JToken.DeepEquals(JToken.FromObject(soraSegmentL.Data),
+                    JToken.FromObject(soraSegmentR.Data));
         return soraSegmentL.Data is null && soraSegmentR.Data is null &&
-               soraSegmentL.MessageType == soraSegmentR.MessageType;
+            soraSegmentL.MessageType == soraSegmentR.MessageType;
     }
 
     /// <summary>

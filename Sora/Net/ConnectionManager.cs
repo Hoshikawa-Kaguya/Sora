@@ -160,7 +160,7 @@ public sealed class ConnectionManager : IDisposable
         {
             CloseConnection("Universal", info.SelfId, connection);
             double t = (now - info.LastHeartBeatTime).TotalMilliseconds;
-            Log.Error("HeartBeatCheck", 
+            Log.Error("HeartBeatCheck",
                 $"Socket:[{connection}]connection time out({t}ms)，disconnect");
             //客户端尝试重连
             if (info.Connection.SocketType == SoraSocketType.Client &&

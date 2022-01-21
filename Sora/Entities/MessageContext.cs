@@ -53,7 +53,7 @@ public sealed class MessageContext : BaseModel
     #region 构造函数
 
     internal MessageContext(Guid serviceId, Guid connectionId, int   msgId, string text, MessageBody messageBody,
-                     long time,      int  font,         long? messageSequence) :
+                            long time,      int  font,         long? messageSequence) :
         base(serviceId, connectionId)
     {
         MessageId       = msgId;
@@ -187,14 +187,14 @@ public sealed class MessageContext : BaseModel
     {
         if (msgL is null && msgR is null) return true;
 
-        return msgL is not null                             &&
-               msgR is not null                             &&
-               msgL.MessageId       == msgR.MessageId       &&
-               msgL.SoraApi         == msgR.SoraApi         &&
-               msgL.Font            == msgR.Font            &&
-               msgL.Time            == msgR.Time            &&
-               msgL.MessageSequence == msgR.MessageSequence &&
-               msgL.RawText.Equals(msgR.RawText);
+        return msgL is not null                          &&
+            msgR is not null                             &&
+            msgL.MessageId       == msgR.MessageId       &&
+            msgL.SoraApi         == msgR.SoraApi         &&
+            msgL.Font            == msgR.Font            &&
+            msgL.Time            == msgR.Time            &&
+            msgL.MessageSequence == msgR.MessageSequence &&
+            msgL.RawText.Equals(msgR.RawText);
     }
 
     /// <summary>
