@@ -31,7 +31,8 @@ public sealed class SoraCommand : Attribute
     }
 
     /// <summary>
-    /// 限制指令响应的群组
+    /// <para>限制指令响应的群组</para>
+    /// <para>私聊时无效</para>
     /// </summary>
     public long[] SourceGroups { get; init; } = Array.Empty<long>();
 
@@ -50,6 +51,12 @@ public sealed class SoraCommand : Attribute
     /// <para>此为QQ群聊权限，私聊时无效</para>
     /// </summary>
     public MemberRoleType PermissionLevel { get; init; } = MemberRoleType.Member;
+
+    /// <summary>
+    /// <para>机器人管理员指令</para>
+    /// <para>此权限会在PermissionLevel之后进行判定</para>
+    /// </summary>
+    internal bool SuperUserCommand { get; init; } = false;
 
     /// <summary>
     /// <para>指令描述</para>
@@ -77,18 +84,6 @@ public sealed class SoraCommand : Attribute
     /// 指令执行异常处理
     /// </summary>
     public readonly Action<Exception> ExceptionHandler = null;
-
-    #endregion
-
-    #region 构造方法
-
-    /// <summary>
-    /// 构造方法
-    /// </summary>
-    public SoraCommand()
-    {
-        Regex.CacheSize++;
-    }
 
     #endregion
 }

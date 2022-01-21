@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Sora;
 using Sora.Interfaces;
@@ -11,10 +10,10 @@ Log.LogConfiguration
    .SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
-ISoraService? service = SoraServiceFactory.CreateService(new ServerConfig
+ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
 {
-    EnableSocketMessage = false,
-    ThrowCommandException = false,
+    EnableSocketMessage   = false,
+    ThrowCommandException = false
 });
 
 #region 事件处理
@@ -56,16 +55,18 @@ service.Event.OnSelfPrivateMessage += (_, eventArgs) =>
     return ValueTask.CompletedTask;
 };
 //动态向管理器注册指令
-// service.Event.CommandManager.RegisterGroupCommand(new[] {"2"},
-//     async eventArgs =>
-//     {
-//         await eventArgs.Reply("哇哦");
-//         eventArgs.IsContinueEventChain = false;
-//     }, MatchType.Full);
+service.Event.CommandManager.RegisterGroupDynamicCommand(
+    new[] {"2"},
+    async eventArgs =>
+    {
+        await eventArgs.Reply("shit");
+        eventArgs.IsContinueEventChain = false;
+    });
 
 #endregion
 
 //启动服务并捕捉错误
 await service.StartService();
 //.RunCatch(e => Log.Error("Sora Service", Log.ErrorLogBuilder(e)));
+
 await Task.Delay(-1);

@@ -120,7 +120,8 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     #region 连续对话
 
     /// <summary>
-    /// 等待下一条消息触发
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
     /// </summary>
     /// <param name="commandExps">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -138,7 +139,8 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     }
 
     /// <summary>
-    /// 等待下一条消息触发
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
     /// </summary>
     /// <param name="commandExps">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -161,7 +163,8 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     }
 
     /// <summary>
-    /// 等待下一条消息触发
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
     /// </summary>
     /// <param name="commandExp">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -177,7 +180,8 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     }
 
     /// <summary>
-    /// 等待下一条消息触发
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
     /// </summary>
     /// <param name="commandExp">指令表达式</param>
     /// <param name="matchType">匹配类型</param>

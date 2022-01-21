@@ -53,6 +53,23 @@ public static class Helper
         return true;
     }
 
+    /// <summary>
+    /// 对列表进行添加 DynamicCommandInfo 元素，或如果存在该项的话，忽略
+    /// </summary>
+    /// <param name="list">要添加元素的列表</param>
+    /// <param name="data">要添加的元素</param>
+    /// <returns>是否成功添加，若已存在则返回false。</returns>
+    [Reviewed("nidbCN", "2021-03-24 19:39")]
+    internal static bool AddOrExist(this List<DynamicCommandInfo> list, DynamicCommandInfo data)
+    {
+        if (list.Any(i => i.Equals(data))) return false;
+        //当有指令表达式相同且优先级相同时，抛出错误
+        if (list.Any(i => i.Regex.ArrayEquals(data.Regex) && i.Priority == data.Priority))
+            throw new NotSupportedException("Priority cannot be the same value");
+        list.Add(data);
+        return true;
+    }
+
     #endregion
 
     #region 网络

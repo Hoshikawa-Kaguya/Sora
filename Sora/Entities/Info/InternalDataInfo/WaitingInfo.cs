@@ -37,14 +37,15 @@ internal struct WaitingInfo
     }
 
     /// <summary>
-    /// 比价是否为同一消息来源
+    /// 比较是否为同一消息来源
     /// </summary>
     internal bool IsSameSource(WaitingInfo info)
     {
-        return info.SourceFlag   == SourceFlag
-            && info.Source       == Source
-            && info.ConnectionId == ConnectionId
-            && info.CommandExpressions.ArrayEquals(CommandExpressions);
+        return info.SourceFlag == SourceFlag   &&
+            info.Source        == Source       &&
+            info.ConnectionId  == ConnectionId &&
+            info.ServiceId     == ServiceId    &&
+            info.CommandExpressions.ArrayEquals(CommandExpressions);
     }
 
     public override int GetHashCode()

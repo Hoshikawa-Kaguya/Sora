@@ -21,8 +21,10 @@ internal sealed record RegexCommandInfo : BaseCommandInfo
     internal RegexCommandInfo(
         string            desc,             string[] regex,        string       groupName,    MethodInfo method,
         MemberRoleType    permissionType,   int      priority,     RegexOptions regexOptions, SourceFlag source,
-        Action<Exception> exceptionHandler, long[]   sourceGroups, long[]       sourceUsers,  Type instanceType = null)
-        : base(desc, regex, permissionType, priority, regexOptions, source, exceptionHandler, sourceGroups, sourceUsers)
+        Action<Exception> exceptionHandler, long[]   sourceGroups, long[]       sourceUsers,  bool       suCommand,
+        Type              instanceType = null)
+        : base(desc, regex, permissionType, suCommand, priority, regexOptions, source, exceptionHandler, sourceGroups,
+            sourceUsers)
     {
         GroupName    = groupName;
         MethodInfo   = method;
