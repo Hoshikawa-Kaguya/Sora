@@ -54,11 +54,11 @@ public sealed class EventAdapter
 
     #region 构造方法
 
-    internal EventAdapter(Guid serviceId)
+    internal EventAdapter(Guid serviceId, bool throwErr)
     {
         ServiceId = serviceId;
         CommandManager = StaticVariable.ServiceConfigs[serviceId].EnableSoraCommandManager
-            ? new CommandManager(Assembly.GetEntryAssembly())
+            ? new CommandManager(Assembly.GetEntryAssembly(), throwErr)
             : null;
     }
 

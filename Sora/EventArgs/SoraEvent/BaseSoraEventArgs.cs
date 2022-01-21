@@ -26,6 +26,16 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     public SoraApi SoraApi { get; private set; }
 
     /// <summary>
+    /// 链接ID
+    /// </summary>
+    internal Guid ConnId { get; }
+
+    /// <summary>
+    /// 服务ID
+    /// </summary>
+    internal Guid ServiceGuid { get; }
+
+    /// <summary>
     /// 当前事件名
     /// </summary>
     public string EventName { get; private set; }
@@ -74,12 +84,14 @@ public abstract class BaseSoraEventArgs : System.EventArgs
                                long loginUid,  long time,         SourceFlag sourceType)
     {
         SoraApi              = new SoraApi(serviceId, connectionId);
+        ServiceGuid          = serviceId;
+        ConnId               = connectionId;
         EventName            = eventName;
         LoginUid             = loginUid;
         TimeStamp            = time;
         Time                 = time.ToDateTime();
         IsContinueEventChain = true;
-        SourceType               = sourceType;
+        SourceType           = sourceType;
     }
 
     #endregion

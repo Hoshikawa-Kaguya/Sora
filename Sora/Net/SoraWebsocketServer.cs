@@ -67,31 +67,29 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     /// <exception cref="ArgumentOutOfRangeException">服务器启动参数错误</exception>
     internal SoraWebsocketServer(ServerConfig config, Action<Exception> crashAction = null)
     {
-        //检查端口占用
-        if (Helper.IsPortInUse(config.Port))
-        {
-            var e = new InvalidOperationException($"端口{config.Port}已被占用，请更换其他端口");
-            Log.Fatal(e, "Sora", $"端口{config.Port}已被占用，请更换其他端口", config);
-            throw e;
-        }
-
-        //写入初始化信息
-        if (!StaticVariable.ServiceConfigs.TryAdd(_serverId, new ServiceConfig(config)))
-            throw new DataException("try add service config failed");
         _serverReady = false;
         Log.Info("Sora", $"Sora WebSocket服务器初始化... [{_serverId}]");
+        Config = config ?? throw new ArgumentNullException(nameof(config));
+        //检查端口占用
+        if (Helper.IsPortInUse(Config.Port))
+        {
+            var e = new InvalidOperationException($"端口{Config.Port}已被占用，请更换其他端口");
+            Log.Fatal(e, "Sora", $"端口{Config.Port}已被占用，请更换其他端口", Config);
+            throw e;
+        }
+        //写入初始化信息
+        if (!StaticVariable.ServiceConfigs.TryAdd(_serverId, new ServiceConfig(Config)))
+            throw new DataException("try add service config failed");
         //检查参数
-        if (config == null) throw new ArgumentNullException(nameof(config));
-        if (config.Port == 0)
-            throw new ArgumentOutOfRangeException(nameof(config.Port), "Port 0 is not allowed");
+        if (Config.Port == 0)
+            throw new ArgumentOutOfRangeException(nameof(Config.Port), "Port 0 is not allowed");
         //初始化连接管理器
-        ConnManager = new ConnectionManager(config);
-        Config      = config;
+        ConnManager = new ConnectionManager(Config);
         //实例化事件接口
-        Event = new EventAdapter(_serverId);
+        Event = new EventAdapter(_serverId, Config.ThrowCommandException);
         //禁用原log
         FleckLog.Level = (LogLevel) 4;
-        Server = new WebSocketServer($"ws://{config.Host}:{config.Port}")
+        Server = new WebSocketServer($"ws://{Config.Host}:{Config.Port}")
         {
             //出错后进行重启
             RestartAfterListenError = true

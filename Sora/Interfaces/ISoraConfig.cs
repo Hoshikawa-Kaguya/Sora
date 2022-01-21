@@ -65,4 +65,9 @@ public interface ISoraConfig
     /// <para>仅支持gocq-1.0-beta6以上版本</para>
     /// </summary>
     bool AutoMarkMessageRead { get; init; }
+
+    /// <summary>
+    /// 是否抛出指令执行时的错误
+    /// </summary>
+    bool ThrowCommandException { get; init; }
 }
