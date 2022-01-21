@@ -50,10 +50,10 @@ public sealed class Anonymous
     {
         if (anonymousL is null && anonymousR is null) return true;
 
-        return anonymousL is not null                  && anonymousR is not null &&
-               anonymousL.Flag.Equals(anonymousR.Flag) &&
-               anonymousL.Id == anonymousR.Id          &&
-               anonymousL.Name.Equals(anonymousR.Name);
+        return anonymousL is not null               && anonymousR is not null &&
+            anonymousL.Flag.Equals(anonymousR.Flag) &&
+            anonymousL.Id == anonymousR.Id          &&
+            anonymousL.Name.Equals(anonymousR.Name);
     }
 
     /// <summary>

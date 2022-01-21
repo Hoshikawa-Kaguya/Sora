@@ -36,8 +36,8 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
 
     #endregion
 
-    internal BaseMessageEventArgs(Guid                   serviceId, Guid connectionId, string eventName,
-                                  BaseObMessageEventArgs msg, SourceFlag source) :
+    internal BaseMessageEventArgs(Guid                   serviceId, Guid       connectionId, string eventName,
+                                  BaseObMessageEventArgs msg,       SourceFlag source) :
         base(serviceId, connectionId, eventName, msg.SelfId, msg.Time, source)
     {
         //将api消息段转换为sorasegment

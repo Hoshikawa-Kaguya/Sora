@@ -297,7 +297,7 @@ public sealed class MessageBody : IList<SoraSegment>
     private static bool SegmentCheck(SoraSegment s)
     {
         return !(s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
-                 s.Data is null);
+            s.Data is null);
     }
 
     #endregion

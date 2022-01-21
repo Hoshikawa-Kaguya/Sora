@@ -394,7 +394,7 @@ public sealed class EventAdapter
                 Log.Debug("Sora",
                     $"Group self msg[{privateMsg.UserId}] -> {privateMsg.RawMessage}");
                 //执行回调
-                    if (OnSelfPrivateMessage == null) break;
+                if (OnSelfPrivateMessage == null) break;
                 await OnSelfPrivateMessage("Message",
                     new PrivateMessageEventArgs(ServiceId, connection, "private_self", privateMsg));
                 break;
