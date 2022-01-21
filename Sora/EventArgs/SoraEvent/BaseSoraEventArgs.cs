@@ -99,7 +99,8 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     #region 连续指令
 
     /// <summary>
-    /// 等待下一条消息触发
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
     /// </summary>
     internal object WaitForNextMessage(long            sourceUid,    string[]  commandExps, MatchType matchType,
                                        RegexOptions    regexOptions, TimeSpan? timeout,

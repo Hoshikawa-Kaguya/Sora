@@ -84,7 +84,8 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     #region 连续对话
 
     /// <summary>
-    /// 等待下一条消息触发
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
     /// </summary>
     /// <param name="commandExps">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -101,7 +102,8 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     }
 
     /// <summary>
-    /// 等待下一条消息触发
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
     /// </summary>
     /// <param name="commandExps">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -109,7 +111,7 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// <param name="timeout">超时</param>
     /// <param name="timeoutTask">超时后执行的动作</param>
     /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
-    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string[]        commandExps, MatchType matchType,
+    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string[]       commandExps, MatchType matchType,
                                                                       TimeSpan        timeout,
                                                                       Func<ValueTask> timeoutTask  = null,
                                                                       RegexOptions    regexOptions = RegexOptions.None)
@@ -123,7 +125,8 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     }
 
     /// <summary>
-    /// 等待下一条消息触发
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
     /// </summary>
     /// <param name="commandExp">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -139,7 +142,8 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     }
 
     /// <summary>
-    /// 等待下一条消息触发
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
     /// </summary>
     /// <param name="commandExp">指令表达式</param>
     /// <param name="matchType">匹配类型</param>

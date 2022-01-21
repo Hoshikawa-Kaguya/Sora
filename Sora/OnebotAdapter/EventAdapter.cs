@@ -67,7 +67,7 @@ public sealed class EventAdapter
     #region 事件委托
 
     /// <summary>
-    /// Onebot事件回调
+    /// Onebot事件委托
     /// </summary>
     /// <typeparam name="TEventArgs">事件参数</typeparam>
     /// <param name="eventType">事件的主要类型</param>
