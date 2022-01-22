@@ -56,7 +56,7 @@ public sealed class SoraCommand : Attribute
     /// <para>机器人管理员指令</para>
     /// <para>此权限会在PermissionLevel之后进行判定</para>
     /// </summary>
-    internal bool SuperUserCommand { get; init; } = false;
+    public bool SuperUserCommand { get; init; } = false;
 
     /// <summary>
     /// <para>指令描述</para>
