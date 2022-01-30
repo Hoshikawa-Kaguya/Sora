@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -137,6 +138,18 @@ public static class Helper
 
 
         return constructor?.Invoke(null) ?? FormatterServices.GetUninitializedObject(type);
+    }
+
+    /// <summary>
+    /// 获取属性的Description特性
+    /// </summary>
+    internal static string GetFieldDesc(object value)
+    {
+        FieldInfo fieldInfo = value.GetType().GetField(value.ToString()!);
+        if (fieldInfo == null) return string.Empty;
+        DescriptionAttribute[] attributes = (DescriptionAttribute[])fieldInfo
+           .GetCustomAttributes(typeof(DescriptionAttribute), false);
+        return attributes.Length > 0 ? attributes[0].Description : string.Empty;
     }
 
     #endregion

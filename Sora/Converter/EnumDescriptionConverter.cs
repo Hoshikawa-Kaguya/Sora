@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using Sora.Util;
 
 namespace Sora.Converter;
 
@@ -29,16 +30,7 @@ internal class EnumDescriptionConverter : JsonConverter
             return;
         }
 
-        FieldInfo fieldInfo = value.GetType().GetField(value.ToString()!);
-        if (fieldInfo == null)
-        {
-            writer.WriteValue("");
-            return;
-        }
-
-        var attributes = (DescriptionAttribute[]) fieldInfo
-           .GetCustomAttributes(typeof(DescriptionAttribute), false);
-        writer.WriteValue(attributes.Length > 0 ? attributes[0].Description : "");
+        writer.WriteValue(Helper.GetFieldDesc(value));
     }
 
     /// <summary>
