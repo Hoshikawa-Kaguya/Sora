@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Sora;
 using Sora.Interfaces;
@@ -41,7 +42,10 @@ service.Event.OnClientConnect += (_, eventArgs) =>
 };
 
 //群聊消息事件
-service.Event.OnGroupMessage += async (_, eventArgs) => { await eventArgs.Reply("好耶"); };
+service.Event.OnGroupMessage += async (_, eventArgs) =>
+{
+    await eventArgs.Reply($"{eventArgs.Message.MessageBody.First().DataType}");
+};
 service.Event.OnSelfGroupMessage += (_, eventArgs) =>
 {
     Log.Warning("test", $"self group msg {eventArgs.Message.MessageId}[{eventArgs.IsSelfMessage}]");
