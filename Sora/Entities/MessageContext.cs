@@ -139,7 +139,15 @@ public sealed class MessageContext : BaseModel
     /// </summary>
     public bool IsForwardMessage()
     {
-        return MessageBody.Count == 1 && MessageBody.First().MessageType == SegmentType.Forward;
+        return MessageBody.Count == 1 && MessageBody[0].MessageType == SegmentType.Forward;
+    }
+
+    /// <summary>
+    /// QQ小程序判断（Xml与Json类型消息）
+    /// </summary>
+    public bool IsCodeCard()
+    {
+        return MessageBody.Count == 1 && MessageBody[0].Data is CodeSegment;
     }
 
     /// <summary>
