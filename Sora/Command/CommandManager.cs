@@ -379,12 +379,7 @@ public sealed class CommandManager
     private bool CommandMatch(BaseCommandInfo      command,
                               BaseMessageEventArgs eventArgs)
     {
-        if (command.SuperUserCommand && !eventArgs.IsSuperUser)
-            Log.Warning("CommandAdapter",
-                $"成员{eventArgs.Sender.Id}正在尝试执行SuperUser指令");
-
-        bool preMatch = command.SourceType == eventArgs.SourceType  && //判断同一源
-            command.SuperUserCommand       == eventArgs.IsSuperUser && //判断机器人管理员权限
+        bool preMatch = command.SourceType == eventArgs.SourceType && //判断同一源
             command.Regex.Any(regex =>
                 //判断正则表达式
                 Regex.IsMatch(eventArgs.Message.RawText,
@@ -392,6 +387,13 @@ public sealed class CommandManager
                     RegexOptions.Compiled | command.RegexOptions));
 
         if (!preMatch) return false;
+
+        if (command.SuperUserCommand && !eventArgs.IsSuperUser)
+        {
+            Log.Warning("CommandAdapter",
+                $"成员{eventArgs.Sender.Id}正在尝试执行SuperUser指令");
+            return false;
+        }
 
         bool sourceMatch = true;
         switch (eventArgs.SourceType)
@@ -412,11 +414,11 @@ public sealed class CommandManager
                     {
                         case RegexCommandInfo regex:
                             Log.Warning("CommandAdapter",
-                                $"成员{e.SenderInfo.UserId}正在尝试执行指令{regex.MethodInfo.Name}");
+                                $"成员{e.SenderInfo.UserId}[{e.SenderInfo.Role}]正在尝试执行指令{regex.MethodInfo.Name}[{command.PermissionType}]");
                             break;
                         case DynamicCommandInfo dynamic:
                             Log.Warning("CommandAdapter",
-                                $"成员{e.SenderInfo.UserId}正在尝试执行指令{dynamic.CommandId}");
+                                $"成员{e.SenderInfo.UserId}[{e.SenderInfo.Role}]正在尝试执行指令{dynamic.CommandId}[{command.PermissionType}]");
                             break;
                     }
 
