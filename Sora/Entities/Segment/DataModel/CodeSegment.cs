@@ -6,7 +6,7 @@ namespace Sora.Entities.Segment.DataModel;
 
 /// <summary>
 /// <para>Xml与Json集合</para>
-/// <para>可能为<see cref="SegmentType"/>.<see langword="Json"/>或<see cref="SegmentType"/>.<see langword="Xml"/></para>
+/// <para>可能为<see cref="SegmentType.Json"/>或<see cref="SegmentType.Xml"/></para>
 /// </summary>
 public sealed record CodeSegment : BaseSegment
 {

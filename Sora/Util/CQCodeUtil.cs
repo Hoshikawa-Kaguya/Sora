@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -19,6 +18,8 @@ namespace Sora.Util;
 /// </summary>
 public static class CQCodeUtil
 {
+    #region 序列化
+
     /// <summary>
     /// 序列化某一个消息
     /// </summary>
@@ -39,19 +40,16 @@ public static class CQCodeUtil
     /// <returns></returns>
     public static string SerializeSegment(this SoraSegment msg)
     {
-        if (msg.MessageType == SegmentType.Text) return ((TextSegment) msg.Data).Content.CQCodeEncode();
+        if (msg.MessageType == SegmentType.Text) return ((TextSegment)msg.Data).Content.CQCodeEncode();
 
         var ret = new StringBuilder();
         ret.Append("[CQ:");
 
-        FieldInfo messageTypeFieldInfo = msg.MessageType.GetType().GetField(msg.MessageType.ToString());
-        if (messageTypeFieldInfo == null) return "";
-        var attributes =
-            (DescriptionAttribute[]) messageTypeFieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-        if (attributes.Length < 1) return "";
+        //CQ码类型
+        string typeName = Helper.GetFieldDesc(msg.MessageType);
+        if (string.IsNullOrEmpty(typeName)) return string.Empty;
 
-        string description = attributes[0].Description;
-        ret.Append(description);
+        ret.Append(typeName);
 
 
         BaseSegment    data       = msg.Data;
@@ -67,13 +65,17 @@ public static class CQCodeUtil
             string                key          = jsonProperty.PropertyName;
             object                propData     = field.GetValue(data);
             if (string.IsNullOrWhiteSpace(key) || propData == null) continue;
-            string value = (propData.ToString() ?? "").CQCodeEncode(true);
+            string value = propData.GetType().IsEnum
+                ? Helper.GetFieldDesc(propData)
+                : (propData.ToString() ?? "").CQCodeEncode(true);
             ret.Append(',').Append(key).Append('=').Append(value);
         }
 
         ret.Append(']');
         return ret.ToString();
     }
+
+    #endregion
 
     #region 反序列化
 
