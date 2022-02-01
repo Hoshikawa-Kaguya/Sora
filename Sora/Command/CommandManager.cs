@@ -85,6 +85,7 @@ public sealed class CommandManager
         foreach ((Type classType, MethodInfo[] methodInfos) in cmdGroups)
         foreach (MethodInfo methodInfo in methodInfos)
         {
+            Log.Debug("Command", $"Registering command [{methodInfo.Name}]");
             //生成指令信息
             if (!GenerateCommandInfo(methodInfo, classType, out RegexCommandInfo commandInfo)) continue;
             //添加指令信息
@@ -527,8 +528,6 @@ public sealed class CommandManager
         SoraCommand commandAttr =
             method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand ??
             throw new NullReferenceException("command attribute is null with unknown reason");
-
-        Log.Debug("Command", $"Registering command [{method.Name}]");
 
         //处理表达式
         string[] matchExp = ParseCommandExps(commandAttr.CommandExpressions, commandAttr.MatchType);

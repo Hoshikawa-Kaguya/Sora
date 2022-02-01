@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Sora.Attributes;
 using Sora.Attributes.Command;
 using Sora.Enumeration;
@@ -35,7 +36,7 @@ internal static class CommandUtils
         }
 
         //源检查
-        if (commandAttr.SourceType is not SourceFlag.Group or SourceFlag.Private)
+        if (commandAttr.SourceType is not SourceFlag.Group and not SourceFlag.Private)
         {
             Log.Warning("CommandCheck", $"指令{method.Name}设置了不支持的消息源类型({commandAttr.SourceType}),已自动忽略");
             return false;
@@ -49,14 +50,10 @@ internal static class CommandUtils
         {
             SourceFlag.Group => preCheck &&
                 method.GetParameters()
-                      .Any(para =>
-                           para.ParameterType == typeof(GroupMessageEventArgs) &&
-                           !para.IsOut),
+                      .Any(para => ParameterCheck<GroupMessageEventArgs>(para, method.Name)),
             SourceFlag.Private => preCheck &&
                 method.GetParameters()
-                      .Any(para =>
-                           para.ParameterType == typeof(GroupMessageEventArgs) &&
-                           !para.IsOut),
+                      .Any(para => ParameterCheck<PrivateMessageEventArgs>(para, method.Name)),
             _ => false
         };
     }
@@ -64,6 +61,21 @@ internal static class CommandUtils
     public static bool IsEmpty(this long[] arr)
     {
         return arr is null || arr.Length == 0;
+    }
+
+    private static bool ParameterCheck<TPara>(ParameterInfo parameter, string name)
+    {
+        bool check = parameter.ParameterType == typeof(TPara) && !parameter.IsOut;
+        if (!check)
+        {
+            var log = new StringBuilder();
+            log.AppendLine($"指令[{name}]参数类型错误");
+            log.AppendLine($"应为{typeof(TPara).Name}实际为{parameter.ParameterType.Name}");
+            log.Append("已自动跳过该指令");
+            Log.Warning("CommandCheck", log.ToString());
+        }
+
+        return check;
     }
 
     #endregion
