@@ -1583,7 +1583,7 @@ internal static class ApiAdapter
             }, connection);
             Log.Debug("Sora",
                 apiStatus.RetCode == ApiStatusType.Ok
-                    ? "Auto mark message read sucess"
+                    ? "Auto mark message read success"
                     : "Auto mark message read failed");
         });
     }

@@ -16,31 +16,11 @@
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <Title>Sora</Title>
         <Nullable>warnings</Nullable>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <DefineConstants>TRACE</DefineConstants>
-        <DocumentationFile>.\Sora.xml</DocumentationFile>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <DocumentationFile>.\Sora.xml</DocumentationFile>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <Compile Remove="Command\Attributes\**" />
-        <Compile Remove="OnebotModel\OnebotEvent\ApiEvent\**" />
-        <Compile Remove="TypeEnum\**" />
-        <EmbeddedResource Remove="Command\Attributes\**" />
-        <EmbeddedResource Remove="OnebotModel\OnebotEvent\ApiEvent\**" />
-        <EmbeddedResource Remove="TypeEnum\**" />
-        <None Remove="Command\Attributes\**" />
-        <None Remove="OnebotModel\OnebotEvent\ApiEvent\**" />
-        <None Remove="TypeEnum\**" />
-        <None Remove="Sora.xml" />
-        <EmbeddedResource Include="Sora.xml" />
-        <None Include="icon.png">
+	<ItemGroup>
+	    <None Include="icon.png">
             <Pack>True</Pack>
             <PackagePath></PackagePath>
         </None>

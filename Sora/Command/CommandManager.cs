@@ -77,10 +77,11 @@ public sealed class CommandManager
             assembly.GetExportedTypes()
                      //获取指令组
                     .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
-                    .Select(type => (type, type.GetMethods()
-                                               .Where(method => method.CheckMethodLegality())
-                                               .ToArray()))
-                    .ToDictionary(methods => methods.type, methods => methods.Item2.ToArray());
+                    .Select(type => (type: type,
+                         methods: type.GetMethods()
+                                      .Where(method => method.CheckMethodLegality())
+                                      .ToArray()))
+                    .ToDictionary(methods => methods.type, methods => methods.methods);
 
         foreach ((Type classType, MethodInfo[] methodInfos) in cmdGroups)
         foreach (MethodInfo methodInfo in methodInfos)

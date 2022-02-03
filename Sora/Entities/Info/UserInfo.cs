@@ -1,4 +1,6 @@
 using Newtonsoft.Json;
+using Sora.Converter;
+using Sora.Enumeration;
 
 namespace Sora.Entities.Info;
 
@@ -36,8 +38,9 @@ public struct UserInfo
     /// <summary>
     /// 性别
     /// </summary>
+    [JsonConverter(typeof(EnumDescriptionConverter))]
     [JsonProperty(PropertyName = "sex")]
-    public string Sex { get; internal init; }
+    public Sex Sex { get; internal init; }
 
     /// <summary>
     /// 等级

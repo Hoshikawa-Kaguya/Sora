@@ -11,18 +11,18 @@ public enum Sex
     /// <summary>
     /// 男
     /// </summary>
-    [Description("")]
+    [Description("male")]
     Male,
 
     /// <summary>
     /// 女
     /// </summary>
-    [Description("")]
+    [Description("female")]
     Female,
 
     /// <summary>
     /// 未知
     /// </summary>
-    [Description("")]
+    [Description("unknown")]
     Unknown
 }
