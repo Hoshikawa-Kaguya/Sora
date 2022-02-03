@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Sora.Converter;
 using Sora.Entities;
 using Sora.Enumeration;
@@ -33,6 +34,16 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     /// 是否为机器人管理员
     /// </summary>
     public bool IsSuperUser { get; }
+
+    /// <summary>
+    /// 在匹配到指令时则此值为匹配到的正则表达式
+    /// </summary>
+    public Regex CommandRegex { get; internal set; }
+
+    /// <summary>
+    /// 在匹配到动态指令时则此值为匹配到的动态指令ID
+    /// </summary>
+    public Guid CommandId { get; internal set; }
 
     #endregion
 
