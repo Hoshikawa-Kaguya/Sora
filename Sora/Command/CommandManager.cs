@@ -77,7 +77,7 @@ public sealed class CommandManager
             assembly.GetExportedTypes()
                      //获取指令组
                     .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
-                    .Select(type => (type: type,
+                    .Select(type => (type,
                          methods: type.GetMethods()
                                       .Where(method => method.CheckMethodLegality())
                                       .ToArray()))
@@ -381,15 +381,23 @@ public sealed class CommandManager
     private bool CommandMatch(BaseCommandInfo      command,
                               BaseMessageEventArgs eventArgs)
     {
-        bool preMatch = command.SourceType == eventArgs.SourceType && //判断同一源
-            command.Regex.Any(regex =>
-                //判断正则表达式
-                Regex.IsMatch(eventArgs.Message.RawText,
-                    regex,
-                    RegexOptions.Compiled | command.RegexOptions));
+        //判断同一源
+        if (command.SourceType != eventArgs.SourceType)
+            return false;
 
-        if (!preMatch) return false;
+        //判断正则表达式
+        Regex matchedRegex = null;
+        if (!command.Regex.Any(regex =>
+        {
+            matchedRegex = regex;
+            return regex.IsMatch(eventArgs.Message.RawText);
+        })) return false;
+        eventArgs.CommandRegex = matchedRegex;
 
+        if (command is DynamicCommandInfo dynamicCmd)
+            eventArgs.CommandId = dynamicCmd.CommandId;
+
+        //机器人管理员判断
         if (command.SuperUserCommand && !eventArgs.IsSuperUser)
         {
             Log.Warning("CommandAdapter",
