@@ -7,6 +7,7 @@ using Sora.Entities.Base;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
+using Sora.Util;
 
 namespace Sora.Entities;
 
@@ -23,7 +24,8 @@ public sealed class MessageContext : BaseModel
     public int MessageId { get; }
 
     /// <summary>
-    /// 纯文本信息
+    /// <para>Gocq提供的纯文本信息</para>
+    /// <para>可能会缺失某些不重要且会在相同消息中不相等的字段</para>
     /// </summary>
     public string RawText { get; }
 
@@ -171,6 +173,20 @@ public sealed class MessageContext : BaseModel
         return text.ToString();
     }
 
+    /// <summary>
+    /// 判定消息段相等
+    /// </summary>
+    public bool MessageEquals(MessageContext ctx)
+    {
+        if (ctx == null || ctx.MessageBody.Count != MessageBody.Count) return false;
+
+        bool equal = true;
+        for (int i = 0; i < MessageBody.Count; i++)
+            equal &= MessageBody[i].Data == ctx.MessageBody[i].Data;
+
+        return equal;
+    }
+
     #endregion
 
     #region 转换方法
@@ -195,14 +211,15 @@ public sealed class MessageContext : BaseModel
     {
         if (msgL is null && msgR is null) return true;
 
-        return msgL is not null                          &&
-            msgR is not null                             &&
-            msgL.MessageId       == msgR.MessageId       &&
-            msgL.SoraApi         == msgR.SoraApi         &&
-            msgL.Font            == msgR.Font            &&
-            msgL.Time            == msgR.Time            &&
-            msgL.MessageSequence == msgR.MessageSequence &&
-            msgL.RawText.Equals(msgR.RawText);
+        return msgL is not null                              &&
+            msgR is not null                                 &&
+            msgL.MessageId         == msgR.MessageId         &&
+            msgL.SoraApi           == msgR.SoraApi           &&
+            msgL.Font              == msgR.Font              &&
+            msgL.Time              == msgR.Time              &&
+            msgL.MessageSequence   == msgR.MessageSequence   &&
+            msgL.MessageBody.Count == msgR.MessageBody.Count &&
+            msgL.MessageEquals(msgR);
     }
 
     /// <summary>

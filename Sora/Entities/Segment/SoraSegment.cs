@@ -1,6 +1,7 @@
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Sora.Converter;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
@@ -19,12 +20,8 @@ public readonly struct SoraSegment
     /// <summary>
     /// 消息段类型
     /// </summary>
+    [JsonConverter(typeof(EnumDescriptionConverter))]
     public SegmentType MessageType { get; }
-
-    /// <summary>
-    /// 数据类型
-    /// </summary>
-    public Type DataType { get; }
 
     /// <summary>
     /// 数据实例
@@ -44,23 +41,6 @@ public readonly struct SoraSegment
     {
         MessageType = segmentType;
         Data        = dataObject;
-        DataType    = dataObject?.GetType();
-    }
-
-    #endregion
-
-    #region 辅助函数
-
-    /// <summary>
-    /// 获取数据类型
-    /// 用于将BaseSegment转换为可读结构体
-    /// </summary>
-    /// <returns>
-    /// 数据结构体类型
-    /// </returns>
-    public Type GetCqCodeDataType()
-    {
-        return DataType;
     }
 
     #endregion
