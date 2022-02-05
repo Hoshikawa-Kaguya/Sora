@@ -1,4 +1,6 @@
+using System;
 using Newtonsoft.Json;
+using YukariToolBox.LightLog;
 
 namespace Sora.Entities.Segment.DataModel;
 
@@ -17,13 +19,13 @@ public sealed record ImageSegment : BaseSegment
     /// 文件名/绝对路径/URL/base64
     /// </summary>
     [JsonProperty(PropertyName = "file")]
-    public string ImgFile { get; internal set; }
+    public string ImgFile { get; internal init; }
 
     /// <summary>
     /// 图片类型
     /// </summary>
     [JsonProperty(PropertyName = "type", NullValueHandling = NullValueHandling.Ignore)]
-    public string ImgType { get; internal set; }
+    public string ImgType { get; internal init; }
 
     /// <summary>
     /// 图片链接
@@ -58,4 +60,21 @@ public sealed record ImageSegment : BaseSegment
     public int? SubType { get; internal set; }
 
     #endregion
+
+    /// <summary>
+    /// Equals
+    /// </summary>
+    /// <param name="other">图片</param>
+    public bool Equals(ImageSegment other)
+    {
+        return ImgFile == other.ImgFile && ImgType == other.ImgType;
+    }
+
+    /// <summary>
+    /// GetHashCode
+    /// </summary>
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(base.GetHashCode(), ImgFile, ImgType);
+    }
 }

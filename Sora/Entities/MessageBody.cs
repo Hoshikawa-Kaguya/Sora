@@ -227,8 +227,8 @@ public sealed class MessageBody : IList<SoraSegment>
         }
         set
         {
-            if (value.MessageType == SegmentType.Unknown || value.DataType == null)
-                throw new NullReferenceException("message element is null");
+            if (value.MessageType == SegmentType.Unknown || value.Data == null)
+                throw new NullReferenceException("get unknown message element");
             if (value.MessageType == SegmentType.Ignore)
                 throw new NullReferenceException(nameof(value));
             _message[index] = value;

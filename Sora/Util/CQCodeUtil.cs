@@ -23,14 +23,30 @@ public static class CQCodeUtil
     /// <summary>
     /// 序列化某一个消息
     /// </summary>
-    /// <param name="msg"></param>
-    /// <returns></returns>
+    /// <param name="msg">消息</param>
     public static string SerializeMessage(this MessageBody msg)
     {
-        var ret = "";
+        return msg.SerializeMessage(out _);
+    }
 
-        foreach (SoraSegment msgSeg in msg) ret += msgSeg.SerializeSegment();
-        return ret;
+    /// <summary>
+    /// 序列化某一个消息
+    /// </summary>
+    /// <param name="msg">消息</param>
+    /// <param name="elementsIndex">消息段在字符串中的索引</param>
+    public static string SerializeMessage(this MessageBody msg, out int[] elementsIndex)
+    {
+        var   sb    = new StringBuilder();
+        int[] index = new int[msg.Count];
+
+        for (int i = 0; i < msg.Count; i++)
+        {
+            index[i] = sb.Length;
+            sb.Append(msg[i].SerializeSegment());
+        }
+
+        elementsIndex = index;
+        return sb.ToString();
     }
 
     /// <summary>

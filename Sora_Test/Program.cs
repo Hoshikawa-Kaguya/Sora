@@ -1,14 +1,21 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Sora;
+using Sora.Entities;
+using Sora.Entities.Segment;
 using Sora.Interfaces;
 using Sora.Net.Config;
+using Sora.Util;
 using YukariToolBox.LightLog;
 
 //设置log等级
 Log.LogConfiguration
    .EnableConsoleOutput()
-   .SetLogLevel(LogLevel.Debug);
+   .SetLogLevel(LogLevel.Info);
 
 //实例化Sora服务
 ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
@@ -44,7 +51,7 @@ service.Event.OnClientConnect += (_, eventArgs) =>
 //群聊消息事件
 service.Event.OnGroupMessage += async (_, eventArgs) =>
 {
-    await eventArgs.Reply($"{eventArgs.Message.MessageBody.First().DataType}");
+    await eventArgs.Reply($"fuck you");
 };
 service.Event.OnSelfGroupMessage += (_, eventArgs) =>
 {
