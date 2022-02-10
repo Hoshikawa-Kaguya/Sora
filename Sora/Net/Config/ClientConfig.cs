@@ -108,6 +108,11 @@ public sealed class ClientConfig : ISoraConfig
     public bool ThrowCommandException { get; init; } = true;
 
     /// <summary>
+    /// 在指令出错时向发送源发送报错消息
+    /// </summary>
+    public bool SendCommandErrMsg { get; init; } = true;
+
+    /// <summary>
     /// <para>丢失连接时的重连超时</para>
     /// <para>默认5秒无需修改</para>
     /// </summary>

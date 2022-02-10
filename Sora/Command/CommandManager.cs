@@ -38,6 +38,11 @@ public sealed class CommandManager
     /// </summary>
     private bool ThrowCommandErr { get; }
 
+    /// <summary>
+    /// 在指令出错时向发送源发送报错消息
+    /// </summary>
+    private bool SendCommandErrMsg { get; }
+
     #endregion
 
     #region 私有字段
@@ -52,10 +57,11 @@ public sealed class CommandManager
 
     #region 构造方法
 
-    internal CommandManager(Assembly assembly, bool throwErr)
+    internal CommandManager(Assembly assembly, bool throwErr, bool sendCommandErrMsg)
     {
-        ServiceIsRunning = false;
-        ThrowCommandErr  = throwErr;
+        ServiceIsRunning  = false;
+        ThrowCommandErr   = throwErr;
+        SendCommandErrMsg = sendCommandErrMsg;
         MappingCommands(assembly);
     }
 
@@ -278,7 +284,7 @@ public sealed class CommandManager
                 }
                 catch (Exception err)
                 {
-                    await CommandErrorMessage(err, eventArgs, commandInfo);
+                    await CommandErrorMessage(err, eventArgs, commandInfo, commandInfo.CommandId.ToString());
                     return;
                 }
 
@@ -337,7 +343,8 @@ public sealed class CommandManager
             }
             catch (Exception err)
             {
-                await CommandErrorMessage(err, eventArgs, commandInfo);
+                await CommandErrorMessage(err, eventArgs, commandInfo, commandInfo.MethodInfo.Name);
+                return;
             }
 
         #endregion
@@ -457,7 +464,7 @@ public sealed class CommandManager
         //获取类属性
         if (!classType?.IsClass ?? true)
         {
-            Log.Error("Command", "method reflected objcet is not a class");
+            Log.Error("Command", "method reflected object is not a class");
             return false;
         }
 
@@ -671,45 +678,41 @@ public sealed class CommandManager
     /// <summary>
     /// 指令执行错误时的提示
     /// </summary>
-    private async ValueTask CommandErrorMessage(Exception       err, BaseMessageEventArgs eventArgs,
-                                                BaseCommandInfo commandInfo)
+    private async ValueTask CommandErrorMessage(Exception       err,         BaseMessageEventArgs eventArgs,
+                                                BaseCommandInfo commandInfo, string               cmdName)
     {
         string errLog = Log.ErrorLogBuilder(err);
-        Log.Error("CommandAdapter", errLog);
-
-        var msg = new StringBuilder();
+        var    msg    = new StringBuilder();
         msg.AppendLine("指令执行错误");
+        msg.AppendLine($"指令：{cmdName}");
+        msg.AppendLine($"MsgID:{eventArgs.Message.MessageId}");
         if (!string.IsNullOrEmpty(commandInfo.Desc))
-            msg.AppendLine($"Description：{commandInfo.Desc}");
-        msg.Append(Log.ErrorLogBuilder(err));
+            msg.AppendLine($"指令描述：{commandInfo.Desc}");
+        msg.Append(errLog);
 
-
-        switch (eventArgs.SourceType)
-        {
-            case SourceFlag.Group:
-                if (eventArgs is not GroupMessageEventArgs e) break;
-                await ApiAdapter.SendGroupMessage(eventArgs.ConnId, e.SourceGroup, msg.ToString(), null)
-                                .RunCatch(er =>
-                                 {
-                                     Log.Error(er, "err cmd", "报错信息发送失败");
-                                     return (new ApiStatus(), 0);
-                                 });
-                break;
-            case SourceFlag.Private:
-                await ApiAdapter.SendPrivateMessage(eventArgs.ConnId, eventArgs.Sender,
-                                     msg.ToString(), null, null)
-                                .RunCatch(er =>
-                                 {
-                                     Log.Error(er, "err cmd", "报错信息发送失败");
-                                     return (new ApiStatus(), 0);
-                                 });
-                break;
-        }
-
-        //检查是否有异常处理
-        if (commandInfo.ExceptionHandler is not null)
-            commandInfo.ExceptionHandler(err);
-        else if (ThrowCommandErr) throw err;
+        Log.Error("CommandAdapter", msg.ToString());
+        if (SendCommandErrMsg)
+            switch (eventArgs.SourceType)
+            {
+                case SourceFlag.Group:
+                    if (eventArgs is not GroupMessageEventArgs e) break;
+                    await ApiAdapter.SendGroupMessage(eventArgs.ConnId, e.SourceGroup, msg.ToString(), null)
+                                    .RunCatch(er =>
+                                     {
+                                         Log.Error(er, "err cmd", "报错信息发送失败");
+                                         return (new ApiStatus(), 0);
+                                     });
+                    break;
+                case SourceFlag.Private:
+                    await ApiAdapter.SendPrivateMessage(eventArgs.ConnId, eventArgs.Sender,
+                                         msg.ToString(), null, null)
+                                    .RunCatch(er =>
+                                     {
+                                         Log.Error(er, "err cmd", "报错信息发送失败");
+                                         return (new ApiStatus(), 0);
+                                     });
+                    break;
+            }
     }
 
     #endregion
