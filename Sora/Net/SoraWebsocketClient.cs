@@ -86,7 +86,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
         //初始化连接管理器
         ConnManager = new ConnectionManager(Config);
         //实例化事件接口
-        Event = new EventAdapter(_clientId, Config.ThrowCommandException);
+        Event = new EventAdapter(_clientId, Config.ThrowCommandException, Config.SendCommandErrMsg);
         //处理连接路径
         string serverPath = string.IsNullOrEmpty(Config.UniversalPath)
             ? $"ws://{Config.Host}:{Config.Port}"

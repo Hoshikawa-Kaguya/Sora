@@ -70,4 +70,9 @@ public interface ISoraConfig
     /// 是否抛出指令执行时的错误
     /// </summary>
     bool ThrowCommandException { get; init; }
+
+    /// <summary>
+    /// 在指令出错时向发送源发送报错消息
+    /// </summary>
+    bool SendCommandErrMsg { get; init; }
 }

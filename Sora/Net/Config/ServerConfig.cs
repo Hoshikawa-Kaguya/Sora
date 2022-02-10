@@ -105,4 +105,9 @@ public sealed class ServerConfig : ISoraConfig
     /// 是否抛出指令执行时的错误
     /// </summary>
     public bool ThrowCommandException { get; init; } = true;
+
+    /// <summary>
+    /// 在指令出错时向发送源发送报错消息
+    /// </summary>
+    public bool SendCommandErrMsg { get; init; } = true;
 }

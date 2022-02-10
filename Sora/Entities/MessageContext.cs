@@ -7,7 +7,6 @@ using Sora.Entities.Base;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
-using Sora.Util;
 
 namespace Sora.Entities;
 

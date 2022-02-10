@@ -1,15 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Sora;
-using Sora.Entities;
-using Sora.Entities.Segment;
 using Sora.Interfaces;
 using Sora.Net.Config;
-using Sora.Util;
 using YukariToolBox.LightLog;
 
 //设置log等级
