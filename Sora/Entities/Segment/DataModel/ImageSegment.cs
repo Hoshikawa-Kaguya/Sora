@@ -1,6 +1,5 @@
 using System;
 using Newtonsoft.Json;
-using YukariToolBox.LightLog;
 
 namespace Sora.Entities.Segment.DataModel;
 

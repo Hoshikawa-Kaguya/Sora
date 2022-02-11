@@ -713,6 +713,8 @@ public sealed class CommandManager
                                      });
                     break;
             }
+
+        if (ThrowCommandErr) throw err;
     }
 
     #endregion
