@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Sora.Enumeration;
@@ -28,6 +29,14 @@ public static class SegmentHelper
     public static SoraSegment ToAt(this int uid)
     {
         return SoraSegment.At(uid);
+    }
+
+    /// <summary>
+    /// 转换方法
+    /// </summary>
+    public static MessageBody ToMessageBody(this IEnumerable<SoraSegment> message)
+    {
+        return new MessageBody(message.ToList());
     }
 
     #endregion
