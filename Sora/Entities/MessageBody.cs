@@ -139,6 +139,19 @@ public sealed class MessageBody : IList<SoraSegment>
     }
 
     /// <summary>
+    /// 通过ID查找索引
+    /// </summary>
+    public int IndexOfById(Guid id)
+    {
+        for (int i = 0; i < _message.Count; i++)
+        {
+            if (_message[i].Id == id) return i;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
     /// 插入消息段
     /// </summary>
     /// <param name="index">索引</param>
