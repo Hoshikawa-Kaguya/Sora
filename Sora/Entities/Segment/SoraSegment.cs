@@ -1,7 +1,6 @@
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Sora.Converter;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
@@ -20,13 +19,17 @@ public readonly struct SoraSegment
     /// <summary>
     /// 消息段类型
     /// </summary>
-    [JsonConverter(typeof(EnumDescriptionConverter))]
     public SegmentType MessageType { get; }
 
     /// <summary>
     /// 数据实例
     /// </summary>
     public BaseSegment Data { get; }
+
+    /// <summary>
+    /// 消息段的ID
+    /// </summary>
+    public Guid Id { get; }
 
     #endregion
 
@@ -41,6 +44,7 @@ public readonly struct SoraSegment
     {
         MessageType = segmentType;
         Data        = dataObject;
+        Id          = Guid.NewGuid();
     }
 
     #endregion
