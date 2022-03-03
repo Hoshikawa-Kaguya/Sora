@@ -54,6 +54,11 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     /// </summary>
     private readonly Guid _serverId = Guid.NewGuid();
 
+    /// <summary>
+    /// dispose flag
+    /// </summary>
+    private bool _disposed;
+
     #endregion
 
     #region 构造函数
@@ -148,6 +153,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         //打开连接
         socket.OnOpen = () =>
         {
+            if (_disposed) return;
             //获取Token
             if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",
                     out string headerValue))
@@ -169,6 +175,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         //关闭连接
         socket.OnClose = () =>
         {
+            if (_disposed) return;
             //移除原连接信息
             if (ConnectionManager.ConnectionExists(socket.ConnectionInfo.Id))
                 ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
@@ -179,7 +186,11 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         };
         //上报接收
         socket.OnMessage = message =>
-            Task.Run(() => Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id));
+            Task.Run(() =>
+            {
+                if (_disposed) return;
+                Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
+            });
     }
 
     /// <summary>
@@ -195,6 +206,8 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     /// </summary>
     public void Dispose()
     {
+        Log.Warning("ServiceDispose", "SoraWebsocketServer正在停止...");
+        _disposed = true;
         StaticVariable.DisposeService(_serverId);
         Server.Dispose();
         ConnManager.Dispose();
