@@ -60,6 +60,11 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     /// </summary>
     private bool _clientIsRunning;
 
+    /// <summary>
+    /// dispose flag
+    /// </summary>
+    private bool _disposed;
+
     #endregion
 
     #region 构造方法
@@ -128,11 +133,16 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     {
         if (!_clientReady) return;
         //消息接收事件
-        Client.MessageReceived.Subscribe(msg => Task.Run(() => { Event.Adapter(JObject.Parse(msg.Text), _clientId); }));
+        Client.MessageReceived.Subscribe(msg => Task.Run(() =>
+        {
+            if (_disposed) return;
+            Event.Adapter(JObject.Parse(msg.Text), _clientId);
+        }));
         //连接断开事件
         Client.DisconnectionHappened
               .Subscribe(info => Task.Run(() =>
                {
+                   if (_disposed) return;
                    ConnectionManager.GetLoginUid(_clientId, out long uid);
                    //移除原连接信息
                    if (ConnectionManager.ConnectionExists(_clientId))
@@ -148,6 +158,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
         Client.ReconnectionHappened
               .Subscribe(info => Task.Run(() =>
                {
+                   if (_disposed) return;
                    if (info.Type == ReconnectionType.Initial || !_clientIsRunning)
                        return;
                    Log.Info("Sora", $"服务器已自动重连{info.Type}");
@@ -176,10 +187,12 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     }
 
     /// <summary>
-    /// 释放资源
+    /// 释放资源并断开链接
     /// </summary>
     public void Dispose()
     {
+        Log.Warning("ServiceDispose", "SoraWebsocketClient正在停止...");
+        _disposed = true;
         StaticVariable.DisposeService(_clientId);
         Client.Dispose();
         ConnManager.Dispose();
