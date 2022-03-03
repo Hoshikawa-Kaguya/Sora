@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Sora.Entities.Segment;
 using Sora.Enumeration;
+using Sora.Util;
 using YukariToolBox.LightLog;
 
 namespace Sora.Entities;
@@ -10,6 +12,7 @@ namespace Sora.Entities;
 /// <summary>
 /// 消息段
 /// </summary>
+[DebuggerDisplay("{DebuggerDisplay,nq}, Count = {_message.Count}")]
 public sealed class MessageBody : IList<SoraSegment>
 {
     #region 私有字段
@@ -29,6 +32,8 @@ public sealed class MessageBody : IList<SoraSegment>
     /// 只读
     /// </summary>
     public bool IsReadOnly => false;
+
+    private string DebuggerDisplay => this.SerializeMessage();
 
     #endregion
 
