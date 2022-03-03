@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Sora;
 using Sora.Interfaces;
@@ -7,7 +8,7 @@ using YukariToolBox.LightLog;
 //设置log等级
 Log.LogConfiguration
    .EnableConsoleOutput()
-   .SetLogLevel(LogLevel.Info);
+   .SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
 ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
@@ -41,10 +42,7 @@ service.Event.OnClientConnect += (_, eventArgs) =>
 };
 
 //群聊消息事件
-service.Event.OnGroupMessage += async (_, eventArgs) =>
-{
-    await eventArgs.Reply($"fuck you");
-};
+service.Event.OnGroupMessage += async (_, eventArgs) => { await eventArgs.Reply("fuck you"); };
 service.Event.OnSelfGroupMessage += (_, eventArgs) =>
 {
     Log.Warning("test", $"self group msg {eventArgs.Message.MessageId}[{eventArgs.IsSelfMessage}]");
