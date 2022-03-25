@@ -19,7 +19,7 @@
     <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
     <img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=flat-square" alt="workflow">
     <a href="https://github.com/Mrs4s/go-cqhttp">
-        <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--beta7--fix2-blue?style=flat-square" alt="gocq-ver">
+        <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--rc1-blue?style=flat-square" alt="gocq-ver">
     </a>
     </h4>
 </h1>
@@ -52,15 +52,15 @@
 
 本框架的正式版本和正常发布版本目前将不会支持Guild相关的API
 
-可能之后V12协议成熟后会考虑支持
-
 具有Guild API的测试版本已经在`extra/guild`分支中编写，如果需要这部分的API请自行clone引用或打包
 
 **警告：请勿将Guild分支测试版本在生产环境中使用，其中很多API都是实验性或不稳定的！**
 
-`extra/guild` 分支不一定会和主分支同步，可能我会直接摆烂（API和事件实在是太乱了）
+`extra/guild` 分支不会和主分支同步，这是一个完全实验性质的分支
 
-所以Guild相关的API的适配，在经过一段时间考虑后，个人认为需要等到相关API成熟且V12协议同时也能够较好的支持相关API/事件的抽象化，才有可能考虑去适配
+把这两套IM的协议做在一个框架里会导致API非常混乱（我都不知道QQ项目组的人怎么想的）
+
+并且鉴于频道也没什么人用，而且通话质量依旧是中东战场音质，本框架将会在V12协议适配频道协议后再考虑适配问题
 
 ## 开发注意事项
 
