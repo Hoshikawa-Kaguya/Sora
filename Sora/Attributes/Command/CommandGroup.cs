@@ -11,6 +11,7 @@ public sealed class CommandGroup : Attribute
     /// <summary>
     /// <para>指令组名</para>
     /// <para>可以用于标识和使能控制</para>
+    /// <para>值为空字符串时默认为类名</para>
     /// </summary>
     public string GroupName { get; init; } = string.Empty;
 

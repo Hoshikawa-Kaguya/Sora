@@ -99,13 +99,15 @@ public sealed class CommandManager
                 classType.GetCustomAttribute(typeof(CommandGroup)) as CommandGroup ??
                 throw new NullReferenceException("CommandGroup attribute is null with unknown reason");
             string prefix       = string.IsNullOrEmpty(groupAttr.GroupPrefix) ? string.Empty : groupAttr.GroupPrefix;
+            string groupName    = string.IsNullOrEmpty(groupAttr.GroupName) ? classType.Name : groupAttr.GroupName;
+            Log.Debug("Command", $"Registering command group[{groupName}]");
             bool   groupSuccess = false;
             foreach (MethodInfo methodInfo in methodInfos)
             {
                 Log.Debug("Command", $"Registering command [{methodInfo.Name}]");
                 //生成指令信息
-                if (!GenerateCommandInfo(methodInfo, classType, groupAttr.GroupName, prefix,
-                        out RegexCommandInfo commandInfo)) continue;
+                if (!GenerateCommandInfo(methodInfo, classType, groupName, prefix, out RegexCommandInfo commandInfo))
+                    continue;
                 //添加指令信息
                 if (_regexCommands.AddOrExist(commandInfo))
                 {
@@ -119,8 +121,7 @@ public sealed class CommandManager
             }
 
             //设置使能字典
-            if (groupSuccess && !string.IsNullOrEmpty(groupAttr.GroupName))
-                _groupEnableFlagDict.TryAdd(groupAttr.GroupName, true);
+            if (groupSuccess) _groupEnableFlagDict.TryAdd(groupName, true);
         }
 
         //增加正则缓存大小
@@ -373,9 +374,9 @@ public sealed class CommandManager
             try
             {
                 Log.Debug("CommandAdapter",
-                    $"trigger command [({commandInfo.ClassName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+                    $"trigger command [(C:{commandInfo.ClassName}|G:{commandInfo.GroupName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
                 Log.Info("CommandAdapter",
-                    $"触发指令[({commandInfo.ClassName}){commandInfo.MethodInfo.Name}]");
+                    $"触发指令[(C:{commandInfo.ClassName}|G:{commandInfo.GroupName}){commandInfo.MethodInfo.Name}]");
                 //尝试执行指令并判断异步方法
                 bool isAsync =
                     commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
