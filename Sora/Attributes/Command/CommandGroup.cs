@@ -8,4 +8,14 @@ namespace Sora.Attributes.Command;
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class CommandGroup : Attribute
 {
+    /// <summary>
+    /// <para>指令组名</para>
+    /// <para>可以用于标识和使能控制</para>
+    /// </summary>
+    public string GroupName { get; init; } = string.Empty;
+
+    /// <summary>
+    /// 指令组前缀
+    /// </summary>
+    public string GroupPrefix { get; init; } = string.Empty;
 }

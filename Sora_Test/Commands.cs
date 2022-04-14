@@ -7,7 +7,7 @@ using YukariToolBox.LightLog;
 
 namespace Sora_Test;
 
-[CommandGroup]
+[CommandGroup(GroupName = "test")]
 public static class Commands
 {
     [SoraCommand(
@@ -17,8 +17,8 @@ public static class Commands
     public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-    
-        var s = eventArgs.Message.MessageBody[0].Data as TextSegment;
+
+        TextSegment s = eventArgs.Message.MessageBody[0].Data as TextSegment;
         Log.Info("触发指令", $"text:{s!.Content}");
         await eventArgs.Reply($"哇哦");
     }
