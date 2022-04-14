@@ -53,6 +53,8 @@ public sealed class CommandManager
 
     private readonly ConcurrentDictionary<Type, dynamic> _instanceDict = new();
 
+    private readonly ConcurrentDictionary<string, bool> _groupEnableFlagDict = new();
+
     #endregion
 
     #region 构造方法
@@ -83,23 +85,42 @@ public sealed class CommandManager
             assembly.GetExportedTypes()
                      //获取指令组
                     .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
-                    .Select(type => (type,
+                    .Select(type => (
+                         type,
                          methods: type.GetMethods()
                                       .Where(method => method.CheckMethodLegality())
                                       .ToArray()))
                     .ToDictionary(methods => methods.type, methods => methods.methods);
 
         foreach ((Type classType, MethodInfo[] methodInfos) in cmdGroups)
-        foreach (MethodInfo methodInfo in methodInfos)
         {
-            Log.Debug("Command", $"Registering command [{methodInfo.Name}]");
-            //生成指令信息
-            if (!GenerateCommandInfo(methodInfo, classType, out RegexCommandInfo commandInfo)) continue;
-            //添加指令信息
-            if (_regexCommands.AddOrExist(commandInfo))
-                Log.Debug("Command", $"Registered {commandInfo.SourceType} command [{methodInfo.Name}]");
-            else
-                Log.Warning("CommandManager", "Command exists");
+            //获取指令属性
+            CommandGroup groupAttr =
+                classType.GetCustomAttribute(typeof(CommandGroup)) as CommandGroup ??
+                throw new NullReferenceException("CommandGroup attribute is null with unknown reason");
+            string prefix       = string.IsNullOrEmpty(groupAttr.GroupPrefix) ? string.Empty : groupAttr.GroupPrefix;
+            bool   groupSuccess = false;
+            foreach (MethodInfo methodInfo in methodInfos)
+            {
+                Log.Debug("Command", $"Registering command [{methodInfo.Name}]");
+                //生成指令信息
+                if (!GenerateCommandInfo(methodInfo, classType, groupAttr.GroupName, prefix,
+                        out RegexCommandInfo commandInfo)) continue;
+                //添加指令信息
+                if (_regexCommands.AddOrExist(commandInfo))
+                {
+                    groupSuccess = true;
+                    Log.Debug("Command", $"Registered {commandInfo.SourceType} command [{methodInfo.Name}]");
+                }
+                else
+                {
+                    Log.Warning("CommandManager", "Command exists");
+                }
+            }
+
+            //设置使能字典
+            if (groupSuccess && !string.IsNullOrEmpty(groupAttr.GroupName))
+                _groupEnableFlagDict.TryAdd(groupAttr.GroupName, true);
         }
 
         //增加正则缓存大小
@@ -138,14 +159,24 @@ public sealed class CommandManager
         if (groupCommand is null) throw new NullReferenceException($"{nameof(groupCommand)} is null");
 
         //生成指令信息
-        if (!GenerateDynamicCommandInfo(cmdExps, groupCommand, matchType, memberRole, suCommand, priority, sourceGroups
-              , sourceUsers, regexOptions, exceptionHandler, desc, out DynamicCommandInfo commandInfo))
-            return Guid.Empty;
+        Guid id = Guid.NewGuid();
+        Log.Debug("Command", $"Registering dynamic command [{id}]");
+
+        //处理表达式
+        string[] matchExp = ParseCommandExps(cmdExps, string.Empty, matchType);
+
+        //创建指令信息
+        DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(
+            desc, matchExp, memberRole, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
+            sourceGroups ?? Array.Empty<long>(),
+            sourceUsers  ?? Array.Empty<long>(),
+            groupCommand, id, suCommand);
 
         //添加指令信息
-        if (_dynamicCommands.AddOrExist(commandInfo))
+        if (_dynamicCommands.AddOrExist(dynamicCommand))
         {
-            Log.Debug("Command", $"Registered {commandInfo.SourceType} dynamic command [{commandInfo.CommandId}]");
+            Log.Debug("Command",
+                $"Registered {dynamicCommand.SourceType} dynamic command [{dynamicCommand.CommandId}]");
         }
         else
         {
@@ -153,7 +184,7 @@ public sealed class CommandManager
             return Guid.Empty;
         }
 
-        return commandInfo.CommandId;
+        return dynamicCommand.CommandId;
     }
 
     /// <summary>
@@ -182,14 +213,23 @@ public sealed class CommandManager
         if (cmdExps is null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
 
         //生成指令信息
-        if (!GenerateDynamicCommandInfo(cmdExps, privateCommand, matchType, suCommand, priority, sourceUsers,
-                regexOptions, exceptionHandler, desc, out DynamicCommandInfo commandInfo))
-            return Guid.Empty;
+        Guid id = Guid.NewGuid();
+        Log.Debug("Command", $"Registering dynamic command [{id}]");
+
+        //处理表达式
+        string[] matchExp = ParseCommandExps(cmdExps, string.Empty, matchType);
+
+        //创建指令信息
+        var dynamicCommand = new DynamicCommandInfo(
+            desc, matchExp, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
+            sourceUsers ?? Array.Empty<long>(),
+            privateCommand, id, suCommand);
 
         //添加指令信息
-        if (_dynamicCommands.AddOrExist(commandInfo))
+        if (_dynamicCommands.AddOrExist(dynamicCommand))
         {
-            Log.Debug("Command", $"Registered {commandInfo.SourceType} dynamic command [{commandInfo.CommandId}]");
+            Log.Debug("Command",
+                $"Registered {dynamicCommand.SourceType} dynamic command [{dynamicCommand.CommandId}]");
         }
         else
         {
@@ -197,7 +237,7 @@ public sealed class CommandManager
             return Guid.Empty;
         }
 
-        return commandInfo.CommandId;
+        return dynamicCommand.CommandId;
     }
 
     /// <summary>
@@ -207,6 +247,28 @@ public sealed class CommandManager
     public bool DeleteDynamicCommand(Guid id)
     {
         return _dynamicCommands.RemoveAll(cmd => cmd.CommandId == id) > 0;
+    }
+
+    #endregion
+
+    #region 指令使能
+
+    /// <summary>
+    /// 尝试启用指令组
+    /// </summary>
+    /// <param name="groupName">指令组名</param>
+    public bool TryEnableCommandGroup(string groupName)
+    {
+        return _groupEnableFlagDict.TryUpdate(groupName, true, false);
+    }
+
+    /// <summary>
+    /// 尝试禁用指令组
+    /// </summary>
+    /// <param name="groupName">指令组名</param>
+    public bool TryDisableCommandGroup(string groupName)
+    {
+        return _groupEnableFlagDict.TryUpdate(groupName, false, true);
     }
 
     #endregion
@@ -296,10 +358,12 @@ public sealed class CommandManager
         if (_regexCommands.Count == 0) return;
 
         List<RegexCommandInfo> matchedCommand =
-            _regexCommands.Where(command => CommandMatch(command, eventArgs))
+            _regexCommands.Where(command =>
+                               CommandMatch(command, eventArgs) &&
+                               (!_groupEnableFlagDict.ContainsKey(command.GroupName) ||
+                                   _groupEnableFlagDict[command.GroupName]))
                           .OrderByDescending(p => p.Priority)
                           .ToList();
-
 
         //在没有匹配到指令时直接跳转至Event触发
         if (matchedCommand.Count == 0) return;
@@ -309,9 +373,9 @@ public sealed class CommandManager
             try
             {
                 Log.Debug("CommandAdapter",
-                    $"trigger command [({commandInfo.GroupName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+                    $"trigger command [({commandInfo.ClassName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
                 Log.Info("CommandAdapter",
-                    $"触发指令[({commandInfo.GroupName}){commandInfo.MethodInfo.Name}]");
+                    $"触发指令[({commandInfo.ClassName}){commandInfo.MethodInfo.Name}]");
                 //尝试执行指令并判断异步方法
                 bool isAsync =
                     commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
@@ -536,17 +600,22 @@ public sealed class CommandManager
     /// </summary>
     /// <param name="method">指令method</param>
     /// <param name="classType">所在实例类型</param>
+    /// <param name="groupName">指令组</param>
+    /// <param name="prefix">指令前缀</param>
     /// <param name="regexCommandInfo">指令信息</param>
     [NeedReview("ALL")]
-    private bool GenerateCommandInfo(MethodInfo method, Type classType, out RegexCommandInfo regexCommandInfo)
+    private bool GenerateCommandInfo(MethodInfo           method,
+                                     Type                 classType,
+                                     string               groupName,
+                                     string               prefix,
+                                     out RegexCommandInfo regexCommandInfo)
     {
         //获取指令属性
         SoraCommand commandAttr =
             method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand ??
-            throw new NullReferenceException("command attribute is null with unknown reason");
-
+            throw new NullReferenceException("SoraCommand attribute is null with unknown reason");
         //处理表达式
-        string[] matchExp = ParseCommandExps(commandAttr.CommandExpressions, commandAttr.MatchType);
+        string[] matchExp = ParseCommandExps(commandAttr.CommandExpressions, prefix, commandAttr.MatchType);
 
         //检查和创建实例
         //若创建实例失败且方法不是静态的，则返回空白命令信息
@@ -561,6 +630,7 @@ public sealed class CommandManager
             commandAttr.Description,
             matchExp,
             classType.Name,
+            groupName,
             method,
             commandAttr.PermissionLevel,
             commandAttr.Priority,
@@ -575,64 +645,6 @@ public sealed class CommandManager
         return true;
     }
 
-    /// <summary>
-    /// 生成动态指令信息
-    /// </summary>
-    private bool GenerateDynamicCommandInfo(
-        string[]               cmdExps, Func<GroupMessageEventArgs, ValueTask> groupCommand,
-        MatchType              matchType,
-        MemberRoleType         memberRole,
-        bool                   suCommand,
-        int                    priority,
-        long[]                 sourceGroups, long[] sourceUsers,
-        RegexOptions           regexOptions,
-        Action<Exception>      exceptionHandler,
-        string                 desc,
-        out DynamicCommandInfo dynamicCommand)
-    {
-        Guid id = Guid.NewGuid();
-        Log.Debug("Command", $"Registering dynamic command [{id}]");
-
-        //处理表达式
-        string[] matchExp = ParseCommandExps(cmdExps, matchType);
-
-        //创建指令信息
-        dynamicCommand = new DynamicCommandInfo(
-            desc, matchExp, memberRole, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
-            sourceGroups ?? Array.Empty<long>(),
-            sourceUsers  ?? Array.Empty<long>(),
-            groupCommand, id, suCommand);
-        return true;
-    }
-
-    /// <summary>
-    /// 生成动态指令信息
-    /// </summary>
-    private bool GenerateDynamicCommandInfo(
-        string[]               cmdExps, Func<PrivateMessageEventArgs, ValueTask> privateCommand,
-        MatchType              matchType,
-        bool                   suCommand,
-        int                    priority,
-        long[]                 sourceUsers,
-        RegexOptions           regexOptions,
-        Action<Exception>      exceptionHandler,
-        string                 desc,
-        out DynamicCommandInfo dynamicCommand)
-    {
-        Guid id = Guid.NewGuid();
-        Log.Debug("Command", $"Registering dynamic command [{id}]");
-
-        //处理表达式
-        string[] matchExp = ParseCommandExps(cmdExps, matchType);
-
-        //创建指令信息
-        dynamicCommand = new DynamicCommandInfo(
-            desc, matchExp, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
-            sourceUsers ?? Array.Empty<long>(),
-            privateCommand, id, suCommand);
-        return true;
-    }
-
     #endregion
 
     #region 通用工具
@@ -641,19 +653,21 @@ public sealed class CommandManager
     /// 处理指令正则表达式
     /// </summary>
     [NeedReview("ALL")]
-    private static string[] ParseCommandExps(string[] cmdExps, MatchType matchType)
+    private static string[] ParseCommandExps(string[] cmdExps, string prefix, MatchType matchType)
     {
-        return matchType switch
+        switch (matchType)
         {
-            MatchType.Full => cmdExps
-                             .Select(command => $"^{command}$")
-                             .ToArray(),
-            MatchType.Regex => cmdExps,
-            MatchType.KeyWord => cmdExps
-                                .Select(command => $"[{command}]+")
-                                .ToArray(),
-            _ => throw new NotSupportedException("unknown matchtype")
-        };
+            case MatchType.Full:
+                return cmdExps.Select(command => $"^{prefix}{command}$").ToArray();
+            case MatchType.Regex:
+                if (!string.IsNullOrEmpty(prefix))
+                    Log.Warning("指令初始化", "发现正则指令的指令组设置了前缀符号，将会自动忽略这个符号");
+                return cmdExps;
+            case MatchType.KeyWord:
+                return cmdExps.Select(command => $"[{prefix}{command}]+").ToArray();
+            default:
+                throw new NotSupportedException("unknown matchtype");
+        }
     }
 
     /// <summary>
