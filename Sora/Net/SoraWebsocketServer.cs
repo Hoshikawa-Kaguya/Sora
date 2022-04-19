@@ -3,6 +3,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Fleck;
 using Newtonsoft.Json.Linq;
+using Sora.Entities.Base;
 using Sora.Entities.Socket;
 using Sora.Interfaces;
 using Sora.Net.Config;
@@ -39,6 +40,11 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     /// 服务器连接管理器
     /// </summary>
     public ConnectionManager ConnManager { get; }
+
+    /// <summary>
+    /// 服务ID
+    /// </summary>
+    public Guid ServiceId => _serverId;
 
     #endregion
 
@@ -212,6 +218,19 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         Server.Dispose();
         ConnManager.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    #region util
+
+    /// <summary>
+    /// 获取API实例
+    /// </summary>
+    /// <param name="connectionId">链接ID</param>
+    public SoraApi GetApi(Guid connectionId)
+    {
+        return new SoraApi(_serverId, connectionId);
     }
 
     #endregion

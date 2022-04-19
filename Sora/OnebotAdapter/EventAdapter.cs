@@ -444,7 +444,7 @@ public sealed class EventAdapter
                 var groupRequest = messageJson.ToObject<OnebotGroupObRequestEventArgs>();
                 if (groupRequest == null) break;
                 Log.Debug("Sora",
-                    $"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with commont[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
+                    $"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with comment[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
                 //执行回调
                 if (OnGroupRequest == null) break;
                 await OnGroupRequest("Request",

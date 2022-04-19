@@ -211,7 +211,7 @@ public sealed class ConnectionManager : IDisposable
 
         if (OnOpenConnectionAsync == null) return;
         if (!long.TryParse(selfId, out long uid)) Log.Error("ConnectionManager", "非法selfid，已忽略");
-        Task.Run(async () => { await OnOpenConnectionAsync(connId, new ConnectionEventArgs(role, uid)); });
+        Task.Run(async () => { await OnOpenConnectionAsync(connId, new ConnectionEventArgs(role, uid, connId)); });
     }
 
     /// <summary>
@@ -238,7 +238,7 @@ public sealed class ConnectionManager : IDisposable
             Log.Error("ConnectionManager", "Remove connection record failed");
         //触发事件
         if (OnCloseConnectionAsync == null) return;
-        Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs(role, selfId)); });
+        Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs(role, selfId, connId)); });
     }
 
     internal static void UpdateUid(Guid connectionGuid, long uid)
