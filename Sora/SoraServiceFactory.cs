@@ -74,13 +74,7 @@ public static class SoraServiceFactory
 
         return createdService;
     }
-}
 
-/// <summary>
-/// SoraServiceFactoryExtension
-/// </summary>
-public static class SoraServiceFactoryExtension
-{
     /// <summary>
     /// 启动多个服务
     /// </summary>
