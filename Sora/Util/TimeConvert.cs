@@ -12,11 +12,11 @@ public static class TimeConvert
     /// <summary>
     /// DateTime转时间戳
     /// <param name="date">时间</param>
-    /// <param name="isMilliSeconds">是否精确到毫秒（13位时间戳）</param>
+    /// <param name="isMilliseconds">是否精确到毫秒（13位时间戳）</param>
     /// </summary>
-    public static long ToTimeStamp(this DateTime date, bool isMilliSeconds = false)
+    public static long ToTimeStamp(this DateTime date, bool isMilliseconds = false)
     {
-        return isMilliSeconds
+        return isMilliseconds
             ? (long) (date - _unixStartTime).TotalMilliseconds
             : (long) (date - _unixStartTime).TotalSeconds;
     }
@@ -24,11 +24,11 @@ public static class TimeConvert
     /// <summary>
     /// 时间戳转DateTime
     /// <param name="timeStamp">时间戳</param>
-    /// <param name="isMilliSeconds">是否精确到毫秒（13位时间戳）</param>
+    /// <param name="isMilliseconds">是否精确到毫秒（13位时间戳）</param>
     /// </summary>
-    public static DateTime ToDateTime(this long timeStamp, bool isMilliSeconds = false)
+    public static DateTime ToDateTime(this long timeStamp, bool isMilliseconds = false)
     {
-        return isMilliSeconds
+        return isMilliseconds
             ? _unixStartTime.AddMilliseconds(timeStamp)
             : _unixStartTime.AddSeconds(timeStamp);
     }

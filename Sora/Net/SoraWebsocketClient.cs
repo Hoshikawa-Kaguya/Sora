@@ -3,6 +3,7 @@ using System.Data;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Sora.Entities.Base;
 using Sora.Entities.Socket;
 using Sora.Exceptions;
 using Sora.Interfaces;
@@ -40,6 +41,11 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     /// 服务器连接管理器
     /// </summary>
     public ConnectionManager ConnManager { get; }
+
+    /// <summary>
+    /// 服务ID
+    /// </summary>
+    public Guid ServiceId => _clientId;
 
     #endregion
 
@@ -209,6 +215,15 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
         clientWebSocket.Options.SetRequestHeader("Authorization",
             $"Bearer {Config.AccessToken}");
         return clientWebSocket;
+    }
+
+    /// <summary>
+    /// 获取API实例
+    /// </summary>
+    /// <param name="connectionId">链接ID</param>
+    public SoraApi GetApi(Guid connectionId)
+    {
+        return new SoraApi(_clientId, connectionId);
     }
 
     #endregion
