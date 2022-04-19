@@ -28,7 +28,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 链接ID
     /// </summary>
-    internal Guid ConnId { get; }
+    public Guid ConnId { get; }
 
     /// <summary>
     /// 服务ID

@@ -167,8 +167,8 @@ internal static class ApiAdapter
         //检查机器人管理员权限
         friendInfos.ForEach(t =>
             {
-                t.IsSuperUser = t.UserId is not 0 or -1 &&
-                    StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
+                t.IsSuperUser = t.UserId is not 0 or -1 
+                  && StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
             }
         );
         return (apiStatus, friendInfos);
@@ -229,8 +229,8 @@ internal static class ApiAdapter
         //检查机器人管理员权限
         memberList.ForEach(t =>
             {
-                t.IsSuperUser = t.UserId is not 0 or -1 &&
-                    StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
+                t.IsSuperUser = t.UserId is not 0 or -1 
+                 && StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
             }
         );
 
@@ -1209,7 +1209,7 @@ internal static class ApiAdapter
     /// <param name="delay">延迟(ms)</param>
     internal static async ValueTask<ApiStatus> Restart(Guid connection, int delay)
     {
-        Log.Debug("Sora", "Sending restart client requset");
+        Log.Debug("Sora", "Sending restart client request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
         {
             ApiRequestType = ApiRequestType.Restart,
@@ -1279,7 +1279,8 @@ internal static class ApiAdapter
     /// <param name="connection">服务器连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="msgList">消息段数组</param>
-    internal static async ValueTask<ApiStatus> SendGroupForwardMsg(Guid                    connection, long groupId,
+    internal static async ValueTask<ApiStatus> SendGroupForwardMsg(Guid                    connection,
+                                                                   long                    groupId,
                                                                    IEnumerable<CustomNode> msgList)
     {
         //将消息段转换为数组
@@ -1471,7 +1472,6 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="name">文件夹名</param>
     /// <param name="folderId">文件夹ID</param>
-    //TODO 测试发现folderId似乎无效，无法创建文件夹套文件夹，待gocq后续完善
     internal static async ValueTask<ApiStatus> CreateGroupFileFolder(
         Guid connection, long groupId, string name, string folderId)
     {
