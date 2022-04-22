@@ -147,7 +147,7 @@ public static class Helper
     {
         FieldInfo fieldInfo = value.GetType().GetField(value.ToString()!);
         if (fieldInfo == null) return string.Empty;
-        DescriptionAttribute[] attributes = (DescriptionAttribute[])fieldInfo
+        DescriptionAttribute[] attributes = (DescriptionAttribute[]) fieldInfo
            .GetCustomAttributes(typeof(DescriptionAttribute), false);
         return attributes.Length > 0 ? attributes[0].Description : string.Empty;
     }

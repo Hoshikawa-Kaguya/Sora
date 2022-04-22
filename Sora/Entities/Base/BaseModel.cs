@@ -12,15 +12,16 @@ public abstract class BaseModel
     /// <summary>
     /// API执行实例
     /// </summary>
+    // ReSharper disable once MemberCanBeProtected.Global
     public SoraApi SoraApi { get; private init; }
 
     #endregion
 
     #region 构造函数
 
-    internal BaseModel(Guid serviceId, Guid connectionId)
+    internal BaseModel(Guid connectionId)
     {
-        SoraApi = new SoraApi(serviceId, connectionId);
+        SoraApi = StaticVariable.ConnectionInfos[connectionId].ApiInstance;
     }
 
     #endregion

@@ -223,7 +223,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     /// <param name="connectionId">链接ID</param>
     public SoraApi GetApi(Guid connectionId)
     {
-        return new SoraApi(_clientId, connectionId);
+        return StaticVariable.ConnectionInfos[connectionId].ApiInstance;
     }
 
     #endregion

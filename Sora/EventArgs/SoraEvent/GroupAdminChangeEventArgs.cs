@@ -43,7 +43,7 @@ public sealed class GroupAdminChangeEventArgs : BaseSoraEventArgs
                                        OnebotAdminChangeEventArgs adminChangeArgs) :
         base(serviceId, connectionId, eventName, adminChangeArgs.SelfId, adminChangeArgs.Time, SourceFlag.Group)
     {
-        SourceGroup = new Group(serviceId, connectionId, adminChangeArgs.GroupId);
+        SourceGroup = new Group(connectionId, adminChangeArgs.GroupId);
         Sender      = new User(serviceId, connectionId, adminChangeArgs.UserId);
         SubType     = adminChangeArgs.SubType;
     }

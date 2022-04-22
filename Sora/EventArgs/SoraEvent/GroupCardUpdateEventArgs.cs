@@ -48,7 +48,7 @@ public sealed class GroupCardUpdateEventArgs : BaseSoraEventArgs
         base(serviceId, connectionId, eventName, groupCardUpdateArgs.SelfId, groupCardUpdateArgs.Time, SourceFlag.Group)
     {
         User        = new User(serviceId, connectionId, groupCardUpdateArgs.UserId);
-        SourceGroup = new Group(serviceId, connectionId, groupCardUpdateArgs.GroupId);
+        SourceGroup = new Group(connectionId, groupCardUpdateArgs.GroupId);
         NewCard     = groupCardUpdateArgs.NewCard;
         OldCard     = groupCardUpdateArgs.OldCard;
     }

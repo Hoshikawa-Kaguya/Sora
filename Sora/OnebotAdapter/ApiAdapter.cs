@@ -167,8 +167,8 @@ internal static class ApiAdapter
         //检查机器人管理员权限
         friendInfos.ForEach(t =>
             {
-                t.IsSuperUser = t.UserId is not 0 or -1 
-                  && StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
+                t.IsSuperUser = t.UserId is not 0 or -1
+                 && StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
             }
         );
         return (apiStatus, friendInfos);
@@ -229,7 +229,7 @@ internal static class ApiAdapter
         //检查机器人管理员权限
         memberList.ForEach(t =>
             {
-                t.IsSuperUser = t.UserId is not 0 or -1 
+                t.IsSuperUser = t.UserId is not 0 or -1
                  && StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
             }
         );
@@ -432,7 +432,7 @@ internal static class ApiAdapter
         //处理消息段
         var rawMessage = ret["data"]?["message"]?.ToObject<List<OnebotSegment>>();
         return (apiStatus,
-            message: new MessageContext(serviceId,
+            message: new MessageContext(
                 connection,
                 msgId,
                 ret["data"]?["raw_message"]?.ToString(),
@@ -446,7 +446,7 @@ internal static class ApiAdapter
                 Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)),
             //判断响应数据中是否有群组信息
             sourceGroup: Convert.ToBoolean(ret["data"]?["group"] ?? false)
-                ? new Group(serviceId, connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
+                ? new Group(connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
                 : null,
             realId: Convert.ToInt32(ret["data"]?["real_id"]                                        ?? 0),
             isGroupMsg: Convert.ToBoolean(ret["data"]?["message_type"]?.ToString().Equals("group") ?? false));
