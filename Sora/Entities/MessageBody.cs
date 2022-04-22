@@ -149,9 +149,8 @@ public sealed class MessageBody : IList<SoraSegment>
     public int IndexOfById(Guid id)
     {
         for (int i = 0; i < _message.Count; i++)
-        {
-            if (_message[i].Id == id) return i;
-        }
+            if (_message[i].Id == id)
+                return i;
 
         return -1;
     }

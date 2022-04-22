@@ -44,7 +44,7 @@ public sealed class LuckyKingEventArgs : BaseSoraEventArgs
     {
         SendUser    = new User(serviceId, connectionId, luckyKingEventArgs.UserId);
         TargetUser  = new User(serviceId, connectionId, luckyKingEventArgs.TargetId);
-        SourceGroup = new Group(serviceId, connectionId, luckyKingEventArgs.GroupId);
+        SourceGroup = new Group(connectionId, luckyKingEventArgs.GroupId);
     }
 
     #endregion

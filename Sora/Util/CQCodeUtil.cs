@@ -56,7 +56,7 @@ public static class CQCodeUtil
     /// <returns></returns>
     public static string SerializeSegment(this SoraSegment msg)
     {
-        if (msg.MessageType == SegmentType.Text) return ((TextSegment)msg.Data).Content.CQCodeEncode();
+        if (msg.MessageType == SegmentType.Text) return ((TextSegment) msg.Data).Content.CQCodeEncode();
 
         var ret = new StringBuilder();
         ret.Append("[CQ:");
@@ -156,7 +156,8 @@ public static class CQCodeUtil
                 JsonConvert.DeserializeObject<ImageSegment>(sb.ToString())),
             SegmentType.Record => new SoraSegment(SegmentType.Record,
                 JsonConvert.DeserializeObject<RecordSegment>(sb.ToString())),
-            SegmentType.At => new SoraSegment(SegmentType.At, JsonConvert.DeserializeObject<AtSegment>(sb.ToString())),
+            SegmentType.At => new SoraSegment(SegmentType.At,
+                JsonConvert.DeserializeObject<AtSegment>(sb.ToString())),
             SegmentType.Share => new SoraSegment(SegmentType.Share,
                 JsonConvert.DeserializeObject<ShareSegment>(sb.ToString())),
             SegmentType.Reply => new SoraSegment(SegmentType.Reply,

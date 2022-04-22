@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Sora.Entities.Base;
 using Sora.Interfaces;
 using Sora.Net;
 using Sora.Net.Config;
@@ -73,6 +74,27 @@ public static class SoraServiceFactory
         };
 
         return createdService;
+    }
+
+    /// <summary>
+    /// 通过登录的uid获取对应的api实例
+    /// </summary>
+    /// <param name="loginUid">uid</param>
+    /// <param name="api">api实例</param>
+    public static bool TryGetApi(long loginUid, out SoraApi api)
+    {
+        if (StaticVariable.ConnectionInfos.Values
+                          .Any(conn => conn.LoginUid == loginUid))
+        {
+            api = StaticVariable.ConnectionInfos.Values
+                                .Where(conn => conn.LoginUid == loginUid)
+                                .Select(conn => conn.ApiInstance)
+                                .First();
+            return true;
+        }
+
+        api = null;
+        return false;
     }
 
     /// <summary>

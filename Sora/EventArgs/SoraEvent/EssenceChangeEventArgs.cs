@@ -49,7 +49,7 @@ public sealed class EssenceChangeEventArgs : BaseSoraEventArgs
         MessageId         = essenceChangeEvent.MessageId;
         Operator          = new User(serviceId, connectionId, essenceChangeEvent.OperatorId);
         Sender            = new User(serviceId, connectionId, essenceChangeEvent.SenderId);
-        SourceGroup       = new Group(serviceId, connectionId, essenceChangeEvent.GroupId);
+        SourceGroup       = new Group(connectionId, essenceChangeEvent.GroupId);
         EssenceChangeType = essenceChangeEvent.EssenceChangeType;
     }
 

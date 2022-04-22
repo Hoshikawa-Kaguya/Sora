@@ -53,9 +53,9 @@ public sealed class MessageContext : BaseModel
 
     #region 构造函数
 
-    internal MessageContext(Guid serviceId, Guid connectionId, int   msgId, string text, MessageBody messageBody,
-                            long time,      int  font,         long? messageSequence) :
-        base(serviceId, connectionId)
+    internal MessageContext(Guid connectionId, int msgId, string text, MessageBody messageBody,
+                            long time,         int font,  long?  messageSequence) :
+        base(connectionId)
     {
         MessageId       = msgId;
         RawText         = text;

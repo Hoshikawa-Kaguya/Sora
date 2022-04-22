@@ -1,4 +1,5 @@
 ﻿using System;
+using Sora.Entities.Base;
 using Sora.Interfaces;
 
 namespace Sora.Entities.Info.InternalDataInfo;
@@ -8,24 +9,24 @@ namespace Sora.Entities.Info.InternalDataInfo;
 /// </summary>
 internal struct SoraConnectionInfo
 {
-    internal readonly Guid        ServiceId;
     internal readonly ISoraSocket Connection;
     internal          DateTime    LastHeartBeatTime;
-    internal          long        SelfId;
+    internal          long        LoginUid;
     internal readonly TimeSpan    ApiTimeout;
+    internal readonly SoraApi     ApiInstance;
 
-    internal SoraConnectionInfo(Guid     serviceId,         ISoraSocket connection,
-                                DateTime lastHeartBeatTime, TimeSpan    apiTimeout)
+    internal SoraConnectionInfo(Guid     serviceId,         Guid     connId, ISoraSocket connection,
+                                DateTime lastHeartBeatTime, TimeSpan apiTimeout)
     {
-        ServiceId         = serviceId;
         Connection        = connection;
         LastHeartBeatTime = lastHeartBeatTime;
-        SelfId            = 0;
+        LoginUid          = 0;
         ApiTimeout        = apiTimeout;
+        ApiInstance       = new SoraApi(serviceId, connId);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(ServiceId);
+        return HashCode.Combine(ApiInstance.ConnectionId, ApiInstance.ServiceId);
     }
 }

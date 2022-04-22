@@ -98,10 +98,10 @@ public sealed class CommandManager
             CommandGroup groupAttr =
                 classType.GetCustomAttribute(typeof(CommandGroup)) as CommandGroup ??
                 throw new NullReferenceException("CommandGroup attribute is null with unknown reason");
-            string prefix       = string.IsNullOrEmpty(groupAttr.GroupPrefix) ? string.Empty : groupAttr.GroupPrefix;
-            string groupName    = string.IsNullOrEmpty(groupAttr.GroupName) ? classType.Name : groupAttr.GroupName;
+            string prefix    = string.IsNullOrEmpty(groupAttr.GroupPrefix) ? string.Empty : groupAttr.GroupPrefix;
+            string groupName = string.IsNullOrEmpty(groupAttr.GroupName) ? classType.Name : groupAttr.GroupName;
             Log.Debug("Command", $"Registering command group[{groupName}]");
-            bool   groupSuccess = false;
+            bool groupSuccess = false;
             foreach (MethodInfo methodInfo in methodInfos)
             {
                 Log.Debug("Command", $"Registering command [{methodInfo.Name}]");

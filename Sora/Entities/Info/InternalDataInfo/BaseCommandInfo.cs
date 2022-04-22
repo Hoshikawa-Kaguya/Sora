@@ -32,10 +32,7 @@ internal abstract record BaseCommandInfo
         ExceptionHandler = exceptionHandler;
 
         Regex = new Regex[regex.Length];
-        for (int i = 0; i < regex.Length; i++)
-        {
-            Regex[i] = new Regex(regex[i], RegexOptions.Compiled | regexOptions);
-        }
+        for (int i = 0; i < regex.Length; i++) Regex[i] = new Regex(regex[i], RegexOptions.Compiled | regexOptions);
     }
 
     public virtual bool Equals(BaseCommandInfo commandInfo)

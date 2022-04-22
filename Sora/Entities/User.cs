@@ -35,7 +35,7 @@ public sealed class User : BaseModel
     /// <param name="serviceId">服务ID</param>
     /// <param name="connectionId">服务器连接标识</param>
     /// <param name="uid">用户ID</param>
-    internal User(Guid serviceId, Guid connectionId, long uid) : base(serviceId, connectionId)
+    internal User(Guid serviceId, Guid connectionId, long uid) : base(connectionId)
     {
         Id = uid;
         IsSuperUser = Id is not 0 or -1 &&

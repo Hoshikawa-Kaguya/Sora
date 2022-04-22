@@ -44,7 +44,7 @@ public sealed class HonorEventArgs : BaseSoraEventArgs
         base(serviceId, connectionId, eventName, honorEventArgs.SelfId, honorEventArgs.Time, SourceFlag.Group)
     {
         TargetUser  = new User(serviceId, connectionId, honorEventArgs.UserId);
-        SourceGroup = new Group(serviceId, connectionId, honorEventArgs.GroupId);
+        SourceGroup = new Group(connectionId, honorEventArgs.GroupId);
         Honor       = honorEventArgs.HonorType;
     }
 

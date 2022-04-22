@@ -44,7 +44,7 @@ public sealed class GroupPokeEventArgs : BaseSoraEventArgs
     {
         SendUser    = new User(serviceId, connectionId, pokeEventArgs.UserId);
         TargetUser  = new User(serviceId, connectionId, pokeEventArgs.TargetId);
-        SourceGroup = new Group(serviceId, connectionId, pokeEventArgs.GroupId);
+        SourceGroup = new Group(connectionId, pokeEventArgs.GroupId);
     }
 
     #endregion

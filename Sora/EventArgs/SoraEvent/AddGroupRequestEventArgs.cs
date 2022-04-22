@@ -55,7 +55,7 @@ public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
         base(serviceId, connectionId, eventName, groupObRequestArgs.SelfId, groupObRequestArgs.Time, SourceFlag.Group)
     {
         Sender      = new User(serviceId, connectionId, groupObRequestArgs.UserId);
-        SourceGroup = new Group(serviceId, connectionId, groupObRequestArgs.GroupId);
+        SourceGroup = new Group(connectionId, groupObRequestArgs.GroupId);
         Comment     = groupObRequestArgs.Comment;
         RequestFlag = groupObRequestArgs.Flag;
         SubType     = groupObRequestArgs.GroupRequestType;

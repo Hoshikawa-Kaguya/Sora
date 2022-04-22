@@ -52,7 +52,7 @@ public sealed class GroupRecallEventArgs : BaseSoraEventArgs
         Operator = groupRecallArgs.UserId == groupRecallArgs.OperatorId
             ? MessageSender
             : new User(serviceId, connectionId, groupRecallArgs.OperatorId);
-        SourceGroup = new Group(serviceId, connectionId, groupRecallArgs.GroupId);
+        SourceGroup = new Group(connectionId, groupRecallArgs.GroupId);
         MessageId   = groupRecallArgs.MessageId;
     }
 
