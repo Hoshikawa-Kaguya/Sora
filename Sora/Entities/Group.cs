@@ -28,10 +28,9 @@ public sealed class Group : BaseModel
     /// <summary>
     /// 初始化
     /// </summary>
-    /// <param name="serviceId">服务ID</param>
     /// <param name="connectionId">服务器连接标识</param>
     /// <param name="gid">群号</param>
-    internal Group(Guid serviceId, Guid connectionId, long gid) : base(serviceId, connectionId)
+    internal Group(Guid connectionId, long gid) : base(connectionId)
     {
         Id = gid;
     }

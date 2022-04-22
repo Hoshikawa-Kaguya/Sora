@@ -49,7 +49,7 @@ public sealed class GroupMuteEventArgs : BaseSoraEventArgs
     {
         User        = new User(serviceId, connectionId, groupMuteArgs.UserId);
         Operator    = new User(serviceId, connectionId, groupMuteArgs.OperatorId);
-        SourceGroup = new Group(serviceId, connectionId, groupMuteArgs.GroupId);
+        SourceGroup = new Group(connectionId, groupMuteArgs.GroupId);
         Duration    = groupMuteArgs.Duration;
     }
 

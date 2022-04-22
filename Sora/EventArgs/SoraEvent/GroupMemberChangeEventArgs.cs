@@ -54,7 +54,7 @@ public sealed class GroupMemberChangeEventArgs : BaseSoraEventArgs
         Operator = groupMemberChangeArgs.UserId == groupMemberChangeArgs.OperatorId
             ? ChangedUser
             : new User(serviceId, connectionId, groupMemberChangeArgs.OperatorId);
-        SourceGroup = new Group(serviceId, connectionId, groupMemberChangeArgs.GroupId);
+        SourceGroup = new Group(connectionId, groupMemberChangeArgs.GroupId);
         SubType     = groupMemberChangeArgs.SubType;
     }
 

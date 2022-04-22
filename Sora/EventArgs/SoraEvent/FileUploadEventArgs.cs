@@ -43,7 +43,7 @@ public sealed class FileUploadEventArgs : BaseSoraEventArgs
                                  OnebotFileUploadEventArgs fileUploadArgs) :
         base(serviceId, connectionId, eventName, fileUploadArgs.SelfId, fileUploadArgs.Time, SourceFlag.Group)
     {
-        SourceGroup = new Group(serviceId, connectionId, fileUploadArgs.GroupId);
+        SourceGroup = new Group(connectionId, fileUploadArgs.GroupId);
         Sender      = new User(serviceId, connectionId, fileUploadArgs.UserId);
         FileInfo    = fileUploadArgs.Upload;
     }

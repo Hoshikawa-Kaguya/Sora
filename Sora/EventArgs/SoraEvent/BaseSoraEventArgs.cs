@@ -8,9 +8,6 @@ using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
 using Sora.Util;
 
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-// ReSharper disable UnusedAutoPropertyAccessor.Local
-
 namespace Sora.EventArgs.SoraEvent;
 
 /// <summary>
@@ -23,7 +20,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 当前事件的API执行实例
     /// </summary>
-    public SoraApi SoraApi { get; private set; }
+    public SoraApi SoraApi { get; }
 
     /// <summary>
     /// 链接ID
@@ -38,17 +35,17 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 当前事件名
     /// </summary>
-    public string EventName { get; private set; }
+    public string EventName { get; }
 
     /// <summary>
     /// 事件产生时间
     /// </summary>
-    public DateTime Time { get; private set; }
+    public DateTime Time { get; }
 
     /// <summary>
     /// 接收当前事件的机器人UID
     /// </summary>
-    public long LoginUid { get; private set; }
+    public long LoginUid { get; }
 
     /// <summary>
     /// 事件产生时间戳
@@ -65,7 +62,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 消息来源类型
     /// </summary>
-    public SourceFlag SourceType { get; private set; }
+    public SourceFlag SourceType { get; }
 
     #endregion
 
@@ -83,7 +80,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     internal BaseSoraEventArgs(Guid serviceId, Guid connectionId, string     eventName,
                                long loginUid,  long time,         SourceFlag sourceType)
     {
-        SoraApi              = new SoraApi(serviceId, connectionId);
+        SoraApi              = StaticVariable.ConnectionInfos[connectionId].ApiInstance;
         ServiceGuid          = serviceId;
         ConnId               = connectionId;
         EventName            = eventName;
@@ -115,7 +112,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
             return null;
         //连续指令不再触发后续事件
         IsContinueEventChain = false;
-        var sessionId = Guid.NewGuid();
+        Guid sessionId = Guid.NewGuid();
         //添加上下文并等待信号量
         StaticVariable.WaitingDict.TryAdd(sessionId, waitInfo);
         //是否正常接受到触发信号

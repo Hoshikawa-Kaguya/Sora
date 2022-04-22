@@ -76,6 +76,7 @@ public sealed class ConnectionManager : IDisposable
         //selfId均在第一次链接开启时留空，并在meta事件触发后更新
         return StaticVariable.ConnectionInfos.TryAdd(connectionId, new SoraConnectionInfo
         (serviceId,
+            connectionId,
             socket,
             DateTime.Now,
             apiTimeout
@@ -147,7 +148,7 @@ public sealed class ConnectionManager : IDisposable
         Dictionary<Guid, SoraConnectionInfo> timeoutDict =
             StaticVariable.ConnectionInfos
                           .Where(conn =>
-                               conn.Value.ServiceId               == serviceId &&
+                               conn.Value.ApiInstance.ServiceId   == serviceId &&
                                now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
                           .ToDictionary(conn => conn.Key,
                                conn => conn.Value);
@@ -158,7 +159,7 @@ public sealed class ConnectionManager : IDisposable
         //遍历超时的连接
         foreach ((Guid connection, SoraConnectionInfo info) in timeoutDict)
         {
-            CloseConnection("Universal", info.SelfId, connection);
+            CloseConnection("Universal", info.LoginUid, connection);
             double t = (now - info.LastHeartBeatTime).TotalMilliseconds;
             Log.Error("HeartBeatCheck",
                 $"Socket:[{connection}]connection time out({t}ms)，disconnect");
@@ -245,7 +246,7 @@ public sealed class ConnectionManager : IDisposable
     {
         SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
         SoraConnectionInfo newInfo = oldInfo;
-        newInfo.SelfId = uid;
+        newInfo.LoginUid = uid;
         StaticVariable.ConnectionInfos.TryUpdate(connectionGuid, newInfo, oldInfo);
     }
 
@@ -262,7 +263,7 @@ public sealed class ConnectionManager : IDisposable
     {
         if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid))
         {
-            userId = StaticVariable.ConnectionInfos[connectionGuid].SelfId;
+            userId = StaticVariable.ConnectionInfos[connectionGuid].LoginUid;
             return true;
         }
 

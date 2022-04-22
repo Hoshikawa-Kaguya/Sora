@@ -1017,7 +1017,7 @@ public sealed class SoraApi
     public Group GetGroup(long groupId)
     {
         if (groupId < MIN_GROUP_ID) throw new ArgumentOutOfRangeException(nameof(groupId));
-        return new Group(ServiceId, ConnectionId, groupId);
+        return new Group(ConnectionId, groupId);
     }
 
     /// <summary>

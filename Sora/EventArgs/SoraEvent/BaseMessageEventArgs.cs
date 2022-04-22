@@ -52,7 +52,7 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
         base(serviceId, connectionId, eventName, msg.SelfId, msg.Time, source)
     {
         //将api消息段转换为sorasegment
-        Message = new MessageContext(serviceId, connectionId, msg.MessageId, msg.RawMessage,
+        Message = new MessageContext(connectionId, msg.MessageId, msg.RawMessage,
             msg.MessageList.ToMessageBody(),
             msg.Time, msg.Font, null);
         Sender        = new User(serviceId, connectionId, msg.UserId);
