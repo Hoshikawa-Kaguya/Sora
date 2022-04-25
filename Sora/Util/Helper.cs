@@ -105,7 +105,7 @@ public static class Helper
 
         if (arr1 is null && arr2 is null) return true;
 
-        for (var i = 0; i < arr1?.Length; i++)
+        for (var i = 0; i < arr1!.Length; i++)
             if (arr2 is not null && !(arr1[i] is null && arr2[i] is null))
             {
                 if (arr1[i] is null || arr2[i] is null) return false;
