@@ -151,12 +151,14 @@ public sealed class SoraApi
     /// <param name="nodeList">
     /// 节点(<see cref="CustomNode"/>)消息段列表
     /// </param>
-    public async ValueTask<ApiStatus> SendGroupForwardMsg(long groupId, IEnumerable<CustomNode> nodeList)
+    /// <param name="timeout">原有超时覆盖</param>
+    public async ValueTask<ApiStatus> SendGroupForwardMsg(long      groupId, IEnumerable<CustomNode> nodeList,
+                                                          TimeSpan? timeout = null)
     {
         if (groupId < MIN_GROUP_ID) throw new ArgumentOutOfRangeException(nameof(groupId));
         IEnumerable<CustomNode> customNodes = nodeList as CustomNode[] ?? nodeList.ToArray();
         if (nodeList == null || !customNodes.Any()) throw new NullReferenceException(nameof(nodeList));
-        return await ApiAdapter.SendGroupForwardMsg(ConnectionId, groupId, customNodes);
+        return await ApiAdapter.SendGroupForwardMsg(ConnectionId, groupId, customNodes, timeout);
     }
 
     /// <summary>
