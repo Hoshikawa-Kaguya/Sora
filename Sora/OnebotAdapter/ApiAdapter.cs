@@ -1279,9 +1279,11 @@ internal static class ApiAdapter
     /// <param name="connection">服务器连接标识</param>
     /// <param name="groupId">群号</param>
     /// <param name="msgList">消息段数组</param>
+    /// <param name="timeout">超时覆盖</param>
     internal static async ValueTask<ApiStatus> SendGroupForwardMsg(Guid                    connection,
                                                                    long                    groupId,
-                                                                   IEnumerable<CustomNode> msgList)
+                                                                   IEnumerable<CustomNode> msgList,
+                                                                   TimeSpan?               timeout = null)
     {
         //将消息段转换为数组
         CustomNode[] customNodes = msgList as CustomNode[] ?? msgList.ToArray();
@@ -1303,7 +1305,7 @@ internal static class ApiAdapter
                 group_id = groupId.ToString(),
                 messages = dataObj
             }
-        }, connection);
+        }, connection, timeout);
         Log.Debug("Sora", $"Get send_group_forward_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
