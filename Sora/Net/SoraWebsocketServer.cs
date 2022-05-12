@@ -29,7 +29,7 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     /// <summary>
     /// WS服务器
     /// </summary>
-    private WebSocketServer Server { get; }
+    private WebSocketServer Server { get; set; }
 
     /// <summary>
     /// 事件接口
@@ -101,11 +101,6 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         Event = new EventAdapter(_serverId, Config.ThrowCommandException, Config.SendCommandErrMsg);
         //禁用原log
         FleckLog.Level = (LogLevel) 4;
-        Server = new WebSocketServer($"ws://{Config.Host}:{Config.Port}")
-        {
-            //出错后进行重启
-            RestartAfterListenError = true
-        };
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
@@ -128,11 +123,30 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
     {
         if (!_serverReady) return ValueTask.CompletedTask;
         //启动服务器
+        Server = new WebSocketServer($"ws://{Config.Host}:{Config.Port}")
+        {
+            //出错后进行重启
+            RestartAfterListenError = true
+        };
         Server.Start(SocketConfig);
         ConnManager.StartTimer(_serverId);
         Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
         return ValueTask.CompletedTask;
     }
+
+    /// <summary>
+    /// 停止 Sora 服务
+    /// </summary>
+    public ValueTask StopService()
+    {
+        if (_disposed) return ValueTask.CompletedTask;
+        //停止服务器
+        Server?.Dispose();
+        ConnManager.StopTimer();
+        Log.Info("Sora", $"Sora WebSocket已停止运行");
+        return ValueTask.CompletedTask;
+    }
+
 
     private void SocketConfig(IWebSocketConnection socket)
     {
@@ -215,8 +229,8 @@ public sealed class SoraWebsocketServer : ISoraService, IDisposable
         Log.Warning("ServiceDispose", "SoraWebsocketServer正在停止...");
         _disposed = true;
         StaticVariable.DisposeService(_serverId);
-        Server.Dispose();
-        ConnManager.Dispose();
+        Server?.Dispose();
+        ConnManager?.Dispose();
         GC.SuppressFinalize(this);
     }
 

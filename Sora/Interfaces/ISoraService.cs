@@ -9,7 +9,7 @@ namespace Sora.Interfaces;
 /// <summary>
 /// Sora 连接服务
 /// </summary>
-public interface ISoraService
+public interface ISoraService:IDisposable
 {
     /// <summary>
     /// 事件接口    
@@ -36,4 +36,8 @@ public interface ISoraService
     /// 启动 Sora 服务
     /// </summary>
     ValueTask StartService();
+    /// <summary>
+    /// 停止 Sora 服务
+    /// </summary>
+    ValueTask StopService();
 }
