@@ -71,6 +71,10 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     /// </summary>
     private bool _disposed;
 
+    private IDisposable _subClientMessageReceived;
+
+    private IDisposable _subClientDisconnectionHappened;
+    private IDisposable _subClientReconnectionHappened;
     #endregion
 
     #region 构造方法
@@ -122,7 +126,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
 
     #endregion
 
-    #region 客户端启动
+    #region 客户端启停
 
     /// <summary>
     /// 启动 Sora 服务
@@ -133,19 +137,27 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     }
 
     /// <summary>
+    /// 停止 Sora 服务
+    /// </summary>
+    public ValueTask StopService()
+    {
+        return StopClient();
+    }
+
+    /// <summary>
     /// 启动客户端并自动连接服务器
     /// </summary>
     private async ValueTask StartClient()
     {
         if (!_clientReady) return;
         //消息接收事件
-        Client.MessageReceived.Subscribe(msg => Task.Run(() =>
+        _subClientMessageReceived = Client.MessageReceived.Subscribe(msg => Task.Run(() =>
         {
             if (_disposed) return;
             Event.Adapter(JObject.Parse(msg.Text), _clientId);
         }));
         //连接断开事件
-        Client.DisconnectionHappened
+        _subClientDisconnectionHappened = Client.DisconnectionHappened
               .Subscribe(info => Task.Run(() =>
                {
                    if (_disposed) return;
@@ -161,7 +173,7 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
                        Log.Info("Sora", "服务器连接被关闭");
                }));
         //重连事件
-        Client.ReconnectionHappened
+        _subClientReconnectionHappened = Client.ReconnectionHappened
               .Subscribe(info => Task.Run(() =>
                {
                    if (_disposed) return;
@@ -185,6 +197,31 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     }
 
     /// <summary>
+    /// 停止客户端
+    /// </summary>
+    private async ValueTask StopClient()
+    {
+        if (_disposed) return;
+        //取消Client上已注册的各事件订阅
+        _subClientMessageReceived?.Dispose();
+        _subClientDisconnectionHappened?.Dispose();
+        _subClientReconnectionHappened?.Dispose();
+        //停止客户端
+        await Client.Stop(WebSocketCloseStatus.NormalClosure, string.Empty);
+        //停止心跳包
+        ConnManager.StopTimer();
+        if (!Client.IsRunning || !Client.IsStarted)
+            throw new WebSocketClientException("WebSocket client is not running");
+        ConnectionManager.GetLoginUid(_clientId, out long uid);
+        //移除原连接信息
+        if (ConnectionManager.ConnectionExists(_clientId))
+            ConnManager.CloseConnection("Universal", uid, _clientId);
+
+        Log.Info("Sora", "Sora WebSocket客户端已停止");
+        _clientIsRunning = false;
+    }
+
+    /// <summary>
     /// GC析构函数
     /// </summary>
     ~SoraWebsocketClient()
@@ -200,8 +237,8 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
         Log.Warning("ServiceDispose", "SoraWebsocketClient正在停止...");
         _disposed = true;
         StaticVariable.DisposeService(_clientId);
-        Client.Dispose();
-        ConnManager.Dispose();
+        Client?.Dispose();
+        ConnManager?.Dispose();
         GC.SuppressFinalize(this);
     }
 

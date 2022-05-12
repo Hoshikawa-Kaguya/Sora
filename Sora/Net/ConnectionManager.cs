@@ -134,6 +134,11 @@ public sealed class ConnectionManager : IDisposable
         HeartBeatTimer ??= new Timer(HeartBeatCheck, serviceId, HeartBeatTimeOut, HeartBeatTimeOut);
     }
 
+    internal void StopTimer()
+    {
+        HeartBeatTimer?.Dispose();
+    }
+
     /// <summary>
     /// 心跳包超时检查
     /// </summary>
