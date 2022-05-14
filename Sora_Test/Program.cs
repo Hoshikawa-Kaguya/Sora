@@ -68,5 +68,7 @@ service.Event.CommandManager.RegisterGroupDynamicCommand(
 //启动服务并捕捉错误
 await service.StartService();
 //.RunCatch(e => Log.Error("Sora Service", Log.ErrorLogBuilder(e)));
-
+await service.StopService();
+await service.StartService();
+await service.StopService();
 await Task.Delay(-1);
