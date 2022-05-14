@@ -210,8 +210,6 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
         await Client.Stop(WebSocketCloseStatus.NormalClosure, string.Empty);
         //停止心跳包
         ConnManager.StopTimer();
-        if (!Client.IsRunning || !Client.IsStarted)
-            throw new WebSocketClientException("WebSocket client is not running");
         ConnectionManager.GetLoginUid(_clientId, out long uid);
         //移除原连接信息
         if (ConnectionManager.ConnectionExists(_clientId))
