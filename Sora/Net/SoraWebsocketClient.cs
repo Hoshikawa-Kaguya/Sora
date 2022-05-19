@@ -18,7 +18,7 @@ namespace Sora.Net;
 /// <summary>
 /// Sora正向WS链接客户端
 /// </summary>
-public sealed class SoraWebsocketClient : ISoraService, IDisposable
+public sealed class SoraWebsocketClient : ISoraService
 {
     #region 属性
 
@@ -71,10 +71,11 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
     /// </summary>
     private bool _disposed;
 
+    //ws客户端事件订阅
     private IDisposable _subClientMessageReceived;
-
     private IDisposable _subClientDisconnectionHappened;
     private IDisposable _subClientReconnectionHappened;
+
     #endregion
 
     #region 构造方法
@@ -157,33 +158,36 @@ public sealed class SoraWebsocketClient : ISoraService, IDisposable
             Event.Adapter(JObject.Parse(msg.Text), _clientId);
         }));
         //连接断开事件
-        _subClientDisconnectionHappened = Client.DisconnectionHappened
-              .Subscribe(info => Task.Run(() =>
-               {
-                   if (_disposed) return;
-                   ConnectionManager.GetLoginUid(_clientId, out long uid);
-                   //移除原连接信息
-                   if (ConnectionManager.ConnectionExists(_clientId))
-                       ConnManager.CloseConnection("Universal", uid, _clientId);
+        _subClientDisconnectionHappened =
+            Client.DisconnectionHappened
+                  .Subscribe(info => Task.Run(() =>
+                   {
+                       if (_disposed) return;
+                       ConnectionManager.GetLoginUid(_clientId, out long uid);
+                       //移除原连接信息
+                       if (ConnectionManager.ConnectionExists(_clientId))
+                           ConnManager.CloseConnection("Universal", uid, _clientId);
 
-                   if (info.Exception != null)
-                       Log.Error("Sora",
-                           $"监听服务器时发生错误{Log.ErrorLogBuilder(info.Exception)}");
-                   else
-                       Log.Info("Sora", "服务器连接被关闭");
-               }));
+                       if (info.Exception != null)
+                           Log.Error("Sora",
+                               $"监听服务器时发生错误{Log.ErrorLogBuilder(info.Exception)}");
+                       else
+                           Log.Info("Sora", "服务器连接被关闭");
+                   }));
         //重连事件
-        _subClientReconnectionHappened = Client.ReconnectionHappened
-              .Subscribe(info => Task.Run(() =>
-               {
-                   if (_disposed) return;
-                   if (info.Type == ReconnectionType.Initial || !_clientIsRunning)
-                       return;
-                   Log.Info("Sora", $"服务器已自动重连{info.Type}");
-                   ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client),
-                       _clientId, _clientId,
-                       Config.ApiTimeOut);
-               }));
+        _subClientReconnectionHappened =
+            Client.ReconnectionHappened
+                  .Subscribe(info => Task.Run(() =>
+                   {
+                       if (_disposed) return;
+                       if (info.Type == ReconnectionType.Initial || !_clientIsRunning)
+                           return;
+                       Log.Info("Sora", $"服务器已自动重连{info.Type}");
+                       ConnManager.OpenConnection("Universal", "0",
+                           new ClientSocket(Client),
+                           _clientId, _clientId,
+                           Config.ApiTimeOut);
+                   }));
         //开始客户端
         await Client.Start();
         ConnManager.StartTimer(_clientId);
