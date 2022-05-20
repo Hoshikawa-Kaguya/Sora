@@ -65,6 +65,11 @@ public sealed class SoraWebsocketServer : ISoraService
     /// </summary>
     private bool _disposed;
 
+    /// <summary>
+    /// 运行标志位
+    /// </summary>
+    private bool _serverRunning;
+
     #endregion
 
     #region 构造函数
@@ -96,7 +101,7 @@ public sealed class SoraWebsocketServer : ISoraService
         if (Config.Port == 0)
             throw new ArgumentOutOfRangeException(nameof(Config.Port), "Port 0 is not allowed");
         //初始化连接管理器
-        ConnManager = new ConnectionManager(Config);
+        ConnManager = new ConnectionManager(Config, _serverId);
         //实例化事件接口
         Event = new EventAdapter(_serverId, Config.ThrowCommandException, Config.SendCommandErrMsg);
         //禁用原log
@@ -121,6 +126,7 @@ public sealed class SoraWebsocketServer : ISoraService
     /// </summary>
     public ValueTask StartService()
     {
+        _serverRunning = true;
         if (!_serverReady) return ValueTask.CompletedTask;
         //启动服务器
         Server = new WebSocketServer($"ws://{Config.Host}:{Config.Port}")
@@ -129,25 +135,29 @@ public sealed class SoraWebsocketServer : ISoraService
             RestartAfterListenError = true
         };
         Server.Start(SocketConfig);
-        ConnManager.StartTimer(_serverId);
         Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
         return ValueTask.CompletedTask;
     }
 
     /// <summary>
-    /// 停止 Sora 服务
+    /// <para>停止 Sora 服务</para>
+    /// <para>停止ws服务器</para>
     /// </summary>
     public ValueTask StopService()
     {
-        if (_disposed) return ValueTask.CompletedTask;
+        if (_disposed && !_serverRunning) return ValueTask.CompletedTask;
+        Log.Warning("Sora", $"SoraWebsocket服务器[{ServiceId}]正在停止...");
+        ConnManager.CloseAllConnection(ServiceId);
         //停止服务器
-        Server?.Dispose();
-        ConnManager.StopTimer();
-        Log.Info("Sora", $"Sora WebSocket已停止运行");
+        Server.Dispose();
+        _serverRunning = false;
+        Log.Warning("Sora", $"Sora WebSocket服务器[{ServiceId}]已停止运行");
         return ValueTask.CompletedTask;
     }
 
-
+    /// <summary>
+    /// socket事件处理
+    /// </summary>
     private void SocketConfig(IWebSocketConnection socket)
     {
         //接收事件处理
@@ -173,7 +183,7 @@ public sealed class SoraWebsocketServer : ISoraService
         //打开连接
         socket.OnOpen = () =>
         {
-            if (_disposed) return;
+            if (_disposed || !_serverRunning) return;
             //获取Token
             if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",
                     out string headerValue))
@@ -195,7 +205,7 @@ public sealed class SoraWebsocketServer : ISoraService
         //关闭连接
         socket.OnClose = () =>
         {
-            if (_disposed) return;
+            if (_disposed || !_serverRunning) return;
             //移除原连接信息
             if (ConnectionManager.ConnectionExists(socket.ConnectionInfo.Id))
                 ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
@@ -208,7 +218,7 @@ public sealed class SoraWebsocketServer : ISoraService
         socket.OnMessage = message =>
             Task.Run(() =>
             {
-                if (_disposed) return;
+                if (_disposed || !_serverRunning) return;
                 Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
             });
     }
@@ -226,11 +236,10 @@ public sealed class SoraWebsocketServer : ISoraService
     /// </summary>
     public void Dispose()
     {
-        Log.Warning("ServiceDispose", "SoraWebsocketServer正在停止...");
         _disposed = true;
-        StaticVariable.DisposeService(_serverId);
-        Server?.Dispose();
+        StopService().AsTask().Wait();
         ConnManager?.Dispose();
+        StaticVariable.DisposeService(_serverId);
         GC.SuppressFinalize(this);
     }
 

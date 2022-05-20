@@ -167,7 +167,8 @@ internal static class ApiAdapter
         //检查机器人管理员权限
         friendInfos.ForEach(t =>
             {
-                t.IsSuperUser = t.UserId is not 0 or -1
+                t.IsSuperUser =
+                    t.UserId is not 0 or -1
                  && StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
             }
         );
@@ -229,7 +230,8 @@ internal static class ApiAdapter
         //检查机器人管理员权限
         memberList.ForEach(t =>
             {
-                t.IsSuperUser = t.UserId is not 0 or -1
+                t.IsSuperUser =
+                    t.UserId is not 0 or -1
                  && StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
             }
         );

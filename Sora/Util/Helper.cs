@@ -99,8 +99,8 @@ public static class Helper
     public static bool ArrayEquals<T>(this T[] arr1, T[] arr2) where T : class
     {
         if (arr1?.Length != arr2?.Length
-         || arr1 is null     && arr2 is not null
-         || arr1 is not null && arr2 is null)
+         || (arr1 is null     && arr2 is not null)
+         || (arr1 is not null && arr2 is null))
             return false;
 
         if (arr1 is null && arr2 is null) return true;

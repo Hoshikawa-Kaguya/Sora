@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Sora;
 using Sora.Interfaces;
 using Sora.Net.Config;
+using Sora.Util;
 using YukariToolBox.LightLog;
 
 //设置log等级
@@ -13,7 +14,8 @@ Log.LogConfiguration
 ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
 {
     EnableSocketMessage   = false,
-    ThrowCommandException = false
+    ThrowCommandException = false,
+    Port                  = 7500
 });
 
 #region 事件处理
@@ -66,6 +68,7 @@ service.Event.CommandManager.RegisterGroupDynamicCommand(
 #endregion
 
 //启动服务并捕捉错误
-await service.StartService();
-//.RunCatch(e => Log.Error("Sora Service", Log.ErrorLogBuilder(e)));
+await service.StartService()
+             .RunCatch(e => Log.Error("Sora Service", Log.ErrorLogBuilder(e)));
+
 await Task.Delay(-1);
