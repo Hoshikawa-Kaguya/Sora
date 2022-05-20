@@ -60,23 +60,6 @@ public static class StaticVariable
         Log.Debug("Sora", "Detect service dispose, cleanup service config...");
         //清空服务信息
         ServiceConfigs.TryRemove(serviceId, out _);
-        //清空连接信息
-        List<KeyValuePair<Guid, SoraConnectionInfo>> removeConnList =
-            ConnectionInfos.Where(i => i.Value.ApiInstance.ServiceId == serviceId)
-                           .ToList();
-        foreach ((Guid guid, SoraConnectionInfo conn) in removeConnList)
-        {
-            try
-            {
-                conn.Connection.Close();
-            }
-            catch (Exception e)
-            {
-                Log.Error("Sora", $"Close conn error\r\n{Log.ErrorLogBuilder(e)}");
-            }
-
-            ConnectionInfos.TryRemove(guid, out _);
-        }
 
         //清空等待信息
         List<KeyValuePair<Guid, WaitingInfo>> removeWaitList =

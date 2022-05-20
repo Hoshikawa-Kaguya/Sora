@@ -30,7 +30,7 @@ public sealed class SoraWebsocketClient : ISoraService
     /// <summary>
     /// WS客户端
     /// </summary>
-    private WebsocketClient Client { get; }
+    private WebsocketClient Client { get; set; }
 
     /// <summary>
     /// 事件接口
@@ -100,20 +100,9 @@ public sealed class SoraWebsocketClient : ISoraService
         if (Config.Port == 0)
             throw new ArgumentOutOfRangeException(nameof(Config.Port), "Port 0 is not allowed");
         //初始化连接管理器
-        ConnManager = new ConnectionManager(Config);
+        ConnManager = new ConnectionManager(Config, _clientId);
         //实例化事件接口
         Event = new EventAdapter(_clientId, Config.ThrowCommandException, Config.SendCommandErrMsg);
-        //处理连接路径
-        string serverPath = string.IsNullOrEmpty(Config.UniversalPath)
-            ? $"ws://{Config.Host}:{Config.Port}"
-            : $"ws://{Config.Host}:{Config.Port}/{Config.UniversalPath.Trim('/')}/";
-        Log.Debug("Sora", $"Onebot服务器地址:{serverPath}");
-        Client =
-            new WebsocketClient(new Uri(serverPath), CreateSocket)
-            {
-                ReconnectTimeout      = Config.ReconnectTimeOut,
-                ErrorReconnectTimeout = Config.ReconnectTimeOut
-            };
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
@@ -130,27 +119,23 @@ public sealed class SoraWebsocketClient : ISoraService
     #region 客户端启停
 
     /// <summary>
-    /// 启动 Sora 服务
+    /// <para>启动 Sora 服务</para>
+    /// <para>启动客户端并自动连接服务器</para>
     /// </summary>
-    public ValueTask StartService()
-    {
-        return StartClient();
-    }
-
-    /// <summary>
-    /// 停止 Sora 服务
-    /// </summary>
-    public ValueTask StopService()
-    {
-        return StopClient();
-    }
-
-    /// <summary>
-    /// 启动客户端并自动连接服务器
-    /// </summary>
-    private async ValueTask StartClient()
+    public async ValueTask StartService()
     {
         if (!_clientReady) return;
+        //处理连接路径
+        string serverPath = string.IsNullOrEmpty(Config.UniversalPath)
+            ? $"ws://{Config.Host}:{Config.Port}"
+            : $"ws://{Config.Host}:{Config.Port}/{Config.UniversalPath.Trim('/')}/";
+        Log.Debug("Sora", $"Onebot服务器地址:{serverPath}");
+        Client =
+            new WebsocketClient(new Uri(serverPath), CreateSocket)
+            {
+                ReconnectTimeout      = Config.ReconnectTimeOut,
+                ErrorReconnectTimeout = Config.ReconnectTimeOut
+            };
         //消息接收事件
         _subClientMessageReceived = Client.MessageReceived.Subscribe(msg => Task.Run(() =>
         {
@@ -170,7 +155,7 @@ public sealed class SoraWebsocketClient : ISoraService
 
                        if (info.Exception != null)
                            Log.Error("Sora",
-                               $"监听服务器时发生错误{Log.ErrorLogBuilder(info.Exception)}");
+                               $"监听服务器时发生错误\r\n{Log.ErrorLogBuilder(info.Exception)}");
                        else
                            Log.Info("Sora", "服务器连接被关闭");
                    }));
@@ -190,7 +175,6 @@ public sealed class SoraWebsocketClient : ISoraService
                    }));
         //开始客户端
         await Client.Start();
-        ConnManager.StartTimer(_clientId);
         if (!Client.IsRunning || !Client.IsStarted)
             throw new WebSocketClientException("WebSocket client is not running");
 
@@ -201,26 +185,23 @@ public sealed class SoraWebsocketClient : ISoraService
     }
 
     /// <summary>
-    /// 停止客户端
+    /// <para>停止 Sora 服务</para>
+    /// <para>停止ws客户端</para>
     /// </summary>
-    private async ValueTask StopClient()
+    public async ValueTask StopService()
     {
         if (_disposed) return;
+        Log.Warning("Sora", $"SoraWebsocket客户端[{ServiceId}]正在停止...");
         //取消Client上已注册的各事件订阅
         _subClientMessageReceived?.Dispose();
         _subClientDisconnectionHappened?.Dispose();
         _subClientReconnectionHappened?.Dispose();
+        ConnManager.CloseAllConnection(ServiceId);
         //停止客户端
         await Client.Stop(WebSocketCloseStatus.NormalClosure, string.Empty);
-        //停止心跳包
-        ConnManager.StopTimer();
-        ConnectionManager.GetLoginUid(_clientId, out long uid);
-        //移除原连接信息
-        if (ConnectionManager.ConnectionExists(_clientId))
-            ConnManager.CloseConnection("Universal", uid, _clientId);
-
-        Log.Info("Sora", "Sora WebSocket客户端已停止");
+        Client.Dispose();
         _clientIsRunning = false;
+        Log.Warning("Sora", $"SoraWebSocket客户端[{ServiceId}]已停止");
     }
 
     /// <summary>
@@ -236,11 +217,11 @@ public sealed class SoraWebsocketClient : ISoraService
     /// </summary>
     public void Dispose()
     {
-        Log.Warning("ServiceDispose", "SoraWebsocketClient正在停止...");
-        _disposed = true;
-        StaticVariable.DisposeService(_clientId);
+        StopService().AsTask().Wait();
         Client?.Dispose();
         ConnManager?.Dispose();
+        _disposed = true;
+        StaticVariable.DisposeService(_clientId);
         GC.SuppressFinalize(this);
     }
 

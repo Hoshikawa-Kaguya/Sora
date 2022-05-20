@@ -52,9 +52,10 @@ public sealed class ConnectionManager : IDisposable
 
     #region 构造函数
 
-    internal ConnectionManager(ISoraConfig config)
+    internal ConnectionManager(ISoraConfig config, Guid serviceId)
     {
-        HeartBeatTimeOut = config.HeartBeatTimeOut;
+        HeartBeatTimeOut =   config.HeartBeatTimeOut;
+        HeartBeatTimer   ??= new Timer(HeartBeatCheck, serviceId, HeartBeatTimeOut, HeartBeatTimeOut);
     }
 
     #endregion
@@ -101,6 +102,20 @@ public sealed class ConnectionManager : IDisposable
         return StaticVariable.ConnectionInfos.ContainsKey(connectionId);
     }
 
+    /// <summary>
+    /// 关闭服务中的所有链接
+    /// </summary>
+    internal void CloseAllConnection(Guid serviceGuid)
+    {
+        List<SoraConnectionInfo> connectionInfos =
+            StaticVariable.ConnectionInfos
+                          .Where(c => c.Value.ApiInstance.ServiceId == serviceGuid)
+                          .Select(c => c.Value)
+                          .ToList();
+        foreach (SoraConnectionInfo connection in connectionInfos)
+            CloseConnection("Universal", connection.LoginUid, connection.ApiInstance.ConnectionId);
+    }
+
     #endregion
 
     #region 服务器信息发送
@@ -127,19 +142,6 @@ public sealed class ConnectionManager : IDisposable
     #region 心跳包管理
 
     /// <summary>
-    /// 启动心跳计时器
-    /// </summary>
-    internal void StartTimer(Guid serviceId)
-    {
-        HeartBeatTimer ??= new Timer(HeartBeatCheck, serviceId, HeartBeatTimeOut, HeartBeatTimeOut);
-    }
-
-    internal void StopTimer()
-    {
-        HeartBeatTimer?.Dispose();
-    }
-
-    /// <summary>
     /// 心跳包超时检查
     /// </summary>
     internal void HeartBeatCheck(object serviceIdObj)
@@ -148,6 +150,7 @@ public sealed class ConnectionManager : IDisposable
         var serviceId = (Guid) serviceIdObj;
         Log.Debug("HeartBeatCheck", $"service id={serviceId}({StaticVariable.ConnectionInfos.Count})");
 
+        if (StaticVariable.ConnectionInfos.Count == 0) return;
         //查找超时连接
         DateTime now = DateTime.Now;
         Dictionary<Guid, SoraConnectionInfo> timeoutDict =
@@ -240,7 +243,7 @@ public sealed class ConnectionManager : IDisposable
         }
 
         //移除连接信息
-        if (!RemoveConnection(connId))
+        if (StaticVariable.ConnectionInfos.ContainsKey(connId) && !RemoveConnection(connId))
             Log.Error("ConnectionManager", "Remove connection record failed");
         //触发事件
         if (OnCloseConnectionAsync == null) return;
