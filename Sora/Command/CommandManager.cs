@@ -320,18 +320,24 @@ public sealed class CommandManager
         //检查指令池
         if (_regexCommands.Count == 0) return;
 
-        List<DynamicCommandInfo> matchedDynamicCommand =
+        Dictionary<DynamicCommandInfo, Regex> matchedDynamicCommand =
             _dynamicCommands.Where(command => CommandMatch(command, eventArgs))
                             .OrderByDescending(p => p.Priority)
-                            .ToList();
+                            .ToDictionary(
+                                 cmd => cmd,
+                                 cmd => cmd.Regex.Single(r => r.IsMatch(eventArgs.Message.RawText)));
+        //清空指令参数信息
+        eventArgs.CommandId    = Guid.Empty;
+        eventArgs.CommandRegex = null;
 
         if (matchedDynamicCommand.Count != 0)
-            foreach (DynamicCommandInfo commandInfo in matchedDynamicCommand)
+            foreach ((DynamicCommandInfo commandInfo, Regex regex) in matchedDynamicCommand)
                 try
                 {
                     Log.Debug("CommandAdapter", $"trigger command [{commandInfo.CommandId}]");
                     Log.Info("CommandAdapter", $"触发指令[{commandInfo.CommandId}]");
-
+                    eventArgs.CommandId = commandInfo.CommandId;
+                    eventArgs.CommandRegex = regex;
                     switch (eventArgs.SourceType)
                     {
                         case SourceFlag.Group:
@@ -358,19 +364,25 @@ public sealed class CommandManager
         //检查指令池
         if (_regexCommands.Count == 0) return;
 
-        List<RegexCommandInfo> matchedCommand =
+        Dictionary<RegexCommandInfo, Regex> matchedCommand =
             _regexCommands.Where(command =>
                                CommandMatch(command, eventArgs) &&
                                (!_groupEnableFlagDict.ContainsKey(command.GroupName) ||
                                    _groupEnableFlagDict[command.GroupName]))
                           .OrderByDescending(p => p.Priority)
-                          .ToList();
+                          .ToDictionary(
+                               cmd => cmd, 
+                               cmd => cmd.Regex.Single(r => r.IsMatch(eventArgs.Message.RawText)));
 
         //在没有匹配到指令时直接跳转至Event触发
         if (matchedCommand.Count == 0) return;
 
+        //清空指令参数信息
+        eventArgs.CommandId    = Guid.Empty;
+        eventArgs.CommandRegex = null;
+
         //遍历匹配到的每个命令
-        foreach (RegexCommandInfo commandInfo in matchedCommand)
+        foreach ((RegexCommandInfo commandInfo, Regex regex) in matchedCommand)
             try
             {
                 Log.Debug("CommandAdapter",
@@ -381,6 +393,8 @@ public sealed class CommandManager
                 bool isAsync =
                     commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
                         false) is not null;
+
+                eventArgs.CommandRegex = regex;
                 //执行指令方法
                 if (isAsync && commandInfo.MethodInfo.ReturnType != typeof(void))
                 {
@@ -458,16 +472,8 @@ public sealed class CommandManager
             return false;
 
         //判断正则表达式
-        Regex matchedRegex = null;
-        if (!command.Regex.Any(regex =>
-        {
-            matchedRegex = regex;
-            return regex.IsMatch(eventArgs.Message.RawText);
-        })) return false;
-        eventArgs.CommandRegex = matchedRegex;
-
-        if (command is DynamicCommandInfo dynamicCmd)
-            eventArgs.CommandId = dynamicCmd.CommandId;
+        if (!command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText))) 
+            return false;
 
         //机器人管理员判断
         if (command.SuperUserCommand && !eventArgs.IsSuperUser)
