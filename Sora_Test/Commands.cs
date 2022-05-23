@@ -7,13 +7,14 @@ using YukariToolBox.LightLog;
 
 namespace Sora_Test;
 
-[CommandGroup()]
+[CommandGroup(GroupName = "test")]
 public static class Commands
 {
     [SoraCommand(
         CommandExpressions = new[] {"1"},
         Description = "死了啦都你害的啦",
-        SourceType = SourceFlag.Group)]
+        SourceType = SourceFlag.Group,
+        Priority = 0)]
     public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;

@@ -71,7 +71,8 @@ public sealed class SoraCommand : Attribute
     public MatchType MatchType { get; init; } = MatchType.Full;
 
     /// <summary>
-    /// 优先级
+    /// <para>优先级</para>
+    /// <para>数值越高优先级越高</para>
     /// </summary>
     public int Priority { get; init; } = 0;
 
