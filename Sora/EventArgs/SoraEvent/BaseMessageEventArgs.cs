@@ -38,7 +38,7 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     /// <summary>
     /// 在匹配到指令时则此值为匹配到的正则表达式
     /// </summary>
-    public Regex CommandRegex { get; internal set; }
+    public Regex[] CommandRegex { get; internal set; }
 
     /// <summary>
     /// 在匹配到动态指令时则此值为匹配到的动态指令ID
