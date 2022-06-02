@@ -187,6 +187,7 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="connectionGuid">连接标识</param>
     internal static void HeartBeatUpdate(Guid connectionGuid)
     {
+        if(!ConnectionExists(connectionGuid)) return;
         SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
         SoraConnectionInfo newInfo = oldInfo;
         newInfo.LastHeartBeatTime = DateTime.Now;

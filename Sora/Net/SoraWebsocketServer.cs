@@ -218,7 +218,8 @@ public sealed class SoraWebsocketServer : ISoraService
         socket.OnMessage = message =>
             Task.Run(() =>
             {
-                if (_disposed || !_serverRunning) return;
+                if (_disposed || !_serverRunning) 
+                    return;
                 Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
             });
     }
