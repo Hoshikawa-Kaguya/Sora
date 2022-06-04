@@ -79,5 +79,18 @@ public static class SegmentHelper
         }
     }
 
+    /// <summary>
+    /// 图片流转Base64字符串
+    /// </summary>
+    /// <param name="stream">图片流</param>
+    public static string StreamToBase64(this Stream stream)
+    {
+        if (stream.Length > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(stream), "流长度超出范围限制");
+        byte[] arr = new byte[stream.Length];
+        stream.Position = 0;
+        stream.Read(arr, 0, (int)stream.Length);
+        return "base64://" + Convert.ToBase64String(arr);
+    }
+
     #endregion
 }
