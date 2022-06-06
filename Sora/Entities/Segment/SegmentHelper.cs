@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Sora.Enumeration;
 
 namespace Sora.Entities.Segment;
@@ -85,11 +86,20 @@ public static class SegmentHelper
     /// <param name="stream">图片流</param>
     public static string StreamToBase64(this Stream stream)
     {
-        if (stream.Length > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(stream), "流长度超出范围限制");
-        byte[] arr = new byte[stream.Length];
+        using MemoryStream ms = new MemoryStream();
+
+        long cur = stream.Position;
         stream.Position = 0;
-        stream.Read(arr, 0, (int)stream.Length);
-        return "base64://" + Convert.ToBase64String(arr);
+        stream.CopyTo(ms);
+        stream.Position = cur;
+
+        string b64Str = Convert.ToBase64String(ms.GetBuffer());
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("base64://");
+        sb.Append(b64Str);
+
+        return sb.ToString();
     }
 
     #endregion
