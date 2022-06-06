@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Sora.Enumeration;
 
 namespace Sora.Entities.Segment;
@@ -77,6 +78,29 @@ public static class SegmentHelper
             default:
                 return (dataStr, true);
         }
+    }
+
+    /// <summary>
+    /// 图片流转Base64字符串
+    /// </summary>
+    /// <param name="stream">图片流</param>
+    public static string StreamToBase64(this Stream stream)
+    {
+        if(stream is null) return null;
+        using MemoryStream ms = new MemoryStream();
+
+        long cur = stream.Position;
+        stream.Position = 0;
+        stream.CopyTo(ms);
+        stream.Position = cur;
+
+        string b64Str = Convert.ToBase64String(ms.GetBuffer());
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("base64://");
+        sb.Append(b64Str);
+
+        return sb.ToString();
     }
 
     #endregion

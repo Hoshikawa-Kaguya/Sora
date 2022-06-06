@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Entities.Segment.DataModel;
@@ -291,6 +292,17 @@ public readonly struct SoraSegment
                 UseCache    = useCache ? 1 : null,
                 ThreadCount = threadCount
             });
+    }
+
+    /// <summary>
+    /// 图片 消息段
+    /// </summary>
+    /// <param name="data">图片流</param>
+    public static SoraSegment Image(Stream data)
+    {
+        if (data is null) throw new NullReferenceException(nameof(data));
+        string dataStr = data.StreamToBase64();
+        return Image(dataStr);
     }
 
     /// <summary>
