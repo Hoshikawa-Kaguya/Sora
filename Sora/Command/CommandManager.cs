@@ -672,7 +672,7 @@ public sealed class CommandManager
                 return cmdExps.Select(command => $"^{prefix}{command}$").ToArray();
             case MatchType.Regex:
                 if (!string.IsNullOrEmpty(prefix))
-                    Log.Warning("指令初始化", "发现正则指令的指令组设置了前缀符号，将会自动忽略这个符号");
+                    Log.Warning("指令初始化", $"当前注册指令类型为正则匹配，自动忽略前缀[{prefix}]");
                 return cmdExps;
             case MatchType.KeyWord:
                 return cmdExps.Select(command => $"[{prefix}{command}]+").ToArray();
