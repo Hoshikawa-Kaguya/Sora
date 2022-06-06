@@ -86,6 +86,7 @@ public static class SegmentHelper
     /// <param name="stream">图片流</param>
     public static string StreamToBase64(this Stream stream)
     {
+        if(stream is null) return null;
         using MemoryStream ms = new MemoryStream();
 
         long cur = stream.Position;
