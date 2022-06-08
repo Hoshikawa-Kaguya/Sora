@@ -121,7 +121,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
 
     /// <summary>
     /// <para>等待下一条消息触发</para>
-    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
     /// </summary>
     /// <param name="commandExps">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -131,7 +131,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
+            return ValueTask.FromResult(WaitForNextRegexMessage(Sender, commandExps,
                 matchType, regexOptions, null, null,
                 SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
@@ -140,7 +140,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
 
     /// <summary>
     /// <para>等待下一条消息触发</para>
-    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
     /// </summary>
     /// <param name="commandExps">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -154,7 +154,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     RegexOptions    regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextMessage(Sender, commandExps,
+            return ValueTask.FromResult(WaitForNextRegexMessage(Sender, commandExps,
                 matchType, regexOptions, timeout,
                 timeoutTask,
                 SourceGroup) as GroupMessageEventArgs);
@@ -164,7 +164,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
 
     /// <summary>
     /// <para>等待下一条消息触发</para>
-    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
     /// </summary>
     /// <param name="commandExp">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -181,7 +181,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
 
     /// <summary>
     /// <para>等待下一条消息触发</para>
-    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
     /// </summary>
     /// <param name="commandExp">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
@@ -195,9 +195,43 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     RegexOptions    regexOptions = RegexOptions.None)
     {
         if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
-            return ValueTask.FromResult(WaitForNextMessage(Sender, new[] {commandExp},
+            return ValueTask.FromResult(WaitForNextRegexMessage(Sender, new[] {commandExp},
                 matchType, regexOptions, timeout,
                 timeoutTask,
+                SourceGroup) as GroupMessageEventArgs);
+        CommandDisableTip();
+        return ValueTask.FromResult<GroupMessageEventArgs>(null);
+    }
+
+    /// <summary>
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
+    /// </summary>
+    /// <param name="matchFunc">指令表达式</param>
+    /// <param name="timeout">超时</param>
+    /// <param name="timeoutTask">超时后执行的动作</param>
+    /// <returns>触发后的事件参数</returns>
+    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(Func<BaseMessageEventArgs, bool> matchFunc,
+                                                                    TimeSpan                         timeout,
+                                                                    Func<ValueTask>                  timeoutTask = null)
+    {
+        if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
+            return ValueTask.FromResult(WaitForNextCustomMessage(Sender, matchFunc, timeout, timeoutTask,
+                SourceGroup) as GroupMessageEventArgs);
+        CommandDisableTip();
+        return ValueTask.FromResult<GroupMessageEventArgs>(null);
+    }
+
+    /// <summary>
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
+    /// </summary>
+    /// <param name="matchFunc">指令表达式</param>
+    /// <returns>触发后的事件参数</returns>
+    public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(Func<BaseMessageEventArgs, bool> matchFunc)
+    {
+        if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
+            return ValueTask.FromResult(WaitForNextCustomMessage(Sender, matchFunc, null, null,
                 SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);

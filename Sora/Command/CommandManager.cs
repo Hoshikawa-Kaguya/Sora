@@ -47,7 +47,7 @@ public sealed class CommandManager
 
     #region 私有字段
 
-    private readonly List<RegexCommandInfo> _regexCommands = new();
+    private readonly List<SoraCommandInfo> _regexCommands = new();
 
     private readonly List<DynamicCommandInfo> _dynamicCommands = new();
 
@@ -106,7 +106,7 @@ public sealed class CommandManager
             {
                 Log.Debug("Command", $"Registering command [{methodInfo.Name}]");
                 //生成指令信息
-                if (!GenerateCommandInfo(methodInfo, classType, groupName, prefix, out RegexCommandInfo commandInfo))
+                if (!GenerateCommandInfo(methodInfo, classType, groupName, prefix, out SoraCommandInfo commandInfo))
                     continue;
                 //添加指令信息
                 if (_regexCommands.AddOrExist(commandInfo))
@@ -168,7 +168,59 @@ public sealed class CommandManager
 
         //创建指令信息
         DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(
-            desc, matchExp, memberRole, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
+            desc, matchExp, null, memberRole, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
+            sourceGroups ?? Array.Empty<long>(),
+            sourceUsers  ?? Array.Empty<long>(),
+            groupCommand, id, suCommand);
+
+        //添加指令信息
+        if (_dynamicCommands.AddOrExist(dynamicCommand))
+        {
+            Log.Debug("Command",
+                $"Registered {dynamicCommand.SourceType} dynamic command [{dynamicCommand.CommandId}]");
+        }
+        else
+        {
+            Log.Warning("CommandManager", "Command exists");
+            return Guid.Empty;
+        }
+
+        return dynamicCommand.CommandId;
+    }
+
+    /// <summary>
+    /// 动态注册指令
+    /// </summary>
+    /// <param name="matchFunc">自定义匹配方法</param>
+    /// <param name="groupCommand">指令执行定义</param>
+    /// <param name="exceptionHandler">异常处理</param>
+    /// <param name="memberRole">成员权限限制</param>
+    /// <param name="suCommand">机器人管理员限制</param>
+    /// <param name="priority">优先级</param>
+    /// <param name="sourceGroups">群组限制</param>
+    /// <param name="sourceUsers">成员限制</param>
+    /// <param name="desc">描述</param>
+    public Guid RegisterGroupDynamicCommand(
+        Func<BaseMessageEventArgs, bool>       matchFunc,
+        Func<GroupMessageEventArgs, ValueTask> groupCommand,
+        Action<Exception>                      exceptionHandler = null,
+        MemberRoleType                         memberRole       = MemberRoleType.Member,
+        bool                                   suCommand        = false,
+        int                                    priority         = 0,
+        long[]                                 sourceGroups     = null,
+        long[]                                 sourceUsers      = null,
+        string                                 desc             = "")
+    {
+        //判断参数合法性
+        if (groupCommand is null) throw new NullReferenceException($"{nameof(groupCommand)} is null");
+
+        //生成指令信息
+        Guid id = Guid.NewGuid();
+        Log.Debug("Command", $"Registering dynamic command [{id}]");
+
+        //创建指令信息
+        DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(
+            desc, Array.Empty<string>(), matchFunc, memberRole, priority, RegexOptions.None, exceptionHandler,
             sourceGroups ?? Array.Empty<long>(),
             sourceUsers  ?? Array.Empty<long>(),
             groupCommand, id, suCommand);
@@ -212,6 +264,7 @@ public sealed class CommandManager
     {
         //判断参数合法性
         if (cmdExps is null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
+        if (privateCommand is null) throw new NullReferenceException("privateCommand is null");
 
         //生成指令信息
         Guid id = Guid.NewGuid();
@@ -222,7 +275,54 @@ public sealed class CommandManager
 
         //创建指令信息
         var dynamicCommand = new DynamicCommandInfo(
-            desc, matchExp, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
+            desc, matchExp, null, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
+            sourceUsers ?? Array.Empty<long>(),
+            privateCommand, id, suCommand);
+
+        //添加指令信息
+        if (_dynamicCommands.AddOrExist(dynamicCommand))
+        {
+            Log.Debug("Command",
+                $"Registered {dynamicCommand.SourceType} dynamic command [{dynamicCommand.CommandId}]");
+        }
+        else
+        {
+            Log.Warning("CommandManager", "Command exists");
+            return Guid.Empty;
+        }
+
+        return dynamicCommand.CommandId;
+    }
+
+    /// <summary>
+    /// 动态注册指令
+    /// </summary>
+    /// <param name="matchFunc">自定义匹配方法</param>
+    /// <param name="privateCommand">指令执行定义</param>
+    /// <param name="exceptionHandler">异常处理</param>
+    /// <param name="suCommand">机器人管理员限制</param>
+    /// <param name="priority">优先级</param>
+    /// <param name="sourceUsers">用户限制</param>
+    /// <param name="desc">描述</param>
+    public Guid RegisterPrivateDynamicCommand(
+        Func<BaseMessageEventArgs, bool>         matchFunc,
+        Func<PrivateMessageEventArgs, ValueTask> privateCommand,
+        Action<Exception>                        exceptionHandler = null,
+        bool                                     suCommand        = false,
+        int                                      priority         = 0,
+        long[]                                   sourceUsers      = null,
+        string                                   desc             = "")
+    {
+        //判断参数合法性
+        if (privateCommand is null) throw new NullReferenceException("privateCommand is null");
+
+        //生成指令信息
+        Guid id = Guid.NewGuid();
+        Log.Debug("Command", $"Registering dynamic command [{id}]");
+
+        //创建指令信息
+        var dynamicCommand = new DynamicCommandInfo(
+            desc, Array.Empty<string>(), matchFunc, priority, RegexOptions.None, exceptionHandler,
             sourceUsers ?? Array.Empty<long>(),
             privateCommand, id, suCommand);
 
@@ -320,25 +420,22 @@ public sealed class CommandManager
         //检查指令池
         if (_regexCommands.Count == 0) return;
 
-        Dictionary<DynamicCommandInfo, Regex[]> matchedDynamicCommand =
-            _dynamicCommands.Where(command => CommandMatch(command, eventArgs))
+        List<DynamicCommandInfo> matchedDynamicCommand =
+            _dynamicCommands.Where(command => CommandMatch(command, eventArgs) ||
+                                 (command.CommandMatchFunc?.Invoke(eventArgs) ?? false))
                             .OrderByDescending(p => p.Priority)
-                            .ToDictionary(
-                                 cmd => cmd,
-                                 cmd => cmd.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText))
-                                           .ToArray());
-        //清空指令参数信息
-        eventArgs.CommandId    = Guid.Empty;
-        eventArgs.CommandRegex = null;
+                            .ToList();
 
         if (matchedDynamicCommand.Count != 0)
-            foreach ((DynamicCommandInfo commandInfo, Regex[] regex) in matchedDynamicCommand)
+            foreach (DynamicCommandInfo commandInfo in matchedDynamicCommand)
                 try
                 {
                     Log.Debug("CommandAdapter", $"trigger command [{commandInfo.CommandId}]");
                     Log.Info("CommandAdapter", $"触发指令[{commandInfo.CommandId}]");
-                    eventArgs.CommandId    = commandInfo.CommandId;
-                    eventArgs.CommandRegex = regex;
+                    eventArgs.CommandId = commandInfo.CommandId;
+                    eventArgs.CommandRegex = commandInfo.Regex.Length != 0
+                        ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText)).ToArray()
+                        : Array.Empty<Regex>();
                     switch (eventArgs.SourceType)
                     {
                         case SourceFlag.Group:
@@ -348,6 +445,10 @@ public sealed class CommandManager
                             await commandInfo.PrivateCommand(eventArgs as PrivateMessageEventArgs);
                             break;
                     }
+
+                    //清空指令参数信息
+                    eventArgs.CommandId    = Guid.Empty;
+                    eventArgs.CommandRegex = null;
 
                     //检测事件触发中断标志
                     if (!eventArgs.IsContinueEventChain) return;
@@ -365,23 +466,19 @@ public sealed class CommandManager
         //检查指令池
         if (_regexCommands.Count == 0) return;
 
-        Dictionary<RegexCommandInfo, Regex[]> matchedCommand =
+        List<SoraCommandInfo> matchedCommand =
             _regexCommands.Where(command => CommandMatch(command, eventArgs))
                           .OrderByDescending(p => p.Priority)
-                          .ToDictionary(
-                               cmd => cmd,
-                               cmd => cmd.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText))
-                                         .ToArray());
+                          .ToList();
 
         //在没有匹配到指令时直接跳转至Event触发
         if (matchedCommand.Count == 0) return;
 
         //清空指令参数信息
-        eventArgs.CommandId    = Guid.Empty;
-        eventArgs.CommandRegex = null;
+        eventArgs.CommandId = Guid.Empty;
 
         //遍历匹配到的每个命令
-        foreach ((RegexCommandInfo commandInfo, Regex[] regex) in matchedCommand)
+        foreach (SoraCommandInfo commandInfo in matchedCommand)
             try
             {
                 Log.Debug("CommandAdapter",
@@ -393,7 +490,9 @@ public sealed class CommandManager
                     commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
                         false) is not null;
 
-                eventArgs.CommandRegex = regex;
+                eventArgs.CommandRegex = commandInfo.Regex.Length != 0
+                    ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText)).ToArray()
+                    : Array.Empty<Regex>();
                 //执行指令方法
                 if (isAsync && commandInfo.MethodInfo.ReturnType != typeof(void))
                 {
@@ -416,6 +515,8 @@ public sealed class CommandManager
                                     new object[] {eventArgs});
                 }
 
+                eventArgs.CommandRegex = null;
+
                 //检测事件触发中断标志
                 if (!eventArgs.IsContinueEventChain) break;
             }
@@ -436,37 +537,51 @@ public sealed class CommandManager
     private bool WaitingCommandMatch(KeyValuePair<Guid, WaitingInfo> command,
                                      BaseMessageEventArgs            eventArgs)
     {
-        return eventArgs.SourceType switch
+        switch (eventArgs.SourceType)
         {
-            SourceFlag.Group =>
-                //判断发起源
-                command.Value.SourceFlag == SourceFlag.Group
-                //判断来自同一个连接
-             && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
-                //判断来着同一个群
-             && command.Value.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
-                //判断来自同一人
-             && command.Value.Source.u == eventArgs.Sender
-                //匹配
-             && command.Value.CommandExpressions.Any(regex => Regex.IsMatch(eventArgs.Message.RawText, regex,
-                    RegexOptions.Compiled | command.Value.RegexOptions)),
-            SourceFlag.Private => command.Value.SourceFlag == SourceFlag.Private
-                //判断来自同一个连接
-             && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
-                //判断来自同一人
-             && command.Value.Source.u == eventArgs.Sender
-                //匹配指令
-             && command.Value.CommandExpressions.Any(regex => Regex.IsMatch(eventArgs.Message.RawText, regex,
-                    RegexOptions.Compiled | command.Value.RegexOptions)),
-            _ => false
-        };
+            case SourceFlag.Group:
+            {
+                bool preMatch =
+                    //判断发起源
+                    command.Value.SourceFlag == SourceFlag.Group
+                    //判断来自同一个连接
+                 && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
+                    //判断来着同一个群
+                 && command.Value.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
+                    //判断来自同一人
+                 && command.Value.Source.u == eventArgs.Sender;
+                if (!preMatch) return false;
+                break;
+            }
+            case SourceFlag.Private:
+            {
+                bool preMatch =
+                    //判断发起源
+                    command.Value.SourceFlag == SourceFlag.Private
+                    //判断来自同一个连接
+                 && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
+                    //判断来自同一人
+                 && command.Value.Source.u == eventArgs.Sender;
+                if (!preMatch) return false;
+                break;
+            }
+            default:
+                return false;
+        }
+
+        if (command.Value.MatchFunc is not null)
+            return command.Value.MatchFunc(eventArgs);
+        else
+            return command.Value.CommandExpressions?.Any(regex => Regex.IsMatch(eventArgs.Message.RawText, regex,
+                RegexOptions.Compiled | command.Value.RegexOptions)) ?? false;
     }
+
 
     [NeedReview("ALL")]
     private bool CommandMatch(BaseCommandInfo      command,
                               BaseMessageEventArgs eventArgs)
     {
-        if (command is RegexCommandInfo regexCmd                 &&
+        if (command is SoraCommandInfo regexCmd                  &&
             _groupEnableFlagDict.ContainsKey(regexCmd.GroupName) &&
             !_groupEnableFlagDict[regexCmd.GroupName])
             return false;
@@ -476,7 +591,7 @@ public sealed class CommandManager
             return false;
 
         //判断正则表达式
-        if (!command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText)))
+        if (command.Regex.Length == 0 || !command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText)))
             return false;
 
         //机器人管理员判断
@@ -504,7 +619,7 @@ public sealed class CommandManager
                 {
                     switch (command)
                     {
-                        case RegexCommandInfo regex:
+                        case SoraCommandInfo regex:
                             Log.Warning("CommandAdapter",
                                 $"成员{e.SenderInfo.UserId}[{e.SenderInfo.Role}]正在尝试执行指令{regex.MethodInfo.Name}[{command.PermissionType}]");
                             break;
@@ -572,6 +687,30 @@ public sealed class CommandManager
     /// </summary>
     /// <param name="sourceUid">消息源UID</param>
     /// <param name="sourceGroup">消息源GID</param>
+    /// <param name="matchFunc">自定义匹配方法</param>
+    /// <param name="sourceFlag">来源标识</param>
+    /// <param name="connectionId">连接标识</param>
+    /// <param name="serviceId">服务标识</param>
+    /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
+    [NeedReview("ALL")]
+    internal static WaitingInfo GenerateWaitingCommandInfo(
+        long       sourceUid,  long sourceGroup,  Func<BaseMessageEventArgs, bool> matchFunc,
+        SourceFlag sourceFlag, Guid connectionId, Guid                             serviceId)
+    {
+        if (matchFunc is null) throw new ArgumentNullException(nameof(matchFunc));
+        return new WaitingInfo(new AutoResetEvent(false),
+            matchFunc,
+            serviceId: serviceId,
+            connectionId: connectionId,
+            source: (sourceUid, sourceGroup),
+            sourceFlag: sourceFlag);
+    }
+
+    /// <summary>
+    /// 生成连续对话上下文
+    /// </summary>
+    /// <param name="sourceUid">消息源UID</param>
+    /// <param name="sourceGroup">消息源GID</param>
     /// <param name="cmdExps">指令表达式</param>
     /// <param name="matchType">匹配类型</param>
     /// <param name="sourceFlag">来源标识</param>
@@ -613,13 +752,13 @@ public sealed class CommandManager
     /// <param name="classType">所在实例类型</param>
     /// <param name="groupName">指令组</param>
     /// <param name="prefix">指令前缀</param>
-    /// <param name="regexCommandInfo">指令信息</param>
+    /// <param name="soraCommandInfo">指令信息</param>
     [NeedReview("ALL")]
-    private bool GenerateCommandInfo(MethodInfo           method,
-                                     Type                 classType,
-                                     string               groupName,
-                                     string               prefix,
-                                     out RegexCommandInfo regexCommandInfo)
+    private bool GenerateCommandInfo(MethodInfo          method,
+                                     Type                classType,
+                                     string              groupName,
+                                     string              prefix,
+                                     out SoraCommandInfo soraCommandInfo)
     {
         //获取指令属性
         SoraCommand commandAttr =
@@ -632,12 +771,12 @@ public sealed class CommandManager
         //若创建实例失败且方法不是静态的，则返回空白命令信息
         if (!method.IsStatic && !CheckAndCreateInstance(classType))
         {
-            regexCommandInfo = Helper.CreateInstance<RegexCommandInfo>();
+            soraCommandInfo = Helper.CreateInstance<SoraCommandInfo>();
             return false;
         }
 
         //创建指令信息
-        regexCommandInfo = new RegexCommandInfo(
+        soraCommandInfo = new SoraCommandInfo(
             commandAttr.Description,
             matchExp,
             classType.Name,
