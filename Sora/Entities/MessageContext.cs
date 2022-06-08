@@ -136,6 +136,22 @@ public sealed class MessageContext : BaseModel
     }
 
     /// <summary>
+    /// 是否为单图片消息
+    /// </summary>
+    public bool IsSingleImageMessage()
+    {
+        return MessageBody.Count == 1 && MessageBody[0].MessageType == SegmentType.Image;
+    }
+
+    /// <summary>
+    /// 是否为纯图片消息
+    /// </summary>
+    public bool IsMultiImageMessage()
+    {
+        return MessageBody.Count > 1 && MessageBody.All(s => s.MessageType == SegmentType.Image);
+    }
+
+    /// <summary>
     /// 是否是转发消息
     /// </summary>
     public bool IsForwardMessage()
