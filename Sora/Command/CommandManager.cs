@@ -354,7 +354,7 @@ public sealed class CommandManager
                 }
                 catch (Exception err)
                 {
-                    await CommandErrorMessage(err, eventArgs, commandInfo, commandInfo.CommandId.ToString());
+                    await CommandErrorParse(err, eventArgs, commandInfo, commandInfo.CommandId.ToString());
                     return;
                 }
 
@@ -421,7 +421,7 @@ public sealed class CommandManager
             }
             catch (Exception err)
             {
-                await CommandErrorMessage(err, eventArgs, commandInfo, commandInfo.MethodInfo.Name);
+                await CommandErrorParse(err, eventArgs, commandInfo, commandInfo.MethodInfo.Name);
                 return;
             }
 
@@ -701,10 +701,10 @@ public sealed class CommandManager
     }
 
     /// <summary>
-    /// 指令执行错误时的提示
+    /// 指令执行错误时的处理
     /// </summary>
-    private async ValueTask CommandErrorMessage(Exception       err,         BaseMessageEventArgs eventArgs,
-                                                BaseCommandInfo commandInfo, string               cmdName)
+    private async ValueTask CommandErrorParse(Exception       err,         BaseMessageEventArgs eventArgs,
+                                              BaseCommandInfo commandInfo, string               cmdName)
     {
         string errLog = Log.ErrorLogBuilder(err);
         var    msg    = new StringBuilder();
@@ -739,7 +739,10 @@ public sealed class CommandManager
                     break;
             }
 
-        if (ThrowCommandErr) throw err;
+        //异常处理
+        if (commandInfo.ExceptionHandler is not null)
+            commandInfo.ExceptionHandler.Invoke(err);
+        else if (ThrowCommandErr) throw err;
     }
 
     #endregion
