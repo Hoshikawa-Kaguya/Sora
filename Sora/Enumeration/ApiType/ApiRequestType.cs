@@ -195,6 +195,12 @@ internal enum ApiRequestType
     SendGroupForwardMsg,
 
     /// <summary>
+    /// 发送合并转发(私聊)
+    /// </summary>
+    [Description("send_private_forward_msg")]
+    SendPrivateForwardMsg,
+
+    /// <summary>
     /// 设置群头像
     /// </summary>
     [Description("set_group_portrait")]
@@ -367,6 +373,18 @@ internal enum ApiRequestType
     /// </summary>
     [Description("delete_unidirectional_friend")]
     DeleteUnidirectionalFriend,
+
+    /// <summary>
+    /// 设置 QQ 资料
+    /// </summary>
+    [Description("set_qq_profile")]
+    SetQQProfile,
+
+    /// <summary>
+    /// 获取群公告
+    /// </summary>
+    [Description("_get_group_notice")]
+    GetGroupNotice
 
     #endregion
 }

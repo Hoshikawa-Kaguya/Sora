@@ -103,6 +103,29 @@ internal static class ApiAdapter
     }
 
     /// <summary>
+    /// 获取版本信息
+    /// </summary>
+    /// <param name="connection">服务器连接标识</param>
+    /// <param name="groupId">群号</param>
+    internal static async ValueTask<(ApiStatus apiStatus, List<GroupNoticeInfo> noticeInfos)> GetGroupNotice(
+        Guid connection, long groupId)
+    {
+        Log.Debug("Sora", "Sending _get_group_notice request");
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.GetGroupNotice,
+            ApiParams = new
+            {
+                group_id = groupId
+            }
+        }, connection);
+        Log.Debug("Sora", $"Get _get_group_notice response {nameof(apiStatus)}={apiStatus.RetCode}");
+        if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null) return (apiStatus, null);
+
+        return (apiStatus, ret["data"]?.ToObject<List<GroupNoticeInfo>>() ?? new List<GroupNoticeInfo>());
+    }
+
+    /// <summary>
     /// 获取登陆账号信息
     /// </summary>
     /// <param name="connection">服务器连接标识</param>
@@ -405,6 +428,82 @@ internal static class ApiAdapter
             Convert.ToInt32(ret["data"]?["size"] ?? 1),
             ret["data"]?["filename"]?.ToString(),
             ret["data"]?["url"]?.ToString());
+    }
+
+    /// <summary>
+    /// 发送合并转发(群)
+    /// </summary>
+    /// <param name="connection">服务器连接标识</param>
+    /// <param name="groupId">群号</param>
+    /// <param name="msgList">消息段数组</param>
+    /// <param name="timeout">超时覆盖</param>
+    internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(Guid connection,
+        long                                                                                       groupId,
+        IEnumerable<CustomNode>                                                                    msgList,
+        TimeSpan?                                                                                  timeout = null)
+    {
+        if (msgList == null) throw new NullReferenceException("msgList is null or empty");
+        //将消息段转换为数组
+        CustomNode[] customNodes = msgList as CustomNode[] ?? msgList.ToArray();
+
+        Log.Debug("Sora", "Sending send_group_forward_msg request");
+        //发送消息
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.SendGroupForwardMsg,
+            ApiParams = new
+            {
+                group_id = groupId,
+                messages = customNodes.Select(node => new
+                {
+                    type = "node",
+                    data = node
+                }).ToList()
+            }
+        }, connection, timeout);
+        int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
+            ? messageCode
+            : -1;
+        Log.Debug("Sora", $"Get send_group_forward_msg response [{msgCode}]{nameof(apiStatus)}={apiStatus.RetCode}");
+        return (apiStatus, msgCode);
+    }
+
+    /// <summary>
+    /// 发送合并转发(群)
+    /// </summary>
+    /// <param name="connection">服务器连接标识</param>
+    /// <param name="userId">用户ID</param>
+    /// <param name="msgList">消息段数组</param>
+    /// <param name="timeout">超时覆盖</param>
+    internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateForwardMsg(Guid connection,
+        long                                                                                         userId,
+        IEnumerable<CustomNode>                                                                      msgList,
+        TimeSpan?                                                                                    timeout = null)
+    {
+        if (msgList == null) throw new NullReferenceException("msgList is null or empty");
+        //将消息段转换为数组
+        CustomNode[] customNodes = msgList as CustomNode[] ?? msgList.ToArray();
+
+        Log.Debug("Sora", "Sending send_group_forward_msg request");
+        //发送消息
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.SendGroupForwardMsg,
+            ApiParams = new
+            {
+                user_id = userId,
+                messages = customNodes.Select(node => new
+                {
+                    type = "node",
+                    data = node
+                }).ToList()
+            }
+        }, connection, timeout);
+        int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
+            ? messageCode
+            : -1;
+        Log.Debug("Sora", $"Get send_group_forward_msg response [{msgCode}]{nameof(apiStatus)}={apiStatus.RetCode}");
+        return (apiStatus, msgCode);
     }
 
     /// <summary>
@@ -1276,43 +1375,6 @@ internal static class ApiAdapter
     }
 
     /// <summary>
-    /// 发送合并转发(群)
-    /// </summary>
-    /// <param name="connection">服务器连接标识</param>
-    /// <param name="groupId">群号</param>
-    /// <param name="msgList">消息段数组</param>
-    /// <param name="timeout">超时覆盖</param>
-    internal static async ValueTask<ApiStatus> SendGroupForwardMsg(Guid                    connection,
-                                                                   long                    groupId,
-                                                                   IEnumerable<CustomNode> msgList,
-                                                                   TimeSpan?               timeout = null)
-    {
-        //将消息段转换为数组
-        CustomNode[] customNodes = msgList as CustomNode[] ?? msgList.ToArray();
-        if (msgList == null || !customNodes.Any()) throw new NullReferenceException("msgList is null or empty");
-        //处理发送消息段
-        var dataObj = customNodes.Select(node => new
-        {
-            type = "node",
-            data = node
-        }).ToList();
-
-        Log.Debug("Sora", "Sending send_group_forward_msg request");
-        //发送消息
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SendGroupForwardMsg,
-            ApiParams = new
-            {
-                group_id = groupId.ToString(),
-                messages = dataObj
-            }
-        }, connection, timeout);
-        Log.Debug("Sora", $"Get send_group_forward_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
-        return apiStatus;
-    }
-
-    /// <summary>
     /// 重载事件过滤器
     /// </summary>
     /// <param name="connection">连接标识</param>
@@ -1609,6 +1671,30 @@ internal static class ApiAdapter
             }
         }, connection);
         Log.Debug("Sora", $"Get delete_unidirectional_friend response {nameof(apiStatus)}={apiStatus.RetCode}");
+        return apiStatus;
+    }
+
+    /// <summary>
+    /// 设置 QQ 个人资料
+    /// </summary>
+    /// <param name="connection">连接标识</param>
+    /// <param name="profile">个人资料</param>
+    internal static async ValueTask<ApiStatus> SetQQProfile(Guid connection, ProfileDetail profile)
+    {
+        Log.Debug("Sora", "Sending set_qq_profile request");
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.SetQQProfile,
+            ApiParams = new
+            {
+                nickname      = profile.Nick,
+                company       = profile.Company,
+                email         = profile.Email,
+                college       = profile.College,
+                personal_note = profile.PersonalNote
+            }
+        }, connection);
+        Log.Debug("Sora", $"Get set_qq_profile response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
 

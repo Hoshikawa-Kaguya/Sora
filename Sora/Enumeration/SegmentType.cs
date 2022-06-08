@@ -120,7 +120,13 @@ public enum SegmentType
     /// 文本转语音
     /// </summary>
     [Description("tts")]
-    TTS
+    TTS,
+
+    /// <summary>
+    /// 猜拳
+    /// </summary>
+    [Description("rps")]
+    RPS
 
     #endregion
 }

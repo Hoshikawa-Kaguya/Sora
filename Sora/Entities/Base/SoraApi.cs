@@ -144,16 +144,34 @@ public sealed class SoraApi
     }
 
     /// <summary>
+    /// 发送合并转发(私聊)
+    /// </summary>
+    /// <param name="userId">群号</param>
+    /// <param name="nodeList">
+    /// 节点(<see cref="CustomNode"/>)消息段列表
+    /// </param>
+    /// <param name="timeout">原有超时覆盖</param>
+    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateForwardMsg(
+        long      userId, IEnumerable<CustomNode> nodeList,
+        TimeSpan? timeout = null)
+    {
+        if (userId < MIN_GROUP_ID) throw new ArgumentOutOfRangeException(nameof(userId));
+        IEnumerable<CustomNode> customNodes = nodeList as CustomNode[] ?? nodeList.ToArray();
+        if (nodeList == null || !customNodes.Any()) throw new NullReferenceException(nameof(nodeList));
+        return await ApiAdapter.SendPrivateForwardMsg(ConnectionId, userId, customNodes, timeout);
+    }
+
+    /// <summary>
     /// 发送合并转发(群)
-    /// 但好像不能用的样子
     /// </summary>
     /// <param name="groupId">群号</param>
     /// <param name="nodeList">
     /// 节点(<see cref="CustomNode"/>)消息段列表
     /// </param>
     /// <param name="timeout">原有超时覆盖</param>
-    public async ValueTask<ApiStatus> SendGroupForwardMsg(long      groupId, IEnumerable<CustomNode> nodeList,
-                                                          TimeSpan? timeout = null)
+    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(
+        long      groupId, IEnumerable<CustomNode> nodeList,
+        TimeSpan? timeout = null)
     {
         if (groupId < MIN_GROUP_ID) throw new ArgumentOutOfRangeException(nameof(groupId));
         IEnumerable<CustomNode> customNodes = nodeList as CustomNode[] ?? nodeList.ToArray();
@@ -657,6 +675,16 @@ public sealed class SoraApi
         return await ApiAdapter.DeleteGroupFile(ConnectionId, groupId, fileId, busId);
     }
 
+    /// <summary>
+    /// 获取群公告
+    /// </summary>
+    /// <param name="groupId">群号</param>
+    public async ValueTask<(ApiStatus apiStatus, List<GroupNoticeInfo> noticeInfos)> GetGroupNotice(long groupId)
+    {
+        if (groupId < MIN_GROUP_ID) throw new ArgumentOutOfRangeException(nameof(groupId));
+        return await ApiAdapter.GetGroupNotice(ConnectionId, groupId);
+    }
+
     #endregion
 
     #endregion
@@ -832,6 +860,15 @@ public sealed class SoraApi
     public async ValueTask<ApiStatus> DeleteUnidirectionalFriend(long userId)
     {
         return await ApiAdapter.DeleteUnidirectionalFriend(ConnectionId, userId);
+    }
+
+    /// <summary>
+    /// 设置 QQ 个人资料
+    /// </summary>
+    /// <param name="profile">个人资料</param>
+    public async ValueTask<ApiStatus> SetQQProfile(ProfileDetail profile)
+    {
+        return await ApiAdapter.SetQQProfile(ConnectionId, profile);
     }
 
     #endregion

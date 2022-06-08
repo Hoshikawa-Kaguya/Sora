@@ -103,12 +103,11 @@ public sealed class Group : BaseModel
 
     /// <summary>
     /// 发送合并转发(群)
-    /// 但好像不能用的样子
     /// </summary>
     /// <param name="nodeList">
     /// 节点(<see cref="CustomNode"/>)消息段列表
     /// </param>
-    public async ValueTask<ApiStatus> SendGroupForwardMsg(IEnumerable<CustomNode> nodeList)
+    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(IEnumerable<CustomNode> nodeList)
     {
         return await SoraApi.SendGroupForwardMsg(Id, nodeList);
     }

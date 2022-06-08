@@ -623,6 +623,15 @@ public readonly struct SoraSegment
             });
     }
 
+
+    /// <summary>
+    /// 猜拳
+    /// </summary>
+    public static SoraSegment RPS()
+    {
+        return new SoraSegment(SegmentType.RPS, new BaseSegment());
+    }
+
     #endregion
 
     /// <summary>
