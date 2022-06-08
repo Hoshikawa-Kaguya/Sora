@@ -26,7 +26,7 @@ public sealed class SoraCommand : Attribute
     /// </summary>
     public string[] CommandExpressions
     {
-        get => _commandExpressions ?? null;
+        get => _commandExpressions ?? Array.Empty<string>();
         init => _commandExpressions = value ?? throw new NullReferenceException("CommandExpression cannot be null");
     }
 
@@ -82,7 +82,8 @@ public sealed class SoraCommand : Attribute
     public RegexOptions RegexOptions { get; init; } = RegexOptions.None;
 
     /// <summary>
-    /// 指令执行异常处理
+    /// <para>指令执行发生异常时的回调</para>
+    /// <para>在设置了此值后将不会再抛出异常，即使已经设置了ThrowCommandErr</para>
     /// </summary>
     public readonly Action<Exception> ExceptionHandler = null;
 

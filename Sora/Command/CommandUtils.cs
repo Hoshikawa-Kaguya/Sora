@@ -31,7 +31,7 @@ internal static class CommandUtils
         //检查是否设置过表达式
         if (commandAttr.CommandExpressions is null || commandAttr.CommandExpressions.Length == 0)
         {
-            Log.Warning("CommandCheck", $"{method.Name}未设置表达式(CommandExpressions),已自动忽略");
+            Log.Warning("CommandCheck", $"{method.Name}未设置表达式(CommandExpressions)或匹配方法(CommandMatchFunc),已自动忽略");
             return false;
         }
 

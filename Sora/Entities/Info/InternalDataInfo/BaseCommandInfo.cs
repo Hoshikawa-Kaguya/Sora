@@ -18,9 +18,9 @@ internal abstract record BaseCommandInfo
     internal readonly long[]            SourceUsers;      //用户限制
 
     internal BaseCommandInfo(
-        string            desc,             string[]     regex,        MemberRoleType permissionType, bool suCommand,
-        int               priority,         RegexOptions regexOptions, SourceFlag     source,
-        Action<Exception> exceptionHandler, long[]       sourceGroups, long[]         sourceUsers)
+        string            desc,             string[] regex,        MemberRoleType permissionType,
+        bool              suCommand,        int      priority,     RegexOptions   regexOptions, SourceFlag source,
+        Action<Exception> exceptionHandler, long[]   sourceGroups, long[]         sourceUsers)
     {
         Desc             = desc;
         PermissionType   = permissionType;
@@ -33,11 +33,6 @@ internal abstract record BaseCommandInfo
 
         Regex = new Regex[regex.Length];
         for (int i = 0; i < regex.Length; i++) Regex[i] = new Regex(regex[i], RegexOptions.Compiled | regexOptions);
-    }
-
-    public virtual bool Equals(BaseCommandInfo commandInfo)
-    {
-        return true;
     }
 
     public override int GetHashCode()

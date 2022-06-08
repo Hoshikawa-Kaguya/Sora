@@ -96,17 +96,39 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     #region 连续指令
 
     /// <summary>
-    /// <para>等待下一条消息触发</para>
-    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
+    /// <para>等待下一条消息触发正则表达式</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
     /// </summary>
-    internal object WaitForNextMessage(long            sourceUid,    string[]  commandExps, MatchType matchType,
-                                       RegexOptions    regexOptions, TimeSpan? timeout,
-                                       Func<ValueTask> timeoutTask,  long      sourceGroup = 0)
+    internal object WaitForNextRegexMessage(long            sourceUid,    string[]  commandExps, MatchType matchType,
+                                            RegexOptions    regexOptions, TimeSpan? timeout,
+                                            Func<ValueTask> timeoutTask,  long      sourceGroup = 0)
     {
         //生成指令上下文
         WaitingInfo waitInfo =
             CommandManager.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, SourceType,
-                regexOptions, SoraApi.ConnectionId, SoraApi.ServiceId);
+                regexOptions, ConnId, ServiceGuid);
+        return WaitForNextMessage(waitInfo, timeout, timeoutTask);
+    }
+
+    /// <summary>
+    /// 等待下一条消息触发自定义匹配方法
+    /// </summary>
+    internal object WaitForNextCustomMessage(long      sourceUid, Func<BaseMessageEventArgs, bool> matchFunc,
+                                             TimeSpan? timeout,   Func<ValueTask> timeoutTask, long sourceGroup = 0)
+    {
+        //生成指令上下文
+        WaitingInfo waitInfo =
+            CommandManager.GenerateWaitingCommandInfo(
+                sourceUid, sourceGroup, matchFunc, SourceType, ConnId, ServiceGuid);
+        return WaitForNextMessage(waitInfo, timeout, timeoutTask);
+    }
+
+    /// <summary>
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
+    /// </summary>
+    internal object WaitForNextMessage(WaitingInfo waitInfo, TimeSpan? timeout, Func<ValueTask> timeoutTask)
+    {
         //检查是否为初始指令重复触发
         if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
             return null;

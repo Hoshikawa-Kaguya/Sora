@@ -9,7 +9,7 @@ namespace Sora.Entities.Info.InternalDataInfo;
 /// <summary>
 /// 指令信息
 /// </summary>
-internal sealed record RegexCommandInfo : BaseCommandInfo
+internal sealed record SoraCommandInfo : BaseCommandInfo
 {
     internal readonly string     ClassName;    //指令类名
     internal readonly string     GroupName;    //指令组名
@@ -19,17 +19,22 @@ internal sealed record RegexCommandInfo : BaseCommandInfo
     /// <summary>
     /// 指令信息构造(常规指令构建)
     /// </summary>
-    internal RegexCommandInfo(
-        string     desc,      string[]          regex,            string className,    string       groupName,
-        MethodInfo method,    MemberRoleType    permissionType,   int    priority,     RegexOptions regexOptions,
-        SourceFlag source,    Action<Exception> exceptionHandler, long[] sourceGroups, long[]       sourceUsers,
-        bool       suCommand, Type              instanceType = null)
-        : base(desc, regex, permissionType, suCommand, priority, regexOptions, source, exceptionHandler, sourceGroups,
-            sourceUsers)
+    internal SoraCommandInfo(
+        string desc, string[] regex, string className, string groupName,
+        MethodInfo method, MemberRoleType permissionType, int priority, RegexOptions regexOptions, SourceFlag source,
+        Action<Exception> exceptionHandler, long[] sourceGroups, long[] sourceUsers, bool suCommand,
+        Type instanceType = null)
+        : base(desc, regex, permissionType, suCommand, priority,
+            regexOptions, source, exceptionHandler, sourceGroups, sourceUsers)
     {
         ClassName    = className;
         GroupName    = groupName;
         MethodInfo   = method;
         InstanceType = instanceType;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(base.GetHashCode(), this);
     }
 }
