@@ -30,6 +30,12 @@ public sealed record Node
     internal List<OnebotSegment> MessageList { get; set; }
 
     /// <summary>
+    /// 消息来源群
+    /// </summary>
+    [JsonProperty(PropertyName = "group_id", NullValueHandling = NullValueHandling.Ignore)]
+    public long GroupId { get; set; }
+
+    /// <summary>
     /// 消息内容
     /// </summary>
     [JsonIgnore]

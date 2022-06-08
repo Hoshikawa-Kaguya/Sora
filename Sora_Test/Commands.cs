@@ -11,7 +11,7 @@ namespace Sora_Test;
 public static class Commands
 {
     [SoraCommand(
-        CommandExpressions = new[] {"1", ".*"},
+        CommandExpressions = new[] {"1"},
         Description = "死了啦都你害的啦",
         SourceType = SourceFlag.Group,
         Priority = 0)]

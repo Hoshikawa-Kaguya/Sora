@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
 using Sora.Entities.Segment;
+using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration.ApiType;
 
 namespace Sora.Entities;
@@ -87,6 +89,17 @@ public sealed class User : BaseModel
     public async ValueTask<ApiStatus> DeleteFriend()
     {
         return await SoraApi.DeleteFriend(Id);
+    }
+
+    /// <summary>
+    /// 发送合并转发(私聊)
+    /// </summary>
+    /// <param name="nodeList">
+    /// 节点(<see cref="CustomNode"/>)消息段列表
+    /// </param>
+    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateForwardMsg(IEnumerable<CustomNode> nodeList)
+    {
+        return await SoraApi.SendPrivateForwardMsg(Id, nodeList);
     }
 
     #endregion
