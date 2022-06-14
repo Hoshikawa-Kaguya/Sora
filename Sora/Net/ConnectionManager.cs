@@ -69,8 +69,7 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="connectionId">连接标识</param>
     /// <param name="socket">连接信息</param>
     /// <param name="apiTimeout">api超时</param>
-    private static bool AddConnection(Guid     serviceId, Guid connectionId, ISoraSocket socket,
-                                      TimeSpan apiTimeout)
+    private static bool AddConnection(Guid serviceId, Guid connectionId, ISoraSocket socket, TimeSpan apiTimeout)
     {
         //检查是否已存在值
         if (StaticVariable.ConnectionInfos.ContainsKey(connectionId)) return false;
@@ -187,7 +186,7 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="connectionGuid">连接标识</param>
     internal static void HeartBeatUpdate(Guid connectionGuid)
     {
-        if(!ConnectionExists(connectionGuid)) return;
+        if (!ConnectionExists(connectionGuid)) return;
         SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
         SoraConnectionInfo newInfo = oldInfo;
         newInfo.LastHeartBeatTime = DateTime.Now;

@@ -20,9 +20,10 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
     public DynamicCommandInfo(
         string desc,        string[] regex, Func<BaseMessageEventArgs, bool> matchFunc, MemberRoleType permissionType,
         int    priority,    RegexOptions regexOptions, Action<Exception> exceptionHandler, long[] sourceGroups,
-        long[] sourceUsers, Func<GroupMessageEventArgs, ValueTask> groupCommand, Guid commandId, bool suCommand)
+        long[] sourceUsers, Func<GroupMessageEventArgs, ValueTask> groupCommand, Guid commandId, bool suCommand,
+        string groupName)
         : base(desc, regex, permissionType, suCommand, priority, regexOptions, SourceFlag.Group,
-            exceptionHandler, sourceGroups, sourceUsers)
+            exceptionHandler, sourceGroups, sourceUsers, groupName)
     {
         CommandId        = commandId;
         GroupCommand     = groupCommand;
@@ -35,10 +36,9 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
     public DynamicCommandInfo(
         string desc, string[] regex, Func<BaseMessageEventArgs, bool> matchFunc, int priority,
         RegexOptions regexOptions, Action<Exception> exceptionHandler, long[] sourceUsers,
-        Func<PrivateMessageEventArgs, ValueTask> privateCommand, Guid commandId, bool suCommand)
+        Func<PrivateMessageEventArgs, ValueTask> privateCommand, Guid commandId, bool suCommand, string groupName)
         : base(desc, regex, MemberRoleType.Member, suCommand, priority, regexOptions, SourceFlag.Private,
-            exceptionHandler,
-            Array.Empty<long>(), sourceUsers)
+            exceptionHandler, Array.Empty<long>(), sourceUsers, groupName)
     {
         CommandId        = commandId;
         PrivateCommand   = privateCommand;
