@@ -12,7 +12,6 @@ namespace Sora.Entities.Info.InternalDataInfo;
 internal sealed record SoraCommandInfo : BaseCommandInfo
 {
     internal readonly string     ClassName;    //指令类名
-    internal readonly string     GroupName;    //指令组名
     internal readonly MethodInfo MethodInfo;   //指令执行的方法
     internal readonly Type       InstanceType; //指令所在实例类型
 
@@ -24,11 +23,10 @@ internal sealed record SoraCommandInfo : BaseCommandInfo
         MethodInfo method, MemberRoleType permissionType, int priority, RegexOptions regexOptions, SourceFlag source,
         Action<Exception> exceptionHandler, long[] sourceGroups, long[] sourceUsers, bool suCommand,
         Type instanceType = null)
-        : base(desc, regex, permissionType, suCommand, priority,
-            regexOptions, source, exceptionHandler, sourceGroups, sourceUsers)
+        : base(desc, regex, permissionType, suCommand, priority, regexOptions,
+            source, exceptionHandler, sourceGroups, sourceUsers, groupName)
     {
         ClassName    = className;
-        GroupName    = groupName;
         MethodInfo   = method;
         InstanceType = instanceType;
     }

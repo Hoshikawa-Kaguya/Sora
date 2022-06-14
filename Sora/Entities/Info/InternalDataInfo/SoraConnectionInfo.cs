@@ -9,13 +9,15 @@ namespace Sora.Entities.Info.InternalDataInfo;
 /// </summary>
 internal struct SoraConnectionInfo
 {
-    private readonly Lazy<SoraApi> _apiInstance;
+    private readonly  Lazy<SoraApi> _apiInstance;
+    internal readonly ISoraSocket   Connection;
+    internal          DateTime      LastHeartBeatTime;
+    internal          long          LoginUid;
 
-    internal readonly ISoraSocket Connection;
-    internal          DateTime    LastHeartBeatTime;
-    internal          long        LoginUid;
-    internal readonly TimeSpan    ApiTimeout;
-    internal readonly SoraApi     ApiInstance => _apiInstance.Value;
+    internal readonly TimeSpan ApiTimeout;
+    // internal readonly Dictionary<long, string>
+
+    internal readonly SoraApi ApiInstance => _apiInstance.Value;
 
 
     internal SoraConnectionInfo(Guid     serviceId,         Guid     connId, ISoraSocket connection,
@@ -25,7 +27,7 @@ internal struct SoraConnectionInfo
         LastHeartBeatTime = lastHeartBeatTime;
         LoginUid          = 0;
         ApiTimeout        = apiTimeout;
-        _apiInstance       = new Lazy<SoraApi>(() => new SoraApi(serviceId, connId));
+        _apiInstance      = new Lazy<SoraApi>(() => new SoraApi(serviceId, connId));
     }
 
     public override int GetHashCode()
