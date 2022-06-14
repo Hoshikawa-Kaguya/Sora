@@ -202,6 +202,20 @@ public sealed class MessageContext : BaseModel
         return equal;
     }
 
+    /// <summary>
+    /// 判定消息段相等
+    /// </summary>
+    public bool MessageEquals(MessageBody msg)
+    {
+        if (msg == null || msg.Count != MessageBody.Count) return false;
+
+        bool equal = true;
+        for (int i = 0; i < MessageBody.Count; i++)
+            equal &= MessageBody[i].Data == msg[i].Data;
+
+        return equal;
+    }
+
     #endregion
 
     #region 转换方法
