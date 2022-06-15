@@ -416,8 +416,7 @@ public sealed class CommandManager
         if (_regexCommands.Count == 0) return;
 
         List<DynamicCommandInfo> matchedDynamicCommand =
-            _dynamicCommands.Where(command => CommandMatch(command, eventArgs) ||
-                                 (command.CommandMatchFunc?.Invoke(eventArgs) ?? false))
+            _dynamicCommands.Where(command => CommandMatch(command, eventArgs))
                             .OrderByDescending(p => p.Priority)
                             .ToList();
 
@@ -585,10 +584,6 @@ public sealed class CommandManager
         if (command.SourceType != eventArgs.SourceType)
             return false;
 
-        //判断正则表达式
-        if (command.Regex.Length == 0 || !command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText)))
-            return false;
-
         //机器人管理员判断
         if (command.SuperUserCommand && !eventArgs.IsSuperUser)
         {
@@ -635,6 +630,17 @@ public sealed class CommandManager
                 break;
             default:
                 return false;
+        }
+
+        //判断正则表达式或自定义表达式
+        if (command is DynamicCommandInfo dynamicCommand)
+        {
+            //动态指令检查自定义表达式
+            if (!dynamicCommand.CommandMatchFunc?.Invoke(eventArgs) ?? false) return false;
+        }
+        else if (command.Regex.Length == 0 || !command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText)))
+        {
+            return false;
         }
 
         return sourceMatch;
