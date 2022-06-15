@@ -44,7 +44,7 @@ public static class StaticVariable
     /// <summary>
     /// 版本号
     /// </summary>
-    public const string VERSION = "1.0.0-rc62";
+    public const string VERSION = "1.0.0-rc63";
 
     /// <summary>
     /// Onebot版本
