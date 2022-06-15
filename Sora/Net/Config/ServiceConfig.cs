@@ -11,7 +11,7 @@ internal record ServiceConfig
     //控制记录
     internal readonly HashSet<long>                     SuperUsers;      //服务管理员设置
     internal readonly HashSet<long>                     BlockUsers;      //服务屏蔽用户设置
-    internal readonly Dictionary<long, HashSet<string>> GroupBanCommand; //服务群组指令控制
+    internal readonly Dictionary<long, HashSet<string>> GroupBanCommand; //TODO 服务群组指令控制
 
     //使能控制
     internal readonly bool EnableSoraCommandManager; //指令使能
