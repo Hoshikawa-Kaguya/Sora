@@ -8,11 +8,15 @@ namespace Sora.Net.Config;
 /// </summary>
 internal record ServiceConfig
 {
-    internal readonly HashSet<long> SuperUsers;
-    internal readonly HashSet<long> BlockUsers;
-    internal readonly bool          EnableSoraCommandManager;
-    internal readonly bool          EnableSocketMessage;
-    internal readonly bool          AutoMarkMessageRead;
+    //控制记录
+    internal readonly HashSet<long>                     SuperUsers;      //服务管理员设置
+    internal readonly HashSet<long>                     BlockUsers;      //服务屏蔽用户设置
+    internal readonly Dictionary<long, HashSet<string>> GroupBanCommand; //服务群组指令控制
+
+    //使能控制
+    internal readonly bool EnableSoraCommandManager; //指令使能
+    internal readonly bool EnableSocketMessage;      //控制台消息打印使能
+    internal readonly bool AutoMarkMessageRead;      //自动已读标记使能
 
     internal ServiceConfig(ISoraConfig config)
     {
@@ -21,5 +25,6 @@ internal record ServiceConfig
         AutoMarkMessageRead      = config.AutoMarkMessageRead;
         SuperUsers               = new HashSet<long>(config.SuperUsers);
         BlockUsers               = new HashSet<long>(config.BlockUsers);
+        GroupBanCommand          = new Dictionary<long, HashSet<string>>();
     }
 }

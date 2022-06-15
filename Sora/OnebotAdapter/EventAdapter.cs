@@ -39,7 +39,7 @@ public sealed class EventAdapter
         get
         {
             if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager) return _commandManager;
-            var e = new InvalidOperationException("在禁用指令管理器后尝试调用管理器，请在开启指令服务后再调用此实例");
+            Exception e = new InvalidOperationException("在禁用指令管理器后尝试调用管理器，请在开启指令服务后再调用此实例");
             Log.Fatal(e, "非法操作", "指令服务已被禁用");
             throw e;
         }
@@ -58,7 +58,7 @@ public sealed class EventAdapter
     {
         ServiceId = serviceId;
         CommandManager = StaticVariable.ServiceConfigs[serviceId].EnableSoraCommandManager
-            ? new CommandManager(Assembly.GetEntryAssembly(), throwErr, sendErr)
+            ? new CommandManager(Assembly.GetEntryAssembly(), serviceId, throwErr, sendErr)
             : null;
     }
 
