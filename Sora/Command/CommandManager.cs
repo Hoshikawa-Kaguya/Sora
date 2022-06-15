@@ -43,6 +43,11 @@ public sealed class CommandManager
     /// </summary>
     private bool SendCommandErrMsg { get; }
 
+    /// <summary>
+    /// 服务ID
+    /// </summary>
+    private Guid ServiceId { get; }
+
     #endregion
 
     #region 私有字段
@@ -59,8 +64,9 @@ public sealed class CommandManager
 
     #region 构造方法
 
-    internal CommandManager(Assembly assembly, bool throwErr, bool sendCommandErrMsg)
+    internal CommandManager(Assembly assembly, Guid serviceId, bool throwErr, bool sendCommandErrMsg)
     {
+        ServiceId         = serviceId;
         ServiceIsRunning  = false;
         ThrowCommandErr   = throwErr;
         SendCommandErrMsg = sendCommandErrMsg;
@@ -140,7 +146,7 @@ public sealed class CommandManager
     /// <param name="exceptionHandler">异常处理</param>
     /// <param name="memberRole">成员权限限制</param>
     /// <param name="suCommand">机器人管理员限制</param>
-    /// <param name="priority">优先级</param>
+    /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
     /// <param name="sourceGroups">群组限制</param>
     /// <param name="sourceUsers">成员限制</param>
     /// <param name="desc">描述</param>
@@ -152,7 +158,7 @@ public sealed class CommandManager
         Action<Exception> exceptionHandler = null,
         MemberRoleType    memberRole       = MemberRoleType.Member,
         bool              suCommand        = false,
-        int               priority         = 0,
+        int?              priority         = null,
         long[]            sourceGroups     = null,
         long[]            sourceUsers      = null,
         string            desc             = "")
@@ -168,9 +174,11 @@ public sealed class CommandManager
         //处理表达式
         string[] matchExp = ParseCommandExps(cmdExps, string.Empty, matchType);
 
+
         //创建指令信息
         DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(
-            desc, matchExp, null, memberRole, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
+            desc, matchExp, null, memberRole, priority ?? GetNewDynamicPriority(),
+            regexOptions | RegexOptions.Compiled, exceptionHandler,
             sourceGroups ?? Array.Empty<long>(),
             sourceUsers  ?? Array.Empty<long>(),
             groupCommand, id, suCommand, groupName);
@@ -187,7 +195,7 @@ public sealed class CommandManager
     /// <param name="exceptionHandler">异常处理</param>
     /// <param name="memberRole">成员权限限制</param>
     /// <param name="suCommand">机器人管理员限制</param>
-    /// <param name="priority">优先级</param>
+    /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
     /// <param name="sourceGroups">群组限制</param>
     /// <param name="sourceUsers">成员限制</param>
     /// <param name="desc">描述</param>
@@ -198,7 +206,7 @@ public sealed class CommandManager
         Action<Exception>                      exceptionHandler = null,
         MemberRoleType                         memberRole       = MemberRoleType.Member,
         bool                                   suCommand        = false,
-        int                                    priority         = 0,
+        int?                                   priority         = null,
         long[]                                 sourceGroups     = null,
         long[]                                 sourceUsers      = null,
         string                                 desc             = "")
@@ -212,7 +220,8 @@ public sealed class CommandManager
 
         //创建指令信息
         DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(
-            desc, Array.Empty<string>(), matchFunc, memberRole, priority, RegexOptions.None, exceptionHandler,
+            desc, Array.Empty<string>(), matchFunc, memberRole, priority ?? GetNewDynamicPriority(),
+            RegexOptions.None, exceptionHandler,
             sourceGroups ?? Array.Empty<long>(),
             sourceUsers  ?? Array.Empty<long>(),
             groupCommand, id, suCommand, groupName);
@@ -230,7 +239,7 @@ public sealed class CommandManager
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
     /// <param name="exceptionHandler">异常处理</param>
     /// <param name="suCommand">机器人管理员限制</param>
-    /// <param name="priority">优先级</param>
+    /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
     /// <param name="sourceUsers">用户限制</param>
     /// <param name="desc">描述</param>
     public Guid RegisterPrivateDynamicCommand(
@@ -240,7 +249,7 @@ public sealed class CommandManager
         string            groupName        = "",
         Action<Exception> exceptionHandler = null,
         bool              suCommand        = false,
-        int               priority         = 0,
+        int?              priority         = null,
         long[]            sourceUsers      = null,
         string            desc             = "")
     {
@@ -257,7 +266,8 @@ public sealed class CommandManager
 
         //创建指令信息
         var dynamicCommand = new DynamicCommandInfo(
-            desc, matchExp, null, priority, regexOptions | RegexOptions.Compiled, exceptionHandler,
+            desc, matchExp, null, priority ?? GetNewDynamicPriority(),
+            regexOptions | RegexOptions.Compiled, exceptionHandler,
             sourceUsers ?? Array.Empty<long>(),
             privateCommand, id, suCommand, groupName);
 
@@ -272,7 +282,7 @@ public sealed class CommandManager
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
     /// <param name="exceptionHandler">异常处理</param>
     /// <param name="suCommand">机器人管理员限制</param>
-    /// <param name="priority">优先级</param>
+    /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
     /// <param name="sourceUsers">用户限制</param>
     /// <param name="desc">描述</param>
     public Guid RegisterPrivateDynamicCommand(
@@ -281,7 +291,7 @@ public sealed class CommandManager
         string                                   groupName        = "",
         Action<Exception>                        exceptionHandler = null,
         bool                                     suCommand        = false,
-        int                                      priority         = 0,
+        int?                                     priority         = null,
         long[]                                   sourceUsers      = null,
         string                                   desc             = "")
     {
@@ -294,7 +304,8 @@ public sealed class CommandManager
 
         //创建指令信息
         var dynamicCommand = new DynamicCommandInfo(
-            desc, Array.Empty<string>(), matchFunc, priority, RegexOptions.None, exceptionHandler,
+            desc, Array.Empty<string>(), matchFunc, priority ?? GetNewDynamicPriority(),
+            RegexOptions.None, exceptionHandler,
             sourceUsers ?? Array.Empty<long>(),
             privateCommand, id, suCommand, groupName);
 
@@ -866,6 +877,12 @@ public sealed class CommandManager
         if (commandInfo.ExceptionHandler is not null)
             commandInfo.ExceptionHandler.Invoke(err);
         else if (ThrowCommandErr) throw err;
+    }
+
+    private int GetNewDynamicPriority()
+    {
+        if (_dynamicCommands.Count == 0) return 0;
+        return _dynamicCommands.Max(c => c.Priority) + 1;
     }
 
     #endregion
