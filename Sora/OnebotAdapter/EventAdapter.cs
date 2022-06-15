@@ -26,6 +26,8 @@ public sealed class EventAdapter
 
     private readonly CommandManager _commandManager;
 
+    private readonly ConnectionManager _connectionManager;
+
     #endregion
 
     #region 属性
@@ -265,12 +267,20 @@ public sealed class EventAdapter
                 if (lifeCycle != null)
                     Log.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
 
-                (ApiStatus infoApiStatus, string clientType, string clientVer) =
+                (ApiStatus ApiStatus, string clientType, string clientVer) info =
                     await ApiAdapter.GetClientInfo(connection);
-                if (infoApiStatus.RetCode != ApiStatusType.Ok) //检查返回值
+                if (info.ApiStatus.RetCode != ApiStatusType.Ok) //检查返回值
                 {
-                    Log.Error("Sora", $"获取onebot版本失败(retcode={infoApiStatus})");
-                    break;
+                    //在第一次链接错误时可能是由于链接开启事件晚于生命周期事件，造成消息不同步
+                    await Task.Delay(500);
+                    info = await ApiAdapter.GetClientInfo(connection);
+                    //在等待后再次错误则判定为无效链接
+                    if (info.ApiStatus.RetCode != ApiStatusType.Ok)
+                    {
+                        ConnectionManager.ForceCloseConnection(connection);
+                        Log.Error("Sora", $"获取onebot版本失败(retcode={info.ApiStatus}),断开链接");
+                        break;
+                    }
                 }
 
                 (ApiStatus loginInfoApiStatus, long uid, _) = await ApiAdapter.GetLoginInfo(connection);
@@ -282,13 +292,13 @@ public sealed class EventAdapter
 
                 ConnectionManager.UpdateUid(connection, uid);
 
-                Log.Info("Sora", $"已连接到{clientType},版本:{clientVer}");
+                Log.Info("Sora", $"已连接到{info.clientType},版本:{info.clientVer}");
 
                 if (OnClientConnect == null) break;
                 //执行回调
                 await OnClientConnect("Meta Event",
                     new ConnectEventArgs(ServiceId, connection, "lifecycle",
-                        lifeCycle?.SelfId ?? -1, clientType, clientVer,
+                        lifeCycle?.SelfId ?? -1, info.clientType, info.clientVer,
                         lifeCycle?.Time   ?? 0));
                 break;
             }

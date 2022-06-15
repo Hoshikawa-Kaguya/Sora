@@ -250,6 +250,22 @@ public sealed class ConnectionManager : IDisposable
         Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs(role, selfId, connId)); });
     }
 
+    /// <summary>
+    /// 强制关闭链接
+    /// </summary>
+    internal static void ForceCloseConnection(Guid connId)
+    {
+        try
+        {
+            StaticVariable.ConnectionInfos[connId].Connection.Close();
+            RemoveConnection(connId);
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
     internal static void UpdateUid(Guid connectionGuid, long uid)
     {
         SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
