@@ -17,11 +17,12 @@ internal abstract record BaseCommandInfo
     internal readonly long[]            SourceGroups;     //群组限制,私聊无效
     internal readonly long[]            SourceUsers;      //用户限制
     internal readonly string            GroupName;        //指令组名
+    internal readonly string            CommandName;      //指令名
 
     internal BaseCommandInfo(
-        string            desc,             string[] regex,        MemberRoleType permissionType,
-        bool              suCommand,        int      priority,     RegexOptions   regexOptions, SourceFlag source,
-        Action<Exception> exceptionHandler, long[]   sourceGroups, long[]         sourceUsers,  string     groupName)
+        string desc,         string[]     regex,        MemberRoleType permissionType, bool suCommand,
+        int    priority,     RegexOptions regexOptions, SourceFlag     source, Action<Exception> exceptionHandler,
+        long[] sourceGroups, long[]       sourceUsers,  string         groupName, string commandName)
     {
         Desc             = desc;
         PermissionType   = permissionType;
@@ -32,6 +33,7 @@ internal abstract record BaseCommandInfo
         SourceUsers      = sourceUsers;
         ExceptionHandler = exceptionHandler;
         GroupName        = groupName;
+        CommandName      = string.IsNullOrEmpty(groupName) ? commandName : $"({groupName}){commandName}";
 
         Regex = new Regex[regex.Length];
         for (int i = 0; i < regex.Length; i++) Regex[i] = new Regex(regex[i], RegexOptions.Compiled | regexOptions);

@@ -426,7 +426,8 @@ public sealed class CommandManager
                 {
                     Log.Debug("CommandAdapter", $"trigger command [{commandInfo.CommandId}]");
                     Log.Info("CommandAdapter", $"触发指令[{commandInfo.CommandId}]");
-                    eventArgs.CommandId = commandInfo.CommandId;
+                    eventArgs.CommandId   = commandInfo.CommandId;
+                    eventArgs.CommandName = commandInfo.CommandName;
                     eventArgs.CommandRegex = commandInfo.Regex.Length != 0
                         ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText)).ToArray()
                         : Array.Empty<Regex>();
@@ -442,6 +443,7 @@ public sealed class CommandManager
 
                     //清空指令参数信息
                     eventArgs.CommandId    = Guid.Empty;
+                    eventArgs.CommandName  = string.Empty;
                     eventArgs.CommandRegex = null;
 
                     //检测事件触发中断标志
@@ -484,6 +486,7 @@ public sealed class CommandManager
                     commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
                         false) is not null;
 
+                eventArgs.CommandName = commandInfo.CommandName;
                 eventArgs.CommandRegex = commandInfo.Regex.Length != 0
                     ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText)).ToArray()
                     : Array.Empty<Regex>();
@@ -509,6 +512,7 @@ public sealed class CommandManager
                                     new object[] {eventArgs});
                 }
 
+                eventArgs.CommandName  = string.Empty;
                 eventArgs.CommandRegex = null;
 
                 //检测事件触发中断标志
@@ -599,7 +603,7 @@ public sealed class CommandManager
         if (command.SuperUserCommand && !eventArgs.IsSuperUser)
         {
             Log.Warning("CommandAdapter",
-                        $"成员{eventArgs.Sender.Id}正在尝试执行SuperUser指令{}");
+                        $"成员{eventArgs.Sender.Id}正在尝试执行SuperUser指令[{command.CommandName}]");
             return false;
         }
 

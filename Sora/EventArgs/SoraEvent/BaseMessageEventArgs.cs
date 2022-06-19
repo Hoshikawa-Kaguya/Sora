@@ -41,9 +41,14 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     public Regex[] CommandRegex { get; internal set; }
 
     /// <summary>
-    /// 在匹配到动态指令时则此值为匹配到的动态指令ID
+    /// 在匹配到动态指令时此值为匹配到的动态指令ID
     /// </summary>
     public Guid CommandId { get; internal set; }
+
+    /// <summary>
+    /// 在匹配到指令时此值为匹配到的指令名
+    /// </summary>
+    public string CommandName { get; internal set; }
 
     #endregion
 

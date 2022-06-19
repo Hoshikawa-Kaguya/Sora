@@ -23,7 +23,7 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
         long[] sourceUsers, Func<GroupMessageEventArgs, ValueTask> groupCommand, Guid commandId, bool suCommand,
         string groupName)
         : base(desc, regex, permissionType, suCommand, priority, regexOptions, SourceFlag.Group,
-            exceptionHandler, sourceGroups, sourceUsers, groupName)
+               exceptionHandler, sourceGroups, sourceUsers, groupName, commandId.ToString())
     {
         CommandId        = commandId;
         GroupCommand     = groupCommand;
@@ -38,7 +38,7 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
         RegexOptions regexOptions, Action<Exception> exceptionHandler, long[] sourceUsers,
         Func<PrivateMessageEventArgs, ValueTask> privateCommand, Guid commandId, bool suCommand, string groupName)
         : base(desc, regex, MemberRoleType.Member, suCommand, priority, regexOptions, SourceFlag.Private,
-            exceptionHandler, Array.Empty<long>(), sourceUsers, groupName)
+               exceptionHandler, Array.Empty<long>(), sourceUsers, groupName, commandId.ToString())
     {
         CommandId        = commandId;
         PrivateCommand   = privateCommand;
