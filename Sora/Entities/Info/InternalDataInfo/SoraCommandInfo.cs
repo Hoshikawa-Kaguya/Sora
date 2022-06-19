@@ -24,7 +24,7 @@ internal sealed record SoraCommandInfo : BaseCommandInfo
         Action<Exception> exceptionHandler, long[] sourceGroups, long[] sourceUsers, bool suCommand,
         Type instanceType = null)
         : base(desc, regex, permissionType, suCommand, priority, regexOptions,
-            source, exceptionHandler, sourceGroups, sourceUsers, groupName)
+               source, exceptionHandler, sourceGroups, sourceUsers, groupName, $"{className}.{method.Name}")
     {
         ClassName    = className;
         MethodInfo   = method;

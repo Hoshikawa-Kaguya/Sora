@@ -26,8 +26,6 @@ public sealed class EventAdapter
 
     private readonly CommandManager _commandManager;
 
-    private readonly ConnectionManager _connectionManager;
-
     #endregion
 
     #region 属性
