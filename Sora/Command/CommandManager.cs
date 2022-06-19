@@ -584,11 +584,22 @@ public sealed class CommandManager
         if (command.SourceType != eventArgs.SourceType)
             return false;
 
+        //判断正则表达式或自定义表达式
+        if (command is DynamicCommandInfo dynamicCommand)
+        {
+            //动态指令检查自定义表达式
+            if (!dynamicCommand.CommandMatchFunc?.Invoke(eventArgs) ?? false) return false;
+        }
+        if (command.Regex.Length != 0 && !command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText)))
+        {
+            return false;
+        }
+
         //机器人管理员判断
         if (command.SuperUserCommand && !eventArgs.IsSuperUser)
         {
             Log.Warning("CommandAdapter",
-                $"成员{eventArgs.Sender.Id}正在尝试执行SuperUser指令");
+                        $"成员{eventArgs.Sender.Id}正在尝试执行SuperUser指令{}");
             return false;
         }
 
@@ -632,16 +643,7 @@ public sealed class CommandManager
                 return false;
         }
 
-        //判断正则表达式或自定义表达式
-        if (command is DynamicCommandInfo dynamicCommand)
-        {
-            //动态指令检查自定义表达式
-            if (!dynamicCommand.CommandMatchFunc?.Invoke(eventArgs) ?? false) return false;
-        }
-        else if (command.Regex.Length == 0 || !command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText)))
-        {
-            return false;
-        }
+        
 
         return sourceMatch;
     }
