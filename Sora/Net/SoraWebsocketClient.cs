@@ -124,7 +124,11 @@ public sealed class SoraWebsocketClient : ISoraService
     /// </summary>
     public async ValueTask StartService()
     {
-        if (!_clientReady) return;
+        if (!_clientReady)
+        {
+            Log.Warning("Sora", "service is not ready!");
+            return;
+        }
         //处理连接路径
         string serverPath = string.IsNullOrEmpty(Config.UniversalPath)
             ? $"ws://{Config.Host}:{Config.Port}"
