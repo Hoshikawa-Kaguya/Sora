@@ -45,7 +45,7 @@ public sealed class SoraWebsocketClient : ISoraService
     /// <summary>
     /// 服务ID
     /// </summary>
-    public Guid ServiceId => _clientId;
+    public Guid ServiceId { get; } = Guid.NewGuid();
 
     #endregion
 
@@ -54,22 +54,17 @@ public sealed class SoraWebsocketClient : ISoraService
     /// <summary>
     /// 客户端已准备启动标识
     /// </summary>
-    private readonly bool _clientReady;
-
-    /// <summary>
-    /// 客户端ID
-    /// </summary>
-    private readonly Guid _clientId = Guid.NewGuid();
+    internal readonly bool _isReady;
 
     /// <summary>
     /// 客户端已启动
     /// </summary>
-    private bool _clientIsRunning;
+    internal bool _isRunning;
 
     /// <summary>
     /// dispose flag
     /// </summary>
-    private bool _disposed;
+    internal bool _disposed;
 
     //ws客户端事件订阅
     private IDisposable _subClientMessageReceived;
@@ -90,19 +85,19 @@ public sealed class SoraWebsocketClient : ISoraService
     /// <exception cref="ArgumentOutOfRangeException">参数错误</exception>
     internal SoraWebsocketClient(ClientConfig config, Action<Exception> crashAction = null)
     {
-        _clientReady = false;
-        Log.Info("Sora", $"Sora WebSocket客户端初始化... [{_clientId}]");
+        _isReady = false;
+        Log.Info("Sora", $"Sora WebSocket客户端初始化... [{ServiceId}]");
         Config = config ?? throw new ArgumentNullException(nameof(config));
         //写入初始化信息
-        if (!StaticVariable.ServiceConfigs.TryAdd(_clientId, new ServiceConfig(config)))
+        if (!StaticVariable.ServiceConfigs.TryAdd(ServiceId, new ServiceConfig(config, this)))
             throw new DataException("try add service config failed");
         //检查参数
         if (Config.Port == 0)
             throw new ArgumentOutOfRangeException(nameof(Config.Port), "Port 0 is not allowed");
         //初始化连接管理器
-        ConnManager = new ConnectionManager(Config, _clientId);
+        ConnManager = new ConnectionManager(Config, ServiceId);
         //实例化事件接口
-        Event = new EventAdapter(_clientId, Config.ThrowCommandException, Config.SendCommandErrMsg);
+        Event = new EventAdapter(ServiceId, Config.ThrowCommandException, Config.SendCommandErrMsg);
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
@@ -111,7 +106,7 @@ public sealed class SoraWebsocketClient : ISoraService
             else
                 crashAction(args.ExceptionObject as Exception);
         };
-        _clientReady = true;
+        _isReady = true;
     }
 
     #endregion
@@ -124,7 +119,7 @@ public sealed class SoraWebsocketClient : ISoraService
     /// </summary>
     public async ValueTask StartService()
     {
-        if (!_clientReady)
+        if (!_isReady)
         {
             Log.Warning("Sora", "service is not ready!");
             return;
@@ -144,7 +139,7 @@ public sealed class SoraWebsocketClient : ISoraService
         _subClientMessageReceived = Client.MessageReceived.Subscribe(msg => Task.Run(() =>
         {
             if (_disposed) return;
-            Event.Adapter(JObject.Parse(msg.Text), _clientId);
+            Event.Adapter(JObject.Parse(msg.Text), ServiceId);
         }));
         //连接断开事件
         _subClientDisconnectionHappened =
@@ -152,10 +147,10 @@ public sealed class SoraWebsocketClient : ISoraService
                   .Subscribe(info => Task.Run(() =>
                    {
                        if (_disposed) return;
-                       ConnectionManager.GetLoginUid(_clientId, out long uid);
+                       ConnectionManager.GetLoginUid(ServiceId, out long uid);
                        //移除原连接信息
-                       if (ConnectionManager.ConnectionExists(_clientId))
-                           ConnManager.CloseConnection("Universal", uid, _clientId);
+                       if (ConnectionManager.ConnectionExists(ServiceId))
+                           ConnManager.CloseConnection("Universal", uid, ServiceId);
 
                        if (info.Exception != null)
                            Log.Error("Sora",
@@ -169,12 +164,12 @@ public sealed class SoraWebsocketClient : ISoraService
                   .Subscribe(info => Task.Run(() =>
                    {
                        if (_disposed) return;
-                       if (info.Type == ReconnectionType.Initial || !_clientIsRunning)
+                       if (info.Type == ReconnectionType.Initial || !_isRunning)
                            return;
                        Log.Info("Sora", $"服务器已自动重连{info.Type}");
                        ConnManager.OpenConnection("Universal", "0",
                            new ClientSocket(Client),
-                           _clientId, _clientId,
+                           ServiceId, ServiceId,
                            Config.ApiTimeOut);
                    }));
         //开始客户端
@@ -182,10 +177,10 @@ public sealed class SoraWebsocketClient : ISoraService
         if (!Client.IsRunning || !Client.IsStarted)
             throw new WebSocketClientException("WebSocket client is not running");
 
-        ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client), _clientId, _clientId,
+        ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client), ServiceId, ServiceId,
             Config.ApiTimeOut);
         Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
-        _clientIsRunning = true;
+        _isRunning = true;
     }
 
     /// <summary>
@@ -204,7 +199,7 @@ public sealed class SoraWebsocketClient : ISoraService
         //停止客户端
         await Client.Stop(WebSocketCloseStatus.NormalClosure, string.Empty);
         Client.Dispose();
-        _clientIsRunning = false;
+        _isRunning = false;
         Log.Warning("Sora", $"SoraWebSocket客户端[{ServiceId}]已停止");
     }
 
@@ -225,7 +220,7 @@ public sealed class SoraWebsocketClient : ISoraService
         Client?.Dispose();
         ConnManager?.Dispose();
         _disposed = true;
-        StaticVariable.DisposeService(_clientId);
+        StaticVariable.DisposeService(ServiceId);
         GC.SuppressFinalize(this);
     }
 

@@ -58,8 +58,6 @@ public static class StaticVariable
     internal static void DisposeService(Guid serviceId)
     {
         Log.Debug("Sora", "Detect service dispose, cleanup service config...");
-        //清空服务信息
-        ServiceConfigs.TryRemove(serviceId, out _);
 
         //清空等待信息
         List<KeyValuePair<Guid, WaitingInfo>> removeWaitList =
@@ -70,6 +68,9 @@ public static class StaticVariable
             waitingInfo.Semaphore.Set();
             WaitingDict.TryRemove(guid, out _);
         }
+
+        //清空服务信息
+        ServiceConfigs.TryRemove(serviceId, out _);
 
         Log.Debug("Sora", "Service config cleanup finished");
     }

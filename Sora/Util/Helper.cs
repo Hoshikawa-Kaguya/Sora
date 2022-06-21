@@ -8,6 +8,8 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Sora.Attributes;
 using Sora.Entities.Info.InternalDataInfo;
+using Sora.Net;
+using Sora.Net.Config;
 using YukariToolBox.LightLog;
 
 namespace Sora.Util;
@@ -152,6 +154,28 @@ public static class Helper
         DescriptionAttribute[] attributes = (DescriptionAttribute[]) fieldInfo
            .GetCustomAttributes(typeof(DescriptionAttribute), false);
         return attributes.Length > 0 ? attributes[0].Description : string.Empty;
+    }
+
+    /// <summary>
+    /// 检查服务可用性
+    /// </summary>
+    internal static bool CheckService(Guid serviceId)
+    {
+        if(!StaticVariable.ServiceConfigs.TryGetValue(serviceId, out ServiceConfig config)) 
+            return false;
+        switch (config.Service)
+        {
+            case SoraWebsocketServer server:
+                if (server._disposed || !server._isReady || !server._isRunning)
+                    return false;
+                break;
+            case SoraWebsocketClient client:
+                if (client._disposed || !client._isReady || !client._isRunning)
+                    return false;
+                break;
+        }
+
+        return true;
     }
 
     #endregion
