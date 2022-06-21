@@ -12,6 +12,7 @@ using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.OnebotModel.OnebotEvent.MetaEvent;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
+using Sora.Util;
 using YukariToolBox.LightLog;
 
 namespace Sora.OnebotAdapter;
@@ -203,6 +204,11 @@ public sealed class EventAdapter
         if (StaticVariable.ServiceConfigs[ServiceId].EnableSocketMessage)
             Log.Debug("Socket",
                 $"Get json message:{messageJson.ToString(Formatting.None)}");
+        if (!Helper.CheckService(ServiceId))
+        {
+            Log.Error("BaseMessageEventArgs ctor", "服务不可用");
+            return;
+        }
         switch (TryGetJsonValue(messageJson, "post_type"))
         {
             //元事件类型
