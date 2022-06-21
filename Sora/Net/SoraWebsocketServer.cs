@@ -126,8 +126,11 @@ public sealed class SoraWebsocketServer : ISoraService
     /// </summary>
     public ValueTask StartService()
     {
-        _serverRunning = true;
-        if (!_serverReady) return ValueTask.CompletedTask;
+        if (!_serverReady)
+        {
+            Log.Warning("Sora", "service is not ready!");
+            return ValueTask.CompletedTask;
+        }
         //启动服务器
         Server = new WebSocketServer($"ws://{Config.Host}:{Config.Port}")
         {
@@ -136,6 +139,7 @@ public sealed class SoraWebsocketServer : ISoraService
         };
         Server.Start(SocketConfig);
         Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
+        _serverRunning = true;
         return ValueTask.CompletedTask;
     }
 
