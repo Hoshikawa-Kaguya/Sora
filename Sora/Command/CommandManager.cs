@@ -15,6 +15,7 @@ using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
+using Sora.Net.Records;
 using Sora.OnebotAdapter;
 using Sora.Util;
 using YukariToolBox.LightLog;
@@ -382,23 +383,10 @@ public sealed class CommandManager
         #region 信号量消息处理
 
         //处理消息段
-
-        Dictionary<Guid, WaitingInfo> waitingCommand =
-            StaticVariable.WaitingDict
-                          .Where(command =>
-                               WaitingCommandMatch(command, eventArgs))
-                          .ToDictionary(
-                               i => i.Key,
-                               i => i.Value);
-
-        foreach ((Guid key, WaitingInfo _) in waitingCommand)
+        List<Guid> waitingCommand = WaitCommandRecord.GetMatchCommand(eventArgs);
+        foreach (Guid key in waitingCommand)
         {
-            //更新等待列表，设置为当前的eventArgs
-            WaitingInfo oldInfo = StaticVariable.WaitingDict[key];
-            WaitingInfo newInfo = oldInfo;
-            newInfo.EventArgs = eventArgs;
-            StaticVariable.WaitingDict.TryUpdate(key, newInfo, oldInfo);
-            StaticVariable.WaitingDict[key].Semaphore.Set();
+            WaitCommandRecord.UpdateRecord(key, eventArgs);
         }
 
         //当前流程已经处理过wait command了。不再继续处理普通command，否则会一次发两条消息，普通消息留到下一次处理
@@ -530,50 +518,6 @@ public sealed class CommandManager
     #endregion
 
     #region 指令检查和匹配
-
-    [NeedReview("ALL")]
-    private bool WaitingCommandMatch(KeyValuePair<Guid, WaitingInfo> command,
-                                     BaseMessageEventArgs            eventArgs)
-    {
-        switch (eventArgs.SourceType)
-        {
-            case SourceFlag.Group:
-            {
-                bool preMatch =
-                    //判断发起源
-                    command.Value.SourceFlag == SourceFlag.Group
-                    //判断来自同一个连接
-                 && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
-                    //判断来着同一个群
-                 && command.Value.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
-                    //判断来自同一人
-                 && command.Value.Source.u == eventArgs.Sender;
-                if (!preMatch) return false;
-                break;
-            }
-            case SourceFlag.Private:
-            {
-                bool preMatch =
-                    //判断发起源
-                    command.Value.SourceFlag == SourceFlag.Private
-                    //判断来自同一个连接
-                 && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
-                    //判断来自同一人
-                 && command.Value.Source.u == eventArgs.Sender;
-                if (!preMatch) return false;
-                break;
-            }
-            default:
-                return false;
-        }
-
-        if (command.Value.MatchFunc is not null)
-            return command.Value.MatchFunc(eventArgs);
-        else
-            return command.Value.CommandExpressions?.Any(regex => Regex.IsMatch(eventArgs.Message.RawText, regex,
-                RegexOptions.Compiled | command.Value.RegexOptions)) ?? false;
-    }
-
 
     [NeedReview("ALL")]
     private bool CommandMatch(BaseCommandInfo      command,

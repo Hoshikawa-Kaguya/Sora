@@ -23,6 +23,6 @@ public abstract class BaseModel
     {
         SoraApi = StaticVariable.ConnectionInfos[connectionId].ApiInstance;
     }
-
+      
     #endregion
 }

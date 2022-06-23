@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Sora.Command;
 using Sora.Converter;
 using Sora.Entities;
+using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
+using Sora.Net.Records;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -65,4 +69,53 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
         IsSuperUser = msg.UserId is not 0 or -1 &&
             StaticVariable.ServiceConfigs[serviceId].SuperUsers.Any(id => id == msg.UserId);
     }
+
+    #region 连续指令
+
+    /// <summary>
+    /// <para>等待下一条消息触发正则表达式</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
+    /// </summary>
+    internal object WaitForNextRegexMessage(long            sourceUid,    string[]  commandExps, MatchType matchType,
+                                            RegexOptions    regexOptions, TimeSpan? timeout,
+                                            Func<ValueTask> timeoutTask,  long      sourceGroup = 0)
+    {
+        //生成指令上下文
+        WaitingInfo waitInfo =
+            CommandManager.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, SourceType,
+                regexOptions, ConnId, ServiceId);
+        return WaitForNextMessage(waitInfo, timeout, timeoutTask);
+    }
+
+    /// <summary>
+    /// 等待下一条消息触发自定义匹配方法
+    /// </summary>
+    internal object WaitForNextCustomMessage(long      sourceUid, Func<BaseMessageEventArgs, bool> matchFunc,
+                                             TimeSpan? timeout,   Func<ValueTask> timeoutTask, long sourceGroup = 0)
+    {
+        //生成指令上下文
+        WaitingInfo waitInfo =
+            CommandManager.GenerateWaitingCommandInfo(
+                sourceUid, sourceGroup, matchFunc, SourceType, ConnId, ServiceId);
+        return WaitForNextMessage(waitInfo, timeout, timeoutTask);
+    }
+
+    /// <summary>
+    /// <para>等待下一条消息触发</para>
+    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
+    /// </summary>
+    internal object WaitForNextMessage(WaitingInfo waitInfo, TimeSpan? timeout, Func<ValueTask> timeoutTask)
+    {
+        //检查是否为初始指令重复触发
+        if (waitInfo.GetSameSource())
+            return null;
+        //连续指令不再触发后续事件
+        IsContinueEventChain = false;
+        //在超时时执行超时任务
+        if (!waitInfo.WaitForNext(timeout, out object e) && timeoutTask != null) 
+            Task.Run(timeoutTask.Invoke);
+        return e;
+    }
+
+    #endregion
 }

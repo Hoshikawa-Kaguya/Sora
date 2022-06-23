@@ -1,10 +1,5 @@
 using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Sora.Command;
 using Sora.Entities.Base;
-using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
 using Sora.Util;
 
@@ -89,64 +84,6 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         Time                 = time.ToDateTime();
         IsContinueEventChain = true;
         SourceType           = sourceType;
-    }
-
-    #endregion
-
-    #region 连续指令
-
-    /// <summary>
-    /// <para>等待下一条消息触发正则表达式</para>
-    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
-    /// </summary>
-    internal object WaitForNextRegexMessage(long            sourceUid,    string[]  commandExps, MatchType matchType,
-                                            RegexOptions    regexOptions, TimeSpan? timeout,
-                                            Func<ValueTask> timeoutTask,  long      sourceGroup = 0)
-    {
-        //生成指令上下文
-        WaitingInfo waitInfo =
-            CommandManager.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, SourceType,
-                regexOptions, ConnId, ServiceId);
-        return WaitForNextMessage(waitInfo, timeout, timeoutTask);
-    }
-
-    /// <summary>
-    /// 等待下一条消息触发自定义匹配方法
-    /// </summary>
-    internal object WaitForNextCustomMessage(long      sourceUid, Func<BaseMessageEventArgs, bool> matchFunc,
-                                             TimeSpan? timeout,   Func<ValueTask> timeoutTask, long sourceGroup = 0)
-    {
-        //生成指令上下文
-        WaitingInfo waitInfo =
-            CommandManager.GenerateWaitingCommandInfo(
-                sourceUid, sourceGroup, matchFunc, SourceType, ConnId, ServiceId);
-        return WaitForNextMessage(waitInfo, timeout, timeoutTask);
-    }
-
-    /// <summary>
-    /// <para>等待下一条消息触发</para>
-    /// <para>当所在的上下文被重复触发时则会直接返回<see langword="false"/></para>
-    /// </summary>
-    internal object WaitForNextMessage(WaitingInfo waitInfo, TimeSpan? timeout, Func<ValueTask> timeoutTask)
-    {
-        //检查是否为初始指令重复触发
-        if (StaticVariable.WaitingDict.Any(i => i.Value.IsSameSource(waitInfo)))
-            return null;
-        //连续指令不再触发后续事件
-        IsContinueEventChain = false;
-        Guid sessionId = Guid.NewGuid();
-        //添加上下文并等待信号量
-        StaticVariable.WaitingDict.TryAdd(sessionId, waitInfo);
-        //是否正常接受到触发信号
-        bool receiveSignal =
-            //等待信号量
-            StaticVariable.WaitingDict[sessionId].Semaphore.WaitOne(timeout ?? TimeSpan.FromMilliseconds(-1));
-        //取出匹配指令的事件参数并删除上一次的上下文
-        object retEventArgs = receiveSignal ? StaticVariable.WaitingDict[sessionId].EventArgs : null;
-        StaticVariable.WaitingDict.TryRemove(sessionId, out _);
-        //在超时时执行超时任务
-        if (!receiveSignal && timeoutTask != null) Task.Run(timeoutTask.Invoke);
-        return retEventArgs;
     }
 
     #endregion
