@@ -1,5 +1,6 @@
 using System;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -18,6 +19,16 @@ namespace Sora.Net;
 /// </summary>
 internal static class ReactiveApiManager
 {
+    #region Buffer
+
+    /// <summary>
+    /// API响应被观察对象
+    /// 结构:Tuple[echo id,响应json]
+    /// </summary>
+    private static readonly Subject<Tuple<Guid, JObject>> ApiSubject = new();
+
+    #endregion
+
     #region 通信
 
     /// <summary>
@@ -28,7 +39,7 @@ internal static class ReactiveApiManager
     internal static void GetResponse(Guid echo, JObject response)
     {
         Log.Debug("Sora", $"Get api response {response.ToString(Formatting.None)}");
-        StaticVariable.ApiSubject.OnNext(new Tuple<Guid, JObject>(echo, response));
+        ApiSubject.OnNext(new Tuple<Guid, JObject>(echo, response));
     }
 
     /// <summary>
@@ -62,22 +73,22 @@ internal static class ReactiveApiManager
         //序列化请求
         string msg = JsonConvert.SerializeObject(apiRequest, Formatting.None);
         //向客户端发送请求数据
-        Task<JObject> apiTask = StaticVariable.ApiSubject
-                                              .Where(request => request.Item1 == apiRequest.Echo)
-                                              .Select(request => request.Item2)
-                                              .Take(1)
-                                              .Timeout(currentTimeout)
-                                              .ToTask()
-                                              .RunCatch(e =>
-                                               {
-                                                   isTimeout = e is TimeoutException;
-                                                   exception = e;
-                                                   //在错误为超时时不打印log
-                                                   if (!isTimeout)
-                                                       Log.Error("Sora",
+        Task<JObject> apiTask = ApiSubject
+                               .Where(request => request.Item1 == apiRequest.Echo)
+                               .Select(request => request.Item2)
+                               .Take(1)
+                               .Timeout(currentTimeout)
+                               .ToTask()
+                               .RunCatch(e =>
+                                         {
+                                             isTimeout = e is TimeoutException;
+                                             exception = e;
+                                             //在错误为超时时不打印log
+                                             if (!isTimeout)
+                                                 Log.Error("Sora",
                                                            $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
-                                                   return new JObject();
-                                               });
+                                             return new JObject();
+                                         });
 
         //这里的错误最终将抛给开发者
         //发送消息
