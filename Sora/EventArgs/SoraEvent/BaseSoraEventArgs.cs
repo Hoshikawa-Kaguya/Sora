@@ -30,7 +30,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 服务ID
     /// </summary>
-    internal Guid ServiceGuid { get; }
+    internal Guid ServiceId { get; }
 
     /// <summary>
     /// 当前事件名
@@ -81,7 +81,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
                                long loginUid,  long time,         SourceFlag sourceType)
     {
         SoraApi              = StaticVariable.ConnectionInfos[connectionId].ApiInstance;
-        ServiceGuid          = serviceId;
+        ServiceId          = serviceId;
         ConnId               = connectionId;
         EventName            = eventName;
         LoginUid             = loginUid;
@@ -106,7 +106,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         //生成指令上下文
         WaitingInfo waitInfo =
             CommandManager.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, SourceType,
-                regexOptions, ConnId, ServiceGuid);
+                regexOptions, ConnId, ServiceId);
         return WaitForNextMessage(waitInfo, timeout, timeoutTask);
     }
 
@@ -119,7 +119,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         //生成指令上下文
         WaitingInfo waitInfo =
             CommandManager.GenerateWaitingCommandInfo(
-                sourceUid, sourceGroup, matchFunc, SourceType, ConnId, ServiceGuid);
+                sourceUid, sourceGroup, matchFunc, SourceType, ConnId, ServiceId);
         return WaitForNextMessage(waitInfo, timeout, timeoutTask);
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Sora.Enumeration;
 
 namespace Sora.Entities.Segment;
@@ -59,7 +60,7 @@ public static class SegmentHelper
         //当字符串太长时跳过正则检查
         if (dataStr.Length > 1000) return (dataStr, true);
 
-        FileType type = StaticVariable.FileRegices.Single(i => i.Value.IsMatch(dataStr)).Key;
+        FileType type = FileRegices.Single(i => i.Value.IsMatch(dataStr)).Key;
 
         switch (type)
         {
@@ -102,6 +103,40 @@ public static class SegmentHelper
 
         return sb.ToString();
     }
+
+    #endregion
+
+    #region 常量
+
+    /// <summary>
+    /// 数据文本匹配正则
+    /// </summary>
+    private static readonly Dictionary<FileType, Regex> FileRegices = new()
+    {
+        //绝对路径-linux/osx
+        {
+            FileType.UnixFile, new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled)
+        },
+        //绝对路径-win
+        {
+            FileType.WinFile,
+            new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled)
+        },
+        //base64
+        {
+            FileType.Base64, new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
+                                       RegexOptions.Compiled)
+        },
+        //网络图片链接
+        {
+            FileType.Url,
+            new
+                Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
+                      RegexOptions.Compiled)
+        },
+        //文件名
+        {FileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled)}
+    };
 
     #endregion
 }
