@@ -7,10 +7,7 @@ namespace Sora.Net.Config;
 /// Sora服务数据结构体
 /// </summary>
 internal record ServiceConfig
-{
-    //服务实例
-    internal readonly ISoraService Service;
-
+{                                                                        
     //控制记录
     internal readonly HashSet<long>                     SuperUsers;      //服务管理员设置
     internal readonly HashSet<long>                     BlockUsers;      //服务屏蔽用户设置
@@ -21,7 +18,7 @@ internal record ServiceConfig
     internal readonly bool EnableSocketMessage;      //控制台消息打印使能
     internal readonly bool AutoMarkMessageRead;      //自动已读标记使能
 
-    internal ServiceConfig(ISoraConfig config, ISoraService service)
+    internal ServiceConfig(ISoraConfig config)
     {
         SuperUsers      = new HashSet<long>(config.SuperUsers);
         BlockUsers      = new HashSet<long>(config.BlockUsers);
@@ -30,7 +27,5 @@ internal record ServiceConfig
         EnableSoraCommandManager = config.EnableSoraCommandManager;
         EnableSocketMessage      = config.EnableSocketMessage;
         AutoMarkMessageRead      = config.AutoMarkMessageRead;
-
-        Service = service;
     }
 }

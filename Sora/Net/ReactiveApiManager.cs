@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using Sora.Attributes;
 using Sora.Entities;
 using Sora.Enumeration.ApiType;
+using Sora.Net.Records;
 using Sora.OnebotModel.ApiParams;
 using Sora.Util;
 using YukariToolBox.LightLog;
@@ -56,7 +57,7 @@ internal static class ReactiveApiManager
         TimeSpan currentTimeout;
         if (timeout is null)
         {
-            if (!ConnectionManager.GetApiTimeout(connectionId, out currentTimeout))
+            if (!ConnectionRecord.GetApiTimeout(connectionId, out currentTimeout))
             {
                 Log.Error("Sora", "Cannot get api timeout");
                 currentTimeout = TimeSpan.FromSeconds(5);

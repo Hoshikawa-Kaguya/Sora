@@ -91,7 +91,7 @@ public sealed class SoraWebsocketServer : ISoraService
         }
 
         //写入初始化信息
-        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(Config, this)))
+        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(Config)))
             throw new DataException("try add service config failed");
         //检查参数
         if (Config.Port == 0)
@@ -127,6 +127,7 @@ public sealed class SoraWebsocketServer : ISoraService
             Log.Warning("Sora", "service is not ready!");
             return ValueTask.CompletedTask;
         }
+
         //启动服务器
         Server = new WebSocketServer($"ws://{Config.Host}:{Config.Port}")
         {
@@ -207,10 +208,9 @@ public sealed class SoraWebsocketServer : ISoraService
         {
             if (_disposed || !_isRunning) return;
             //移除原连接信息
-            if (ConnectionManager.ConnectionExists(socket.ConnectionInfo.Id))
+            if (ConnectionRecord.Exists(ServiceId))
                 ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
                     socket.ConnectionInfo.Id);
-
             Log.Info("Sora",
                 $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
         };
@@ -218,7 +218,7 @@ public sealed class SoraWebsocketServer : ISoraService
         socket.OnMessage = message =>
             Task.Run(() =>
             {
-                if (_disposed || !_isRunning) 
+                if (_disposed || !_isRunning)
                     return;
                 Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
             });
@@ -229,7 +229,7 @@ public sealed class SoraWebsocketServer : ISoraService
     /// </summary>
     ~SoraWebsocketServer()
     {
-        Log.Warning("Destructor", $"Service[{ServiceId}]");
+        Log.Warning("Destructor Call", $"Service[{ServiceId}]");
         Dispose();
     }
 
@@ -244,7 +244,7 @@ public sealed class SoraWebsocketServer : ISoraService
         ConnManager?.Dispose();
         Task.Delay(100).Wait();
         //清除所有连接
-        StaticVariable.DisposeService(ServiceId);
+        Helper.DisposeService(ServiceId);
         GC.SuppressFinalize(this);
     }
 
@@ -258,7 +258,7 @@ public sealed class SoraWebsocketServer : ISoraService
     /// <param name="connectionId">链接ID</param>
     public SoraApi GetApi(Guid connectionId)
     {
-        return StaticVariable.ConnectionInfos[connectionId].ApiInstance;
+        return ConnectionRecord.GetApi(connectionId);
     }
 
     #endregion

@@ -90,7 +90,7 @@ public sealed class SoraWebsocketClient : ISoraService
         Log.Info("Sora", $"Sora WebSocket客户端初始化... [{ServiceId}]");
         Config = config ?? throw new ArgumentNullException(nameof(config));
         //写入初始化信息
-        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(config, this)))
+        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(config)))
             throw new DataException("try add service config failed");
         //检查参数
         if (Config.Port == 0)
@@ -148,9 +148,9 @@ public sealed class SoraWebsocketClient : ISoraService
                   .Subscribe(info => Task.Run(() =>
                    {
                        if (_disposed) return;
-                       ConnectionManager.GetLoginUid(ServiceId, out long uid);
+                       ConnectionRecord.GetLoginUid(ServiceId, out long uid);
                        //移除原连接信息
-                       if (ConnectionManager.ConnectionExists(ServiceId))
+                       if (ConnectionRecord.Exists(ServiceId))
                            ConnManager.CloseConnection("Universal", uid, ServiceId);
 
                        if (info.Exception != null)
@@ -209,7 +209,7 @@ public sealed class SoraWebsocketClient : ISoraService
     /// </summary>
     ~SoraWebsocketClient()
     {
-        Log.Warning("Destructor", $"Service[{ServiceId}]");
+        Log.Warning("Destructor Call", $"Service[{ServiceId}]");
         Dispose();
     }
 
@@ -222,7 +222,8 @@ public sealed class SoraWebsocketClient : ISoraService
         Client?.Dispose();
         ConnManager?.Dispose();
         _disposed = true;
-        StaticVariable.DisposeService(ServiceId);
+        Task.Delay(100).Wait();
+        Helper.DisposeService(ServiceId);
         GC.SuppressFinalize(this);
     }
 
@@ -244,7 +245,7 @@ public sealed class SoraWebsocketClient : ISoraService
     /// <param name="connectionId">链接ID</param>
     public SoraApi GetApi(Guid connectionId)
     {
-        return StaticVariable.ConnectionInfos[connectionId].ApiInstance;
+        return ConnectionRecord.GetApi(connectionId);
     }
 
     #endregion

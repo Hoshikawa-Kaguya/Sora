@@ -1,4 +1,5 @@
 using System;
+using Sora.Net.Records;
 
 namespace Sora.Entities.Base;
 
@@ -21,7 +22,7 @@ public abstract class BaseModel
 
     internal BaseModel(Guid connectionId)
     {
-        SoraApi = StaticVariable.ConnectionInfos[connectionId].ApiInstance;
+        SoraApi = ConnectionRecord.GetApi(connectionId);
     }
       
     #endregion

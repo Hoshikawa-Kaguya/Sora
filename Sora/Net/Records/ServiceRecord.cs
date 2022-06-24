@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Sora.Net.Config;
 
 namespace Sora.Net.Records;
@@ -12,12 +14,14 @@ internal static class ServiceRecord
     /// </summary>
     private static readonly ConcurrentDictionary<Guid, ServiceConfig> _serviceConfigs = new();
 
+    private static readonly HashSet<Guid> _deadService = new();
+
     /// <summary>
     /// 用户是否为超级管理员
     /// </summary>
     public static bool IsSuperUser(Guid service, long userId)
     {
-        if (!_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) || !_serviceConfigs.ContainsKey(service)) return false;
         return _serviceConfigs[service].SuperUsers.Contains(userId);
     }
 
@@ -26,7 +30,7 @@ internal static class ServiceRecord
     /// </summary>
     public static bool IsBlockUser(Guid service, long userId)
     {
-        if (!_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) ||!_serviceConfigs.ContainsKey(service)) return false;
         return _serviceConfigs[service].BlockUsers.Contains(userId);
     }
 
@@ -34,19 +38,19 @@ internal static class ServiceRecord
 
     public static bool IsEnableSoraCommandManager(Guid service)
     {
-        if (!_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) ||!_serviceConfigs.ContainsKey(service)) return false;
         return _serviceConfigs[service].EnableSoraCommandManager;
     }
 
     public static bool IsEnableSocketMessage(Guid service)
     {
-        if (!_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) ||!_serviceConfigs.ContainsKey(service)) return false;
         return _serviceConfigs[service].EnableSocketMessage;
     }
 
     public static bool IsAutoMarkMessageRead(Guid service)
     {
-        if (!_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) ||!_serviceConfigs.ContainsKey(service)) return false;
         return _serviceConfigs[service].AutoMarkMessageRead;
     }
 
@@ -58,14 +62,23 @@ internal static class ServiceRecord
     {
         if (_serviceConfigs.ContainsKey(service))
         {
+            if (_deadService.Contains(service)) _deadService.Remove(service);
             ServiceConfig old = _serviceConfigs[service];
             return _serviceConfigs.TryUpdate(service, config, old);
         }
+
         return _serviceConfigs.TryAdd(service, config);
     }
 
     public static bool RemoveRecord(Guid service)
     {
+        _deadService.Add(service);
+        //防止多线程冲突
+        Task.Run(async () =>
+        {
+            await Task.Delay(TimeSpan.FromMinutes(1));
+            _deadService.Remove(service);
+        });
         return _serviceConfigs.TryRemove(service, out _);
     }
 

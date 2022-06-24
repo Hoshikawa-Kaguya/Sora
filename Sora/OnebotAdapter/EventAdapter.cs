@@ -261,7 +261,7 @@ public sealed class EventAdapter
                 Log.Debug("Sora", $"Get heartbeat from [{connection}]");
                 //刷新心跳包记录
                 if (heartBeat != null)
-                    ConnectionManager.HeartBeatUpdate(connection);
+                    ConnectionRecord.UpdateHeartBeat(connection);
                 break;
             }
             //生命周期
@@ -294,7 +294,7 @@ public sealed class EventAdapter
                     break;
                 }
 
-                ConnectionManager.UpdateUid(connection, uid);
+                ConnectionRecord.UpdateLoginUid(connection, uid);
 
                 Log.Info("Sora", $"已连接到{info.clientType},版本:{info.clientVer}");
 

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
 using Sora.EventArgs.WebsocketEvent;
 using Sora.Interfaces;
+using Sora.Net.Records;
 using Websocket.Client;
 using YukariToolBox.LightLog;
 
@@ -60,78 +60,23 @@ public sealed class ConnectionManager : IDisposable
 
     #endregion
 
-    #region 服务器连接管理
-
-    /// <summary>
-    /// 添加服务器连接记录
-    /// </summary>
-    /// <param name="serviceId">服务Id</param>
-    /// <param name="connectionId">连接标识</param>
-    /// <param name="socket">连接信息</param>
-    /// <param name="apiTimeout">api超时</param>
-    private static bool AddConnection(Guid serviceId, Guid connectionId, ISoraSocket socket, TimeSpan apiTimeout)
-    {
-        //检查是否已存在值
-        if (StaticVariable.ConnectionInfos.ContainsKey(connectionId)) return false;
-        //selfId均在第一次链接开启时留空，并在meta事件触发后更新
-        return StaticVariable.ConnectionInfos.TryAdd(connectionId, new SoraConnectionInfo
-        (serviceId,
-            connectionId,
-            socket,
-            DateTime.Now,
-            apiTimeout
-        ));
-    }
-
-    /// <summary>
-    /// 移除服务器连接记录
-    /// </summary>
-    /// <param name="connectionId">连接标识</param>
-    private static bool RemoveConnection(Guid connectionId)
-    {
-        return StaticVariable.ConnectionInfos.TryRemove(connectionId, out _);
-    }
-
-    /// <summary>
-    /// 检查是否存在连接
-    /// </summary>
-    /// <param name="connectionId">连接标识</param>
-    internal static bool ConnectionExists(Guid connectionId)
-    {
-        return StaticVariable.ConnectionInfos.ContainsKey(connectionId);
-    }
-
-    /// <summary>
-    /// 关闭服务中的所有链接
-    /// </summary>
-    internal void CloseAllConnection(Guid serviceGuid)
-    {
-        List<SoraConnectionInfo> connectionInfos =
-            StaticVariable.ConnectionInfos
-                          .Where(c => c.Value.ApiInstance.ServiceId == serviceGuid)
-                          .Select(c => c.Value)
-                          .ToList();
-        foreach (SoraConnectionInfo connection in connectionInfos)
-            CloseConnection("Universal", connection.LoginUid, connection.ApiInstance.ConnectionId);
-    }
-
-    #endregion
-
     #region 服务器信息发送
 
     internal static bool SendMessage(Guid connectionId, string message)
     {
-        if (StaticVariable.ConnectionInfos.All(connection => connection.Key != connectionId))
-            return false;
-
         try
         {
-            StaticVariable.ConnectionInfos[connectionId].Connection.Send(message);
+            if (!ConnectionRecord.GetConn(connectionId, out SoraConnectionInfo connection))
+            {
+                Log.Error("Socket", $"无法获取Socket连接[{connectionId}]");
+                return false;
+            }
+            connection.Connection.Send(message);
             return true;
         }
         catch (Exception e)
         {
-            Log.Error("ConnectionManager", $"Send message to client error\r\n{Log.ErrorLogBuilder(e)}");
+            Log.Error("Socket", $"Send message to client error\r\n{Log.ErrorLogBuilder(e)}");
             return false;
         }
     }
@@ -145,20 +90,14 @@ public sealed class ConnectionManager : IDisposable
     /// </summary>
     internal void HeartBeatCheck(object serviceIdObj)
     {
-        if (StaticVariable.ConnectionInfos.IsEmpty) return;
+        if (ConnectionRecord.IsEmpty()) return;
         var serviceId = (Guid) serviceIdObj;
-        Log.Debug("HeartBeatCheck", $"service id={serviceId}({StaticVariable.ConnectionInfos.Count})");
+        Log.Debug("HeartBeatCheck", $"service id={serviceId}({ConnectionRecord.ConnCount()})");
 
-        if (StaticVariable.ConnectionInfos.Count == 0) return;
         //查找超时连接
         DateTime now = DateTime.Now;
         Dictionary<Guid, SoraConnectionInfo> timeoutDict =
-            StaticVariable.ConnectionInfos
-                          .Where(conn =>
-                               conn.Value.ApiInstance.ServiceId   == serviceId &&
-                               now - conn.Value.LastHeartBeatTime > HeartBeatTimeOut)
-                          .ToDictionary(conn => conn.Key,
-                               conn => conn.Value);
+            ConnectionRecord.GetTimeoutConn(serviceId, now, HeartBeatTimeOut);
         if (timeoutDict.Count == 0) return;
         Log.Warning("HeartBeatCheck", $"timeout connection count {timeoutDict.Count}");
 
@@ -180,19 +119,6 @@ public sealed class ConnectionManager : IDisposable
             needReconnect.ForEach(conn => conn.Reconnect());
     }
 
-    /// <summary>
-    /// 刷新心跳包记录
-    /// </summary>
-    /// <param name="connectionGuid">连接标识</param>
-    internal static void HeartBeatUpdate(Guid connectionGuid)
-    {
-        if (!ConnectionExists(connectionGuid)) return;
-        SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
-        SoraConnectionInfo newInfo = oldInfo;
-        newInfo.LastHeartBeatTime = DateTime.Now;
-        StaticVariable.ConnectionInfos.TryUpdate(connectionGuid, newInfo, oldInfo);
-    }
-
     #endregion
 
     #region 服务器事件
@@ -210,7 +136,7 @@ public sealed class ConnectionManager : IDisposable
                                  TimeSpan apiTimeout)
     {
         //添加服务器记录
-        if (!AddConnection(serviceId, connId, socket, apiTimeout))
+        if (!ConnectionRecord.AddNewConn(serviceId, connId, socket, apiTimeout))
         {
             //记录添加失败关闭超时的连接
             socket.Close();
@@ -231,23 +157,20 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="connId">id</param>
     internal void CloseConnection(string role, long selfId, Guid connId)
     {
-        //关闭连接
-        try
-        {
-            StaticVariable.ConnectionInfos[connId].Connection.Close();
-        }
-        catch (Exception e)
-        {
-            Log.Error("ConnectionManager", "Close connection failed");
-            Log.Error("ConnectionManager", Log.ErrorLogBuilder(e));
-        }
-
-        //移除连接信息
-        if (StaticVariable.ConnectionInfos.ContainsKey(connId) && !RemoveConnection(connId))
-            Log.Error("ConnectionManager", "Remove connection record failed");
+        ConnectionRecord.CloseConn(connId);
         //触发事件
         if (OnCloseConnectionAsync == null) return;
         Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs(role, selfId, connId)); });
+    }
+
+    /// <summary>
+    /// 关闭服务中的所有链接
+    /// </summary>
+    internal void CloseAllConnection(Guid serviceId)
+    {
+        List<SoraConnectionInfo> connections = ConnectionRecord.GetConnList(serviceId);
+        foreach (SoraConnectionInfo connection in connections)
+            CloseConnection("Universal", connection.LoginUid, connection.ApiInstance.ConnectionId);
     }
 
     /// <summary>
@@ -255,61 +178,7 @@ public sealed class ConnectionManager : IDisposable
     /// </summary>
     internal static void ForceCloseConnection(Guid connId)
     {
-        try
-        {
-            StaticVariable.ConnectionInfos[connId].Connection.Close();
-            RemoveConnection(connId);
-        }
-        catch
-        {
-            // ignored
-        }
-    }
-
-    internal static void UpdateUid(Guid connectionGuid, long uid)
-    {
-        SoraConnectionInfo oldInfo = StaticVariable.ConnectionInfos[connectionGuid];
-        SoraConnectionInfo newInfo = oldInfo;
-        newInfo.LoginUid = uid;
-        StaticVariable.ConnectionInfos.TryUpdate(connectionGuid, newInfo, oldInfo);
-    }
-
-    #endregion
-
-    #region API
-
-    /// <summary>
-    /// 获取当前登录连接的账号ID
-    /// </summary>
-    /// <param name="connectionGuid">连接标识</param>
-    /// <param name="userId">UID</param>
-    internal static bool GetLoginUid(Guid connectionGuid, out long userId)
-    {
-        if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid))
-        {
-            userId = StaticVariable.ConnectionInfos[connectionGuid].LoginUid;
-            return true;
-        }
-
-        userId = -1;
-        return false;
-    }
-
-    /// <summary>
-    /// 获取当前连接设置的API超时
-    /// </summary>
-    /// <param name="connectionGuid">连接标识</param>
-    /// <param name="timeout">超时</param>
-    internal static bool GetApiTimeout(Guid connectionGuid, out TimeSpan timeout)
-    {
-        if (StaticVariable.ConnectionInfos.ContainsKey(connectionGuid))
-        {
-            timeout = StaticVariable.ConnectionInfos[connectionGuid].ApiTimeout;
-            return true;
-        }
-
-        timeout = TimeSpan.Zero;
-        return false;
+        ConnectionRecord.CloseConn(connId);
     }
 
     #endregion

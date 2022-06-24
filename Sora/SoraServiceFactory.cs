@@ -7,6 +7,7 @@ using Sora.Entities.Base;
 using Sora.Interfaces;
 using Sora.Net;
 using Sora.Net.Config;
+using Sora.Net.Records;
 using YukariToolBox.LightLog;
 
 namespace Sora;
@@ -84,18 +85,8 @@ public static class SoraServiceFactory
     /// <param name="api">api实例</param>
     public static bool TryGetApi(long loginUid, out SoraApi api)
     {
-        if (StaticVariable.ConnectionInfos.Values
-                          .Any(conn => conn.LoginUid == loginUid))
-        {
-            api = StaticVariable.ConnectionInfos.Values
-                                .Where(conn => conn.LoginUid == loginUid)
-                                .Select(conn => conn.ApiInstance)
-                                .First();
-            return true;
-        }
-
-        api = null;
-        return false;
+        api = ConnectionRecord.GetApi(loginUid);
+        return api != null;
     }
 
     /// <summary>
