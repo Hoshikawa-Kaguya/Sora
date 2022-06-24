@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using Sora.Entities.Info.InternalDataInfo;
-using Sora.Net.Config;
 using Sora.Net.Records;
 using YukariToolBox.LightLog;
 
@@ -17,12 +16,6 @@ public static class StaticVariable
     /// Key:链接标识符[Conn Id]
     /// </summary>
     internal static readonly ConcurrentDictionary<Guid, SoraConnectionInfo> ConnectionInfos = new();
-
-    /// <summary>
-    /// 服务信息
-    /// Key:服务标识符[Service Id]
-    /// </summary>
-    internal static readonly ConcurrentDictionary<Guid, ServiceConfig> ServiceConfigs = new();
 
     /// <summary>
     /// 版本号
@@ -41,12 +34,9 @@ public static class StaticVariable
     internal static void DisposeService(Guid serviceId)
     {
         Log.Debug("Sora", "Detect service dispose, cleanup service config...");
-
-        WaitCommandRecord.DisposeSession(serviceId);
-
         //清空服务信息
-        ServiceConfigs.TryRemove(serviceId, out _);
-
+        WaitCommandRecord.DisposeSession(serviceId);
+        ServiceRecord.RemoveRecord(serviceId);
         Log.Debug("Sora", "Service config cleanup finished");
     }
 }

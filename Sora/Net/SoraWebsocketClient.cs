@@ -8,6 +8,7 @@ using Sora.Entities.Socket;
 using Sora.Exceptions;
 using Sora.Interfaces;
 using Sora.Net.Config;
+using Sora.Net.Records;
 using Sora.OnebotAdapter;
 using Sora.Util;
 using Websocket.Client;
@@ -89,7 +90,7 @@ public sealed class SoraWebsocketClient : ISoraService
         Log.Info("Sora", $"Sora WebSocket客户端初始化... [{ServiceId}]");
         Config = config ?? throw new ArgumentNullException(nameof(config));
         //写入初始化信息
-        if (!StaticVariable.ServiceConfigs.TryAdd(ServiceId, new ServiceConfig(config, this)))
+        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(config, this)))
             throw new DataException("try add service config failed");
         //检查参数
         if (Config.Port == 0)
@@ -208,6 +209,7 @@ public sealed class SoraWebsocketClient : ISoraService
     /// </summary>
     ~SoraWebsocketClient()
     {
+        Log.Warning("Destructor", $"Service[{ServiceId}]");
         Dispose();
     }
 

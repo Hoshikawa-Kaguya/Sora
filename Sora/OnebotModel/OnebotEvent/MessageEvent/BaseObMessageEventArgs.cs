@@ -28,7 +28,7 @@ internal abstract class BaseObMessageEventArgs : BaseObApiEventArgs
     internal int MessageId { get; set; }
 
     /// <summary>
-    /// 发送者 QQ 号
+    /// 发送者UID
     /// </summary>
     [JsonProperty(PropertyName = "user_id")]
     internal long UserId { get; set; }

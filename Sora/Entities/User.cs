@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration.ApiType;
+using Sora.Net.Records;
 
 namespace Sora.Entities;
 
@@ -39,9 +39,8 @@ public sealed class User : BaseModel
     /// <param name="uid">用户ID</param>
     internal User(Guid serviceId, Guid connectionId, long uid) : base(connectionId)
     {
-        Id = uid;
-        IsSuperUser = Id is not 0 or -1 &&
-            StaticVariable.ServiceConfigs[serviceId].SuperUsers.Any(id => id == Id);
+        Id          = uid;
+        IsSuperUser = Id is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, uid);
     }
 
     #endregion
