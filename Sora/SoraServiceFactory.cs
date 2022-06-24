@@ -23,11 +23,11 @@ public static class SoraServiceFactory
     static SoraServiceFactory()
     {
         Log.Info("Sora", "Ciallo～");
-        Log.Info("Sora", $"框架版本:{StaticVariable.VERSION}");
+        Log.Info("Sora", $"框架版本:{VersionCode.VERSION}");
         Log.Debug("Sora", "开发交流群：1081190562");
         Log.Debug("System", Environment.OSVersion.ToString());
         Log.Debug("Runtime", Environment.Version.ToString());
-        Log.Info("OnebotProtocolVersion", StaticVariable.ONEBOT_PROTOCOL);
+        Log.Info("OnebotProtocolVersion", VersionCode.ONEBOT_PROTOCOL);
     }
 
     /// <summary>
