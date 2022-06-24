@@ -9,7 +9,6 @@ using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Net;
 using Sora.Net.Records;
 using Sora.OnebotAdapter;
 
@@ -1063,10 +1062,11 @@ public sealed class SoraApi
     /// <summary>
     /// <para>获取登录账号的id</para>
     /// <para>使用正向ws链接时此方法在触发lifecycle事件前失效</para>
+    /// <para>再连接失效时返回 -1</para>
     /// </summary>
     public long GetLoginUserId()
     {
-        if (ConnectionManager.GetLoginUid(ConnectionId, out long uid)) return uid;
+        if (ConnectionRecord.GetLoginUid(ConnectionId, out long uid)) return uid;
         return -1;
     }
 

@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Sora.Attributes;
 using Sora.Entities.Info.InternalDataInfo;
+using Sora.Net.Records;
 using YukariToolBox.LightLog;
 
 namespace Sora.Util;
@@ -90,6 +91,19 @@ public static class Helper
     #endregion
 
     #region 小工具
+
+    /// <summary>
+    /// 清除服务数据
+    /// </summary>
+    /// <param name="serviceId">服务标识</param>
+    internal static void DisposeService(Guid serviceId)
+    {
+        Log.Debug("Sora", "Detect service dispose, cleanup service config...");
+        //清空服务信息
+        WaitCommandRecord.DisposeSession(serviceId);
+        ServiceRecord.RemoveRecord(serviceId);
+        Log.Debug("Sora", "Service config cleanup finished");
+    }
 
     /// <summary>
     /// 数组元素完全相等判断（引用类型）

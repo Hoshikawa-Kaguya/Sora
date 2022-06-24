@@ -1,6 +1,7 @@
 using System;
 using Sora.Entities.Base;
 using Sora.Enumeration;
+using Sora.Net.Records;
 using Sora.Util;
 
 namespace Sora.EventArgs.SoraEvent;
@@ -75,8 +76,8 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     internal BaseSoraEventArgs(Guid serviceId, Guid connectionId, string     eventName,
                                long loginUid,  long time,         SourceFlag sourceType)
     {
-        SoraApi              = StaticVariable.ConnectionInfos[connectionId].ApiInstance;
-        ServiceId          = serviceId;
+        SoraApi              = ConnectionRecord.GetApi(connectionId);
+        ServiceId            = serviceId;
         ConnId               = connectionId;
         EventName            = eventName;
         LoginUid             = loginUid;
