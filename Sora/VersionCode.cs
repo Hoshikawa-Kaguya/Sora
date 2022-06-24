@@ -1,9 +1,9 @@
 namespace Sora;
 
 /// <summary>
-/// 静态变量存放区
+/// 版本代号
 /// </summary>
-public static class StaticVariable
+public static class VersionCode
 {
     /// <summary>
     /// 版本号
