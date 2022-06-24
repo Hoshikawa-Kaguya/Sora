@@ -5,6 +5,7 @@ using Sora.Entities;
 using Sora.Entities.Info;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
+using Sora.Net.Records;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using YukariToolBox.LightLog;
 using Group = Sora.Entities.Group;
@@ -130,7 +131,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string[]     commandExps, MatchType matchType,
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
-        if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
+        if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
             return ValueTask.FromResult(WaitForNextRegexMessage(Sender, commandExps,
                 matchType, regexOptions, null, null,
                 SourceGroup) as GroupMessageEventArgs);
@@ -153,7 +154,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     Func<ValueTask> timeoutTask  = null,
                                                                     RegexOptions    regexOptions = RegexOptions.None)
     {
-        if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
+        if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
             return ValueTask.FromResult(WaitForNextRegexMessage(Sender, commandExps,
                 matchType, regexOptions, timeout,
                 timeoutTask,
@@ -173,7 +174,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(string       commandExp, MatchType matchType,
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
-        if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
+        if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
             return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
@@ -194,7 +195,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     Func<ValueTask> timeoutTask  = null,
                                                                     RegexOptions    regexOptions = RegexOptions.None)
     {
-        if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
+        if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
             return ValueTask.FromResult(WaitForNextRegexMessage(Sender, new[] {commandExp},
                 matchType, regexOptions, timeout,
                 timeoutTask,
@@ -215,7 +216,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     TimeSpan                         timeout,
                                                                     Func<ValueTask>                  timeoutTask = null)
     {
-        if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
+        if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
             return ValueTask.FromResult(WaitForNextCustomMessage(Sender, matchFunc, timeout, timeoutTask,
                 SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
@@ -230,7 +231,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     /// <returns>触发后的事件参数</returns>
     public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(Func<BaseMessageEventArgs, bool> matchFunc)
     {
-        if (StaticVariable.ServiceConfigs[SoraApi.ServiceId].EnableSoraCommandManager)
+        if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
             return ValueTask.FromResult(WaitForNextCustomMessage(Sender, matchFunc, null, null,
                 SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();

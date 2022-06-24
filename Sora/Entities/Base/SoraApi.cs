@@ -10,6 +10,7 @@ using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
+using Sora.Net.Records;
 using Sora.OnebotAdapter;
 
 namespace Sora.Entities.Base;
@@ -1076,7 +1077,7 @@ public sealed class SoraApi
     /// <param name="userId">用户ID</param>
     public bool BlockUser(long userId)
     {
-        return StaticVariable.ServiceConfigs[ServiceId].BlockUsers.Add(userId);
+        return ServiceRecord.AddSuperUser(ServiceId, userId);
     }
 
     /// <summary>
@@ -1085,7 +1086,7 @@ public sealed class SoraApi
     /// <param name="userId">用户ID</param>
     public bool RemoveBlock(long userId)
     {
-        return StaticVariable.ServiceConfigs[ServiceId].BlockUsers.Remove(userId);
+        return ServiceRecord.RemoveSuperUser(ServiceId, userId);
     }
 
     /// <summary>
@@ -1094,7 +1095,7 @@ public sealed class SoraApi
     /// <param name="userId">用户ID</param>
     public bool AddSuperUser(long userId)
     {
-        return StaticVariable.ServiceConfigs[ServiceId].SuperUsers.Add(userId);
+        return ServiceRecord.AddBlockUser(ServiceId, userId);
     }
 
     /// <summary>
@@ -1103,7 +1104,7 @@ public sealed class SoraApi
     /// <param name="userId">用户ID</param>
     public bool RemoveSuperUser(long userId)
     {
-        return StaticVariable.ServiceConfigs[ServiceId].SuperUsers.Remove(userId);
+        return ServiceRecord.RemoveBlockUser(ServiceId, userId);
     }
 
     #endregion

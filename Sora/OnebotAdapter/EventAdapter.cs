@@ -8,11 +8,11 @@ using Sora.Entities;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
+using Sora.Net.Records;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using Sora.OnebotModel.OnebotEvent.MetaEvent;
 using Sora.OnebotModel.OnebotEvent.NoticeEvent;
 using Sora.OnebotModel.OnebotEvent.RequestEvent;
-using Sora.Util;
 using YukariToolBox.LightLog;
 
 namespace Sora.OnebotAdapter;
@@ -39,7 +39,7 @@ public sealed class EventAdapter
         private init => _commandManager = value;
         get
         {
-            if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager) return _commandManager;
+            if (ServiceRecord.IsEnableSoraCommandManager(ServiceId)) return _commandManager;
             Exception e = new InvalidOperationException("在禁用指令管理器后尝试调用管理器，请在开启指令服务后再调用此实例");
             Log.Fatal(e, "非法操作", "指令服务已被禁用");
             throw e;
@@ -58,7 +58,7 @@ public sealed class EventAdapter
     internal EventAdapter(Guid serviceId, bool throwErr, bool sendErr)
     {
         ServiceId = serviceId;
-        CommandManager = StaticVariable.ServiceConfigs[serviceId].EnableSoraCommandManager
+        CommandManager = ServiceRecord.IsEnableSoraCommandManager(serviceId)
             ? new CommandManager(Assembly.GetEntryAssembly(), serviceId, throwErr, sendErr)
             : null;
     }
@@ -201,14 +201,14 @@ public sealed class EventAdapter
     /// <param name="connection">客户端链接接口</param>
     internal void Adapter(JObject messageJson, Guid connection)
     {
-        if (StaticVariable.ServiceConfigs[ServiceId].EnableSocketMessage)
-            Log.Debug("Socket",
-                $"Get json message:{messageJson.ToString(Formatting.None)}");
-        if (!Helper.CheckService(ServiceId))
+        if (!ServiceRecord.Exists(ServiceId))
         {
             Log.Error("BaseMessageEventArgs ctor", "服务不可用");
             return;
         }
+        if (ServiceRecord.IsEnableSocketMessage(ServiceId))
+            Log.Debug("Socket",
+                $"Get json message:{messageJson.ToString(Formatting.None)}");
         switch (TryGetJsonValue(messageJson, "post_type"))
         {
             //元事件类型
@@ -331,15 +331,15 @@ public sealed class EventAdapter
                 var privateMsg = messageJson.ToObject<OnebotPrivateMsgEventArgs>();
                 if (privateMsg == null) break;
                 //检查屏蔽用户
-                if (StaticVariable.ServiceConfigs[ServiceId].BlockUsers.Contains(privateMsg.UserId)) return;
+                if (ServiceRecord.IsBlockUser(ServiceId, privateMsg.UserId)) return;
                 Log.Debug("Sora",
                     $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                 var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
                 //标记消息已读
-                if (StaticVariable.ServiceConfigs[ServiceId].AutoMarkMessageRead)
+                if (ServiceRecord.IsAutoMarkMessageRead(ServiceId))
                     ApiAdapter.InternalMarkMessageRead(connection, privateMsg.MessageId);
                 //处理指令
-                if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager)
+                if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
                     await CommandManager.CommandAdapter(eventArgs);
                 if (!eventArgs.IsContinueEventChain)
                     break;
@@ -353,15 +353,15 @@ public sealed class EventAdapter
             {
                 var groupMsg = messageJson.ToObject<OnebotGroupMsgEventArgs>();
                 if (groupMsg == null) break;
-                if (StaticVariable.ServiceConfigs[ServiceId].BlockUsers.Contains(groupMsg.UserId)) return;
+                if (ServiceRecord.IsBlockUser(ServiceId, groupMsg.UserId)) return;
                 Log.Debug("Sora",
                     $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                 var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
                 //标记消息已读
-                if (StaticVariable.ServiceConfigs[ServiceId].AutoMarkMessageRead)
+                if (ServiceRecord.IsAutoMarkMessageRead(ServiceId))
                     ApiAdapter.InternalMarkMessageRead(connection, groupMsg.MessageId);
                 //处理指令
-                if (StaticVariable.ServiceConfigs[ServiceId].EnableSoraCommandManager)
+                if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
                     await CommandManager.CommandAdapter(eventArgs);
                 if (!eventArgs.IsContinueEventChain)
                     break;

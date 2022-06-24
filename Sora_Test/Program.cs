@@ -8,7 +8,7 @@ using YukariToolBox.LightLog;
 //设置log等级
 Log.LogConfiguration
    .EnableConsoleOutput()
-   .SetLogLevel(LogLevel.Debug);
+   .SetLogLevel(LogLevel.Verbose);
 
 //实例化Sora服务
 ISoraService service = SoraServiceFactory.CreateService(new ServerConfig

@@ -7,6 +7,7 @@ using Sora.Entities.Base;
 using Sora.Entities.Socket;
 using Sora.Interfaces;
 using Sora.Net.Config;
+using Sora.Net.Records;
 using Sora.OnebotAdapter;
 using Sora.Util;
 using YukariToolBox.LightLog;
@@ -90,7 +91,7 @@ public sealed class SoraWebsocketServer : ISoraService
         }
 
         //写入初始化信息
-        if (!StaticVariable.ServiceConfigs.TryAdd(ServiceId, new ServiceConfig(Config, this)))
+        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(Config, this)))
             throw new DataException("try add service config failed");
         //检查参数
         if (Config.Port == 0)
@@ -228,6 +229,7 @@ public sealed class SoraWebsocketServer : ISoraService
     /// </summary>
     ~SoraWebsocketServer()
     {
+        Log.Warning("Destructor", $"Service[{ServiceId}]");
         Dispose();
     }
 
@@ -237,8 +239,11 @@ public sealed class SoraWebsocketServer : ISoraService
     public void Dispose()
     {
         _disposed = true;
+        //清理连接和ConnectionInfos
         StopService().AsTask().Wait();
         ConnManager?.Dispose();
+        Task.Delay(100).Wait();
+        //清除所有连接
         StaticVariable.DisposeService(ServiceId);
         GC.SuppressFinalize(this);
     }

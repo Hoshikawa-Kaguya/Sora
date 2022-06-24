@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sora.Command;
@@ -66,8 +65,7 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
             msg.Time, msg.Font, null);
         Sender        = new User(serviceId, connectionId, msg.UserId);
         IsSelfMessage = msg.UserId == msg.SelfId;
-        IsSuperUser = msg.UserId is not 0 or -1 &&
-            StaticVariable.ServiceConfigs[serviceId].SuperUsers.Any(id => id == msg.UserId);
+        IsSuperUser   = msg.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, msg.UserId);
     }
 
     #region 连续指令

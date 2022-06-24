@@ -13,6 +13,7 @@ using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Net;
+using Sora.Net.Records;
 using Sora.OnebotModel.ApiParams;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 using YukariToolBox.LightLog;
@@ -192,7 +193,7 @@ internal static class ApiAdapter
             {
                 t.IsSuperUser =
                     t.UserId is not 0 or -1
-                 && StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
+                 && ServiceRecord.IsSuperUser(serviceId, t.UserId);
             }
         );
         return (apiStatus, friendInfos);
@@ -255,7 +256,7 @@ internal static class ApiAdapter
             {
                 t.IsSuperUser =
                     t.UserId is not 0 or -1
-                 && StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(t.UserId);
+                 && ServiceRecord.IsSuperUser(serviceId, t.UserId);
             }
         );
 
@@ -315,7 +316,7 @@ internal static class ApiAdapter
         GroupMemberInfo memberInfo = ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo();
         //检查服务管理员权限
         memberInfo.IsSuperUser = memberInfo.UserId is not 0 or -1 &&
-            StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(memberInfo.UserId);
+            ServiceRecord.IsSuperUser(serviceId, memberInfo.UserId);
         return (apiStatus, memberInfo);
     }
 
@@ -346,7 +347,7 @@ internal static class ApiAdapter
         UserInfo info = ret["data"]?.ToObject<UserInfo>() ?? new UserInfo();
         //检查服务管理员权限
         info.IsSuperUser = info.UserId is not 0 or -1 &&
-            StaticVariable.ServiceConfigs[serviceId].SuperUsers.Contains(info.UserId);
+            ServiceRecord.IsSuperUser(serviceId, info.UserId);
 
         return (apiStatus, info, ret["data"]?["qid"]?.ToString());
     }
