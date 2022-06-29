@@ -134,7 +134,7 @@ public sealed class SoraWebsocketServer : ISoraService
             //出错后进行重启
             RestartAfterListenError = true
         };
-        Server.Start(SocketConfig);
+        Server.Start(SocketEvent);
         Log.Info("Sora", $"Sora WebSocket服务器正在运行[{Config.Host}:{Config.Port}]");
         _isRunning = true;
         return ValueTask.CompletedTask;
@@ -159,46 +159,16 @@ public sealed class SoraWebsocketServer : ISoraService
     /// <summary>
     /// socket事件处理
     /// </summary>
-    private void SocketConfig(IWebSocketConnection socket)
+    private void SocketEvent(IWebSocketConnection socket)
     {
-        //接收事件处理
-        //获取请求头数据
-        if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID", out string selfId) || //bot UID
-            !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role", out string role)) //Client Type
-            return;
-
-        //请求路径检查
-        bool isLost = role switch
-        {
-            "Universal" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath.Trim('/')),
-            _           => true
-        };
-        if (isLost)
-        {
-            socket.Close();
-            Log.Warning("Sora",
-                $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
-            return;
-        }
-
         //打开连接
         socket.OnOpen = () =>
         {
             if (_disposed || !_isRunning) return;
-            //获取Token
-            if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",
-                    out string headerValue))
-            {
-                string token = headerValue.Split(' ')[1];
-                Log.Debug("Server", $"get token = {token}");
-                //验证Token
-                if (!token.Equals(Config.AccessToken)) return;
-            }
-
-            //向客户端发送Ping
-            socket.SendPing(new byte[] {1, 2, 5});
+            // 接收事件处理
+            if (!CheckRequest(socket, out string selfId)) return;
             //事件回调
-            ConnManager.OpenConnection(role, selfId, new ServerSocket(socket), ServiceId,
+            ConnManager.OpenConnection("Universal", selfId, new ServerSocket(socket), ServiceId,
                 socket.ConnectionInfo.Id, Config.ApiTimeOut);
             Log.Info("Sora",
                 $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
@@ -209,8 +179,7 @@ public sealed class SoraWebsocketServer : ISoraService
             if (_disposed || !_isRunning) return;
             //移除原连接信息
             if (ConnectionRecord.Exists(ServiceId))
-                ConnManager.CloseConnection(role, Convert.ToInt64(selfId),
-                    socket.ConnectionInfo.Id);
+                ConnManager.CloseConnection(socket.ConnectionInfo.Id);
             Log.Info("Sora",
                 $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
         };
@@ -259,6 +228,40 @@ public sealed class SoraWebsocketServer : ISoraService
     public SoraApi GetApi(Guid connectionId)
     {
         return ConnectionRecord.GetApi(connectionId);
+    }
+
+    private bool CheckRequest(IWebSocketConnection socket, out string selfId)
+    {
+        //获取请求头数据
+        if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID", out selfId) ||        //bot UID
+            !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role", out string role)) //Client Type
+            return false;
+
+        //请求路径检查
+        bool isLost = role switch
+        {
+            "Universal" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath.Trim('/')),
+            _           => true
+        };
+        if (isLost)
+        {
+            socket.Close();
+            Log.Warning("Sora",
+                $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
+            return false;
+        }
+
+        //获取Token
+        if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",
+                out string headerValue))
+        {
+            string token = headerValue.Split(' ')[1];
+            Log.Debug("Server", $"get token = {token}");
+            //验证Token
+            if (!token.Equals(Config.AccessToken)) return false;
+        }
+
+        return true;
     }
 
     #endregion
