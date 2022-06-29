@@ -46,7 +46,8 @@ public sealed class CommandManager
 
     /// <summary>
     /// 服务ID
-    /// </summary>
+    /// </summary> TODO
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local
     private Guid ServiceId { get; }
 
     #endregion

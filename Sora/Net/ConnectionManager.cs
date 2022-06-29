@@ -105,7 +105,7 @@ public sealed class ConnectionManager : IDisposable
         //遍历超时的连接
         foreach ((Guid connection, SoraConnectionInfo info) in timeoutDict)
         {
-            CloseConnection("Universal", info.LoginUid, connection);
+            CloseConnection(connection);
             double t = (now - info.LastHeartBeatTime).TotalMilliseconds;
             Log.Error("HeartBeatCheck",
                 $"Socket:[{connection}]connection time out({t}ms)，disconnect");
@@ -152,15 +152,15 @@ public sealed class ConnectionManager : IDisposable
     /// <summary>
     /// 服务器链接关闭事件
     /// </summary>
-    /// <param name="role">通道标识</param>
-    /// <param name="selfId">事件源</param>
     /// <param name="connId">id</param>
-    internal void CloseConnection(string role, long selfId, Guid connId)
+    internal void CloseConnection(Guid connId)
     {
+        ConnectionRecord.GetConn(connId, out SoraConnectionInfo conn);
+
         ConnectionRecord.CloseConn(connId);
         //触发事件
         if (OnCloseConnectionAsync == null) return;
-        Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs(role, selfId, connId)); });
+        Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs("Universal", conn.LoginUid, connId)); });
     }
 
     /// <summary>
@@ -170,7 +170,7 @@ public sealed class ConnectionManager : IDisposable
     {
         List<SoraConnectionInfo> connections = ConnectionRecord.GetConnList(serviceId);
         foreach (SoraConnectionInfo connection in connections)
-            CloseConnection("Universal", connection.LoginUid, connection.ApiInstance.ConnectionId);
+            CloseConnection(connection.ApiInstance.ConnectionId);
     }
 
     /// <summary>
