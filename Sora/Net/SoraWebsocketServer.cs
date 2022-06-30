@@ -178,7 +178,7 @@ public sealed class SoraWebsocketServer : ISoraService
         {
             if (_disposed || !_isRunning) return;
             //移除原连接信息
-            if (ConnectionRecord.Exists(ServiceId))
+            if (ConnectionRecord.Exists(socket.ConnectionInfo.Id))
                 ConnManager.CloseConnection(socket.ConnectionInfo.Id);
             Log.Info("Sora",
                 $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
