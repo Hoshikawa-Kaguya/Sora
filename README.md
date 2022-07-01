@@ -40,8 +40,6 @@
 
 如需要查看最新自动生成的文档请前往 [![Sora on fuget.org](https://www.fuget.org/packages/Sora/badge.svg)](https://www.fuget.org/packages/Sora)
 
-没什么人的开发交流群号(qq):1081190562
-
 <details>
   <summary>支持的连接方式</summary>
 
