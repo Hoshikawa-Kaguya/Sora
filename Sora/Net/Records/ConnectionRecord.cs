@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Sora.Entities.Base;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Interfaces;
@@ -17,6 +18,8 @@ internal static class ConnectionRecord
     /// </summary>
     private static readonly ConcurrentDictionary<Guid, SoraConnectionInfo> _connections = new();
 
+    private static readonly HashSet<Guid> _deadConn = new();
+
     #region 连接管理
 
     /// <summary>
@@ -30,6 +33,7 @@ internal static class ConnectionRecord
     {
         //检查是否已存在值
         if (_connections.ContainsKey(connId)) return false;
+        if (_deadConn.Contains(connId)) _deadConn.Remove(connId);
         //selfId均在第一次链接开启时留空，并在meta事件触发后更新
         return _connections.TryAdd(connId, new SoraConnectionInfo(
             serviceId,
@@ -47,10 +51,11 @@ internal static class ConnectionRecord
     {
         if (!_connections.ContainsKey(connId))
         {
-            Log.Error("Socket", $"连接不可用[{connId}]");
+            Log.Error("Socket", $"连接不可用[{connId}]1");
             return;
         }
-
+        //关闭链接并标记
+        _deadConn.Add(connId);
         bool closeFailed = false;
         try
         {
@@ -62,12 +67,22 @@ internal static class ConnectionRecord
             closeFailed = true;
         }
 
-        if (!_connections.TryRemove(connId, out _) || closeFailed) Log.Error("Socket", "关闭socket连接时发生错误");
+        bool e1     = _connections.ContainsKey(connId);
+        bool connRm = _connections.TryRemove(connId, out _);
+        bool e2     = _connections.ContainsKey(connId);
+
+        if (!connRm || closeFailed) Log.Error("Socket", "关闭socket连接时发生错误");
+        //防止多线程冲突
+        Task.Run(async () =>
+        {
+            await Task.Delay(TimeSpan.FromSeconds(30));
+            _deadConn.Remove(connId);
+        });
     }
 
     public static List<SoraConnectionInfo> GetConnList(Guid serviceId)
     {
-        return _connections.Where(c => c.Value.ApiInstance.ServiceId == serviceId)
+        return _connections.Where(c => c.Value.ApiInstance.ServiceId == serviceId && !_deadConn.Contains(c.Key))
                            .Select(c => c.Value)
                            .ToList();
     }
@@ -85,9 +100,9 @@ internal static class ConnectionRecord
 
     public static bool GetConn(Guid connId, out SoraConnectionInfo connection)
     {
-        if (!_connections.ContainsKey(connId))
+        if (!_connections.ContainsKey(connId) || _deadConn.Contains(connId))
         {
-            Log.Error("Socket", $"连接不可用[{connId}]");
+            Log.Error("Socket", $"连接不可用[{connId}]2");
             connection = default;
             return false;
         }
@@ -98,7 +113,7 @@ internal static class ConnectionRecord
 
     public static bool Exists(Guid connId)
     {
-        return _connections.ContainsKey(connId);
+        return _connections.ContainsKey(connId) && !_deadConn.Contains(connId);
     }
 
     public static bool IsEmpty()
@@ -139,7 +154,7 @@ internal static class ConnectionRecord
     /// <param name="uid">新的UID</param>
     public static void UpdateLoginUid(Guid connId, long uid)
     {
-        if (!_connections.ContainsKey(connId)) return;
+        if (!_connections.ContainsKey(connId) || _deadConn.Contains(connId)) return;
         SoraConnectionInfo oldInfo = _connections[connId];
         SoraConnectionInfo newInfo = oldInfo;
         newInfo.LoginUid = uid;
@@ -152,7 +167,7 @@ internal static class ConnectionRecord
     /// <param name="connId">连接标识</param>
     public static void UpdateHeartBeat(Guid connId)
     {
-        if (!_connections.ContainsKey(connId)) return;
+        if (!_connections.ContainsKey(connId) || _deadConn.Contains(connId)) return;
         SoraConnectionInfo oldInfo = _connections[connId];
         SoraConnectionInfo newInfo = oldInfo;
         newInfo.LastHeartBeatTime = DateTime.Now;
@@ -182,9 +197,9 @@ internal static class ConnectionRecord
 
     public static SoraApi GetApi(Guid connId)
     {
-        if (!_connections.ContainsKey(connId))
+        if (!_connections.ContainsKey(connId) || _deadConn.Contains(connId))
         {
-            Log.Error("Socket", $"连接不可用[{connId}]");
+            Log.Error("Socket", $"连接不可用[{connId}]3");
             return null;
         }
 
