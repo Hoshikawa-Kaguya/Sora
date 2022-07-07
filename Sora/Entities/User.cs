@@ -96,9 +96,10 @@ public sealed class User : BaseModel
     /// <param name="nodeList">
     /// 节点(<see cref="CustomNode"/>)消息段列表
     /// </param>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateForwardMsg(IEnumerable<CustomNode> nodeList)
+    /// <param name="timeout">覆盖原超时</param>
+    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateForwardMsg(IEnumerable<CustomNode> nodeList, TimeSpan? timeout)
     {
-        return await SoraApi.SendPrivateForwardMsg(Id, nodeList);
+        return await SoraApi.SendPrivateForwardMsg(Id, nodeList, timeout);
     }
 
     #endregion

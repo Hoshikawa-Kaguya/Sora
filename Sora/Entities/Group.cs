@@ -107,9 +107,10 @@ public sealed class Group : BaseModel
     /// <param name="nodeList">
     /// 节点(<see cref="CustomNode"/>)消息段列表
     /// </param>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(IEnumerable<CustomNode> nodeList)
+    /// <param name="timeout">超时覆盖</param>
+    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(IEnumerable<CustomNode> nodeList, TimeSpan? timeout = null)
     {
-        return await SoraApi.SendGroupForwardMsg(Id, nodeList);
+        return await SoraApi.SendGroupForwardMsg(Id, nodeList, timeout);
     }
 
     /// <summary>
