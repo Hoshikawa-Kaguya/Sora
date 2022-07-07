@@ -8,7 +8,7 @@ public static class VersionCode
     /// <summary>
     /// 版本号
     /// </summary>
-    public const string VERSION = "1.0.0-rc66";
+    public const string VERSION = "1.0.0-rc67";
 
     /// <summary>
     /// Onebot版本
