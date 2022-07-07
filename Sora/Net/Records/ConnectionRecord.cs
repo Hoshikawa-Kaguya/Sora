@@ -54,6 +54,7 @@ internal static class ConnectionRecord
             Log.Error("Socket", $"连接不可用[{connId}]1");
             return;
         }
+
         //关闭链接并标记
         _deadConn.Add(connId);
         bool closeFailed = false;
@@ -67,17 +68,14 @@ internal static class ConnectionRecord
             closeFailed = true;
         }
 
-        bool e1     = _connections.ContainsKey(connId);
-        bool connRm = _connections.TryRemove(connId, out _);
-        bool e2     = _connections.ContainsKey(connId);
-
-        if (!connRm || closeFailed) Log.Error("Socket", "关闭socket连接时发生错误");
         //防止多线程冲突
         Task.Run(async () =>
         {
             await Task.Delay(TimeSpan.FromSeconds(30));
             _deadConn.Remove(connId);
         });
+        if (!_connections.TryRemove(connId, out _) || closeFailed) 
+            Log.Error("Socket", "关闭socket连接时发生错误");
     }
 
     public static List<SoraConnectionInfo> GetConnList(Guid serviceId)
