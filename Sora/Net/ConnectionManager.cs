@@ -155,7 +155,7 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="connId">id</param>
     internal void CloseConnection(Guid connId)
     {
-        ConnectionRecord.GetConn(connId, out SoraConnectionInfo conn);
+        if (!ConnectionRecord.GetConn(connId, out SoraConnectionInfo conn)) return;
 
         ConnectionRecord.CloseConn(connId);
         //触发事件

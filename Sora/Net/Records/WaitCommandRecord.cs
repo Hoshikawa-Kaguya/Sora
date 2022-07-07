@@ -77,8 +77,7 @@ internal static class WaitCommandRecord
     public static List<Guid> GetMatchCommand(BaseMessageEventArgs eventArgs)
     {
         return _waitingDict
-              .Where(command =>
-                   WaitingCommandMatch(command, eventArgs))
+              .Where(command => WaitingCommandMatch(command.Value, eventArgs))
               .Select(i => i.Key)
               .ToList();
     }
@@ -99,8 +98,9 @@ internal static class WaitCommandRecord
     #region 等待指令匹配
 
     [NeedReview("ALL")]
-    private static bool WaitingCommandMatch(KeyValuePair<Guid, WaitingInfo> command,
-                                            BaseMessageEventArgs            eventArgs)
+    private static bool WaitingCommandMatch(
+        WaitingInfo          command,
+        BaseMessageEventArgs eventArgs)
     {
         switch (eventArgs.SourceType)
         {
@@ -108,13 +108,13 @@ internal static class WaitCommandRecord
             {
                 bool preMatch =
                     //判断发起源
-                    command.Value.SourceFlag == SourceFlag.Group
+                    command.SourceFlag == SourceFlag.Group
                     //判断来自同一个连接
-                 && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
+                 && command.ConnectionId == eventArgs.SoraApi.ConnectionId
                     //判断来着同一个群
-                 && command.Value.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
+                 && command.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
                     //判断来自同一人
-                 && command.Value.Source.u == eventArgs.Sender;
+                 && command.Source.u == eventArgs.Sender;
                 if (!preMatch) return false;
                 break;
             }
@@ -122,11 +122,11 @@ internal static class WaitCommandRecord
             {
                 bool preMatch =
                     //判断发起源
-                    command.Value.SourceFlag == SourceFlag.Private
+                    command.SourceFlag == SourceFlag.Private
                     //判断来自同一个连接
-                 && command.Value.ConnectionId == eventArgs.SoraApi.ConnectionId
+                 && command.ConnectionId == eventArgs.SoraApi.ConnectionId
                     //判断来自同一人
-                 && command.Value.Source.u == eventArgs.Sender;
+                 && command.Source.u == eventArgs.Sender;
                 if (!preMatch) return false;
                 break;
             }
@@ -134,13 +134,10 @@ internal static class WaitCommandRecord
                 return false;
         }
 
-        if (command.Value.MatchFunc is not null)
-            return command.Value.MatchFunc(eventArgs);
-        return command.Value.CommandExpressions?.Any(regex =>
-                Regex.IsMatch(eventArgs.Message.RawText, regex,
-                    RegexOptions.Compiled |
-                    command.Value.RegexOptions)) ??
-            false;
+        if (command.MatchFunc is not null)
+            return command.MatchFunc(eventArgs);
+        return command.CommandExpressions?.Any(regex => Regex.IsMatch(
+                   eventArgs.Message.RawText, regex, RegexOptions.Compiled | command.RegexOptions)) ?? false;
     }
 
     #endregion

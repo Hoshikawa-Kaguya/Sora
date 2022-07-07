@@ -148,7 +148,6 @@ public sealed class SoraWebsocketClient : ISoraService
                   .Subscribe(info => Task.Run(() =>
                    {
                        if (_disposed) return;
-                       ConnectionRecord.GetLoginUid(ServiceId, out long uid);
                        //移除原连接信息
                        if (ConnectionRecord.Exists(ServiceId))
                            ConnManager.CloseConnection(ServiceId);
