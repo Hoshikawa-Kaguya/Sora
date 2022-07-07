@@ -485,7 +485,7 @@ internal static class ApiAdapter
         //将消息段转换为数组
         CustomNode[] customNodes = msgList as CustomNode[] ?? msgList.ToArray();
 
-        Log.Debug("Sora", "Sending send_group_forward_msg request");
+        Log.Debug("Sora", "Sending send_private_forward_msg request");
         //发送消息
         (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
         {
@@ -503,7 +503,7 @@ internal static class ApiAdapter
         int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
             ? messageCode
             : -1;
-        Log.Debug("Sora", $"Get send_group_forward_msg response [{msgCode}]{nameof(apiStatus)}={apiStatus.RetCode}");
+        Log.Debug("Sora", $"Get send_private_forward_msg response [{msgCode}]{nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus, msgCode);
     }
 
