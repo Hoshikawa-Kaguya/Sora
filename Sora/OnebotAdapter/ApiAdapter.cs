@@ -489,7 +489,7 @@ internal static class ApiAdapter
         //发送消息
         (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
         {
-            ApiRequestType = ApiRequestType.SendGroupForwardMsg,
+            ApiRequestType = ApiRequestType.SendPrivateForwardMsg,
             ApiParams = new
             {
                 user_id = userId,
