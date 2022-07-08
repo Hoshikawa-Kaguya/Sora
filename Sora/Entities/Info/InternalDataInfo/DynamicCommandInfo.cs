@@ -18,12 +18,13 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
     /// 指令信息构造(群聊动态指令构建)
     /// </summary>
     public DynamicCommandInfo(
-        string desc,        string[] regex, Func<BaseMessageEventArgs, bool> matchFunc, MemberRoleType permissionType,
-        int    priority,    RegexOptions regexOptions, Action<Exception> exceptionHandler, long[] sourceGroups,
+        string desc,     string[]     regex, Func<BaseMessageEventArgs, bool> matchFunc, MemberRoleType permissionType,
+        int    priority, RegexOptions regexOptions, Action<Exception, BaseMessageEventArgs> exceptionHandler,
+        long[] sourceGroups,
         long[] sourceUsers, Func<GroupMessageEventArgs, ValueTask> groupCommand, Guid commandId, bool suCommand,
         string groupName)
         : base(desc, regex, permissionType, suCommand, priority, regexOptions, SourceFlag.Group,
-               exceptionHandler, sourceGroups, sourceUsers, groupName, commandId.ToString())
+            exceptionHandler, sourceGroups, sourceUsers, groupName, commandId.ToString())
     {
         CommandId        = commandId;
         GroupCommand     = groupCommand;
@@ -35,10 +36,10 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
     /// </summary>
     public DynamicCommandInfo(
         string desc, string[] regex, Func<BaseMessageEventArgs, bool> matchFunc, int priority,
-        RegexOptions regexOptions, Action<Exception> exceptionHandler, long[] sourceUsers,
+        RegexOptions regexOptions, Action<Exception, BaseMessageEventArgs> exceptionHandler, long[] sourceUsers,
         Func<PrivateMessageEventArgs, ValueTask> privateCommand, Guid commandId, bool suCommand, string groupName)
         : base(desc, regex, MemberRoleType.Member, suCommand, priority, regexOptions, SourceFlag.Private,
-               exceptionHandler, Array.Empty<long>(), sourceUsers, groupName, commandId.ToString())
+            exceptionHandler, Array.Empty<long>(), sourceUsers, groupName, commandId.ToString())
     {
         CommandId        = commandId;
         PrivateCommand   = privateCommand;
