@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
+using Sora.EventArgs.SoraEvent;
 
 namespace Sora.Entities.Info.InternalDataInfo;
 
@@ -21,10 +22,10 @@ internal sealed record SoraCommandInfo : BaseCommandInfo
     internal SoraCommandInfo(
         string desc, string[] regex, string className, string groupName,
         MethodInfo method, MemberRoleType permissionType, int priority, RegexOptions regexOptions, SourceFlag source,
-        Action<Exception> exceptionHandler, long[] sourceGroups, long[] sourceUsers, bool suCommand,
-        Type instanceType = null)
+        Action<Exception, BaseMessageEventArgs> exceptionHandler, long[] sourceGroups, long[] sourceUsers,
+        bool suCommand, Type instanceType = null)
         : base(desc, regex, permissionType, suCommand, priority, regexOptions,
-               source, exceptionHandler, sourceGroups, sourceUsers, groupName, $"{className}.{method.Name}")
+            source, exceptionHandler, sourceGroups, sourceUsers, groupName, $"{className}.{method.Name}")
     {
         ClassName    = className;
         MethodInfo   = method;

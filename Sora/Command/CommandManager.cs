@@ -94,10 +94,10 @@ public sealed class CommandManager
                      //获取指令组
                     .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
                     .Select(type => (
-                         type,
-                         methods: type.GetMethods()
-                                      .Where(method => method.CheckMethodLegality())
-                                      .ToArray()))
+                                        type,
+                                        methods: type.GetMethods()
+                                                     .Where(method => method.CheckMethodLegality())
+                                                     .ToArray()))
                     .ToDictionary(methods => methods.type, methods => methods.methods);
 
         foreach ((Type classType, MethodInfo[] methodInfos) in cmdGroups)
@@ -153,17 +153,17 @@ public sealed class CommandManager
     /// <param name="sourceUsers">成员限制</param>
     /// <param name="desc">描述</param>
     public Guid RegisterGroupDynamicCommand(
-        string[]          cmdExps, Func<GroupMessageEventArgs, ValueTask> groupCommand,
-        MatchType         matchType        = MatchType.Full,
-        RegexOptions      regexOptions     = RegexOptions.None,
-        string            groupName        = "",
-        Action<Exception> exceptionHandler = null,
-        MemberRoleType    memberRole       = MemberRoleType.Member,
-        bool              suCommand        = false,
-        int?              priority         = null,
-        long[]            sourceGroups     = null,
-        long[]            sourceUsers      = null,
-        string            desc             = "")
+        string[]                                cmdExps, Func<GroupMessageEventArgs, ValueTask> groupCommand,
+        MatchType                               matchType        = MatchType.Full,
+        RegexOptions                            regexOptions     = RegexOptions.None,
+        string                                  groupName        = "",
+        Action<Exception, BaseMessageEventArgs> exceptionHandler = null,
+        MemberRoleType                          memberRole       = MemberRoleType.Member,
+        bool                                    suCommand        = false,
+        int?                                    priority         = null,
+        long[]                                  sourceGroups     = null,
+        long[]                                  sourceUsers      = null,
+        string                                  desc             = "")
     {
         //判断参数合法性
         if (cmdExps is null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
@@ -202,16 +202,16 @@ public sealed class CommandManager
     /// <param name="sourceUsers">成员限制</param>
     /// <param name="desc">描述</param>
     public Guid RegisterGroupDynamicCommand(
-        Func<BaseMessageEventArgs, bool>       matchFunc,
-        Func<GroupMessageEventArgs, ValueTask> groupCommand,
-        string                                 groupName        = "",
-        Action<Exception>                      exceptionHandler = null,
-        MemberRoleType                         memberRole       = MemberRoleType.Member,
-        bool                                   suCommand        = false,
-        int?                                   priority         = null,
-        long[]                                 sourceGroups     = null,
-        long[]                                 sourceUsers      = null,
-        string                                 desc             = "")
+        Func<BaseMessageEventArgs, bool>        matchFunc,
+        Func<GroupMessageEventArgs, ValueTask>  groupCommand,
+        string                                  groupName        = "",
+        Action<Exception, BaseMessageEventArgs> exceptionHandler = null,
+        MemberRoleType                          memberRole       = MemberRoleType.Member,
+        bool                                    suCommand        = false,
+        int?                                    priority         = null,
+        long[]                                  sourceGroups     = null,
+        long[]                                  sourceUsers      = null,
+        string                                  desc             = "")
     {
         //判断参数合法性
         if (groupCommand is null) throw new NullReferenceException($"{nameof(groupCommand)} is null");
@@ -245,15 +245,15 @@ public sealed class CommandManager
     /// <param name="sourceUsers">用户限制</param>
     /// <param name="desc">描述</param>
     public Guid RegisterPrivateDynamicCommand(
-        string[]          cmdExps, Func<PrivateMessageEventArgs, ValueTask> privateCommand,
-        MatchType         matchType        = MatchType.Full,
-        RegexOptions      regexOptions     = RegexOptions.None,
-        string            groupName        = "",
-        Action<Exception> exceptionHandler = null,
-        bool              suCommand        = false,
-        int?              priority         = null,
-        long[]            sourceUsers      = null,
-        string            desc             = "")
+        string[]                                cmdExps, Func<PrivateMessageEventArgs, ValueTask> privateCommand,
+        MatchType                               matchType        = MatchType.Full,
+        RegexOptions                            regexOptions     = RegexOptions.None,
+        string                                  groupName        = "",
+        Action<Exception, BaseMessageEventArgs> exceptionHandler = null,
+        bool                                    suCommand        = false,
+        int?                                    priority         = null,
+        long[]                                  sourceUsers      = null,
+        string                                  desc             = "")
     {
         //判断参数合法性
         if (cmdExps is null || cmdExps.Length == 0) throw new NullReferenceException("cmdExps is empty");
@@ -291,7 +291,7 @@ public sealed class CommandManager
         Func<BaseMessageEventArgs, bool>         matchFunc,
         Func<PrivateMessageEventArgs, ValueTask> privateCommand,
         string                                   groupName        = "",
-        Action<Exception>                        exceptionHandler = null,
+        Action<Exception, BaseMessageEventArgs>  exceptionHandler = null,
         bool                                     suCommand        = false,
         int?                                     priority         = null,
         long[]                                   sourceUsers      = null,
@@ -385,10 +385,7 @@ public sealed class CommandManager
 
         //处理消息段
         List<Guid> waitingCommand = WaitCommandRecord.GetMatchCommand(eventArgs);
-        foreach (Guid key in waitingCommand)
-        {
-            WaitCommandRecord.UpdateRecord(key, eventArgs);
-        }
+        foreach (Guid key in waitingCommand) WaitCommandRecord.UpdateRecord(key, eventArgs);
 
         //当前流程已经处理过wait command了。不再继续处理普通command，否则会一次发两条消息，普通消息留到下一次处理
         if (waitingCommand.Count != 0)
@@ -418,8 +415,9 @@ public sealed class CommandManager
                     eventArgs.CommandId   = commandInfo.CommandId;
                     eventArgs.CommandName = commandInfo.CommandName;
                     eventArgs.CommandRegex = commandInfo.Regex.Length != 0
-                        ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText)).ToArray()
-                        : Array.Empty<Regex>();
+                                                 ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText))
+                                                              .ToArray()
+                                                 : Array.Empty<Regex>();
                     switch (eventArgs.SourceType)
                     {
                         case SourceFlag.Group:
@@ -477,8 +475,9 @@ public sealed class CommandManager
 
                 eventArgs.CommandName = commandInfo.CommandName;
                 eventArgs.CommandRegex = commandInfo.Regex.Length != 0
-                    ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText)).ToArray()
-                    : Array.Empty<Regex>();
+                                             ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText))
+                                                          .ToArray()
+                                             : Array.Empty<Regex>();
                 //执行指令方法
                 if (isAsync && commandInfo.MethodInfo.ReturnType != typeof(void))
                 {
@@ -521,8 +520,9 @@ public sealed class CommandManager
     #region 指令检查和匹配
 
     [NeedReview("ALL")]
-    private bool CommandMatch(BaseCommandInfo      command,
-                              BaseMessageEventArgs eventArgs)
+    private bool CommandMatch(
+        BaseCommandInfo      command,
+        BaseMessageEventArgs eventArgs)
     {
         if (!string.IsNullOrEmpty(command.GroupName)            &&
             _groupEnableFlagDict.ContainsKey(command.GroupName) &&
@@ -535,20 +535,17 @@ public sealed class CommandManager
 
         //判断正则表达式或自定义表达式
         if (command is DynamicCommandInfo dynamicCommand)
-        {
             //动态指令检查自定义表达式
-            if (!dynamicCommand.CommandMatchFunc?.Invoke(eventArgs) ?? false) return false;
-        }
-        if (command.Regex.Length != 0 && !command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText)))
-        {
-            return false;
-        }
+            if (!dynamicCommand.CommandMatchFunc?.Invoke(eventArgs) ?? false)
+                return false;
+        if (command.Regex.Length != 0 &&
+            !command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText))) return false;
 
         //机器人管理员判断
         if (command.SuperUserCommand && !eventArgs.IsSuperUser)
         {
             Log.Warning("CommandAdapter",
-                        $"成员{eventArgs.Sender.Id}正在尝试执行SuperUser指令[{command.CommandName}]");
+                $"成员{eventArgs.Sender.Id}正在尝试执行SuperUser指令[{command.CommandName}]");
             return false;
         }
 
@@ -557,7 +554,7 @@ public sealed class CommandManager
         {
             case SourceFlag.Group:
                 var e = eventArgs as GroupMessageEventArgs ??
-                    throw new NullReferenceException("event args is null with unknown reason");
+                        throw new NullReferenceException("event args is null with unknown reason");
                 //检查来源群
                 if (command.SourceGroups.Length != 0)
                     sourceMatch &= command.SourceGroups.Any(gid => gid == e.SourceGroup);
@@ -592,7 +589,6 @@ public sealed class CommandManager
                 return false;
         }
 
-        
 
         return sourceMatch;
     }
@@ -706,11 +702,12 @@ public sealed class CommandManager
     /// <param name="prefix">指令前缀</param>
     /// <param name="soraCommandInfo">指令信息</param>
     [NeedReview("ALL")]
-    private bool GenerateCommandInfo(MethodInfo          method,
-                                     Type                classType,
-                                     string              groupName,
-                                     string              prefix,
-                                     out SoraCommandInfo soraCommandInfo)
+    private bool GenerateCommandInfo(
+        MethodInfo          method,
+        Type                classType,
+        string              groupName,
+        string              prefix,
+        out SoraCommandInfo soraCommandInfo)
     {
         //获取指令属性
         SoraCommand commandAttr =
@@ -794,8 +791,9 @@ public sealed class CommandManager
     /// <summary>
     /// 指令执行错误时的处理
     /// </summary>
-    private async ValueTask CommandErrorParse(Exception       err,         BaseMessageEventArgs eventArgs,
-                                              BaseCommandInfo commandInfo, string               cmdName)
+    private async ValueTask CommandErrorParse(
+        Exception       err,         BaseMessageEventArgs eventArgs,
+        BaseCommandInfo commandInfo, string               cmdName)
     {
         string errLog = Log.ErrorLogBuilder(err);
         var    msg    = new StringBuilder();
@@ -832,7 +830,7 @@ public sealed class CommandManager
 
         //异常处理
         if (commandInfo.ExceptionHandler is not null)
-            commandInfo.ExceptionHandler.Invoke(err);
+            commandInfo.ExceptionHandler.Invoke(err, eventArgs);
         else if (ThrowCommandErr) throw err;
     }
 
