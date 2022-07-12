@@ -71,9 +71,9 @@ service.Event.CommandManager.RegisterGroupDynamicCommand(
     });
 
 //指令错误处理
-async void CommandExceptionHandle(Exception exception, BaseMessageEventArgs eventArgs, string cmdName)
+async void CommandExceptionHandle(Exception exception, BaseMessageEventArgs eventArgs, string log)
 {
-    string msg = $"死了啦都你害的啦[{cmdName}]{exception.Message}";
+    string msg = $"死了啦都你害的啦\r\n{log}\r\n{exception.Message}";
     switch (eventArgs)
     {
         case GroupMessageEventArgs g:
