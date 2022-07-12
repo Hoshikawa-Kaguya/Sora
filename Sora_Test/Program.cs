@@ -1,5 +1,7 @@
+using System;
 using System.Threading.Tasks;
 using Sora;
+using Sora.EventArgs.SoraEvent;
 using Sora.Interfaces;
 using Sora.Net.Config;
 using Sora.Util;
@@ -15,7 +17,9 @@ ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
 {
     EnableSocketMessage   = false,
     ThrowCommandException = false,
-    Port                  = 7500
+    SendCommandErrMsg     = false,
+    CommandExceptionHandle = CommandExceptionHandle,
+    Port = 7500
 });
 
 #region 事件处理
@@ -56,6 +60,7 @@ service.Event.OnSelfPrivateMessage += (_, eventArgs) =>
     Log.Warning("test", $"self private msg {eventArgs.Message.MessageId}[{eventArgs.IsSelfMessage}]");
     return ValueTask.CompletedTask;
 };
+
 //动态向管理器注册指令
 service.Event.CommandManager.RegisterGroupDynamicCommand(
     new[] {"2"},
@@ -64,6 +69,21 @@ service.Event.CommandManager.RegisterGroupDynamicCommand(
         await eventArgs.Reply("shit");
         eventArgs.IsContinueEventChain = false;
     });
+
+//指令错误处理
+async void CommandExceptionHandle(Exception exception, BaseMessageEventArgs eventArgs, string cmdName)
+{
+    string msg = $"死了啦都你害的啦[{cmdName}]{exception.Message}";
+    switch (eventArgs)
+    {
+        case GroupMessageEventArgs g:
+            await g.Reply(msg);
+            break;
+        case PrivateMessageEventArgs p:
+            await p.Reply(msg);
+            break;
+    }
+}
 
 #endregion
 

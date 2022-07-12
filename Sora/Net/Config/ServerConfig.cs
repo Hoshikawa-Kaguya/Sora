@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Sora.EventArgs.SoraEvent;
 using Sora.Interfaces;
 
 namespace Sora.Net.Config;
@@ -110,4 +111,10 @@ public sealed class ServerConfig : ISoraConfig
     /// 在指令出错时向发送源发送报错消息
     /// </summary>
     public bool SendCommandErrMsg { get; init; } = true;
+
+    /// <summary>
+    /// <para>全局指令执行错误回调</para>
+    /// <para><see cref="string"/>值为指令错误log</para>
+    /// </summary>
+    public Action<Exception, BaseMessageEventArgs, string> CommandExceptionHandle { get; init; } = null;
 }
