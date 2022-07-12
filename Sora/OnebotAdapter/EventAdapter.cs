@@ -273,6 +273,8 @@ public sealed class EventAdapter
                 var lifeCycle = messageJson.ToObject<OnebotLifeCycleEventArgs>();
                 if (lifeCycle != null)
                     Log.Debug("Sore", $"Lifecycle event[{lifeCycle.SubType}] from [{connection}]");
+                //尝试避免链接开启事件晚于生命周期事件
+                await Task.Delay(100);
 
                 (ApiStatus ApiStatus, string clientType, string clientVer) info =
                     await ApiAdapter.GetClientInfo(connection);
