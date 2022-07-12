@@ -48,12 +48,13 @@ public sealed class Anonymous
     /// </summary>
     public static bool operator ==(Anonymous anonymousL, Anonymous anonymousR)
     {
-        if (anonymousL is null && anonymousR is null) return true;
+        if (anonymousL is null && anonymousR is null)
+            return true;
 
-        return anonymousL is not null               && anonymousR is not null &&
-            anonymousL.Flag.Equals(anonymousR.Flag) &&
-            anonymousL.Id == anonymousR.Id          &&
-            anonymousL.Name.Equals(anonymousR.Name);
+        return anonymousL is not null                  && anonymousR is not null &&
+               anonymousL.Flag.Equals(anonymousR.Flag) &&
+               anonymousL.Id == anonymousR.Id          &&
+               anonymousL.Name.Equals(anonymousR.Name);
     }
 
     /// <summary>
@@ -73,7 +74,8 @@ public sealed class Anonymous
     /// </summary>
     public override bool Equals(object obj)
     {
-        if (obj is Anonymous anonymous) return this == anonymous;
+        if (obj is Anonymous anonymous)
+            return this == anonymous;
 
         return false;
     }

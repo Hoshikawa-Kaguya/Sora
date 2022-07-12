@@ -7,7 +7,7 @@ namespace Sora.Net.Config;
 /// Sora服务数据结构体
 /// </summary>
 internal record ServiceConfig
-{                                                                        
+{
     //控制记录
     internal readonly HashSet<long>                     SuperUsers;      //服务管理员设置
     internal readonly HashSet<long>                     BlockUsers;      //服务屏蔽用户设置

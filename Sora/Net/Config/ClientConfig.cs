@@ -54,8 +54,10 @@ public sealed class ClientConfig : ISoraConfig
         get => _superUsers ?? Array.Empty<long>();
         init
         {
-            if (value is null) throw new ArgumentNullException(nameof(value));
-            if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");
+            if (value is null)
+                throw new ArgumentNullException(nameof(value));
+            if (value.Any(uid => uid < 10000))
+                throw new ArgumentException("uid cannot less than 10000");
             _superUsers = value;
         }
     }
@@ -68,8 +70,10 @@ public sealed class ClientConfig : ISoraConfig
         get => _blockUsers ?? Array.Empty<long>();
         init
         {
-            if (value is null) throw new ArgumentNullException(nameof(value));
-            if (value.Any(uid => uid < 10000)) throw new ArgumentException("uid cannot less than 10000");
+            if (value is null)
+                throw new ArgumentNullException(nameof(value));
+            if (value.Any(uid => uid < 10000))
+                throw new ArgumentException("uid cannot less than 10000");
             _blockUsers = value;
         }
     }

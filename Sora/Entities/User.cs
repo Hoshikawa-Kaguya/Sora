@@ -73,8 +73,7 @@ public sealed class User : BaseModel
     /// <para><see cref="UserInfo"/> 群成员信息</para>
     /// <para><see cref="string"/> qid</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
-        bool useCache = true)
+    public async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(bool useCache = true)
     {
         return await SoraApi.GetUserInfo(Id, useCache);
     }
@@ -97,7 +96,8 @@ public sealed class User : BaseModel
     /// 节点(<see cref="CustomNode"/>)消息段列表
     /// </param>
     /// <param name="timeout">覆盖原超时</param>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateForwardMsg(IEnumerable<CustomNode> nodeList, TimeSpan? timeout = null)
+    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateForwardMsg(
+        IEnumerable<CustomNode> nodeList, TimeSpan? timeout = null)
     {
         return await SoraApi.SendPrivateForwardMsg(Id, nodeList, timeout);
     }
@@ -148,7 +148,8 @@ public sealed class User : BaseModel
     /// </summary>
     public static bool operator ==(User userL, User userR)
     {
-        if (userL is null && userR is null) return true;
+        if (userL is null && userR is null)
+            return true;
 
         return userL is not null && userR is not null && userL.Id == userR.Id && userL.SoraApi == userR.SoraApi;
     }
@@ -170,7 +171,8 @@ public sealed class User : BaseModel
     /// </summary>
     public override bool Equals(object obj)
     {
-        if (obj is User user) return this == user;
+        if (obj is User user)
+            return this == user;
 
         return false;
     }

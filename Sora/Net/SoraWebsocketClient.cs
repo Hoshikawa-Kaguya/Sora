@@ -98,7 +98,10 @@ public sealed class SoraWebsocketClient : ISoraService
         //初始化连接管理器
         ConnManager = new ConnectionManager(Config, ServiceId);
         //实例化事件接口
-        Event = new EventAdapter(ServiceId, Config.ThrowCommandException, Config.SendCommandErrMsg, Config.CommandExceptionHandle);
+        Event = new EventAdapter(ServiceId,
+            Config.ThrowCommandException,
+            Config.SendCommandErrMsg,
+            Config.CommandExceptionHandle);
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
@@ -125,10 +128,11 @@ public sealed class SoraWebsocketClient : ISoraService
             Log.Warning("Sora", "service is not ready!");
             return;
         }
+
         //处理连接路径
         string serverPath = string.IsNullOrEmpty(Config.UniversalPath)
-            ? $"ws://{Config.Host}:{Config.Port}"
-            : $"ws://{Config.Host}:{Config.Port}/{Config.UniversalPath.Trim('/')}/";
+                                ? $"ws://{Config.Host}:{Config.Port}"
+                                : $"ws://{Config.Host}:{Config.Port}/{Config.UniversalPath.Trim('/')}/";
         Log.Debug("Sora", $"Onebot服务器地址:{serverPath}");
         Client =
             new WebsocketClient(new Uri(serverPath), CreateSocket)
@@ -139,7 +143,8 @@ public sealed class SoraWebsocketClient : ISoraService
         //消息接收事件
         _subClientMessageReceived = Client.MessageReceived.Subscribe(msg => Task.Run(() =>
         {
-            if (_disposed) return;
+            if (_disposed)
+                return;
             Event.Adapter(JObject.Parse(msg.Text), ServiceId);
         }));
         //连接断开事件
@@ -147,7 +152,8 @@ public sealed class SoraWebsocketClient : ISoraService
             Client.DisconnectionHappened
                   .Subscribe(info => Task.Run(() =>
                    {
-                       if (_disposed) return;
+                       if (_disposed)
+                           return;
                        //移除原连接信息
                        if (ConnectionRecord.Exists(ServiceId))
                            ConnManager.CloseConnection(ServiceId);
@@ -163,7 +169,8 @@ public sealed class SoraWebsocketClient : ISoraService
             Client.ReconnectionHappened
                   .Subscribe(info => Task.Run(() =>
                    {
-                       if (_disposed) return;
+                       if (_disposed)
+                           return;
                        if (info.Type == ReconnectionType.Initial || !_isRunning)
                            return;
                        Log.Info("Sora", $"服务器已自动重连{info.Type}");
@@ -189,7 +196,8 @@ public sealed class SoraWebsocketClient : ISoraService
     /// </summary>
     public async ValueTask StopService()
     {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         Log.Warning("Sora", $"SoraWebsocket客户端[{ServiceId}]正在停止...");
         //取消Client上已注册的各事件订阅
         _subClientMessageReceived?.Dispose();

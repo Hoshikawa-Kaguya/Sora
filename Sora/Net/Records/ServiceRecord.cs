@@ -21,7 +21,8 @@ internal static class ServiceRecord
     /// </summary>
     public static bool IsSuperUser(Guid service, long userId)
     {
-        if (_deadService.Contains(service) || !_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) || !_serviceConfigs.ContainsKey(service))
+            return false;
         return _serviceConfigs[service].SuperUsers.Contains(userId);
     }
 
@@ -30,7 +31,8 @@ internal static class ServiceRecord
     /// </summary>
     public static bool IsBlockUser(Guid service, long userId)
     {
-        if (_deadService.Contains(service) ||!_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) || !_serviceConfigs.ContainsKey(service))
+            return false;
         return _serviceConfigs[service].BlockUsers.Contains(userId);
     }
 
@@ -38,19 +40,22 @@ internal static class ServiceRecord
 
     public static bool IsEnableSoraCommandManager(Guid service)
     {
-        if (_deadService.Contains(service) ||!_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) || !_serviceConfigs.ContainsKey(service))
+            return false;
         return _serviceConfigs[service].EnableSoraCommandManager;
     }
 
     public static bool IsEnableSocketMessage(Guid service)
     {
-        if (_deadService.Contains(service) ||!_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) || !_serviceConfigs.ContainsKey(service))
+            return false;
         return _serviceConfigs[service].EnableSocketMessage;
     }
 
     public static bool IsAutoMarkMessageRead(Guid service)
     {
-        if (_deadService.Contains(service) ||!_serviceConfigs.ContainsKey(service)) return false;
+        if (_deadService.Contains(service) || !_serviceConfigs.ContainsKey(service))
+            return false;
         return _serviceConfigs[service].AutoMarkMessageRead;
     }
 
@@ -62,7 +67,8 @@ internal static class ServiceRecord
     {
         if (_serviceConfigs.ContainsKey(service))
         {
-            if (_deadService.Contains(service)) _deadService.Remove(service);
+            if (_deadService.Contains(service))
+                _deadService.Remove(service);
             ServiceConfig old = _serviceConfigs[service];
             return _serviceConfigs.TryUpdate(service, config, old);
         }
@@ -89,25 +95,29 @@ internal static class ServiceRecord
 
     public static bool AddSuperUser(Guid service, long userId)
     {
-        if (!_serviceConfigs.ContainsKey(service)) return false;
+        if (!_serviceConfigs.ContainsKey(service))
+            return false;
         return _serviceConfigs[service].SuperUsers.Add(userId);
     }
 
     public static bool RemoveSuperUser(Guid service, long userId)
     {
-        if (!_serviceConfigs.ContainsKey(service)) return false;
+        if (!_serviceConfigs.ContainsKey(service))
+            return false;
         return _serviceConfigs[service].SuperUsers.Remove(userId);
     }
 
     public static bool AddBlockUser(Guid service, long userId)
     {
-        if (!_serviceConfigs.ContainsKey(service)) return false;
+        if (!_serviceConfigs.ContainsKey(service))
+            return false;
         return _serviceConfigs[service].BlockUsers.Add(userId);
     }
 
     public static bool RemoveBlockUser(Guid service, long userId)
     {
-        if (!_serviceConfigs.ContainsKey(service)) return false;
+        if (!_serviceConfigs.ContainsKey(service))
+            return false;
         return _serviceConfigs[service].BlockUsers.Remove(userId);
     }
 

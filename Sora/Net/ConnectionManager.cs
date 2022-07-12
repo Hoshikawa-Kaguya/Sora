@@ -34,8 +34,8 @@ public sealed class ConnectionManager : IDisposable
     /// <typeparam name="TEventArgs">事件参数类型</typeparam>
     /// <param name="connectionId">连接Id</param>
     /// <param name="eventArgs">事件参数</param>
-    public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(
-        Guid connectionId, TEventArgs eventArgs) where TEventArgs : System.EventArgs;
+    public delegate ValueTask ServerAsyncCallBackHandler<in TEventArgs>(Guid connectionId, TEventArgs eventArgs)
+        where TEventArgs : System.EventArgs;
 
     /// <summary>
     /// <para>打开连接回调</para>
@@ -71,6 +71,7 @@ public sealed class ConnectionManager : IDisposable
                 Log.Error("Socket", $"无法获取Socket连接[{connectionId}]");
                 return false;
             }
+
             connection.Connection.Send(message);
             return true;
         }
@@ -90,7 +91,8 @@ public sealed class ConnectionManager : IDisposable
     /// </summary>
     internal void HeartBeatCheck(object serviceIdObj)
     {
-        if (ConnectionRecord.IsEmpty()) return;
+        if (ConnectionRecord.IsEmpty())
+            return;
         var serviceId = (Guid) serviceIdObj;
         Log.Debug("HeartBeatCheck", $"service id={serviceId}({ConnectionRecord.ConnCount()})");
 
@@ -98,7 +100,8 @@ public sealed class ConnectionManager : IDisposable
         DateTime now = DateTime.Now;
         Dictionary<Guid, SoraConnectionInfo> timeoutDict =
             ConnectionRecord.GetTimeoutConn(serviceId, now, HeartBeatTimeOut);
-        if (timeoutDict.Count == 0) return;
+        if (timeoutDict.Count == 0)
+            return;
         Log.Warning("HeartBeatCheck", $"timeout connection count {timeoutDict.Count}");
 
         var needReconnect = new List<WebsocketClient>();
@@ -132,8 +135,9 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="serviceId">服务ID</param>
     /// <param name="connId">连接ID</param>
     /// <param name="apiTimeout">api超时</param>
-    internal void OpenConnection(string   role, string selfId, ISoraSocket socket, Guid serviceId, Guid connId,
-                                 TimeSpan apiTimeout)
+    internal void OpenConnection(
+        string   role, string selfId, ISoraSocket socket, Guid serviceId, Guid connId,
+        TimeSpan apiTimeout)
     {
         //添加服务器记录
         if (!ConnectionRecord.AddNewConn(serviceId, connId, socket, apiTimeout))
@@ -144,8 +148,10 @@ public sealed class ConnectionManager : IDisposable
             return;
         }
 
-        if (OnOpenConnectionAsync == null) return;
-        if (!long.TryParse(selfId, out long uid)) Log.Error("ConnectionManager", "非法selfid，已忽略");
+        if (OnOpenConnectionAsync == null)
+            return;
+        if (!long.TryParse(selfId, out long uid))
+            Log.Error("ConnectionManager", "非法selfid，已忽略");
         Task.Run(async () => { await OnOpenConnectionAsync(connId, new ConnectionEventArgs(role, uid, connId)); });
     }
 
@@ -155,12 +161,17 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="connId">id</param>
     internal void CloseConnection(Guid connId)
     {
-        if (!ConnectionRecord.GetConn(connId, out SoraConnectionInfo conn)) return;
+        if (!ConnectionRecord.GetConn(connId, out SoraConnectionInfo conn))
+            return;
 
         ConnectionRecord.CloseConn(connId);
         //触发事件
-        if (OnCloseConnectionAsync == null) return;
-        Task.Run(async () => { await OnCloseConnectionAsync(connId, new ConnectionEventArgs("Universal", conn.LoginUid, connId)); });
+        if (OnCloseConnectionAsync == null)
+            return;
+        Task.Run(async () =>
+        {
+            await OnCloseConnectionAsync(connId, new ConnectionEventArgs("Universal", conn.LoginUid, connId));
+        });
     }
 
     /// <summary>

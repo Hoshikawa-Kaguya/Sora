@@ -32,8 +32,10 @@ internal static class ConnectionRecord
     public static bool AddNewConn(Guid serviceId, Guid connId, ISoraSocket socket, TimeSpan apiTimeout)
     {
         //检查是否已存在值
-        if (_connections.ContainsKey(connId)) return false;
-        if (_deadConn.Contains(connId)) _deadConn.Remove(connId);
+        if (_connections.ContainsKey(connId))
+            return false;
+        if (_deadConn.Contains(connId))
+            _deadConn.Remove(connId);
         //selfId均在第一次链接开启时留空，并在meta事件触发后更新
         return _connections.TryAdd(connId, new SoraConnectionInfo(
             serviceId,
@@ -74,7 +76,7 @@ internal static class ConnectionRecord
             await Task.Delay(TimeSpan.FromSeconds(30));
             _deadConn.Remove(connId);
         });
-        if (!_connections.TryRemove(connId, out _) || closeFailed) 
+        if (!_connections.TryRemove(connId, out _) || closeFailed)
             Log.Error("Socket", "关闭socket连接时发生错误");
     }
 
@@ -85,8 +87,8 @@ internal static class ConnectionRecord
                            .ToList();
     }
 
-    public static Dictionary<Guid, SoraConnectionInfo> GetTimeoutConn
-        (Guid serviceId, DateTime now, TimeSpan heartbeatTimeout)
+    public static Dictionary<Guid, SoraConnectionInfo> GetTimeoutConn(
+        Guid serviceId, DateTime now, TimeSpan heartbeatTimeout)
     {
         return _connections
               .Where(conn =>
@@ -152,7 +154,8 @@ internal static class ConnectionRecord
     /// <param name="uid">新的UID</param>
     public static void UpdateLoginUid(Guid connId, long uid)
     {
-        if (!_connections.ContainsKey(connId) || _deadConn.Contains(connId)) return;
+        if (!_connections.ContainsKey(connId) || _deadConn.Contains(connId))
+            return;
         SoraConnectionInfo oldInfo = _connections[connId];
         SoraConnectionInfo newInfo = oldInfo;
         newInfo.LoginUid = uid;
@@ -165,7 +168,8 @@ internal static class ConnectionRecord
     /// <param name="connId">连接标识</param>
     public static void UpdateHeartBeat(Guid connId)
     {
-        if (!_connections.ContainsKey(connId) || _deadConn.Contains(connId)) return;
+        if (!_connections.ContainsKey(connId) || _deadConn.Contains(connId))
+            return;
         SoraConnectionInfo oldInfo = _connections[connId];
         SoraConnectionInfo newInfo = oldInfo;
         newInfo.LastHeartBeatTime = DateTime.Now;

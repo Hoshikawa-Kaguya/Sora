@@ -55,10 +55,12 @@ public static class SegmentHelper
     /// </returns>
     internal static (string retStr, bool isMatch) ParseDataStr(string dataStr)
     {
-        if (string.IsNullOrEmpty(dataStr)) return (null, false);
+        if (string.IsNullOrEmpty(dataStr))
+            return (null, false);
         dataStr = dataStr.Replace('\\', '/');
         //当字符串太长时跳过正则检查
-        if (dataStr.Length > 1000) return (dataStr, true);
+        if (dataStr.Length > 1000)
+            return (dataStr, true);
 
         FileType type = FileRegices.Single(i => i.Value.IsMatch(dataStr)).Key;
 
@@ -87,7 +89,8 @@ public static class SegmentHelper
     /// <param name="stream">图片流</param>
     public static string StreamToBase64(this Stream stream)
     {
-        if(stream is null) return null;
+        if (stream is null)
+            return null;
         using MemoryStream ms = new MemoryStream();
 
         long cur = stream.Position;
@@ -125,14 +128,14 @@ public static class SegmentHelper
         //base64
         {
             FileType.Base64, new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
-                                       RegexOptions.Compiled)
+                RegexOptions.Compiled)
         },
         //网络图片链接
         {
             FileType.Url,
             new
                 Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
-                      RegexOptions.Compiled)
+                    RegexOptions.Compiled)
         },
         //文件名
         {FileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled)}

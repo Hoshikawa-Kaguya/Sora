@@ -24,6 +24,6 @@ public abstract class BaseModel
     {
         SoraApi = ConnectionRecord.GetApi(connectionId);
     }
-      
+
     #endregion
 }

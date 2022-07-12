@@ -24,8 +24,9 @@ public sealed class TitleUpdateEventArgs : BaseSoraEventArgs
 
     #endregion
 
-    internal TitleUpdateEventArgs(Guid                              serviceId, Guid connectionId, string eventName,
-                                  OnebotMemberTitleUpdatedEventArgs eventArgs) :
+    internal TitleUpdateEventArgs(
+        Guid                              serviceId, Guid connectionId, string eventName,
+        OnebotMemberTitleUpdatedEventArgs eventArgs) :
         base(serviceId, connectionId, eventName, eventArgs.SelfId, eventArgs.Time, SourceFlag.Group)
     {
         TargetUser = new User(serviceId, connectionId, eventArgs.UserId);

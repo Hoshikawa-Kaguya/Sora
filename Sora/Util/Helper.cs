@@ -47,7 +47,8 @@ public static class Helper
     [Reviewed("nidbCN", "2021-03-24 19:39")]
     internal static bool AddOrExist(this List<SoraCommandInfo> list, SoraCommandInfo data)
     {
-        if (list.Any(i => i.Equals(data))) return false;
+        if (list.Any(i => i.Equals(data)))
+            return false;
         //当有指令表达式相同且优先级相同时，抛出错误
         if (data.Regex.Length != 0 && list.Any(i => i.Regex.ArrayEquals(data.Regex) && i.Priority == data.Priority))
             throw new NotSupportedException("Priority cannot be the same value");
@@ -64,11 +65,13 @@ public static class Helper
     [Reviewed("nidbCN", "2021-03-24 19:39")]
     internal static bool AddOrExist(this List<DynamicCommandInfo> list, DynamicCommandInfo data)
     {
-        if (list.Contains(data)) return false;
+        if (list.Contains(data))
+            return false;
         //当有指令表达式相同且优先级相同时，抛出错误
         if (data.Regex.Length != 0 && list.Any(i => i.Regex.ArrayEquals(data.Regex) && i.Priority == data.Priority))
             throw new NotSupportedException("Priority cannot be the same value");
-        if (data.CommandMatchFunc is not null && list.Any(i => i?.CommandMatchFunc == data.CommandMatchFunc && i.Priority == data.Priority))
+        if (data.CommandMatchFunc is not null &&
+            list.Any(i => i?.CommandMatchFunc == data.CommandMatchFunc && i.Priority == data.Priority))
             throw new NotSupportedException("Priority cannot be the same value");
         list.Add(data);
         return true;
@@ -119,14 +122,17 @@ public static class Helper
          || (arr1 is not null && arr2 is null))
             return false;
 
-        if (arr1 is null && arr2 is null) return true;
+        if (arr1 is null && arr2 is null)
+            return true;
 
         for (var i = 0; i < arr1!.Length; i++)
             if (arr2 is not null && !(arr1[i] is null && arr2[i] is null))
             {
-                if (arr1[i] is null || arr2[i] is null) return false;
+                if (arr1[i] is null || arr2[i] is null)
+                    return false;
 
-                if (!arr1[i].Equals(arr2[i])) return false;
+                if (!arr1[i].Equals(arr2[i]))
+                    return false;
             }
 
         return true;
@@ -162,7 +168,8 @@ public static class Helper
     internal static string GetFieldDesc(object value)
     {
         FieldInfo fieldInfo = value.GetType().GetField(value.ToString()!);
-        if (fieldInfo == null) return string.Empty;
+        if (fieldInfo == null)
+            return string.Empty;
         DescriptionAttribute[] attributes = (DescriptionAttribute[]) fieldInfo
            .GetCustomAttributes(typeof(DescriptionAttribute), false);
         return attributes.Length > 0 ? attributes[0].Description : string.Empty;

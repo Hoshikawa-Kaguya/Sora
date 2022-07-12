@@ -50,8 +50,9 @@ public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="groupObRequestArgs">加群申请事件参数</param>
-    internal AddGroupRequestEventArgs(Guid                          serviceId, Guid connectionId, string eventName,
-                                      OnebotGroupObRequestEventArgs groupObRequestArgs) :
+    internal AddGroupRequestEventArgs(
+        Guid                          serviceId, Guid connectionId, string eventName,
+        OnebotGroupObRequestEventArgs groupObRequestArgs) :
         base(serviceId, connectionId, eventName, groupObRequestArgs.SelfId, groupObRequestArgs.Time, SourceFlag.Group)
     {
         Sender      = new User(serviceId, connectionId, groupObRequestArgs.UserId);

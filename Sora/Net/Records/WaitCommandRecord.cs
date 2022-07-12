@@ -115,7 +115,8 @@ internal static class WaitCommandRecord
                  && command.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
                     //判断来自同一人
                  && command.Source.u == eventArgs.Sender;
-                if (!preMatch) return false;
+                if (!preMatch)
+                    return false;
                 break;
             }
             case SourceFlag.Private:
@@ -127,7 +128,8 @@ internal static class WaitCommandRecord
                  && command.ConnectionId == eventArgs.SoraApi.ConnectionId
                     //判断来自同一人
                  && command.Source.u == eventArgs.Sender;
-                if (!preMatch) return false;
+                if (!preMatch)
+                    return false;
                 break;
             }
             default:

@@ -73,8 +73,9 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <param name="loginUid">当前使用的QQ号</param>
     /// <param name="time">连接时间</param>
     /// <param name="sourceType">来源</param>
-    internal BaseSoraEventArgs(Guid serviceId, Guid connectionId, string     eventName,
-                               long loginUid,  long time,         SourceFlag sourceType)
+    internal BaseSoraEventArgs(
+        Guid serviceId, Guid connectionId, string     eventName,
+        long loginUid,  long time,         SourceFlag sourceType)
     {
         SoraApi              = ConnectionRecord.GetApi(connectionId);
         ServiceId            = serviceId;

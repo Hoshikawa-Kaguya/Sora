@@ -84,7 +84,8 @@ public sealed class MessageBody : IList<SoraSegment>
     {
         if (SegmentCheck(item))
             _message.Add(item);
-        else throw new ArgumentOutOfRangeException(nameof(item), "cannnot add Unknown/Ignored segement");
+        else
+            throw new ArgumentOutOfRangeException(nameof(item), "cannnot add Unknown/Ignored segement");
     }
 
     /// <summary>
@@ -164,7 +165,8 @@ public sealed class MessageBody : IList<SoraSegment>
     {
         if (SegmentCheck(item))
             _message.Insert(index, item);
-        else throw new ArgumentOutOfRangeException(nameof(item), "cannnot insert Unknown/Ignored segement");
+        else
+            throw new ArgumentOutOfRangeException(nameof(item), "cannnot insert Unknown/Ignored segement");
     }
 
     /// <summary>
@@ -300,7 +302,8 @@ public sealed class MessageBody : IList<SoraSegment>
         int iCount = segmentDatas.RemoveAll(s =>
             s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
             s.Data is null);
-        if (iCount != 0) Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
+        if (iCount != 0)
+            Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
     }
 
     private static void RemoveIllegalSegment(ref List<SoraSegment> segmentDatas)
@@ -308,13 +311,14 @@ public sealed class MessageBody : IList<SoraSegment>
         int iCount = segmentDatas.RemoveAll(s =>
             s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
             s.Data is null);
-        if (iCount != 0) Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
+        if (iCount != 0)
+            Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
     }
 
     private static bool SegmentCheck(SoraSegment s)
     {
         return !(s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
-            s.Data is null);
+                 s.Data is null);
     }
 
     #endregion

@@ -55,8 +55,9 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
 
     #endregion
 
-    internal BaseMessageEventArgs(Guid                   serviceId, Guid       connectionId, string eventName,
-                                  BaseObMessageEventArgs msg,       SourceFlag source) :
+    internal BaseMessageEventArgs(
+        Guid                   serviceId, Guid       connectionId, string eventName,
+        BaseObMessageEventArgs msg,       SourceFlag source) :
         base(serviceId, connectionId, eventName, msg.SelfId, msg.Time, source)
     {
         //将api消息段转换为sorasegment
@@ -74,9 +75,10 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     /// <para>等待下一条消息触发正则表达式</para>
     /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
     /// </summary>
-    internal object WaitForNextRegexMessage(long            sourceUid,    string[]  commandExps, MatchType matchType,
-                                            RegexOptions    regexOptions, TimeSpan? timeout,
-                                            Func<ValueTask> timeoutTask,  long      sourceGroup = 0)
+    internal object WaitForNextRegexMessage(
+        long            sourceUid,    string[]  commandExps, MatchType matchType,
+        RegexOptions    regexOptions, TimeSpan? timeout,
+        Func<ValueTask> timeoutTask,  long      sourceGroup = 0)
     {
         //生成指令上下文
         WaitingInfo waitInfo =
@@ -88,8 +90,9 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     /// <summary>
     /// 等待下一条消息触发自定义匹配方法
     /// </summary>
-    internal object WaitForNextCustomMessage(long      sourceUid, Func<BaseMessageEventArgs, bool> matchFunc,
-                                             TimeSpan? timeout,   Func<ValueTask> timeoutTask, long sourceGroup = 0)
+    internal object WaitForNextCustomMessage(
+        long      sourceUid, Func<BaseMessageEventArgs, bool> matchFunc,
+        TimeSpan? timeout,   Func<ValueTask>                  timeoutTask, long sourceGroup = 0)
     {
         //生成指令上下文
         WaitingInfo waitInfo =
@@ -110,7 +113,7 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
         //连续指令不再触发后续事件
         IsContinueEventChain = false;
         //在超时时执行超时任务
-        if (!waitInfo.WaitForNext(timeout, out object e) && timeoutTask != null) 
+        if (!waitInfo.WaitForNext(timeout, out object e) && timeoutTask != null)
             Task.Run(timeoutTask.Invoke);
         return e;
     }
