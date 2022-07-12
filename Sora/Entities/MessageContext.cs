@@ -53,8 +53,9 @@ public sealed class MessageContext : BaseModel
 
     #region 构造函数
 
-    internal MessageContext(Guid connectionId, int msgId, string text, MessageBody messageBody,
-                            long time,         int font,  long?  messageSequence) :
+    internal MessageContext(
+        Guid connectionId, int msgId, string text, MessageBody messageBody,
+        long time,         int font,  long?  messageSequence) :
         base(connectionId)
     {
         MessageId       = msgId;
@@ -101,9 +102,9 @@ public sealed class MessageContext : BaseModel
     {
         List<long> uidList = MessageBody.Where(s => s.MessageType == SegmentType.At)
                                         .Select(s => long.TryParse((s.Data as AtSegment)?.Target ?? "0",
-                                             out long uid)
-                                             ? uid
-                                             : -1)
+                                                         out long uid)
+                                                         ? uid
+                                                         : -1)
                                         .ToList();
         //去除无法转换的值，如at全体
         uidList.RemoveAll(uid => uid == -1);
@@ -117,7 +118,8 @@ public sealed class MessageContext : BaseModel
     /// <returns>语音文件url</returns>
     public string GetRecordUrl()
     {
-        if (MessageBody.Count != 1 || MessageBody.First().MessageType != SegmentType.Record) return null;
+        if (MessageBody.Count != 1 || MessageBody.First().MessageType != SegmentType.Record)
+            return null;
         return (MessageBody.First().Data as RecordSegment)?.Url;
     }
 
@@ -193,7 +195,8 @@ public sealed class MessageContext : BaseModel
     /// </summary>
     public bool MessageEquals(MessageContext ctx)
     {
-        if (ctx == null || ctx.MessageBody.Count != MessageBody.Count) return false;
+        if (ctx == null || ctx.MessageBody.Count != MessageBody.Count)
+            return false;
 
         bool equal = true;
         for (int i = 0; i < MessageBody.Count; i++)
@@ -207,7 +210,8 @@ public sealed class MessageContext : BaseModel
     /// </summary>
     public bool MessageEquals(MessageBody msg)
     {
-        if (msg == null || msg.Count != MessageBody.Count) return false;
+        if (msg == null || msg.Count != MessageBody.Count)
+            return false;
 
         bool equal = true;
         for (int i = 0; i < MessageBody.Count; i++)
@@ -238,17 +242,18 @@ public sealed class MessageContext : BaseModel
     /// </summary>
     public static bool operator ==(MessageContext msgL, MessageContext msgR)
     {
-        if (msgL is null && msgR is null) return true;
+        if (msgL is null && msgR is null)
+            return true;
 
-        return msgL is not null                              &&
-            msgR is not null                                 &&
-            msgL.MessageId         == msgR.MessageId         &&
-            msgL.SoraApi           == msgR.SoraApi           &&
-            msgL.Font              == msgR.Font              &&
-            msgL.Time              == msgR.Time              &&
-            msgL.MessageSequence   == msgR.MessageSequence   &&
-            msgL.MessageBody.Count == msgR.MessageBody.Count &&
-            msgL.MessageEquals(msgR);
+        return msgL is not null                                 &&
+               msgR is not null                                 &&
+               msgL.MessageId         == msgR.MessageId         &&
+               msgL.SoraApi           == msgR.SoraApi           &&
+               msgL.Font              == msgR.Font              &&
+               msgL.Time              == msgR.Time              &&
+               msgL.MessageSequence   == msgR.MessageSequence   &&
+               msgL.MessageBody.Count == msgR.MessageBody.Count &&
+               msgL.MessageEquals(msgR);
     }
 
     /// <summary>
@@ -268,7 +273,8 @@ public sealed class MessageContext : BaseModel
     /// </summary>
     public override bool Equals(object obj)
     {
-        if (obj is MessageContext msg) return this == msg;
+        if (obj is MessageContext msg)
+            return this == msg;
 
         return false;
     }

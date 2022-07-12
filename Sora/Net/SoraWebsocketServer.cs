@@ -99,7 +99,10 @@ public sealed class SoraWebsocketServer : ISoraService
         //初始化连接管理器
         ConnManager = new ConnectionManager(Config, ServiceId);
         //实例化事件接口
-        Event = new EventAdapter(ServiceId, Config.ThrowCommandException, Config.SendCommandErrMsg, Config.CommandExceptionHandle);
+        Event = new EventAdapter(ServiceId,
+            Config.ThrowCommandException,
+            Config.SendCommandErrMsg,
+            Config.CommandExceptionHandle);
         //禁用原log
         FleckLog.Level = (LogLevel) 4;
         //全局异常事件
@@ -146,7 +149,8 @@ public sealed class SoraWebsocketServer : ISoraService
     /// </summary>
     public ValueTask StopService()
     {
-        if (_disposed && !_isRunning) return ValueTask.CompletedTask;
+        if (_disposed && !_isRunning)
+            return ValueTask.CompletedTask;
         Log.Warning("Sora", $"SoraWebsocket服务器[{ServiceId}]正在停止...");
         ConnManager.CloseAllConnection(ServiceId);
         //停止服务器
@@ -164,9 +168,11 @@ public sealed class SoraWebsocketServer : ISoraService
         //打开连接
         socket.OnOpen = () =>
         {
-            if (_disposed || !_isRunning) return;
+            if (_disposed || !_isRunning)
+                return;
             // 接收事件处理
-            if (!CheckRequest(socket, out string selfId)) return;
+            if (!CheckRequest(socket, out string selfId))
+                return;
             //事件回调
             ConnManager.OpenConnection("Universal", selfId, new ServerSocket(socket), ServiceId,
                 socket.ConnectionInfo.Id, Config.ApiTimeOut);
@@ -176,7 +182,8 @@ public sealed class SoraWebsocketServer : ISoraService
         //关闭连接
         socket.OnClose = () =>
         {
-            if (_disposed || !_isRunning) return;
+            if (_disposed || !_isRunning)
+                return;
             //移除原连接信息
             if (ConnectionRecord.Exists(socket.ConnectionInfo.Id))
                 ConnManager.CloseConnection(socket.ConnectionInfo.Id);
@@ -258,7 +265,8 @@ public sealed class SoraWebsocketServer : ISoraService
             string token = headerValue.Split(' ')[1];
             Log.Debug("Server", $"get token = {token}");
             //验证Token
-            if (!token.Equals(Config.AccessToken)) return false;
+            if (!token.Equals(Config.AccessToken))
+                return false;
         }
 
         return true;

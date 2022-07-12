@@ -39,8 +39,9 @@ public sealed class HonorEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="honorEventArgs">荣誉变更事件参数</param>
-    internal HonorEventArgs(Guid                 serviceId, Guid connectionId, string eventName,
-                            OnebotHonorEventArgs honorEventArgs) :
+    internal HonorEventArgs(
+        Guid                 serviceId, Guid connectionId, string eventName,
+        OnebotHonorEventArgs honorEventArgs) :
         base(serviceId, connectionId, eventName, honorEventArgs.SelfId, honorEventArgs.Time, SourceFlag.Group)
     {
         TargetUser  = new User(serviceId, connectionId, honorEventArgs.UserId);

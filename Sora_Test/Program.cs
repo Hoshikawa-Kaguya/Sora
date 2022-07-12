@@ -15,11 +15,11 @@ Log.LogConfiguration
 //实例化Sora服务
 ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
 {
-    EnableSocketMessage   = false,
-    ThrowCommandException = false,
-    SendCommandErrMsg     = false,
+    EnableSocketMessage    = false,
+    ThrowCommandException  = false,
+    SendCommandErrMsg      = false,
     CommandExceptionHandle = CommandExceptionHandle,
-    Port = 7500
+    Port                   = 7500
 });
 
 #region 事件处理

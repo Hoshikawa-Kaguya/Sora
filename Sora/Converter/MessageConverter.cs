@@ -26,11 +26,13 @@ internal static class MessageConverter
     /// <returns>消息段列表</returns>
     private static SoraSegment ParseMessageElement(OnebotSegment onebotSegment)
     {
-        if (onebotSegment.RawData == null) return new SoraSegment(SegmentType.Unknown, null);
+        if (onebotSegment.RawData == null)
+            return new SoraSegment(SegmentType.Unknown, null);
         try
         {
             JObject jsonObj = JObject.FromObject(onebotSegment.RawData);
-            if (jsonObj.Count == 0) return new SoraSegment(SegmentType.Unknown, null);
+            if (jsonObj.Count == 0)
+                return new SoraSegment(SegmentType.Unknown, null);
             return onebotSegment.MsgType switch
             {
                 SegmentType.Text    => new SoraSegment(SegmentType.Text, jsonObj.ToObject<TextSegment>()),
@@ -62,7 +64,8 @@ internal static class MessageConverter
     internal static MessageBody ToMessageBody(this List<OnebotSegment> messages)
     {
         Log.Debug("Sora", "Parsing msg list");
-        if (messages == null || messages.Count == 0) return new MessageBody();
+        if (messages == null || messages.Count == 0)
+            return new MessageBody();
         List<SoraSegment> retMsg = messages.Select(ParseMessageElement).ToList();
 
         Log.Debug("Sora", $"Get msg len={retMsg.Count}");

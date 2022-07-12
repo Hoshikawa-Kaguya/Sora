@@ -38,7 +38,8 @@ internal abstract record BaseCommandInfo
         CommandName      = string.IsNullOrEmpty(groupName) ? commandName : $"({groupName}){commandName}";
 
         Regex = new Regex[regex.Length];
-        for (int i = 0; i < regex.Length; i++) Regex[i] = new Regex(regex[i], RegexOptions.Compiled | regexOptions);
+        for (int i = 0; i < regex.Length; i++)
+            Regex[i] = new Regex(regex[i], RegexOptions.Compiled | regexOptions);
     }
 
     public override int GetHashCode()

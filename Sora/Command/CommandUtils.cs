@@ -26,7 +26,8 @@ internal static class CommandUtils
             method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand ??
             null;
 
-        if (commandAttr is null) return false;
+        if (commandAttr is null)
+            return false;
 
         //检查是否设置过表达式
         if (commandAttr.CommandExpressions is null || commandAttr.CommandExpressions.Length == 0)
@@ -49,11 +50,11 @@ internal static class CommandUtils
         return commandAttr.SourceType switch
         {
             SourceFlag.Group => preCheck &&
-                method.GetParameters()
-                      .Any(para => ParameterCheck<GroupMessageEventArgs>(para, method.Name)),
+                                method.GetParameters()
+                                      .Any(para => ParameterCheck<GroupMessageEventArgs>(para, method.Name)),
             SourceFlag.Private => preCheck &&
-                method.GetParameters()
-                      .Any(para => ParameterCheck<PrivateMessageEventArgs>(para, method.Name)),
+                                  method.GetParameters()
+                                        .Any(para => ParameterCheck<PrivateMessageEventArgs>(para, method.Name)),
             _ => false
         };
     }

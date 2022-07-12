@@ -20,8 +20,9 @@ internal struct SoraConnectionInfo
     internal readonly SoraApi ApiInstance => _apiInstance.Value;
 
 
-    internal SoraConnectionInfo(Guid     serviceId,         Guid     connId, ISoraSocket connection,
-                                DateTime lastHeartBeatTime, TimeSpan apiTimeout)
+    internal SoraConnectionInfo(
+        Guid     serviceId,         Guid     connId, ISoraSocket connection,
+        DateTime lastHeartBeatTime, TimeSpan apiTimeout)
     {
         Connection        = connection;
         LastHeartBeatTime = lastHeartBeatTime;

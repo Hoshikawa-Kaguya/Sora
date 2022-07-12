@@ -48,8 +48,9 @@ public sealed class Group : BaseModel
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(MessageBody message,
-        TimeSpan?                                                                             timeout = null)
+    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
+        MessageBody message,
+        TimeSpan?   timeout = null)
     {
         return await SoraApi.SendGroupMessage(Id, message, timeout);
     }
@@ -108,7 +109,8 @@ public sealed class Group : BaseModel
     /// 节点(<see cref="CustomNode"/>)消息段列表
     /// </param>
     /// <param name="timeout">超时覆盖</param>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(IEnumerable<CustomNode> nodeList, TimeSpan? timeout = null)
+    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(
+        IEnumerable<CustomNode> nodeList, TimeSpan? timeout = null)
     {
         return await SoraApi.SendGroupForwardMsg(Id, nodeList, timeout);
     }
@@ -162,8 +164,7 @@ public sealed class Group : BaseModel
     /// <param name="fileId">文件ID</param>
     /// <param name="busid">文件类型</param>
     /// <returns>文件链接</returns>
-    public async ValueTask<(ApiStatus apiStatus, string fileUrl)> GetGroupFileUrl(
-        string fileId, int busid)
+    public async ValueTask<(ApiStatus apiStatus, string fileUrl)> GetGroupFileUrl(string fileId, int busid)
     {
         return await SoraApi.GetGroupFileUrl(Id, fileId, busid);
     }
@@ -209,11 +210,12 @@ public sealed class Group : BaseModel
     /// <param name="fileName">上传文件名</param>
     /// <param name="folderId">父目录ID</param>
     /// <returns>API状态</returns>
-    public async ValueTask<ApiStatus> UploadGroupFile(string localFilePath, string fileName,
-                                                      string folderId = null)
+    public async ValueTask<ApiStatus> UploadGroupFile(
+        string localFilePath, string fileName,
+        string folderId = null)
     {
         return await SoraApi.UploadGroupFile(Id, localFilePath,
-            fileName, folderId);
+                   fileName, folderId);
     }
 
     #endregion
@@ -390,10 +392,11 @@ public sealed class Group : BaseModel
     /// </summary>
     public static bool operator ==(Group groupL, Group groupR)
     {
-        if (groupL is null && groupR is null) return true;
+        if (groupL is null && groupR is null)
+            return true;
 
         return groupL is not null && groupR is not null && groupL.Id == groupR.Id &&
-            groupL.SoraApi                                           == groupR.SoraApi;
+               groupL.SoraApi                                        == groupR.SoraApi;
     }
 
     /// <summary>
@@ -413,7 +416,8 @@ public sealed class Group : BaseModel
     /// </summary>
     public override bool Equals(object obj)
     {
-        if (obj is Group api) return this == api;
+        if (obj is Group api)
+            return this == api;
 
         return false;
     }

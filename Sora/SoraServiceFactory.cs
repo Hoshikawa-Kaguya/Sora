@@ -97,6 +97,7 @@ public static class SoraServiceFactory
     /// <param name="serviceList">多服务列表</param>
     public static async ValueTask StartMultiService(this IEnumerable<ISoraService> serviceList)
     {
-        foreach (ISoraService soraService in serviceList) await soraService.StartService();
+        foreach (ISoraService soraService in serviceList)
+            await soraService.StartService();
     }
 }

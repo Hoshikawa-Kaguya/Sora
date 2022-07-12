@@ -112,8 +112,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(
-        bool useCache = true)
+    public async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetSenderMemberInfo(bool useCache = true)
     {
         return await SoraApi.GetGroupMemberInfo(SourceGroup.Id, Sender.Id, useCache);
     }

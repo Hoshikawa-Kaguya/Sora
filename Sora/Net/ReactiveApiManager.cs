@@ -81,15 +81,15 @@ internal static class ReactiveApiManager
                                .Timeout(currentTimeout)
                                .ToTask()
                                .RunCatch(e =>
-                                         {
-                                             isTimeout = e is TimeoutException;
-                                             exception = e;
-                                             //在错误为超时时不打印log
-                                             if (!isTimeout)
-                                                 Log.Error("Sora",
-                                                           $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
-                                             return new JObject();
-                                         });
+                                {
+                                    isTimeout = e is TimeoutException;
+                                    exception = e;
+                                    //在错误为超时时不打印log
+                                    if (!isTimeout)
+                                        Log.Error("Sora",
+                                            $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
+                                    return new JObject();
+                                });
 
         //这里的错误最终将抛给开发者
         //发送消息
@@ -100,17 +100,19 @@ internal static class ReactiveApiManager
         //等待客户端返回调用结果
         JObject response = await apiTask;
         //检查API返回
-        if (response != null && response.Count != 0) return (GetApiStatus(response), response);
+        if (response != null && response.Count != 0)
+            return (GetApiStatus(response), response);
 
         //空响应
-        if (exception == null) return (NullResponse(), null);
+        if (exception == null)
+            return (NullResponse(), null);
         //观察者抛出异常
         if (isTimeout)
             Log.Error("Sora",
                 $"api time out[msg echo:{apiRequest.Echo}]");
         return isTimeout
-            ? (TimeOut(), null)
-            : (ObservableError(Log.ErrorLogBuilder(exception)), null);
+                   ? (TimeOut(), null)
+                   : (ObservableError(Log.ErrorLogBuilder(exception)), null);
     }
 
     #endregion
@@ -128,12 +130,12 @@ internal static class ReactiveApiManager
         return new ApiStatus
         {
             RetCode = Enum.TryParse(msg["retcode"]?.ToString() ?? string.Empty,
-                out ApiStatusType messageCode)
-                ? messageCode
-                : ApiStatusType.UnknownStatus,
+                          out ApiStatusType messageCode)
+                          ? messageCode
+                          : ApiStatusType.UnknownStatus,
             ApiMessage = msg["msg"] == null && msg["wording"] == null
-                ? string.Empty
-                : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})",
+                             ? string.Empty
+                             : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})",
             ApiStatusStr = msg["status"]?.ToString() ?? "failed"
         };
     }

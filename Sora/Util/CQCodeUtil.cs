@@ -56,14 +56,16 @@ public static class CQCodeUtil
     /// <returns></returns>
     public static string SerializeSegment(this SoraSegment msg)
     {
-        if (msg.MessageType == SegmentType.Text) return ((TextSegment) msg.Data).Content.CQCodeEncode();
+        if (msg.MessageType == SegmentType.Text)
+            return ((TextSegment) msg.Data).Content.CQCodeEncode();
 
         var ret = new StringBuilder();
         ret.Append("[CQ:");
 
         //CQ码类型
         string typeName = Helper.GetFieldDesc(msg.MessageType);
-        if (string.IsNullOrEmpty(typeName)) return string.Empty;
+        if (string.IsNullOrEmpty(typeName))
+            return string.Empty;
 
         ret.Append(typeName);
 
@@ -76,14 +78,16 @@ public static class CQCodeUtil
         {
             List<JsonPropertyAttribute> jsonPropertyArr =
                 field.GetCustomAttributes<JsonPropertyAttribute>(true).ToList();
-            if (jsonPropertyArr.Count != 1) continue;
+            if (jsonPropertyArr.Count != 1)
+                continue;
             JsonPropertyAttribute jsonProperty = jsonPropertyArr.First();
             string                key          = jsonProperty.PropertyName;
             object                propData     = field.GetValue(data);
-            if (string.IsNullOrWhiteSpace(key) || propData == null) continue;
+            if (string.IsNullOrWhiteSpace(key) || propData == null)
+                continue;
             string value = propData.GetType().IsEnum
-                ? Helper.GetFieldDesc(propData)
-                : (propData.ToString() ?? "").CQCodeEncode(true);
+                               ? Helper.GetFieldDesc(propData)
+                               : (propData.ToString() ?? "").CQCodeEncode(true);
             ret.Append(',').Append(key).Append('=').Append(value);
         }
 
@@ -114,11 +118,13 @@ public static class CQCodeUtil
         var      segments = new List<SoraSegment>();
         for (var i = 0; i < code.Length; i++)
         {
-            if (text[i].Length > 0) segments.Add(SoraSegment.Text(text[i]));
+            if (text[i].Length > 0)
+                segments.Add(SoraSegment.Text(text[i]));
             segments.Add(DeserializeCqCode(code[i].Value));
         }
 
-        if (text[code.Length].Length > 0) segments.Add(SoraSegment.Text(text[code.Length]));
+        if (text[code.Length].Length > 0)
+            segments.Add(SoraSegment.Text(text[code.Length]));
         return new MessageBody(segments);
     }
 
@@ -253,7 +259,8 @@ public static class CQCodeUtil
                 i++;
             }
 
-        if (last < i) ret.Append(msg[new Range(last, i)]);
+        if (last < i)
+            ret.Append(msg[new Range(last, i)]);
 
         return ret.ToString();
     }
