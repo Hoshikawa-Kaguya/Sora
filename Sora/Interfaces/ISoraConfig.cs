@@ -1,4 +1,5 @@
 using System;
+using Sora.EventArgs.SoraEvent;
 
 namespace Sora.Interfaces;
 
@@ -75,4 +76,10 @@ public interface ISoraConfig
     /// 在指令出错时向发送源发送报错消息
     /// </summary>
     bool SendCommandErrMsg { get; init; }
+
+    /// <summary>
+    /// <para>全局指令执行错误回调</para>
+    /// <para><see cref="string"/>值为指令错误log</para>
+    /// </summary>
+    Action<Exception, BaseMessageEventArgs, string> CommandExceptionHandle { get; init; }
 }

@@ -99,7 +99,7 @@ public sealed class SoraWebsocketServer : ISoraService
         //初始化连接管理器
         ConnManager = new ConnectionManager(Config, ServiceId);
         //实例化事件接口
-        Event = new EventAdapter(ServiceId, Config.ThrowCommandException, Config.SendCommandErrMsg);
+        Event = new EventAdapter(ServiceId, Config.ThrowCommandException, Config.SendCommandErrMsg, Config.CommandExceptionHandle);
         //禁用原log
         FleckLog.Level = (LogLevel) 4;
         //全局异常事件
