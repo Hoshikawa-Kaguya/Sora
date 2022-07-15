@@ -807,7 +807,7 @@ public sealed class CommandManager
                     Log.Warning("指令初始化", $"当前注册指令类型为正则匹配，自动忽略前缀[{prefix}]");
                 return cmdExps;
             case MatchType.KeyWord:
-                return cmdExps.Select(command => $"[{prefix}{command}]+").ToArray();
+                return cmdExps.Select(command => $"({prefix}{command})+").ToArray();
             default:
                 throw new NotSupportedException("unknown matchtype");
         }
