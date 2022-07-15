@@ -720,7 +720,7 @@ public sealed class CommandManager
                              .ToArray(),
             MatchType.Regex => cmdExps,
             MatchType.KeyWord => cmdExps
-                                .Select(command => $"[{command}]+")
+                                .Select(command => $"({command})+")
                                 .ToArray(),
             _ => throw new NotSupportedException("unknown matchtype")
         };
