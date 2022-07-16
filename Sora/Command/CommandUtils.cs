@@ -1,8 +1,12 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using Sora.Attributes;
 using Sora.Attributes.Command;
+using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
@@ -80,4 +84,107 @@ internal static class CommandUtils
     }
 
     #endregion
+
+    #region 连续对话指令生成
+
+    /// <summary>
+    /// 生成连续对话上下文
+    /// </summary>
+    /// <param name="sourceUid">消息源UID</param>
+    /// <param name="sourceGroup">消息源GID</param>
+    /// <param name="matchFunc">自定义匹配方法</param>
+    /// <param name="sourceFlag">来源标识</param>
+    /// <param name="connectionId">连接标识</param>
+    /// <param name="serviceId">服务标识</param>
+    /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
+    [NeedReview("ALL")]
+    internal static WaitingInfo GenerateWaitingCommandInfo(
+        long                             sourceUid,
+        long                             sourceGroup,
+        Func<BaseMessageEventArgs, bool> matchFunc,
+        SourceFlag                       sourceFlag,
+        Guid                             connectionId,
+        Guid                             serviceId)
+    {
+        if (matchFunc is null)
+            throw new ArgumentNullException(nameof(matchFunc));
+        return new WaitingInfo(new AutoResetEvent(false),
+            matchFunc,
+            serviceId: serviceId,
+            connectionId: connectionId,
+            source: (sourceUid, sourceGroup),
+            sourceFlag: sourceFlag);
+    }
+
+    /// <summary>
+    /// 生成连续对话上下文
+    /// </summary>
+    /// <param name="sourceUid">消息源UID</param>
+    /// <param name="sourceGroup">消息源GID</param>
+    /// <param name="cmdExps">指令表达式</param>
+    /// <param name="matchType">匹配类型</param>
+    /// <param name="sourceFlag">来源标识</param>
+    /// <param name="regexOptions">正则匹配选项</param>
+    /// <param name="connectionId">连接标识</param>
+    /// <param name="serviceId">服务标识</param>
+    /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
+    [NeedReview("ALL")]
+    internal static WaitingInfo GenerateWaitingCommandInfo(
+        long         sourceUid,
+        long         sourceGroup,
+        string[]     cmdExps,
+        MatchType    matchType,
+        SourceFlag   sourceFlag,
+        RegexOptions regexOptions,
+        Guid         connectionId,
+        Guid         serviceId)
+    {
+        if (cmdExps == null || cmdExps.Length == 0)
+            throw new NullReferenceException("cmdExps is empty");
+        string[] matchExp = matchType switch
+        {
+            MatchType.Full => cmdExps
+                             .Select(command => $"^{command}$")
+                             .ToArray(),
+            MatchType.Regex => cmdExps,
+            MatchType.KeyWord => cmdExps
+                                .Select(command => $"({command})+")
+                                .ToArray(),
+            _ => throw new NotSupportedException("unknown matchtype")
+        };
+
+        return new WaitingInfo(new AutoResetEvent(false),
+            matchExp,
+            serviceId: serviceId,
+            connectionId: connectionId,
+            source: (sourceUid, sourceGroup),
+            sourceFlag: sourceFlag,
+            regexOptions: regexOptions);
+    }
+
+    #endregion
+
+    /// <summary>
+    /// 处理指令正则表达式
+    /// </summary>
+    [NeedReview("ALL")]
+    internal static string[] ParseCommandExps(
+        string[]  cmdExps,
+        string    prefix,
+        MatchType matchType)
+    {
+        switch (matchType)
+        {
+            case MatchType.Full:
+                return cmdExps.Select(command => $"^{prefix}{command}$").ToArray();
+            case MatchType.Regex:
+                if (!string.IsNullOrEmpty(prefix))
+                    Log.Warning("指令初始化", $"当前注册指令类型为正则匹配，自动忽略前缀[{prefix}]");
+                return cmdExps;
+            case MatchType.KeyWord:
+                return cmdExps.Select(command => $"({prefix}{command})+").ToArray();
+            default:
+                throw new NotSupportedException("unknown matchtype");
+        }
+    }
 }

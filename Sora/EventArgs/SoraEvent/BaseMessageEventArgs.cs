@@ -82,7 +82,7 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     {
         //生成指令上下文
         WaitingInfo waitInfo =
-            CommandManager.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, SourceType,
+            CommandUtils.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, SourceType,
                 regexOptions, ConnId, ServiceId);
         return WaitForNextMessage(waitInfo, timeout, timeoutTask);
     }
@@ -96,7 +96,7 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     {
         //生成指令上下文
         WaitingInfo waitInfo =
-            CommandManager.GenerateWaitingCommandInfo(
+            CommandUtils.GenerateWaitingCommandInfo(
                 sourceUid, sourceGroup, matchFunc, SourceType, ConnId, ServiceId);
         return WaitForNextMessage(waitInfo, timeout, timeoutTask);
     }
