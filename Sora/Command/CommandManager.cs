@@ -158,7 +158,6 @@ public sealed class CommandManager
     /// <param name="matchType">匹配类型</param>
     /// <param name="regexOptions">正则选项</param>
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
-    /// <param name="exceptionHandler">异常处理</param>
     /// <param name="memberRole">成员权限限制</param>
     /// <param name="suCommand">机器人管理员限制</param>
     /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
@@ -166,18 +165,17 @@ public sealed class CommandManager
     /// <param name="sourceUsers">成员限制</param>
     /// <param name="desc">描述</param>
     public Guid RegisterGroupDynamicCommand(
-        string[]                                cmdExps,
-        Func<GroupMessageEventArgs, ValueTask>  groupCommand,
-        MatchType                               matchType        = MatchType.Full,
-        RegexOptions                            regexOptions     = RegexOptions.None,
-        string                                  groupName        = "",
-        Action<Exception, BaseMessageEventArgs> exceptionHandler = null,
-        MemberRoleType                          memberRole       = MemberRoleType.Member,
-        bool                                    suCommand        = false,
-        int?                                    priority         = null,
-        long[]                                  sourceGroups     = null,
-        long[]                                  sourceUsers      = null,
-        string                                  desc             = "")
+        string[]                               cmdExps,
+        Func<GroupMessageEventArgs, ValueTask> groupCommand,
+        MatchType                              matchType    = MatchType.Full,
+        RegexOptions                           regexOptions = RegexOptions.None,
+        string                                 groupName    = "",
+        MemberRoleType                         memberRole   = MemberRoleType.Member,
+        bool                                   suCommand    = false,
+        int?                                   priority     = null,
+        long[]                                 sourceGroups = null,
+        long[]                                 sourceUsers  = null,
+        string                                 desc         = "")
     {
         //判断参数合法性
         if (cmdExps is null || cmdExps.Length == 0)
@@ -196,7 +194,7 @@ public sealed class CommandManager
         //创建指令信息
         DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(
             desc, matchExp, null, memberRole, priority ?? GetNewDynamicPriority(),
-            regexOptions | RegexOptions.Compiled, exceptionHandler,
+            regexOptions | RegexOptions.Compiled,
             sourceGroups ?? Array.Empty<long>(),
             sourceUsers  ?? Array.Empty<long>(),
             groupCommand, id, suCommand, groupName);
@@ -210,7 +208,6 @@ public sealed class CommandManager
     /// <param name="matchFunc">自定义匹配方法</param>
     /// <param name="groupCommand">指令执行定义</param>
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
-    /// <param name="exceptionHandler">异常处理</param>
     /// <param name="memberRole">成员权限限制</param>
     /// <param name="suCommand">机器人管理员限制</param>
     /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
@@ -218,16 +215,15 @@ public sealed class CommandManager
     /// <param name="sourceUsers">成员限制</param>
     /// <param name="desc">描述</param>
     public Guid RegisterGroupDynamicCommand(
-        Func<BaseMessageEventArgs, bool>        matchFunc,
-        Func<GroupMessageEventArgs, ValueTask>  groupCommand,
-        string                                  groupName        = "",
-        Action<Exception, BaseMessageEventArgs> exceptionHandler = null,
-        MemberRoleType                          memberRole       = MemberRoleType.Member,
-        bool                                    suCommand        = false,
-        int?                                    priority         = null,
-        long[]                                  sourceGroups     = null,
-        long[]                                  sourceUsers      = null,
-        string                                  desc             = "")
+        Func<BaseMessageEventArgs, bool>       matchFunc,
+        Func<GroupMessageEventArgs, ValueTask> groupCommand,
+        string                                 groupName    = "",
+        MemberRoleType                         memberRole   = MemberRoleType.Member,
+        bool                                   suCommand    = false,
+        int?                                   priority     = null,
+        long[]                                 sourceGroups = null,
+        long[]                                 sourceUsers  = null,
+        string                                 desc         = "")
     {
         //判断参数合法性
         if (groupCommand is null)
@@ -240,7 +236,7 @@ public sealed class CommandManager
         //创建指令信息
         DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(
             desc, Array.Empty<string>(), matchFunc, memberRole, priority ?? GetNewDynamicPriority(),
-            RegexOptions.None, exceptionHandler,
+            RegexOptions.None,
             sourceGroups ?? Array.Empty<long>(),
             sourceUsers  ?? Array.Empty<long>(),
             groupCommand, id, suCommand, groupName);
@@ -256,7 +252,6 @@ public sealed class CommandManager
     /// <param name="matchType">匹配类型</param>
     /// <param name="regexOptions">正则选项</param>
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
-    /// <param name="exceptionHandler">异常处理</param>
     /// <param name="suCommand">机器人管理员限制</param>
     /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
     /// <param name="sourceUsers">用户限制</param>
@@ -264,14 +259,13 @@ public sealed class CommandManager
     public Guid RegisterPrivateDynamicCommand(
         string[]                                 cmdExps,
         Func<PrivateMessageEventArgs, ValueTask> privateCommand,
-        MatchType                                matchType        = MatchType.Full,
-        RegexOptions                             regexOptions     = RegexOptions.None,
-        string                                   groupName        = "",
-        Action<Exception, BaseMessageEventArgs>  exceptionHandler = null,
-        bool                                     suCommand        = false,
-        int?                                     priority         = null,
-        long[]                                   sourceUsers      = null,
-        string                                   desc             = "")
+        MatchType                                matchType    = MatchType.Full,
+        RegexOptions                             regexOptions = RegexOptions.None,
+        string                                   groupName    = "",
+        bool                                     suCommand    = false,
+        int?                                     priority     = null,
+        long[]                                   sourceUsers  = null,
+        string                                   desc         = "")
     {
         //判断参数合法性
         if (cmdExps is null || cmdExps.Length == 0)
@@ -289,7 +283,7 @@ public sealed class CommandManager
         //创建指令信息
         var dynamicCommand = new DynamicCommandInfo(
             desc, matchExp, null, priority ?? GetNewDynamicPriority(),
-            regexOptions | RegexOptions.Compiled, exceptionHandler,
+            regexOptions | RegexOptions.Compiled,
             sourceUsers ?? Array.Empty<long>(),
             privateCommand, id, suCommand, groupName);
 
@@ -302,7 +296,6 @@ public sealed class CommandManager
     /// <param name="matchFunc">自定义匹配方法</param>
     /// <param name="privateCommand">指令执行定义</param>
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
-    /// <param name="exceptionHandler">异常处理</param>
     /// <param name="suCommand">机器人管理员限制</param>
     /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
     /// <param name="sourceUsers">用户限制</param>
@@ -310,12 +303,11 @@ public sealed class CommandManager
     public Guid RegisterPrivateDynamicCommand(
         Func<BaseMessageEventArgs, bool>         matchFunc,
         Func<PrivateMessageEventArgs, ValueTask> privateCommand,
-        string                                   groupName        = "",
-        Action<Exception, BaseMessageEventArgs>  exceptionHandler = null,
-        bool                                     suCommand        = false,
-        int?                                     priority         = null,
-        long[]                                   sourceUsers      = null,
-        string                                   desc             = "")
+        string                                   groupName   = "",
+        bool                                     suCommand   = false,
+        int?                                     priority    = null,
+        long[]                                   sourceUsers = null,
+        string                                   desc        = "")
     {
         //判断参数合法性
         if (privateCommand is null)
@@ -328,7 +320,7 @@ public sealed class CommandManager
         //创建指令信息
         var dynamicCommand = new DynamicCommandInfo(
             desc, Array.Empty<string>(), matchFunc, priority ?? GetNewDynamicPriority(),
-            RegexOptions.None, exceptionHandler,
+            RegexOptions.None,
             sourceUsers ?? Array.Empty<long>(),
             privateCommand, id, suCommand, groupName);
 
@@ -776,7 +768,6 @@ public sealed class CommandManager
             commandAttr.Priority,
             commandAttr.RegexOptions,
             commandAttr.SourceType,
-            commandAttr.ExceptionHandler,
             commandAttr.SourceGroups.IsEmpty() ? Array.Empty<long>() : commandAttr.SourceGroups,
             commandAttr.SourceUsers.IsEmpty() ? Array.Empty<long>() : commandAttr.SourceUsers,
             commandAttr.SuperUserCommand,
@@ -876,9 +867,7 @@ public sealed class CommandManager
             }
 
         //异常处理
-        if (commandInfo.ExceptionHandler is not null) //动态指令错误处理
-            commandInfo.ExceptionHandler.Invoke(err, eventArgs);
-        else if (CmdExceptionHandler is not null) //全局错误处理
+        if (CmdExceptionHandler is not null)
             CmdExceptionHandler.Invoke(err, eventArgs, msg.ToString());
         else if (ThrowCommandErr)
             throw err;

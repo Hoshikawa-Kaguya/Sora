@@ -2,29 +2,26 @@
 using System.Text.RegularExpressions;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
-using Sora.EventArgs.SoraEvent;
 
 namespace Sora.Entities.Info.InternalDataInfo;
 
 internal abstract record BaseCommandInfo
 {
-    internal readonly string                                  Desc;             //注释
-    internal readonly Regex[]                                 Regex;            //正则表达式
-    internal readonly MemberRoleType                          PermissionType;   //指令执行权限,私聊无效
-    internal readonly bool                                    SuperUserCommand; //机器人管理员指令
-    internal readonly SourceFlag                              SourceType;       //指令匹配源类型
-    internal readonly int                                     Priority;         //优先级
-    internal readonly Action<Exception, BaseMessageEventArgs> ExceptionHandler; //异常回调
-    internal readonly long[]                                  SourceGroups;     //群组限制,私聊无效
-    internal readonly long[]                                  SourceUsers;      //用户限制
-    internal readonly string                                  GroupName;        //指令组名
-    internal readonly string                                  CommandName;      //指令名
+    internal readonly string         Desc;             //注释
+    internal readonly Regex[]        Regex;            //正则表达式
+    internal readonly MemberRoleType PermissionType;   //指令执行权限,私聊无效
+    internal readonly bool           SuperUserCommand; //机器人管理员指令
+    internal readonly SourceFlag     SourceType;       //指令匹配源类型
+    internal readonly int            Priority;         //优先级
+    internal readonly long[]         SourceGroups;     //群组限制,私聊无效
+    internal readonly long[]         SourceUsers;      //用户限制
+    internal readonly string         GroupName;        //指令组名
+    internal readonly string         CommandName;      //指令名
 
     internal BaseCommandInfo(
-        string                                  desc,     string[] regex, MemberRoleType permissionType, bool suCommand,
-        int                                     priority, RegexOptions regexOptions, SourceFlag source,
-        Action<Exception, BaseMessageEventArgs> exceptionHandler,
-        long[]                                  sourceGroups, long[] sourceUsers, string groupName, string commandName)
+        string desc,         string[]     regex,        MemberRoleType permissionType, bool suCommand,
+        int    priority,     RegexOptions regexOptions, SourceFlag     source,
+        long[] sourceGroups, long[]       sourceUsers,  string         groupName, string commandName)
     {
         Desc             = desc;
         PermissionType   = permissionType;
@@ -33,7 +30,6 @@ internal abstract record BaseCommandInfo
         SourceType       = source;
         SourceGroups     = sourceGroups;
         SourceUsers      = sourceUsers;
-        ExceptionHandler = exceptionHandler;
         GroupName        = groupName;
         CommandName      = string.IsNullOrEmpty(groupName) ? commandName : $"({groupName}){commandName}";
 
