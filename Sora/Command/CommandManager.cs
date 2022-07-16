@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Sora.Attributes;
 using Sora.Attributes.Command;
@@ -188,7 +187,7 @@ public sealed class CommandManager
         Log.Debug("Command", $"Registering dynamic command [{id}]");
 
         //处理表达式
-        string[] matchExp = ParseCommandExps(cmdExps, string.Empty, matchType);
+        string[] matchExp = CommandUtils.ParseCommandExps(cmdExps, string.Empty, matchType);
 
 
         //创建指令信息
@@ -278,7 +277,7 @@ public sealed class CommandManager
         Log.Debug("Command", $"Registering dynamic command [{id}]");
 
         //处理表达式
-        string[] matchExp = ParseCommandExps(cmdExps, string.Empty, matchType);
+        string[] matchExp = CommandUtils.ParseCommandExps(cmdExps, string.Empty, matchType);
 
         //创建指令信息
         var dynamicCommand = new DynamicCommandInfo(
@@ -429,10 +428,11 @@ public sealed class CommandManager
             Log.Info("CommandAdapter", $"触发指令 [<{p}>{commandInfo.CommandId}]");
             eventArgs.CommandId   = commandInfo.CommandId;
             eventArgs.CommandName = commandInfo.CommandName;
-            eventArgs.CommandRegex = commandInfo.Regex.Length != 0
-                                         ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText))
-                                                      .ToArray()
-                                         : Array.Empty<Regex>();
+
+            eventArgs.CommandRegex =
+                commandInfo.Regex.Length != 0
+                    ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText)).ToArray()
+                    : Array.Empty<Regex>();
             try
             {
                 switch (eventArgs.SourceType)
@@ -501,27 +501,18 @@ public sealed class CommandManager
                                                       .ToArray()
                                          : Array.Empty<Regex>();
 
+            Log.Debug("Command", "invoke command method");
             try
             {
                 //执行指令方法
                 if (isAsync && commandInfo.MethodInfo.ReturnType != typeof(void))
-                {
-                    Log.Debug("Command", "invoke async command method");
-                    await commandInfo.MethodInfo
-                                     .Invoke(commandInfo.InstanceType == null
-                                                 ? null
-                                                 : _instanceDict[commandInfo.InstanceType],
-                                          new object[] {eventArgs});
-                }
+                    await commandInfo.MethodInfo.Invoke(
+                        commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
+                        new object[] {eventArgs});
                 else
-                {
-                    Log.Debug("Command", "invoke command method");
-                    commandInfo.MethodInfo
-                               .Invoke(commandInfo.InstanceType == null
-                                           ? null
-                                           : _instanceDict[commandInfo.InstanceType],
-                                    new object[] {eventArgs});
-                }
+                    commandInfo.MethodInfo.Invoke(
+                        commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
+                        new object[] {eventArgs});
             }
             catch (Exception err)
             {
@@ -658,81 +649,6 @@ public sealed class CommandManager
     #region 指令信息初始化
 
     /// <summary>
-    /// 生成连续对话上下文
-    /// </summary>
-    /// <param name="sourceUid">消息源UID</param>
-    /// <param name="sourceGroup">消息源GID</param>
-    /// <param name="matchFunc">自定义匹配方法</param>
-    /// <param name="sourceFlag">来源标识</param>
-    /// <param name="connectionId">连接标识</param>
-    /// <param name="serviceId">服务标识</param>
-    /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
-    [NeedReview("ALL")]
-    internal static WaitingInfo GenerateWaitingCommandInfo(
-        long                             sourceUid,
-        long                             sourceGroup,
-        Func<BaseMessageEventArgs, bool> matchFunc,
-        SourceFlag                       sourceFlag,
-        Guid                             connectionId,
-        Guid                             serviceId)
-    {
-        if (matchFunc is null)
-            throw new ArgumentNullException(nameof(matchFunc));
-        return new WaitingInfo(new AutoResetEvent(false),
-            matchFunc,
-            serviceId: serviceId,
-            connectionId: connectionId,
-            source: (sourceUid, sourceGroup),
-            sourceFlag: sourceFlag);
-    }
-
-    /// <summary>
-    /// 生成连续对话上下文
-    /// </summary>
-    /// <param name="sourceUid">消息源UID</param>
-    /// <param name="sourceGroup">消息源GID</param>
-    /// <param name="cmdExps">指令表达式</param>
-    /// <param name="matchType">匹配类型</param>
-    /// <param name="sourceFlag">来源标识</param>
-    /// <param name="regexOptions">正则匹配选项</param>
-    /// <param name="connectionId">连接标识</param>
-    /// <param name="serviceId">服务标识</param>
-    /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
-    [NeedReview("ALL")]
-    internal static WaitingInfo GenerateWaitingCommandInfo(
-        long         sourceUid,
-        long         sourceGroup,
-        string[]     cmdExps,
-        MatchType    matchType,
-        SourceFlag   sourceFlag,
-        RegexOptions regexOptions,
-        Guid         connectionId,
-        Guid         serviceId)
-    {
-        if (cmdExps == null || cmdExps.Length == 0)
-            throw new NullReferenceException("cmdExps is empty");
-        string[] matchExp = matchType switch
-        {
-            MatchType.Full => cmdExps
-                             .Select(command => $"^{command}$")
-                             .ToArray(),
-            MatchType.Regex => cmdExps,
-            MatchType.KeyWord => cmdExps
-                                .Select(command => $"({command})+")
-                                .ToArray(),
-            _ => throw new NotSupportedException("unknown matchtype")
-        };
-
-        return new WaitingInfo(new AutoResetEvent(false),
-            matchExp,
-            serviceId: serviceId,
-            connectionId: connectionId,
-            source: (sourceUid, sourceGroup),
-            sourceFlag: sourceFlag,
-            regexOptions: regexOptions);
-    }
-
-    /// <summary>
     /// 生成指令信息
     /// </summary>
     /// <param name="method">指令method</param>
@@ -753,7 +669,8 @@ public sealed class CommandManager
             method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand ??
             throw new NullReferenceException("SoraCommand attribute is null with unknown reason");
         //处理表达式
-        string[] matchExp = ParseCommandExps(commandAttr.CommandExpressions, prefix, commandAttr.MatchType);
+        string[] matchExp =
+            CommandUtils.ParseCommandExps(commandAttr.CommandExpressions, prefix, commandAttr.MatchType);
 
         //检查和创建实例
         //若创建实例失败且方法不是静态的，则返回空白命令信息
@@ -785,30 +702,6 @@ public sealed class CommandManager
     #endregion
 
     #region 通用工具
-
-    /// <summary>
-    /// 处理指令正则表达式
-    /// </summary>
-    [NeedReview("ALL")]
-    private static string[] ParseCommandExps(
-        string[]  cmdExps,
-        string    prefix,
-        MatchType matchType)
-    {
-        switch (matchType)
-        {
-            case MatchType.Full:
-                return cmdExps.Select(command => $"^{prefix}{command}$").ToArray();
-            case MatchType.Regex:
-                if (!string.IsNullOrEmpty(prefix))
-                    Log.Warning("指令初始化", $"当前注册指令类型为正则匹配，自动忽略前缀[{prefix}]");
-                return cmdExps;
-            case MatchType.KeyWord:
-                return cmdExps.Select(command => $"({prefix}{command})+").ToArray();
-            default:
-                throw new NotSupportedException("unknown matchtype");
-        }
-    }
 
     /// <summary>
     /// 获取已注册过的实例
