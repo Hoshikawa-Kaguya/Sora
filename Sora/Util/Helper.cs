@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Sora.Attributes;
 using Sora.Entities.Info.InternalDataInfo;
@@ -36,49 +37,6 @@ public static class Helper
 
     #endregion
 
-    #region 指令实例相关
-
-    /// <summary>
-    /// 对列表进行添加 SoraCommandInfo 元素，或如果存在该项的话，忽略
-    /// </summary>
-    /// <param name="list">要添加元素的列表</param>
-    /// <param name="data">要添加的元素</param>
-    /// <returns>是否成功添加，若已存在则返回false。</returns>
-    [Reviewed("nidbCN", "2021-03-24 19:39")]
-    internal static bool AddOrExist(this List<SoraCommandInfo> list, SoraCommandInfo data)
-    {
-        if (list.Any(i => i.Equals(data)))
-            return false;
-        //当有指令表达式相同且优先级相同时，抛出错误
-        if (data.Regex.Length != 0 && list.Any(i => i.Regex.ArrayEquals(data.Regex) && i.Priority == data.Priority))
-            throw new NotSupportedException("Priority cannot be the same value");
-        list.Add(data);
-        return true;
-    }
-
-    /// <summary>
-    /// 对列表进行添加 DynamicCommandInfo 元素，或如果存在该项的话，忽略
-    /// </summary>
-    /// <param name="list">要添加元素的列表</param>
-    /// <param name="data">要添加的元素</param>
-    /// <returns>是否成功添加，若已存在则返回false。</returns>
-    [Reviewed("nidbCN", "2021-03-24 19:39")]
-    internal static bool AddOrExist(this List<DynamicCommandInfo> list, DynamicCommandInfo data)
-    {
-        if (list.Contains(data))
-            return false;
-        //当有指令表达式相同且优先级相同时，抛出错误
-        if (data.Regex.Length != 0 && list.Any(i => i.Regex.ArrayEquals(data.Regex) && i.Priority == data.Priority))
-            throw new NotSupportedException("Priority cannot be the same value");
-        if (data.CommandMatchFunc is not null &&
-            list.Any(i => i?.CommandMatchFunc == data.CommandMatchFunc && i.Priority == data.Priority))
-            throw new NotSupportedException("Priority cannot be the same value");
-        list.Add(data);
-        return true;
-    }
-
-    #endregion
-
     #region 网络
 
     /// <summary>
@@ -93,7 +51,52 @@ public static class Helper
 
     #endregion
 
+    #region 指令优先级转换
+
+    internal static List<(int p, List<T> cmds)> ToPriorityDict<T>(this List<T> cmdList) where T : BaseCommandInfo
+    {
+        HashSet<int> priorityRecord = new HashSet<int>();
+        foreach (T cmd in cmdList)
+            priorityRecord.Add(cmd.Priority);
+
+        //将相同优先级的指令顺序打乱
+        List<(int p, List<T> cmds)> ret = new List<(int p, List<T> cmds)>();
+        foreach (int p in priorityRecord)
+        {
+            List<T> cmds = cmdList.Where(c => c.Priority == p).ToList();
+            int     n    = cmds.Count;
+
+            while (n > 1)
+            {
+                n--;
+                int k = Random.Shared.Next(n + 1);
+                (cmds[k], cmds[n]) = (cmds[n], cmds[k]);
+            }
+
+            ret.Add((p, cmds));
+        }
+
+        return ret;
+    }
+
+    #endregion
+
     #region 小工具
+
+    /// <summary>
+    /// 对列表进行添加元素，或如果存在该项的话，忽略
+    /// </summary>
+    /// <param name="list">要添加元素的列表</param>
+    /// <param name="data">要添加的元素</param>
+    /// <returns>是否成功添加，若已存在则返回false。</returns>
+    [Reviewed("nidbCN", "2021-03-24 19:39")]
+    internal static bool AddOrExist<T>(this List<T> list, T data) where T : class
+    {
+        if (list.Contains(data))
+            return false;
+        list.Add(data);
+        return true;
+    }
 
     /// <summary>
     /// 清除服务数据
@@ -130,8 +133,9 @@ public static class Helper
             {
                 if (arr1[i] is null || arr2[i] is null)
                     return false;
-
-                if (!arr1[i].Equals(arr2[i]))
+                if (!arr1[i].Equals(arr2[i]) && typeof(T) != typeof(Regex))
+                    return false;
+                if (arr1[i].ToString() != arr2[i].ToString())
                     return false;
             }
 
