@@ -66,8 +66,8 @@ service.Event.CommandManager.RegisterGroupDynamicCommand(
     new[] {"2"},
     async eventArgs =>
     {
-        await eventArgs.Reply("shit");
         eventArgs.IsContinueEventChain = false;
+        await eventArgs.Reply("shit");
     });
 
 //指令错误处理
