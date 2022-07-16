@@ -416,47 +416,50 @@ public sealed class CommandManager
         if (_regexCommands.Count == 0)
             return;
 
-        List<DynamicCommandInfo> matchedDynamicCommand =
+        List<(int, List<DynamicCommandInfo>)> matchedDynamicCommand =
             _dynamicCommands.Where(command => CommandMatch(command, eventArgs))
-                            .OrderByDescending(p => p.Priority)
-                            .ToList();
+                            .OrderByDescending(c => c.Priority)
+                            .ToList()
+                            .ToPriorityDict();
 
-        if (matchedDynamicCommand.Count != 0)
-            foreach (DynamicCommandInfo commandInfo in matchedDynamicCommand)
-                try
+        foreach ((int p, List<DynamicCommandInfo> commandInfos) in matchedDynamicCommand)
+        foreach (DynamicCommandInfo commandInfo in commandInfos)
+        {
+            Log.Debug("CommandAdapter", $"trigger command [<{p}>{commandInfo.CommandId}]");
+            Log.Info("CommandAdapter", $"触发指令 [<{p}>{commandInfo.CommandId}]");
+            eventArgs.CommandId   = commandInfo.CommandId;
+            eventArgs.CommandName = commandInfo.CommandName;
+            eventArgs.CommandRegex = commandInfo.Regex.Length != 0
+                                         ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText))
+                                                      .ToArray()
+                                         : Array.Empty<Regex>();
+            try
+            {
+                switch (eventArgs.SourceType)
                 {
-                    Log.Debug("CommandAdapter", $"trigger command [{commandInfo.CommandId}]");
-                    Log.Info("CommandAdapter", $"触发指令[{commandInfo.CommandId}]");
-                    eventArgs.CommandId   = commandInfo.CommandId;
-                    eventArgs.CommandName = commandInfo.CommandName;
-                    eventArgs.CommandRegex = commandInfo.Regex.Length != 0
-                                                 ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText))
-                                                              .ToArray()
-                                                 : Array.Empty<Regex>();
-                    switch (eventArgs.SourceType)
-                    {
-                        case SourceFlag.Group:
-                            await commandInfo.GroupCommand(eventArgs as GroupMessageEventArgs);
-                            break;
-                        case SourceFlag.Private:
-                            await commandInfo.PrivateCommand(eventArgs as PrivateMessageEventArgs);
-                            break;
-                    }
-
-                    //清空指令参数信息
-                    eventArgs.CommandId    = Guid.Empty;
-                    eventArgs.CommandName  = string.Empty;
-                    eventArgs.CommandRegex = null;
-
-                    //检测事件触发中断标志
-                    if (!eventArgs.IsContinueEventChain)
-                        return;
+                    case SourceFlag.Group:
+                        await commandInfo.GroupCommand(eventArgs as GroupMessageEventArgs);
+                        break;
+                    case SourceFlag.Private:
+                        await commandInfo.PrivateCommand(eventArgs as PrivateMessageEventArgs);
+                        break;
                 }
-                catch (Exception err)
-                {
-                    await CommandErrorParse(err, eventArgs, commandInfo, commandInfo.CommandId.ToString());
-                    return;
-                }
+            }
+            catch (Exception err)
+            {
+                await CommandErrorParse(err, eventArgs, commandInfo, commandInfo.CommandId.ToString());
+                return;
+            }
+
+            //清空指令参数信息
+            eventArgs.CommandId    = Guid.Empty;
+            eventArgs.CommandName  = string.Empty;
+            eventArgs.CommandRegex = null;
+
+            //检测事件触发中断标志
+            if (!eventArgs.IsContinueEventChain)
+                return;
+        }
 
         #endregion
 
@@ -466,10 +469,11 @@ public sealed class CommandManager
         if (_regexCommands.Count == 0)
             return;
 
-        List<SoraCommandInfo> matchedCommand =
+        List<(int, List<SoraCommandInfo>)> matchedCommand =
             _regexCommands.Where(command => CommandMatch(command, eventArgs))
-                          .OrderByDescending(p => p.Priority)
-                          .ToList();
+                          .OrderByDescending(c => c.Priority)
+                          .ToList()
+                          .ToPriorityDict();
 
         //在没有匹配到指令时直接跳转至Event触发
         if (matchedCommand.Count == 0)
@@ -479,57 +483,59 @@ public sealed class CommandManager
         eventArgs.CommandId = Guid.Empty;
 
         //遍历匹配到的每个命令
-        foreach (SoraCommandInfo commandInfo in matchedCommand)
+        foreach ((int p, List<SoraCommandInfo> commandInfos) in matchedCommand)
+        foreach (SoraCommandInfo commandInfo in commandInfos)
+        {
+            Log.Debug("CommandAdapter",
+                $"trigger command [<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.GroupName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+            Log.Info("CommandAdapter",
+                $"触发指令[<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.GroupName}){commandInfo.MethodInfo.Name}]");
+            //尝试执行指令并判断异步方法
+            bool isAsync =
+                commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
+                    false) is not null;
+
+            eventArgs.CommandName = commandInfo.CommandName;
+            eventArgs.CommandRegex = commandInfo.Regex.Length != 0
+                                         ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText))
+                                                      .ToArray()
+                                         : Array.Empty<Regex>();
+
             try
             {
-                Log.Debug("CommandAdapter",
-                    $"trigger command [(C:{commandInfo.ClassName}|G:{commandInfo.GroupName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
-                Log.Info("CommandAdapter",
-                    $"触发指令[(C:{commandInfo.ClassName}|G:{commandInfo.GroupName}){commandInfo.MethodInfo.Name}]");
-                //尝试执行指令并判断异步方法
-                bool isAsync =
-                    commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
-                        false) is not null;
-
-                eventArgs.CommandName = commandInfo.CommandName;
-                eventArgs.CommandRegex = commandInfo.Regex.Length != 0
-                                             ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText))
-                                                          .ToArray()
-                                             : Array.Empty<Regex>();
                 //执行指令方法
                 if (isAsync && commandInfo.MethodInfo.ReturnType != typeof(void))
                 {
                     Log.Debug("Command", "invoke async command method");
                     await commandInfo.MethodInfo
-                                     .Invoke(
-                                          commandInfo.InstanceType == null
-                                              ? null
-                                              : _instanceDict[commandInfo.InstanceType],
+                                     .Invoke(commandInfo.InstanceType == null
+                                                 ? null
+                                                 : _instanceDict[commandInfo.InstanceType],
                                           new object[] {eventArgs});
                 }
                 else
                 {
                     Log.Debug("Command", "invoke command method");
                     commandInfo.MethodInfo
-                               .Invoke(
-                                    commandInfo.InstanceType == null
-                                        ? null
-                                        : _instanceDict[commandInfo.InstanceType],
+                               .Invoke(commandInfo.InstanceType == null
+                                           ? null
+                                           : _instanceDict[commandInfo.InstanceType],
                                     new object[] {eventArgs});
                 }
-
-                eventArgs.CommandName  = string.Empty;
-                eventArgs.CommandRegex = null;
-
-                //检测事件触发中断标志
-                if (!eventArgs.IsContinueEventChain)
-                    break;
             }
             catch (Exception err)
             {
                 await CommandErrorParse(err, eventArgs, commandInfo, commandInfo.MethodInfo.Name);
                 return;
             }
+
+            eventArgs.CommandName  = string.Empty;
+            eventArgs.CommandRegex = null;
+
+            //检测事件触发中断标志
+            if (!eventArgs.IsContinueEventChain)
+                break;
+        }
 
         #endregion
     }
