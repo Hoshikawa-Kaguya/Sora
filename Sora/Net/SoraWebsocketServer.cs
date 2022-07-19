@@ -127,7 +127,7 @@ public sealed class SoraWebsocketServer : ISoraService
     {
         if (!_isReady)
         {
-            Log.Warning("Sora", "service is not ready!");
+            Log.Warning("Sora", "服务已经启动了！");
             return ValueTask.CompletedTask;
         }
 

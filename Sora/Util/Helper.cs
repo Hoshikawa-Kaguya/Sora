@@ -53,9 +53,9 @@ public static class Helper
 
     #region 指令优先级转换
 
-    internal static List<(int p, List<T> cmds)> ToPriorityDict<T>(this List<T> cmdList) where T : BaseCommandInfo
+    internal static List<(int p, List<T> cmds)> ToPriorityList<T>(this List<T> cmdList) where T : BaseCommandInfo
     {
-        HashSet<int> priorityRecord = new HashSet<int>();
+        HashSet<int> priorityRecord = new();
         foreach (T cmd in cmdList)
             priorityRecord.Add(cmd.Priority);
 
@@ -90,7 +90,7 @@ public static class Helper
     /// <param name="data">要添加的元素</param>
     /// <returns>是否成功添加，若已存在则返回false。</returns>
     [Reviewed("nidbCN", "2021-03-24 19:39")]
-    internal static bool AddOrExist<T>(this List<T> list, T data) where T : class
+    internal static bool AddOrExist<T>(this List<T> list, T data) where T : BaseCommandInfo
     {
         if (list.Contains(data))
             return false;

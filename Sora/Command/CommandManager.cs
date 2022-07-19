@@ -135,7 +135,7 @@ public sealed class CommandManager
                 }
                 else
                 {
-                    Log.Warning("CommandManager", "Command exists");
+                    Log.Warning("CommandManager", "指令已存在");
                 }
             }
 
@@ -343,7 +343,7 @@ public sealed class CommandManager
         }
         else
         {
-            Log.Warning("CommandManager", "Command exists");
+            Log.Warning("CommandManager", "指令已存在");
             return Guid.Empty;
         }
 
@@ -357,28 +357,6 @@ public sealed class CommandManager
     public bool DeleteDynamicCommand(Guid id)
     {
         return _dynamicCommands.RemoveAll(cmd => cmd.CommandId == id) > 0;
-    }
-
-    #endregion
-
-    #region 指令使能
-
-    /// <summary>
-    /// 尝试启用指令组
-    /// </summary>
-    /// <param name="groupName">指令组名</param>
-    public bool TryEnableCommandGroup(string groupName)
-    {
-        return _groupEnableFlagDict.TryUpdate(groupName, true, false);
-    }
-
-    /// <summary>
-    /// 尝试禁用指令组
-    /// </summary>
-    /// <param name="groupName">指令组名</param>
-    public bool TryDisableCommandGroup(string groupName)
-    {
-        return _groupEnableFlagDict.TryUpdate(groupName, false, true);
     }
 
     #endregion
@@ -419,7 +397,7 @@ public sealed class CommandManager
             _dynamicCommands.Where(command => CommandMatch(command, eventArgs))
                             .OrderByDescending(c => c.Priority)
                             .ToList()
-                            .ToPriorityDict();
+                            .ToPriorityList();
 
         foreach ((int p, List<DynamicCommandInfo> commandInfos) in matchedDynamicCommand)
         foreach (DynamicCommandInfo commandInfo in commandInfos)
@@ -433,6 +411,8 @@ public sealed class CommandManager
                 commandInfo.Regex.Length != 0
                     ? commandInfo.Regex.Where(r => r.IsMatch(eventArgs.Message.RawText)).ToArray()
                     : Array.Empty<Regex>();
+
+            //执行动态指令
             try
             {
                 switch (eventArgs.SourceType)
@@ -473,7 +453,7 @@ public sealed class CommandManager
             _regexCommands.Where(command => CommandMatch(command, eventArgs))
                           .OrderByDescending(c => c.Priority)
                           .ToList()
-                          .ToPriorityDict();
+                          .ToPriorityList();
 
         //在没有匹配到指令时直接跳转至Event触发
         if (matchedCommand.Count == 0)
@@ -492,8 +472,7 @@ public sealed class CommandManager
                 $"触发指令[<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.GroupName}){commandInfo.MethodInfo.Name}]");
             //尝试执行指令并判断异步方法
             bool isAsync =
-                commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute),
-                    false) is not null;
+                commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute), false) is not null;
 
             eventArgs.CommandName = commandInfo.CommandName;
             eventArgs.CommandRegex = commandInfo.Regex.Length != 0
@@ -501,10 +480,10 @@ public sealed class CommandManager
                                                       .ToArray()
                                          : Array.Empty<Regex>();
 
+            //执行指令方法
             Log.Debug("Command", "invoke command method");
             try
             {
-                //执行指令方法
                 if (isAsync && commandInfo.MethodInfo.ReturnType != typeof(void))
                     await commandInfo.MethodInfo.Invoke(
                         commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
@@ -619,7 +598,7 @@ public sealed class CommandManager
         //获取类属性
         if (!classType?.IsClass ?? true)
         {
-            Log.Error("Command", "method reflected object is not a class");
+            Log.Error("Command", $"[{classType?.Name}] 不是一个class");
             return false;
         }
 
@@ -639,9 +618,31 @@ public sealed class CommandManager
         }
         catch (Exception e)
         {
-            Log.Error("Command", $"cannot create instance with error:{Log.ErrorLogBuilder(e)}");
+            Log.Error("Command", $"在创建实例[{classType?.Name}]时发生错误:{Log.ErrorLogBuilder(e)}");
             return false;
         }
+    }
+
+    #endregion
+
+    #region 指令使能
+
+    /// <summary>
+    /// 尝试启用指令组
+    /// </summary>
+    /// <param name="groupName">指令组名</param>
+    public bool TryEnableCommandGroup(string groupName)
+    {
+        return _groupEnableFlagDict.TryUpdate(groupName, true, false);
+    }
+
+    /// <summary>
+    /// 尝试禁用指令组
+    /// </summary>
+    /// <param name="groupName">指令组名</param>
+    public bool TryDisableCommandGroup(string groupName)
+    {
+        return _groupEnableFlagDict.TryUpdate(groupName, false, true);
     }
 
     #endregion
