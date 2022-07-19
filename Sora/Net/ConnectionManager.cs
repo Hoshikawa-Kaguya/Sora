@@ -77,7 +77,7 @@ public sealed class ConnectionManager : IDisposable
         }
         catch (Exception e)
         {
-            Log.Error("Socket", $"Send message to client error\r\n{Log.ErrorLogBuilder(e)}");
+            Log.Error("Socket", $"发送WS消息时发生错误:\r\n{Log.ErrorLogBuilder(e)}");
             return false;
         }
     }
@@ -102,7 +102,7 @@ public sealed class ConnectionManager : IDisposable
             ConnectionRecord.GetTimeoutConn(serviceId, now, HeartBeatTimeOut);
         if (timeoutDict.Count == 0)
             return;
-        Log.Warning("HeartBeatCheck", $"timeout connection count {timeoutDict.Count}");
+        Log.Warning("HeartBeatCheck", $"发现超时的连接[{timeoutDict.Count}]");
 
         var needReconnect = new List<WebsocketClient>();
         //遍历超时的连接
@@ -111,7 +111,7 @@ public sealed class ConnectionManager : IDisposable
             CloseConnection(connection);
             double t = (now - info.LastHeartBeatTime).TotalMilliseconds;
             Log.Error("HeartBeatCheck",
-                $"Socket:[{connection}]connection time out({t}ms)，disconnect");
+                $"WebSocket连接[{connection}]心跳包超时({t}ms)，断开连接");
             //客户端尝试重连
             if (info.Connection.SocketType == SoraSocketType.Client &&
                 info.Connection.SocketInstance is WebsocketClient c)
@@ -144,7 +144,7 @@ public sealed class ConnectionManager : IDisposable
         {
             //记录添加失败关闭超时的连接
             socket.Close();
-            Log.Error("ConnectionManager", $"Cannot record connection[{connId}]");
+            Log.Error("ConnectionManager", $"无法添加新连接[{connId}]");
             return;
         }
 
