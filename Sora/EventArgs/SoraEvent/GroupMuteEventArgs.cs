@@ -29,9 +29,8 @@ public sealed class GroupMuteEventArgs : BaseSoraEventArgs
 
     /// <summary>
     /// 禁言时长(s)
-    /// 0为解除禁言
     /// </summary>
-    public long Duration { get; set; }
+    internal long Duration { get; set; }
 
     #endregion
 
