@@ -59,7 +59,7 @@ internal static class ReactiveApiManager
         {
             if (!ConnectionRecord.GetApiTimeout(connectionId, out currentTimeout))
             {
-                Log.Error("Sora", "Cannot get api timeout");
+                Log.Error("Sora", "无法获取当前api的超时设置");
                 currentTimeout = TimeSpan.FromSeconds(5);
             }
         }
@@ -87,7 +87,7 @@ internal static class ReactiveApiManager
                                     //在错误为超时时不打印log
                                     if (!isTimeout)
                                         Log.Error("Sora",
-                                            $"ApiSubject Error {Log.ErrorLogBuilder(e)}");
+                                            $"ApiSubject 发生错误: {Log.ErrorLogBuilder(e)}");
                                     return new JObject();
                                 });
 
@@ -108,8 +108,7 @@ internal static class ReactiveApiManager
             return (NullResponse(), null);
         //观察者抛出异常
         if (isTimeout)
-            Log.Error("Sora",
-                $"api time out[msg echo:{apiRequest.Echo}]");
+            Log.Error("Sora", $"API超时[msg echo:{apiRequest.Echo}]");
         return isTimeout
                    ? (TimeOut(), null)
                    : (ObservableError(Log.ErrorLogBuilder(exception)), null);
