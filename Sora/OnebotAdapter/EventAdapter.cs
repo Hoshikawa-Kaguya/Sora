@@ -238,7 +238,7 @@ public sealed class EventAdapter
                     ReactiveApiManager.GetResponse(echo, messageJson);
                 else
                     Log.Warning("Sora",
-                        $"Unknown message type:{TryGetJsonValue(messageJson, "post_type")}\r\njson = {messageJson}");
+                        $"未知类型的上报:{TryGetJsonValue(messageJson, "post_type")}\r\njson = {messageJson}");
 
                 break;
         }
@@ -532,8 +532,7 @@ public sealed class EventAdapter
                 if (OnGroupAdminChange == null)
                     break;
                 await OnGroupAdminChange("Notice",
-                    new GroupAdminChangeEventArgs(ServiceId, connection, "group_upload",
-                        adminChange));
+                    new GroupAdminChangeEventArgs(ServiceId, connection, "group_admin", adminChange));
                 break;
             }
             //群成员变动
@@ -549,9 +548,7 @@ public sealed class EventAdapter
                 if (OnGroupMemberChange == null)
                     break;
                 await OnGroupMemberChange("Notice",
-                    new GroupMemberChangeEventArgs(ServiceId, connection,
-                        "group_member_change",
-                        groupMemberChange));
+                    new GroupMemberChangeEventArgs(ServiceId, connection, "group_member_change", groupMemberChange));
                 break;
             }
             //群禁言

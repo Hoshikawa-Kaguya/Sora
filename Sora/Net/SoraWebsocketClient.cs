@@ -125,7 +125,7 @@ public sealed class SoraWebsocketClient : ISoraService
     {
         if (!_isReady)
         {
-            Log.Warning("Sora", "service is not ready!");
+            Log.Warning("Sora", "服务已经启动了！");
             return;
         }
 
@@ -133,7 +133,7 @@ public sealed class SoraWebsocketClient : ISoraService
         string serverPath = string.IsNullOrEmpty(Config.UniversalPath)
                                 ? $"ws://{Config.Host}:{Config.Port}"
                                 : $"ws://{Config.Host}:{Config.Port}/{Config.UniversalPath.Trim('/')}/";
-        Log.Debug("Sora", $"Onebot服务器地址:{serverPath}");
+        Log.Debug("Sora", $"Onebot server addr:{serverPath}");
         Client =
             new WebsocketClient(new Uri(serverPath), CreateSocket)
             {
