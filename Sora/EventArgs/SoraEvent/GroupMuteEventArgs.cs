@@ -29,8 +29,10 @@ public sealed class GroupMuteEventArgs : BaseSoraEventArgs
 
     /// <summary>
     /// 禁言时长(s)
+    /// 0 为解除个人禁言/全员禁言
+    /// -1 为开启全员禁言
     /// </summary>
-    internal long Duration { get; set; }
+    public long Duration { get; set; }
 
     #endregion
 
