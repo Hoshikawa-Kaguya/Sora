@@ -19,7 +19,7 @@
     <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
     <img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=flat-square" alt="workflow">
     <a href="https://github.com/Mrs4s/go-cqhttp">
-        <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--rc2-blue?style=flat-square" alt="gocq-ver">
+        <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--rc3-blue?style=flat-square" alt="gocq-ver">
     </a>
     </h4>
 </h1>
