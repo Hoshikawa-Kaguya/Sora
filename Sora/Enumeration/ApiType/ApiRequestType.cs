@@ -384,7 +384,13 @@ internal enum ApiRequestType
     /// 获取群公告
     /// </summary>
     [Description("_get_group_notice")]
-    GetGroupNotice
+    GetGroupNotice,
+
+    /// <summary>
+    /// 上传私聊文件
+    /// </summary>
+    [Description("upload_private_file")]
+    UploadPrivateFile
 
     #endregion
 }

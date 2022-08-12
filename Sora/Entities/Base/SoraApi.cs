@@ -601,15 +601,34 @@ public sealed class SoraApi
     /// <param name="localFilePath">本地文件路径</param>
     /// <param name="fileName">上传文件名</param>
     /// <param name="folderId">父目录ID</param>
+    /// <param name="timeout">API超时覆盖</param>
     /// <returns>API状态</returns>
     public async ValueTask<ApiStatus> UploadGroupFile(
-        long   groupId, string localFilePath, string fileName,
-        string folderId = null)
+        long   groupId,         string localFilePath, string fileName,
+        string folderId = null, int    timeout = 10000)
     {
         if (groupId < MIN_GROUP_ID)
             throw new ArgumentOutOfRangeException(nameof(groupId));
         return await ApiAdapter.UploadGroupFile(ConnectionId, groupId, localFilePath,
-                   fileName, folderId);
+                   fileName, folderId, timeout);
+    }
+
+    /// <summary>
+    /// 上传私聊文件
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    /// <param name="localFilePath">本地文件路径</param>
+    /// <param name="fileName">上传文件名</param>
+    /// <param name="timeout">API超时覆盖</param>
+    /// <returns>API状态</returns>
+    public async ValueTask<ApiStatus> UploadPrivateFile(
+        long userId, string localFilePath, string fileName,
+        int  timeout = 10000)
+    {
+        if (userId < MIN_USER_ID)
+            throw new ArgumentOutOfRangeException(nameof(userId));
+        return await ApiAdapter.UploadPrivateFile(ConnectionId, userId, localFilePath,
+                   fileName, timeout);
     }
 
     /// <summary>
