@@ -1434,9 +1434,8 @@ internal static class ApiAdapter
     /// <param name="folderId">父目录ID 为<see langword="null"/>时则上传到根目录</param>
     /// <param name="timeout">超时</param>
     internal static async ValueTask<ApiStatus> UploadGroupFile(
-        Guid   connection, long groupId, string localFilePath,
-        string fileName,
-        string folderId = null, int timeout = 10000)
+        Guid   connection,      long groupId, string localFilePath, string fileName,
+        string folderId = null, int  timeout = 10000)
     {
         Log.Debug("Sora", "Sending upload_group_file request");
         (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
@@ -1451,6 +1450,33 @@ internal static class ApiAdapter
             }
         }, connection, TimeSpan.FromMilliseconds(timeout));
         Log.Debug("Sora", $"Get upload_group_file response {nameof(apiStatus)}={apiStatus.RetCode}");
+        return apiStatus;
+    }
+
+    /// <summary>
+    /// 上传私聊文件
+    /// </summary>
+    /// <param name="connection">链接标识</param>
+    /// <param name="userId">用户ID</param>
+    /// <param name="localFilePath">本地文件路径</param>
+    /// <param name="fileName">上传文件名</param>
+    /// <param name="timeout">超时</param>
+    internal static async ValueTask<ApiStatus> UploadPrivateFile(
+        Guid connection, long userId, string localFilePath, string fileName,
+        int  timeout = 10000)
+    {
+        Log.Debug("Sora", "Sending upload_private_file request");
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
+        {
+            ApiRequestType = ApiRequestType.UploadPrivateFile,
+            ApiParams = new
+            {
+                user_id = userId,
+                file    = localFilePath ?? throw new NullReferenceException("localFilePath is null"),
+                name    = fileName      ?? throw new NullReferenceException("fileName is null")
+            }
+        }, connection, TimeSpan.FromMilliseconds(timeout));
+        Log.Debug("Sora", $"Get upload_private_file response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
 
