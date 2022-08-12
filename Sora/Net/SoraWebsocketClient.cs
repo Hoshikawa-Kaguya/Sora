@@ -90,7 +90,7 @@ public sealed class SoraWebsocketClient : ISoraService
         Log.Info("Sora", $"Sora WebSocket客户端初始化... [{ServiceId}]");
         Config = config ?? throw new ArgumentNullException(nameof(config));
         //写入初始化信息
-        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(config)))
+        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(config), this))
             throw new DataException("try add service config failed");
         //检查参数
         if (Config.Port == 0)

@@ -92,6 +92,23 @@ public static class SoraServiceFactory
     }
 
     /// <summary>
+    /// 通过服务ID获取服务实例
+    /// </summary>
+    /// <param name="serviceId"></param>
+    /// <param name="service"></param>
+    public static bool TryGetService(Guid serviceId, out ISoraService service)
+    {
+        if (ServiceRecord.Exists(serviceId))
+        {
+            service = ServiceRecord.GetService(serviceId);
+            return true;
+        }
+
+        service = null;
+        return false;
+    }
+
+    /// <summary>
     /// 启动多个服务
     /// </summary>
     /// <param name="serviceList">多服务列表</param>
