@@ -26,7 +26,7 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <summary>
     /// 服务ID
     /// </summary>
-    internal Guid ServiceId { get; }
+    public Guid ServiceId { get; }
 
     /// <summary>
     /// 当前事件名

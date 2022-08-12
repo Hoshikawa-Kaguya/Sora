@@ -47,7 +47,7 @@ service.Event.OnClientConnect += (_, eventArgs) =>
 };
 
 //群聊消息事件
-service.Event.OnGroupMessage += async (_, eventArgs) => { await eventArgs.Reply("fuck you"); };
+service.Event.OnGroupMessage += async (_, eventArgs) => { await eventArgs.Reply("?"); };
 service.Event.OnSelfGroupMessage += (_, eventArgs) =>
 {
     Log.Warning("test", $"self group msg {eventArgs.Message.MessageId}[{eventArgs.IsSelfMessage}]");
@@ -63,7 +63,7 @@ service.Event.OnSelfPrivateMessage += (_, eventArgs) =>
 
 //动态向管理器注册指令
 service.Event.CommandManager.RegisterGroupDynamicCommand(
-    new[] {"2"},
+    new[] {"哇哦"},
     async eventArgs =>
     {
         eventArgs.IsContinueEventChain = false;

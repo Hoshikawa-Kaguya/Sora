@@ -91,7 +91,7 @@ public sealed class SoraWebsocketServer : ISoraService
         }
 
         //写入初始化信息
-        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(Config)))
+        if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(Config), this))
             throw new DataException("try add service config failed");
         //检查参数
         if (Config.Port == 0)

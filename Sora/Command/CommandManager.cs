@@ -549,11 +549,19 @@ public sealed class CommandManager
         switch (eventArgs.SourceType)
         {
             case SourceFlag.Group:
+            {
                 var e = eventArgs as GroupMessageEventArgs ??
                         throw new NullReferenceException("event args is null with unknown reason");
                 //检查来源群
                 if (command.SourceGroups.Length != 0)
                     sourceMatch &= command.SourceGroups.Any(gid => gid == e.SourceGroup);
+                //检查群是否禁用过该指令组
+                if (ServiceRecord.IsGroupBlockedCommand(eventArgs.ServiceId, e.SourceGroup, command.GroupName))
+                {
+                    Log.Info("CommandAdapter", $"群[{e.SourceGroup.Id}]已禁用指令组[{command.GroupName}]");
+                    return false;
+                }
+
                 //检查来源用户
                 if (command.SourceUsers.Length != 0)
                     sourceMatch &= command.SourceUsers.Any(uid => uid == e.Sender);
@@ -576,6 +584,7 @@ public sealed class CommandManager
                 }
 
                 break;
+            }
             case SourceFlag.Private:
                 //检查来源用户
                 if (command.SourceUsers.Length != 0)
@@ -643,6 +652,38 @@ public sealed class CommandManager
     public bool TryDisableCommandGroup(string groupName)
     {
         return _groupEnableFlagDict.TryUpdate(groupName, false, true);
+    }
+
+    /// <summary>
+    /// 启用群组中禁用的指令
+    /// </summary>
+    /// <param name="cmdGroupName">指令组名</param>
+    /// <param name="groupId">群组ID</param>
+    public bool TryEnableGroupCommand(string cmdGroupName, long groupId)
+    {
+        if (!_groupEnableFlagDict.ContainsKey(cmdGroupName))
+        {
+            Log.Warning("CommandGroup", $"不存在的指令组名[{cmdGroupName}]");
+            return false;
+        }
+
+        return ServiceRecord.EnableGroupCommand(ServiceId, cmdGroupName, groupId);
+    }
+
+    /// <summary>
+    /// 禁用群组中的指令
+    /// </summary>
+    /// <param name="cmdGroupName">指令组名</param>
+    /// <param name="groupId">群组ID</param>
+    public bool TryDisableGroupCommand(string cmdGroupName, long groupId)
+    {
+        if (!_groupEnableFlagDict.ContainsKey(cmdGroupName))
+        {
+            Log.Warning("CommandGroup", $"不存在的指令组名[{cmdGroupName}]");
+            return false;
+        }
+
+        return ServiceRecord.DisableGroupCommand(ServiceId, cmdGroupName, groupId);
     }
 
     #endregion
