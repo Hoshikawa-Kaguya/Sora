@@ -19,11 +19,11 @@ internal sealed record SoraCommandInfo : BaseCommandInfo
     /// 指令信息构造(常规指令构建)
     /// </summary>
     internal SoraCommandInfo(
-        string     desc,   string[]       regex,          string className,   string groupName,
+        string     desc,   string[]       regex,          string className,   string seriesName,
         MethodInfo method, MemberRoleType permissionType, int    priority,    RegexOptions regexOptions,
         SourceFlag source, long[]         sourceGroups,   long[] sourceUsers, bool suCommand, Type instanceType = null)
         : base(desc, regex, permissionType, suCommand, priority, regexOptions,
-            source, sourceGroups, sourceUsers, groupName, $"{className}.{method.Name}")
+            source, sourceGroups, sourceUsers, seriesName, $"{className}.{method.Name}")
     {
         ClassName    = className;
         MethodInfo   = method;
