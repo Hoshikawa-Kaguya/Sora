@@ -45,7 +45,7 @@ public sealed class CommandManager
 
     /// <summary>
     /// 服务ID
-    /// </summary> TODO
+    /// </summary>
     // ReSharper disable once UnusedAutoPropertyAccessor.Local
     private Guid ServiceId { get; }
 
@@ -100,37 +100,36 @@ public sealed class CommandManager
             return;
 
         //查找所有的指令集
-        Dictionary<Type, MethodInfo[]> cmdGroups =
+        Dictionary<Type, MethodInfo[]> cmdSeries =
             assembly.GetExportedTypes()
                      //获取指令组
                     .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
-                    .Select(type => (
-                                        type,
-                                        methods: type.GetMethods()
-                                                     .Where(method => method.CheckMethodLegality())
-                                                     .ToArray()))
-                    .ToDictionary(methods => methods.type, methods => methods.methods);
+                    .Select(type => (type,
+                                        type.GetMethods()
+                                            .Where(method => method.CheckMethodLegality())
+                                            .ToArray()))
+                    .ToDictionary(methods => methods.type, methods => methods.Item2);
 
-        foreach ((Type classType, MethodInfo[] methodInfos) in cmdGroups)
+        foreach ((Type classType, MethodInfo[] methodInfos) in cmdSeries)
         {
             //获取指令属性
             CommandGroup groupAttr =
                 classType.GetCustomAttribute(typeof(CommandGroup)) as CommandGroup ??
                 throw new NullReferenceException("CommandGroup attribute is null with unknown reason");
-            string prefix    = string.IsNullOrEmpty(groupAttr.GroupPrefix) ? string.Empty : groupAttr.GroupPrefix;
-            string groupName = string.IsNullOrEmpty(groupAttr.SeriesName) ? classType.Name : groupAttr.SeriesName;
-            Log.Debug("Command", $"Registering command group[{groupName}]");
-            bool groupSuccess = false;
+            string prefix     = string.IsNullOrEmpty(groupAttr.GroupPrefix) ? string.Empty : groupAttr.GroupPrefix;
+            string seriesName = string.IsNullOrEmpty(groupAttr.SeriesName) ? classType.Name : groupAttr.SeriesName;
+            Log.Debug("Command", $"Registering command group[{seriesName}]");
+            bool seriesSuccess = false;
             foreach (MethodInfo methodInfo in methodInfos)
             {
                 Log.Debug("Command", $"Registering command [{methodInfo.Name}]");
                 //生成指令信息
-                if (!GenerateCommandInfo(methodInfo, classType, groupName, prefix, out SoraCommandInfo commandInfo))
+                if (!GenerateCommandInfo(methodInfo, classType, seriesName, prefix, out SoraCommandInfo commandInfo))
                     continue;
                 //添加指令信息
                 if (_regexCommands.AddOrExist(commandInfo))
                 {
-                    groupSuccess = true;
+                    seriesSuccess = true;
                     Log.Debug("Command", $"Registered {commandInfo.SourceType} command [{methodInfo.Name}]");
                 }
                 else
@@ -140,8 +139,8 @@ public sealed class CommandManager
             }
 
             //设置使能字典
-            if (groupSuccess)
-                _commandEnableFlagDict.TryAdd(groupName, true);
+            if (seriesSuccess)
+                _commandEnableFlagDict.TryAdd(seriesName, true);
         }
 
         //增加正则缓存大小
@@ -153,7 +152,7 @@ public sealed class CommandManager
     /// 动态注册指令
     /// </summary>
     /// <param name="cmdExps">指令表达式</param>
-    /// <param name="groupCommand">指令执行定义</param>
+    /// <param name="seriesCommand">指令执行定义</param>
     /// <param name="matchType">匹配类型</param>
     /// <param name="regexOptions">正则选项</param>
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
@@ -165,7 +164,7 @@ public sealed class CommandManager
     /// <param name="desc">描述</param>
     public Guid RegisterGroupDynamicCommand(
         string[]                               cmdExps,
-        Func<GroupMessageEventArgs, ValueTask> groupCommand,
+        Func<GroupMessageEventArgs, ValueTask> seriesCommand,
         MatchType                              matchType    = MatchType.Full,
         RegexOptions                           regexOptions = RegexOptions.None,
         string                                 groupName    = "",
@@ -179,8 +178,8 @@ public sealed class CommandManager
         //判断参数合法性
         if (cmdExps is null || cmdExps.Length == 0)
             throw new NullReferenceException("cmdExps is empty");
-        if (groupCommand is null)
-            throw new NullReferenceException($"{nameof(groupCommand)} is null");
+        if (seriesCommand is null)
+            throw new NullReferenceException($"{nameof(seriesCommand)} is null");
 
         //生成指令信息
         Guid id = Guid.NewGuid();
@@ -196,7 +195,7 @@ public sealed class CommandManager
             regexOptions | RegexOptions.Compiled,
             sourceGroups ?? Array.Empty<long>(),
             sourceUsers  ?? Array.Empty<long>(),
-            groupCommand, id, suCommand, groupName);
+            seriesCommand, id, suCommand, groupName);
 
         return AddDynamicCommand(dynamicCommand);
     }
@@ -205,7 +204,7 @@ public sealed class CommandManager
     /// 动态注册指令
     /// </summary>
     /// <param name="matchFunc">自定义匹配方法</param>
-    /// <param name="groupCommand">指令执行定义</param>
+    /// <param name="seriesCommand">指令执行定义</param>
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
     /// <param name="memberRole">成员权限限制</param>
     /// <param name="suCommand">机器人管理员限制</param>
@@ -215,7 +214,7 @@ public sealed class CommandManager
     /// <param name="desc">描述</param>
     public Guid RegisterGroupDynamicCommand(
         Func<BaseMessageEventArgs, bool>       matchFunc,
-        Func<GroupMessageEventArgs, ValueTask> groupCommand,
+        Func<GroupMessageEventArgs, ValueTask> seriesCommand,
         string                                 groupName    = "",
         MemberRoleType                         memberRole   = MemberRoleType.Member,
         bool                                   suCommand    = false,
@@ -225,8 +224,8 @@ public sealed class CommandManager
         string                                 desc         = "")
     {
         //判断参数合法性
-        if (groupCommand is null)
-            throw new NullReferenceException($"{nameof(groupCommand)} is null");
+        if (seriesCommand is null)
+            throw new NullReferenceException($"{nameof(seriesCommand)} is null");
 
         //生成指令信息
         Guid id = Guid.NewGuid();
@@ -238,7 +237,7 @@ public sealed class CommandManager
             RegexOptions.None,
             sourceGroups ?? Array.Empty<long>(),
             sourceUsers  ?? Array.Empty<long>(),
-            groupCommand, id, suCommand, groupName);
+            seriesCommand, id, suCommand, groupName);
 
         return AddDynamicCommand(dynamicCommand);
     }
