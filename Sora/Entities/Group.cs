@@ -6,6 +6,7 @@ using Sora.Entities.Info;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
+using Sora.Interfaces;
 
 namespace Sora.Entities;
 
@@ -369,6 +370,40 @@ public sealed class Group : BaseModel
     }
 
     #endregion
+
+    #endregion
+
+    #region 指令相关
+
+    /// <summary>
+    /// 禁用群组中的指令组
+    /// </summary>
+    /// <param name="seriesName">指令组名</param>
+    public bool TryDisableCommandSeries(string seriesName)
+    {
+        SoraServiceFactory.TryGetService(SoraApi.ServiceId, out ISoraService service);
+        return service.Event.CommandManager.TryDisableGroupCommand(seriesName, Id);
+    }
+
+    /// <summary>
+    /// 启用群组中的指令组
+    /// </summary>
+    /// <param name="seriesName">指令组名</param>
+    public bool TryEnableCommandSeries(string seriesName)
+    {
+        SoraServiceFactory.TryGetService(SoraApi.ServiceId, out ISoraService service);
+        return service.Event.CommandManager.TryEnableGroupCommand(seriesName, Id);
+    }
+
+    /// <summary>
+    /// 获取群组指令使能列表
+    /// </summary>
+    /// <returns></returns>
+    public Dictionary<string, bool> GetGroupCmdSeries()
+    {
+        SoraServiceFactory.TryGetService(SoraApi.ServiceId, out ISoraService service);
+        return service.Event.CommandManager.GetGroupCmdSeries(Id);
+    }
 
     #endregion
 
