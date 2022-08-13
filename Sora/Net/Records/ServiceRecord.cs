@@ -135,13 +135,13 @@ internal static class ServiceRecord
     /// <summary>
     /// 是否为群组中禁用的指令
     /// </summary>
-    public static bool IsGroupBlockedCommand(Guid service, long groupId, string cmdGroupName)
+    public static bool IsGroupBlockedCommand(Guid service, long groupId, string seriesName)
     {
         if (!ServiceAlive("Command", service))
             return false;
         if (_servicesDict[service].c.GroupBanCommand.ContainsKey(groupId))
         {
-            return _servicesDict[service].c.GroupBanCommand[groupId]!.Contains(cmdGroupName);
+            return _servicesDict[service].c.GroupBanCommand[groupId]!.Contains(seriesName);
         }
 
         return false;
@@ -150,7 +150,7 @@ internal static class ServiceRecord
     /// <summary>
     /// 启用群组中禁用的指令
     /// </summary>
-    public static bool EnableGroupCommand(Guid service, string groupName, long groupId)
+    public static bool EnableGroupCommand(Guid service, string seriesName, long groupId)
     {
         if (!ServiceAlive("Command", service))
             return false;
@@ -159,14 +159,14 @@ internal static class ServiceRecord
             return false;
         }
 
-        Log.Info("CommandAdapter", $"正在启用群[{groupId}]的指令组[{groupName}]");
-        return _servicesDict[service].c.GroupBanCommand[groupId].Remove(groupName);
+        Log.Info("CommandAdapter", $"正在启用群[{groupId}]的指令组[{seriesName}]");
+        return _servicesDict[service].c.GroupBanCommand[groupId].Remove(seriesName);
     }
 
     /// <summary>
     /// 禁用群组中的指令
     /// </summary>
-    public static bool DisableGroupCommand(Guid service, string groupName, long groupId)
+    public static bool DisableGroupCommand(Guid service, string seriesName, long groupId)
     {
         if (!ServiceAlive("Command", service))
             return false;
@@ -175,8 +175,8 @@ internal static class ServiceRecord
             _servicesDict[service].c.GroupBanCommand[groupId] = new HashSet<string>();
         }
 
-        Log.Info("CommandAdapter", $"正在禁用群[{groupId}]的指令组[{groupName}]");
-        return _servicesDict[service].c.GroupBanCommand[groupId].Add(groupName);
+        Log.Info("CommandAdapter", $"正在禁用群[{groupId}]的指令组[{seriesName}]");
+        return _servicesDict[service].c.GroupBanCommand[groupId].Add(seriesName);
     }
 
     #endregion
