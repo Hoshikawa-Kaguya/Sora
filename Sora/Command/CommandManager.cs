@@ -64,7 +64,7 @@ public sealed class CommandManager
 
     private readonly ConcurrentDictionary<Type, dynamic> _instanceDict = new();
 
-    private readonly ConcurrentDictionary<string, bool> _groupEnableFlagDict = new();
+    private readonly ConcurrentDictionary<string, bool> _commandEnableFlagDict = new();
 
     #endregion
 
@@ -118,7 +118,7 @@ public sealed class CommandManager
                 classType.GetCustomAttribute(typeof(CommandGroup)) as CommandGroup ??
                 throw new NullReferenceException("CommandGroup attribute is null with unknown reason");
             string prefix    = string.IsNullOrEmpty(groupAttr.GroupPrefix) ? string.Empty : groupAttr.GroupPrefix;
-            string groupName = string.IsNullOrEmpty(groupAttr.GroupName) ? classType.Name : groupAttr.GroupName;
+            string groupName = string.IsNullOrEmpty(groupAttr.SeriesName) ? classType.Name : groupAttr.SeriesName;
             Log.Debug("Command", $"Registering command group[{groupName}]");
             bool groupSuccess = false;
             foreach (MethodInfo methodInfo in methodInfos)
@@ -141,7 +141,7 @@ public sealed class CommandManager
 
             //设置使能字典
             if (groupSuccess)
-                _groupEnableFlagDict.TryAdd(groupName, true);
+                _commandEnableFlagDict.TryAdd(groupName, true);
         }
 
         //增加正则缓存大小
@@ -331,9 +331,8 @@ public sealed class CommandManager
     /// </summary>
     private Guid AddDynamicCommand(DynamicCommandInfo command)
     {
-        if (!string.IsNullOrEmpty(command.GroupName))
-            if (_groupEnableFlagDict.TryAdd(command.GroupName, true))
-                Log.Info("DynamicCommand", $"注册新的动态指令组[{command.GroupName}]");
+        if (!string.IsNullOrEmpty(command.SeriesName) && _commandEnableFlagDict.TryAdd(command.SeriesName, true))
+            Log.Info("DynamicCommand", $"注册新的动态指令组[{command.SeriesName}]");
 
         //添加指令信息
         if (_dynamicCommands.AddOrExist(command))
@@ -467,9 +466,9 @@ public sealed class CommandManager
         foreach (SoraCommandInfo commandInfo in commandInfos)
         {
             Log.Debug("CommandAdapter",
-                $"trigger command [<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.GroupName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+                $"trigger command [<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.SeriesName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
             Log.Info("CommandAdapter",
-                $"触发指令[<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.GroupName}){commandInfo.MethodInfo.Name}]");
+                $"触发指令[<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.SeriesName}){commandInfo.MethodInfo.Name}]");
             //尝试执行指令并判断异步方法
             bool isAsync =
                 commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute), false) is not null;
@@ -519,9 +518,9 @@ public sealed class CommandManager
         BaseCommandInfo      command,
         BaseMessageEventArgs eventArgs)
     {
-        if (!string.IsNullOrEmpty(command.GroupName)            &&
-            _groupEnableFlagDict.ContainsKey(command.GroupName) &&
-            !_groupEnableFlagDict[command.GroupName])
+        if (!string.IsNullOrEmpty(command.SeriesName)              &&
+            _commandEnableFlagDict.ContainsKey(command.SeriesName) &&
+            !_commandEnableFlagDict[command.SeriesName])
             return false;
 
         //判断同一源
@@ -556,9 +555,9 @@ public sealed class CommandManager
                 if (command.SourceGroups.Length != 0)
                     sourceMatch &= command.SourceGroups.Any(gid => gid == e.SourceGroup);
                 //检查群是否禁用过该指令组
-                if (ServiceRecord.IsGroupBlockedCommand(eventArgs.ServiceId, e.SourceGroup, command.GroupName))
+                if (ServiceRecord.IsGroupBlockedCommand(eventArgs.ServiceId, e.SourceGroup, command.SeriesName))
                 {
-                    Log.Info("CommandAdapter", $"群[{e.SourceGroup.Id}]已禁用指令组[{command.GroupName}]");
+                    Log.Info("CommandAdapter", $"群[{e.SourceGroup.Id}]已禁用指令组[{command.SeriesName}]");
                     return false;
                 }
 
@@ -640,18 +639,18 @@ public sealed class CommandManager
     /// 尝试启用指令组
     /// </summary>
     /// <param name="groupName">指令组名</param>
-    public bool TryEnableCommandGroup(string groupName)
+    public bool TryEnableCommandSeries(string groupName)
     {
-        return _groupEnableFlagDict.TryUpdate(groupName, true, false);
+        return _commandEnableFlagDict.TryUpdate(groupName, true, false);
     }
 
     /// <summary>
     /// 尝试禁用指令组
     /// </summary>
     /// <param name="groupName">指令组名</param>
-    public bool TryDisableCommandGroup(string groupName)
+    public bool TryDisableCommandSeries(string groupName)
     {
-        return _groupEnableFlagDict.TryUpdate(groupName, false, true);
+        return _commandEnableFlagDict.TryUpdate(groupName, false, true);
     }
 
     /// <summary>
@@ -661,7 +660,7 @@ public sealed class CommandManager
     /// <param name="groupId">群组ID</param>
     public bool TryEnableGroupCommand(string cmdGroupName, long groupId)
     {
-        if (!_groupEnableFlagDict.ContainsKey(cmdGroupName))
+        if (!_commandEnableFlagDict.ContainsKey(cmdGroupName))
         {
             Log.Warning("CommandGroup", $"不存在的指令组名[{cmdGroupName}]");
             return false;
@@ -677,7 +676,7 @@ public sealed class CommandManager
     /// <param name="groupId">群组ID</param>
     public bool TryDisableGroupCommand(string cmdGroupName, long groupId)
     {
-        if (!_groupEnableFlagDict.ContainsKey(cmdGroupName))
+        if (!_commandEnableFlagDict.ContainsKey(cmdGroupName))
         {
             Log.Warning("CommandGroup", $"不存在的指令组名[{cmdGroupName}]");
             return false;

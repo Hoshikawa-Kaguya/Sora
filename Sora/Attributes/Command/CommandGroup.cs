@@ -13,7 +13,7 @@ public sealed class CommandGroup : Attribute
     /// <para>可以用于标识和使能控制</para>
     /// <para>值为空字符串时默认为类名</para>
     /// </summary>
-    public string GroupName { get; init; } = string.Empty;
+    public string SeriesName { get; init; } = string.Empty;
 
     /// <summary>
     /// 指令组前缀
