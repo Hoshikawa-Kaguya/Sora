@@ -744,6 +744,29 @@ public sealed class CommandManager
     #region 通用工具
 
     /// <summary>
+    /// 获取指定群中的指令使能列表
+    /// </summary>
+    /// <param name="groupId">群组ID</param>
+    /// <returns>指令使能列表</returns>
+    public Dictionary<string, bool> GetGroupCmdSeries(long groupId)
+    {
+        Dictionary<string, bool> result = new Dictionary<string, bool>();
+        foreach (string sName in _commandEnableFlagDict.Keys)
+        {
+            result.Add(sName, !ServiceRecord.IsGroupBlockedCommand(ServiceId, groupId, sName));
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// 获取当前服务下的所有指令组名
+    /// </summary>
+    public List<string> GetCommandList()
+    {
+        return _commandEnableFlagDict.Keys.ToList();
+    }
+
+    /// <summary>
     /// 获取已注册过的实例
     /// </summary>
     /// <param name="instance">实例</param>
