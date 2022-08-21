@@ -32,7 +32,7 @@ public readonly struct SoraSegment
     /// </summary>
     public Guid Id { get; }
 
-    #endregion
+    #endregion 属性
 
     #region 构造函数
 
@@ -48,7 +48,7 @@ public readonly struct SoraSegment
         Id          = Guid.NewGuid();
     }
 
-    #endregion
+    #endregion 构造函数
 
     #region 获取数据内容(仅用于序列化)
 
@@ -61,7 +61,7 @@ public readonly struct SoraSegment
         };
     }
 
-    #endregion
+    #endregion 获取数据内容(仅用于序列化)
 
     #region 运算符重载
 
@@ -145,7 +145,7 @@ public readonly struct SoraSegment
         return new MessageBody {soraSegment};
     }
 
-    #endregion
+    #endregion 运算符重载
 
     #region 常用重载
 
@@ -168,7 +168,7 @@ public readonly struct SoraSegment
         return HashCode.Combine(MessageType, Data);
     }
 
-    #endregion
+    #endregion 常用重载
 
     #region 隐式转换
 
@@ -180,7 +180,7 @@ public readonly struct SoraSegment
         return Text(text);
     }
 
-    #endregion
+    #endregion 隐式转换
 
     #region 消息段生成/处理
 
@@ -249,7 +249,8 @@ public readonly struct SoraSegment
     /// <param name="isMagic">是否为变声</param>
     /// <param name="useCache">是否使用已缓存的文件</param>
     /// <param name="useProxy">是否通过代理下载文件</param>
-    /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
+    /// <param name="timeout">超时时间，默认为 <see langword="null"/>(不超时)</param>
+    /// <remarks>若要使用Base64,需要让 data 以 base64:// 开头</remarks>
     public static SoraSegment Record(
         string data, bool isMagic = false, bool useCache = true,
         bool   useProxy = true,
@@ -279,6 +280,7 @@ public readonly struct SoraSegment
     /// <param name="data">图片名/绝对路径/URL/base64</param>
     /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
     /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
+    /// <remarks>若要使用Base64,需要让 data 以 base64:// 开头</remarks>
     public static SoraSegment Image(string data, bool useCache = true, int? threadCount = null)
     {
         if (string.IsNullOrEmpty(data))
@@ -318,6 +320,7 @@ public readonly struct SoraSegment
     /// <param name="data">图片名/绝对路径/URL/base64</param>
     /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
     /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
+    /// <remarks>若要使用Base64,需要让 data 以 base64:// 开头</remarks>
     public static SoraSegment FlashImage(string data, bool useCache = true, int? threadCount = null)
     {
         if (string.IsNullOrEmpty(data))
@@ -346,6 +349,7 @@ public readonly struct SoraSegment
     /// <param name="useCache">通过URL发送时有效,是否使用已缓存的文件</param>
     /// <param name="threadCount">通过URL发送时有效,通过网络下载图片时的线程数,默认单线程</param>
     /// <param name="id">秀图特效id，默认为40000</param>
+    /// <remarks>若要使用Base64,需要让 data 以 base64:// 开头</remarks>
     public static SoraSegment ShowImage(
         string data, int id = 40000, bool useCache = true,
         int?   threadCount = null)
@@ -376,7 +380,8 @@ public readonly struct SoraSegment
     /// <param name="data">视频名/绝对路径/URL/base64</param>
     /// <param name="useCache">是否使用已缓存的文件</param>
     /// <param name="useProxy">是否通过代理下载文件</param>
-    /// <param name="timeout">超时时间，默认为<see langword="null"/>(不超时)</param>
+    /// <param name="timeout">超时时间，默认为 <see langword="null"/>(不超时)</param>
+    /// <remarks>若要使用Base64,需要让 data 以 base64:// 开头</remarks>
     public static SoraSegment Video(
         string data, bool useCache = true, bool useProxy = true,
         int?   timeout = null)
@@ -605,6 +610,7 @@ public readonly struct SoraSegment
     /// <param name="minHeight">最小 Height</param>
     /// <param name="maxWidth">最大 Width</param>
     /// <param name="maxHeight">最大 Height</param>
+    /// <remarks>若要使用Base64,需要让 imageFile 以 base64:// 开头</remarks>
     public static SoraSegment CardImage(
         string imageFile,
         string source    = null,
@@ -651,7 +657,6 @@ public readonly struct SoraSegment
             });
     }
 
-
     /// <summary>
     /// 猜拳
     /// </summary>
@@ -660,7 +665,7 @@ public readonly struct SoraSegment
         return new SoraSegment(SegmentType.RPS, new BaseSegment());
     }
 
-    #endregion
+    #endregion GoCQ扩展 消息段
 
     /// <summary>
     /// 空 消息段
@@ -671,5 +676,5 @@ public readonly struct SoraSegment
         return new SoraSegment(SegmentType.Ignore, null);
     }
 
-    #endregion
+    #endregion 消息段生成/处理
 }
