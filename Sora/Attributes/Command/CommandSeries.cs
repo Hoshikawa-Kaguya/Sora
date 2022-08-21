@@ -6,7 +6,7 @@ namespace Sora.Attributes.Command;
 /// 指令组
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class CommandGroup : Attribute
+public sealed class CommandSeries : Attribute
 {
     /// <summary>
     /// <para>指令组名</para>

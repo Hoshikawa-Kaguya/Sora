@@ -9,7 +9,7 @@ using YukariToolBox.LightLog;
 
 namespace Sora_Test;
 
-[CommandGroup(SeriesName = "test")]
+[CommandSeries(SeriesName = "test")]
 public static class Commands
 {
     [SoraCommand(

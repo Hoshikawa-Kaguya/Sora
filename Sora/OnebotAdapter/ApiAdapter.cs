@@ -51,7 +51,7 @@ internal static class ApiAdapter
                 UserId      = target,
                 //转换消息段列表
                 Message = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
-                                  .Select(msg => msg.ToOnebotMessage())
+                                  .Select(msg => msg.ToOnebotSegment())
                                   .ToList(),
                 GroupId = groupId
             }
@@ -83,7 +83,7 @@ internal static class ApiAdapter
         if (messages == null || messages.Count == 0)
             throw new NullReferenceException(nameof(messages));
         List<OnebotSegment> msglist = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
-                                              .Select(msg => msg.ToOnebotMessage())
+                                              .Select(msg => msg.ToOnebotSegment())
                                               .ToList();
         //发送信息
         (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
