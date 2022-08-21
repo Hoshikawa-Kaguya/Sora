@@ -103,7 +103,7 @@ public sealed class CommandManager
         Dictionary<Type, MethodInfo[]> cmdSeries =
             assembly.GetExportedTypes()
                      //获取指令组
-                    .Where(type => type.IsDefined(typeof(CommandGroup), false) && type.IsClass)
+                    .Where(type => type.IsDefined(typeof(CommandSeries), false) && type.IsClass)
                     .Select(type => (type,
                                         type.GetMethods()
                                             .Where(method => method.CheckMethodLegality())
@@ -113,11 +113,11 @@ public sealed class CommandManager
         foreach ((Type classType, MethodInfo[] methodInfos) in cmdSeries)
         {
             //获取指令属性
-            CommandGroup groupAttr =
-                classType.GetCustomAttribute(typeof(CommandGroup)) as CommandGroup ??
-                throw new NullReferenceException("CommandGroup attribute is null with unknown reason");
-            string prefix     = string.IsNullOrEmpty(groupAttr.GroupPrefix) ? string.Empty : groupAttr.GroupPrefix;
-            string seriesName = string.IsNullOrEmpty(groupAttr.SeriesName) ? classType.Name : groupAttr.SeriesName;
+            CommandSeries seriesAttr =
+                classType.GetCustomAttribute(typeof(CommandSeries)) as CommandSeries ??
+                throw new NullReferenceException("CommandSeries attribute is null with unknown reason");
+            string prefix     = string.IsNullOrEmpty(seriesAttr.GroupPrefix) ? string.Empty : seriesAttr.GroupPrefix;
+            string seriesName = string.IsNullOrEmpty(seriesAttr.SeriesName) ? classType.Name : seriesAttr.SeriesName;
             Log.Debug("Command", $"Registering command group[{seriesName}]");
             bool seriesSuccess = false;
             foreach (MethodInfo methodInfo in methodInfos)
@@ -659,12 +659,6 @@ public sealed class CommandManager
     /// <param name="groupId">群组ID</param>
     public bool TryEnableGroupCommand(string cmdGroupName, long groupId)
     {
-        if (!_commandEnableFlagDict.ContainsKey(cmdGroupName))
-        {
-            Log.Warning("CommandGroup", $"不存在的指令组名[{cmdGroupName}]");
-            return false;
-        }
-
         return ServiceRecord.EnableGroupCommand(ServiceId, cmdGroupName, groupId);
     }
 
@@ -675,12 +669,6 @@ public sealed class CommandManager
     /// <param name="groupId">群组ID</param>
     public bool TryDisableGroupCommand(string cmdGroupName, long groupId)
     {
-        if (!_commandEnableFlagDict.ContainsKey(cmdGroupName))
-        {
-            Log.Warning("CommandGroup", $"不存在的指令组名[{cmdGroupName}]");
-            return false;
-        }
-
         return ServiceRecord.DisableGroupCommand(ServiceId, cmdGroupName, groupId);
     }
 

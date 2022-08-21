@@ -52,7 +52,7 @@ public readonly struct SoraSegment
 
     #region 获取数据内容(仅用于序列化)
 
-    internal OnebotSegment ToOnebotMessage()
+    internal OnebotSegment ToOnebotSegment()
     {
         return new OnebotSegment
         {

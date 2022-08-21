@@ -67,9 +67,9 @@ public sealed record CustomNode
         Name      = name;
         UserId    = userId.ToString();
         Messages = customMessage.Where(msg => msg.MessageType != SegmentType.Ignore)
-                                .Select(msg => msg.ToOnebotMessage())
+                                .Select(msg => msg.ToOnebotSegment())
                                 .ToList();
-        Time = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";
+        Time = (time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()).ToString();
     }
 
     /// <summary>
@@ -85,6 +85,6 @@ public sealed record CustomNode
         Name      = name;
         UserId    = userId.ToString();
         Messages  = message;
-        Time      = $"{time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()}";
+        Time      = (time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()).ToString();
     }
 }
