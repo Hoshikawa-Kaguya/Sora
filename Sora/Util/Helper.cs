@@ -169,7 +169,7 @@ public static class Helper
     /// <summary>
     /// 获取属性的Description特性
     /// </summary>
-    internal static string GetFieldDesc(object value)
+    internal static string GetFieldDesc<T>(T value)
     {
         FieldInfo fieldInfo = value.GetType().GetField(value.ToString()!);
         if (fieldInfo == null)
