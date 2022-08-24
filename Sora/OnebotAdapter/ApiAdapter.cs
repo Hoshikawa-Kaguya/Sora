@@ -479,6 +479,8 @@ internal static class ApiAdapter
                 }).ToList()
             }
         }, connection, timeout);
+        if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
+            return (apiStatus, -1);
         int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
                           ? messageCode
                           : -1;
@@ -522,6 +524,8 @@ internal static class ApiAdapter
         int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
                           ? messageCode
                           : -1;
+        if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
+            return (apiStatus, -1);
         Log.Debug("Sora", $"Get send_private_forward_msg response [{msgCode}]{nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus, msgCode);
     }
