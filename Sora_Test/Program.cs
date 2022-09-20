@@ -10,7 +10,7 @@ using YukariToolBox.LightLog;
 //设置log等级
 Log.LogConfiguration
    .EnableConsoleOutput()
-   .SetLogLevel(LogLevel.Verbose);
+   .SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
 ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
@@ -19,7 +19,7 @@ ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
     ThrowCommandException  = false,
     SendCommandErrMsg      = false,
     CommandExceptionHandle = CommandExceptionHandle,
-    Port                   = 7500
+    Port                   = 8199
 });
 
 #region 事件处理

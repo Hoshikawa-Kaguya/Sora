@@ -261,7 +261,7 @@ public sealed class EventAdapter
             case "heartbeat":
             {
                 var heartBeat = messageJson.ToObject<OnebotHeartBeatEventArgs>();
-                Log.Debug("Sora", $"Get heartbeat from [{connection}]");
+                Log.Verbose("Sora", $"Get heartbeat from [{connection}]");
                 //刷新心跳包记录
                 if (heartBeat != null)
                     ConnectionRecord.UpdateHeartBeat(connection);
