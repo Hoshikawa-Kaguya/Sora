@@ -94,7 +94,7 @@ public sealed class ConnectionManager : IDisposable
         if (ConnectionRecord.IsEmpty())
             return;
         var serviceId = (Guid) serviceIdObj;
-        Log.Debug("HeartBeatCheck", $"service id={serviceId}({ConnectionRecord.ConnCount()})");
+        Log.Verbose("HeartBeatCheck", $"service id={serviceId}({ConnectionRecord.ConnCount()})");
 
         //查找超时连接
         DateTime now = DateTime.Now;

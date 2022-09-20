@@ -108,15 +108,16 @@ internal static class CommandUtils
     {
         if (matchFunc is null)
             throw new ArgumentNullException(nameof(matchFunc));
-        return new WaitingInfo(new AutoResetEvent(false),
+        return new WaitingInfo(
+            new AutoResetEvent(false),
             matchFunc,
-            serviceId: serviceId,
-            connectionId: connectionId,
-            source: (sourceUid, sourceGroup),
-            sourceFlag: sourceFlag);
+            connectionId,
+            serviceId,
+            (sourceUid, sourceGroup),
+            sourceFlag);
     }
 
-    /// <summary>
+    /// <summary>EE
     /// 生成连续对话上下文
     /// </summary>
     /// <param name="sourceUid">消息源UID</param>
