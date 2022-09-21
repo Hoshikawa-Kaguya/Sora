@@ -16,7 +16,7 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public abstract class BaseMessageEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 消息内容
@@ -53,51 +53,55 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     /// </summary>
     public string CommandName { get; internal set; }
 
-    #endregion
+#endregion
 
-    internal BaseMessageEventArgs(
-        Guid                   serviceId, Guid       connectionId, string eventName,
-        BaseObMessageEventArgs msg,       SourceFlag source) :
-        base(serviceId, connectionId, eventName, msg.SelfId, msg.Time, source)
+    internal BaseMessageEventArgs(Guid                   serviceId,
+                                  Guid                   connectionId,
+                                  string                 eventName,
+                                  BaseObMessageEventArgs msg,
+                                  SourceFlag             source)
+        : base(serviceId, connectionId, eventName, msg.SelfId, msg.Time, source)
     {
         //将api消息段转换为sorasegment
-        Message = new MessageContext(connectionId, msg.MessageId, msg.RawMessage,
-            msg.MessageList.ToMessageBody(),
+        Message = new MessageContext(connectionId, msg.MessageId, msg.RawMessage, msg.MessageList.ToMessageBody(),
             msg.Time, msg.Font, null);
         Sender        = new User(serviceId, connectionId, msg.UserId);
         IsSelfMessage = msg.UserId == msg.SelfId;
         IsSuperUser   = msg.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, msg.UserId);
     }
 
-    #region 连续指令
+#region 连续指令
 
     /// <summary>
     /// <para>等待下一条消息触发正则表达式</para>
     /// <para>当所在的上下文被重复触发时则会直接返回<see langword="null"/></para>
     /// </summary>
-    internal object WaitForNextRegexMessage(
-        long            sourceUid,    string[]  commandExps, MatchType matchType,
-        RegexOptions    regexOptions, TimeSpan? timeout,
-        Func<ValueTask> timeoutTask,  long      sourceGroup = 0)
+    internal object WaitForNextRegexMessage(long            sourceUid,
+                                            string[]        commandExps,
+                                            MatchType       matchType,
+                                            RegexOptions    regexOptions,
+                                            TimeSpan?       timeout,
+                                            Func<ValueTask> timeoutTask,
+                                            long            sourceGroup = 0)
     {
         //生成指令上下文
-        WaitingInfo waitInfo =
-            CommandUtils.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType, SourceType,
-                regexOptions, ConnId, ServiceId);
+        WaitingInfo waitInfo = CommandUtils.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType,
+            SourceType, regexOptions, ConnId, ServiceId);
         return WaitForNextMessage(waitInfo, timeout, timeoutTask);
     }
 
     /// <summary>
     /// 等待下一条消息触发自定义匹配方法
     /// </summary>
-    internal object WaitForNextCustomMessage(
-        long      sourceUid, Func<BaseMessageEventArgs, bool> matchFunc,
-        TimeSpan? timeout,   Func<ValueTask>                  timeoutTask, long sourceGroup = 0)
+    internal object WaitForNextCustomMessage(long                             sourceUid,
+                                             Func<BaseMessageEventArgs, bool> matchFunc,
+                                             TimeSpan?                        timeout,
+                                             Func<ValueTask>                  timeoutTask,
+                                             long                             sourceGroup = 0)
     {
         //生成指令上下文
         WaitingInfo waitInfo =
-            CommandUtils.GenerateWaitingCommandInfo(
-                sourceUid, sourceGroup, matchFunc, SourceType, ConnId, ServiceId);
+            CommandUtils.GenerateWaitingCommandInfo(sourceUid, sourceGroup, matchFunc, SourceType, ConnId, ServiceId);
         return WaitForNextMessage(waitInfo, timeout, timeoutTask);
     }
 
@@ -118,5 +122,5 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
         return e;
     }
 
-    #endregion
+#endregion
 }

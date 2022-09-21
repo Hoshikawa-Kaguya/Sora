@@ -17,8 +17,8 @@ public static class TimeConvert
     public static long ToTimeStamp(this DateTime date, bool isMilliseconds = false)
     {
         return isMilliseconds
-                   ? (long) (date - _unixStartTime).TotalMilliseconds
-                   : (long) (date - _unixStartTime).TotalSeconds;
+            ? (long)(date - _unixStartTime).TotalMilliseconds
+            : (long)(date - _unixStartTime).TotalSeconds;
     }
 
     /// <summary>
@@ -28,8 +28,6 @@ public static class TimeConvert
     /// </summary>
     public static DateTime ToDateTime(this long timeStamp, bool isMilliseconds = false)
     {
-        return isMilliseconds
-                   ? _unixStartTime.AddMilliseconds(timeStamp)
-                   : _unixStartTime.AddSeconds(timeStamp);
+        return isMilliseconds ? _unixStartTime.AddMilliseconds(timeStamp) : _unixStartTime.AddSeconds(timeStamp);
     }
 }

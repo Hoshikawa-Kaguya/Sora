@@ -9,7 +9,7 @@ namespace Sora.Entities.Segment.DataModel;
 /// </summary>
 public sealed record Node
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 发送者昵称
@@ -41,9 +41,9 @@ public sealed record Node
     [JsonIgnore]
     public MessageBody MessageBody { get; internal set; }
 
-    #endregion
+#endregion
 
-    #region 发送者结构体
+#region 发送者结构体
 
     /// <summary>
     /// 节点消息发送者
@@ -63,5 +63,5 @@ public sealed record Node
         public long Uid { get; internal set; }
     }
 
-    #endregion
+#endregion
 }

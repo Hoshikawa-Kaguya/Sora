@@ -8,9 +8,7 @@ using Sora.Util;
 using YukariToolBox.LightLog;
 
 //设置log等级
-Log.LogConfiguration
-   .EnableConsoleOutput()
-   .SetLogLevel(LogLevel.Debug);
+Log.LogConfiguration.EnableConsoleOutput().SetLogLevel(LogLevel.Debug);
 
 //实例化Sora服务
 ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
@@ -27,8 +25,7 @@ ISoraService service = SoraServiceFactory.CreateService(new ServerConfig
 //连接事件
 service.ConnManager.OnOpenConnectionAsync += (connectionId, eventArgs) =>
 {
-    Log.Debug("Sora_Test|OnOpenConnectionAsync",
-        $"connectionId = {connectionId} type = {eventArgs.Role}");
+    Log.Debug("Sora_Test|OnOpenConnectionAsync", $"connectionId = {connectionId} type = {eventArgs.Role}");
     return ValueTask.CompletedTask;
 };
 //连接关闭事件
@@ -41,8 +38,7 @@ service.ConnManager.OnCloseConnectionAsync += (connectionId, eventArgs) =>
 //连接成功元事件
 service.Event.OnClientConnect += (_, eventArgs) =>
 {
-    Log.Debug("Sora_Test|OnClientConnect",
-        $"uid = {eventArgs.LoginUid}");
+    Log.Debug("Sora_Test|OnClientConnect", $"uid = {eventArgs.LoginUid}");
     return ValueTask.CompletedTask;
 };
 
@@ -62,13 +58,11 @@ service.Event.OnSelfPrivateMessage += (_, eventArgs) =>
 };
 
 //动态向管理器注册指令
-service.Event.CommandManager.RegisterGroupDynamicCommand(
-    new[] {"哇哦"},
-    async eventArgs =>
-    {
-        eventArgs.IsContinueEventChain = false;
-        await eventArgs.Reply("shit");
-    });
+service.Event.CommandManager.RegisterGroupDynamicCommand(new[] { "哇哦" }, async eventArgs =>
+{
+    eventArgs.IsContinueEventChain = false;
+    await eventArgs.Reply("shit");
+});
 
 //指令错误处理
 async void CommandExceptionHandle(Exception exception, BaseMessageEventArgs eventArgs, string log)
@@ -88,7 +82,6 @@ async void CommandExceptionHandle(Exception exception, BaseMessageEventArgs even
 #endregion
 
 //启动服务并捕捉错误
-await service.StartService()
-             .RunCatch(e => Log.Error("Sora Service", Log.ErrorLogBuilder(e)));
+await service.StartService().RunCatch(e => Log.Error("Sora Service", Log.ErrorLogBuilder(e)));
 
 await Task.Delay(-1);

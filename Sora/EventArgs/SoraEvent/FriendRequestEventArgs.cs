@@ -11,26 +11,26 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class FriendRequestEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 请求发送者实例
     /// </summary>
-    public User Sender { get; private set; }
+    public User Sender { get; }
 
     /// <summary>
     /// 验证信息
     /// </summary>
-    public string Comment { get; private set; }
+    public string Comment { get; }
 
     /// <summary>
     /// 当前请求的flag标识
     /// </summary>
-    public string RequestFlag { get; private set; }
+    public string RequestFlag { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
@@ -39,10 +39,11 @@ public sealed class FriendRequestEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="friendObRequestArgs">好友申请事件参数</param>
-    internal FriendRequestEventArgs(
-        Guid                           serviceId, Guid connectionId, string eventName,
-        OnebotFriendObRequestEventArgs friendObRequestArgs) :
-        base(serviceId, connectionId, eventName, friendObRequestArgs.SelfId, friendObRequestArgs.Time,
+    internal FriendRequestEventArgs(Guid                           serviceId,
+                                    Guid                           connectionId,
+                                    string                         eventName,
+                                    OnebotFriendObRequestEventArgs friendObRequestArgs)
+        : base(serviceId, connectionId, eventName, friendObRequestArgs.SelfId, friendObRequestArgs.Time,
             SourceFlag.Private)
     {
         Sender      = new User(serviceId, connectionId, friendObRequestArgs.UserId);
@@ -50,9 +51,9 @@ public sealed class FriendRequestEventArgs : BaseSoraEventArgs
         RequestFlag = friendObRequestArgs.Flag;
     }
 
-    #endregion
+#endregion
 
-    #region 公有方法
+#region 公有方法
 
     /// <summary>
     /// 同意当前申请
@@ -71,5 +72,5 @@ public sealed class FriendRequestEventArgs : BaseSoraEventArgs
         await SoraApi.SetFriendAddRequest(RequestFlag, false);
     }
 
-    #endregion
+#endregion
 }

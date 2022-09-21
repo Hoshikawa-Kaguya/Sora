@@ -19,30 +19,30 @@ namespace Sora.Entities.Base;
 /// </summary>
 public sealed class SoraApi
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 当前实例对应的链接ID
     /// 用于调用API
     /// </summary>
-    internal Guid ConnectionId { get; private init; }
+    internal Guid ConnectionId { get; }
 
     /// <summary>
     /// 当前实例对应的服务ID
     /// </summary>
-    internal Guid ServiceId { get; private init; }
+    internal Guid ServiceId { get; }
 
-    #endregion
+#endregion
 
-    #region 常量
+#region 常量
 
     private const int MIN_GROUP_ID = 100000;
     private const int MIN_USER_ID  = 10000;
     private const int MIN_DURATION = 60;
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化Api实例
@@ -55,11 +55,11 @@ public sealed class SoraApi
         ConnectionId = connectionId;
     }
 
-    #endregion
+#endregion
 
-    #region 通讯类API
+#region 通讯类API
 
-    #region 消息API
+#region 消息API
 
     /// <summary>
     /// 发送私聊消息
@@ -72,7 +72,9 @@ public sealed class SoraApi
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
-        long userId, MessageBody message, TimeSpan? timeout = null)
+        long        userId,
+        MessageBody message,
+        TimeSpan?   timeout = null)
     {
         if (userId < MIN_USER_ID)
             throw new ArgumentOutOfRangeException(nameof(userId));
@@ -93,7 +95,10 @@ public sealed class SoraApi
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> SendTemporaryMessage(
-        long userId, long groupId, MessageBody message, TimeSpan? timeout = null)
+        long        userId,
+        long        groupId,
+        MessageBody message,
+        TimeSpan?   timeout = null)
     {
         if (userId < MIN_USER_ID)
             throw new ArgumentOutOfRangeException(nameof(userId));
@@ -115,7 +120,9 @@ public sealed class SoraApi
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
-        long groupId, MessageBody message, TimeSpan? timeout = null)
+        long        groupId,
+        MessageBody message,
+        TimeSpan?   timeout = null)
     {
         if (groupId < MIN_GROUP_ID)
             throw new ArgumentOutOfRangeException(nameof(groupId));
@@ -133,7 +140,7 @@ public sealed class SoraApi
         return await ApiAdapter.RecallMsg(ConnectionId, messageId);
     }
 
-    #region GoCQ API
+#region GoCQ API
 
     /// <summary>
     /// 获取合并转发消息
@@ -160,8 +167,9 @@ public sealed class SoraApi
     /// </param>
     /// <param name="timeout">原有超时覆盖</param>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateForwardMsg(
-        long      userId, IEnumerable<CustomNode> nodeList,
-        TimeSpan? timeout = null)
+        long                    userId,
+        IEnumerable<CustomNode> nodeList,
+        TimeSpan?               timeout = null)
     {
         if (userId < MIN_GROUP_ID)
             throw new ArgumentOutOfRangeException(nameof(userId));
@@ -180,8 +188,9 @@ public sealed class SoraApi
     /// </param>
     /// <param name="timeout">原有超时覆盖</param>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(
-        long      groupId, IEnumerable<CustomNode> nodeList,
-        TimeSpan? timeout = null)
+        long                    groupId,
+        IEnumerable<CustomNode> nodeList,
+        TimeSpan?               timeout = null)
     {
         if (groupId < MIN_GROUP_ID)
             throw new ArgumentOutOfRangeException(nameof(groupId));
@@ -220,8 +229,8 @@ public sealed class SoraApi
     /// <para><see cref="Group"/> 消息来源群，如果不是群消息则为<see langword="null"/></para>
     /// </returns>
     public async
-        ValueTask<(ApiStatus apiStatus, MessageContext message, User sender, Group sourceGroup,
-            int realId, bool isGroupMsg)> GetMessage(int messageId)
+        ValueTask<(ApiStatus apiStatus, MessageContext message, User sender, Group sourceGroup, int realId, bool
+            isGroupMsg)> GetMessage(int messageId)
     {
         return await ApiAdapter.GetMessage(ServiceId, ConnectionId, messageId);
     }
@@ -237,7 +246,8 @@ public sealed class SoraApi
     /// <para><see cref="List{T}"/> 消息记录</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> messages)> GetGroupMessageHistory(
-        long groupId, long? messageSequence = null)
+        long  groupId,
+        long? messageSequence = null)
     {
         return await ApiAdapter.GetGroupMessageHistory(messageSequence, groupId, ServiceId, ConnectionId);
     }
@@ -264,11 +274,11 @@ public sealed class SoraApi
         return await ApiAdapter.MarkMessageRead(ConnectionId, messageId);
     }
 
-    #endregion
+#endregion
 
-    #endregion
+#endregion
 
-    #region 群管理方法
+#region 群管理方法
 
     /// <summary>
     /// 设置群名片
@@ -375,9 +385,7 @@ public sealed class SoraApi
     /// <param name="groupId">群号</param>
     /// <param name="anonymousFlag">匿名用户Flag</param>
     /// <param name="duration">禁言时长, 单位秒</param>
-    public async ValueTask<ApiStatus> EnableGroupAnonymousMute(
-        long groupId, string anonymousFlag,
-        long duration)
+    public async ValueTask<ApiStatus> EnableGroupAnonymousMute(long groupId, string anonymousFlag, long duration)
     {
         if (groupId < MIN_GROUP_ID)
             throw new ArgumentOutOfRangeException(nameof(groupId), $"out of range [{groupId}]");
@@ -460,7 +468,7 @@ public sealed class SoraApi
         return await ApiAdapter.SetGroupLeave(ConnectionId, groupId, true);
     }
 
-    #region GoCQ API
+#region GoCQ API
 
     /// <summary>
     /// 设置群名
@@ -502,8 +510,7 @@ public sealed class SoraApi
     /// <para><see langword="joinList"/> 进群消息列表</para>
     /// <para><see langword="invitedList"/> 邀请消息列表</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, List<GroupRequestInfo> joinList, List<GroupRequestInfo>
-            invitedList)>
+    public async ValueTask<(ApiStatus apiStatus, List<GroupRequestInfo> joinList, List<GroupRequestInfo> invitedList)>
         GetGroupSystemMsg()
     {
         return await ApiAdapter.GetGroupSystemMsg(ConnectionId);
@@ -533,8 +540,7 @@ public sealed class SoraApi
     /// <para><see langword="groupFiles"/> 文件列表</para>
     /// <para><see langword="groupFolders"/> 文件夹列表</para>
     /// </returns>
-    public async
-        ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+    public async ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
         GetGroupRootFiles(long groupId)
     {
         if (groupId < MIN_GROUP_ID)
@@ -552,8 +558,7 @@ public sealed class SoraApi
     /// <para><see langword="groupFiles"/> 文件列表</para>
     /// <para><see langword="groupFolders"/> 文件夹列表</para>
     /// </returns>
-    public async
-        ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+    public async ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
         GetGroupFilesByFolder(long groupId, string foldId)
     {
         if (groupId < MIN_GROUP_ID)
@@ -587,7 +592,9 @@ public sealed class SoraApi
     /// <param name="busid">文件类型</param>
     /// <returns>文件链接</returns>
     public async ValueTask<(ApiStatus apiStatus, string fileUrl)> GetGroupFileUrl(
-        long groupId, string fileId, int busid)
+        long   groupId,
+        string fileId,
+        int    busid)
     {
         if (groupId < MIN_GROUP_ID)
             throw new ArgumentOutOfRangeException(nameof(groupId));
@@ -603,14 +610,15 @@ public sealed class SoraApi
     /// <param name="folderId">父目录ID</param>
     /// <param name="timeout">API超时覆盖</param>
     /// <returns>API状态</returns>
-    public async ValueTask<ApiStatus> UploadGroupFile(
-        long   groupId,         string localFilePath, string fileName,
-        string folderId = null, int    timeout = 10000)
+    public async ValueTask<ApiStatus> UploadGroupFile(long   groupId,
+                                                      string localFilePath,
+                                                      string fileName,
+                                                      string folderId = null,
+                                                      int    timeout  = 10000)
     {
         if (groupId < MIN_GROUP_ID)
             throw new ArgumentOutOfRangeException(nameof(groupId));
-        return await ApiAdapter.UploadGroupFile(ConnectionId, groupId, localFilePath,
-                   fileName, folderId, timeout);
+        return await ApiAdapter.UploadGroupFile(ConnectionId, groupId, localFilePath, fileName, folderId, timeout);
     }
 
     /// <summary>
@@ -621,14 +629,14 @@ public sealed class SoraApi
     /// <param name="fileName">上传文件名</param>
     /// <param name="timeout">API超时覆盖</param>
     /// <returns>API状态</returns>
-    public async ValueTask<ApiStatus> UploadPrivateFile(
-        long userId, string localFilePath, string fileName,
-        int  timeout = 10000)
+    public async ValueTask<ApiStatus> UploadPrivateFile(long   userId,
+                                                        string localFilePath,
+                                                        string fileName,
+                                                        int    timeout = 10000)
     {
         if (userId < MIN_USER_ID)
             throw new ArgumentOutOfRangeException(nameof(userId));
-        return await ApiAdapter.UploadPrivateFile(ConnectionId, userId, localFilePath,
-                   fileName, timeout);
+        return await ApiAdapter.UploadPrivateFile(ConnectionId, userId, localFilePath, fileName, timeout);
     }
 
     /// <summary>
@@ -735,11 +743,11 @@ public sealed class SoraApi
         return await ApiAdapter.GetGroupNotice(ConnectionId, groupId);
     }
 
-    #endregion
+#endregion
 
-    #endregion
+#endregion
 
-    #region 账号API
+#region 账号API
 
     /// <summary>
     /// <para>获取登陆QQ的名字</para>
@@ -787,7 +795,8 @@ public sealed class SoraApi
     /// <para><see cref="List{T}"/> 群成员列表</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
-        long groupId, bool useCache = true)
+        long groupId,
+        bool useCache = true)
     {
         if (groupId < MIN_GROUP_ID)
             throw new ArgumentOutOfRangeException(nameof(groupId), $"out of range [{groupId}]");
@@ -821,7 +830,9 @@ public sealed class SoraApi
     /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
-        long groupId, long userId, bool useCache = true)
+        long groupId,
+        long userId,
+        bool useCache = true)
     {
         if (groupId < MIN_GROUP_ID)
             throw new ArgumentOutOfRangeException(nameof(groupId), $"out of range [{groupId}]");
@@ -842,7 +853,8 @@ public sealed class SoraApi
     /// <para><see cref="string"/> qid</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
-        long userId, bool useCache = true)
+        long userId,
+        bool useCache = true)
     {
         if (userId < MIN_USER_ID)
             throw new ArgumentOutOfRangeException(nameof(userId));
@@ -921,9 +933,9 @@ public sealed class SoraApi
         return await ApiAdapter.SetQQProfile(ConnectionId, profile);
     }
 
-    #endregion
+#endregion
 
-    #region 服务端API
+#region 服务端API
 
     /// <summary>
     /// 获取连接客户端版本信息
@@ -994,9 +1006,9 @@ public sealed class SoraApi
         return await ApiAdapter.ReloadEventFilter(ConnectionId);
     }
 
-    #endregion
+#endregion
 
-    #region 请求处理API
+#region 请求处理API
 
     /// <summary>
     /// 处理加好友请求
@@ -1004,9 +1016,7 @@ public sealed class SoraApi
     /// <param name="flag">请求flag</param>
     /// <param name="approve">是否同意</param>
     /// <param name="remark">好友备注</param>
-    public async ValueTask<ApiStatus> SetFriendAddRequest(
-        string flag, bool approve,
-        string remark = null)
+    public async ValueTask<ApiStatus> SetFriendAddRequest(string flag, bool approve, string remark = null)
     {
         if (string.IsNullOrEmpty(flag))
             throw new NullReferenceException(nameof(flag));
@@ -1020,22 +1030,21 @@ public sealed class SoraApi
     /// <param name="requestType">请求类型</param>
     /// <param name="approve">是否同意</param>
     /// <param name="reason">拒绝理由</param>
-    public async ValueTask<ApiStatus> SetGroupAddRequest(
-        string           flag,
-        GroupRequestType requestType,
-        bool             approve,
-        string           reason = null)
+    public async ValueTask<ApiStatus> SetGroupAddRequest(string           flag,
+                                                         GroupRequestType requestType,
+                                                         bool             approve,
+                                                         string           reason = null)
     {
         if (string.IsNullOrEmpty(flag))
             throw new NullReferenceException(nameof(flag));
         return await ApiAdapter.SetGroupAddRequest(ConnectionId, flag, requestType, approve, reason);
     }
 
-    #endregion
+#endregion
 
-    #region 辅助API
+#region 辅助API
 
-    #region GoCQ API
+#region GoCQ API
 
     /// <summary>
     /// 获取中文分词
@@ -1062,8 +1071,10 @@ public sealed class SoraApi
     /// <param name="timeout">超时(ms)</param>
     /// <returns>文件绝对路径</returns>
     public async ValueTask<(ApiStatus apiStatus, string filePath)> DownloadFile(
-        string url, int threadCount, Dictionary<string, string> customHeader = null,
-        int    timeout = 10000)
+        string                     url,
+        int                        threadCount,
+        Dictionary<string, string> customHeader = null,
+        int                        timeout      = 10000)
     {
         if (string.IsNullOrEmpty(url))
             throw new NullReferenceException(nameof(url));
@@ -1088,13 +1099,13 @@ public sealed class SoraApi
         return await ApiAdapter.OcrImage(imageId, ConnectionId);
     }
 
-    #endregion
+#endregion
 
-    #endregion
+#endregion
 
-    #endregion
+#endregion
 
-    #region 框架类API
+#region 框架类API
 
     /// <summary>
     /// 获取用户实例
@@ -1167,9 +1178,9 @@ public sealed class SoraApi
         return ServiceRecord.RemoveBlockUser(ServiceId, userId);
     }
 
-    #endregion
+#endregion
 
-    #region 运算符重载
+#region 运算符重载
 
     /// <summary>
     /// 等于重载
@@ -1190,9 +1201,9 @@ public sealed class SoraApi
         return !(apiL == apiR);
     }
 
-    #endregion
+#endregion
 
-    #region 常用重载
+#region 常用重载
 
     /// <summary>
     /// 比较重载
@@ -1213,5 +1224,5 @@ public sealed class SoraApi
         return ConnectionId.GetHashCode();
     }
 
-    #endregion
+#endregion
 }

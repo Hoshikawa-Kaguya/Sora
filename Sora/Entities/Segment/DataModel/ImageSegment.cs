@@ -12,7 +12,7 @@ public sealed record ImageSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 文件名/绝对路径/URL/base64
@@ -58,7 +58,7 @@ public sealed record ImageSegment : BaseSegment
     [JsonProperty(PropertyName = "subType", NullValueHandling = NullValueHandling.Ignore)]
     public int? SubType { get; internal set; }
 
-    #endregion
+#endregion
 
     /// <summary>
     /// Equals

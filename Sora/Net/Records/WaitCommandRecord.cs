@@ -61,8 +61,7 @@ internal static class WaitCommandRecord
     public static void DisposeSession(Guid serviceId)
     {
         List<KeyValuePair<Guid, WaitingInfo>> removeWaitList =
-            _waitingDict.Where(i => i.Value.ServiceId == serviceId)
-                        .ToList();
+            _waitingDict.Where(i => i.Value.ServiceId == serviceId).ToList();
         foreach ((Guid guid, WaitingInfo waitingInfo) in removeWaitList)
         {
             _deadSession.Add(guid);
@@ -76,10 +75,7 @@ internal static class WaitCommandRecord
     /// </summary>
     public static List<Guid> GetMatchCommand(BaseMessageEventArgs eventArgs)
     {
-        return _waitingDict
-              .Where(command => WaitingCommandMatch(command.Value, eventArgs))
-              .Select(i => i.Key)
-              .ToList();
+        return _waitingDict.Where(command => WaitingCommandMatch(command.Value, eventArgs)).Select(i => i.Key).ToList();
     }
 
     /// <summary>
@@ -95,12 +91,10 @@ internal static class WaitCommandRecord
         _waitingDict[sessionId].Semaphore.Set();
     }
 
-    #region 等待指令匹配
+#region 等待指令匹配
 
     [NeedReview("ALL")]
-    private static bool WaitingCommandMatch(
-        WaitingInfo          command,
-        BaseMessageEventArgs eventArgs)
+    private static bool WaitingCommandMatch(WaitingInfo command, BaseMessageEventArgs eventArgs)
     {
         switch (eventArgs.SourceType)
         {
@@ -110,11 +104,11 @@ internal static class WaitCommandRecord
                     //判断发起源
                     command.SourceFlag == SourceFlag.Group
                     //判断来自同一个连接
-                 && command.ConnectionId == eventArgs.SoraApi.ConnectionId
+                    && command.ConnectionId == eventArgs.SoraApi.ConnectionId
                     //判断来着同一个群
-                 && command.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
+                    && command.Source.g == (eventArgs as GroupMessageEventArgs)?.SourceGroup
                     //判断来自同一人
-                 && command.Source.u == eventArgs.Sender;
+                    && command.Source.u == eventArgs.Sender;
                 if (!preMatch)
                     return false;
                 break;
@@ -125,9 +119,9 @@ internal static class WaitCommandRecord
                     //判断发起源
                     command.SourceFlag == SourceFlag.Private
                     //判断来自同一个连接
-                 && command.ConnectionId == eventArgs.SoraApi.ConnectionId
+                    && command.ConnectionId == eventArgs.SoraApi.ConnectionId
                     //判断来自同一人
-                 && command.Source.u == eventArgs.Sender;
+                    && command.Source.u == eventArgs.Sender;
                 if (!preMatch)
                     return false;
                 break;
@@ -139,8 +133,9 @@ internal static class WaitCommandRecord
         if (command.MatchFunc is not null)
             return command.MatchFunc(eventArgs);
         return command.CommandExpressions?.Any(regex => Regex.IsMatch(
-                   eventArgs.Message.RawText, regex, RegexOptions.Compiled | command.RegexOptions)) ?? false;
+                   eventArgs.Message.RawText, regex, RegexOptions.Compiled | command.RegexOptions))
+               ?? false;
     }
 
-    #endregion
+#endregion
 }

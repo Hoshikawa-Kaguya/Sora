@@ -12,7 +12,7 @@ public sealed record FaceSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 纯文本内容
@@ -21,5 +21,5 @@ public sealed record FaceSegment : BaseSegment
     [JsonProperty(PropertyName = "id")]
     public int Id { get; internal set; }
 
-    #endregion
+#endregion
 }

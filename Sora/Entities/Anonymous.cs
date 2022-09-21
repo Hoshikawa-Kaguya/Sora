@@ -8,7 +8,7 @@ namespace Sora.Entities;
 /// </summary>
 public sealed class Anonymous
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 匿名用户 flag
@@ -28,9 +28,9 @@ public sealed class Anonymous
     [JsonProperty(PropertyName = "name")]
     public string Name { get; private init; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 构造函数
@@ -39,9 +39,9 @@ public sealed class Anonymous
     {
     }
 
-    #endregion
+#endregion
 
-    #region 运算符重载
+#region 运算符重载
 
     /// <summary>
     /// 等于重载
@@ -51,10 +51,11 @@ public sealed class Anonymous
         if (anonymousL is null && anonymousR is null)
             return true;
 
-        return anonymousL is not null                  && anonymousR is not null &&
-               anonymousL.Flag.Equals(anonymousR.Flag) &&
-               anonymousL.Id == anonymousR.Id          &&
-               anonymousL.Name.Equals(anonymousR.Name);
+        return anonymousL is not null
+               && anonymousR is not null
+               && anonymousL.Flag.Equals(anonymousR.Flag)
+               && anonymousL.Id == anonymousR.Id
+               && anonymousL.Name.Equals(anonymousR.Name);
     }
 
     /// <summary>
@@ -65,9 +66,9 @@ public sealed class Anonymous
         return !(anonymousL == anonymousR);
     }
 
-    #endregion
+#endregion
 
-    #region 常用重载
+#region 常用重载
 
     /// <summary>
     /// 比较重载
@@ -88,5 +89,5 @@ public sealed class Anonymous
         return HashCode.Combine(Flag, Id, Name);
     }
 
-    #endregion
+#endregion
 }

@@ -12,7 +12,7 @@ public sealed record RecordSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 文件名/绝对路径/URL/base64
@@ -54,5 +54,5 @@ public sealed record RecordSegment : BaseSegment
     [JsonProperty(PropertyName = "timeout", NullValueHandling = NullValueHandling.Ignore)]
     public int? Timeout { get; internal set; }
 
-    #endregion
+#endregion
 }

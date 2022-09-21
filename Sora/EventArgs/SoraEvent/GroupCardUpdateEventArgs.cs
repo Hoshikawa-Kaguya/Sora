@@ -10,31 +10,31 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class GroupCardUpdateEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 名片改变的成员
     /// </summary>
-    public User User { get; private set; }
+    public User User { get; }
 
     /// <summary>
     /// 消息源群
     /// </summary>
-    public Group SourceGroup { get; private set; }
+    public Group SourceGroup { get; }
 
     /// <summary>
     /// 新名片
     /// </summary>
-    public string NewCard { get; private set; }
+    public string NewCard { get; }
 
     /// <summary>
     /// 旧名片
     /// </summary>
-    public string OldCard { get; private set; }
+    public string OldCard { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
@@ -43,10 +43,12 @@ public sealed class GroupCardUpdateEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="groupCardUpdateArgs">群名片更新事件参数</param>
-    internal GroupCardUpdateEventArgs(
-        Guid                           serviceId, Guid connectionId, string eventName,
-        OnebotGroupCardUpdateEventArgs groupCardUpdateArgs) :
-        base(serviceId, connectionId, eventName, groupCardUpdateArgs.SelfId, groupCardUpdateArgs.Time, SourceFlag.Group)
+    internal GroupCardUpdateEventArgs(Guid                           serviceId,
+                                      Guid                           connectionId,
+                                      string                         eventName,
+                                      OnebotGroupCardUpdateEventArgs groupCardUpdateArgs)
+        : base(serviceId, connectionId, eventName, groupCardUpdateArgs.SelfId, groupCardUpdateArgs.Time,
+            SourceFlag.Group)
     {
         User        = new User(serviceId, connectionId, groupCardUpdateArgs.UserId);
         SourceGroup = new Group(connectionId, groupCardUpdateArgs.GroupId);
@@ -54,5 +56,5 @@ public sealed class GroupCardUpdateEventArgs : BaseSoraEventArgs
         OldCard     = groupCardUpdateArgs.OldCard;
     }
 
-    #endregion
+#endregion
 }

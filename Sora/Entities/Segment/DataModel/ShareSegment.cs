@@ -11,7 +11,7 @@ public sealed record ShareSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// URL
@@ -37,5 +37,5 @@ public sealed record ShareSegment : BaseSegment
     [JsonProperty(PropertyName = "image", NullValueHandling = NullValueHandling.Ignore)]
     public string ImageUrl { get; internal set; }
 
-    #endregion
+#endregion
 }

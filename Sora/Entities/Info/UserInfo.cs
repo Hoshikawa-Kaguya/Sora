@@ -9,7 +9,7 @@ namespace Sora.Entities.Info;
 /// </summary>
 public struct UserInfo
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 用户id
@@ -54,5 +54,5 @@ public struct UserInfo
     [JsonProperty(PropertyName = "login_days")]
     public int LoginDays { get; internal init; }
 
-    #endregion
+#endregion
 }

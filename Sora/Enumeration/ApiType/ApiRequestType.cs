@@ -14,7 +14,7 @@ internal enum ApiRequestType
     [Description("")]
     Unknown,
 
-    #region OnebotAPI
+#region OnebotAPI
 
     /// <summary>
     /// 发送消息
@@ -160,9 +160,9 @@ internal enum ApiRequestType
     [Description("set_restart")]
     Restart,
 
-    #endregion
+#endregion
 
-    #region GoCQ API
+#region GoCQ API
 
     /// <summary>
     /// 获取图片信息
@@ -392,5 +392,5 @@ internal enum ApiRequestType
     [Description("upload_private_file")]
     UploadPrivateFile
 
-    #endregion
+#endregion
 }

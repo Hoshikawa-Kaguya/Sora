@@ -11,7 +11,7 @@ public sealed record TextSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 纯文本内容
@@ -19,5 +19,5 @@ public sealed record TextSegment : BaseSegment
     [JsonProperty(PropertyName = "text")]
     public string Content { get; internal set; }
 
-    #endregion
+#endregion
 }

@@ -11,7 +11,7 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public abstract class BaseSoraEventArgs : System.EventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 当前事件的API执行实例
@@ -60,9 +60,9 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// </summary>
     public SourceFlag SourceType { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
@@ -73,9 +73,12 @@ public abstract class BaseSoraEventArgs : System.EventArgs
     /// <param name="loginUid">当前使用的QQ号</param>
     /// <param name="time">连接时间</param>
     /// <param name="sourceType">来源</param>
-    internal BaseSoraEventArgs(
-        Guid serviceId, Guid connectionId, string     eventName,
-        long loginUid,  long time,         SourceFlag sourceType)
+    internal BaseSoraEventArgs(Guid       serviceId,
+                               Guid       connectionId,
+                               string     eventName,
+                               long       loginUid,
+                               long       time,
+                               SourceFlag sourceType)
     {
         SoraApi              = ConnectionRecord.GetApi(connectionId);
         ServiceId            = serviceId;
@@ -88,5 +91,5 @@ public abstract class BaseSoraEventArgs : System.EventArgs
         SourceType           = sourceType;
     }
 
-    #endregion
+#endregion
 }

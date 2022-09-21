@@ -12,7 +12,7 @@ public sealed record ReplySegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 消息ID
@@ -21,5 +21,5 @@ public sealed record ReplySegment : BaseSegment
     [JsonProperty(PropertyName = "id")]
     public int Target { get; internal set; }
 
-    #endregion
+#endregion
 }

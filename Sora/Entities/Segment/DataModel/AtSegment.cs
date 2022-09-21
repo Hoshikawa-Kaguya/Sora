@@ -12,7 +12,7 @@ public sealed record AtSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// At目标UID
@@ -28,5 +28,5 @@ public sealed record AtSegment : BaseSegment
     [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
     public string Name { get; internal set; }
 
-    #endregion
+#endregion
 }

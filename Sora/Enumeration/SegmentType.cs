@@ -18,7 +18,7 @@ public enum SegmentType
     /// </summary>
     Ignore,
 
-    #region 基础消息段
+#region 基础消息段
 
     /// <summary>
     /// 纯文本
@@ -82,9 +82,9 @@ public enum SegmentType
     [Description("forward")]
     Forward,
 
-    #endregion
+#endregion
 
-    #region GoCQ扩展消息段
+#region GoCQ扩展消息段
 
     /// <summary>
     /// 群戳一戳
@@ -128,5 +128,5 @@ public enum SegmentType
     [Description("rps")]
     RPS
 
-    #endregion
+#endregion
 }

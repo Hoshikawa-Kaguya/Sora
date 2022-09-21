@@ -11,13 +11,13 @@ namespace Sora.Attributes.Command;
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class SoraCommand : Attribute
 {
-    #region 私有字段
+#region 私有字段
 
     private readonly string[] _commandExpressions;
 
-    #endregion
+#endregion
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// <para>正则指令表达式</para>
@@ -81,5 +81,5 @@ public sealed class SoraCommand : Attribute
     /// </summary>
     public RegexOptions RegexOptions { get; init; } = RegexOptions.None;
 
-    #endregion
+#endregion
 }

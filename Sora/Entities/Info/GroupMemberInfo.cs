@@ -51,11 +51,11 @@ public sealed record GroupMemberInfo
         get
         {
             return SexStr switch
-            {
-                "male"   => Sex.Male,
-                "female" => Sex.Female,
-                _        => Sex.Unknown
-            };
+                   {
+                       "male"   => Sex.Male,
+                       "female" => Sex.Female,
+                       _        => Sex.Unknown
+                   };
         }
     }
 

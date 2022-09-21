@@ -11,7 +11,7 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class EssenceChangeEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 消息ID
@@ -38,14 +38,15 @@ public sealed class EssenceChangeEventArgs : BaseSoraEventArgs
     /// </summary>
     public EssenceChangeType EssenceChangeType { get; internal set; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
-    internal EssenceChangeEventArgs(
-        Guid                         serviceId, Guid connectionId, string eventName,
-        OnebotEssenceChangeEventArgs essenceChangeEvent) :
-        base(serviceId, connectionId, eventName, essenceChangeEvent.SelfId, essenceChangeEvent.Time, SourceFlag.Group)
+    internal EssenceChangeEventArgs(Guid                         serviceId,
+                                    Guid                         connectionId,
+                                    string                       eventName,
+                                    OnebotEssenceChangeEventArgs essenceChangeEvent)
+        : base(serviceId, connectionId, eventName, essenceChangeEvent.SelfId, essenceChangeEvent.Time, SourceFlag.Group)
     {
         MessageId         = essenceChangeEvent.MessageId;
         Operator          = new User(serviceId, connectionId, essenceChangeEvent.OperatorId);
@@ -54,5 +55,5 @@ public sealed class EssenceChangeEventArgs : BaseSoraEventArgs
         EssenceChangeType = essenceChangeEvent.EssenceChangeType;
     }
 
-    #endregion
+#endregion
 }

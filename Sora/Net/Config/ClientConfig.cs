@@ -12,7 +12,7 @@ namespace Sora.Net.Config;
 // ReSharper disable once ClassNeverInstantiated.Global
 public sealed class ClientConfig : ISoraConfig
 {
-    #region 私有字段
+#region 私有字段
 
     /// <summary>
     /// 机器人管理员UID
@@ -24,7 +24,7 @@ public sealed class ClientConfig : ISoraConfig
     /// </summary>
     private readonly long[] _blockUsers;
 
-    #endregion
+#endregion
 
     /// <summary>
     /// 服务器地址

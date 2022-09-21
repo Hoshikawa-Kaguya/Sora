@@ -19,7 +19,7 @@ namespace Sora.Util;
 /// </summary>
 public static class Helper
 {
-    #region 崩溃提示
+#region 崩溃提示
 
     /// <summary>
     /// 友好的崩溃提示(x)
@@ -35,9 +35,9 @@ public static class Helper
         Log.UnhandledExceptionLog(args);
     }
 
-    #endregion
+#endregion
 
-    #region 网络
+#region 网络
 
     /// <summary>
     /// 检查端口占用
@@ -49,9 +49,9 @@ public static class Helper
                                  .Any(ipEndPoint => ipEndPoint.Port == port);
     }
 
-    #endregion
+#endregion
 
-    #region 指令优先级转换
+#region 指令优先级转换
 
     internal static List<(int p, List<T> cmds)> ToPriorityList<T>(this List<T> cmdList) where T : BaseCommandInfo
     {
@@ -79,9 +79,9 @@ public static class Helper
         return ret;
     }
 
-    #endregion
+#endregion
 
-    #region 小工具
+#region 小工具
 
     /// <summary>
     /// 对列表进行添加元素，或如果存在该项的话，忽略
@@ -120,9 +120,7 @@ public static class Helper
     /// <returns>2个数组是否全等</returns>
     public static bool ArrayEquals<T>(this T[] arr1, T[] arr2) where T : class
     {
-        if (arr1?.Length != arr2?.Length
-         || (arr1 is null     && arr2 is not null)
-         || (arr1 is not null && arr2 is null))
+        if (arr1?.Length != arr2?.Length || (arr1 is null && arr2 is not null) || (arr1 is not null && arr2 is null))
             return false;
 
         if (arr1 is null && arr2 is null)
@@ -149,7 +147,7 @@ public static class Helper
     /// <returns>实例</returns>
     public static T CreateInstance<T>()
     {
-        return (T) typeof(T).CreateInstance();
+        return (T)typeof(T).CreateInstance();
     }
 
     /// <summary>
@@ -174,10 +172,10 @@ public static class Helper
         FieldInfo fieldInfo = value.GetType().GetField(value.ToString()!);
         if (fieldInfo == null)
             return string.Empty;
-        DescriptionAttribute[] attributes = (DescriptionAttribute[]) fieldInfo
-           .GetCustomAttributes(typeof(DescriptionAttribute), false);
+        DescriptionAttribute[] attributes =
+            (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
         return attributes.Length > 0 ? attributes[0].Description : string.Empty;
     }
 
-    #endregion
+#endregion
 }

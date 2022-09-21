@@ -14,7 +14,7 @@ public sealed record CodeSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 内容
@@ -29,5 +29,5 @@ public sealed record CodeSegment : BaseSegment
     [JsonProperty(PropertyName = "resid", NullValueHandling = NullValueHandling.Ignore)]
     public int? Resid { get; internal set; }
 
-    #endregion
+#endregion
 }

@@ -11,7 +11,7 @@ namespace Sora.Net.Config;
 /// </summary>
 public sealed class ServerConfig : ISoraConfig
 {
-    #region 私有字段
+#region 私有字段
 
     /// <summary>
     /// 机器人管理员UID
@@ -23,7 +23,7 @@ public sealed class ServerConfig : ISoraConfig
     /// </summary>
     private readonly long[] _blockUsers;
 
-    #endregion
+#endregion
 
     /// <summary>
     /// 反向服务器监听地址

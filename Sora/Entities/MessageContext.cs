@@ -15,7 +15,7 @@ namespace Sora.Entities;
 /// </summary>
 public sealed class MessageContext : BaseModel
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 消息ID
@@ -49,14 +49,18 @@ public sealed class MessageContext : BaseModel
     /// </summary>
     public long? MessageSequence { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
-    internal MessageContext(
-        Guid connectionId, int msgId, string text, MessageBody messageBody,
-        long time,         int font,  long?  messageSequence) :
-        base(connectionId)
+    internal MessageContext(Guid        connectionId,
+                            int         msgId,
+                            string      text,
+                            MessageBody messageBody,
+                            long        time,
+                            int         font,
+                            long?       messageSequence)
+        : base(connectionId)
     {
         MessageId       = msgId;
         RawText         = text;
@@ -66,9 +70,9 @@ public sealed class MessageContext : BaseModel
         MessageSequence = messageSequence;
     }
 
-    #endregion
+#endregion
 
-    #region 消息管理方法
+#region 消息管理方法
 
     /// <summary>
     /// 撤回本条消息
@@ -86,9 +90,9 @@ public sealed class MessageContext : BaseModel
         return await SoraApi.MarkMessageRead(MessageId);
     }
 
-    #endregion
+#endregion
 
-    #region 快捷方法
+#region 快捷方法
 
     /// <summary>
     /// 获取所有At的UID
@@ -101,11 +105,10 @@ public sealed class MessageContext : BaseModel
     public IEnumerable<long> GetAllAtList()
     {
         List<long> uidList = MessageBody.Where(s => s.MessageType == SegmentType.At)
-                                        .Select(s => long.TryParse((s.Data as AtSegment)?.Target ?? "0",
-                                                         out long uid)
-                                                         ? uid
-                                                         : -1)
-                                        .ToList();
+                                        .Select(s =>
+                                            long.TryParse((s.Data as AtSegment)?.Target ?? "0", out long uid)
+                                                ? uid
+                                                : -1).ToList();
         //去除无法转换的值，如at全体
         uidList.RemoveAll(uid => uid == -1);
         return uidList;
@@ -132,9 +135,7 @@ public sealed class MessageContext : BaseModel
     /// </returns>
     public IEnumerable<ImageSegment> GetAllImage()
     {
-        return MessageBody.Where(s => s.MessageType == SegmentType.Image)
-                          .Select(s => s.Data as ImageSegment)
-                          .ToList();
+        return MessageBody.Where(s => s.MessageType == SegmentType.Image).Select(s => s.Data as ImageSegment).ToList();
     }
 
     /// <summary>
@@ -183,9 +184,7 @@ public sealed class MessageContext : BaseModel
     public string GetText()
     {
         var text = new StringBuilder();
-        MessageBody.Where(s => s.MessageType == SegmentType.Text)
-                   .Select(s => s.Data as TextSegment)
-                   .ToList()
+        MessageBody.Where(s => s.MessageType == SegmentType.Text).Select(s => s.Data as TextSegment).ToList()
                    .ForEach(t => text.Append(t?.Content ?? string.Empty));
         return text.ToString();
     }
@@ -220,9 +219,9 @@ public sealed class MessageContext : BaseModel
         return equal;
     }
 
-    #endregion
+#endregion
 
-    #region 转换方法
+#region 转换方法
 
     /// <summary>
     /// <para>转纯文本信息</para>
@@ -233,9 +232,9 @@ public sealed class MessageContext : BaseModel
         return RawText;
     }
 
-    #endregion
+#endregion
 
-    #region 运算符重载
+#region 运算符重载
 
     /// <summary>
     /// 等于重载
@@ -245,15 +244,15 @@ public sealed class MessageContext : BaseModel
         if (msgL is null && msgR is null)
             return true;
 
-        return msgL is not null                                 &&
-               msgR is not null                                 &&
-               msgL.MessageId         == msgR.MessageId         &&
-               msgL.SoraApi           == msgR.SoraApi           &&
-               msgL.Font              == msgR.Font              &&
-               msgL.Time              == msgR.Time              &&
-               msgL.MessageSequence   == msgR.MessageSequence   &&
-               msgL.MessageBody.Count == msgR.MessageBody.Count &&
-               msgL.MessageEquals(msgR);
+        return msgL is not null
+               && msgR is not null
+               && msgL.MessageId == msgR.MessageId
+               && msgL.SoraApi == msgR.SoraApi
+               && msgL.Font == msgR.Font
+               && msgL.Time == msgR.Time
+               && msgL.MessageSequence == msgR.MessageSequence
+               && msgL.MessageBody.Count == msgR.MessageBody.Count
+               && msgL.MessageEquals(msgR);
     }
 
     /// <summary>
@@ -264,9 +263,9 @@ public sealed class MessageContext : BaseModel
         return !(msgL == msgR);
     }
 
-    #endregion
+#endregion
 
-    #region 常用重载
+#region 常用重载
 
     /// <summary>
     /// 比较重载
@@ -287,9 +286,9 @@ public sealed class MessageContext : BaseModel
         return HashCode.Combine(MessageId, RawText, MessageBody, Time, Font, MessageSequence);
     }
 
-    #endregion
+#endregion
 
-    #region 索引器
+#region 索引器
 
     /// <summary>
     /// 索引器
@@ -303,5 +302,5 @@ public sealed class MessageContext : BaseModel
         internal set => MessageBody[index] = value;
     }
 
-    #endregion
+#endregion
 }

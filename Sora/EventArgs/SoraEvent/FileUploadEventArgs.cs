@@ -11,26 +11,26 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class FileUploadEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 消息源群
     /// </summary>
-    public Group SourceGroup { get; private set; }
+    public Group SourceGroup { get; }
 
     /// <summary>
     /// 上传者
     /// </summary>
-    public User Sender { get; private set; }
+    public User Sender { get; }
 
     /// <summary>
     /// 上传文件的信息
     /// </summary>
-    public UploadFileInfo FileInfo { get; private set; }
+    public UploadFileInfo FileInfo { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
@@ -39,15 +39,16 @@ public sealed class FileUploadEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="fileUploadArgs">文件上传事件参数</param>
-    internal FileUploadEventArgs(
-        Guid                      serviceId, Guid connectionId, string eventName,
-        OnebotFileUploadEventArgs fileUploadArgs) :
-        base(serviceId, connectionId, eventName, fileUploadArgs.SelfId, fileUploadArgs.Time, SourceFlag.Group)
+    internal FileUploadEventArgs(Guid                      serviceId,
+                                 Guid                      connectionId,
+                                 string                    eventName,
+                                 OnebotFileUploadEventArgs fileUploadArgs)
+        : base(serviceId, connectionId, eventName, fileUploadArgs.SelfId, fileUploadArgs.Time, SourceFlag.Group)
     {
         SourceGroup = new Group(connectionId, fileUploadArgs.GroupId);
         Sender      = new User(serviceId, connectionId, fileUploadArgs.UserId);
         FileInfo    = fileUploadArgs.Upload;
     }
 
-    #endregion
+#endregion
 }

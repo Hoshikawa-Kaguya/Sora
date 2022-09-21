@@ -21,7 +21,7 @@ namespace Sora.Net;
 /// </summary>
 public sealed class SoraWebsocketClient : ISoraService
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 服务器配置类
@@ -48,9 +48,9 @@ public sealed class SoraWebsocketClient : ISoraService
     /// </summary>
     public Guid ServiceId { get; } = Guid.NewGuid();
 
-    #endregion
+#endregion
 
-    #region 私有字段
+#region 私有字段
 
     /// <summary>
     /// 客户端已准备启动标识
@@ -72,9 +72,9 @@ public sealed class SoraWebsocketClient : ISoraService
     private IDisposable _subClientDisconnectionHappened;
     private IDisposable _subClientReconnectionHappened;
 
-    #endregion
+#endregion
 
-    #region 构造方法
+#region 构造方法
 
     /// <summary>
     /// 创建一个正向WS客户端
@@ -98,9 +98,7 @@ public sealed class SoraWebsocketClient : ISoraService
         //初始化连接管理器
         ConnManager = new ConnectionManager(Config, ServiceId);
         //实例化事件接口
-        Event = new EventAdapter(ServiceId,
-            Config.ThrowCommandException,
-            Config.SendCommandErrMsg,
+        Event = new EventAdapter(ServiceId, Config.ThrowCommandException, Config.SendCommandErrMsg,
             Config.CommandExceptionHandle);
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
@@ -113,9 +111,9 @@ public sealed class SoraWebsocketClient : ISoraService
         _isReady = true;
     }
 
-    #endregion
+#endregion
 
-    #region 客户端启停
+#region 客户端启停
 
     /// <summary>
     /// <para>启动 Sora 服务</para>
@@ -131,15 +129,14 @@ public sealed class SoraWebsocketClient : ISoraService
 
         //处理连接路径
         string serverPath = string.IsNullOrEmpty(Config.UniversalPath)
-                                ? $"ws://{Config.Host}:{Config.Port}"
-                                : $"ws://{Config.Host}:{Config.Port}/{Config.UniversalPath.Trim('/')}/";
+            ? $"ws://{Config.Host}:{Config.Port}"
+            : $"ws://{Config.Host}:{Config.Port}/{Config.UniversalPath.Trim('/')}/";
         Log.Debug("Sora", $"Onebot server addr:{serverPath}");
-        Client =
-            new WebsocketClient(new Uri(serverPath), CreateSocket)
-            {
-                ReconnectTimeout      = Config.ReconnectTimeOut,
-                ErrorReconnectTimeout = Config.ReconnectTimeOut
-            };
+        Client = new WebsocketClient(new Uri(serverPath), CreateSocket)
+        {
+            ReconnectTimeout      = Config.ReconnectTimeOut,
+            ErrorReconnectTimeout = Config.ReconnectTimeOut
+        };
         //消息接收事件
         _subClientMessageReceived = Client.MessageReceived.Subscribe(msg => Task.Run(() =>
         {
@@ -148,44 +145,36 @@ public sealed class SoraWebsocketClient : ISoraService
             Event.Adapter(JObject.Parse(msg.Text), ServiceId);
         }));
         //连接断开事件
-        _subClientDisconnectionHappened =
-            Client.DisconnectionHappened
-                  .Subscribe(info => Task.Run(() =>
-                   {
-                       if (_disposed)
-                           return;
-                       //移除原连接信息
-                       if (ConnectionRecord.Exists(ServiceId))
-                           ConnManager.CloseConnection(ServiceId);
+        _subClientDisconnectionHappened = Client.DisconnectionHappened.Subscribe(info => Task.Run(() =>
+        {
+            if (_disposed)
+                return;
+            //移除原连接信息
+            if (ConnectionRecord.Exists(ServiceId))
+                ConnManager.CloseConnection(ServiceId);
 
-                       if (info.Exception != null)
-                           Log.Error("Sora",
-                               $"监听服务器时发生错误\r\n{Log.ErrorLogBuilder(info.Exception)}");
-                       else
-                           Log.Info("Sora", "服务器连接被关闭");
-                   }));
+            if (info.Exception != null)
+                Log.Error("Sora", $"监听服务器时发生错误\r\n{Log.ErrorLogBuilder(info.Exception)}");
+            else
+                Log.Info("Sora", "服务器连接被关闭");
+        }));
         //重连事件
-        _subClientReconnectionHappened =
-            Client.ReconnectionHappened
-                  .Subscribe(info => Task.Run(() =>
-                   {
-                       if (_disposed)
-                           return;
-                       if (info.Type == ReconnectionType.Initial || !_isRunning)
-                           return;
-                       Log.Info("Sora", $"服务器已自动重连{info.Type}");
-                       ConnManager.OpenConnection("Universal", "0",
-                           new ClientSocket(Client),
-                           ServiceId, ServiceId,
-                           Config.ApiTimeOut);
-                   }));
+        _subClientReconnectionHappened = Client.ReconnectionHappened.Subscribe(info => Task.Run(() =>
+        {
+            if (_disposed)
+                return;
+            if (info.Type == ReconnectionType.Initial || !_isRunning)
+                return;
+            Log.Info("Sora", $"服务器已自动重连{info.Type}");
+            ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client), ServiceId, ServiceId,
+                Config.ApiTimeOut);
+        }));
         //开始客户端
         await Client.Start();
         if (!Client.IsRunning || !Client.IsStarted)
             throw new WebSocketClientException("WebSocket client is not running");
 
-        ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client), ServiceId, ServiceId,
-            Config.ApiTimeOut);
+        ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client), ServiceId, ServiceId, Config.ApiTimeOut);
         Log.Info("Sora", "Sora WebSocket客户端正在运行并已连接至onebot服务器");
         _isRunning = true;
     }
@@ -234,15 +223,14 @@ public sealed class SoraWebsocketClient : ISoraService
         GC.SuppressFinalize(this);
     }
 
-    #endregion
+#endregion
 
-    #region util
+#region util
 
     private ClientWebSocket CreateSocket()
     {
         var clientWebSocket = new ClientWebSocket();
-        clientWebSocket.Options.SetRequestHeader("Authorization",
-            $"Bearer {Config.AccessToken}");
+        clientWebSocket.Options.SetRequestHeader("Authorization", $"Bearer {Config.AccessToken}");
         return clientWebSocket;
     }
 
@@ -255,5 +243,5 @@ public sealed class SoraWebsocketClient : ISoraService
         return ConnectionRecord.GetApi(connectionId);
     }
 
-    #endregion
+#endregion
 }

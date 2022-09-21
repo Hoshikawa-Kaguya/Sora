@@ -12,36 +12,36 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 请求发送者实例
     /// </summary>
-    public User Sender { get; private set; }
+    public User Sender { get; }
 
     /// <summary>
     /// 请求发送到的群组实例
     /// </summary>
-    public Group SourceGroup { get; private set; }
+    public Group SourceGroup { get; }
 
     /// <summary>
     /// 验证信息
     /// </summary>
-    public string Comment { get; private set; }
+    public string Comment { get; }
 
     /// <summary>
     /// 当前请求的 flag 标识
     /// </summary>
-    public string RequestFlag { get; private set; }
+    public string RequestFlag { get; }
 
     /// <summary>
     /// 请求子类型
     /// </summary>
-    public GroupRequestType SubType { get; private set; }
+    public GroupRequestType SubType { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
@@ -50,10 +50,11 @@ public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="groupObRequestArgs">加群申请事件参数</param>
-    internal AddGroupRequestEventArgs(
-        Guid                          serviceId, Guid connectionId, string eventName,
-        OnebotGroupObRequestEventArgs groupObRequestArgs) :
-        base(serviceId, connectionId, eventName, groupObRequestArgs.SelfId, groupObRequestArgs.Time, SourceFlag.Group)
+    internal AddGroupRequestEventArgs(Guid                          serviceId,
+                                      Guid                          connectionId,
+                                      string                        eventName,
+                                      OnebotGroupObRequestEventArgs groupObRequestArgs)
+        : base(serviceId, connectionId, eventName, groupObRequestArgs.SelfId, groupObRequestArgs.Time, SourceFlag.Group)
     {
         Sender      = new User(serviceId, connectionId, groupObRequestArgs.UserId);
         SourceGroup = new Group(connectionId, groupObRequestArgs.GroupId);
@@ -62,9 +63,9 @@ public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
         SubType     = groupObRequestArgs.GroupRequestType;
     }
 
-    #endregion
+#endregion
 
-    #region 公有方法
+#region 公有方法
 
     /// <summary>
     /// 同意当前申请
@@ -83,5 +84,5 @@ public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
         await SoraApi.SetGroupAddRequest(RequestFlag, SubType, false, reason);
     }
 
-    #endregion
+#endregion
 }

@@ -7,7 +7,7 @@ namespace Sora.Entities.Info;
 /// </summary>
 public sealed record FriendInfo
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 好友备注
@@ -33,5 +33,5 @@ public sealed record FriendInfo
     [JsonProperty(PropertyName = "user_id")]
     public long UserId { get; internal init; }
 
-    #endregion
+#endregion
 }

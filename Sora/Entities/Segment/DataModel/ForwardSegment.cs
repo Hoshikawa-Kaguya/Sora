@@ -11,7 +11,7 @@ public sealed record ForwardSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 转发消息ID
@@ -19,5 +19,5 @@ public sealed record ForwardSegment : BaseSegment
     [JsonProperty(PropertyName = "id")]
     public string MessageId { get; internal set; }
 
-    #endregion
+#endregion
 }

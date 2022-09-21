@@ -14,7 +14,7 @@ public sealed record PokeSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 需要戳的成员
@@ -23,5 +23,5 @@ public sealed record PokeSegment : BaseSegment
     [JsonProperty(PropertyName = "qq")]
     public long Uid { get; internal set; }
 
-    #endregion
+#endregion
 }

@@ -18,10 +18,17 @@ internal abstract record BaseCommandInfo
     internal readonly string         SeriesName;       //指令组名
     internal readonly string         CommandName;      //指令名
 
-    internal BaseCommandInfo(
-        string desc,         string[]     regex,        MemberRoleType permissionType, bool suCommand,
-        int    priority,     RegexOptions regexOptions, SourceFlag     source,
-        long[] sourceGroups, long[]       sourceUsers,  string         seriesName, string commandName)
+    internal BaseCommandInfo(string         desc,
+                             string[]       regex,
+                             MemberRoleType permissionType,
+                             bool           suCommand,
+                             int            priority,
+                             RegexOptions   regexOptions,
+                             SourceFlag     source,
+                             long[]         sourceGroups,
+                             long[]         sourceUsers,
+                             string         seriesName,
+                             string         commandName)
     {
         Desc             = desc;
         PermissionType   = permissionType;
@@ -40,6 +47,6 @@ internal abstract record BaseCommandInfo
 
     public override int GetHashCode()
     {
-        return HashCode.Combine((int) PermissionType, SuperUserCommand, (int) SourceType, Priority, SourceType, Regex);
+        return HashCode.Combine((int)PermissionType, SuperUserCommand, (int)SourceType, Priority, SourceType, Regex);
     }
 }
