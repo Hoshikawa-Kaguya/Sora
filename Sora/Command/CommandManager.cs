@@ -101,21 +101,22 @@ public sealed class CommandManager
         //查找所有的指令集
         Dictionary<Type, MethodInfo[]> cmdSeries = assembly.GetExportedTypes()
                                                            //获取指令组
-                                                           .Where(type =>
-                                                               type.IsDefined(typeof(CommandSeries), false)
-                                                               && type.IsClass)
+                                                           .Where(type => type.IsDefined(typeof(CommandSeries), false)
+                                                                          && type.IsClass)
                                                            .Select(type => (type,
-                                                               type.GetMethods().Where(method =>
-                                                                   method.CheckMethodLegality()).ToArray()))
+                                                                       type.GetMethods()
+                                                                           .Where(method => method
+                                                                                      .CheckMethodLegality())
+                                                                           .ToArray()))
                                                            .ToDictionary(methods => methods.type,
-                                                               methods => methods.Item2);
+                                                                         methods => methods.Item2);
 
         foreach ((Type classType, MethodInfo[] methodInfos) in cmdSeries)
         {
             //获取指令属性
             CommandSeries seriesAttr = classType.GetCustomAttribute(typeof(CommandSeries)) as CommandSeries
-                                       ?? throw new NullReferenceException(
-                                           "CommandSeries attribute is null with unknown reason");
+                                       ?? throw new
+                                           NullReferenceException("CommandSeries attribute is null with unknown reason");
 
             string prefix        = string.IsNullOrEmpty(seriesAttr.GroupPrefix) ? string.Empty : seriesAttr.GroupPrefix;
             string seriesName    = string.IsNullOrEmpty(seriesAttr.SeriesName) ? classType.Name : seriesAttr.SeriesName;
@@ -191,10 +192,18 @@ public sealed class CommandManager
 
 
         //创建指令信息
-        DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(desc, matchExp, null, memberRole,
-            priority ?? GetNewDynamicPriority(), regexOptions | RegexOptions.Compiled,
-            sourceGroups ?? Array.Empty<long>(), sourceUsers ?? Array.Empty<long>(), seriesCommand, id, suCommand,
-            groupName);
+        DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(desc,
+                                                                   matchExp,
+                                                                   null,
+                                                                   memberRole,
+                                                                   priority ?? GetNewDynamicPriority(),
+                                                                   regexOptions | RegexOptions.Compiled,
+                                                                   sourceGroups ?? Array.Empty<long>(),
+                                                                   sourceUsers ?? Array.Empty<long>(),
+                                                                   seriesCommand,
+                                                                   id,
+                                                                   suCommand,
+                                                                   groupName);
 
         return AddDynamicCommand(dynamicCommand);
     }
@@ -230,9 +239,18 @@ public sealed class CommandManager
         Log.Debug("Command", $"Registering dynamic command [{id}]");
 
         //创建指令信息
-        DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(desc, Array.Empty<string>(), matchFunc, memberRole,
-            priority ?? GetNewDynamicPriority(), RegexOptions.None, sourceGroups ?? Array.Empty<long>(),
-            sourceUsers ?? Array.Empty<long>(), seriesCommand, id, suCommand, groupName);
+        DynamicCommandInfo dynamicCommand = new DynamicCommandInfo(desc,
+                                                                   Array.Empty<string>(),
+                                                                   matchFunc,
+                                                                   memberRole,
+                                                                   priority ?? GetNewDynamicPriority(),
+                                                                   RegexOptions.None,
+                                                                   sourceGroups ?? Array.Empty<long>(),
+                                                                   sourceUsers ?? Array.Empty<long>(),
+                                                                   seriesCommand,
+                                                                   id,
+                                                                   suCommand,
+                                                                   groupName);
 
         return AddDynamicCommand(dynamicCommand);
     }
@@ -273,9 +291,16 @@ public sealed class CommandManager
         string[] matchExp = CommandUtils.ParseCommandExps(cmdExps, string.Empty, matchType);
 
         //创建指令信息
-        var dynamicCommand = new DynamicCommandInfo(desc, matchExp, null, priority ?? GetNewDynamicPriority(),
-            regexOptions | RegexOptions.Compiled, sourceUsers ?? Array.Empty<long>(), privateCommand, id, suCommand,
-            groupName);
+        var dynamicCommand = new DynamicCommandInfo(desc,
+                                                    matchExp,
+                                                    null,
+                                                    priority ?? GetNewDynamicPriority(),
+                                                    regexOptions | RegexOptions.Compiled,
+                                                    sourceUsers ?? Array.Empty<long>(),
+                                                    privateCommand,
+                                                    id,
+                                                    suCommand,
+                                                    groupName);
 
         return AddDynamicCommand(dynamicCommand);
     }
@@ -307,9 +332,16 @@ public sealed class CommandManager
         Log.Debug("Command", $"Registering dynamic command [{id}]");
 
         //创建指令信息
-        var dynamicCommand = new DynamicCommandInfo(desc, Array.Empty<string>(), matchFunc,
-            priority ?? GetNewDynamicPriority(), RegexOptions.None, sourceUsers ?? Array.Empty<long>(), privateCommand,
-            id, suCommand, groupName);
+        var dynamicCommand = new DynamicCommandInfo(desc,
+                                                    Array.Empty<string>(),
+                                                    matchFunc,
+                                                    priority ?? GetNewDynamicPriority(),
+                                                    RegexOptions.None,
+                                                    sourceUsers ?? Array.Empty<long>(),
+                                                    privateCommand,
+                                                    id,
+                                                    suCommand,
+                                                    groupName);
 
         return AddDynamicCommand(dynamicCommand);
     }
@@ -381,7 +413,7 @@ public sealed class CommandManager
 
         List<(int, List<DynamicCommandInfo>)> matchedDynamicCommand = _dynamicCommands
                                                                       .Where(command =>
-                                                                          CommandMatch(command, eventArgs))
+                                                                                 CommandMatch(command, eventArgs))
                                                                       .OrderByDescending(c => c.Priority).ToList()
                                                                       .ToPriorityList();
 
@@ -450,9 +482,9 @@ public sealed class CommandManager
         foreach (SoraCommandInfo commandInfo in commandInfos)
         {
             Log.Debug("CommandAdapter",
-                $"trigger command [<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.SeriesName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
+                      $"trigger command [<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.SeriesName}){commandInfo.MethodInfo.ReflectedType?.FullName}.{commandInfo.MethodInfo.Name}]");
             Log.Info("CommandAdapter",
-                $"触发指令[<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.SeriesName}){commandInfo.MethodInfo.Name}]");
+                     $"触发指令[<{p}>(C:{commandInfo.ClassName}|G:{commandInfo.SeriesName}){commandInfo.MethodInfo.Name}]");
             //尝试执行指令并判断异步方法
             bool isAsync =
                 commandInfo.MethodInfo.GetCustomAttribute(typeof(AsyncStateMachineAttribute), false) is not null;
@@ -467,13 +499,15 @@ public sealed class CommandManager
             try
             {
                 if (isAsync && commandInfo.MethodInfo.ReturnType != typeof(void))
-                    await commandInfo.MethodInfo.Invoke(
-                        commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                        new object[] { eventArgs });
+                    await commandInfo.MethodInfo.Invoke(commandInfo.InstanceType == null
+                                                            ? null
+                                                            : _instanceDict[commandInfo.InstanceType],
+                                                        new object[] { eventArgs });
                 else
-                    commandInfo.MethodInfo.Invoke(
-                        commandInfo.InstanceType == null ? null : _instanceDict[commandInfo.InstanceType],
-                        new object[] { eventArgs });
+                    commandInfo.MethodInfo.Invoke(commandInfo.InstanceType == null
+                                                      ? null
+                                                      : _instanceDict[commandInfo.InstanceType],
+                                                  new object[] { eventArgs });
             }
             catch (Exception err)
             {
@@ -550,11 +584,11 @@ public sealed class CommandManager
                     {
                         case SoraCommandInfo regex:
                             Log.Warning("CommandAdapter",
-                                $"成员{e.SenderInfo.UserId}[{e.SenderInfo.Role}]正在尝试执行指令{regex.MethodInfo.Name}[{command.PermissionType}]");
+                                        $"成员{e.SenderInfo.UserId}[{e.SenderInfo.Role}]正在尝试执行指令{regex.MethodInfo.Name}[{command.PermissionType}]");
                             break;
                         case DynamicCommandInfo dynamic:
                             Log.Warning("CommandAdapter",
-                                $"成员{e.SenderInfo.UserId}[{e.SenderInfo.Role}]正在尝试执行指令{dynamic.CommandId}[{command.PermissionType}]");
+                                        $"成员{e.SenderInfo.UserId}[{e.SenderInfo.Role}]正在尝试执行指令{dynamic.CommandId}[{command.PermissionType}]");
                             break;
                     }
 
@@ -599,8 +633,9 @@ public sealed class CommandManager
             object instance = classType.CreateInstance();
 
             //添加实例
-            return _instanceDict.TryAdd(
-                classType ?? throw new ArgumentNullException(nameof(classType), "get null class type"), instance);
+            return _instanceDict.TryAdd(classType
+                                        ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
+                                        instance);
         }
         catch (Exception e)
         {
@@ -672,8 +707,8 @@ public sealed class CommandManager
     {
         //获取指令属性
         SoraCommand commandAttr = method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand
-                                  ?? throw new NullReferenceException(
-                                      "SoraCommand attribute is null with unknown reason");
+                                  ?? throw new
+                                      NullReferenceException("SoraCommand attribute is null with unknown reason");
         //处理表达式
         string[] matchExp =
             CommandUtils.ParseCommandExps(commandAttr.CommandExpressions, prefix, commandAttr.MatchType);
@@ -687,11 +722,23 @@ public sealed class CommandManager
         }
 
         //创建指令信息
-        soraCommandInfo = new SoraCommandInfo(commandAttr.Description, matchExp, classType.Name, groupName, method,
-            commandAttr.PermissionLevel, commandAttr.Priority, commandAttr.RegexOptions, commandAttr.SourceType,
-            commandAttr.SourceGroups.IsEmpty() ? Array.Empty<long>() : commandAttr.SourceGroups,
-            commandAttr.SourceUsers.IsEmpty() ? Array.Empty<long>() : commandAttr.SourceUsers,
-            commandAttr.SuperUserCommand, method.IsStatic ? null : classType);
+        soraCommandInfo = new SoraCommandInfo(commandAttr.Description,
+                                              matchExp,
+                                              classType.Name,
+                                              groupName,
+                                              method,
+                                              commandAttr.PermissionLevel,
+                                              commandAttr.Priority,
+                                              commandAttr.RegexOptions,
+                                              commandAttr.SourceType,
+                                              commandAttr.SourceGroups.IsEmpty()
+                                                  ? Array.Empty<long>()
+                                                  : commandAttr.SourceGroups,
+                                              commandAttr.SourceUsers.IsEmpty()
+                                                  ? Array.Empty<long>()
+                                                  : commandAttr.SourceUsers,
+                                              commandAttr.SuperUserCommand,
+                                              method.IsStatic ? null : classType);
 
         return true;
     }
@@ -764,12 +811,12 @@ public sealed class CommandManager
                 case SourceFlag.Group:
                     if (eventArgs is not GroupMessageEventArgs e)
                         break;
-                    await ApiAdapter.SendGroupMessage(eventArgs.ConnId, e.SourceGroup, msg.ToString(), null).RunCatch(
-                        er =>
-                        {
-                            Log.Error(er, "err cmd", "报错信息发送失败");
-                            return (new ApiStatus(), 0);
-                        });
+                    await ApiAdapter.SendGroupMessage(eventArgs.ConnId, e.SourceGroup, msg.ToString(), null)
+                                    .RunCatch(er =>
+                                    {
+                                        Log.Error(er, "err cmd", "报错信息发送失败");
+                                        return (new ApiStatus(), 0);
+                                    });
                     break;
                 case SourceFlag.Private:
                     await ApiAdapter.SendPrivateMessage(eventArgs.ConnId, eventArgs.Sender, msg.ToString(), null, null)

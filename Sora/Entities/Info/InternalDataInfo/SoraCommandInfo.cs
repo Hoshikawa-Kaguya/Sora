@@ -31,8 +31,17 @@ internal sealed record SoraCommandInfo : BaseCommandInfo
                              long[]         sourceUsers,
                              bool           suCommand,
                              Type           instanceType = null)
-        : base(desc, regex, permissionType, suCommand, priority, regexOptions, source, sourceGroups, sourceUsers,
-            seriesName, $"{className}.{method.Name}")
+        : base(desc,
+               regex,
+               permissionType,
+               suCommand,
+               priority,
+               regexOptions,
+               source,
+               sourceGroups,
+               sourceUsers,
+               seriesName,
+               $"{className}.{method.Name}")
     {
         ClassName    = className;
         MethodInfo   = method;

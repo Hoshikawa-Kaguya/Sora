@@ -85,9 +85,8 @@ internal static class ConnectionRecord
                                                                       TimeSpan heartbeatTimeout)
     {
         return _connections
-               .Where(conn =>
-                   conn.Value.ApiInstance.ServiceId == serviceId
-                   && now - conn.Value.LastHeartBeatTime > heartbeatTimeout)
+               .Where(conn => conn.Value.ApiInstance.ServiceId == serviceId
+                              && now - conn.Value.LastHeartBeatTime > heartbeatTimeout)
                .ToDictionary(conn => conn.Key, conn => conn.Value);
     }
 

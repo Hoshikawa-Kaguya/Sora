@@ -29,8 +29,17 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
                               Guid                                   commandId,
                               bool                                   suCommand,
                               string                                 seriesName)
-        : base(desc, regex, permissionType, suCommand, priority, regexOptions, SourceFlag.Group, sourceGroups,
-            sourceUsers, seriesName, commandId.ToString())
+        : base(desc,
+               regex,
+               permissionType,
+               suCommand,
+               priority,
+               regexOptions,
+               SourceFlag.Group,
+               sourceGroups,
+               sourceUsers,
+               seriesName,
+               commandId.ToString())
     {
         CommandId        = commandId;
         GroupCommand     = groupCommand;
@@ -50,8 +59,17 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
                               Guid                                     commandId,
                               bool                                     suCommand,
                               string                                   seriesName)
-        : base(desc, regex, MemberRoleType.Member, suCommand, priority, regexOptions, SourceFlag.Private,
-            Array.Empty<long>(), sourceUsers, seriesName, commandId.ToString())
+        : base(desc,
+               regex,
+               MemberRoleType.Member,
+               suCommand,
+               priority,
+               regexOptions,
+               SourceFlag.Private,
+               Array.Empty<long>(),
+               sourceUsers,
+               seriesName,
+               commandId.ToString())
     {
         CommandId        = commandId;
         PrivateCommand   = privateCommand;

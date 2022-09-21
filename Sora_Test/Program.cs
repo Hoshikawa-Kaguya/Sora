@@ -32,7 +32,7 @@ service.ConnManager.OnOpenConnectionAsync += (connectionId, eventArgs) =>
 service.ConnManager.OnCloseConnectionAsync += (connectionId, eventArgs) =>
 {
     Log.Debug("Sora_Test|OnCloseConnectionAsync",
-        $"uid = {eventArgs.SelfId} connectionId = {connectionId} type = {eventArgs.Role}");
+              $"uid = {eventArgs.SelfId} connectionId = {connectionId} type = {eventArgs.Role}");
     return ValueTask.CompletedTask;
 };
 //连接成功元事件
@@ -58,11 +58,12 @@ service.Event.OnSelfPrivateMessage += (_, eventArgs) =>
 };
 
 //动态向管理器注册指令
-service.Event.CommandManager.RegisterGroupDynamicCommand(new[] { "哇哦" }, async eventArgs =>
-{
-    eventArgs.IsContinueEventChain = false;
-    await eventArgs.Reply("shit");
-});
+service.Event.CommandManager.RegisterGroupDynamicCommand(new[] { "哇哦" },
+                                                         async eventArgs =>
+                                                         {
+                                                             eventArgs.IsContinueEventChain = false;
+                                                             await eventArgs.Reply("shit");
+                                                         });
 
 //指令错误处理
 async void CommandExceptionHandle(Exception exception, BaseMessageEventArgs eventArgs, string log)

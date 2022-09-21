@@ -48,8 +48,12 @@ public sealed class GroupMemberChangeEventArgs : BaseSoraEventArgs
                                         Guid                             connectionId,
                                         string                           eventName,
                                         OnebotGroupMemberChangeEventArgs groupMemberChangeArgs)
-        : base(serviceId, connectionId, eventName, groupMemberChangeArgs.SelfId, groupMemberChangeArgs.Time,
-            SourceFlag.Group)
+        : base(serviceId,
+               connectionId,
+               eventName,
+               groupMemberChangeArgs.SelfId,
+               groupMemberChangeArgs.Time,
+               SourceFlag.Group)
     {
         ChangedUser = new User(serviceId, connectionId, groupMemberChangeArgs.UserId);
         //执行者和变动成员可能为同一人

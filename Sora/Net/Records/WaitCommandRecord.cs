@@ -132,8 +132,9 @@ internal static class WaitCommandRecord
 
         if (command.MatchFunc is not null)
             return command.MatchFunc(eventArgs);
-        return command.CommandExpressions?.Any(regex => Regex.IsMatch(
-                   eventArgs.Message.RawText, regex, RegexOptions.Compiled | command.RegexOptions))
+        return command.CommandExpressions?.Any(regex => Regex.IsMatch(eventArgs.Message.RawText,
+                                                                      regex,
+                                                                      RegexOptions.Compiled | command.RegexOptions))
                ?? false;
     }
 

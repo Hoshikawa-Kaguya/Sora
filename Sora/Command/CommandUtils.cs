@@ -50,11 +50,12 @@ internal static class CommandUtils
         return commandAttr.SourceType switch
                {
                    SourceFlag.Group => preCheck
-                                       && method.GetParameters().Any(para =>
-                                           ParameterCheck<GroupMessageEventArgs>(para, method.Name)),
+                                       && method.GetParameters()
+                                                .Any(para => ParameterCheck<GroupMessageEventArgs>(para, method.Name)),
                    SourceFlag.Private => preCheck
-                                         && method.GetParameters().Any(para =>
-                                             ParameterCheck<PrivateMessageEventArgs>(para, method.Name)),
+                                         && method.GetParameters()
+                                                  .Any(para =>
+                                                           ParameterCheck<PrivateMessageEventArgs>(para, method.Name)),
                    _ => false
                };
     }
@@ -103,8 +104,12 @@ internal static class CommandUtils
     {
         if (matchFunc is null)
             throw new ArgumentNullException(nameof(matchFunc));
-        return new WaitingInfo(new AutoResetEvent(false), matchFunc, connectionId, serviceId, (sourceUid, sourceGroup),
-            sourceFlag);
+        return new WaitingInfo(new AutoResetEvent(false),
+                               matchFunc,
+                               connectionId,
+                               serviceId,
+                               (sourceUid, sourceGroup),
+                               sourceFlag);
     }
 
     /// <summary>EE
@@ -139,8 +144,13 @@ internal static class CommandUtils
                                 _                 => throw new NotSupportedException("unknown matchtype")
                             };
 
-        return new WaitingInfo(new AutoResetEvent(false), matchExp, serviceId: serviceId, connectionId: connectionId,
-            source: (sourceUid, sourceGroup), sourceFlag: sourceFlag, regexOptions: regexOptions);
+        return new WaitingInfo(new AutoResetEvent(false),
+                               matchExp,
+                               serviceId: serviceId,
+                               connectionId: connectionId,
+                               source: (sourceUid, sourceGroup),
+                               sourceFlag: sourceFlag,
+                               regexOptions: regexOptions);
     }
 
 #endregion

@@ -127,7 +127,7 @@ public static class SegmentHelper
         {
             FileType.Url,
             new Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
-                RegexOptions.Compiled)
+                      RegexOptions.Compiled)
         },
         //文件名
         { FileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled) }
