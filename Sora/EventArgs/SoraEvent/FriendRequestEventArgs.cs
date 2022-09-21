@@ -43,8 +43,12 @@ public sealed class FriendRequestEventArgs : BaseSoraEventArgs
                                     Guid                           connectionId,
                                     string                         eventName,
                                     OnebotFriendObRequestEventArgs friendObRequestArgs)
-        : base(serviceId, connectionId, eventName, friendObRequestArgs.SelfId, friendObRequestArgs.Time,
-            SourceFlag.Private)
+        : base(serviceId,
+               connectionId,
+               eventName,
+               friendObRequestArgs.SelfId,
+               friendObRequestArgs.Time,
+               SourceFlag.Private)
     {
         Sender      = new User(serviceId, connectionId, friendObRequestArgs.UserId);
         Comment     = friendObRequestArgs.Comment;

@@ -299,16 +299,16 @@ public sealed class MessageBody : IList<SoraSegment>
 
     private static void RemoveIllegalSegment(ref MessageBody segmentDatas)
     {
-        int iCount = segmentDatas.RemoveAll(s =>
-            s.MessageType is SegmentType.Ignore or SegmentType.Unknown || s.Data is null);
+        int iCount =
+            segmentDatas.RemoveAll(s => s.MessageType is SegmentType.Ignore or SegmentType.Unknown || s.Data is null);
         if (iCount != 0)
             Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
     }
 
     private static void RemoveIllegalSegment(ref List<SoraSegment> segmentDatas)
     {
-        int iCount = segmentDatas.RemoveAll(s =>
-            s.MessageType is SegmentType.Ignore or SegmentType.Unknown || s.Data is null);
+        int iCount =
+            segmentDatas.RemoveAll(s => s.MessageType is SegmentType.Ignore or SegmentType.Unknown || s.Data is null);
         if (iCount != 0)
             Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
     }

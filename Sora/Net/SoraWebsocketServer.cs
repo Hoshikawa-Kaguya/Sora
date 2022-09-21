@@ -99,8 +99,10 @@ public sealed class SoraWebsocketServer : ISoraService
         //初始化连接管理器
         ConnManager = new ConnectionManager(Config, ServiceId);
         //实例化事件接口
-        Event = new EventAdapter(ServiceId, Config.ThrowCommandException, Config.SendCommandErrMsg,
-            Config.CommandExceptionHandle);
+        Event = new EventAdapter(ServiceId,
+                                 Config.ThrowCommandException,
+                                 Config.SendCommandErrMsg,
+                                 Config.CommandExceptionHandle);
         //禁用原log
         FleckLog.Level = (LogLevel)4;
         //全局异常事件
@@ -172,8 +174,12 @@ public sealed class SoraWebsocketServer : ISoraService
             if (!CheckRequest(socket, out string selfId))
                 return;
             //事件回调
-            ConnManager.OpenConnection("Universal", selfId, new ServerSocket(socket), ServiceId,
-                socket.ConnectionInfo.Id, Config.ApiTimeOut);
+            ConnManager.OpenConnection("Universal",
+                                       selfId,
+                                       new ServerSocket(socket),
+                                       ServiceId,
+                                       socket.ConnectionInfo.Id,
+                                       Config.ApiTimeOut);
             Log.Info("Sora", $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
         };
         //关闭连接
@@ -250,7 +256,7 @@ public sealed class SoraWebsocketServer : ISoraService
         {
             socket.Close();
             Log.Warning("Sora",
-                $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
+                        $"关闭与未知客户端的连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]，请检查是否设置正确的监听地址");
             return false;
         }
 

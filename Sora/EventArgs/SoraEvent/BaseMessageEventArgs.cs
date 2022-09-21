@@ -63,8 +63,13 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
         : base(serviceId, connectionId, eventName, msg.SelfId, msg.Time, source)
     {
         //将api消息段转换为sorasegment
-        Message = new MessageContext(connectionId, msg.MessageId, msg.RawMessage, msg.MessageList.ToMessageBody(),
-            msg.Time, msg.Font, null);
+        Message = new MessageContext(connectionId,
+                                     msg.MessageId,
+                                     msg.RawMessage,
+                                     msg.MessageList.ToMessageBody(),
+                                     msg.Time,
+                                     msg.Font,
+                                     null);
         Sender        = new User(serviceId, connectionId, msg.UserId);
         IsSelfMessage = msg.UserId == msg.SelfId;
         IsSuperUser   = msg.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, msg.UserId);
@@ -85,8 +90,14 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
                                             long            sourceGroup = 0)
     {
         //生成指令上下文
-        WaitingInfo waitInfo = CommandUtils.GenerateWaitingCommandInfo(sourceUid, sourceGroup, commandExps, matchType,
-            SourceType, regexOptions, ConnId, ServiceId);
+        WaitingInfo waitInfo = CommandUtils.GenerateWaitingCommandInfo(sourceUid,
+                                                                       sourceGroup,
+                                                                       commandExps,
+                                                                       matchType,
+                                                                       SourceType,
+                                                                       regexOptions,
+                                                                       ConnId,
+                                                                       ServiceId);
         return WaitForNextMessage(waitInfo, timeout, timeoutTask);
     }
 

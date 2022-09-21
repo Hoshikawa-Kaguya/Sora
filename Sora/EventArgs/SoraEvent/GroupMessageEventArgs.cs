@@ -133,8 +133,13 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     RegexOptions regexOptions = RegexOptions.None)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
-            return ValueTask.FromResult(WaitForNextRegexMessage(Sender, commandExps,
-                matchType, regexOptions, null, null, SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextRegexMessage(Sender,
+                                                                commandExps,
+                                                                matchType,
+                                                                regexOptions,
+                                                                null,
+                                                                null,
+                                                                SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
@@ -156,8 +161,13 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     RegexOptions    regexOptions = RegexOptions.None)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
-            return ValueTask.FromResult(WaitForNextRegexMessage(Sender, commandExps,
-                matchType, regexOptions, timeout, timeoutTask, SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextRegexMessage(Sender,
+                                                                commandExps,
+                                                                matchType,
+                                                                regexOptions,
+                                                                timeout,
+                                                                timeoutTask,
+                                                                SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
@@ -197,8 +207,13 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     RegexOptions    regexOptions = RegexOptions.None)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
-            return ValueTask.FromResult(WaitForNextRegexMessage(Sender, new[] { commandExp }, matchType, regexOptions,
-                timeout, timeoutTask, SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextRegexMessage(Sender,
+                                                                new[] { commandExp },
+                                                                matchType,
+                                                                regexOptions,
+                                                                timeout,
+                                                                timeoutTask,
+                                                                SourceGroup) as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
@@ -216,9 +231,8 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
                                                                     Func<ValueTask>                  timeoutTask = null)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
-            return ValueTask.FromResult(
-                WaitForNextCustomMessage(Sender, matchFunc, timeout, timeoutTask,
-                    SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextCustomMessage(Sender, matchFunc, timeout, timeoutTask, SourceGroup)
+                                            as GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }
@@ -232,8 +246,8 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     public ValueTask<GroupMessageEventArgs> WaitForNextMessageAsync(Func<BaseMessageEventArgs, bool> matchFunc)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
-            return ValueTask.FromResult(
-                WaitForNextCustomMessage(Sender, matchFunc, null, null, SourceGroup) as GroupMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextCustomMessage(Sender, matchFunc, null, null, SourceGroup) as
+                                            GroupMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<GroupMessageEventArgs>(null);
     }

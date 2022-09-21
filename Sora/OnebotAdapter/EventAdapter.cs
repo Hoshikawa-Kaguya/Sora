@@ -307,8 +307,13 @@ public sealed class EventAdapter
                     break;
                 //执行回调
                 await OnClientConnect("Meta Event",
-                    new ConnectEventArgs(ServiceId, connection, "lifecycle", lifeCycle?.SelfId ?? -1, info.clientType,
-                        info.clientVer, lifeCycle?.Time ?? 0));
+                                      new ConnectEventArgs(ServiceId,
+                                                           connection,
+                                                           "lifecycle",
+                                                           lifeCycle?.SelfId ?? -1,
+                                                           info.clientType,
+                                                           info.clientVer,
+                                                           lifeCycle?.Time ?? 0));
                 break;
             }
             default:
@@ -340,7 +345,7 @@ public sealed class EventAdapter
                 if (ServiceRecord.IsBlockUser(ServiceId, privateMsg.UserId))
                     return;
                 Log.Debug("Sora",
-                    $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
+                          $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
                 var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
                 //标记消息已读
                 if (ServiceRecord.IsAutoMarkMessageRead(ServiceId))
@@ -365,7 +370,7 @@ public sealed class EventAdapter
                 if (ServiceRecord.IsBlockUser(ServiceId, groupMsg.UserId))
                     return;
                 Log.Debug("Sora",
-                    $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
+                          $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
                 var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
                 //标记消息已读
                 if (ServiceRecord.IsAutoMarkMessageRead(ServiceId))
@@ -410,7 +415,7 @@ public sealed class EventAdapter
                 if (OnSelfGroupMessage == null)
                     break;
                 await OnSelfGroupMessage("Message",
-                    new GroupMessageEventArgs(ServiceId, connection, "group_self", groupMsg));
+                                         new GroupMessageEventArgs(ServiceId, connection, "group_self", groupMsg));
                 break;
             }
             case "private":
@@ -423,7 +428,10 @@ public sealed class EventAdapter
                 if (OnSelfPrivateMessage == null)
                     break;
                 await OnSelfPrivateMessage("Message",
-                    new PrivateMessageEventArgs(ServiceId, connection, "private_self", privateMsg));
+                                           new PrivateMessageEventArgs(ServiceId,
+                                                                       connection,
+                                                                       "private_self",
+                                                                       privateMsg));
                 break;
             }
             default:
@@ -452,12 +460,15 @@ public sealed class EventAdapter
                 if (friendRequest == null)
                     break;
                 Log.Debug("Sora",
-                    $"Friend request form [{friendRequest.UserId}] with comment[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
+                          $"Friend request form [{friendRequest.UserId}] with comment[{friendRequest.Comment}] | flag[{friendRequest.Flag}]");
                 //执行回调
                 if (OnFriendRequest == null)
                     break;
                 await OnFriendRequest("Request",
-                    new FriendRequestEventArgs(ServiceId, connection, "request|friend", friendRequest));
+                                      new FriendRequestEventArgs(ServiceId,
+                                                                 connection,
+                                                                 "request|friend",
+                                                                 friendRequest));
                 break;
             }
             //群组请求事件
@@ -473,12 +484,15 @@ public sealed class EventAdapter
                 if (groupRequest == null)
                     break;
                 Log.Debug("Sora",
-                    $"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with comment[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
+                          $"Group request [{groupRequest.GroupRequestType}] form [{groupRequest.UserId}] with comment[{groupRequest.Comment}] | flag[{groupRequest.Flag}]");
                 //执行回调
                 if (OnGroupRequest == null)
                     break;
                 await OnGroupRequest("Request",
-                    new AddGroupRequestEventArgs(ServiceId, connection, "request|group", groupRequest));
+                                     new AddGroupRequestEventArgs(ServiceId,
+                                                                  connection,
+                                                                  "request|group",
+                                                                  groupRequest));
                 break;
             }
             default:
@@ -507,12 +521,12 @@ public sealed class EventAdapter
                 if (fileUpload == null)
                     break;
                 Log.Debug("Sora",
-                    $"Group notice[Upload file] file[{fileUpload.Upload.Name}] from group[{fileUpload.GroupId}({fileUpload.UserId})]");
+                          $"Group notice[Upload file] file[{fileUpload.Upload.Name}] from group[{fileUpload.GroupId}({fileUpload.UserId})]");
                 //执行回调
                 if (OnFileUpload == null)
                     break;
                 await OnFileUpload("Notice",
-                    new FileUploadEventArgs(ServiceId, connection, "group_upload", fileUpload));
+                                   new FileUploadEventArgs(ServiceId, connection, "group_upload", fileUpload));
                 break;
             }
             //群管理员变动
@@ -522,12 +536,15 @@ public sealed class EventAdapter
                 if (adminChange == null)
                     break;
                 Log.Debug("Sora",
-                    $"Group admin change[{adminChange.SubType}] from group[{adminChange.GroupId}] by[{adminChange.UserId}]");
+                          $"Group admin change[{adminChange.SubType}] from group[{adminChange.GroupId}] by[{adminChange.UserId}]");
                 //执行回调
                 if (OnGroupAdminChange == null)
                     break;
                 await OnGroupAdminChange("Notice",
-                    new GroupAdminChangeEventArgs(ServiceId, connection, "group_admin", adminChange));
+                                         new GroupAdminChangeEventArgs(ServiceId,
+                                                                       connection,
+                                                                       "group_admin",
+                                                                       adminChange));
                 break;
             }
             //群成员变动
@@ -538,12 +555,15 @@ public sealed class EventAdapter
                 if (groupMemberChange == null)
                     break;
                 Log.Debug("Sora",
-                    $"{groupMemberChange.NoticeType} type[{groupMemberChange.SubType}] member {groupMemberChange.GroupId}[{groupMemberChange.UserId}]");
+                          $"{groupMemberChange.NoticeType} type[{groupMemberChange.SubType}] member {groupMemberChange.GroupId}[{groupMemberChange.UserId}]");
                 //执行回调
                 if (OnGroupMemberChange == null)
                     break;
                 await OnGroupMemberChange("Notice",
-                    new GroupMemberChangeEventArgs(ServiceId, connection, "group_member_change", groupMemberChange));
+                                          new GroupMemberChangeEventArgs(ServiceId,
+                                                                         connection,
+                                                                         "group_member_change",
+                                                                         groupMemberChange));
                 break;
             }
             //群禁言
@@ -553,12 +573,12 @@ public sealed class EventAdapter
                 if (groupMute == null)
                     break;
                 Log.Debug("Sora",
-                    $"Group[{groupMute.GroupId}] {groupMute.ActionType} member[{groupMute.UserId}]{groupMute.Duration}");
+                          $"Group[{groupMute.GroupId}] {groupMute.ActionType} member[{groupMute.UserId}]{groupMute.Duration}");
                 //执行回调
                 if (OnGroupMemberMute == null)
                     break;
                 await OnGroupMemberMute("Notice",
-                    new GroupMuteEventArgs(ServiceId, connection, "group_ban", groupMute));
+                                        new GroupMuteEventArgs(ServiceId, connection, "group_ban", groupMute));
                 break;
             }
             //好友添加
@@ -581,12 +601,12 @@ public sealed class EventAdapter
                 if (groupRecall == null)
                     break;
                 Log.Debug("Sora",
-                    $"Group[{groupRecall.GroupId}] recall by [{groupRecall.OperatorId}],msg id={groupRecall.MessageId} sender={groupRecall.UserId}");
+                          $"Group[{groupRecall.GroupId}] recall by [{groupRecall.OperatorId}],msg id={groupRecall.MessageId} sender={groupRecall.UserId}");
                 //执行回调
                 if (OnGroupRecall == null)
                     break;
                 await OnGroupRecall("Notice",
-                    new GroupRecallEventArgs(ServiceId, connection, "group_recall", groupRecall));
+                                    new GroupRecallEventArgs(ServiceId, connection, "group_recall", groupRecall));
                 break;
             }
             //好友消息撤回
@@ -600,7 +620,7 @@ public sealed class EventAdapter
                 if (OnFriendRecall == null)
                     break;
                 await OnFriendRecall("Notice",
-                    new FriendRecallEventArgs(ServiceId, connection, "friend_recall", friendRecall));
+                                     new FriendRecallEventArgs(ServiceId, connection, "friend_recall", friendRecall));
                 break;
             }
             //群名片变更
@@ -611,11 +631,14 @@ public sealed class EventAdapter
                 if (groupCardUpdate == null)
                     break;
                 Log.Debug("Sora",
-                    $"Group[{groupCardUpdate.GroupId}] member[{groupCardUpdate.UserId}] card update [{groupCardUpdate.OldCard} => {groupCardUpdate.NewCard}]");
+                          $"Group[{groupCardUpdate.GroupId}] member[{groupCardUpdate.UserId}] card update [{groupCardUpdate.OldCard} => {groupCardUpdate.NewCard}]");
                 if (OnGroupCardUpdate == null)
                     break;
                 await OnGroupCardUpdate("Notice",
-                    new GroupCardUpdateEventArgs(ServiceId, connection, "group_card", groupCardUpdate));
+                                        new GroupCardUpdateEventArgs(ServiceId,
+                                                                     connection,
+                                                                     "group_card",
+                                                                     groupCardUpdate));
                 break;
             }
             case "offline_file":
@@ -627,7 +650,7 @@ public sealed class EventAdapter
                 if (OnOfflineFileEvent == null)
                     break;
                 await OnOfflineFileEvent("Notice",
-                    new OfflineFileEventArgs(ServiceId, connection, "offline_file", offlineFile));
+                                         new OfflineFileEventArgs(ServiceId, connection, "offline_file", offlineFile));
                 break;
             }
             case "client_status":
@@ -636,11 +659,14 @@ public sealed class EventAdapter
                 if (clientStatus == null)
                     break;
                 Log.Debug("Sora",
-                    $"Get client status change from[{clientStatus.UserId}] client id = {clientStatus.ClientInfo.AppId}");
+                          $"Get client status change from[{clientStatus.UserId}] client id = {clientStatus.ClientInfo.AppId}");
                 if (OnClientStatusChangeEvent == null)
                     break;
                 await OnClientStatusChangeEvent("Notice",
-                    new ClientStatusChangeEventArgs(ServiceId, connection, "client_status", clientStatus));
+                                                new ClientStatusChangeEventArgs(ServiceId,
+                                                                                connection,
+                                                                                "client_status",
+                                                                                clientStatus));
                 break;
             }
             case "essence":
@@ -649,11 +675,11 @@ public sealed class EventAdapter
                 if (essenceChange == null)
                     break;
                 Log.Debug("Sora",
-                    $"Get essence change msg_id = {essenceChange.MessageId} type = {essenceChange.EssenceChangeType}");
+                          $"Get essence change msg_id = {essenceChange.MessageId} type = {essenceChange.EssenceChangeType}");
                 if (OnEssenceChange == null)
                     break;
                 await OnEssenceChange("Notice",
-                    new EssenceChangeEventArgs(ServiceId, connection, "essence", essenceChange));
+                                      new EssenceChangeEventArgs(ServiceId, connection, "essence", essenceChange));
                 break;
             }
             //通知类事件
@@ -666,7 +692,7 @@ public sealed class EventAdapter
                         if (pokeEvent == null)
                             break;
                         Log.Debug("Sora",
-                            $"Group[{pokeEvent.GroupId}] poke from [{pokeEvent.UserId}] to [{pokeEvent.TargetId}]");
+                                  $"Group[{pokeEvent.GroupId}] poke from [{pokeEvent.UserId}] to [{pokeEvent.TargetId}]");
                         if (OnGroupPoke == null)
                             break;
                         await OnGroupPoke("Notify", new GroupPokeEventArgs(ServiceId, connection, "poke", pokeEvent));
@@ -681,7 +707,7 @@ public sealed class EventAdapter
                         if (OnLuckyKingEvent == null)
                             break;
                         await OnLuckyKingEvent("Notify",
-                            new LuckyKingEventArgs(ServiceId, connection, "lucky_king", luckyEvent));
+                                               new LuckyKingEventArgs(ServiceId, connection, "lucky_king", luckyEvent));
                         break;
                     }
                     case "honor":
@@ -701,11 +727,11 @@ public sealed class EventAdapter
                         if (newTitleEvent == null)
                             break;
                         Log.Debug("Sora",
-                            $"Group[{newTitleEvent.GroupId} member title change to [{newTitleEvent.NewTitle}]]");
+                                  $"Group[{newTitleEvent.GroupId} member title change to [{newTitleEvent.NewTitle}]]");
                         if (OnTitleUpdate == null)
                             break;
                         await OnTitleUpdate("Notify",
-                            new TitleUpdateEventArgs(ServiceId, connection, "title", newTitleEvent));
+                                            new TitleUpdateEventArgs(ServiceId, connection, "title", newTitleEvent));
                         break;
                     }
                     default:

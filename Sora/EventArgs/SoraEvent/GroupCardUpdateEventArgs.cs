@@ -47,8 +47,12 @@ public sealed class GroupCardUpdateEventArgs : BaseSoraEventArgs
                                       Guid                           connectionId,
                                       string                         eventName,
                                       OnebotGroupCardUpdateEventArgs groupCardUpdateArgs)
-        : base(serviceId, connectionId, eventName, groupCardUpdateArgs.SelfId, groupCardUpdateArgs.Time,
-            SourceFlag.Group)
+        : base(serviceId,
+               connectionId,
+               eventName,
+               groupCardUpdateArgs.SelfId,
+               groupCardUpdateArgs.Time,
+               SourceFlag.Group)
     {
         User        = new User(serviceId, connectionId, groupCardUpdateArgs.UserId);
         SourceGroup = new Group(connectionId, groupCardUpdateArgs.GroupId);

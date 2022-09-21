@@ -105,10 +105,9 @@ public sealed class MessageContext : BaseModel
     public IEnumerable<long> GetAllAtList()
     {
         List<long> uidList = MessageBody.Where(s => s.MessageType == SegmentType.At)
-                                        .Select(s =>
-                                            long.TryParse((s.Data as AtSegment)?.Target ?? "0", out long uid)
-                                                ? uid
-                                                : -1).ToList();
+                                        .Select(s => long.TryParse((s.Data as AtSegment)?.Target ?? "0", out long uid)
+                                                    ? uid
+                                                    : -1).ToList();
         //去除无法转换的值，如at全体
         uidList.RemoveAll(uid => uid == -1);
         return uidList;

@@ -98,8 +98,10 @@ public sealed class SoraWebsocketClient : ISoraService
         //初始化连接管理器
         ConnManager = new ConnectionManager(Config, ServiceId);
         //实例化事件接口
-        Event = new EventAdapter(ServiceId, Config.ThrowCommandException, Config.SendCommandErrMsg,
-            Config.CommandExceptionHandle);
+        Event = new EventAdapter(ServiceId,
+                                 Config.ThrowCommandException,
+                                 Config.SendCommandErrMsg,
+                                 Config.CommandExceptionHandle);
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
@@ -166,8 +168,12 @@ public sealed class SoraWebsocketClient : ISoraService
             if (info.Type == ReconnectionType.Initial || !_isRunning)
                 return;
             Log.Info("Sora", $"服务器已自动重连{info.Type}");
-            ConnManager.OpenConnection("Universal", "0", new ClientSocket(Client), ServiceId, ServiceId,
-                Config.ApiTimeOut);
+            ConnManager.OpenConnection("Universal",
+                                       "0",
+                                       new ClientSocket(Client),
+                                       ServiceId,
+                                       ServiceId,
+                                       Config.ApiTimeOut);
         }));
         //开始客户端
         await Client.Start();
