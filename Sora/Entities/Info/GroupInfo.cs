@@ -2,7 +2,6 @@ using System;
 using Newtonsoft.Json;
 using Sora.Util;
 
-
 namespace Sora.Entities.Info;
 
 /// <summary>
@@ -10,7 +9,7 @@ namespace Sora.Entities.Info;
 /// </summary>
 public readonly struct GroupInfo
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 群名称
@@ -56,7 +55,7 @@ public readonly struct GroupInfo
     private long? GroupCreateTimeStamp
     {
         get => (GroupCreateTime ?? DateTime.MinValue).ToTimeStamp();
-        init => (value          ?? default).ToDateTime();
+        init => (value ?? default).ToDateTime();
     }
 
     /// <summary>
@@ -65,5 +64,5 @@ public readonly struct GroupInfo
     [JsonProperty(PropertyName = "group_level", NullValueHandling = NullValueHandling.Ignore)]
     public int? GroupLevel { get; internal init; }
 
-    #endregion
+#endregion
 }

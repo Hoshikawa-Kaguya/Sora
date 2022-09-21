@@ -18,7 +18,7 @@ namespace Sora.Util;
 /// </summary>
 public static class CQCodeUtil
 {
-    #region 序列化
+#region 序列化
 
     /// <summary>
     /// 序列化某一个消息
@@ -57,7 +57,7 @@ public static class CQCodeUtil
     public static string SerializeSegment(this SoraSegment msg)
     {
         if (msg.MessageType == SegmentType.Text)
-            return ((TextSegment) msg.Data).Content.CQCodeEncode();
+            return ((TextSegment)msg.Data).Content.CQCodeEncode();
 
         var ret = new StringBuilder();
         ret.Append("[CQ:");
@@ -86,8 +86,8 @@ public static class CQCodeUtil
             if (string.IsNullOrWhiteSpace(key) || propData == null)
                 continue;
             string value = propData.GetType().IsEnum
-                               ? Helper.GetFieldDesc(propData)
-                               : (propData.ToString() ?? "").CQCodeEncode(true);
+                ? Helper.GetFieldDesc(propData)
+                : (propData.ToString() ?? "").CQCodeEncode(true);
             ret.Append(',').Append(key).Append('=').Append(value);
         }
 
@@ -95,15 +95,13 @@ public static class CQCodeUtil
         return ret.ToString();
     }
 
-    #endregion
+#endregion
 
-    #region 反序列化
+#region 反序列化
 
-    private static readonly Regex _cqRegex =
-        new(@"\[CQ:([A-Za-z]*)(?:(,[^\[\]]+))?\]", RegexOptions.Compiled);
+    private static readonly Regex _cqRegex = new(@"\[CQ:([A-Za-z]*)(?:(,[^\[\]]+))?\]", RegexOptions.Compiled);
 
-    private static readonly Regex _cqKeyValueRegex =
-        new(@",([A-Za-z]+)=([^,\[\]]+)", RegexOptions.Compiled);
+    private static readonly Regex _cqKeyValueRegex = new(@",([A-Za-z]+)=([^,\[\]]+)", RegexOptions.Compiled);
 
     /// <summary>
     /// 将字符串反序列化为SoraSegment集合
@@ -153,34 +151,34 @@ public static class CQCodeUtil
 
         sb.Append('}');
         return segmentType switch
-        {
-            SegmentType.Text => new SoraSegment(SegmentType.Text,
-                JsonConvert.DeserializeObject<TextSegment>(sb.ToString())),
-            SegmentType.Face => new SoraSegment(SegmentType.Face,
-                JsonConvert.DeserializeObject<FaceSegment>(sb.ToString())),
-            SegmentType.Image => new SoraSegment(SegmentType.Image,
-                JsonConvert.DeserializeObject<ImageSegment>(sb.ToString())),
-            SegmentType.Record => new SoraSegment(SegmentType.Record,
-                JsonConvert.DeserializeObject<RecordSegment>(sb.ToString())),
-            SegmentType.At => new SoraSegment(SegmentType.At,
-                JsonConvert.DeserializeObject<AtSegment>(sb.ToString())),
-            SegmentType.Share => new SoraSegment(SegmentType.Share,
-                JsonConvert.DeserializeObject<ShareSegment>(sb.ToString())),
-            SegmentType.Reply => new SoraSegment(SegmentType.Reply,
-                JsonConvert.DeserializeObject<ReplySegment>(sb.ToString())),
-            SegmentType.Forward => new SoraSegment(SegmentType.Forward,
-                JsonConvert.DeserializeObject<ForwardSegment>(sb.ToString())),
-            SegmentType.Xml => new SoraSegment(SegmentType.Xml,
-                JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
-            SegmentType.Json => new SoraSegment(SegmentType.Json,
-                JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
-            _ => new SoraSegment(SegmentType.Unknown, null)
-        };
+               {
+                   SegmentType.Text => new SoraSegment(SegmentType.Text,
+                       JsonConvert.DeserializeObject<TextSegment>(sb.ToString())),
+                   SegmentType.Face => new SoraSegment(SegmentType.Face,
+                       JsonConvert.DeserializeObject<FaceSegment>(sb.ToString())),
+                   SegmentType.Image => new SoraSegment(SegmentType.Image,
+                       JsonConvert.DeserializeObject<ImageSegment>(sb.ToString())),
+                   SegmentType.Record => new SoraSegment(SegmentType.Record,
+                       JsonConvert.DeserializeObject<RecordSegment>(sb.ToString())),
+                   SegmentType.At => new SoraSegment(SegmentType.At,
+                       JsonConvert.DeserializeObject<AtSegment>(sb.ToString())),
+                   SegmentType.Share => new SoraSegment(SegmentType.Share,
+                       JsonConvert.DeserializeObject<ShareSegment>(sb.ToString())),
+                   SegmentType.Reply => new SoraSegment(SegmentType.Reply,
+                       JsonConvert.DeserializeObject<ReplySegment>(sb.ToString())),
+                   SegmentType.Forward => new SoraSegment(SegmentType.Forward,
+                       JsonConvert.DeserializeObject<ForwardSegment>(sb.ToString())),
+                   SegmentType.Xml => new SoraSegment(SegmentType.Xml,
+                       JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
+                   SegmentType.Json => new SoraSegment(SegmentType.Json,
+                       JsonConvert.DeserializeObject<CodeSegment>(sb.ToString())),
+                   _ => new SoraSegment(SegmentType.Unknown, null)
+               };
     }
 
-    #endregion
+#endregion
 
-    #region 转义
+#region 转义
 
     /// <summary>
     ///  酷Q码转义
@@ -192,16 +190,14 @@ public static class CQCodeUtil
     {
         var ret = new StringBuilder(255);
         foreach (char t in msg)
-            ret.Append(
-                t switch
-                {
-                    '&' => "&amp;",
-                    '[' => "&#91;",
-                    ']' => "&#93;",
-                    ',' => comma ? "&#44;" : ",",
-                    _   => t
-                }
-            );
+            ret.Append(t switch
+                       {
+                           '&' => "&amp;",
+                           '[' => "&#91;",
+                           ']' => "&#93;",
+                           ',' => comma ? "&#44;" : ",",
+                           _   => t
+                       });
 
         return ret.ToString();
     }
@@ -210,10 +206,7 @@ public static class CQCodeUtil
     /// <summary>
     /// 需要被反转义的内容
     /// </summary>
-    private static readonly string[] _decodeTarget =
-    {
-        "&amp;", "&#91;", "&#93;", "&#44;"
-    };
+    private static readonly string[] _decodeTarget = { "&amp;", "&#91;", "&#93;", "&#44;" };
 
     /// <summary>
     ///  酷Q码反转义
@@ -235,13 +228,13 @@ public static class CQCodeUtil
                 {
                     string t = msg[new Range(i, i + 5)];
                     char unEscaped = t switch
-                    {
-                        "&amp;" => '&',
-                        "&#91;" => '[',
-                        "&#93;" => ']',
-                        "&#44;" => ',',
-                        _       => throw new ArgumentOutOfRangeException() // unreachable
-                    };
+                                     {
+                                         "&amp;" => '&',
+                                         "&#91;" => '[',
+                                         "&#93;" => ']',
+                                         "&#44;" => ',',
+                                         _       => throw new ArgumentOutOfRangeException() // unreachable
+                                     };
 
                     ret.Append(msg[new Range(last, i)]);
                     ret.Append(unEscaped);
@@ -265,5 +258,5 @@ public static class CQCodeUtil
         return ret.ToString();
     }
 
-    #endregion
+#endregion
 }

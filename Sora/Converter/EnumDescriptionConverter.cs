@@ -37,9 +37,7 @@ internal class EnumDescriptionConverter : JsonConverter
     /// 反序列化时执行的转换
     /// 通过Description获取枚举值
     /// </summary>
-    public override object ReadJson(
-        JsonReader     reader, Type objectType, object existingValue,
-        JsonSerializer serializer)
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
         FieldInfo[] fields    = objectType.GetFields();
         string      readValue = reader.Value?.ToString() ?? string.Empty;

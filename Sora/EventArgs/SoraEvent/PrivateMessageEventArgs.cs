@@ -16,7 +16,7 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 发送者信息
@@ -28,9 +28,9 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// </summary>
     public bool IsTemporaryMessage { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
@@ -39,9 +39,10 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="privateMsgArgs">私聊消息事件参数</param>
-    internal PrivateMessageEventArgs(
-        Guid                      serviceId, Guid connectionId, string eventName,
-        OnebotPrivateMsgEventArgs privateMsgArgs)
+    internal PrivateMessageEventArgs(Guid                      serviceId,
+                                     Guid                      connectionId,
+                                     string                    eventName,
+                                     OnebotPrivateMsgEventArgs privateMsgArgs)
         : base(serviceId, connectionId, eventName, privateMsgArgs, SourceFlag.Private)
     {
         IsTemporaryMessage = privateMsgArgs.SenderInfo.GroupId != null;
@@ -50,9 +51,9 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
         SenderInfo = privateSenderInfo;
     }
 
-    #endregion
+#endregion
 
-    #region 快捷方法
+#region 快捷方法
 
     /// <summary>
     /// 快速回复
@@ -80,9 +81,9 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
         return await SoraApi.SendPrivateMessage(Sender.Id, Message.MessageBody);
     }
 
-    #endregion
+#endregion
 
-    #region 连续对话
+#region 连续对话
 
     /// <summary>
     /// <para>等待下一条消息触发</para>
@@ -92,13 +93,13 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// <param name="matchType">匹配类型</param>
     /// <param name="regexOptions">正则匹配选项</param>
     /// <returns>触发后的事件参数</returns>
-    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(
-        string[]     commandExps, MatchType matchType,
-        RegexOptions regexOptions = RegexOptions.None)
+    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string[]     commandExps,
+                                                                      MatchType    matchType,
+                                                                      RegexOptions regexOptions = RegexOptions.None)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
             return ValueTask.FromResult(WaitForNextRegexMessage(Sender, commandExps, matchType, regexOptions,
-                                            null, null) as PrivateMessageEventArgs);
+                null, null) as PrivateMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
@@ -113,16 +114,15 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// <param name="timeout">超时</param>
     /// <param name="timeoutTask">超时后执行的动作</param>
     /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
-    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(
-        string[]        commandExps, MatchType matchType,
-        TimeSpan        timeout,
-        Func<ValueTask> timeoutTask  = null,
-        RegexOptions    regexOptions = RegexOptions.None)
+    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string[]        commandExps,
+                                                                      MatchType       matchType,
+                                                                      TimeSpan        timeout,
+                                                                      Func<ValueTask> timeoutTask  = null,
+                                                                      RegexOptions    regexOptions = RegexOptions.None)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
             return ValueTask.FromResult(WaitForNextRegexMessage(Sender, commandExps,
-                                            matchType, regexOptions,
-                                            timeout, timeoutTask) as PrivateMessageEventArgs);
+                matchType, regexOptions, timeout, timeoutTask) as PrivateMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
@@ -135,12 +135,12 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// <param name="matchType">匹配类型</param>
     /// <param name="regexOptions">正则匹配选项</param>
     /// <returns>触发后的事件参数</returns>
-    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(
-        string       commandExp, MatchType matchType,
-        RegexOptions regexOptions = RegexOptions.None)
+    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string       commandExp,
+                                                                      MatchType    matchType,
+                                                                      RegexOptions regexOptions = RegexOptions.None)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
-            return WaitForNextMessageAsync(new[] {commandExp}, matchType, regexOptions);
+            return WaitForNextMessageAsync(new[] { commandExp }, matchType, regexOptions);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
@@ -155,17 +155,15 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// <param name="timeout">超时</param>
     /// <param name="timeoutTask">超时后执行的动作</param>
     /// <returns>触发后的事件参数，超时后为<see langword="null"/></returns>
-    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(
-        string          commandExp, MatchType matchType,
-        TimeSpan        timeout,
-        Func<ValueTask> timeoutTask  = null,
-        RegexOptions    regexOptions = RegexOptions.None)
+    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(string          commandExp,
+                                                                      MatchType       matchType,
+                                                                      TimeSpan        timeout,
+                                                                      Func<ValueTask> timeoutTask  = null,
+                                                                      RegexOptions    regexOptions = RegexOptions.None)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
-            return ValueTask.FromResult(WaitForNextRegexMessage(Sender, new[] {commandExp},
-                                            matchType,
-                                            regexOptions,
-                                            timeout, timeoutTask) as PrivateMessageEventArgs);
+            return ValueTask.FromResult(WaitForNextRegexMessage(Sender, new[] { commandExp },
+                matchType, regexOptions, timeout, timeoutTask) as PrivateMessageEventArgs);
         CommandDisableTip();
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
@@ -178,10 +176,9 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
     /// <param name="timeout">超时</param>
     /// <param name="timeoutTask">超时后执行的动作</param>
     /// <returns>触发后的事件参数</returns>
-    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(
-        Func<BaseMessageEventArgs, bool> matchFunc,
-        TimeSpan                         timeout,
-        Func<ValueTask>                  timeoutTask = null)
+    public ValueTask<PrivateMessageEventArgs> WaitForNextMessageAsync(Func<BaseMessageEventArgs, bool> matchFunc,
+                                                                      TimeSpan timeout,
+                                                                      Func<ValueTask> timeoutTask = null)
     {
         if (ServiceRecord.IsEnableSoraCommandManager(ServiceId))
             return ValueTask.FromResult(
@@ -205,14 +202,14 @@ public sealed class PrivateMessageEventArgs : BaseMessageEventArgs
         return ValueTask.FromResult<PrivateMessageEventArgs>(null);
     }
 
-    #endregion
+#endregion
 
-    #region 私有方法
+#region 私有方法
 
     private void CommandDisableTip()
     {
         Log.Error("非法操作", "指令服务已被禁用，无法执行连续对话操作");
     }
 
-    #endregion
+#endregion
 }

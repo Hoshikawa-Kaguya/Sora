@@ -67,8 +67,7 @@ public sealed record CustomNode
         Name      = name;
         UserId    = userId.ToString();
         Messages = customMessage.Where(msg => msg.MessageType != SegmentType.Ignore)
-                                .Select(msg => msg.ToOnebotSegment())
-                                .ToList();
+                                .Select(msg => msg.ToOnebotSegment()).ToList();
         Time = (time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()).ToString();
     }
 

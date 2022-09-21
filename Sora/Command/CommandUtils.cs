@@ -15,7 +15,7 @@ namespace Sora.Command;
 
 internal static class CommandUtils
 {
-    #region 检查方法
+#region 检查方法
 
     /// <summary>
     /// 检查方法合法性
@@ -26,9 +26,7 @@ internal static class CommandUtils
     internal static bool CheckMethodLegality(this MethodInfo method)
     {
         //获取指令属性
-        SoraCommand commandAttr =
-            method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand ??
-            null;
+        SoraCommand commandAttr = method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand ?? null;
 
         if (commandAttr is null)
             return false;
@@ -47,20 +45,18 @@ internal static class CommandUtils
             return false;
         }
 
-        bool preCheck =
-            method.IsDefined(typeof(SoraCommand), false) &&
-            method.GetParameters().Length == 1;
+        bool preCheck = method.IsDefined(typeof(SoraCommand), false) && method.GetParameters().Length == 1;
 
         return commandAttr.SourceType switch
-        {
-            SourceFlag.Group => preCheck &&
-                                method.GetParameters()
-                                      .Any(para => ParameterCheck<GroupMessageEventArgs>(para, method.Name)),
-            SourceFlag.Private => preCheck &&
-                                  method.GetParameters()
-                                        .Any(para => ParameterCheck<PrivateMessageEventArgs>(para, method.Name)),
-            _ => false
-        };
+               {
+                   SourceFlag.Group => preCheck
+                                       && method.GetParameters().Any(para =>
+                                           ParameterCheck<GroupMessageEventArgs>(para, method.Name)),
+                   SourceFlag.Private => preCheck
+                                         && method.GetParameters().Any(para =>
+                                             ParameterCheck<PrivateMessageEventArgs>(para, method.Name)),
+                   _ => false
+               };
     }
 
     public static bool IsEmpty(this long[] arr)
@@ -83,9 +79,9 @@ internal static class CommandUtils
         return check;
     }
 
-    #endregion
+#endregion
 
-    #region 连续对话指令生成
+#region 连续对话指令生成
 
     /// <summary>
     /// 生成连续对话上下文
@@ -98,22 +94,16 @@ internal static class CommandUtils
     /// <param name="serviceId">服务标识</param>
     /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
     [NeedReview("ALL")]
-    internal static WaitingInfo GenerateWaitingCommandInfo(
-        long                             sourceUid,
-        long                             sourceGroup,
-        Func<BaseMessageEventArgs, bool> matchFunc,
-        SourceFlag                       sourceFlag,
-        Guid                             connectionId,
-        Guid                             serviceId)
+    internal static WaitingInfo GenerateWaitingCommandInfo(long                             sourceUid,
+                                                           long                             sourceGroup,
+                                                           Func<BaseMessageEventArgs, bool> matchFunc,
+                                                           SourceFlag                       sourceFlag,
+                                                           Guid                             connectionId,
+                                                           Guid                             serviceId)
     {
         if (matchFunc is null)
             throw new ArgumentNullException(nameof(matchFunc));
-        return new WaitingInfo(
-            new AutoResetEvent(false),
-            matchFunc,
-            connectionId,
-            serviceId,
-            (sourceUid, sourceGroup),
+        return new WaitingInfo(new AutoResetEvent(false), matchFunc, connectionId, serviceId, (sourceUid, sourceGroup),
             sourceFlag);
     }
 
@@ -130,49 +120,36 @@ internal static class CommandUtils
     /// <param name="serviceId">服务标识</param>
     /// <exception cref="NullReferenceException">表达式为空时抛出异常</exception>
     [NeedReview("ALL")]
-    internal static WaitingInfo GenerateWaitingCommandInfo(
-        long         sourceUid,
-        long         sourceGroup,
-        string[]     cmdExps,
-        MatchType    matchType,
-        SourceFlag   sourceFlag,
-        RegexOptions regexOptions,
-        Guid         connectionId,
-        Guid         serviceId)
+    internal static WaitingInfo GenerateWaitingCommandInfo(long         sourceUid,
+                                                           long         sourceGroup,
+                                                           string[]     cmdExps,
+                                                           MatchType    matchType,
+                                                           SourceFlag   sourceFlag,
+                                                           RegexOptions regexOptions,
+                                                           Guid         connectionId,
+                                                           Guid         serviceId)
     {
         if (cmdExps == null || cmdExps.Length == 0)
             throw new NullReferenceException("cmdExps is empty");
         string[] matchExp = matchType switch
-        {
-            MatchType.Full => cmdExps
-                             .Select(command => $"^{command}$")
-                             .ToArray(),
-            MatchType.Regex => cmdExps,
-            MatchType.KeyWord => cmdExps
-                                .Select(command => $"({command})+")
-                                .ToArray(),
-            _ => throw new NotSupportedException("unknown matchtype")
-        };
+                            {
+                                MatchType.Full    => cmdExps.Select(command => $"^{command}$").ToArray(),
+                                MatchType.Regex   => cmdExps,
+                                MatchType.KeyWord => cmdExps.Select(command => $"({command})+").ToArray(),
+                                _                 => throw new NotSupportedException("unknown matchtype")
+                            };
 
-        return new WaitingInfo(new AutoResetEvent(false),
-            matchExp,
-            serviceId: serviceId,
-            connectionId: connectionId,
-            source: (sourceUid, sourceGroup),
-            sourceFlag: sourceFlag,
-            regexOptions: regexOptions);
+        return new WaitingInfo(new AutoResetEvent(false), matchExp, serviceId: serviceId, connectionId: connectionId,
+            source: (sourceUid, sourceGroup), sourceFlag: sourceFlag, regexOptions: regexOptions);
     }
 
-    #endregion
+#endregion
 
     /// <summary>
     /// 处理指令正则表达式
     /// </summary>
     [NeedReview("ALL")]
-    internal static string[] ParseCommandExps(
-        string[]  cmdExps,
-        string    prefix,
-        MatchType matchType)
+    internal static string[] ParseCommandExps(string[] cmdExps, string prefix, MatchType matchType)
     {
         switch (matchType)
         {

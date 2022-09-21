@@ -22,7 +22,7 @@ namespace Sora.OnebotAdapter;
 
 internal static class ApiAdapter
 {
-    #region API请求
+#region API请求
 
     /// <summary>
     /// 发送私聊消息
@@ -36,7 +36,11 @@ internal static class ApiAdapter
     /// message id
     /// </returns>
     internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
-        Guid connection, long target, MessageBody messages, long? groupId, TimeSpan? timeout)
+        Guid        connection,
+        long        target,
+        MessageBody messages,
+        long?       groupId,
+        TimeSpan?   timeout)
     {
         Log.Debug("Sora", "Sending send_msg(Private) request");
         if (messages == null || messages.Count == 0)
@@ -51,17 +55,14 @@ internal static class ApiAdapter
                 UserId      = target,
                 //转换消息段列表
                 Message = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
-                                  .Select(msg => msg.ToOnebotSegment())
-                                  .ToList(),
+                                  .Select(msg => msg.ToOnebotSegment()).ToList(),
                 GroupId = groupId
             }
         }, connection, timeout);
         Log.Debug("Sora", $"Get send_msg(Private) response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, -1);
-        int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
-                          ? messageCode
-                          : -1;
+        int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode) ? messageCode : -1;
         Log.Debug("Sora", $"msg send -> private[{target}]");
         return (apiStatus, msgCode);
     }
@@ -77,14 +78,16 @@ internal static class ApiAdapter
     /// ApiResponseCollection
     /// </returns>
     internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupMessage(
-        Guid connection, long target, MessageBody messages, TimeSpan? timeout)
+        Guid        connection,
+        long        target,
+        MessageBody messages,
+        TimeSpan?   timeout)
     {
         Log.Debug("Sora", "Sending send_msg(Group) request");
         if (messages == null || messages.Count == 0)
             throw new NullReferenceException(nameof(messages));
         List<OnebotSegment> msglist = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
-                                              .Select(msg => msg.ToOnebotSegment())
-                                              .ToList();
+                                              .Select(msg => msg.ToOnebotSegment()).ToList();
         //发送信息
         (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
         {
@@ -100,9 +103,7 @@ internal static class ApiAdapter
         Log.Debug("Sora", $"Get send_msg(Group) response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, -1);
-        int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode)
-                          ? messageCode
-                          : -1;
+        int msgCode = int.TryParse(ret?["data"]?["message_id"]?.ToString(), out int messageCode) ? messageCode : -1;
         Log.Debug("Sora", $"msg send -> group[{target}]");
         return (apiStatus, msgCode);
     }
@@ -113,17 +114,16 @@ internal static class ApiAdapter
     /// <param name="connection">服务器连接标识</param>
     /// <param name="groupId">群号</param>
     internal static async ValueTask<(ApiStatus apiStatus, List<GroupNoticeInfo> noticeInfos)> GetGroupNotice(
-        Guid connection, long groupId)
+        Guid connection,
+        long groupId)
     {
         Log.Debug("Sora", "Sending _get_group_notice request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupNotice,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupNotice,
+                ApiParams      = new { group_id = groupId }
+            }, connection);
         Log.Debug("Sora", $"Get _get_group_notice response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, null);
@@ -140,19 +140,14 @@ internal static class ApiAdapter
     internal static async ValueTask<(ApiStatus apiStatus, long userId, string nick)> GetLoginInfo(Guid connection)
     {
         Log.Debug("Sora", "Sending get_login_info request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetLoginInfo
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(new ApiRequest { ApiRequestType = ApiRequestType.GetLoginInfo },
+                connection);
         Log.Debug("Sora", $"Get get_login_info response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, -1, null);
-        return
-            (
-                apiStatus,
-                userId: long.TryParse(ret?["data"]?["user_id"]?.ToString(), out long userId) ? userId : -1,
-                nick: ret?["data"]?["nickname"]?.ToString() ?? string.Empty
-            );
+        return (apiStatus, userId: long.TryParse(ret?["data"]?["user_id"]?.ToString(), out long userId) ? userId : -1,
+            nick: ret?["data"]?["nickname"]?.ToString() ?? string.Empty);
     }
 
     /// <summary>
@@ -164,10 +159,9 @@ internal static class ApiAdapter
         Guid connection)
     {
         Log.Debug("Sora", "Sending get_version_info request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetVersion
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(new ApiRequest { ApiRequestType = ApiRequestType.GetVersion },
+                connection);
         Log.Debug("Sora", $"Get get_version_info response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, "unknown", null);
@@ -184,13 +178,13 @@ internal static class ApiAdapter
     /// <returns>好友信息列表</returns>
     [Reviewed("nidbCN", "2021-03-24 20:40")]
     internal static async ValueTask<(ApiStatus apiStatus, List<FriendInfo> friendList)> GetFriendList(
-        Guid serviceId, Guid connection)
+        Guid serviceId,
+        Guid connection)
     {
         Log.Debug("Sora", "Sending get_friend_list request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetFriendList
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(new ApiRequest { ApiRequestType = ApiRequestType.GetFriendList },
+                connection);
         Log.Debug("Sora", $"Get get_friend_list response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, null);
@@ -198,12 +192,9 @@ internal static class ApiAdapter
         List<FriendInfo> friendInfos = ret["data"]?.ToObject<List<FriendInfo>>() ?? new List<FriendInfo>();
         //检查机器人管理员权限
         friendInfos.ForEach(t =>
-            {
-                t.IsSuperUser =
-                    t.UserId is not 0 or -1
-                 && ServiceRecord.IsSuperUser(serviceId, t.UserId);
-            }
-        );
+        {
+            t.IsSuperUser = t.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, t.UserId);
+        });
         return (apiStatus, friendInfos);
     }
 
@@ -215,17 +206,16 @@ internal static class ApiAdapter
     /// <returns>群组信息列表</returns>
     [Reviewed("nidbCN", "2021-03-24 20:44")]
     internal static async ValueTask<(ApiStatus apiStatus, List<GroupInfo> groupList)> GetGroupList(
-        Guid connection, bool useCache)
+        Guid connection,
+        bool useCache)
     {
         Log.Debug("Sora", "Sending get_group_list request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupList,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                no_cache = !useCache
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupList,
+                ApiParams      = new { no_cache = !useCache }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_list response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, null);
@@ -243,18 +233,22 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="useCache">使用缓存</param>
     [Reviewed("nidbCN", "2021-03-24 20:49")]
-    internal static async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)>
-        GetGroupMemberList(Guid serviceId, Guid connection, long groupId, bool useCache)
+    internal static async ValueTask<(ApiStatus apiStatus, List<GroupMemberInfo> groupMemberList)> GetGroupMemberList(
+        Guid serviceId,
+        Guid connection,
+        long groupId,
+        bool useCache)
     {
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupMemberList,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                no_cache = !useCache
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupMemberList,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    no_cache = !useCache
+                }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_member_list response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, null);
@@ -263,12 +257,9 @@ internal static class ApiAdapter
             ret["data"]?.ToObject<List<GroupMemberInfo>>() ?? new List<GroupMemberInfo>();
         //检查机器人管理员权限
         memberList.ForEach(t =>
-            {
-                t.IsSuperUser =
-                    t.UserId is not 0 or -1
-                 && ServiceRecord.IsSuperUser(serviceId, t.UserId);
-            }
-        );
+        {
+            t.IsSuperUser = t.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, t.UserId);
+        });
 
         return (apiStatus, memberList);
     }
@@ -281,18 +272,21 @@ internal static class ApiAdapter
     /// <param name="useCache">是否使用缓存</param>
     [Reviewed("nidbCN", "2021-03-24 20:55")]
     internal static async ValueTask<(ApiStatus apiStatus, GroupInfo groupInfo)> GetGroupInfo(
-        Guid connection, long groupId, bool useCache)
+        Guid connection,
+        long groupId,
+        bool useCache)
     {
         Log.Debug("Sora", "Sending get_group_info request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupInfo,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                no_cache = !useCache
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupInfo,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    no_cache = !useCache
+                }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_info response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, new GroupInfo());
@@ -308,26 +302,31 @@ internal static class ApiAdapter
     /// <param name="userId">用户ID</param>
     /// <param name="useCache">是否使用缓存</param>
     internal static async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
-        Guid serviceId, Guid connection, long groupId, long userId, bool useCache)
+        Guid serviceId,
+        Guid connection,
+        long groupId,
+        long userId,
+        bool useCache)
     {
         Log.Debug("Sora", "Sending get_group_member_info request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupMemberInfo,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                user_id  = userId,
-                no_cache = !useCache
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupMemberInfo,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    user_id  = userId,
+                    no_cache = !useCache
+                }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_member_info response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, new GroupMemberInfo());
         GroupMemberInfo memberInfo = ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo();
         //检查服务管理员权限
-        memberInfo.IsSuperUser = memberInfo.UserId is not 0 or -1 &&
-                                 ServiceRecord.IsSuperUser(serviceId, memberInfo.UserId);
+        memberInfo.IsSuperUser =
+            memberInfo.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, memberInfo.UserId);
         return (apiStatus, memberInfo);
     }
 
@@ -340,25 +339,28 @@ internal static class ApiAdapter
     /// <param name="userId">用户ID</param>
     /// <param name="useCache">使用缓存</param>
     internal static async ValueTask<(ApiStatus apiStatus, UserInfo userInfo, string qid)> GetUserInfo(
-        Guid serviceId, Guid connection, long userId, bool useCache)
+        Guid serviceId,
+        Guid connection,
+        long userId,
+        bool useCache)
     {
         Log.Debug("Sora", "Sending get_stranger_info request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetStrangerInfo,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                user_id  = userId,
-                no_cache = !useCache
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetStrangerInfo,
+                ApiParams = new
+                {
+                    user_id  = userId,
+                    no_cache = !useCache
+                }
+            }, connection);
         Log.Debug("Sora", $"Get get_stranger_info response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, new UserInfo(), string.Empty);
         UserInfo info = ret["data"]?.ToObject<UserInfo>() ?? new UserInfo();
         //检查服务管理员权限
-        info.IsSuperUser = info.UserId is not 0 or -1 &&
-                           ServiceRecord.IsSuperUser(serviceId, info.UserId);
+        info.IsSuperUser = info.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, info.UserId);
 
         return (apiStatus, info, ret["data"]?["qid"]?.ToString());
     }
@@ -370,10 +372,9 @@ internal static class ApiAdapter
     internal static async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendImage(Guid connection)
     {
         Log.Debug("Sora", "Sending can_send_image request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.CanSendImage
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(new ApiRequest { ApiRequestType = ApiRequestType.CanSendImage },
+                connection);
         Log.Debug("Sora", $"Get can_send_image response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, false);
@@ -387,10 +388,9 @@ internal static class ApiAdapter
     internal static async ValueTask<(ApiStatus apiStatus, bool canSend)> CanSendRecord(Guid connection)
     {
         Log.Debug("Sora", "Sending can_send_record request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.CanSendRecord
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(new ApiRequest { ApiRequestType = ApiRequestType.CanSendRecord },
+                connection);
         Log.Debug("Sora", $"Get can_send_record response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, false);
@@ -405,45 +405,40 @@ internal static class ApiAdapter
         Guid connection)
     {
         Log.Debug("Sora", "Sending get_status request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetStatus
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(new ApiRequest { ApiRequestType = ApiRequestType.GetStatus },
+                connection);
         Log.Debug("Sora", $"Get get_status response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, false, false, null);
-        return (apiStatus,
-                   Convert.ToBoolean(ret["data"]?["online"]?.ToString()     ?? "false"),
-                   Convert.ToBoolean(ret["data"]?["good"]?.ToString()       ?? "false"),
-                   JObject.FromObject((ret["data"]?["stat"] ?? ret["data"]) ?? new JObject()));
+        return (apiStatus, Convert.ToBoolean(ret["data"]?["online"]?.ToString() ?? "false"),
+            Convert.ToBoolean(ret["data"]?["good"]?.ToString() ?? "false"),
+            JObject.FromObject((ret["data"]?["stat"] ?? ret["data"]) ?? new JObject()));
     }
 
-    #region GoCQ API
+#region GoCQ API
 
     /// <summary>
     /// 获取图片信息
     /// </summary>
     /// <param name="connection">服务器连接标识</param>
     /// <param name="cacheFileName">缓存文件名</param>
-    internal static async ValueTask<(ApiStatus apiStatus, int size, string fileName, string url)>
-        GetImage(Guid connection, string cacheFileName)
+    internal static async ValueTask<(ApiStatus apiStatus, int size, string fileName, string url)> GetImage(
+        Guid   connection,
+        string cacheFileName)
     {
         Log.Debug("Sora", "Sending get_image request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetImage,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                file = cacheFileName
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetImage,
+                ApiParams      = new { file = cacheFileName }
+            }, connection);
         Log.Debug("Sora", $"Get get_image response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, -1, null, null);
-        return (apiStatus,
-                   Convert.ToInt32(ret["data"]?["size"] ?? 1),
-                   ret["data"]?["filename"]?.ToString(),
-                   ret["data"]?["url"]?.ToString());
+        return (apiStatus, Convert.ToInt32(ret["data"]?["size"] ?? 1), ret["data"]?["filename"]?.ToString(),
+            ret["data"]?["url"]?.ToString());
     }
 
     /// <summary>
@@ -466,24 +461,23 @@ internal static class ApiAdapter
 
         Log.Debug("Sora", "Sending send_group_forward_msg request");
         //发送消息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SendGroupForwardMsg,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                messages = customNodes.Select(node => new
+                ApiRequestType = ApiRequestType.SendGroupForwardMsg,
+                ApiParams = new
                 {
-                    type = "node",
-                    data = node
-                }).ToList()
-            }
-        }, connection, timeout);
+                    group_id = groupId,
+                    messages = customNodes.Select(node => new
+                    {
+                        type = "node",
+                        data = node
+                    }).ToList()
+                }
+            }, connection, timeout);
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, -1);
-        int msgCode = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode)
-                          ? messageCode
-                          : -1;
+        int msgCode = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode) ? messageCode : -1;
         Log.Debug("Sora", $"Get send_group_forward_msg response [{msgCode}]{nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus, msgCode);
     }
@@ -508,24 +502,23 @@ internal static class ApiAdapter
 
         Log.Debug("Sora", "Sending send_private_forward_msg request");
         //发送消息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SendPrivateForwardMsg,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                user_id = userId,
-                messages = customNodes.Select(node => new
+                ApiRequestType = ApiRequestType.SendPrivateForwardMsg,
+                ApiParams = new
                 {
-                    type = "node",
-                    data = node
-                }).ToList()
-            }
-        }, connection, timeout);
+                    user_id = userId,
+                    messages = customNodes.Select(node => new
+                    {
+                        type = "node",
+                        data = node
+                    }).ToList()
+                }
+            }, connection, timeout);
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, -1);
-        int msgCode = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode)
-                          ? messageCode
-                          : -1;
+        int msgCode = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode) ? messageCode : -1;
         Log.Debug("Sora", $"Get send_private_forward_msg response [{msgCode}]{nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus, msgCode);
     }
@@ -537,43 +530,34 @@ internal static class ApiAdapter
     /// <param name="connection">服务器连接标识</param>
     /// <param name="msgId">消息ID</param>
     internal static async
-        ValueTask<(ApiStatus apiStatus, MessageContext message, User sender, Group sourceGroup, int
-            realId, bool
+        ValueTask<(ApiStatus apiStatus, MessageContext message, User sender, Group sourceGroup, int realId, bool
             isGroupMsg)> GetMessage(Guid serviceId, Guid connection, int msgId)
     {
         Log.Debug("Sora", "Sending get_msg request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetMessage,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                message_id = msgId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetMessage,
+                ApiParams      = new { message_id = msgId }
+            }, connection);
         Log.Debug("Sora", $"Get get_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, null, null, null, 0, false);
         //处理消息段
         var rawMessage = ret["data"]?["message"]?.ToObject<List<OnebotSegment>>();
         return (apiStatus,
-                   message: new MessageContext(
-                       connection,
-                       msgId,
-                       ret["data"]?["raw_message"]?.ToString(),
-                       (rawMessage ?? new List<OnebotSegment>()).ToMessageBody(),
-                       Convert.ToInt64(ret["data"]?["time"] ?? -1),
-                       0,
-                       Convert.ToBoolean(ret["data"]?["group"]           ?? false)
-                           ? Convert.ToInt32(ret["data"]?["message_seq"] ?? 0)
-                           : null),
-                   sender: new User(serviceId, connection,
-                       Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)),
-                   //判断响应数据中是否有群组信息
-                   sourceGroup: Convert.ToBoolean(ret["data"]?["group"] ?? false)
-                                    ? new Group(connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
-                                    : null,
-                   realId: Convert.ToInt32(ret["data"]?["real_id"]                                        ?? 0),
-                   isGroupMsg: Convert.ToBoolean(ret["data"]?["message_type"]?.ToString().Equals("group") ?? false));
+            message: new MessageContext(connection, msgId, ret["data"]?["raw_message"]?.ToString(),
+                (rawMessage ?? new List<OnebotSegment>()).ToMessageBody(), Convert.ToInt64(ret["data"]?["time"] ?? -1),
+                0,
+                Convert.ToBoolean(ret["data"]?["group"] ?? false)
+                    ? Convert.ToInt32(ret["data"]?["message_seq"] ?? 0)
+                    : null),
+            sender: new User(serviceId, connection, Convert.ToInt64(ret["data"]?["sender"]?["user_id"] ?? -1)),
+            //判断响应数据中是否有群组信息
+            sourceGroup: Convert.ToBoolean(ret["data"]?["group"] ?? false)
+                ? new Group(connection, Convert.ToInt64(ret["data"]?["group_id"] ?? 0))
+                : null, realId: Convert.ToInt32(ret["data"]?["real_id"] ?? 0),
+            isGroupMsg: Convert.ToBoolean(ret["data"]?["message_type"]?.ToString().Equals("group") ?? false));
     }
 
     /// <summary>
@@ -583,19 +567,18 @@ internal static class ApiAdapter
     /// <param name="text">内容</param>
     /// <returns>词组列表</returns>
     internal static async ValueTask<(ApiStatus apiStatus, List<string> slicesList)> GetWordSlices(
-        Guid connection, string text)
+        Guid   connection,
+        string text)
     {
         if (string.IsNullOrEmpty(text))
             throw new NullReferenceException(nameof(text));
         Log.Debug("Sora", "Sending .get_word_slices request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetWordSlices,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                content = text
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetWordSlices,
+                ApiParams      = new { content = text }
+            }, connection);
         Log.Debug("Sora", $"Get .get_word_slices response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, null);
@@ -609,20 +592,19 @@ internal static class ApiAdapter
     /// <param name="msgId">合并转发 ID</param>
     /// <returns>ApiResponseCollection</returns>
     internal static async ValueTask<(ApiStatus apiStatus, List<Node> nodeArray)> GetForwardMessage(
-        Guid connection, string msgId)
+        Guid   connection,
+        string msgId)
     {
         if (string.IsNullOrEmpty(msgId))
             throw new NullReferenceException(nameof(msgId));
         Log.Debug("Sora", "Sending get_forward_msg request");
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetForwardMessage,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                message_id = msgId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetForwardMessage,
+                ApiParams      = new { message_id = msgId }
+            }, connection);
         Log.Debug("Sora", $"Get get_forward_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, null);
@@ -643,20 +625,17 @@ internal static class ApiAdapter
     {
         Log.Debug("Sora", "Sending get_group_system_msg request");
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupSystemMsg
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(
+                new ApiRequest { ApiRequestType = ApiRequestType.GetGroupSystemMsg }, connection);
         Log.Debug("Sora", $"Get get_group_system_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, new List<GroupRequestInfo>(), new List<GroupRequestInfo>());
         //解析消息
-        List<GroupRequestInfo> joinList =
-            ret?["data"]?["join_requests"]?.ToObject<List<GroupRequestInfo>>() ??
-            new List<GroupRequestInfo>();
-        List<GroupRequestInfo> invitedList =
-            ret?["data"]?["invited_requests"]?.ToObject<List<GroupRequestInfo>>() ??
-            new List<GroupRequestInfo>();
+        List<GroupRequestInfo> joinList = ret?["data"]?["join_requests"]?.ToObject<List<GroupRequestInfo>>()
+                                          ?? new List<GroupRequestInfo>();
+        List<GroupRequestInfo> invitedList = ret?["data"]?["invited_requests"]?.ToObject<List<GroupRequestInfo>>()
+                                             ?? new List<GroupRequestInfo>();
         return (apiStatus, joinList, invitedList);
     }
 
@@ -666,25 +645,23 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="connection">连接标识</param>
     /// <returns>文件系统信息</returns>
-    internal static async
-        ValueTask<(ApiStatus apiStatus, GroupFileSysInfo fileSysInfo)> GetGroupFileSysInfo(
-            long groupId, Guid connection)
+    internal static async ValueTask<(ApiStatus apiStatus, GroupFileSysInfo fileSysInfo)> GetGroupFileSysInfo(
+        long groupId,
+        Guid connection)
     {
         Log.Debug("Sora", "Sending get_group_file_system_info request");
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupFileSystemInfo,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupFileSystemInfo,
+                ApiParams      = new { group_id = groupId }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_file_system_info response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus.RetCode != ApiStatusType.Ok
-                   ? (apiStatus, new GroupFileSysInfo())
-                   //解析消息
-                   : (apiStatus, ret?["data"]?.ToObject<GroupFileSysInfo>() ?? new GroupFileSysInfo());
+            ? (apiStatus, new GroupFileSysInfo())
+            //解析消息
+            : (apiStatus, ret?["data"]?.ToObject<GroupFileSysInfo>() ?? new GroupFileSysInfo());
     }
 
     /// <summary>
@@ -699,20 +676,17 @@ internal static class ApiAdapter
     {
         Log.Debug("Sora", "Sending get_group_root_files request");
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupRootFiles,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupRootFiles,
+                ApiParams      = new { group_id = groupId }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_root_files response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
-        return (apiStatus,
-                   ret?["data"]?["files"]?.ToObject<List<GroupFileInfo>>()     ?? new List<GroupFileInfo>(),
-                   ret?["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>());
+        return (apiStatus, ret?["data"]?["files"]?.ToObject<List<GroupFileInfo>>() ?? new List<GroupFileInfo>(),
+            ret?["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>());
     }
 
     /// <summary>
@@ -728,21 +702,21 @@ internal static class ApiAdapter
     {
         Log.Debug("Sora", "Sending get_group_files_by_folder request");
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupFilesByFolder,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id  = groupId,
-                folder_id = folderId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupFilesByFolder,
+                ApiParams = new
+                {
+                    group_id  = groupId,
+                    folder_id = folderId
+                }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_files_by_folder response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, new List<GroupFileInfo>(), new List<GroupFolderInfo>());
-        return (apiStatus,
-                   ret?["data"]?["files"]?.ToObject<List<GroupFileInfo>>()     ?? new List<GroupFileInfo>(),
-                   ret?["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>());
+        return (apiStatus, ret?["data"]?["files"]?.ToObject<List<GroupFileInfo>>() ?? new List<GroupFileInfo>(),
+            ret?["data"]?["folders"]?.ToObject<List<GroupFolderInfo>>() ?? new List<GroupFolderInfo>());
     }
 
     /// <summary>
@@ -754,24 +728,28 @@ internal static class ApiAdapter
     /// <param name="connection">连接标识</param>
     /// <returns>资源链接</returns>
     internal static async ValueTask<(ApiStatus apiStatus, string fileUrl)> GetGroupFileUrl(
-        long groupId, string fileId, int busId, Guid connection)
+        long   groupId,
+        string fileId,
+        int    busId,
+        Guid   connection)
     {
         Log.Debug("Sora", "Sending get_group_file_url request");
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupFileUrl,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                file_id  = fileId,
-                busid    = busId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupFileUrl,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    file_id  = fileId,
+                    busid    = busId
+                }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_file_url response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus.RetCode != ApiStatusType.Ok
-                   ? (apiStatus, null)
-                   : (apiStatus, ret?["data"]?["url"]?.ToString());
+            ? (apiStatus, null)
+            : (apiStatus, ret?["data"]?["url"]?.ToString());
     }
 
     /// <summary>
@@ -785,20 +763,18 @@ internal static class ApiAdapter
     {
         Log.Debug("Sora", "Sending get_group_at_all_remain request");
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupAtAllRemain,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetGroupAtAllRemain,
+                ApiParams      = new { group_id = groupId }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_at_all_remain response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, false, -1, -1);
         return (apiStatus, Convert.ToBoolean(ret?["data"]?["can_at_all"]),
-                   Convert.ToInt16(ret?["data"]?["remain_at_all_count_for_group"]),
-                   Convert.ToInt16(ret?["data"]?["remain_at_all_count_for_uin"]));
+            Convert.ToInt16(ret?["data"]?["remain_at_all_count_for_group"]),
+            Convert.ToInt16(ret?["data"]?["remain_at_all_count_for_uin"]));
     }
 
     /// <summary>
@@ -808,24 +784,23 @@ internal static class ApiAdapter
     /// <param name="connection">连接标识</param>
     /// <returns>文字识别信息</returns>
     internal static async ValueTask<(ApiStatus apiStatus, List<TextDetection> texts, string lang)> OcrImage(
-        string imgId, Guid connection)
+        string imgId,
+        Guid   connection)
     {
         Log.Debug("Sora", "Sending ocr_image request");
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.Ocr,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                image = imgId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.Ocr,
+                ApiParams      = new { image = imgId }
+            }, connection);
         Log.Debug("Sora", $"Get ocr_image response {nameof(apiStatus)}={apiStatus.RetCode}");
 
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, new List<TextDetection>(), string.Empty);
         return (apiStatus, ret?["data"]?["texts"]?.ToObject<List<TextDetection>>(),
-                   ret?["data"]?["language"]?.ToString());
+            ret?["data"]?["language"]?.ToString());
     }
 
     /// <summary>
@@ -839,8 +814,11 @@ internal static class ApiAdapter
     /// <param name="timeout">超时(ms)</param>
     /// <returns>文件绝对路径</returns>
     internal static async ValueTask<(ApiStatus apiStatus, string filePath)> DownloadFile(
-        string url, int threadCount, Guid connection, Dictionary<string, string> customHeader = null,
-        int    timeout = 10000)
+        string                     url,
+        int                        threadCount,
+        Guid                       connection,
+        Dictionary<string, string> customHeader = null,
+        int                        timeout      = 10000)
     {
         //处理自定义请求头
         List<string> customHeaderStr = new();
@@ -850,21 +828,22 @@ internal static class ApiAdapter
         Log.Debug("Sora", "Sending download_file request");
 
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.DownloadFile,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                url,
-                thread_count = threadCount,
-                headers      = customHeaderStr
-            }
-        }, connection, TimeSpan.FromMilliseconds(timeout));
+                ApiRequestType = ApiRequestType.DownloadFile,
+                ApiParams = new
+                {
+                    url,
+                    thread_count = threadCount,
+                    headers      = customHeaderStr
+                }
+            }, connection, TimeSpan.FromMilliseconds(timeout));
 
         Log.Debug("Sora", $"Get download_file response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus.RetCode != ApiStatusType.Ok
-                   ? (apiStatus, string.Empty)
-                   : (apiStatus, ret?["data"]?["file"]?.ToString());
+            ? (apiStatus, string.Empty)
+            : (apiStatus, ret?["data"]?["file"]?.ToString());
     }
 
     /// <summary>
@@ -875,32 +854,32 @@ internal static class ApiAdapter
     /// <param name="serviceId">服务ID</param>
     /// <param name="connection">连接标识</param>
     /// <returns>消息</returns>
-    internal static async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> msgList)>
-        GetGroupMessageHistory(long? msgSeq, long groupId, Guid serviceId, Guid connection)
+    internal static async ValueTask<(ApiStatus apiStatus, List<GroupMessageEventArgs> msgList)> GetGroupMessageHistory(
+        long? msgSeq,
+        long  groupId,
+        Guid  serviceId,
+        Guid  connection)
     {
         Log.Debug("Sora", "Sending get_group_msg_history request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetGroupMsgHistory,
-            ApiParams = msgSeq == null
-                            ? new
-                            {
-                                group_id = groupId
-                            }
-                            : new
-                            {
-                                message_seq = msgSeq,
-                                group_id    = groupId
-                            }
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.GetGroupMsgHistory,
+                ApiParams = msgSeq == null
+                    ? new { group_id = groupId }
+                    : new
+                    {
+                        message_seq = msgSeq,
+                        group_id    = groupId
+                    }
+            }, connection);
         Log.Debug("Sora", $"Get get_group_msg_history response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, null);
         //处理消息段
-        return (apiStatus, ret["data"]?["messages"]?.ToObject<List<OnebotGroupMsgEventArgs>>()
-                                                   ?.Select(messageArg =>
-                                                         new GroupMessageEventArgs(serviceId, connection,
-                                                             "group", messageArg)).ToList());
+        return (apiStatus,
+            ret["data"]?["messages"]?.ToObject<List<OnebotGroupMsgEventArgs>>()?.Select(messageArg =>
+                new GroupMessageEventArgs(serviceId, connection, "group", messageArg)).ToList());
     }
 
     /// <summary>
@@ -910,18 +889,17 @@ internal static class ApiAdapter
     /// <param name="connection">连接标识</param>
     /// <returns>在线客户端信息</returns>
     internal static async ValueTask<(ApiStatus apiStatus, List<ClientInfo> clients)> GetOnlineClients(
-        bool useCache, Guid connection)
+        bool useCache,
+        Guid connection)
     {
         Log.Debug("Sora", "Sending get_online_clients request");
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetOnlineClients,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                no_cache = !useCache
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetOnlineClients,
+                ApiParams      = new { no_cache = !useCache }
+            }, connection);
         Log.Debug("Sora", $"Get get_online_clients response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
             return (apiStatus, null);
@@ -936,21 +914,20 @@ internal static class ApiAdapter
     /// <param name="connection">链接标识</param>
     /// <param name="groupId">群号</param>
     internal static async ValueTask<(ApiStatus apiStatus, List<EssenceInfo> essenceInfos)> GetEssenceMsgList(
-        Guid serviceId, Guid connection, long groupId)
+        Guid serviceId,
+        Guid connection,
+        long groupId)
     {
         Log.Debug("Sora", "Sending get_essence_msg_list request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetEssenceMsgList,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetEssenceMsgList,
+                ApiParams      = new { group_id = groupId }
+            }, connection);
         Log.Debug("Sora", $"Get get_essence_msg_list response {nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus,
-                   (ret?["data"] ?? new JArray()).Select(element => new EssenceInfo(element, serviceId, connection))
-                                                 .ToList());
+            (ret?["data"] ?? new JArray()).Select(element => new EssenceInfo(element, serviceId, connection)).ToList());
     }
 
     /// <summary>
@@ -959,19 +936,18 @@ internal static class ApiAdapter
     /// <param name="connection">链接标识</param>
     /// <param name="url">需要检查的链接</param>
     internal static async ValueTask<(ApiStatus apiStatus, SecurityLevelType securityLevel)> CheckUrlSafely(
-        Guid connection, string url)
+        Guid   connection,
+        string url)
     {
         Log.Debug("Sora", "Sending check_url_safely request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.CheckUrlSafely,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                url
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.CheckUrlSafely,
+                ApiParams      = new { url }
+            }, connection);
         Log.Debug("Sora", $"Get check_url_safely response {nameof(apiStatus)}={apiStatus.RetCode}");
-        return (apiStatus, (SecurityLevelType) Convert.ToInt32(ret?["data"]?["level"] ?? 1));
+        return (apiStatus, (SecurityLevelType)Convert.ToInt32(ret?["data"]?["level"] ?? 1));
     }
 
     /// <summary>
@@ -979,14 +955,13 @@ internal static class ApiAdapter
     /// <para>该API只有企点协议可用</para>
     /// </summary>
     /// <param name="connection">链接标识</param>
-    internal static async ValueTask<(ApiStatus apiStatus, QidianAccountInfo qidianAccountInfo)>
-        GetQidianAccountInfo(Guid connection)
+    internal static async ValueTask<(ApiStatus apiStatus, QidianAccountInfo qidianAccountInfo)> GetQidianAccountInfo(
+        Guid connection)
     {
         Log.Debug("Sora", "Sending qidian_get_account_info request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetQidianAccountInfo
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(
+                new ApiRequest { ApiRequestType = ApiRequestType.GetQidianAccountInfo }, connection);
         Log.Debug("Sora", $"Get qidian_get_account_info response {nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus, ret?["data"]?.ToObject<QidianAccountInfo>() ?? new QidianAccountInfo());
     }
@@ -997,17 +972,16 @@ internal static class ApiAdapter
     /// <param name="connection">链接标识</param>
     /// <param name="model">型号</param>
     internal static async ValueTask<(ApiStatus apiStatus, List<ModelInfo> models)> GetModelShow(
-        Guid connection, string model)
+        Guid   connection,
+        string model)
     {
         Log.Debug("Sora", "Sending _get_model_show request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetModelShow,
-            ApiParams = new
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                model
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.GetModelShow,
+                ApiParams      = new { model }
+            }, connection);
         Log.Debug("Sora", $"Get _get_model_show response {nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus, ret?["data"]?["variants"]?.ToObject<List<ModelInfo>>() ?? new List<ModelInfo>());
     }
@@ -1020,20 +994,18 @@ internal static class ApiAdapter
         GetUnidirectionalFriendList(Guid connection)
     {
         Log.Debug("Sora", "Sending get_unidirectional_friend_list request");
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.GetUnidirectionalFriendList
-        }, connection);
+        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest { ApiRequestType = ApiRequestType.GetUnidirectionalFriendList }, connection);
         Log.Debug("Sora", $"Get get_unidirectional_friend_list response {nameof(apiStatus)}={apiStatus.RetCode}");
         return (apiStatus,
-                   ret?["data"]?.ToObject<List<UnidirectionalFriendInfo>>() ?? new List<UnidirectionalFriendInfo>());
+            ret?["data"]?.ToObject<List<UnidirectionalFriendInfo>>() ?? new List<UnidirectionalFriendInfo>());
     }
 
-    #endregion
+#endregion
 
-    #endregion
+#endregion
 
-    #region 无响应数据的API请求
+#region 无响应数据的API请求
 
     /// <summary>
     /// 撤回消息
@@ -1043,14 +1015,12 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> RecallMsg(Guid connection, int msgId)
     {
         Log.Debug("Sora", "Sending delete_msg request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.RecallMsg,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                message_id = msgId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.RecallMsg,
+                ApiParams      = new { message_id = msgId }
+            }, connection);
         Log.Debug("Sora", $"Get delete_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1062,23 +1032,25 @@ internal static class ApiAdapter
     /// <param name="flag">请求flag</param>
     /// <param name="approve">是否同意</param>
     /// <param name="remark">好友备注</param>
-    internal static async ValueTask<ApiStatus> SetFriendAddRequest(
-        Guid   connection, string flag, bool approve,
-        string remark = null)
+    internal static async ValueTask<ApiStatus> SetFriendAddRequest(Guid   connection,
+                                                                   string flag,
+                                                                   bool   approve,
+                                                                   string remark = null)
     {
         if (string.IsNullOrEmpty(flag))
             throw new NullReferenceException(nameof(flag));
         Log.Debug("Sora", "Sending set_friend_add_request request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetFriendAddRequest,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                flag,
-                approve,
-                remark
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetFriendAddRequest,
+                ApiParams = new
+                {
+                    flag,
+                    approve,
+                    remark
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_friend_add_request response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1091,25 +1063,25 @@ internal static class ApiAdapter
     /// <param name="requestType">请求类型</param>
     /// <param name="approve">是否同意</param>
     /// <param name="reason">好友备注</param>
-    internal static async ValueTask<ApiStatus> SetGroupAddRequest(
-        Guid             connection,
-        string           flag,
-        GroupRequestType requestType,
-        bool             approve,
-        string           reason = null)
+    internal static async ValueTask<ApiStatus> SetGroupAddRequest(Guid             connection,
+                                                                  string           flag,
+                                                                  GroupRequestType requestType,
+                                                                  bool             approve,
+                                                                  string           reason = null)
     {
         Log.Debug("Sora", "Sending set_group_add_request request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupAddRequest,
-            ApiParams = new SetGroupAddRequestParams
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                Flag             = flag,
-                GroupRequestType = requestType,
-                Approve          = approve,
-                Reason           = reason
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupAddRequest,
+                ApiParams = new SetGroupAddRequestParams
+                {
+                    Flag             = flag,
+                    GroupRequestType = requestType,
+                    Approve          = approve,
+                    Reason           = reason
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_add_request response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1124,16 +1096,17 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> SetGroupCard(Guid connection, long groupId, long userId, string card)
     {
         Log.Debug("Sora", "Sending set_group_card request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupCard,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                user_id  = userId,
-                card
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupCard,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    user_id  = userId,
+                    card
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_card response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1145,22 +1118,24 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="userId">用户id</param>
     /// <param name="title">头衔</param>
-    internal static async ValueTask<ApiStatus> SetGroupSpecialTitle(
-        Guid   connection, long groupId, long userId,
-        string title)
+    internal static async ValueTask<ApiStatus> SetGroupSpecialTitle(Guid   connection,
+                                                                    long   groupId,
+                                                                    long   userId,
+                                                                    string title)
     {
         Log.Debug("Sora", "Sending set_group_special_title request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupSpecialTitle,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id      = groupId,
-                user_id       = userId,
-                special_title = title,
-                duration      = -1
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupSpecialTitle,
+                ApiParams = new
+                {
+                    group_id      = groupId,
+                    user_id       = userId,
+                    special_title = title,
+                    duration      = -1
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_special_title response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1172,21 +1147,23 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="userId">用户id</param>
     /// <param name="rejectRequest">拒绝此人的加群请求</param>
-    internal static async ValueTask<ApiStatus> KickGroupMember(
-        Guid connection, long groupId, long userId,
-        bool rejectRequest)
+    internal static async ValueTask<ApiStatus> KickGroupMember(Guid connection,
+                                                               long groupId,
+                                                               long userId,
+                                                               bool rejectRequest)
     {
         Log.Debug("Sora", "Sending set_group_kick request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupKick,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id           = groupId,
-                user_id            = userId,
-                reject_add_request = rejectRequest
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupKick,
+                ApiParams = new
+                {
+                    group_id           = groupId,
+                    user_id            = userId,
+                    reject_add_request = rejectRequest
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_kick response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1198,21 +1175,20 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="userId">用户id</param>
     /// <param name="duration">禁言时长(s)</param>
-    internal static async ValueTask<ApiStatus> SetGroupBan(
-        Guid connection, long groupId, long userId,
-        long duration)
+    internal static async ValueTask<ApiStatus> SetGroupBan(Guid connection, long groupId, long userId, long duration)
     {
         Log.Debug("Sora", "Sending set_group_ban request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupBan,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                user_id  = userId,
-                duration
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupBan,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    user_id  = userId,
+                    duration
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_ban response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1226,15 +1202,16 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> SetGroupWholeBan(Guid connection, long groupId, bool enable)
     {
         Log.Debug("Sora", "Sending set_group_whole_ban request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupWholeBan,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                enable
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupWholeBan,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    enable
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_whole_ban response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1246,21 +1223,23 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="anonymous">匿名用户对象</param>
     /// <param name="duration">禁言时长, 单位秒</param>
-    internal static async ValueTask<ApiStatus> SetAnonymousBan(
-        Guid connection, long groupId, Anonymous anonymous,
-        long duration)
+    internal static async ValueTask<ApiStatus> SetAnonymousBan(Guid      connection,
+                                                               long      groupId,
+                                                               Anonymous anonymous,
+                                                               long      duration)
     {
         Log.Debug("Sora", "Sending set_group_anonymous_ban request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                anonymous,
-                duration
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    anonymous,
+                    duration
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_anonymous_ban response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1272,21 +1251,23 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="anonymousFlag">匿名用户flag</param>
     /// <param name="duration">禁言时长, 单位秒</param>
-    internal static async ValueTask<ApiStatus> SetAnonymousBan(
-        Guid connection, long groupId, string anonymousFlag,
-        long duration)
+    internal static async ValueTask<ApiStatus> SetAnonymousBan(Guid   connection,
+                                                               long   groupId,
+                                                               string anonymousFlag,
+                                                               long   duration)
     {
         Log.Debug("Sora", "Sending set_group_anonymous_ban request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                flag     = anonymousFlag,
-                duration
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupAnonymousBan,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    flag     = anonymousFlag,
+                    duration
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_anonymous_ban response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1298,21 +1279,20 @@ internal static class ApiAdapter
     /// <param name="userId">成员id</param>
     /// <param name="groupId">群号</param>
     /// <param name="enable">设置或取消</param>
-    internal static async ValueTask<ApiStatus> SetGroupAdmin(
-        Guid connection, long userId, long groupId,
-        bool enable)
+    internal static async ValueTask<ApiStatus> SetGroupAdmin(Guid connection, long userId, long groupId, bool enable)
     {
         Log.Debug("Sora", "Sending set_group_admin request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupAdmin,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                user_id  = userId,
-                enable
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupAdmin,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    user_id  = userId,
+                    enable
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_admin response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1326,15 +1306,16 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> SetGroupLeave(Guid connection, long groupId, bool dismiss)
     {
         Log.Debug("Sora", "Sending set_group_leave request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupLeave,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id   = groupId,
-                is_dismiss = dismiss
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupLeave,
+                ApiParams = new
+                {
+                    group_id   = groupId,
+                    is_dismiss = dismiss
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_leave response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1347,19 +1328,17 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> Restart(Guid connection, int delay)
     {
         Log.Debug("Sora", "Sending restart client request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.Restart,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                delay
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.Restart,
+                ApiParams      = new { delay }
+            }, connection);
         Log.Debug("Sora", $"Get restart response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
 
-    #region GoCQ API
+#region GoCQ API
 
     /// <summary>
     /// 设置群名
@@ -1372,15 +1351,16 @@ internal static class ApiAdapter
         if (string.IsNullOrEmpty(name))
             throw new NullReferenceException(nameof(name));
         Log.Debug("Sora", "Sending set_group_name request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupName,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id   = groupId,
-                group_name = name
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupName,
+                ApiParams = new
+                {
+                    group_id   = groupId,
+                    group_name = name
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_name response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1392,23 +1372,25 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="file">图片文件</param>
     /// <param name="useCache">是否使用缓存</param>
-    internal static async ValueTask<ApiStatus> SetGroupPortrait(
-        Guid connection, long groupId, string file,
-        bool useCache)
+    internal static async ValueTask<ApiStatus> SetGroupPortrait(Guid   connection,
+                                                                long   groupId,
+                                                                string file,
+                                                                bool   useCache)
     {
         if (string.IsNullOrEmpty(file))
             throw new NullReferenceException(nameof(file));
         Log.Debug("Sora", "Sending set_group_portrait request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetGroupPortrait,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                file,
-                cache = useCache ? 1 : 0
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetGroupPortrait,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    file,
+                    cache = useCache ? 1 : 0
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_group_portrait response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1420,10 +1402,9 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> ReloadEventFilter(Guid connection)
     {
         Log.Debug("Sora", "Sending reload_event_filter request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.ReloadEventFilter
-        }, connection);
+        (ApiStatus apiStatus, _) =
+            await ReactiveApiManager.SendApiRequest(
+                new ApiRequest { ApiRequestType = ApiRequestType.ReloadEventFilter }, connection);
         Log.Debug("Sora", $"Get reload_event_filter response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1437,22 +1418,26 @@ internal static class ApiAdapter
     /// <param name="fileName">上传文件名</param>
     /// <param name="folderId">父目录ID 为<see langword="null"/>时则上传到根目录</param>
     /// <param name="timeout">超时</param>
-    internal static async ValueTask<ApiStatus> UploadGroupFile(
-        Guid   connection,      long groupId, string localFilePath, string fileName,
-        string folderId = null, int  timeout = 10000)
+    internal static async ValueTask<ApiStatus> UploadGroupFile(Guid   connection,
+                                                               long   groupId,
+                                                               string localFilePath,
+                                                               string fileName,
+                                                               string folderId = null,
+                                                               int    timeout  = 10000)
     {
         Log.Debug("Sora", "Sending upload_group_file request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.UploadGroupFile,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                file     = localFilePath ?? throw new NullReferenceException("localFilePath is null"),
-                name     = fileName      ?? throw new NullReferenceException("fileName is null"),
-                folder   = folderId      ?? string.Empty
-            }
-        }, connection, TimeSpan.FromMilliseconds(timeout));
+                ApiRequestType = ApiRequestType.UploadGroupFile,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    file     = localFilePath ?? throw new NullReferenceException("localFilePath is null"),
+                    name     = fileName ?? throw new NullReferenceException("fileName is null"),
+                    folder   = folderId ?? string.Empty
+                }
+            }, connection, TimeSpan.FromMilliseconds(timeout));
         Log.Debug("Sora", $"Get upload_group_file response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1465,21 +1450,24 @@ internal static class ApiAdapter
     /// <param name="localFilePath">本地文件路径</param>
     /// <param name="fileName">上传文件名</param>
     /// <param name="timeout">超时</param>
-    internal static async ValueTask<ApiStatus> UploadPrivateFile(
-        Guid connection, long userId, string localFilePath, string fileName,
-        int  timeout = 10000)
+    internal static async ValueTask<ApiStatus> UploadPrivateFile(Guid   connection,
+                                                                 long   userId,
+                                                                 string localFilePath,
+                                                                 string fileName,
+                                                                 int    timeout = 10000)
     {
         Log.Debug("Sora", "Sending upload_private_file request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.UploadPrivateFile,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                user_id = userId,
-                file    = localFilePath ?? throw new NullReferenceException("localFilePath is null"),
-                name    = fileName      ?? throw new NullReferenceException("fileName is null")
-            }
-        }, connection, TimeSpan.FromMilliseconds(timeout));
+                ApiRequestType = ApiRequestType.UploadPrivateFile,
+                ApiParams = new
+                {
+                    user_id = userId,
+                    file    = localFilePath ?? throw new NullReferenceException("localFilePath is null"),
+                    name    = fileName ?? throw new NullReferenceException("fileName is null")
+                }
+            }, connection, TimeSpan.FromMilliseconds(timeout));
         Log.Debug("Sora", $"Get upload_private_file response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1492,14 +1480,12 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> SetEssenceMsg(Guid connection, long msgId)
     {
         Log.Debug("Sora", "Sending set_essence_msg request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetEssenceMsg,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                message_id = msgId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetEssenceMsg,
+                ApiParams      = new { message_id = msgId }
+            }, connection);
         Log.Debug("Sora", $"Get set_essence_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1512,14 +1498,12 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> DelEssenceMsg(Guid connection, long msgId)
     {
         Log.Debug("Sora", "Sending delete_essence_msg request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.DeleteEssenceMsg,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                message_id = msgId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.DeleteEssenceMsg,
+                ApiParams      = new { message_id = msgId }
+            }, connection);
         Log.Debug("Sora", $"Get delete_essence_msg response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1531,27 +1515,29 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="content">公告内容</param>
     /// <param name="image">图片</param>
-    internal static async ValueTask<ApiStatus> SendGroupNotice(
-        Guid   connection, long groupId, string content,
-        string image)
+    internal static async ValueTask<ApiStatus> SendGroupNotice(Guid   connection,
+                                                               long   groupId,
+                                                               string content,
+                                                               string image)
     {
         Log.Debug("Sora", "Sending _send_group_notice request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SendGroupNotice,
-            ApiParams = string.IsNullOrEmpty(image)
-                            ? new
-                            {
-                                group_id = groupId,
-                                content
-                            }
-                            : new
-                            {
-                                group_id = groupId,
-                                content,
-                                image
-                            }
-        }, connection);
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.SendGroupNotice,
+                ApiParams = string.IsNullOrEmpty(image)
+                    ? new
+                    {
+                        group_id = groupId,
+                        content
+                    }
+                    : new
+                    {
+                        group_id = groupId,
+                        content,
+                        image
+                    }
+            }, connection);
         Log.Debug("Sora", $"Get _send_group_notice response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1564,14 +1550,12 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> DeleteFriend(Guid connection, long userId)
     {
         Log.Debug("Sora", "Sending delete_friend request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.DeleteFriend,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                id = userId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.DeleteFriend,
+                ApiParams      = new { id = userId }
+            }, connection);
         Log.Debug("Sora", $"Get delete_friend response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1585,15 +1569,16 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> SetModelShow(Guid connection, string model, string showModel)
     {
         Log.Debug("Sora", "Sending _set_model_show request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetModelShow,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                model,
-                model_show = showModel
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetModelShow,
+                ApiParams = new
+                {
+                    model,
+                    model_show = showModel
+                }
+            }, connection);
         Log.Debug("Sora", $"Get _set_model_show response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1605,26 +1590,29 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="name">文件夹名</param>
     /// <param name="folderId">文件夹ID</param>
-    internal static async ValueTask<ApiStatus> CreateGroupFileFolder(
-        Guid connection, long groupId, string name, string folderId)
+    internal static async ValueTask<ApiStatus> CreateGroupFileFolder(Guid   connection,
+                                                                     long   groupId,
+                                                                     string name,
+                                                                     string folderId)
     {
         Log.Debug("Sora", "Sending create_group_file_folder request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.CreateGroupFileFolder,
-            ApiParams = string.IsNullOrEmpty(folderId)
-                            ? new
-                            {
-                                group_id = groupId,
-                                name
-                            }
-                            : new
-                            {
-                                group_id = groupId,
-                                name,
-                                folder_id = folderId
-                            }
-        }, connection);
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
+            {
+                ApiRequestType = ApiRequestType.CreateGroupFileFolder,
+                ApiParams = string.IsNullOrEmpty(folderId)
+                    ? new
+                    {
+                        group_id = groupId,
+                        name
+                    }
+                    : new
+                    {
+                        group_id = groupId,
+                        name,
+                        folder_id = folderId
+                    }
+            }, connection);
         Log.Debug("Sora", $"Get create_group_file_folder response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1638,15 +1626,16 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> DeleteGroupFolder(Guid connection, long groupId, string folderId)
     {
         Log.Debug("Sora", "Sending delete_group_folder request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.DeleteGroupFolder,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id  = groupId,
-                folder_id = folderId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.DeleteGroupFolder,
+                ApiParams = new
+                {
+                    group_id  = groupId,
+                    folder_id = folderId
+                }
+            }, connection);
         Log.Debug("Sora", $"Get delete_group_folder response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1658,21 +1647,20 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="fileId">文件ID</param>
     /// <param name="busId">文件类型</param>
-    internal static async ValueTask<ApiStatus> DeleteGroupFile(
-        Guid connection, long groupId, string fileId,
-        int  busId)
+    internal static async ValueTask<ApiStatus> DeleteGroupFile(Guid connection, long groupId, string fileId, int busId)
     {
         Log.Debug("Sora", "Sending delete_group_file request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.DeleteGroupFile,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                group_id = groupId,
-                file_id  = fileId,
-                bus_id   = busId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.DeleteGroupFile,
+                ApiParams = new
+                {
+                    group_id = groupId,
+                    file_id  = fileId,
+                    bus_id   = busId
+                }
+            }, connection);
         Log.Debug("Sora", $"Get delete_group_file response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1685,14 +1673,12 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> MarkMessageRead(Guid connection, int msgId)
     {
         Log.Debug("Sora", "Sending mark_msg_as_read request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.MarkMsgAsRead,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                message_id = msgId
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.MarkMsgAsRead,
+                ApiParams      = new { message_id = msgId }
+            }, connection);
         Log.Debug("Sora", $"Get mark_msg_as_read response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1707,14 +1693,12 @@ internal static class ApiAdapter
         Task.Run(async () =>
         {
             Log.Debug("Sora", "Auto mark message read request send");
-            (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-            {
-                ApiRequestType = ApiRequestType.MarkMsgAsRead,
-                ApiParams = new
+            (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+                new ApiRequest
                 {
-                    message_id = msgId
-                }
-            }, connection);
+                    ApiRequestType = ApiRequestType.MarkMsgAsRead,
+                    ApiParams      = new { message_id = msgId }
+                }, connection);
             Log.Debug("Sora",
                 apiStatus.RetCode == ApiStatusType.Ok
                     ? "Auto mark message read success"
@@ -1730,14 +1714,12 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> DeleteUnidirectionalFriend(Guid connection, long uid)
     {
         Log.Debug("Sora", "Sending delete_unidirectional_friend request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.DeleteUnidirectionalFriend,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                user_id = uid
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.DeleteUnidirectionalFriend,
+                ApiParams      = new { user_id = uid }
+            }, connection);
         Log.Debug("Sora", $"Get delete_unidirectional_friend response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
@@ -1750,23 +1732,24 @@ internal static class ApiAdapter
     internal static async ValueTask<ApiStatus> SetQQProfile(Guid connection, ProfileDetail profile)
     {
         Log.Debug("Sora", "Sending set_qq_profile request");
-        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-        {
-            ApiRequestType = ApiRequestType.SetQQProfile,
-            ApiParams = new
+        (ApiStatus apiStatus, _) = await ReactiveApiManager.SendApiRequest(
+            new ApiRequest
             {
-                nickname      = profile.Nick,
-                company       = profile.Company,
-                email         = profile.Email,
-                college       = profile.College,
-                personal_note = profile.PersonalNote
-            }
-        }, connection);
+                ApiRequestType = ApiRequestType.SetQQProfile,
+                ApiParams = new
+                {
+                    nickname      = profile.Nick,
+                    company       = profile.Company,
+                    email         = profile.Email,
+                    college       = profile.College,
+                    personal_note = profile.PersonalNote
+                }
+            }, connection);
         Log.Debug("Sora", $"Get set_qq_profile response {nameof(apiStatus)}={apiStatus.RetCode}");
         return apiStatus;
     }
 
-    #endregion
+#endregion
 
-    #endregion
+#endregion
 }

@@ -20,7 +20,7 @@ internal static class ConnectionRecord
 
     private static readonly HashSet<Guid> _deadConn = new();
 
-    #region 连接管理
+#region 连接管理
 
     /// <summary>
     /// 添加服务器连接记录
@@ -37,13 +37,7 @@ internal static class ConnectionRecord
         if (_deadConn.Contains(connId))
             _deadConn.Remove(connId);
         //selfId均在第一次链接开启时留空，并在meta事件触发后更新
-        return _connections.TryAdd(connId, new SoraConnectionInfo(
-            serviceId,
-            connId,
-            socket,
-            DateTime.Now,
-            apiTimeout
-        ));
+        return _connections.TryAdd(connId, new SoraConnectionInfo(serviceId, connId, socket, DateTime.Now, apiTimeout));
     }
 
     /// <summary>
@@ -83,19 +77,18 @@ internal static class ConnectionRecord
     public static List<SoraConnectionInfo> GetConnList(Guid serviceId)
     {
         return _connections.Where(c => c.Value.ApiInstance.ServiceId == serviceId && !_deadConn.Contains(c.Key))
-                           .Select(c => c.Value)
-                           .ToList();
+                           .Select(c => c.Value).ToList();
     }
 
-    public static Dictionary<Guid, SoraConnectionInfo> GetTimeoutConn(
-        Guid serviceId, DateTime now, TimeSpan heartbeatTimeout)
+    public static Dictionary<Guid, SoraConnectionInfo> GetTimeoutConn(Guid     serviceId,
+                                                                      DateTime now,
+                                                                      TimeSpan heartbeatTimeout)
     {
         return _connections
-              .Where(conn =>
-                   conn.Value.ApiInstance.ServiceId   == serviceId &&
-                   now - conn.Value.LastHeartBeatTime > heartbeatTimeout)
-              .ToDictionary(conn => conn.Key,
-                   conn => conn.Value);
+               .Where(conn =>
+                   conn.Value.ApiInstance.ServiceId == serviceId
+                   && now - conn.Value.LastHeartBeatTime > heartbeatTimeout)
+               .ToDictionary(conn => conn.Key, conn => conn.Value);
     }
 
     public static bool GetConn(Guid connId, out SoraConnectionInfo connection)
@@ -126,9 +119,9 @@ internal static class ConnectionRecord
         return _connections.Count;
     }
 
-    #endregion
+#endregion
 
-    #region 连接参数
+#region 连接参数
 
     /// <summary>
     /// 获取当前登录连接的账号ID
@@ -193,9 +186,9 @@ internal static class ConnectionRecord
         return false;
     }
 
-    #endregion
+#endregion
 
-    #region API
+#region API
 
     public static SoraApi GetApi(Guid connId)
     {
@@ -210,15 +203,11 @@ internal static class ConnectionRecord
 
     public static SoraApi GetApi(long uid)
     {
-        if (_connections.Values
-                        .Any(conn => conn.LoginUid == uid))
-            return _connections.Values
-                               .Where(conn => conn.LoginUid == uid)
-                               .Select(conn => conn.ApiInstance)
-                               .First();
+        if (_connections.Values.Any(conn => conn.LoginUid == uid))
+            return _connections.Values.Where(conn => conn.LoginUid == uid).Select(conn => conn.ApiInstance).First();
 
         return null;
     }
 
-    #endregion
+#endregion
 }

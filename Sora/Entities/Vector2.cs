@@ -7,7 +7,7 @@ namespace Sora.Entities;
 /// </summary>
 public struct Vector2
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// X
@@ -21,5 +21,5 @@ public struct Vector2
     [JsonProperty(PropertyName = "y")]
     public int Y { get; internal init; }
 
-    #endregion
+#endregion
 }

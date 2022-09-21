@@ -10,24 +10,25 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class TitleUpdateEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 运气王
     /// </summary>
-    public User TargetUser { get; private set; }
+    public User TargetUser { get; }
 
     /// <summary>
     /// 消息源群
     /// </summary>
-    public string NewTitle { get; private set; }
+    public string NewTitle { get; }
 
-    #endregion
+#endregion
 
-    internal TitleUpdateEventArgs(
-        Guid                              serviceId, Guid connectionId, string eventName,
-        OnebotMemberTitleUpdatedEventArgs eventArgs) :
-        base(serviceId, connectionId, eventName, eventArgs.SelfId, eventArgs.Time, SourceFlag.Group)
+    internal TitleUpdateEventArgs(Guid                              serviceId,
+                                  Guid                              connectionId,
+                                  string                            eventName,
+                                  OnebotMemberTitleUpdatedEventArgs eventArgs)
+        : base(serviceId, connectionId, eventName, eventArgs.SelfId, eventArgs.Time, SourceFlag.Group)
     {
         TargetUser = new User(serviceId, connectionId, eventArgs.UserId);
         NewTitle   = eventArgs.NewTitle;

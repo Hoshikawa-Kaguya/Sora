@@ -20,7 +20,7 @@ namespace Sora.Net;
 /// </summary>
 public sealed class SoraWebsocketServer : ISoraService
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 服务器配置类
@@ -47,9 +47,9 @@ public sealed class SoraWebsocketServer : ISoraService
     /// </summary>
     public Guid ServiceId { get; } = Guid.NewGuid();
 
-    #endregion
+#endregion
 
-    #region 私有字段
+#region 私有字段
 
     /// <summary>
     /// 服务器已准备启动标识
@@ -66,9 +66,9 @@ public sealed class SoraWebsocketServer : ISoraService
     /// </summary>
     internal bool _isRunning;
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 创建一个反向WS服务端
@@ -99,12 +99,10 @@ public sealed class SoraWebsocketServer : ISoraService
         //初始化连接管理器
         ConnManager = new ConnectionManager(Config, ServiceId);
         //实例化事件接口
-        Event = new EventAdapter(ServiceId,
-            Config.ThrowCommandException,
-            Config.SendCommandErrMsg,
+        Event = new EventAdapter(ServiceId, Config.ThrowCommandException, Config.SendCommandErrMsg,
             Config.CommandExceptionHandle);
         //禁用原log
-        FleckLog.Level = (LogLevel) 4;
+        FleckLog.Level = (LogLevel)4;
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
@@ -116,9 +114,9 @@ public sealed class SoraWebsocketServer : ISoraService
         _isReady = true;
     }
 
-    #endregion
+#endregion
 
-    #region 服务端启动
+#region 服务端启动
 
     /// <summary>
     /// 启动 Sora 服务
@@ -176,8 +174,7 @@ public sealed class SoraWebsocketServer : ISoraService
             //事件回调
             ConnManager.OpenConnection("Universal", selfId, new ServerSocket(socket), ServiceId,
                 socket.ConnectionInfo.Id, Config.ApiTimeOut);
-            Log.Info("Sora",
-                $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
+            Log.Info("Sora", $"已连接客户端[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
         };
         //关闭连接
         socket.OnClose = () =>
@@ -187,17 +184,15 @@ public sealed class SoraWebsocketServer : ISoraService
             //移除原连接信息
             if (ConnectionRecord.Exists(socket.ConnectionInfo.Id))
                 ConnManager.CloseConnection(socket.ConnectionInfo.Id);
-            Log.Info("Sora",
-                $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
+            Log.Info("Sora", $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
         };
         //上报接收
-        socket.OnMessage = message =>
-            Task.Run(() =>
-            {
-                if (_disposed || !_isRunning)
-                    return;
-                Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
-            });
+        socket.OnMessage = message => Task.Run(() =>
+        {
+            if (_disposed || !_isRunning)
+                return;
+            Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
+        });
     }
 
     /// <summary>
@@ -224,9 +219,9 @@ public sealed class SoraWebsocketServer : ISoraService
         GC.SuppressFinalize(this);
     }
 
-    #endregion
+#endregion
 
-    #region util
+#region util
 
     /// <summary>
     /// 获取API实例
@@ -240,16 +235,17 @@ public sealed class SoraWebsocketServer : ISoraService
     private bool CheckRequest(IWebSocketConnection socket, out string selfId)
     {
         //获取请求头数据
-        if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID", out selfId) ||        //bot UID
+        if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID", out selfId)
+            ||                                                                            //bot UID
             !socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role", out string role)) //Client Type
             return false;
 
         //请求路径检查
         bool isLost = role switch
-        {
-            "Universal" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath.Trim('/')),
-            _           => true
-        };
+                      {
+                          "Universal" => !socket.ConnectionInfo.Path.Trim('/').Equals(Config.UniversalPath.Trim('/')),
+                          _           => true
+                      };
         if (isLost)
         {
             socket.Close();
@@ -259,8 +255,7 @@ public sealed class SoraWebsocketServer : ISoraService
         }
 
         //获取Token
-        if (socket.ConnectionInfo.Headers.TryGetValue("Authorization",
-                out string headerValue))
+        if (socket.ConnectionInfo.Headers.TryGetValue("Authorization", out string headerValue))
         {
             string token = headerValue.Split(' ')[1];
             Log.Debug("Server", $"get token = {token}");
@@ -272,5 +267,5 @@ public sealed class SoraWebsocketServer : ISoraService
         return true;
     }
 
-    #endregion
+#endregion
 }

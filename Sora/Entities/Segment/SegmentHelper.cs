@@ -13,7 +13,7 @@ namespace Sora.Entities.Segment;
 /// </summary>
 public static class SegmentHelper
 {
-    #region 扩展构建方法
+#region 扩展构建方法
 
     /// <summary>
     /// 生成AT 消息段
@@ -41,9 +41,9 @@ public static class SegmentHelper
         return new MessageBody(message.ToList());
     }
 
-    #endregion
+#endregion
 
-    #region 消息字符串处理
+#region 消息字符串处理
 
     /// <summary>
     /// 处理传入数据
@@ -67,17 +67,15 @@ public static class SegmentHelper
         switch (type)
         {
             case FileType.UnixFile: //linux/osx
-                if (Environment.OSVersion.Platform != PlatformID.Unix   &&
-                    Environment.OSVersion.Platform != PlatformID.MacOSX &&
-                    !File.Exists(dataStr))
+                if (Environment.OSVersion.Platform != PlatformID.Unix
+                    && Environment.OSVersion.Platform != PlatformID.MacOSX
+                    && !File.Exists(dataStr))
                     return (dataStr, false);
-                else
-                    return ($"file:///{dataStr}", true);
+                return ($"file:///{dataStr}", true);
             case FileType.WinFile: //win
                 if (Environment.OSVersion.Platform == PlatformID.Win32NT && File.Exists(dataStr))
                     return ($"file:///{dataStr}", true);
-                else
-                    return (dataStr, false);
+                return (dataStr, false);
             default:
                 return (dataStr, true);
         }
@@ -107,9 +105,9 @@ public static class SegmentHelper
         return sb.ToString();
     }
 
-    #endregion
+#endregion
 
-    #region 常量
+#region 常量
 
     /// <summary>
     /// 数据文本匹配正则
@@ -117,29 +115,23 @@ public static class SegmentHelper
     private static readonly Dictionary<FileType, Regex> FileRegices = new()
     {
         //绝对路径-linux/osx
-        {
-            FileType.UnixFile, new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled)
-        },
+        { FileType.UnixFile, new Regex(@"^(/[^/ ]*)+/?([a-zA-Z0-9]+\.[a-zA-Z0-9]+)$", RegexOptions.Compiled) },
         //绝对路径-win
-        {
-            FileType.WinFile,
-            new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled)
-        },
+        { FileType.WinFile, new Regex(@"^(?:[a-zA-Z]:\/)(?:[^\/|<>?*:""]*\/)*[^\/|<>?*:""]*$", RegexOptions.Compiled) },
         //base64
         {
-            FileType.Base64, new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$",
-                RegexOptions.Compiled)
+            FileType.Base64,
+            new Regex(@"^base64:\/\/[\/]?([\da-zA-Z]+[\/+]+)*[\da-zA-Z]+([+=]{1,2}|[\/])?$", RegexOptions.Compiled)
         },
         //网络图片链接
         {
             FileType.Url,
-            new
-                Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
-                    RegexOptions.Compiled)
+            new Regex(@"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$",
+                RegexOptions.Compiled)
         },
         //文件名
-        {FileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled)}
+        { FileType.FileName, new Regex(@"^[\w,\s-]+\.[a-zA-Z0-9]+$", RegexOptions.Compiled) }
     };
 
-    #endregion
+#endregion
 }

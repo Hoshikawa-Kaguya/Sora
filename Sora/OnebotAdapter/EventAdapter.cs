@@ -23,13 +23,13 @@ namespace Sora.OnebotAdapter;
 /// </summary>
 public sealed class EventAdapter
 {
-    #region 私有字段
+#region 私有字段
 
     private readonly CommandManager _commandManager;
 
-    #endregion
+#endregion
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 特性指令管理器
@@ -52,22 +52,24 @@ public sealed class EventAdapter
     /// </summary>
     private Guid ServiceId { get; }
 
-    #endregion
+#endregion
 
-    #region 构造方法
+#region 构造方法
 
-    internal EventAdapter(
-        Guid serviceId, bool throwErr, bool sendErr, Action<Exception, BaseMessageEventArgs, string> errHandle)
+    internal EventAdapter(Guid                                            serviceId,
+                          bool                                            throwErr,
+                          bool                                            sendErr,
+                          Action<Exception, BaseMessageEventArgs, string> errHandle)
     {
         ServiceId = serviceId;
         CommandManager = ServiceRecord.IsEnableSoraCommandManager(serviceId)
-                             ? new CommandManager(Assembly.GetEntryAssembly(), serviceId, throwErr, sendErr, errHandle)
-                             : null;
+            ? new CommandManager(Assembly.GetEntryAssembly(), serviceId, throwErr, sendErr, errHandle)
+            : null;
     }
 
-    #endregion
+#endregion
 
-    #region 事件委托
+#region 事件委托
 
     /// <summary>
     /// Onebot事件委托
@@ -78,9 +80,9 @@ public sealed class EventAdapter
     public delegate ValueTask EventAsyncCallBackHandler<in TEventArgs>(string eventType, TEventArgs eventArgs)
         where TEventArgs : System.EventArgs;
 
-    #endregion
+#endregion
 
-    #region 事件回调
+#region 事件回调
 
     /// <summary>
     /// onebot链接完成事件
@@ -192,9 +194,9 @@ public sealed class EventAdapter
     /// </summary>
     public event EventAsyncCallBackHandler<EssenceChangeEventArgs> OnEssenceChange;
 
-    #endregion
+#endregion
 
-    #region 事件分发
+#region 事件分发
 
     /// <summary>
     /// 事件分发
@@ -210,8 +212,7 @@ public sealed class EventAdapter
         }
 
         if (ServiceRecord.IsEnableSocketMessage(ServiceId))
-            Log.Debug("Socket",
-                $"Get json message:{messageJson.ToString(Formatting.None)}");
+            Log.Debug("Socket", $"Get json message:{messageJson.ToString(Formatting.None)}");
         switch (TryGetJsonValue(messageJson, "post_type"))
         {
             //元事件类型
@@ -232,21 +233,20 @@ public sealed class EventAdapter
                 break;
             default:
                 //尝试从响应中获取标识符
-                if (messageJson.TryGetValue("echo", out JToken echoJson) &&
-                    Guid.TryParse(echoJson.ToString(), out Guid echo))
+                if (messageJson.TryGetValue("echo", out JToken echoJson)
+                    && Guid.TryParse(echoJson.ToString(), out Guid echo))
                     //取出返回值中的数据
                     ReactiveApiManager.GetResponse(echo, messageJson);
                 else
-                    Log.Warning("Sora",
-                        $"未知类型的上报:{TryGetJsonValue(messageJson, "post_type")}\r\njson = {messageJson}");
+                    Log.Warning("Sora", $"未知类型的上报:{TryGetJsonValue(messageJson, "post_type")}\r\njson = {messageJson}");
 
                 break;
         }
     }
 
-    #endregion
+#endregion
 
-    #region 元事件处理和分发
+#region 元事件处理和分发
 
     /// <summary>
     /// 元事件处理和分发
@@ -307,9 +307,8 @@ public sealed class EventAdapter
                     break;
                 //执行回调
                 await OnClientConnect("Meta Event",
-                    new ConnectEventArgs(ServiceId, connection, "lifecycle",
-                        lifeCycle?.SelfId ?? -1, info.clientType, info.clientVer,
-                        lifeCycle?.Time   ?? 0));
+                    new ConnectEventArgs(ServiceId, connection, "lifecycle", lifeCycle?.SelfId ?? -1, info.clientType,
+                        info.clientVer, lifeCycle?.Time ?? 0));
                 break;
             }
             default:
@@ -318,9 +317,9 @@ public sealed class EventAdapter
         }
     }
 
-    #endregion
+#endregion
 
-    #region 消息事件处理和分发
+#region 消息事件处理和分发
 
     /// <summary>
     /// 消息事件处理和分发
@@ -388,9 +387,9 @@ public sealed class EventAdapter
         }
     }
 
-    #endregion
+#endregion
 
-    #region 自身消息事件处理和分发
+#region 自身消息事件处理和分发
 
     /// <summary>
     /// 自身事件处理和分发
@@ -406,8 +405,7 @@ public sealed class EventAdapter
                 var groupMsg = messageJson.ToObject<OnebotGroupMsgEventArgs>();
                 if (groupMsg == null)
                     break;
-                Log.Debug("Sora",
-                    $"Group self msg[{groupMsg.GroupId}] -> {groupMsg.RawMessage}");
+                Log.Debug("Sora", $"Group self msg[{groupMsg.GroupId}] -> {groupMsg.RawMessage}");
                 //执行回调
                 if (OnSelfGroupMessage == null)
                     break;
@@ -420,8 +418,7 @@ public sealed class EventAdapter
                 var privateMsg = messageJson.ToObject<OnebotPrivateMsgEventArgs>();
                 if (privateMsg == null)
                     break;
-                Log.Debug("Sora",
-                    $"Group self msg[{privateMsg.UserId}] -> {privateMsg.RawMessage}");
+                Log.Debug("Sora", $"Group self msg[{privateMsg.UserId}] -> {privateMsg.RawMessage}");
                 //执行回调
                 if (OnSelfPrivateMessage == null)
                     break;
@@ -435,9 +432,9 @@ public sealed class EventAdapter
         }
     }
 
-    #endregion
+#endregion
 
-    #region 请求事件处理和分发
+#region 请求事件处理和分发
 
     /// <summary>
     /// 请求事件处理和分发
@@ -460,8 +457,7 @@ public sealed class EventAdapter
                 if (OnFriendRequest == null)
                     break;
                 await OnFriendRequest("Request",
-                    new FriendRequestEventArgs(ServiceId, connection, "request|friend",
-                        friendRequest));
+                    new FriendRequestEventArgs(ServiceId, connection, "request|friend", friendRequest));
                 break;
             }
             //群组请求事件
@@ -482,8 +478,7 @@ public sealed class EventAdapter
                 if (OnGroupRequest == null)
                     break;
                 await OnGroupRequest("Request",
-                    new AddGroupRequestEventArgs(ServiceId, connection, "request|group",
-                        groupRequest));
+                    new AddGroupRequestEventArgs(ServiceId, connection, "request|group", groupRequest));
                 break;
             }
             default:
@@ -492,9 +487,9 @@ public sealed class EventAdapter
         }
     }
 
-    #endregion
+#endregion
 
-    #region 通知事件处理和分发
+#region 通知事件处理和分发
 
     /// <summary>
     /// 通知事件处理和分发
@@ -576,8 +571,7 @@ public sealed class EventAdapter
                 //执行回调
                 if (OnFriendAdd == null)
                     break;
-                await OnFriendAdd("Notice",
-                    new FriendAddEventArgs(ServiceId, connection, "friend_add", friendAdd));
+                await OnFriendAdd("Notice", new FriendAddEventArgs(ServiceId, connection, "friend_add", friendAdd));
                 break;
             }
             //群消息撤回
@@ -606,16 +600,14 @@ public sealed class EventAdapter
                 if (OnFriendRecall == null)
                     break;
                 await OnFriendRecall("Notice",
-                    new FriendRecallEventArgs(ServiceId, connection, "friend_recall",
-                        friendRecall));
+                    new FriendRecallEventArgs(ServiceId, connection, "friend_recall", friendRecall));
                 break;
             }
             //群名片变更
             //仅支持GoCQ
             case "group_card":
             {
-                var groupCardUpdate =
-                    messageJson.ToObject<OnebotGroupCardUpdateEventArgs>();
+                var groupCardUpdate = messageJson.ToObject<OnebotGroupCardUpdateEventArgs>();
                 if (groupCardUpdate == null)
                     break;
                 Log.Debug("Sora",
@@ -623,8 +615,7 @@ public sealed class EventAdapter
                 if (OnGroupCardUpdate == null)
                     break;
                 await OnGroupCardUpdate("Notice",
-                    new GroupCardUpdateEventArgs(ServiceId, connection, "group_card",
-                        groupCardUpdate));
+                    new GroupCardUpdateEventArgs(ServiceId, connection, "group_card", groupCardUpdate));
                 break;
             }
             case "offline_file":
@@ -632,13 +623,11 @@ public sealed class EventAdapter
                 var offlineFile = messageJson.ToObject<OnebotOfflineFileEventArgs>();
                 if (offlineFile == null)
                     break;
-                Log.Debug("Sora",
-                    $"Get offline file from[{offlineFile.UserId}] file name = {offlineFile.Info.Name}");
+                Log.Debug("Sora", $"Get offline file from[{offlineFile.UserId}] file name = {offlineFile.Info.Name}");
                 if (OnOfflineFileEvent == null)
                     break;
                 await OnOfflineFileEvent("Notice",
-                    new OfflineFileEventArgs(ServiceId, connection, "offline_file",
-                        offlineFile));
+                    new OfflineFileEventArgs(ServiceId, connection, "offline_file", offlineFile));
                 break;
             }
             case "client_status":
@@ -651,9 +640,7 @@ public sealed class EventAdapter
                 if (OnClientStatusChangeEvent == null)
                     break;
                 await OnClientStatusChangeEvent("Notice",
-                    new ClientStatusChangeEventArgs(ServiceId, connection,
-                        "client_status",
-                        clientStatus));
+                    new ClientStatusChangeEventArgs(ServiceId, connection, "client_status", clientStatus));
                 break;
             }
             case "essence":
@@ -682,8 +669,7 @@ public sealed class EventAdapter
                             $"Group[{pokeEvent.GroupId}] poke from [{pokeEvent.UserId}] to [{pokeEvent.TargetId}]");
                         if (OnGroupPoke == null)
                             break;
-                        await OnGroupPoke("Notify",
-                            new GroupPokeEventArgs(ServiceId, connection, "poke", pokeEvent));
+                        await OnGroupPoke("Notify", new GroupPokeEventArgs(ServiceId, connection, "poke", pokeEvent));
                         break;
                     }
                     case "lucky_king": //运气王
@@ -691,13 +677,11 @@ public sealed class EventAdapter
                         var luckyEvent = messageJson.ToObject<OnebotPokeOrLuckyEventArgs>();
                         if (luckyEvent == null)
                             break;
-                        Log.Debug("Sora",
-                            $"Group[{luckyEvent.GroupId}] lucky king user[{luckyEvent.TargetId}]");
+                        Log.Debug("Sora", $"Group[{luckyEvent.GroupId}] lucky king user[{luckyEvent.TargetId}]");
                         if (OnLuckyKingEvent == null)
                             break;
                         await OnLuckyKingEvent("Notify",
-                            new LuckyKingEventArgs(ServiceId, connection, "lucky_king",
-                                luckyEvent));
+                            new LuckyKingEventArgs(ServiceId, connection, "lucky_king", luckyEvent));
                         break;
                     }
                     case "honor":
@@ -705,12 +689,10 @@ public sealed class EventAdapter
                         var honorEvent = messageJson.ToObject<OnebotHonorEventArgs>();
                         if (honorEvent == null)
                             break;
-                        Log.Debug("Sora",
-                            $"Group[{honorEvent.GroupId}] member honor change [{honorEvent.HonorType}]");
+                        Log.Debug("Sora", $"Group[{honorEvent.GroupId}] member honor change [{honorEvent.HonorType}]");
                         if (OnHonorEvent == null)
                             break;
-                        await OnHonorEvent("Notify",
-                            new HonorEventArgs(ServiceId, connection, "honor", honorEvent));
+                        await OnHonorEvent("Notify", new HonorEventArgs(ServiceId, connection, "honor", honorEvent));
                         break;
                     }
                     case "title":
@@ -723,8 +705,7 @@ public sealed class EventAdapter
                         if (OnTitleUpdate == null)
                             break;
                         await OnTitleUpdate("Notify",
-                            new TitleUpdateEventArgs(ServiceId, connection, "title",
-                                newTitleEvent));
+                            new TitleUpdateEventArgs(ServiceId, connection, "title", newTitleEvent));
                         break;
                     }
                     default:
@@ -739,9 +720,9 @@ public sealed class EventAdapter
         }
     }
 
-    #endregion
+#endregion
 
-    #region 事件类型获取
+#region 事件类型获取
 
     /// <summary>
     /// 获取json中的值
@@ -751,5 +732,5 @@ public sealed class EventAdapter
         return dataJson.TryGetValue(key, out JToken value) ? value.ToString() : string.Empty;
     }
 
-    #endregion
+#endregion
 }

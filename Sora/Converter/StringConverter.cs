@@ -19,9 +19,7 @@ internal class StringConverter : JsonConverter
         writer.WriteValue(value.ToString());
     }
 
-    public override object ReadJson(
-        JsonReader     reader, Type objectType, object existingValue,
-        JsonSerializer serializer)
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
         //此方法不可能调用，不做实现
         return null;

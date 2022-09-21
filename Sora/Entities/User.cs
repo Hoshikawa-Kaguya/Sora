@@ -15,7 +15,7 @@ namespace Sora.Entities;
 /// </summary>
 public sealed class User : BaseModel
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 当前实例的用户ID
@@ -27,9 +27,9 @@ public sealed class User : BaseModel
     /// </summary>
     public bool IsSuperUser { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
@@ -37,15 +37,16 @@ public sealed class User : BaseModel
     /// <param name="serviceId">服务ID</param>
     /// <param name="connectionId">服务器连接标识</param>
     /// <param name="uid">用户ID</param>
-    internal User(Guid serviceId, Guid connectionId, long uid) : base(connectionId)
+    internal User(Guid serviceId, Guid connectionId, long uid)
+        : base(connectionId)
     {
         Id          = uid;
         IsSuperUser = Id is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, uid);
     }
 
-    #endregion
+#endregion
 
-    #region 常用操作方法
+#region 常用操作方法
 
     /// <summary>
     /// 发送群消息
@@ -59,7 +60,8 @@ public sealed class User : BaseModel
     /// <para><see langword="messageId"/> 消息ID</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateMessage(
-        MessageBody message, TimeSpan? timeout = null)
+        MessageBody message,
+        TimeSpan?   timeout = null)
     {
         return await SoraApi.SendPrivateMessage(Id, message, timeout);
     }
@@ -97,14 +99,15 @@ public sealed class User : BaseModel
     /// </param>
     /// <param name="timeout">覆盖原超时</param>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> SendPrivateForwardMsg(
-        IEnumerable<CustomNode> nodeList, TimeSpan? timeout = null)
+        IEnumerable<CustomNode> nodeList,
+        TimeSpan?               timeout = null)
     {
         return await SoraApi.SendPrivateForwardMsg(Id, nodeList, timeout);
     }
 
-    #endregion
+#endregion
 
-    #region 消息段方法
+#region 消息段方法
 
     /// <summary>
     /// 获取At消息段
@@ -117,9 +120,9 @@ public sealed class User : BaseModel
         return SoraSegment.At(Id);
     }
 
-    #endregion
+#endregion
 
-    #region 转换方法
+#region 转换方法
 
     /// <summary>
     /// 定义将 <see cref="User"/> 对象转换为 <see cref="long"/>
@@ -139,9 +142,9 @@ public sealed class User : BaseModel
         return value.ToString();
     }
 
-    #endregion
+#endregion
 
-    #region 运算符重载
+#region 运算符重载
 
     /// <summary>
     /// 等于重载
@@ -162,9 +165,9 @@ public sealed class User : BaseModel
         return !(userL == userR);
     }
 
-    #endregion
+#endregion
 
-    #region 常用重载
+#region 常用重载
 
     /// <summary>
     /// 比较重载
@@ -185,5 +188,5 @@ public sealed class User : BaseModel
         return HashCode.Combine(Id, SoraApi);
     }
 
-    #endregion
+#endregion
 }

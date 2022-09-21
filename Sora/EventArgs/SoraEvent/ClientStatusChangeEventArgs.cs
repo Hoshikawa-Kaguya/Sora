@@ -10,32 +10,31 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class ClientStatusChangeEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 客户端信息
     /// </summary>
-    public ClientInfo Client { get; private set; }
+    public ClientInfo Client { get; }
 
     /// <summary>
     /// 是否在线
     /// </summary>
-    public bool Online { get; private set; }
+    public bool Online { get; }
 
-    #endregion
+#endregion
 
-    #region 构造方法
+#region 构造方法
 
-    internal ClientStatusChangeEventArgs(
-        Guid                        serviceId,
-        Guid                        connectionId,
-        string                      eventName,
-        OnebotClientStatusEventArgs clientStatus) :
-        base(serviceId, connectionId, eventName, clientStatus.SelfId, clientStatus.Time, SourceFlag.System)
+    internal ClientStatusChangeEventArgs(Guid                        serviceId,
+                                         Guid                        connectionId,
+                                         string                      eventName,
+                                         OnebotClientStatusEventArgs clientStatus)
+        : base(serviceId, connectionId, eventName, clientStatus.SelfId, clientStatus.Time, SourceFlag.System)
     {
         Client = clientStatus.ClientInfo;
         Online = clientStatus.Online;
     }
 
-    #endregion
+#endregion
 }

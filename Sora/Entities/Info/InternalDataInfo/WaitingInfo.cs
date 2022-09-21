@@ -25,9 +25,13 @@ internal struct WaitingInfo
     /// <summary>
     /// 构造方法
     /// </summary>
-    internal WaitingInfo(
-        AutoResetEvent   semaphore, string[]     commandExpressions, Guid       connectionId, Guid serviceId,
-        (long u, long g) source,    RegexOptions regexOptions,       SourceFlag sourceFlag)
+    internal WaitingInfo(AutoResetEvent   semaphore,
+                         string[]         commandExpressions,
+                         Guid             connectionId,
+                         Guid             serviceId,
+                         (long u, long g) source,
+                         RegexOptions     regexOptions,
+                         SourceFlag       sourceFlag)
     {
         Semaphore          = semaphore;
         CommandExpressions = commandExpressions;
@@ -43,9 +47,12 @@ internal struct WaitingInfo
     /// <summary>
     /// 构造方法
     /// </summary>
-    internal WaitingInfo(
-        AutoResetEvent semaphore, Func<BaseMessageEventArgs, bool> matchFunc, Guid       connectionId,
-        Guid           serviceId, (long u, long g)                 source,    SourceFlag sourceFlag)
+    internal WaitingInfo(AutoResetEvent                   semaphore,
+                         Func<BaseMessageEventArgs, bool> matchFunc,
+                         Guid                             connectionId,
+                         Guid                             serviceId,
+                         (long u, long g)                 source,
+                         SourceFlag                       sourceFlag)
     {
         Semaphore          = semaphore;
         CommandExpressions = null;
@@ -63,12 +70,12 @@ internal struct WaitingInfo
     /// </summary>
     internal bool IsSameSource(WaitingInfo info)
     {
-        return info.SourceFlag   == SourceFlag   &&
-               info.Source       == Source       &&
-               info.ConnectionId == ConnectionId &&
-               info.ServiceId    == ServiceId    &&
-               info.MatchFunc    == MatchFunc    &&
-               info.CommandExpressions.ArrayEquals(CommandExpressions);
+        return info.SourceFlag == SourceFlag
+               && info.Source == Source
+               && info.ConnectionId == ConnectionId
+               && info.ServiceId == ServiceId
+               && info.MatchFunc == MatchFunc
+               && info.CommandExpressions.ArrayEquals(CommandExpressions);
     }
 
     public override int GetHashCode()

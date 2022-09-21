@@ -13,26 +13,26 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class GroupPokeEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 发送者
     /// </summary>
-    public User SendUser { get; private set; }
+    public User SendUser { get; }
 
     /// <summary>
     /// 被戳者
     /// </summary>
-    public User TargetUser { get; private set; }
+    public User TargetUser { get; }
 
     /// <summary>
     /// 消息源群
     /// </summary>
-    public Group SourceGroup { get; private set; }
+    public Group SourceGroup { get; }
 
-    #endregion 属性
+#endregion 属性
 
-    #region 快捷方法
+#region 快捷方法
 
     /// <summary>
     /// 戳回去
@@ -47,9 +47,9 @@ public sealed class GroupPokeEventArgs : BaseSoraEventArgs
         return await SoraApi.SendGroupMessage(SourceGroup, SoraSegment.Poke(SendUser), timeout);
     }
 
-    #endregion 快捷方法
+#endregion 快捷方法
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
@@ -58,15 +58,16 @@ public sealed class GroupPokeEventArgs : BaseSoraEventArgs
     /// <param name="connectionId">服务器链接标识</param>
     /// <param name="eventName">事件名</param>
     /// <param name="pokeEventArgs">戳一戳事件参数</param>
-    internal GroupPokeEventArgs(
-        Guid serviceId, Guid connectionId, string eventName,
-        OnebotPokeOrLuckyEventArgs pokeEventArgs) :
-        base(serviceId, connectionId, eventName, pokeEventArgs.SelfId, pokeEventArgs.Time, SourceFlag.Group)
+    internal GroupPokeEventArgs(Guid                       serviceId,
+                                Guid                       connectionId,
+                                string                     eventName,
+                                OnebotPokeOrLuckyEventArgs pokeEventArgs)
+        : base(serviceId, connectionId, eventName, pokeEventArgs.SelfId, pokeEventArgs.Time, SourceFlag.Group)
     {
-        SendUser = new User(serviceId, connectionId, pokeEventArgs.UserId);
-        TargetUser = new User(serviceId, connectionId, pokeEventArgs.TargetId);
+        SendUser    = new User(serviceId, connectionId, pokeEventArgs.UserId);
+        TargetUser  = new User(serviceId, connectionId, pokeEventArgs.TargetId);
         SourceGroup = new Group(connectionId, pokeEventArgs.GroupId);
     }
 
-    #endregion 构造函数
+#endregion 构造函数
 }

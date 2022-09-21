@@ -15,13 +15,13 @@ namespace Sora.Entities;
 [DebuggerDisplay("{DebuggerDisplay,nq}, Count = {_message.Count}")]
 public sealed class MessageBody : IList<SoraSegment>
 {
-    #region 私有字段
+#region 私有字段
 
     private readonly List<SoraSegment> _message = new();
 
-    #endregion
+#endregion
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 消息段数量
@@ -35,9 +35,9 @@ public sealed class MessageBody : IList<SoraSegment>
 
     private string DebuggerDisplay => this.SerializeMessage();
 
-    #endregion
+#endregion
 
-    #region 构造方法
+#region 构造方法
 
     /// <summary>
     /// 构造消息段列表
@@ -56,9 +56,9 @@ public sealed class MessageBody : IList<SoraSegment>
     {
     }
 
-    #endregion
+#endregion
 
-    #region List方法
+#region List方法
 
     /// <summary>
     /// 迭代器
@@ -212,9 +212,9 @@ public sealed class MessageBody : IList<SoraSegment>
         return _message;
     }
 
-    #endregion
+#endregion
 
-    #region 扩展方法
+#region 扩展方法
 
     /// <summary>
     /// <para>添加纯文本消息段</para>
@@ -226,9 +226,9 @@ public sealed class MessageBody : IList<SoraSegment>
         _message.Add(SoraSegment.Text(text));
     }
 
-    #endregion
+#endregion
 
-    #region 运算重载
+#region 运算重载
 
     /// <summary>
     /// 索引器
@@ -281,27 +281,26 @@ public sealed class MessageBody : IList<SoraSegment>
         return messageL;
     }
 
-    #endregion
+#endregion
 
-    #region 隐式转换
+#region 隐式转换
 
     /// <summary>
     /// 隐式类型转换
     /// </summary>
     public static implicit operator MessageBody(string text)
     {
-        return new MessageBody() {SoraSegment.Text(text)};
+        return new MessageBody { SoraSegment.Text(text) };
     }
 
-    #endregion
+#endregion
 
-    #region 类内部工具
+#region 类内部工具
 
     private static void RemoveIllegalSegment(ref MessageBody segmentDatas)
     {
         int iCount = segmentDatas.RemoveAll(s =>
-            s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
-            s.Data is null);
+            s.MessageType is SegmentType.Ignore or SegmentType.Unknown || s.Data is null);
         if (iCount != 0)
             Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
     }
@@ -309,17 +308,15 @@ public sealed class MessageBody : IList<SoraSegment>
     private static void RemoveIllegalSegment(ref List<SoraSegment> segmentDatas)
     {
         int iCount = segmentDatas.RemoveAll(s =>
-            s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
-            s.Data is null);
+            s.MessageType is SegmentType.Ignore or SegmentType.Unknown || s.Data is null);
         if (iCount != 0)
             Log.Warning("MessageBody", $"已移除{iCount}个无效消息段");
     }
 
     private static bool SegmentCheck(SoraSegment s)
     {
-        return !(s.MessageType is SegmentType.Ignore or SegmentType.Unknown ||
-                 s.Data is null);
+        return !(s.MessageType is SegmentType.Ignore or SegmentType.Unknown || s.Data is null);
     }
 
-    #endregion
+#endregion
 }

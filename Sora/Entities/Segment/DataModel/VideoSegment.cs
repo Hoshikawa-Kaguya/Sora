@@ -12,7 +12,7 @@ public sealed record VideoSegment : BaseSegment
     {
     }
 
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 视频文件名
@@ -47,5 +47,5 @@ public sealed record VideoSegment : BaseSegment
     [JsonProperty(PropertyName = "timeout", NullValueHandling = NullValueHandling.Ignore)]
     public int? Timeout { get; internal set; }
 
-    #endregion
+#endregion
 }

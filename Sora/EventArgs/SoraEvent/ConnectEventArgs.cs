@@ -8,21 +8,21 @@ namespace Sora.EventArgs.SoraEvent;
 /// </summary>
 public sealed class ConnectEventArgs : BaseSoraEventArgs
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 连接客户端类型
     /// </summary>
-    public string ClientType { get; private set; }
+    public string ClientType { get; }
 
     /// <summary>
     /// 连接客户端版本号
     /// </summary>
-    public string ClientVersionCode { get; private set; }
+    public string ClientVersionCode { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
@@ -34,14 +34,18 @@ public sealed class ConnectEventArgs : BaseSoraEventArgs
     /// <param name="clientType">当前客户端类型</param>
     /// <param name="clientVersion">当前客户端版本</param>
     /// <param name="time">连接时间</param>
-    internal ConnectEventArgs(
-        Guid   serviceId,  Guid   connectionId,  string eventName, long loginUid,
-        string clientType, string clientVersion, long   time) :
-        base(serviceId, connectionId, eventName, loginUid, time, SourceFlag.System)
+    internal ConnectEventArgs(Guid   serviceId,
+                              Guid   connectionId,
+                              string eventName,
+                              long   loginUid,
+                              string clientType,
+                              string clientVersion,
+                              long   time)
+        : base(serviceId, connectionId, eventName, loginUid, time, SourceFlag.System)
     {
         ClientType        = clientType;
         ClientVersionCode = clientVersion;
     }
 
-    #endregion
+#endregion
 }

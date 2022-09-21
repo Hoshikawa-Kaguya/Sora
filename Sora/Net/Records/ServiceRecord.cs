@@ -38,7 +38,7 @@ internal static class ServiceRecord
         return _servicesDict[service].c.BlockUsers.Contains(userId);
     }
 
-    #region flag
+#region flag
 
     public static bool IsEnableSoraCommandManager(Guid service)
     {
@@ -61,9 +61,9 @@ internal static class ServiceRecord
         return _servicesDict[service].c.AutoMarkMessageRead;
     }
 
-    #endregion
+#endregion
 
-    #region 基本操作
+#region 基本操作
 
     public static bool AddOrUpdateRecord(Guid service, ServiceConfig config, ISoraService serviceInstance)
     {
@@ -128,9 +128,9 @@ internal static class ServiceRecord
         return _servicesDict[service].c.BlockUsers.Remove(userId);
     }
 
-    #endregion
+#endregion
 
-    #region 指令相关
+#region 指令相关
 
     /// <summary>
     /// 是否为群组中禁用的指令
@@ -140,9 +140,7 @@ internal static class ServiceRecord
         if (!ServiceAlive("Command", service))
             return false;
         if (_servicesDict[service].c.GroupBanCommand.ContainsKey(groupId))
-        {
             return _servicesDict[service].c.GroupBanCommand[groupId]!.Contains(seriesName);
-        }
 
         return false;
     }
@@ -154,10 +152,7 @@ internal static class ServiceRecord
     {
         if (!ServiceAlive("Command", service))
             return false;
-        if (!_servicesDict[service].c.GroupBanCommand.ContainsKey(groupId))
-        {
-            return false;
-        }
+        if (!_servicesDict[service].c.GroupBanCommand.ContainsKey(groupId)) return false;
 
         Log.Info("CommandAdapter", $"正在启用群[{groupId}]的指令组[{seriesName}]");
         return _servicesDict[service].c.GroupBanCommand[groupId].Remove(seriesName);
@@ -171,17 +166,15 @@ internal static class ServiceRecord
         if (!ServiceAlive("Command", service))
             return false;
         if (!_servicesDict[service].c.GroupBanCommand.ContainsKey(groupId))
-        {
             _servicesDict[service].c.GroupBanCommand[groupId] = new HashSet<string>();
-        }
 
         Log.Info("CommandAdapter", $"正在禁用群[{groupId}]的指令组[{seriesName}]");
         return _servicesDict[service].c.GroupBanCommand[groupId].Add(seriesName);
     }
 
-    #endregion
+#endregion
 
-    #region 小工具
+#region 小工具
 
     private static bool ServiceAlive(string desc, Guid service)
     {
@@ -198,12 +191,12 @@ internal static class ServiceRecord
     {
         if (!_servicesDict.ContainsKey(service))
         {
-            if(!ignore) Log.Warning(desc, $"不存在的Sora服务[{service}]");
+            if (!ignore) Log.Warning(desc, $"不存在的Sora服务[{service}]");
             return false;
         }
 
         return true;
     }
 
-    #endregion
+#endregion
 }

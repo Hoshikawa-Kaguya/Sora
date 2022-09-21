@@ -18,15 +18,15 @@ namespace Sora.Net;
 /// </summary>
 public sealed class ConnectionManager : IDisposable
 {
-    #region 属性
+#region 属性
 
     private TimeSpan HeartBeatTimeOut { get; }
 
-    private Timer HeartBeatTimer { set; get; }
+    private Timer HeartBeatTimer { get; }
 
-    #endregion
+#endregion
 
-    #region 回调事件
+#region 回调事件
 
     /// <summary>
     /// 服务器事件回调
@@ -48,9 +48,9 @@ public sealed class ConnectionManager : IDisposable
     /// </summary>
     public event ServerAsyncCallBackHandler<ConnectionEventArgs> OnCloseConnectionAsync;
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     internal ConnectionManager(ISoraConfig config, Guid serviceId)
     {
@@ -58,9 +58,9 @@ public sealed class ConnectionManager : IDisposable
         HeartBeatTimer   ??= new Timer(HeartBeatCheck, serviceId, HeartBeatTimeOut, HeartBeatTimeOut);
     }
 
-    #endregion
+#endregion
 
-    #region 服务器信息发送
+#region 服务器信息发送
 
     internal static bool SendMessage(Guid connectionId, string message)
     {
@@ -82,9 +82,9 @@ public sealed class ConnectionManager : IDisposable
         }
     }
 
-    #endregion
+#endregion
 
-    #region 心跳包管理
+#region 心跳包管理
 
     /// <summary>
     /// 心跳包超时检查
@@ -93,7 +93,7 @@ public sealed class ConnectionManager : IDisposable
     {
         if (ConnectionRecord.IsEmpty())
             return;
-        var serviceId = (Guid) serviceIdObj;
+        var serviceId = (Guid)serviceIdObj;
         Log.Verbose("HeartBeatCheck", $"service id={serviceId}({ConnectionRecord.ConnCount()})");
 
         //查找超时连接
@@ -110,11 +110,10 @@ public sealed class ConnectionManager : IDisposable
         {
             CloseConnection(connection);
             double t = (now - info.LastHeartBeatTime).TotalMilliseconds;
-            Log.Error("HeartBeatCheck",
-                $"WebSocket连接[{connection}]心跳包超时({t}ms)，断开连接");
+            Log.Error("HeartBeatCheck", $"WebSocket连接[{connection}]心跳包超时({t}ms)，断开连接");
             //客户端尝试重连
-            if (info.Connection.SocketType == SoraSocketType.Client &&
-                info.Connection.SocketInstance is WebsocketClient c)
+            if (info.Connection.SocketType == SoraSocketType.Client
+                && info.Connection.SocketInstance is WebsocketClient c)
                 needReconnect.Add(c);
         }
 
@@ -122,9 +121,9 @@ public sealed class ConnectionManager : IDisposable
             needReconnect.ForEach(conn => conn.Reconnect());
     }
 
-    #endregion
+#endregion
 
-    #region 服务器事件
+#region 服务器事件
 
     /// <summary>
     /// 服务器链接开启事件
@@ -135,9 +134,12 @@ public sealed class ConnectionManager : IDisposable
     /// <param name="serviceId">服务ID</param>
     /// <param name="connId">连接ID</param>
     /// <param name="apiTimeout">api超时</param>
-    internal void OpenConnection(
-        string   role, string selfId, ISoraSocket socket, Guid serviceId, Guid connId,
-        TimeSpan apiTimeout)
+    internal void OpenConnection(string      role,
+                                 string      selfId,
+                                 ISoraSocket socket,
+                                 Guid        serviceId,
+                                 Guid        connId,
+                                 TimeSpan    apiTimeout)
     {
         //添加服务器记录
         if (!ConnectionRecord.AddNewConn(serviceId, connId, socket, apiTimeout))
@@ -192,9 +194,9 @@ public sealed class ConnectionManager : IDisposable
         ConnectionRecord.CloseConn(connId);
     }
 
-    #endregion
+#endregion
 
-    #region 析构
+#region 析构
 
     /// <summary>
     /// 析构
@@ -213,5 +215,5 @@ public sealed class ConnectionManager : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    #endregion
+#endregion
 }

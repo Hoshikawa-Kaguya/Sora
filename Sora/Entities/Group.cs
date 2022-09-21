@@ -15,30 +15,31 @@ namespace Sora.Entities;
 /// </summary>
 public sealed class Group : BaseModel
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 群号
     /// </summary>
     public long Id { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     /// <summary>
     /// 初始化
     /// </summary>
     /// <param name="connectionId">服务器连接标识</param>
     /// <param name="gid">群号</param>
-    internal Group(Guid connectionId, long gid) : base(connectionId)
+    internal Group(Guid connectionId, long gid)
+        : base(connectionId)
     {
         Id = gid;
     }
 
-    #endregion
+#endregion
 
-    #region 群消息类方法
+#region 群消息类方法
 
     /// <summary>
     /// 发送群消息
@@ -56,9 +57,9 @@ public sealed class Group : BaseModel
         return await SoraApi.SendGroupMessage(Id, message, timeout);
     }
 
-    #endregion
+#endregion
 
-    #region 群信息类方法
+#region 群信息类方法
 
     /// <summary>
     /// 获取群信息
@@ -96,12 +97,13 @@ public sealed class Group : BaseModel
     /// <para><see cref="GroupMemberInfo"/> 群成员信息</para>
     /// </returns>
     public async ValueTask<(ApiStatus apiStatus, GroupMemberInfo memberInfo)> GetGroupMemberInfo(
-        long userId, bool useCache = true)
+        long userId,
+        bool useCache = true)
     {
         return await SoraApi.GetGroupMemberInfo(Id, userId, useCache);
     }
 
-    #region GoCQ扩展
+#region GoCQ扩展
 
     /// <summary>
     /// 发送合并转发(群)
@@ -111,7 +113,8 @@ public sealed class Group : BaseModel
     /// </param>
     /// <param name="timeout">超时覆盖</param>
     public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(
-        IEnumerable<CustomNode> nodeList, TimeSpan? timeout = null)
+        IEnumerable<CustomNode> nodeList,
+        TimeSpan?               timeout = null)
     {
         return await SoraApi.SendGroupForwardMsg(Id, nodeList, timeout);
     }
@@ -136,8 +139,7 @@ public sealed class Group : BaseModel
     /// <para><see langword="groupFiles"/> 文件列表</para>
     /// <para><see langword="groupFolders"/> 文件夹列表</para>
     /// </returns>
-    public async
-        ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+    public async ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
         GetGroupRootFiles()
     {
         return await SoraApi.GetGroupRootFiles(Id);
@@ -152,8 +154,7 @@ public sealed class Group : BaseModel
     /// <para><see langword="groupFiles"/> 文件列表</para>
     /// <para><see langword="groupFolders"/> 文件夹列表</para>
     /// </returns>
-    public async
-        ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
+    public async ValueTask<(ApiStatus apiStatus, List<GroupFileInfo> groupFiles, List<GroupFolderInfo> groupFolders)>
         GetGroupFilesByFolder(string foldId)
     {
         return await SoraApi.GetGroupFilesByFolder(Id, foldId);
@@ -211,19 +212,16 @@ public sealed class Group : BaseModel
     /// <param name="fileName">上传文件名</param>
     /// <param name="folderId">父目录ID</param>
     /// <returns>API状态</returns>
-    public async ValueTask<ApiStatus> UploadGroupFile(
-        string localFilePath, string fileName,
-        string folderId = null)
+    public async ValueTask<ApiStatus> UploadGroupFile(string localFilePath, string fileName, string folderId = null)
     {
-        return await SoraApi.UploadGroupFile(Id, localFilePath,
-                   fileName, folderId);
+        return await SoraApi.UploadGroupFile(Id, localFilePath, fileName, folderId);
     }
 
-    #endregion
+#endregion
 
-    #endregion
+#endregion
 
-    #region 群管理方法
+#region 群管理方法
 
     /// <summary>
     /// 设置群组成员禁言
@@ -333,7 +331,7 @@ public sealed class Group : BaseModel
         return await SoraApi.KickGroupMember(Id, userId, rejectRequest);
     }
 
-    #region GoCQ扩展
+#region GoCQ扩展
 
     /// <summary>
     /// 设置群名
@@ -363,17 +361,16 @@ public sealed class Group : BaseModel
     /// <para><see langword="groupRemain"/> 群内所有管理当天剩余@全体成员次数</para>
     /// <para><see langword="botRemain"/> BOT当天剩余@全体成员次数</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, bool canAt, short groupRemain, short botRemain)>
-        GetGroupAtAllRemain()
+    public async ValueTask<(ApiStatus apiStatus, bool canAt, short groupRemain, short botRemain)> GetGroupAtAllRemain()
     {
         return await SoraApi.GetGroupAtAllRemain(Id);
     }
 
-    #endregion
+#endregion
 
-    #endregion
+#endregion
 
-    #region 指令相关
+#region 指令相关
 
     /// <summary>
     /// 禁用群组中的指令组
@@ -405,9 +402,9 @@ public sealed class Group : BaseModel
         return service.Event.CommandManager.GetGroupCmdSeries(Id);
     }
 
-    #endregion
+#endregion
 
-    #region 转换方法
+#region 转换方法
 
     /// <summary>
     /// 定义将 <see cref="Group"/> 对象转换为 <see cref="long"/>
@@ -418,9 +415,9 @@ public sealed class Group : BaseModel
         return value.Id;
     }
 
-    #endregion
+#endregion
 
-    #region 运算符重载
+#region 运算符重载
 
     /// <summary>
     /// 等于重载
@@ -430,8 +427,7 @@ public sealed class Group : BaseModel
         if (groupL is null && groupR is null)
             return true;
 
-        return groupL is not null && groupR is not null && groupL.Id == groupR.Id &&
-               groupL.SoraApi                                        == groupR.SoraApi;
+        return groupL is not null && groupR is not null && groupL.Id == groupR.Id && groupL.SoraApi == groupR.SoraApi;
     }
 
     /// <summary>
@@ -442,9 +438,9 @@ public sealed class Group : BaseModel
         return !(groupL == groupR);
     }
 
-    #endregion
+#endregion
 
-    #region 常用重载
+#region 常用重载
 
     /// <summary>
     /// 比较重载
@@ -465,5 +461,5 @@ public sealed class Group : BaseModel
         return HashCode.Combine(Id, SoraApi);
     }
 
-    #endregion
+#endregion
 }

@@ -42,11 +42,11 @@ public static class SoraServiceFactory
     public static ISoraService CreateService(ISoraConfig config, Action<Exception> crashAction = null)
     {
         return config switch
-        {
-            ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
-            ServerConfig s2 => new SoraWebsocketServer(s2, crashAction),
-            _               => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
-        };
+               {
+                   ClientConfig s1 => new SoraWebsocketClient(s1, crashAction),
+                   ServerConfig s2 => new SoraWebsocketServer(s2, crashAction),
+                   _               => throw new ArgumentException("接收到了不认识的 Sora 配置对象。")
+               };
     }
 
     /// <summary>
@@ -55,9 +55,8 @@ public static class SoraServiceFactory
     /// <param name="configList">服务配置列表</param>
     /// <param name="crashAction">发生未处理异常时的统一回调</param>
     /// <returns>Sora 服务实例列表</returns>
-    public static List<ISoraService> CreateMultiService(
-        IEnumerable<ISoraConfig> configList,
-        Action<Exception>        crashAction = null)
+    public static List<ISoraService> CreateMultiService(IEnumerable<ISoraConfig> configList,
+                                                        Action<Exception>        crashAction = null)
     {
         return configList.Select(soraConfig => CreateService(soraConfig, crashAction)).ToList();
     }
@@ -68,14 +67,9 @@ public static class SoraServiceFactory
     /// <param name="config">服务配置</param>
     /// <param name="crashAction">发生未处理异常时的统一回调</param>
     /// <returns>Sora 服务实例列表</returns>
-    public static List<ISoraService> CreateMultiService(
-        ISoraConfig       config,
-        Action<Exception> crashAction = null)
+    public static List<ISoraService> CreateMultiService(ISoraConfig config, Action<Exception> crashAction = null)
     {
-        var createdService = new List<ISoraService>
-        {
-            CreateService(config, crashAction)
-        };
+        var createdService = new List<ISoraService> { CreateService(config, crashAction) };
 
         return createdService;
     }

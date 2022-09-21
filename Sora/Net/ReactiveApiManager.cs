@@ -20,7 +20,7 @@ namespace Sora.Net;
 /// </summary>
 internal static class ReactiveApiManager
 {
-    #region Buffer
+#region Buffer
 
     /// <summary>
     /// API响应被观察对象
@@ -28,9 +28,9 @@ internal static class ReactiveApiManager
     /// </summary>
     private static readonly Subject<(Guid id, JObject data)> ApiSubject = new();
 
-    #endregion
+#endregion
 
-    #region 通信
+#region 通信
 
     /// <summary>
     /// 获取到API响应
@@ -52,7 +52,9 @@ internal static class ReactiveApiManager
     /// <returns>API返回</returns>
     [NeedReview("ALL")]
     internal static async ValueTask<(ApiStatus, JObject)> SendApiRequest(
-        ApiRequest apiRequest, Guid connectionId, TimeSpan? timeout = null)
+        ApiRequest apiRequest,
+        Guid       connectionId,
+        TimeSpan?  timeout = null)
     {
         TimeSpan currentTimeout;
         if (timeout is null)
@@ -66,7 +68,7 @@ internal static class ReactiveApiManager
         else
         {
             Log.Debug("Sora", $"timeout covered to {timeout.Value.TotalMilliseconds} ms");
-            currentTimeout = (TimeSpan) timeout;
+            currentTimeout = (TimeSpan)timeout;
         }
 
         //错误数据
@@ -74,22 +76,17 @@ internal static class ReactiveApiManager
         //序列化请求
         string msg = JsonConvert.SerializeObject(apiRequest, Formatting.None);
         //向客户端发送请求数据
-        Task<JObject> apiTask = ApiSubject
-                               .Where(request => request.id == apiRequest.Echo)
-                               .Select(request => request.data)
-                               .Take(1)
-                               .Timeout(currentTimeout)
-                               .ToTask()
-                               .RunCatch(e =>
-                                {
-                                    isTimeout = e is TimeoutException;
-                                    exception = e;
-                                    //在错误为超时时不打印log
-                                    if (!isTimeout)
-                                        Log.Error("Sora",
-                                            $"ApiSubject 发生错误: {Log.ErrorLogBuilder(e)}");
-                                    return new JObject();
-                                });
+        Task<JObject> apiTask = ApiSubject.Where(request => request.id == apiRequest.Echo)
+                                          .Select(request => request.data).Take(1).Timeout(currentTimeout).ToTask()
+                                          .RunCatch(e =>
+                                          {
+                                              isTimeout = e is TimeoutException;
+                                              exception = e;
+                                              //在错误为超时时不打印log
+                                              if (!isTimeout)
+                                                  Log.Error("Sora", $"ApiSubject 发生错误: {Log.ErrorLogBuilder(e)}");
+                                              return new JObject();
+                                          });
 
         //这里的错误最终将抛给开发者
         //发送消息
@@ -109,14 +106,12 @@ internal static class ReactiveApiManager
         //观察者抛出异常
         if (isTimeout)
             Log.Error("Sora", $"API超时[msg echo:{apiRequest.Echo}]");
-        return isTimeout
-                   ? (TimeOut(), null)
-                   : (ObservableError(Log.ErrorLogBuilder(exception)), null);
+        return isTimeout ? (TimeOut(), null) : (ObservableError(Log.ErrorLogBuilder(exception)), null);
     }
 
-    #endregion
+#endregion
 
-    #region API状态处理
+#region API状态处理
 
     /// <summary>
     /// 获取API状态返回值
@@ -128,13 +123,13 @@ internal static class ReactiveApiManager
     {
         return new ApiStatus
         {
-            RetCode = Enum.TryParse(msg["retcode"]?.ToString() ?? string.Empty,
-                          out ApiStatusType messageCode)
-                          ? messageCode
-                          : ApiStatusType.UnknownStatus,
+            RetCode =
+                Enum.TryParse(msg["retcode"]?.ToString() ?? string.Empty, out ApiStatusType messageCode)
+                    ? messageCode
+                    : ApiStatusType.UnknownStatus,
             ApiMessage = msg["msg"] == null && msg["wording"] == null
-                             ? string.Empty
-                             : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})",
+                ? string.Empty
+                : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})",
             ApiStatusStr = msg["status"]?.ToString() ?? "failed"
         };
     }
@@ -179,5 +174,5 @@ internal static class ReactiveApiManager
         };
     }
 
-    #endregion
+#endregion
 }

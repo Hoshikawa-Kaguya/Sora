@@ -8,22 +8,22 @@ namespace Sora.Entities.Base;
 /// </summary>
 public abstract class BaseModel
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// API执行实例
     /// </summary>
     // ReSharper disable once MemberCanBeProtected.Global
-    public SoraApi SoraApi { get; private init; }
+    public SoraApi SoraApi { get; }
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     internal BaseModel(Guid connectionId)
     {
         SoraApi = ConnectionRecord.GetApi(connectionId);
     }
 
-    #endregion
+#endregion
 }

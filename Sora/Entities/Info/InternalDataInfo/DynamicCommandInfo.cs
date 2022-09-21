@@ -17,10 +17,18 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
     /// <summary>
     /// 指令信息构造(群聊动态指令构建)
     /// </summary>
-    public DynamicCommandInfo(
-        string desc, string[] regex, Func<BaseMessageEventArgs, bool> matchFunc, MemberRoleType permissionType,
-        int priority, RegexOptions regexOptions, long[] sourceGroups, long[] sourceUsers,
-        Func<GroupMessageEventArgs, ValueTask> groupCommand, Guid commandId, bool suCommand, string seriesName)
+    public DynamicCommandInfo(string                                 desc,
+                              string[]                               regex,
+                              Func<BaseMessageEventArgs, bool>       matchFunc,
+                              MemberRoleType                         permissionType,
+                              int                                    priority,
+                              RegexOptions                           regexOptions,
+                              long[]                                 sourceGroups,
+                              long[]                                 sourceUsers,
+                              Func<GroupMessageEventArgs, ValueTask> groupCommand,
+                              Guid                                   commandId,
+                              bool                                   suCommand,
+                              string                                 seriesName)
         : base(desc, regex, permissionType, suCommand, priority, regexOptions, SourceFlag.Group, sourceGroups,
             sourceUsers, seriesName, commandId.ToString())
     {
@@ -32,10 +40,16 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
     /// <summary>
     /// 指令信息构造(私聊动态指令构建)
     /// </summary>
-    public DynamicCommandInfo(
-        string       desc,         string[] regex,       Func<BaseMessageEventArgs, bool> matchFunc, int priority,
-        RegexOptions regexOptions, long[]   sourceUsers, Func<PrivateMessageEventArgs, ValueTask> privateCommand,
-        Guid         commandId,    bool     suCommand,   string seriesName)
+    public DynamicCommandInfo(string                                   desc,
+                              string[]                                 regex,
+                              Func<BaseMessageEventArgs, bool>         matchFunc,
+                              int                                      priority,
+                              RegexOptions                             regexOptions,
+                              long[]                                   sourceUsers,
+                              Func<PrivateMessageEventArgs, ValueTask> privateCommand,
+                              Guid                                     commandId,
+                              bool                                     suCommand,
+                              string                                   seriesName)
         : base(desc, regex, MemberRoleType.Member, suCommand, priority, regexOptions, SourceFlag.Private,
             Array.Empty<long>(), sourceUsers, seriesName, commandId.ToString())
     {
