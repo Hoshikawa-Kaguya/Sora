@@ -25,6 +25,7 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
                               RegexOptions                           regexOptions,
                               long[]                                 sourceGroups,
                               long[]                                 sourceUsers,
+                              long[]                                 sourceLogins,
                               Func<GroupMessageEventArgs, ValueTask> groupCommand,
                               Guid                                   commandId,
                               bool                                   suCommand,
@@ -38,6 +39,7 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
                SourceFlag.Group,
                sourceGroups,
                sourceUsers,
+               sourceLogins,
                seriesName,
                commandId.ToString())
     {
@@ -55,6 +57,7 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
                               int                                      priority,
                               RegexOptions                             regexOptions,
                               long[]                                   sourceUsers,
+                              long[]                                   sourceLogins,
                               Func<PrivateMessageEventArgs, ValueTask> privateCommand,
                               Guid                                     commandId,
                               bool                                     suCommand,
@@ -68,6 +71,7 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
                SourceFlag.Private,
                Array.Empty<long>(),
                sourceUsers,
+               sourceLogins,
                seriesName,
                commandId.ToString())
     {

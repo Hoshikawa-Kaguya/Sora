@@ -42,6 +42,11 @@ public sealed class SoraCommand : Attribute
     public long[] SourceUsers { get; init; } = Array.Empty<long>();
 
     /// <summary>
+    /// 限制响应的bot账号来源
+    /// </summary>
+    public long[] SourceLogins { get; init; } = Array.Empty<long>();
+
+    /// <summary>
     /// 指令响应的源
     /// </summary>
     public SourceFlag SourceType { get; init; } = SourceFlag.None;
