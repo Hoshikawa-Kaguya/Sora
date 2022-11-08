@@ -29,6 +29,7 @@ internal sealed record SoraCommandInfo : BaseCommandInfo
                              SourceFlag     source,
                              long[]         sourceGroups,
                              long[]         sourceUsers,
+                             long[]         sourceLogins,
                              bool           suCommand,
                              Type           instanceType = null)
         : base(desc,
@@ -40,6 +41,7 @@ internal sealed record SoraCommandInfo : BaseCommandInfo
                source,
                sourceGroups,
                sourceUsers,
+               sourceLogins,
                seriesName,
                $"{className}.{method.Name}")
     {
