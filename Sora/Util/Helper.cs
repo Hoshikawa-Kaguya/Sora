@@ -60,7 +60,7 @@ public static class Helper
             priorityRecord.Add(cmd.Priority);
 
         //将相同优先级的指令顺序打乱
-        List<(int p, List<T> cmds)> ret = new List<(int p, List<T> cmds)>();
+        List<(int p, List<T> cmds)> ret = new();
         foreach (int p in priorityRecord)
         {
             List<T> cmds = cmdList.Where(c => c.Priority == p).ToList();

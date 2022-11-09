@@ -89,7 +89,7 @@ public static class SegmentHelper
     {
         if (stream is null)
             return null;
-        using MemoryStream ms = new MemoryStream();
+        using MemoryStream ms = new();
 
         long cur = stream.Position;
         stream.Position = 0;

@@ -77,7 +77,10 @@ internal static class ReactiveApiManager
         string msg = JsonConvert.SerializeObject(apiRequest, Formatting.None);
         //向客户端发送请求数据
         Task<JObject> apiTask = ApiSubject.Where(request => request.id == apiRequest.Echo)
-                                          .Select(request => request.data).Take(1).Timeout(currentTimeout).ToTask()
+                                          .Select(request => request.data)
+                                          .Take(1)
+                                          .Timeout(currentTimeout)
+                                          .ToTask()
                                           .RunCatch(e =>
                                           {
                                               isTimeout = e is TimeoutException;
