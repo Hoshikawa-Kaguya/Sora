@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 using Sora.Attributes.Command;
+using Sora.Entities;
+using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
@@ -19,6 +21,12 @@ public static class Commands
         eventArgs.IsContinueEventChain = false;
         TextSegment s = eventArgs.Message.MessageBody[0].Data as TextSegment;
         Log.Info("触发指令", $"text:{s!.Content}");
-        await eventArgs.Reply("哇哦1");
+
+        MessageBody message = new MessageBody
+        {
+            SoraSegment.Poke(eventArgs.Sender)
+        };
+
+        await eventArgs.Reply(message);
     }
 }

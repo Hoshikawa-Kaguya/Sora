@@ -194,7 +194,9 @@ public readonly struct SoraSegment
     /// <param name="msg">文本消息</param>
     public static SoraSegment Text(string msg)
     {
-        return new SoraSegment(SegmentType.Text, new TextSegment { Content = msg });
+        return msg is null
+            ? IllegalSegment("Text", "消息不能为空")
+            : new SoraSegment(SegmentType.Text, new TextSegment { Content = msg });
     }
 
     /// <summary>
@@ -203,9 +205,9 @@ public readonly struct SoraSegment
     /// <param name="uid">用户uid</param>
     public static SoraSegment At(long uid)
     {
-        if (uid < 10000)
-            throw new ArgumentOutOfRangeException(nameof(uid), $"非法参数[id超出范围限制({uid})]");
-        return new SoraSegment(SegmentType.At, new AtSegment { Target = uid.ToString() });
+        return uid < 10000
+            ? IllegalSegment("At", $"id超出范围限制({uid})")
+            : new SoraSegment(SegmentType.At, new AtSegment { Target = uid.ToString() });
     }
 
     /// <summary>
@@ -215,14 +217,14 @@ public readonly struct SoraSegment
     /// <param name="name">当在群中找不到此uid的名称时使用的名字</param>
     public static SoraSegment At(long uid, string name)
     {
-        if (uid < 10000)
-            throw new ArgumentOutOfRangeException(nameof(uid), $"非法参数[id超出范围限制({uid})]");
-        return new SoraSegment(SegmentType.At,
-                               new AtSegment
-                               {
-                                   Target = uid.ToString(),
-                                   Name   = name
-                               });
+        return uid < 10000
+            ? IllegalSegment("At", $"非法参数[id超出范围限制({uid})]")
+            : new SoraSegment(SegmentType.At,
+                              new AtSegment
+                              {
+                                  Target = uid.ToString(),
+                                  Name   = name
+                              });
     }
 
     /// <summary>
@@ -240,10 +242,9 @@ public readonly struct SoraSegment
     public static SoraSegment Face(int id)
     {
         //检查ID合法性
-        if (id is < 0 or > 244)
-            throw new ArgumentOutOfRangeException(nameof(id), $"非法参数[id超出范围限制({id})]");
-
-        return new SoraSegment(SegmentType.Face, new FaceSegment { Id = id });
+        return id is < 0 or > 244
+            ? IllegalSegment("Face", $"非法参数[id超出范围限制({id})]")
+            : new SoraSegment(SegmentType.Face, new FaceSegment { Id = id });
     }
 
     /// <summary>
@@ -262,21 +263,17 @@ public readonly struct SoraSegment
                                      int?   timeout  = null)
     {
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
-        if (!isDataStr)
-        {
-            Log.Error("SoraSegment|Record", $"非法数据字符串({data})，已忽略此消息段");
-            return IllegalSegment();
-        }
-
-        return new SoraSegment(SegmentType.Record,
-                               new RecordSegment
-                               {
-                                   RecordFile = dataStr,
-                                   Magic      = isMagic ? 1 : null,
-                                   Cache      = useCache ? 1 : null,
-                                   Proxy      = useProxy ? 1 : null,
-                                   Timeout    = timeout
-                               });
+        return !isDataStr
+            ? IllegalSegment("Record", $"非法数据字符串({data})")
+            : new SoraSegment(SegmentType.Record,
+                              new RecordSegment
+                              {
+                                  RecordFile = dataStr,
+                                  Magic      = isMagic ? 1 : null,
+                                  Cache      = useCache ? 1 : null,
+                                  Proxy      = useProxy ? 1 : null,
+                                  Timeout    = timeout
+                              });
     }
 
     /// <summary>
@@ -289,22 +286,18 @@ public readonly struct SoraSegment
     public static SoraSegment Image(string data, bool useCache = true, int? threadCount = null)
     {
         if (string.IsNullOrEmpty(data))
-            throw new NullReferenceException(nameof(data));
+            return IllegalSegment("Image", "data is null");
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
-        if (!isDataStr)
-        {
-            Log.Error("SoraSegment|Image", $"非法数据字符串({data})，已忽略消息段");
-            return IllegalSegment();
-        }
-
-        return new SoraSegment(SegmentType.Image,
-                               new ImageSegment
-                               {
-                                   ImgFile     = dataStr,
-                                   ImgType     = null,
-                                   UseCache    = useCache ? 1 : null,
-                                   ThreadCount = threadCount
-                               });
+        return !isDataStr
+            ? IllegalSegment("Image", $"非法数据字符串({data})")
+            : new SoraSegment(SegmentType.Image,
+                              new ImageSegment
+                              {
+                                  ImgFile     = dataStr,
+                                  ImgType     = null,
+                                  UseCache    = useCache ? 1 : null,
+                                  ThreadCount = threadCount
+                              });
     }
 
     /// <summary>
@@ -313,10 +306,9 @@ public readonly struct SoraSegment
     /// <param name="data">图片流</param>
     public static SoraSegment Image(Stream data)
     {
-        if (data is null)
-            throw new NullReferenceException(nameof(data));
-        string dataStr = data.StreamToBase64();
-        return Image(dataStr);
+        return data is null 
+            ? IllegalSegment("Image", "data is null") 
+            : Image(data.StreamToBase64());
     }
 
     /// <summary>
@@ -329,22 +321,18 @@ public readonly struct SoraSegment
     public static SoraSegment FlashImage(string data, bool useCache = true, int? threadCount = null)
     {
         if (string.IsNullOrEmpty(data))
-            throw new NullReferenceException(nameof(data));
+            return IllegalSegment("Image", "data is null");
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
-        if (!isDataStr)
-        {
-            Log.Error("SoraSegment|Image", $"非法数据字符串({data})，已忽略消息段");
-            return IllegalSegment();
-        }
-
-        return new SoraSegment(SegmentType.Image,
-                               new ImageSegment
-                               {
-                                   ImgFile     = dataStr,
-                                   ImgType     = "flash",
-                                   UseCache    = useCache ? 1 : null,
-                                   ThreadCount = threadCount
-                               });
+        return !isDataStr
+            ? IllegalSegment("Image", $"非法数据字符串({data})")
+            : new SoraSegment(SegmentType.Image,
+                              new ImageSegment
+                              {
+                                  ImgFile     = dataStr,
+                                  ImgType     = "flash",
+                                  UseCache    = useCache ? 1 : null,
+                                  ThreadCount = threadCount
+                              });
     }
 
     /// <summary>
@@ -358,23 +346,19 @@ public readonly struct SoraSegment
     public static SoraSegment ShowImage(string data, int id = 40000, bool useCache = true, int? threadCount = null)
     {
         if (string.IsNullOrEmpty(data))
-            throw new NullReferenceException(nameof(data));
+            return IllegalSegment("Image", "data is null");
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
-        if (!isDataStr)
-        {
-            Log.Error("SoraSegment|ShowImage", $"非法数据字符串({data})，已忽略消息段");
-            return IllegalSegment();
-        }
-
-        return new SoraSegment(SegmentType.Image,
-                               new ImageSegment
-                               {
-                                   ImgFile     = dataStr,
-                                   ImgType     = "show",
-                                   UseCache    = useCache ? 1 : null,
-                                   Id          = id,
-                                   ThreadCount = threadCount
-                               });
+        return !isDataStr
+            ? IllegalSegment("ShowImage", $"非法数据字符串({data})")
+            : new SoraSegment(SegmentType.Image,
+                              new ImageSegment
+                              {
+                                  ImgFile     = dataStr,
+                                  ImgType     = "show",
+                                  UseCache    = useCache ? 1 : null,
+                                  Id          = id,
+                                  ThreadCount = threadCount
+                              });
     }
 
     /// <summary>
@@ -388,20 +372,16 @@ public readonly struct SoraSegment
     public static SoraSegment Video(string data, bool useCache = true, bool useProxy = true, int? timeout = null)
     {
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
-        if (!isDataStr)
-        {
-            Log.Error("SoraSegment|Video", $"非法数据字符串({data})，已忽略消息段");
-            return IllegalSegment();
-        }
-
-        return new SoraSegment(SegmentType.Video,
-                               new VideoSegment
-                               {
-                                   VideoFile = dataStr,
-                                   Cache     = useCache ? 1 : null,
-                                   Proxy     = useProxy ? 1 : null,
-                                   Timeout   = timeout
-                               });
+        return !isDataStr
+            ? IllegalSegment("Video", $"非法数据字符串({data})")
+            : new SoraSegment(SegmentType.Video,
+                              new VideoSegment
+                              {
+                                  VideoFile = dataStr,
+                                  Cache     = useCache ? 1 : null,
+                                  Proxy     = useProxy ? 1 : null,
+                                  Timeout   = timeout
+                              });
     }
 
     /// <summary>
@@ -433,23 +413,18 @@ public readonly struct SoraSegment
                                           string content       = null,
                                           string coverImageUrl = null)
     {
-        if (url is null)
-            throw new ArgumentNullException(nameof(url));
-        if (musicUrl is null)
-            throw new ArgumentNullException(nameof(musicUrl));
-        if (title is null)
-            throw new ArgumentNullException(nameof(title));
-
-        return new SoraSegment(SegmentType.Music,
-                               new CustomMusicSegment
-                               {
-                                   ShareType     = "custom",
-                                   Url           = url,
-                                   MusicUrl      = musicUrl,
-                                   Title         = title,
-                                   Content       = content,
-                                   CoverImageUrl = coverImageUrl
-                               });
+        return url is null || musicUrl is null || title is null
+            ? IllegalSegment("CustomMusic", "参数不能为空")
+            : new SoraSegment(SegmentType.Music,
+                              new CustomMusicSegment
+                              {
+                                  ShareType     = "custom",
+                                  Url           = url,
+                                  MusicUrl      = musicUrl,
+                                  Title         = title,
+                                  Content       = content,
+                                  CoverImageUrl = coverImageUrl
+                              });
     }
 
     /// <summary>
@@ -461,18 +436,16 @@ public readonly struct SoraSegment
     /// <param name="imageUrl">可选，图片 URL</param>
     public static SoraSegment Share(string url, string title, string content = null, string imageUrl = null)
     {
-        if (url is null)
-            throw new ArgumentNullException(nameof(url));
-        if (title is null)
-            throw new ArgumentNullException(nameof(title));
-        return new SoraSegment(SegmentType.Share,
-                               new ShareSegment
-                               {
-                                   Url      = url,
-                                   Title    = title,
-                                   Content  = content,
-                                   ImageUrl = imageUrl
-                               });
+        return url is null || title is null
+            ? IllegalSegment("CustomMusic", "参数不能为空")
+            : new SoraSegment(SegmentType.Share,
+                              new ShareSegment
+                              {
+                                  Url      = url,
+                                  Title    = title,
+                                  Content  = content,
+                                  ImageUrl = imageUrl
+                              });
     }
 
     /// <summary>
@@ -494,11 +467,11 @@ public readonly struct SoraSegment
     public static SoraSegment Reply(string text, long uid, DateTime time, long messageSequence)
     {
         if (text == null)
-            throw new ArgumentNullException(nameof(text));
+            return IllegalSegment("Reply", "信息不能为空");
         if (messageSequence <= 0)
-            throw new ArgumentOutOfRangeException(nameof(messageSequence), $"messageSequence超出范围限制({messageSequence})");
+            return IllegalSegment("Reply", $"messageSequence超出范围限制({messageSequence})");
         if (uid < 10000)
-            throw new ArgumentOutOfRangeException(nameof(uid), $"uid超出范围限制({uid})");
+            return IllegalSegment("Reply", $"uid超出范围限制({uid})");
         return new SoraSegment(SegmentType.Reply,
                                new CustomReplySegment
                                {
@@ -518,9 +491,9 @@ public readonly struct SoraSegment
     /// <param name="uid">ID</param>
     public static SoraSegment Poke(long uid)
     {
-        if (uid < 10000)
-            throw new ArgumentOutOfRangeException(nameof(uid), $"uid超出范围限制({uid})");
-        return new SoraSegment(SegmentType.Poke, new PokeSegment { Uid = uid });
+        return uid < 10000
+            ? IllegalSegment("Poke", $"uid超出范围限制({uid})")
+            : new SoraSegment(SegmentType.Poke, new PokeSegment { Uid = uid });
     }
 
     /// <summary>
@@ -530,9 +503,9 @@ public readonly struct SoraSegment
     /// <param name="title">祝福语/口令</param>
     public static SoraSegment Redbag(string title)
     {
-        if (string.IsNullOrEmpty(title))
-            throw new NullReferenceException(nameof(title));
-        return new SoraSegment(SegmentType.RedBag, new RedbagSegment { Title = title });
+        return string.IsNullOrEmpty(title)
+            ? IllegalSegment("Redbag", "title为空")
+            : new SoraSegment(SegmentType.RedBag, new RedbagSegment { Title = title });
     }
 
     /// <summary>
@@ -541,14 +514,14 @@ public readonly struct SoraSegment
     /// <param name="content">xml文本</param>
     public static SoraSegment Xml(string content)
     {
-        if (string.IsNullOrEmpty(content))
-            throw new NullReferenceException(nameof(content));
-        return new SoraSegment(SegmentType.Xml,
-                               new CodeSegment
-                               {
-                                   Content = content,
-                                   Resid   = null
-                               });
+        return string.IsNullOrEmpty(content)
+            ? IllegalSegment("Xml", "content为空")
+            : new SoraSegment(SegmentType.Xml,
+                              new CodeSegment
+                              {
+                                  Content = content,
+                                  Resid   = null
+                              });
     }
 
     /// <summary>
@@ -558,14 +531,14 @@ public readonly struct SoraSegment
     /// <param name="richText">富文本内容</param>
     public static SoraSegment Json(string content, bool richText = false)
     {
-        if (string.IsNullOrEmpty(content))
-            throw new NullReferenceException(nameof(content));
-        return new SoraSegment(SegmentType.Json,
-                               new CodeSegment
-                               {
-                                   Content = content,
-                                   Resid   = richText ? 1 : null
-                               });
+        return string.IsNullOrEmpty(content)
+            ? IllegalSegment("Json", "content为空")
+            : new SoraSegment(SegmentType.Json,
+                              new CodeSegment
+                              {
+                                  Content = content,
+                                  Resid   = richText ? 1 : null
+                              });
     }
 
     /// <summary>
@@ -575,15 +548,15 @@ public readonly struct SoraSegment
     /// <param name="richText">富文本内容</param>
     public static SoraSegment Json(JObject content, bool richText = false)
     {
-        if (content == null)
-            throw new NullReferenceException(nameof(content));
-        return new SoraSegment(SegmentType.Json,
-                               new CodeSegment
-                               {
-                                   Content =
-                                       JsonConvert.SerializeObject(content, Formatting.None),
-                                   Resid = richText ? 1 : null
-                               });
+        return content == null
+            ? IllegalSegment("Json", "content为空")
+            : new SoraSegment(SegmentType.Json,
+                              new CodeSegment
+                              {
+                                  Content =
+                                      JsonConvert.SerializeObject(content, Formatting.None),
+                                  Resid = richText ? 1 : null
+                              });
     }
 
     /// <summary>
@@ -606,25 +579,21 @@ public readonly struct SoraSegment
                                         long   maxHeight = 400)
     {
         if (string.IsNullOrEmpty(imageFile))
-            throw new NullReferenceException(nameof(imageFile));
+            return IllegalSegment("CardImage", "imageFile为空");
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(imageFile);
-        if (!isDataStr)
-        {
-            Log.Error("SoraSegment|CardImage", $"非法数据字符串({imageFile})，已忽略消息段");
-            return IllegalSegment();
-        }
-
-        return new SoraSegment(SegmentType.CardImage,
-                               new CardImageSegment
-                               {
-                                   ImageFile = dataStr,
-                                   Source    = source,
-                                   Icon      = iconUrl,
-                                   MinWidth  = minWidth,
-                                   MinHeight = minHeight,
-                                   MaxWidth  = maxWidth,
-                                   MaxHeight = maxHeight
-                               });
+        return !isDataStr
+            ? IllegalSegment("CardImage", $"非法数据字符串({imageFile})")
+            : new SoraSegment(SegmentType.CardImage,
+                              new CardImageSegment
+                              {
+                                  ImageFile = dataStr,
+                                  Source    = source,
+                                  Icon      = iconUrl,
+                                  MinWidth  = minWidth,
+                                  MinHeight = minHeight,
+                                  MaxWidth  = maxWidth,
+                                  MaxHeight = maxHeight
+                              });
     }
 
     /// <summary>
@@ -633,9 +602,9 @@ public readonly struct SoraSegment
     /// <param name="messageStr">要转换的文本信息</param>
     public static SoraSegment TTS(string messageStr)
     {
-        if (string.IsNullOrEmpty(messageStr))
-            throw new NullReferenceException(nameof(messageStr));
-        return new SoraSegment(SegmentType.TTS, new TtsSegment { Content = messageStr });
+        return string.IsNullOrEmpty(messageStr)
+            ? IllegalSegment("TTS", "messageStr为空")
+            : new SoraSegment(SegmentType.TTS, new TtsSegment { Content = messageStr });
     }
 
     /// <summary>
@@ -652,8 +621,9 @@ public readonly struct SoraSegment
     /// 空 消息段
     /// <para>当存在非法参数时消息段将被本函数重置</para>
     /// </summary>
-    private static SoraSegment IllegalSegment()
+    private static SoraSegment IllegalSegment(string waringType, string waring)
     {
+        Log.Error($"{waringType} Segment", $"非法消息段[{waring}]，已忽略消息段");
         return new SoraSegment(SegmentType.Ignore, null);
     }
 
