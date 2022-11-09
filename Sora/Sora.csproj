@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
-        <Version>1.0.0-rc.79</Version>
+        <Version>1.0.0-rc.80</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <Description>.Net 6异步Onebot机器人框架</Description>
@@ -30,7 +30,6 @@
         <PackageReference Include="Fleck" Version="1.2.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
-        <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
         <PackageReference Include="Websocket.Client" Version="4.4.43" />
         <PackageReference Include="YukariToolBox.LightLog" Version="3.0.9" />
     </ItemGroup>

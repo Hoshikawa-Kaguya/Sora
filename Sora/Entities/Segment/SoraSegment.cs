@@ -286,7 +286,7 @@ public readonly struct SoraSegment
     public static SoraSegment Image(string data, bool useCache = true, int? threadCount = null)
     {
         if (string.IsNullOrEmpty(data))
-            return IllegalSegment("Image", "data is null");
+            return IllegalSegment("Image", "data为空");
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
         return !isDataStr
             ? IllegalSegment("Image", $"非法数据字符串({data})")
@@ -307,7 +307,7 @@ public readonly struct SoraSegment
     public static SoraSegment Image(Stream data)
     {
         return data is null 
-            ? IllegalSegment("Image", "data is null") 
+            ? IllegalSegment("Image", "data为空") 
             : Image(data.StreamToBase64());
     }
 
@@ -321,7 +321,7 @@ public readonly struct SoraSegment
     public static SoraSegment FlashImage(string data, bool useCache = true, int? threadCount = null)
     {
         if (string.IsNullOrEmpty(data))
-            return IllegalSegment("Image", "data is null");
+            return IllegalSegment("Image", "data为空");
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
         return !isDataStr
             ? IllegalSegment("Image", $"非法数据字符串({data})")
@@ -346,7 +346,7 @@ public readonly struct SoraSegment
     public static SoraSegment ShowImage(string data, int id = 40000, bool useCache = true, int? threadCount = null)
     {
         if (string.IsNullOrEmpty(data))
-            return IllegalSegment("Image", "data is null");
+            return IllegalSegment("Image", "data为空");
         (string dataStr, bool isDataStr) = SegmentHelper.ParseDataStr(data);
         return !isDataStr
             ? IllegalSegment("ShowImage", $"非法数据字符串({data})")

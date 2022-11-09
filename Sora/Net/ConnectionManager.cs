@@ -153,7 +153,7 @@ public sealed class ConnectionManager : IDisposable
         if (OnOpenConnectionAsync == null)
             return;
         if (!long.TryParse(selfId, out long uid))
-            Log.Error("ConnectionManager", "非法selfid，已忽略");
+            Log.Error("ConnectionManager", "接收到非法selfid，已忽略");
         Task.Run(async () => { await OnOpenConnectionAsync(connId, new ConnectionEventArgs(role, uid, connId)); });
     }
 
