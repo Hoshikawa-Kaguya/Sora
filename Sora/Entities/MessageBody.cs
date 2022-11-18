@@ -85,7 +85,7 @@ public sealed class MessageBody : IList<SoraSegment>
         if (SegmentCheck(item))
             _message.Add(item);
         else
-            throw new ArgumentOutOfRangeException(nameof(item), "cannnot add Unknown/Ignored segement");
+            Log.Warning("MB_Add","非法消息段，已忽略");
     }
 
     /// <summary>
@@ -95,7 +95,10 @@ public sealed class MessageBody : IList<SoraSegment>
     public void Add(string text)
     {
         if (string.IsNullOrEmpty(text))
-            throw new ArgumentOutOfRangeException(nameof(text), "cannot add empty string");
+        {
+            Log.Warning("MB_Add", "空字符串消息，已忽略");
+            return;
+        }
         _message.Add(SoraSegment.Text(text));
     }
 
@@ -166,7 +169,7 @@ public sealed class MessageBody : IList<SoraSegment>
         if (SegmentCheck(item))
             _message.Insert(index, item);
         else
-            throw new ArgumentOutOfRangeException(nameof(item), "cannnot insert Unknown/Ignored segement");
+            Log.Warning("MB_Insert", "非法消息段，已忽略");
     }
 
     /// <summary>

@@ -45,34 +45,25 @@ internal static class ApiAdapter
         Log.Debug("Sora", "Sending send_msg(Private) request");
         if (messages == null || messages.Count == 0)
             throw new NullReferenceException(nameof(messages));
+        List<OnebotSegment> msgList = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
+                                              .Select(msg => msg.ToOnebotSegment())
+                                              .ToList();
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-                                                                                     {
-                                                                                         ApiRequestType =
-                                                                                             ApiRequestType.SendMsg,
-                                                                                         ApiParams =
-                                                                                             new SendMessageParams
-                                                                                             {
-                                                                                                 MessageType =
-                                                                                                     MessageType
-                                                                                                         .Private,
-                                                                                                 UserId = target,
-                                                                                                 //转换消息段列表
-                                                                                                 Message = messages
-                                                                                                           .Where(msg =>
-                                                                                                                      msg
-                                                                                                                          .MessageType
-                                                                                                                      != SegmentType
-                                                                                                                          .Ignore)
-                                                                                                           .Select(msg =>
-                                                                                                                       msg
-                                                                                                                           .ToOnebotSegment())
-                                                                                                           .ToList(),
-                                                                                                 GroupId = groupId
-                                                                                             }
-                                                                                     },
-                                                                                     connection,
-                                                                                     timeout);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(new ApiRequest
+                                                    {
+                                                        ApiRequestType = ApiRequestType.SendMsg,
+                                                        ApiParams = new SendMessageParams
+                                                        {
+                                                            MessageType = MessageType.Private,
+                                                            UserId      = target,
+                                                            //转换消息段列表
+                                                            Message = msgList,
+                                                            GroupId = groupId
+                                                        }
+                                                    },
+                                                    connection,
+                                                    timeout);
         Log.Debug("Sora", $"Get send_msg(Private) response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, -1);
@@ -100,25 +91,24 @@ internal static class ApiAdapter
         Log.Debug("Sora", "Sending send_msg(Group) request");
         if (messages == null || messages.Count == 0)
             throw new NullReferenceException(nameof(messages));
-        List<OnebotSegment> msglist = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
-                                              .Select(msg => msg.ToOnebotSegment()).ToList();
+        List<OnebotSegment> msgList = messages.Where(msg => msg.MessageType != SegmentType.Ignore)
+                                              .Select(msg => msg.ToOnebotSegment())
+                                              .ToList();
         //发送信息
-        (ApiStatus apiStatus, JObject ret) = await ReactiveApiManager.SendApiRequest(new ApiRequest
-                                                                                     {
-                                                                                         ApiRequestType =
-                                                                                             ApiRequestType.SendMsg,
-                                                                                         ApiParams =
-                                                                                             new SendMessageParams
-                                                                                             {
-                                                                                                 MessageType =
-                                                                                                     MessageType.Group,
-                                                                                                 GroupId = target,
-                                                                                                 //转换消息段列表
-                                                                                                 Message = msglist
-                                                                                             }
-                                                                                     },
-                                                                                     connection,
-                                                                                     timeout);
+        (ApiStatus apiStatus, JObject ret) =
+            await ReactiveApiManager.SendApiRequest(new ApiRequest
+                                                    {
+                                                        ApiRequestType = ApiRequestType.SendMsg,
+                                                        ApiParams = new SendMessageParams
+                                                        {
+                                                            MessageType = MessageType.Group,
+                                                            GroupId     = target,
+                                                            //转换消息段列表
+                                                            Message = msgList
+                                                        }
+                                                    },
+                                                    connection,
+                                                    timeout);
         Log.Debug("Sora", $"Get send_msg(Group) response {nameof(apiStatus)}={apiStatus.RetCode}");
         if (apiStatus.RetCode != ApiStatusType.Ok)
             return (apiStatus, -1);
