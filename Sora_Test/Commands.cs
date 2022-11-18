@@ -22,7 +22,7 @@ public static class Commands
         TextSegment s = eventArgs.Message.MessageBody[0].Data as TextSegment;
         Log.Info("触发指令", $"text:{s!.Content}");
 
-        MessageBody message = new MessageBody
+        MessageBody message = new()
         {
             SoraSegment.Poke(eventArgs.Sender)
         };
