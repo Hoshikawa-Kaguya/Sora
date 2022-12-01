@@ -182,7 +182,7 @@ public sealed class MessageContext : BaseModel
     /// </summary>
     public string GetText()
     {
-        var text = new StringBuilder();
+        StringBuilder text = new();
         MessageBody.Where(s => s.MessageType == SegmentType.Text).Select(s => s.Data as TextSegment).ToList()
                    .ForEach(t => text.Append(t?.Content ?? string.Empty));
         return text.ToString();

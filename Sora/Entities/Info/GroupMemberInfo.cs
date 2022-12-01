@@ -134,8 +134,8 @@ public sealed record GroupMemberInfo
     public DateTime? TitleExpireTime { get; internal init; }
 
     [JsonProperty(PropertyName = "title_expire_time",
-                     NullValueHandling = NullValueHandling.Ignore,
-                     DefaultValueHandling = DefaultValueHandling.Ignore)]
+                  NullValueHandling = NullValueHandling.Ignore,
+                  DefaultValueHandling = DefaultValueHandling.Ignore)]
     private long? TitleExpireTimeStamp
     {
         init => TitleExpireTime = value == 0 ? null : value?.ToDateTime() ?? null;
@@ -154,8 +154,8 @@ public sealed record GroupMemberInfo
     public DateTime? ShutUpTime { get; internal init; }
 
     [JsonProperty(PropertyName = "shut_up_timestamp",
-                     NullValueHandling = NullValueHandling.Ignore,
-                     DefaultValueHandling = DefaultValueHandling.Ignore)]
+                  NullValueHandling = NullValueHandling.Ignore,
+                  DefaultValueHandling = DefaultValueHandling.Ignore)]
     private long? ShutUpTimestamp
     {
         init => ShutUpTime = value == 0 ? null : value?.ToDateTime() ?? null;

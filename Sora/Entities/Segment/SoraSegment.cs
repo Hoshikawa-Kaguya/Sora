@@ -306,8 +306,8 @@ public readonly struct SoraSegment
     /// <param name="data">图片流</param>
     public static SoraSegment Image(Stream data)
     {
-        return data is null 
-            ? IllegalSegment("Image", "data为空") 
+        return data is null
+            ? IllegalSegment("Image", "data为空")
             : Image(data.StreamToBase64());
     }
 

@@ -7,7 +7,13 @@ namespace Sora.Util;
 /// </summary>
 public static class TimeConvert
 {
-    private static readonly DateTime _unixStartTime = new(1970, 1, 1, 8, 0, 0, 0);
+    private static readonly DateTime _unixStartTime = new(1970,
+                                                          1,
+                                                          1,
+                                                          8,
+                                                          0,
+                                                          0,
+                                                          0);
 
     /// <summary>
     /// DateTime转时间戳
