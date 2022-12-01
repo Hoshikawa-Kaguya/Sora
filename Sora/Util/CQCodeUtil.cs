@@ -36,7 +36,7 @@ public static class CQCodeUtil
     /// <param name="elementsIndex">消息段在字符串中的索引</param>
     public static string SerializeMessage(this MessageBody msg, out int[] elementsIndex)
     {
-        var   sb    = new StringBuilder();
+        StringBuilder sb = new();
         int[] index = new int[msg.Count];
 
         for (int i = 0; i < msg.Count; i++)
@@ -59,7 +59,7 @@ public static class CQCodeUtil
         if (msg.MessageType == SegmentType.Text)
             return ((TextSegment)msg.Data).Content.CQCodeEncode();
 
-        var ret = new StringBuilder();
+        StringBuilder ret = new();
         ret.Append("[CQ:");
 
         //CQ码类型
@@ -111,10 +111,10 @@ public static class CQCodeUtil
     public static MessageBody DeserializeMessage(string cqMsgStr)
     {
         // 分离为文本数组和CQ码数组
-        string[] text     = _cqRegex.Replace(cqMsgStr, "\0").Split('\0');
-        Match[]  code     = _cqRegex.Matches(cqMsgStr).ToArray();
-        var      segments = new List<SoraSegment>();
-        for (var i = 0; i < code.Length; i++)
+        string[]          text     = _cqRegex.Replace(cqMsgStr, "\0").Split('\0');
+        Match[]           code     = _cqRegex.Matches(cqMsgStr).ToArray();
+        List<SoraSegment> segments = new();
+        for (int i = 0; i < code.Length; i++)
         {
             if (text[i].Length > 0)
                 segments.Add(SoraSegment.Text(text[i]));
@@ -138,7 +138,7 @@ public static class CQCodeUtil
             segmentType = SegmentType.Unknown;
         MatchCollection collection = _cqKeyValueRegex.Matches(match.Groups[2].Value);
 
-        var sb = new StringBuilder();
+        StringBuilder sb = new();
         sb.Append('{');
         foreach (Match code in collection)
         {
@@ -188,7 +188,7 @@ public static class CQCodeUtil
     /// <returns></returns>
     public static string CQCodeEncode(this string msg, bool comma = false)
     {
-        var ret = new StringBuilder(255);
+        StringBuilder ret = new(255);
         foreach (char t in msg)
             ret.Append(t switch
                        {
@@ -215,10 +215,10 @@ public static class CQCodeUtil
     /// <returns></returns>
     public static string CQCodeDecode(this string msg)
     {
-        var ret = new StringBuilder(255);
+        StringBuilder ret = new(255);
 
-        var i    = 0;
-        var last = 0;
+        int i    = 0;
+        int last = 0;
         while (i < msg.Length)
             // i i+1 i+2 i+3  i+4
             // & a   m   p    ;

@@ -93,7 +93,7 @@ public sealed class ConnectionManager : IDisposable
     {
         if (ConnectionRecord.IsEmpty())
             return;
-        var serviceId = (Guid)serviceIdObj;
+        Guid serviceId = (Guid)serviceIdObj;
         Log.Verbose("HeartBeatCheck", $"service id={serviceId}({ConnectionRecord.ConnCount()})");
 
         //查找超时连接
@@ -104,7 +104,7 @@ public sealed class ConnectionManager : IDisposable
             return;
         Log.Warning("HeartBeatCheck", $"发现超时的连接[{timeoutDict.Count}]");
 
-        var needReconnect = new List<WebsocketClient>();
+        List<WebsocketClient> needReconnect = new();
         //遍历超时的连接
         foreach ((Guid connection, SoraConnectionInfo info) in timeoutDict)
         {

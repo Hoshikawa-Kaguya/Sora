@@ -69,7 +69,10 @@ public static class SoraServiceFactory
     /// <returns>Sora 服务实例列表</returns>
     public static List<ISoraService> CreateMultiService(ISoraConfig config, Action<Exception> crashAction = null)
     {
-        var createdService = new List<ISoraService> { CreateService(config, crashAction) };
+        List<ISoraService> createdService = new()
+        {
+            CreateService(config, crashAction)
+        };
 
         return createdService;
     }

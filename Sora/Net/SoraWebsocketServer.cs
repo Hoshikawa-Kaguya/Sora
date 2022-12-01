@@ -85,7 +85,7 @@ public sealed class SoraWebsocketServer : ISoraService
         //检查端口占用
         if (Helper.IsPortInUse(Config.Port))
         {
-            var e = new InvalidOperationException($"端口{Config.Port}已被占用，请更换其他端口");
+            InvalidOperationException e = new($"端口{Config.Port}已被占用，请更换其他端口");
             Log.Fatal(e, "Sora", $"端口{Config.Port}已被占用，请更换其他端口", Config);
             throw e;
         }

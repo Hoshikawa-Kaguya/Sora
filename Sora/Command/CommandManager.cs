@@ -299,17 +299,17 @@ public sealed class CommandManager
         string[] matchExp = CommandUtils.ParseCommandExps(cmdExps, string.Empty, matchType);
 
         //创建指令信息
-        var dynamicCommand = new DynamicCommandInfo(desc,
-                                                    matchExp,
-                                                    null,
-                                                    priority ?? GetNewDynamicPriority(),
-                                                    regexOptions | RegexOptions.Compiled,
-                                                    sourceUsers ?? Array.Empty<long>(),
-                                                    sourceLogins ?? Array.Empty<long>(),
-                                                    privateCommand,
-                                                    id,
-                                                    suCommand,
-                                                    groupName);
+        DynamicCommandInfo dynamicCommand = new(desc,
+                                                matchExp,
+                                                null,
+                                                priority ?? GetNewDynamicPriority(),
+                                                regexOptions | RegexOptions.Compiled,
+                                                sourceUsers ?? Array.Empty<long>(),
+                                                sourceLogins ?? Array.Empty<long>(),
+                                                privateCommand,
+                                                id,
+                                                suCommand,
+                                                groupName);
 
         return AddDynamicCommand(dynamicCommand);
     }
@@ -343,17 +343,17 @@ public sealed class CommandManager
         Log.Debug("Command", $"Registering dynamic command [{id}]");
 
         //创建指令信息
-        var dynamicCommand = new DynamicCommandInfo(desc,
-                                                    Array.Empty<string>(),
-                                                    matchFunc,
-                                                    priority ?? GetNewDynamicPriority(),
-                                                    RegexOptions.None,
-                                                    sourceUsers ?? Array.Empty<long>(),
-                                                    sourceLogins ?? Array.Empty<long>(),
-                                                    privateCommand,
-                                                    id,
-                                                    suCommand,
-                                                    groupName);
+        DynamicCommandInfo dynamicCommand = new(desc,
+                                                Array.Empty<string>(),
+                                                matchFunc,
+                                                priority ?? GetNewDynamicPriority(),
+                                                RegexOptions.None,
+                                                sourceUsers ?? Array.Empty<long>(),
+                                                sourceLogins ?? Array.Empty<long>(),
+                                                privateCommand,
+                                                id,
+                                                suCommand,
+                                                groupName);
 
         return AddDynamicCommand(dynamicCommand);
     }
@@ -811,8 +811,8 @@ public sealed class CommandManager
                                               BaseCommandInfo      commandInfo,
                                               string               cmdName)
     {
-        string errLog = Log.ErrorLogBuilder(err);
-        var    msg    = new StringBuilder();
+        string        errLog = Log.ErrorLogBuilder(err);
+        StringBuilder msg    = new();
         msg.AppendLine("指令执行错误");
         msg.AppendLine($"指令：{cmdName}");
         msg.AppendLine($"MsgID:{eventArgs.Message.MessageId}");

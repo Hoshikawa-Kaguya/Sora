@@ -70,7 +70,7 @@ internal static class CommandUtils
         bool check = parameter.ParameterType == typeof(TPara) && !parameter.IsOut;
         if (!check)
         {
-            var log = new StringBuilder();
+            StringBuilder log = new();
             log.AppendLine($"指令[{name}]参数类型错误");
             log.AppendLine($"应为{typeof(TPara).Name}实际为{parameter.ParameterType.Name}");
             log.Append("已自动跳过该指令");
