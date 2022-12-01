@@ -91,7 +91,7 @@ public readonly struct SoraSegment
     /// </summary>
     public static MessageBody operator +(SoraSegment soraSegmentR, SoraSegment soraSegmentL)
     {
-        var messages = new MessageBody
+        MessageBody messages = new()
         {
             soraSegmentR,
             soraSegmentL

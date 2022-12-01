@@ -71,7 +71,7 @@ internal static class ServiceRecord
         {
             if (_deadService.Contains(service))
                 _deadService.Remove(service);
-            var old = _servicesDict[service];
+            (ServiceConfig c, ISoraService s) old = _servicesDict[service];
             return _servicesDict.TryUpdate(service, (config, serviceInstance), old);
         }
 

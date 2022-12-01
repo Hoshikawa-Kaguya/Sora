@@ -27,7 +27,7 @@ public static class Helper
     [Reviewed("nidbCN", "2021-03-24 19:31")]
     internal static void FriendlyException(UnhandledExceptionEventArgs args)
     {
-        var e = args.ExceptionObject as Exception;
+        Exception e = args.ExceptionObject as Exception;
 
         if (e is JsonSerializationException)
             Log.Error("Sora", "Json反序列化时出现错误，可能是go-cqhttp配置出现问题。请把go-cqhttp配置中的post_message_format从string改为array。");
@@ -126,7 +126,7 @@ public static class Helper
         if (arr1 is null && arr2 is null)
             return true;
 
-        for (var i = 0; i < arr1!.Length; i++)
+        for (int i = 0; i < arr1!.Length; i++)
             if (arr2 is not null && !(arr1[i] is null && arr2[i] is null))
             {
                 if (arr1[i] is null || arr2[i] is null)
