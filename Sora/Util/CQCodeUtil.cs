@@ -36,8 +36,8 @@ public static class CQCodeUtil
     /// <param name="elementsIndex">消息段在字符串中的索引</param>
     public static string SerializeMessage(this MessageBody msg, out int[] elementsIndex)
     {
-        StringBuilder sb = new();
-        int[] index = new int[msg.Count];
+        StringBuilder sb    = new();
+        int[]         index = new int[msg.Count];
 
         for (int i = 0; i < msg.Count; i++)
         {

@@ -85,7 +85,7 @@ public sealed class MessageBody : IList<SoraSegment>
         if (SegmentCheck(item))
             _message.Add(item);
         else
-            Log.Warning("MB_Add","非法消息段，已忽略");
+            Log.Warning("MB_Add", "非法消息段，已忽略");
     }
 
     /// <summary>
@@ -99,6 +99,7 @@ public sealed class MessageBody : IList<SoraSegment>
             Log.Warning("MB_Add", "空字符串消息，已忽略");
             return;
         }
+
         _message.Add(SoraSegment.Text(text));
     }
 

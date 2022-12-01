@@ -40,8 +40,8 @@ public struct PrivateSenderInfo
     /// <para>仅支持GoCQ</para>
     /// </summary>
     [JsonProperty(PropertyName = "group_id",
-                     NullValueHandling = NullValueHandling.Ignore,
-                     DefaultValueHandling = DefaultValueHandling.Ignore)]
+                  NullValueHandling = NullValueHandling.Ignore,
+                  DefaultValueHandling = DefaultValueHandling.Ignore)]
     public long? GroupId { get; internal init; }
 
     /// <summary>

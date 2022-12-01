@@ -98,7 +98,7 @@ public static class SegmentHelper
 
         string b64Str = Convert.ToBase64String(ms.GetBuffer());
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         sb.Append("base64://");
         sb.Append(b64Str);
 
