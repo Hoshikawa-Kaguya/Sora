@@ -11,6 +11,9 @@
     </h4>
     <h4 align="center">
         <a href="https://www.nuget.org/packages/Sora/">
+            <img src="https://img.shields.io/nuget/v/Sora?style=flat-square" alt="nuget">
+        </a>
+        <a href="https://www.nuget.org/packages/Sora/">
             <img src="https://img.shields.io/nuget/vpre/Sora?style=flat-square&color=ff69b4" alt="nuget">
         </a>
         <a href="https://github.com/howmanybots/onebot">
