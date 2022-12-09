@@ -57,12 +57,6 @@
 
 更新日志中会标注框架所对应的go-cqhttp版本号
 
-### 版本
-
-release: [![Sora](https://img.shields.io/nuget/v/Sora?style=flat-square)](https://www.nuget.org/packages/Sora/)
-
-prerelease: [![Sora](https://img.shields.io/nuget/vpre/Sora?style=flat-square&color=ff69b4)](https://www.nuget.org/packages/Sora/)
-
 ## 开发注意事项
 
 <details>
