@@ -26,13 +26,11 @@
 
 ## 文档
 
-> 对.Net5的支持在1.0.0-rc26之后的版本将会停止，1.0将会发布单独的.Net5版本
-> 
-> 之后的开发将会转为.Net6，由于.Net6为LTS的.Net版本，之后将会在.Net6的生命周期内使用.Net6进行开发
-
 **=====本框架只支持Array的上报格式!=====**
 
-查看框架的说明文档 [Docs](https://sora-docs.yukari.one/) [更新日志](https://sora-docs.yukari.one/updatelog/)
+本页面不会对框架的特性做介绍，如果需要详细了解框架的功能<font size="4"> **一定**要看**文档**！</font>
+
+<font size="7"> >[Docs](https://sora-docs.yukari.one/)< </font>
 
 文档目前只有简单的向导和自动生成API文档
 
@@ -48,33 +46,15 @@
 
 </details>
 
-## 有关QQ频道的适配
+## 开发计划
 
-本框架的正式版本和正常发布版本目前将不会支持Guild相关的API
-
-具有Guild API的测试版本已经在`extra/guild`分支中编写，如果需要这部分的API请自行clone引用或打包
-
-**警告：请勿将Guild分支测试版本在生产环境中使用，其中很多API都是实验性或不稳定的！**
-
-`extra/guild` 分支不会和主分支同步，这是一个完全实验性质的分支
-
-把这两套IM的协议做在一个框架里会导致API非常混乱（我都不知道QQ项目组的人怎么想的）
-
-并且鉴于频道也没什么人用，而且通话质量依旧是中东战场音质，本框架将会在V12协议适配频道协议后再考虑适配问题
-
-## 开发注意事项
-
-### **目前框架并没有发布LTS版本**
-
-目前会和go-cqhttp同步进行更新和调整
-
-并在go-cqhttp正式更新LTS版本时更新第一个LTS版本
-
-框架在LTS版本前可能会因为各种调整而做出**毁灭性**调整
+本框架从开始到今后都只会支持onebot协议，非onebot的平台并不会考虑进行支持，并且主要功能都已经基本完成，更新将会变为技术性/功能性更新。
 
 详细内容请关注 [更新日志](https://sora-docs.yukari.one/updatelog/)
 
-更新日志中会标注框架所对应的go-cqhttp版本号，并且框架对所对应的go-cqhttp均具有完整的API支持/扩展
+更新日志中会标注框架所对应的go-cqhttp版本号
+
+## 开发注意事项
 
 <details>
 <summary>开源协议</summary>
@@ -116,6 +96,22 @@ internal async ValueTask METHOD_NAME()
 internal async ValueTask METHOD_NAME()
 ```
 
+</details>
+
+<details>
+<summary>QQ频道</summary>
+
+本框架的正式版本和正常发布版本目前将不会支持Guild相关的API
+
+具有Guild API的测试版本已经在`extra/guild`分支中编写，如果需要这部分的API请自行clone引用或打包
+
+**警告：请勿将Guild分支测试版本在生产环境中使用，其中很多API都是实验性或不稳定的！**
+
+`extra/guild` 分支不会和主分支同步，这是一个完全实验性质的分支
+
+把这两套IM的协议做在一个框架里会导致API非常混乱（我都不知道QQ项目组的人怎么想的）
+
+并且鉴于频道也没什么人用，而且通话质量依旧是中东战场音质，本框架将会在V12协议适配频道协议后再考虑适配问题
 </details>
 
 ## 关于ISSUE
