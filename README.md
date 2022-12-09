@@ -4,23 +4,26 @@
     <br>
     Sora
     <h4 align="center">
-        一个基于<a href="https://github.com/howmanybots/onebot">OneBot</a>协议的 <a href="https://dotnet.microsoft.com/download/dotnet/6.0">C#/.Net 6</a> 异步机器人开发框架
+        一个基于<a href="https://github.com/howmanybots/onebot">OneBot</a>协议的 <a href="https://dotnet.microsoft.com/download/dotnet/6.0">C#/.Net 6</a> 异步机器人开发框架 | 
+        <a href="https://sora-docs.yukari.one/">
+            框架文档
+        </a>
     </h4>
     <h4 align="center">
-    <a href="https://www.nuget.org/packages/Sora/">
-        <img src="https://img.shields.io/nuget/vpre/Sora?style=flat-square&color=ff69b4" alt="nuget">
-    </a>
-    <a href="https://github.com/howmanybots/onebot">
-        <img src="https://img.shields.io/badge/OneBot-v11-black?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAABwCAMAAADxPgR5AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF////29vbr6+vAAAAk1hCcwAAAAR0Uk5T////AEAqqfQAAAKcSURBVHja7NrbctswDATQXfD//zlpO7FlmwAWIOnOtNaTM5JwDMa8E+PNFz7g3waJ24fviyDPgfhz8fHP39cBcBL9KoJbQUxjA2iYqHL3FAnvzhL4GtVNUcoSZe6eSHizBcK5LL7dBr2AUZlev1ARRHCljzRALIEog6H3U6bCIyqIZdAT0eBuJYaGiJaHSjmkYIZd+qSGWAQnIaz2OArVnX6vrItQvbhZJtVGB5qX9wKqCMkb9W7aexfCO/rwQRBzsDIsYx4AOz0nhAtWu7bqkEQBO0Pr+Ftjt5fFCUEbm0Sbgdu8WSgJ5NgH2iu46R/o1UcBXJsFusWF/QUaz3RwJMEgngfaGGdSxJkE/Yg4lOBryBiMwvAhZrVMUUvwqU7F05b5WLaUIN4M4hRocQQRnEedgsn7TZB3UCpRrIJwQfqvGwsg18EnI2uSVNC8t+0QmMXogvbPg/xk+Mnw/6kW/rraUlvqgmFreAA09xW5t0AFlHrQZ3CsgvZm0FbHNKyBmheBKIF2cCA8A600aHPmFtRB1XvMsJAiza7LpPog0UJwccKdzw8rdf8MyN2ePYF896LC5hTzdZqxb6VNXInaupARLDNBWgI8spq4T0Qb5H4vWfPmHo8OyB1ito+AysNNz0oglj1U955sjUN9d41LnrX2D/u7eRwxyOaOpfyevCWbTgDEoilsOnu7zsKhjRCsnD/QzhdkYLBLXjiK4f3UWmcx2M7PO21CKVTH84638NTplt6JIQH0ZwCNuiWAfvuLhdrcOYPVO9eW3A67l7hZtgaY9GZo9AFc6cryjoeFBIWeU+npnk/nLE0OxCHL1eQsc1IciehjpJv5mqCsjeopaH6r15/MrxNnVhu7tmcslay2gO2Z1QfcfX0JMACG41/u0RrI9QAAAABJRU5ErkJggg==" alt="onebot">
-    </a>
-    <a href="https://www.apache.org/licenses/LICENSE-2.0">
-        <img src="https://img.shields.io/github/license/Yukari316/Sora?style=flat-square&color=blueviolet" alt="license">
-    </a>
-    <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
-    <img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=flat-square" alt="workflow">
-    <a href="https://github.com/Mrs4s/go-cqhttp">
-        <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--rc3-blue?style=flat-square" alt="gocq-ver">
-    </a>
+        <a href="https://www.nuget.org/packages/Sora/">
+            <img src="https://img.shields.io/nuget/vpre/Sora?style=flat-square&color=ff69b4" alt="nuget">
+        </a>
+        <a href="https://github.com/howmanybots/onebot">
+            <img src="https://img.shields.io/badge/OneBot-v11-black?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAABwCAMAAADxPgR5AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF////29vbr6+vAAAAk1hCcwAAAAR0Uk5T////AEAqqfQAAAKcSURBVHja7NrbctswDATQXfD//zlpO7FlmwAWIOnOtNaTM5JwDMa8E+PNFz7g3waJ24fviyDPgfhz8fHP39cBcBL9KoJbQUxjA2iYqHL3FAnvzhL4GtVNUcoSZe6eSHizBcK5LL7dBr2AUZlev1ARRHCljzRALIEog6H3U6bCIyqIZdAT0eBuJYaGiJaHSjmkYIZd+qSGWAQnIaz2OArVnX6vrItQvbhZJtVGB5qX9wKqCMkb9W7aexfCO/rwQRBzsDIsYx4AOz0nhAtWu7bqkEQBO0Pr+Ftjt5fFCUEbm0Sbgdu8WSgJ5NgH2iu46R/o1UcBXJsFusWF/QUaz3RwJMEgngfaGGdSxJkE/Yg4lOBryBiMwvAhZrVMUUvwqU7F05b5WLaUIN4M4hRocQQRnEedgsn7TZB3UCpRrIJwQfqvGwsg18EnI2uSVNC8t+0QmMXogvbPg/xk+Mnw/6kW/rraUlvqgmFreAA09xW5t0AFlHrQZ3CsgvZm0FbHNKyBmheBKIF2cCA8A600aHPmFtRB1XvMsJAiza7LpPog0UJwccKdzw8rdf8MyN2ePYF896LC5hTzdZqxb6VNXInaupARLDNBWgI8spq4T0Qb5H4vWfPmHo8OyB1ito+AysNNz0oglj1U955sjUN9d41LnrX2D/u7eRwxyOaOpfyevCWbTgDEoilsOnu7zsKhjRCsnD/QzhdkYLBLXjiK4f3UWmcx2M7PO21CKVTH84638NTplt6JIQH0ZwCNuiWAfvuLhdrcOYPVO9eW3A67l7hZtgaY9GZo9AFc6cryjoeFBIWeU+npnk/nLE0OxCHL1eQsc1IciehjpJv5mqCsjeopaH6r15/MrxNnVhu7tmcslay2gO2Z1QfcfX0JMACG41/u0RrI9QAAAABJRU5ErkJggg==" alt="onebot">
+        </a>
+        <a href="https://www.apache.org/licenses/LICENSE-2.0">
+            <img src="https://img.shields.io/github/license/Yukari316/Sora?style=flat-square&color=blueviolet" alt="license">
+        </a>
+        <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
+        <img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=flat-square" alt="workflow">
+        <a href="https://github.com/Mrs4s/go-cqhttp">
+            <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--rc3-blue?style=flat-square" alt="gocq-ver">
+        </a>
     </h4>
 </h1>
 
@@ -28,9 +31,9 @@
 
 **=====本框架只支持Array的上报格式!=====**
 
-本页面不会对框架的特性做介绍，如果需要详细了解框架的功能<font size="4"> **一定**要看**文档**！</font>
+本页面不会对框架的特性做介绍，如果需要详细了解框架的功能**一定**要看**文档**！
 
-<font size="7"> >[Docs](https://sora-docs.yukari.one/)< </font>
+->[Docs](https://sora-docs.yukari.one/)<-
 
 文档目前只有简单的向导和自动生成API文档
 
