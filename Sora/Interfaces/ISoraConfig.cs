@@ -36,7 +36,7 @@ public interface ISoraConfig
 
     /// <summary>
     /// <para>客户端API调用超时设置(毫秒)</para>
-    /// <para>默认为1000无需修改</para>
+    /// <para>默认为5000无需修改</para>
     /// </summary>
     TimeSpan ApiTimeOut { get; init; }
 
