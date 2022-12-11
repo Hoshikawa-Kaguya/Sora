@@ -420,7 +420,7 @@ public sealed class CommandManager
 #region 动态指令处理
 
         //检查指令池
-        if (_regexCommands.Count == 0)
+        if (_dynamicCommands.Count == 0 && _regexCommands.Count == 0)
             return;
 
         List<(int, List<DynamicCommandInfo>)> matchedDynamicCommand =
@@ -471,10 +471,6 @@ public sealed class CommandManager
 #endregion
 
 #region 常规指令处理
-
-        //检查指令池
-        if (_regexCommands.Count == 0)
-            return;
 
         List<(int, List<SoraCommandInfo>)> matchedCommand =
             _regexCommands.Where(c => CommandMatch(c, eventArgs))
