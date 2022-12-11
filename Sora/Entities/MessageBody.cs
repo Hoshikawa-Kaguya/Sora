@@ -294,7 +294,7 @@ public sealed class MessageBody : IList<SoraSegment>
     /// </summary>
     public static implicit operator MessageBody(string text)
     {
-        return new MessageBody { SoraSegment.Text(text) };
+        return CQCodeUtil.DeserializeMessage(text);
     }
 
 #endregion
