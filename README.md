@@ -20,7 +20,7 @@
             <img src="https://img.shields.io/github/license/Yukari316/Sora?style=flat-square&color=blueviolet" alt="license">
         </a>
         <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
-        <img src="https://img.shields.io/github/workflow/status/Yukari316/Sora/.NET%20Core/master?style=flat-square" alt="workflow">
+        <img src="https://img.shields.io/github/actions/workflow/status/Hoshikawa-Kaguya/Sora/nuget.yml?branch=master&&style=flat-square" alt="workflow">
         <a href="https://github.com/Mrs4s/go-cqhttp">
             <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--rc3-blue?style=flat-square" alt="gocq-ver">
         </a>
