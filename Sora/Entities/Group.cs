@@ -197,6 +197,15 @@ public sealed class Group : BaseModel
     }
 
     /// <summary>
+    /// 删除群公告
+    /// </summary>
+    /// <param name="noticeId">公告ID</param>
+    public async ValueTask<ApiStatus> DelGroupNotice(string noticeId)
+    {
+        return await SoraApi.DelGroupNotice(Id, noticeId);
+    }
+
+    /// <summary>
     /// 获取群精华消息列表
     /// </summary>
     /// <returns>精华消息列表</returns>

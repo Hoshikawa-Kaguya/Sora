@@ -694,6 +694,18 @@ public sealed class SoraApi
     }
 
     /// <summary>
+    /// 删除群公告
+    /// </summary>
+    /// <param name="groupId">群号</param>
+    /// <param name="noticeId">公獒ID</param>
+    public async ValueTask<ApiStatus> DelGroupNotice(long groupId, string noticeId)
+    {
+        if (groupId < MIN_GROUP_ID)
+            throw new ArgumentOutOfRangeException(nameof(groupId));
+        return await ApiAdapter.DelGroupNotice(ConnectionId, groupId, noticeId);
+    }
+
+    /// <summary>
     /// 在群根目录创建文件夹
     /// </summary>
     /// <param name="groupId">群号</param>
