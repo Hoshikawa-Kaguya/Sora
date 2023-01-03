@@ -1,11 +1,7 @@
 using System.Threading.Tasks;
 using Sora.Attributes.Command;
-using Sora.Entities;
-using Sora.Entities.Segment;
-using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.LightLog;
 
 namespace Sora_Test;
 
@@ -19,14 +15,7 @@ public static class Commands
     public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        TextSegment s = eventArgs.Message.MessageBody[0].Data as TextSegment;
-        Log.Info("触发指令", $"text:{s!.Content}");
-
-        MessageBody message = new()
-        {
-            SoraSegment.Poke(eventArgs.Sender)
-        };
-
-        await eventArgs.Reply(message);
+        // TextSegment s = eventArgs.Message.MessageBody[0].Data as TextSegment;
+        await eventArgs.Reply("wow");
     }
 }
