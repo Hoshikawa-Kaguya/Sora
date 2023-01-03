@@ -20,6 +20,11 @@ public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
     public User Sender { get; }
 
     /// <summary>
+    /// 邀请者
+    /// </summary>
+    public User InvitorUser { get; }
+
+    /// <summary>
     /// 请求发送到的群组实例
     /// </summary>
     public Group SourceGroup { get; }
@@ -61,6 +66,10 @@ public sealed class AddGroupRequestEventArgs : BaseSoraEventArgs
         Comment     = groupObRequestArgs.Comment;
         RequestFlag = groupObRequestArgs.Flag;
         SubType     = groupObRequestArgs.GroupRequestType;
+
+        InvitorUser = groupObRequestArgs.InvitorId != 0
+            ? new User(serviceId, connectionId, groupObRequestArgs.InvitorId)
+            : null;
     }
 
 #endregion
