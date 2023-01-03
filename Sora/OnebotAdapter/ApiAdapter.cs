@@ -466,7 +466,7 @@ internal static class ApiAdapter
     /// <param name="groupId">群号</param>
     /// <param name="msgList">消息段数组</param>
     /// <param name="timeout">超时覆盖</param>
-    internal static async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(
+    internal static async ValueTask<(ApiStatus apiStatus, int messageId, string forwardId)> SendGroupForwardMsg(
         Guid                    connection,
         long                    groupId,
         IEnumerable<CustomNode> msgList,
@@ -496,10 +496,11 @@ internal static class ApiAdapter
                                                     connection,
                                                     timeout);
         if (apiStatus.RetCode != ApiStatusType.Ok || ret?["data"] == null)
-            return (apiStatus, -1);
+            return (apiStatus, -1, string.Empty);
         int msgCode = int.TryParse(ret["data"]?["message_id"]?.ToString(), out int messageCode) ? messageCode : -1;
+        string fwId = ret["data"]?["forward_id"]?.ToString() ?? string.Empty;
         Log.Debug("Sora", $"Get send_group_forward_msg response [{msgCode}]{nameof(apiStatus)}={apiStatus.RetCode}");
-        return (apiStatus, msgCode);
+        return (apiStatus, msgCode, fwId);
     }
 
     /// <summary>

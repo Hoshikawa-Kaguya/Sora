@@ -187,7 +187,7 @@ public sealed class SoraApi
     /// 节点(<see cref="CustomNode"/>)消息段列表
     /// </param>
     /// <param name="timeout">原有超时覆盖</param>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> SendGroupForwardMsg(
+    public async ValueTask<(ApiStatus apiStatus, int messageId, string forwardId)> SendGroupForwardMsg(
         long                    groupId,
         IEnumerable<CustomNode> nodeList,
         TimeSpan?               timeout = null)
