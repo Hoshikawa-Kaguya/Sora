@@ -212,7 +212,7 @@ public sealed class EventAdapter
         }
 
         if (ServiceRecord.IsEnableSocketMessage(ServiceId))
-            Log.Debug("Socket", $"Get json message:{messageJson.ToString(Formatting.None)}");
+            Log.Verbose("Socket", $"Get json message:{messageJson.ToString(Formatting.None)}");
         switch (TryGetJsonValue(messageJson, "post_type"))
         {
             //元事件类型

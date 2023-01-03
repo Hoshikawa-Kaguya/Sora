@@ -24,10 +24,10 @@ public static class SoraServiceFactory
     {
         Log.Info("Sora", "Ciallo～");
         Log.Info("Sora", $"框架版本:{VersionCode.VERSION}");
+        Log.Verbose("OnebotProtocolVersion", VersionCode.ONEBOT_PROTOCOL);
         Log.Debug("Sora", "Developer QQ Group：1081190562");
-        Log.Debug("System", Environment.OSVersion.ToString());
-        Log.Debug("Runtime", Environment.Version.ToString());
-        Log.Info("OnebotProtocolVersion", VersionCode.ONEBOT_PROTOCOL);
+        Log.Verbose("System", Environment.OSVersion.ToString());
+        Log.Verbose("Runtime", Environment.Version.ToString());
     }
 
     /// <summary>
