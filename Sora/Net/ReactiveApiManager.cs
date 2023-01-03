@@ -138,7 +138,7 @@ internal static class ReactiveApiManager
             : ApiStatusType.UnknownStatus;
         string message = msg["msg"] == null && msg["wording"] == null
             ? string.Empty
-            : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})"; 
+            : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})";
         string statusStr = msg["status"]?.ToString() ?? "failed";
 
         Log.Debug("Sora", $"Get {apiName} response [{apiStatus}]");
