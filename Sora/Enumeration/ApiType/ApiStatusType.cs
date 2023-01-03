@@ -19,12 +19,12 @@ public enum ApiStatusType
     Failed = 100,
 
     /// <summary>
-    /// 403
+    /// 权限不足
     /// </summary>
     Forbidden = 403,
 
     /// <summary>
-    /// 404
+    /// API不存在
     /// </summary>
     NotFound = 404,
 
