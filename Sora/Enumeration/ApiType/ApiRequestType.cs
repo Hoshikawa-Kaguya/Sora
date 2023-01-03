@@ -398,5 +398,5 @@ internal enum ApiRequestType
     [Description("_del_group_notice")]
     DeleteGroupNotice
 
-    #endregion
+#endregion
 }
