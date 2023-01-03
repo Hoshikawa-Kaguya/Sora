@@ -11,6 +11,12 @@ namespace Sora.Entities.Info;
 public readonly struct GroupNoticeInfo
 {
     /// <summary>
+    /// 公告ID
+    /// </summary>
+    [JsonProperty(PropertyName = "notice_id")]
+    public string NoticeId { get; init; }
+
+    /// <summary>
     /// 发布者
     /// </summary>
     [JsonProperty(PropertyName = "sender_id")]
