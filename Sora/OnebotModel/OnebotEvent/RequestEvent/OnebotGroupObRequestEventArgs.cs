@@ -21,4 +21,10 @@ internal sealed class OnebotGroupObRequestEventArgs : BaseObRequestEvent
     /// </summary>
     [JsonProperty(PropertyName = "group_id")]
     internal long GroupId { get; set; }
+
+    /// <summary>
+    /// 邀请者ID
+    /// </summary>
+    [JsonProperty(PropertyName = "invitor_id")]
+    internal long InvitorId { get; set; }
 }
