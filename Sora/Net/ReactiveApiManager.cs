@@ -124,12 +124,18 @@ internal static class ReactiveApiManager
     [Reviewed("XiaoHe321", "2021-04-13 22:54")]
     private static ApiStatus GetApiStatus(JObject msg)
     {
+        string retCode = int.TryParse(msg["retcode"]?.ToString(), out int ret) switch
+                         {
+                             true when ret < 0 => "100",
+                             false             => "-5",
+                             _                 => ret.ToString()
+                         };
+
         return new ApiStatus
         {
-            RetCode =
-                Enum.TryParse(msg["retcode"]?.ToString() ?? string.Empty, out ApiStatusType messageCode)
-                    ? messageCode
-                    : ApiStatusType.UnknownStatus,
+            RetCode = Enum.TryParse(retCode, out ApiStatusType messageCode)
+                ? messageCode
+                : ApiStatusType.UnknownStatus,
             ApiMessage = msg["msg"] == null && msg["wording"] == null
                 ? string.Empty
                 : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})",
