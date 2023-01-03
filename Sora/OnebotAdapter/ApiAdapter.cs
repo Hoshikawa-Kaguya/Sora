@@ -1582,6 +1582,24 @@ internal static class ApiAdapter
         return apiStatus;
     }
 
+    internal static async ValueTask<ApiStatus> DelGroupNotice(Guid   connection,
+                                                              long   groupId,
+                                                              string noticeId)
+    {
+        (ApiStatus apiStatus, _) =
+            await ReactiveApiManager.SendApiRequest(new ApiRequest
+                                                    {
+                                                        ApiRequestType = ApiRequestType.DeleteGroupNotice,
+                                                        ApiParams = new
+                                                        {
+                                                            group_id  = groupId,
+                                                            notice_id = noticeId
+                                                        }
+                                                    },
+                                                    connection);
+        return apiStatus;
+    }
+
     /// <summary>
     /// 删除好友
     /// </summary>

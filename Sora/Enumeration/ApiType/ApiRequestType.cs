@@ -390,7 +390,13 @@ internal enum ApiRequestType
     /// 上传私聊文件
     /// </summary>
     [Description("upload_private_file")]
-    UploadPrivateFile
+    UploadPrivateFile,
 
-#endregion
+    /// <summary>
+    /// 删除群公告
+    /// </summary>
+    [Description("_del_group_notice")]
+    DeleteGroupNotice
+
+    #endregion
 }

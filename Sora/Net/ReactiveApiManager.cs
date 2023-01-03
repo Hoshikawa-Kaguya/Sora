@@ -148,6 +148,7 @@ internal static class ReactiveApiManager
             StringBuilder errMsg = new();
             errMsg.AppendLine("gocq api error");
             errMsg.AppendLine($"api: {apiName}");
+            errMsg.AppendLine($"retcode: {retCode}");
             errMsg.Append($"message: {message}[{statusStr}]");
             Log.Error("api", errMsg.ToString());
         }
