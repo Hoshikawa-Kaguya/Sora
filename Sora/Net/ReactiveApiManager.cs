@@ -2,6 +2,7 @@ using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -74,8 +75,10 @@ internal static class ReactiveApiManager
         //错误数据
         (bool isTimeout, Exception exception) = (false, null);
         //序列化请求
-        string msg = JsonConvert.SerializeObject(apiRequest, Formatting.None);
+        string msg     = JsonConvert.SerializeObject(apiRequest, Formatting.None);
+        string apiName = Helper.GetFieldDesc(apiRequest.ApiRequestType);
         //向客户端发送请求数据
+        Log.Debug("Sora", $"Sending {apiName} request");
         Task<JObject> apiTask = ApiSubject.Where(request => request.id == apiRequest.Echo)
                                           .Select(request => request.data)
                                           .Take(1)
@@ -101,7 +104,7 @@ internal static class ReactiveApiManager
         JObject response = await apiTask;
         //检查API返回
         if (response != null && response.Count != 0)
-            return (GetApiStatus(response), response);
+            return (GetApiStatus(apiName, response), response);
 
         //空响应
         if (exception == null)
@@ -120,9 +123,8 @@ internal static class ReactiveApiManager
     /// 获取API状态返回值
     /// 所有API回调请求都会返回状态值
     /// </summary>
-    /// <param name="msg">消息JSON</param>
     [Reviewed("XiaoHe321", "2021-04-13 22:54")]
-    private static ApiStatus GetApiStatus(JObject msg)
+    private static ApiStatus GetApiStatus(string apiName, JObject msg)
     {
         string retCode = int.TryParse(msg["retcode"]?.ToString(), out int ret) switch
                          {
@@ -131,15 +133,30 @@ internal static class ReactiveApiManager
                              _                 => ret.ToString()
                          };
 
+        ApiStatusType apiStatus = Enum.TryParse(retCode, out ApiStatusType messageCode)
+            ? messageCode
+            : ApiStatusType.UnknownStatus;
+        string message = msg["msg"] == null && msg["wording"] == null
+            ? string.Empty
+            : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})"; 
+        string statusStr = msg["status"]?.ToString() ?? "failed";
+
+        Log.Debug("Sora", $"Get {apiName} response [{apiStatus}]");
+
+        if (retCode != "0")
+        {
+            StringBuilder errMsg = new();
+            errMsg.AppendLine("gocq api error");
+            errMsg.AppendLine($"api: {apiName}");
+            errMsg.Append($"message: {message}[{statusStr}]");
+            Log.Error("api", errMsg.ToString());
+        }
+
         return new ApiStatus
         {
-            RetCode = Enum.TryParse(retCode, out ApiStatusType messageCode)
-                ? messageCode
-                : ApiStatusType.UnknownStatus,
-            ApiMessage = msg["msg"] == null && msg["wording"] == null
-                ? string.Empty
-                : $"{msg["msg"] ?? string.Empty}({msg["wording"] ?? string.Empty})",
-            ApiStatusStr = msg["status"]?.ToString() ?? "failed"
+            RetCode      = apiStatus,
+            ApiMessage   = message,
+            ApiStatusStr = statusStr
         };
     }
 
