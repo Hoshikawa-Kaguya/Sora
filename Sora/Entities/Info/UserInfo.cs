@@ -54,5 +54,11 @@ public struct UserInfo
     [JsonProperty(PropertyName = "login_days")]
     public int LoginDays { get; internal init; }
 
+    /// <summary>
+    /// 会员等级
+    /// </summary>
+    [JsonProperty(PropertyName = "vip_level")]
+    public string VipLevel { get; internal init; }
+
 #endregion
 }
