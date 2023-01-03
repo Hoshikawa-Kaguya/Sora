@@ -13,7 +13,7 @@
         <a href="https://www.nuget.org/packages/Sora/">
             <img src="https://img.shields.io/nuget/v/Sora?style=flat-square" alt="nuget">
         </a>
-        <a href="https://github.com/howmanybots/onebot">
+        <a href="https://onebot.dev/">
             <img src="https://img.shields.io/badge/OneBot-v11-black?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAABwCAMAAADxPgR5AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF////29vbr6+vAAAAk1hCcwAAAAR0Uk5T////AEAqqfQAAAKcSURBVHja7NrbctswDATQXfD//zlpO7FlmwAWIOnOtNaTM5JwDMa8E+PNFz7g3waJ24fviyDPgfhz8fHP39cBcBL9KoJbQUxjA2iYqHL3FAnvzhL4GtVNUcoSZe6eSHizBcK5LL7dBr2AUZlev1ARRHCljzRALIEog6H3U6bCIyqIZdAT0eBuJYaGiJaHSjmkYIZd+qSGWAQnIaz2OArVnX6vrItQvbhZJtVGB5qX9wKqCMkb9W7aexfCO/rwQRBzsDIsYx4AOz0nhAtWu7bqkEQBO0Pr+Ftjt5fFCUEbm0Sbgdu8WSgJ5NgH2iu46R/o1UcBXJsFusWF/QUaz3RwJMEgngfaGGdSxJkE/Yg4lOBryBiMwvAhZrVMUUvwqU7F05b5WLaUIN4M4hRocQQRnEedgsn7TZB3UCpRrIJwQfqvGwsg18EnI2uSVNC8t+0QmMXogvbPg/xk+Mnw/6kW/rraUlvqgmFreAA09xW5t0AFlHrQZ3CsgvZm0FbHNKyBmheBKIF2cCA8A600aHPmFtRB1XvMsJAiza7LpPog0UJwccKdzw8rdf8MyN2ePYF896LC5hTzdZqxb6VNXInaupARLDNBWgI8spq4T0Qb5H4vWfPmHo8OyB1ito+AysNNz0oglj1U955sjUN9d41LnrX2D/u7eRwxyOaOpfyevCWbTgDEoilsOnu7zsKhjRCsnD/QzhdkYLBLXjiK4f3UWmcx2M7PO21CKVTH84638NTplt6JIQH0ZwCNuiWAfvuLhdrcOYPVO9eW3A67l7hZtgaY9GZo9AFc6cryjoeFBIWeU+npnk/nLE0OxCHL1eQsc1IciehjpJv5mqCsjeopaH6r15/MrxNnVhu7tmcslay2gO2Z1QfcfX0JMACG41/u0RrI9QAAAABJRU5ErkJggg==" alt="onebot">
         </a>
         <a href="https://www.apache.org/licenses/LICENSE-2.0">
@@ -22,7 +22,7 @@
         <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
         <img src="https://img.shields.io/github/actions/workflow/status/Hoshikawa-Kaguya/Sora/nuget.yml?branch=master&&style=flat-square" alt="workflow">
         <a href="https://github.com/Mrs4s/go-cqhttp">
-            <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--rc3-blue?style=flat-square" alt="gocq-ver">
+            <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--rc4-blue?style=flat-square" alt="gocq-ver">
         </a>
     </h4>
 </h1>
@@ -34,6 +34,8 @@
 本页面不会对框架的特性做介绍，如果需要详细了解框架的功能**一定**要看**文档**！
 
 ->[Docs](https://sora-docs.yukari.one/)<-
+
+->[更新日志](https://sora-docs.yukari.one/updatelog/)<- `更新日志中会标注框架所对应的go-cqhttp版本号`
 
 文档目前只有简单的向导和自动生成API文档
 
@@ -49,13 +51,19 @@
 
 </details>
 
-## 开发计划
+## 关于本框架
 
-本框架从开始到今后都只会支持onebot协议，非onebot的平台并不会考虑进行支持，并且主要功能都已经基本完成，更新将会变为技术性/功能性更新。
+> 本框架从开始到今后都只会支持onebot协议，非onebot的平台并不会考虑进行支持
 
-详细内容请关注 [更新日志](https://sora-docs.yukari.one/updatelog/)
+这是一个以轻量为主的 [onebot](https://onebot.dev/) 机器人开发框架，主要的支持方向为 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp)
 
-更新日志中会标注框架所对应的go-cqhttp版本号
+这个框架将会一直以简单易用为主，也会向着更加便捷的方向进行开发
+
+所以不会有什么 `起夜级` 的组件 比如：DI，AOP...
+
+这个项目同时也是我学习C#这个语言的过程中的产物，所以里面可能会部分拉高血压的代码 ~~屎山~~
+
+如果有什么建议的话，可以在[Discussions](https://github.com/Yukari316/Sora/discussions)里提出哦
 
 ## 开发注意事项
 
@@ -133,15 +141,11 @@ ISSUE 目前只接受bug的提交和新功能的建议
 - 提交当前版本下已经被修复的BUG
 - 询问问题（为什么不用用[Discussions](https://github.com/Yukari316/Sora/discussions)呢）
 
-## 关于本框架
+## 关于命名
 
 Sora这个名字来源于日语中"空"的罗马音
 
-当初只是想到了空灵这个词就想到了这么个字 ~~假装自己会起名~~
-
-这个项目同时也是我学习C#这个语言的过程中的产物，所以里面可能会部分拉高血压的代码 ~~屎山~~
-
-如果有什么建议的话，可以在[Discussions](https://github.com/Yukari316/Sora/discussions)里提出哦
+一拍脑袋想的.jpg
 
 ## 鸣谢
 
