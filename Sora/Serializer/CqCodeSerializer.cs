@@ -9,24 +9,25 @@ using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
+using Sora.Util;
 
-namespace Sora.Util;
+namespace Sora.Serializer;
 
 /// <summary>
-/// 原CQ码序列化
+/// 消息段CQ码序列化
 /// 该方法由ExerciseBook(https://github.com/ExerciseBook)提供
 /// </summary>
-public static class CQCodeUtil
+public static class CqCodeSerializer
 {
-#region 序列化
+#region Serialize
 
     /// <summary>
     /// 序列化某一个消息
     /// </summary>
     /// <param name="msg">消息</param>
-    public static string SerializeMessage(this MessageBody msg)
+    public static string SerializeToCq(this MessageBody msg)
     {
-        return msg.SerializeMessage(out _);
+        return msg.SerializeToCq(out _);
     }
 
     /// <summary>
@@ -34,7 +35,7 @@ public static class CQCodeUtil
     /// </summary>
     /// <param name="msg">消息</param>
     /// <param name="elementsIndex">消息段在字符串中的索引</param>
-    public static string SerializeMessage(this MessageBody msg, out int[] elementsIndex)
+    public static string SerializeToCq(this MessageBody msg, out int[] elementsIndex)
     {
         StringBuilder sb    = new();
         int[]         index = new int[msg.Count];
@@ -42,7 +43,7 @@ public static class CQCodeUtil
         for (int i = 0; i < msg.Count; i++)
         {
             index[i] = sb.Length;
-            sb.Append(msg[i].SerializeSegment());
+            sb.Append(msg[i].SerializeToCq());
         }
 
         elementsIndex = index;
@@ -54,10 +55,10 @@ public static class CQCodeUtil
     /// </summary>
     /// <param name="msg"></param>
     /// <returns></returns>
-    public static string SerializeSegment(this SoraSegment msg)
+    public static string SerializeToCq(this SoraSegment msg)
     {
         if (msg.MessageType == SegmentType.Text)
-            return ((TextSegment)msg.Data).Content.CQCodeEncode();
+            return ((TextSegment)msg.Data).Content.CqCodeEncode();
 
         StringBuilder ret = new();
         ret.Append("[CQ:");
@@ -68,7 +69,6 @@ public static class CQCodeUtil
             return string.Empty;
 
         ret.Append(typeName);
-
 
         BaseSegment    data       = msg.Data;
         Type           dataType   = data.GetType();
@@ -87,7 +87,7 @@ public static class CQCodeUtil
                 continue;
             string value = propData.GetType().IsEnum
                 ? Helper.GetFieldDesc(propData)
-                : (propData.ToString() ?? "").CQCodeEncode(true);
+                : (propData.ToString() ?? "").CqCodeEncode(true);
             ret.Append(',').Append(key).Append('=').Append(value);
         }
 
@@ -97,7 +97,7 @@ public static class CQCodeUtil
 
 #endregion
 
-#region 反序列化
+#region Deserialize
 
     private static readonly Regex _cqRegex = new(@"\[CQ:([A-Za-z]*)(?:(,[^\[\]]+))?\]", RegexOptions.Compiled);
 
@@ -108,7 +108,7 @@ public static class CQCodeUtil
     /// </summary>
     /// <param name="cqMsgStr">需要进行反序列化的消息字符串</param>
     /// <returns>SoraSegment集合</returns>
-    public static MessageBody DeserializeMessage(string cqMsgStr)
+    public static MessageBody DeserializeCqMessage(this string cqMsgStr)
     {
         // 分离为文本数组和CQ码数组
         string[]          text     = _cqRegex.Replace(cqMsgStr, "\0").Split('\0');
@@ -131,7 +131,7 @@ public static class CQCodeUtil
     /// </summary>
     /// <param name="str">CQ码字符串</param>
     /// <returns>生成的SoraSegment对象</returns>
-    public static SoraSegment DeserializeCqCode(string str)
+    public static SoraSegment DeserializeCqCode(this string str)
     {
         Match match = _cqRegex.Match(str);
         if (!Enum.TryParse(match.Groups[1].Value, true, out SegmentType segmentType))
@@ -178,7 +178,7 @@ public static class CQCodeUtil
 
 #endregion
 
-#region 转义
+#region Encode/Decode
 
     /// <summary>
     ///  酷Q码转义
@@ -186,7 +186,7 @@ public static class CQCodeUtil
     /// <param name="msg"></param>
     /// <param name="comma"></param>
     /// <returns></returns>
-    public static string CQCodeEncode(this string msg, bool comma = false)
+    public static string CqCodeEncode(this string msg, bool comma = false)
     {
         StringBuilder ret = new(255);
         foreach (char t in msg)
@@ -213,7 +213,7 @@ public static class CQCodeUtil
     /// </summary>
     /// <param name="msg"></param>
     /// <returns></returns>
-    public static string CQCodeDecode(this string msg)
+    public static string CqCodeDecode(this string msg)
     {
         StringBuilder ret = new(255);
 
