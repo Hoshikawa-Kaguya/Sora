@@ -63,7 +63,7 @@
 
 同时也不会将框架拆分为多个不同功能的包 ~~毕竟本来就没有什么功能~~
 
-如果希望拥有  `指令路由`  `跨平台` `DI` 等等功能，推荐使用 [OneBot-Framework](https://github.com/ParaParty/OneBot-Framework)
+如果希望拥有  `指令路由`  `多IM平台支持`   `DI` 等等功能，推荐使用 [OneBot-Framework](https://github.com/ParaParty/OneBot-Framework)
 
 这个项目同时也是我学习C#这个语言的过程中的产物，所以里面可能会部分拉高血压的代码 ~~屎山~~
 
