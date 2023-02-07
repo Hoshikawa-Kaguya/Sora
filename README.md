@@ -176,4 +176,13 @@ Sora这个名字来源于日语中"空"的罗马音
 
 > 本项目使用了免费的[ReSharper](https://www.jetbrains.com/resharper/)插件/[Rider](https://www.jetbrains.com/rider/?from=Sora)开发环境
 
-[`<img src=".github/jetbrains-variant-4.svg" width="200"/>`](https://www.jetbrains.com/?from=Sora) [`<img src=".github/icon-resharper.svg" width="100"/>`](https://www.jetbrains.com/ReSharper/?from=Sora)[`<img src=".github/icon-rider.svg" width="100"/>`](https://www.jetbrains.com/rider/?from=Sora)
+<a href="https://www.jetbrains.com/?from=Sora">
+    <img src=".github/jetbrains-variant-4.svg" alt="jetbrains">
+</a>
+<a href="https://www.jetbrains.com/ReSharper/?from=Sora">
+    <img src=".github/icon-resharper.svg" alt="jetbrains">
+</a>
+<a href="https://www.jetbrains.com/rider/?from=Sora">
+    <img src=".github/icon-rider.svg" alt="jetbrains">
+</a>
+
