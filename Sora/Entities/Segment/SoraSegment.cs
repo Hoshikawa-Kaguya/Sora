@@ -15,7 +15,7 @@ namespace Sora.Entities.Segment;
 /// 消息段结构体
 /// </summary>
 [ProtoContract]
-public readonly struct SoraSegment
+public class SoraSegment
 {
     #region 属性
 
@@ -55,6 +55,9 @@ public readonly struct SoraSegment
         Data        = dataObject;
         Id          = Guid.NewGuid();
     }
+
+    //Default constructor for protobuf
+    private SoraSegment(){}
 
 #endregion 构造函数
 
