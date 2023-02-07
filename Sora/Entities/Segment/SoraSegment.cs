@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ProtoBuf;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
@@ -13,23 +14,30 @@ namespace Sora.Entities.Segment;
 /// <summary>
 /// 消息段结构体
 /// </summary>
+[ProtoContract]
 public readonly struct SoraSegment
 {
-#region 属性
+    #region 属性
 
     /// <summary>
     /// 消息段类型
     /// </summary>
+    [JsonProperty(PropertyName = "msg_t")]
+    [ProtoMember(1)]
     public SegmentType MessageType { get; }
 
     /// <summary>
     /// 数据实例
     /// </summary>
+    [JsonProperty(PropertyName = "data")]
+    [ProtoMember(2)]
     public BaseSegment Data { get; }
 
     /// <summary>
     /// 消息段的ID
     /// </summary>
+    [JsonProperty(PropertyName = "id")]
+    [ProtoMember(3)]
     public Guid Id { get; }
 
 #endregion 属性

@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Newtonsoft.Json;
+using ProtoBuf;
 using Sora.Entities.Segment;
 using Sora.Enumeration;
 using Sora.Util;
@@ -13,10 +15,13 @@ namespace Sora.Entities;
 /// 消息段
 /// </summary>
 [DebuggerDisplay("{DebuggerDisplay,nq}, Count = {_message.Count}")]
+[ProtoContract]
 public sealed class MessageBody : IList<SoraSegment>
 {
 #region 私有字段
 
+    [JsonProperty(PropertyName = "message")]
+    [ProtoMember(1)]
     private readonly List<SoraSegment> _message = new();
 
 #endregion

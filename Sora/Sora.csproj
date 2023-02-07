@@ -32,6 +32,7 @@
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <PackageReference Include="Websocket.Client" Version="4.4.43" />
         <PackageReference Include="YukariToolBox.LightLog" Version="3.0.9" />
+        <PackageReference Include="protobuf-net" Version="3.1.33" />
     </ItemGroup>
 
 </Project>

@@ -3,7 +3,8 @@
 namespace Sora.Entities.Segment.DataModel;
 
 /// <summary>
-/// 未知消息段
+/// <para>未知消息段</para>
+/// <para>此消息段需要在pb序列化前去除</para>
 /// </summary>
 public sealed record UnknownSegment : BaseSegment
 {

@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using ProtoBuf;
 using Sora.Converter;
 using Sora.Enumeration;
 
@@ -8,6 +9,7 @@ namespace Sora.Entities.Segment.DataModel;
 /// <para>Xml与Json集合</para>
 /// <para>可能为<see cref="SegmentType.Json"/>或<see cref="SegmentType.Xml"/></para>
 /// </summary>
+[ProtoContract]
 public sealed record CodeSegment : BaseSegment
 {
     internal CodeSegment()
@@ -20,6 +22,7 @@ public sealed record CodeSegment : BaseSegment
     /// 内容
     /// </summary>
     [JsonProperty(PropertyName = "data")]
+    [ProtoMember(1)]
     public string Content { get; internal set; }
 
     /// <summary>
@@ -27,6 +30,7 @@ public sealed record CodeSegment : BaseSegment
     /// </summary>
     [JsonConverter(typeof(StringConverter))]
     [JsonProperty(PropertyName = "resid", NullValueHandling = NullValueHandling.Ignore)]
+    [ProtoMember(2)]
     public int? Resid { get; internal set; }
 
 #endregion

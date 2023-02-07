@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using ProtoBuf;
 
 namespace Sora.Entities.Segment.DataModel;
 
@@ -6,6 +7,7 @@ namespace Sora.Entities.Segment.DataModel;
 /// 接收红包
 /// 仅支持GoCQ
 /// </summary>
+[ProtoContract]
 public sealed record RedbagSegment : BaseSegment
 {
     internal RedbagSegment()
@@ -16,5 +18,6 @@ public sealed record RedbagSegment : BaseSegment
     /// 祝福语/口令
     /// </summary>
     [JsonProperty(PropertyName = "title")]
+    [ProtoMember(1)]
     public string Title { get; internal set; }
 }
