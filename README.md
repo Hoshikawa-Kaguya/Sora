@@ -168,6 +168,8 @@ Sora这个名字来源于日语中"空"的罗马音
 
 [Newtonsoft.Json](https://www.newtonsoft.com/json) | Json序列化/反序列化
 
+[protobuf-net](https://github.com/protobuf-net/protobuf-net) | ProtoBuf序列化/反序列化
+
 [System.Reactive](https://github.com/dotnet/reactive) | 响应式异步API支持
 
 [YukariToolBox](https://github.com/DeepOceanSoft/YukariToolBox) | Log，异步扩展工具箱
@@ -185,4 +187,3 @@ Sora这个名字来源于日语中"空"的罗马音
 <a href="https://www.jetbrains.com/rider/?from=Sora">
     <img src=".github/icon-rider.svg" alt="jetbrains">
 </a>
-
