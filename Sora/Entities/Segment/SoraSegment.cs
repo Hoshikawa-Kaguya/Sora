@@ -17,7 +17,7 @@ namespace Sora.Entities.Segment;
 [ProtoContract]
 public class SoraSegment
 {
-    #region 属性
+#region 属性
 
     /// <summary>
     /// 消息段类型
@@ -57,7 +57,9 @@ public class SoraSegment
     }
 
     //Default constructor for protobuf
-    private SoraSegment(){}
+    private SoraSegment()
+    {
+    }
 
 #endregion 构造函数
 

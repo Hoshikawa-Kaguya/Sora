@@ -299,7 +299,7 @@ public sealed class MessageBody : IList<SoraSegment>
     /// </summary>
     public static implicit operator MessageBody(string text)
     {
-        return CqCodeSerializer.DeserializeCqMessage(text);
+        return text.DeserializeCqMessage();
     }
 
 #endregion
