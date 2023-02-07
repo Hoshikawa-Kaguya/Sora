@@ -63,6 +63,8 @@
 
 同时也不会将框架拆分为多个不同功能的包 ~~毕竟本来就没有什么功能~~
 
+如果希望拥有  `指令路由`  `跨平台` `DI` 等等功能，推荐使用 [OneBot-Framework](https://github.com/ParaParty/OneBot-Framework)
+
 这个项目同时也是我学习C#这个语言的过程中的产物，所以里面可能会部分拉高血压的代码 ~~屎山~~
 
 如果有什么建议的话，可以在[Discussions](https://github.com/Yukari316/Sora/discussions)里提出哦
@@ -72,7 +74,7 @@
 <details>
 <summary>开源协议</summary>
 
-本项目使用了`Apache-2.0`开源协议
+本项目使用了 `Apache-2.0`开源协议
 
 这意味着在引用/修改本类库时需要遵守相关的协议规定
 
@@ -102,7 +104,7 @@ internal async ValueTask METHOD_NAME()
 
 例如：
 
-> 行号也可以是`ALL`一代表这整个方法都需要检查
+> 行号也可以是 `ALL`一代表这整个方法都需要检查
 
 ```csharp
 [NeedReview("L12-L123")]
@@ -116,7 +118,7 @@ internal async ValueTask METHOD_NAME()
 
 本框架的正式版本和正常发布版本目前将不会支持Guild相关的API
 
-具有Guild API的测试版本已经在`extra/guild`分支中编写，如果需要这部分的API请自行clone引用或打包
+具有Guild API的测试版本已经在 `extra/guild`分支中编写，如果需要这部分的API请自行clone引用或打包
 
 **警告：请勿将Guild分支测试版本在生产环境中使用，其中很多API都是实验性或不稳定的！**
 
@@ -125,6 +127,7 @@ internal async ValueTask METHOD_NAME()
 把这两套IM的协议做在一个框架里会导致API非常混乱（我都不知道QQ项目组的人怎么想的）
 
 并且鉴于频道也没什么人用，而且通话质量依旧是中东战场音质，本框架将会在V12协议适配频道协议后再考虑适配问题
+
 </details>
 
 ## 关于ISSUE
@@ -134,7 +137,7 @@ ISSUE 目前只接受bug的提交和新功能的建议
 如果有使用问题或者不确定的问题请使用[Discussions](https://github.com/Yukari316/Sora/discussions)
 
 > 请注意, 开发者并没有**义务**回复您的问题. 您应该具备基本的提问技巧。
-> 
+>
 > 如果不知道该怎么样提问，那么请在提问前阅读 [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)
 
 以下ISSUE会被直接关闭
@@ -173,4 +176,4 @@ Sora这个名字来源于日语中"空"的罗马音
 
 > 本项目使用了免费的[ReSharper](https://www.jetbrains.com/resharper/)插件/[Rider](https://www.jetbrains.com/rider/?from=Sora)开发环境
 
-[<img src=".github/jetbrains-variant-4.svg" width="200"/>](https://www.jetbrains.com/?from=Sora) [<img src=".github/icon-resharper.svg" width="100"/>](https://www.jetbrains.com/ReSharper/?from=Sora)[<img src=".github/icon-rider.svg" width="100"/>](https://www.jetbrains.com/rider/?from=Sora)
+[`<img src=".github/jetbrains-variant-4.svg" width="200"/>`](https://www.jetbrains.com/?from=Sora) [`<img src=".github/icon-resharper.svg" width="100"/>`](https://www.jetbrains.com/ReSharper/?from=Sora)[`<img src=".github/icon-rider.svg" width="100"/>`](https://www.jetbrains.com/rider/?from=Sora)
