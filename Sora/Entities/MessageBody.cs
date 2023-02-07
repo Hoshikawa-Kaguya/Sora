@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using ProtoBuf;
 using Sora.Entities.Segment;
 using Sora.Enumeration;
-using Sora.Util;
+using Sora.Serializer;
 using YukariToolBox.LightLog;
 
 namespace Sora.Entities;
@@ -38,7 +38,7 @@ public sealed class MessageBody : IList<SoraSegment>
     /// </summary>
     public bool IsReadOnly => false;
 
-    private string DebuggerDisplay => this.SerializeMessage();
+    private string DebuggerDisplay => this.SerializeToCq();
 
 #endregion
 
@@ -299,7 +299,7 @@ public sealed class MessageBody : IList<SoraSegment>
     /// </summary>
     public static implicit operator MessageBody(string text)
     {
-        return CQCodeUtil.DeserializeMessage(text);
+        return CqCodeSerializer.DeserializeCqMessage(text);
     }
 
 #endregion

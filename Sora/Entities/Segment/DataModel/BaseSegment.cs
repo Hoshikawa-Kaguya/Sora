@@ -23,4 +23,5 @@ namespace Sora.Entities.Segment.DataModel;
 [ProtoInclude(15, typeof(TextSegment))]
 [ProtoInclude(16, typeof(TtsSegment))]
 [ProtoInclude(17, typeof(VideoSegment))]
+[ProtoInclude(18, typeof(UnknownSegment))]
 public record BaseSegment;
