@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using ProtoBuf;
 using Sora.Converter;
 using Sora.Enumeration.EventParamsType;
 
@@ -8,6 +9,7 @@ namespace Sora.Entities.Segment.DataModel;
 /// 音乐分享
 /// 仅发送
 /// </summary>
+[ProtoContract]
 public sealed record MusicSegment : BaseSegment
 {
     internal MusicSegment()
@@ -19,6 +21,7 @@ public sealed record MusicSegment : BaseSegment
     /// </summary>
     [JsonConverter(typeof(EnumDescriptionConverter))]
     [JsonProperty(PropertyName = "type")]
+    [ProtoMember(1)]
     public MusicShareType MusicType { get; internal set; }
 
     /// <summary>
@@ -26,5 +29,6 @@ public sealed record MusicSegment : BaseSegment
     /// </summary>
     [JsonConverter(typeof(StringConverter))]
     [JsonProperty(PropertyName = "id")]
+    [ProtoMember(2)]
     public long MusicId { get; internal set; }
 }

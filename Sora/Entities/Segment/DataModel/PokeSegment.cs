@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using ProtoBuf;
 using Sora.Converter;
 
 namespace Sora.Entities.Segment.DataModel;
@@ -8,6 +9,7 @@ namespace Sora.Entities.Segment.DataModel;
 /// <para>仅发送</para>
 /// <para>仅支持GoCQ</para>
 /// </summary>
+[ProtoContract]
 public sealed record PokeSegment : BaseSegment
 {
     internal PokeSegment()
@@ -21,6 +23,7 @@ public sealed record PokeSegment : BaseSegment
     /// </summary>
     [JsonConverter(typeof(StringConverter))]
     [JsonProperty(PropertyName = "qq")]
+    [ProtoMember(1)]
     public long Uid { get; internal set; }
 
 #endregion
