@@ -33,13 +33,6 @@ public class SoraSegment
     [ProtoMember(2)]
     public BaseSegment Data { get; }
 
-    /// <summary>
-    /// 消息段的ID
-    /// </summary>
-    [JsonProperty(PropertyName = "id")]
-    [ProtoMember(3)]
-    public Guid Id { get; }
-
 #endregion 属性
 
 #region 构造函数
@@ -53,7 +46,6 @@ public class SoraSegment
     {
         MessageType = segmentType;
         Data        = dataObject;
-        Id          = Guid.NewGuid();
     }
 
     //Default constructor for protobuf
