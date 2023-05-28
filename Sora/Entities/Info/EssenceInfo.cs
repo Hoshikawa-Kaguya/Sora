@@ -12,7 +12,7 @@ public readonly struct EssenceInfo
     /// <summary>
     /// 消息ID
     /// </summary>
-    public long MessageId { get; internal init; }
+    public int MessageId { get; internal init; }
 
     /// <summary>
     /// 精华设置者
@@ -46,7 +46,7 @@ public readonly struct EssenceInfo
 
     internal EssenceInfo(JToken dataJson, Guid serviceId, Guid connection)
     {
-        MessageId       = Convert.ToInt64(dataJson["message_id"] ?? 0);
+        MessageId       = Convert.ToInt32(dataJson["message_id"] ?? 0);
         Operator        = new User(serviceId, connection, Convert.ToInt64(dataJson["operator_id"] ?? 0));
         OperatorName    = dataJson["operator_nick"]?.ToString() ?? string.Empty;
         Time            = Convert.ToInt64(dataJson["operator_time"] ?? 0).ToDateTime();

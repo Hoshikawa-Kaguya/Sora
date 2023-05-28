@@ -70,13 +70,13 @@ public readonly struct NoticeImage
     /// 高
     /// </summary>
     [JsonProperty(PropertyName = "height")]
-    public int Height { get; init; }
+    public int? Height { get; init; }
 
     /// <summary>
     /// 宽
     /// </summary>
     [JsonProperty(PropertyName = "width")]
-    public int Width { get; init; }
+    public int? Width { get; init; }
 
     /// <summary>
     /// 图片ID
