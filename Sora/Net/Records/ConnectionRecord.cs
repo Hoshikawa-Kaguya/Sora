@@ -129,9 +129,9 @@ internal static class ConnectionRecord
     /// <param name="userId">UID</param>
     public static bool GetLoginUid(Guid connId, out long userId)
     {
-        if (_connections.ContainsKey(connId))
+        if (_connections.TryGetValue(connId, out SoraConnectionInfo connection))
         {
-            userId = _connections[connId].LoginUid;
+            userId = connection.LoginUid;
             return true;
         }
 
@@ -175,9 +175,9 @@ internal static class ConnectionRecord
     /// <param name="timeout">超时</param>
     public static bool GetApiTimeout(Guid connId, out TimeSpan timeout)
     {
-        if (_connections.ContainsKey(connId))
+        if (_connections.TryGetValue(connId, out SoraConnectionInfo connection))
         {
-            timeout = _connections[connId].ApiTimeout;
+            timeout = connection.ApiTimeout;
             return true;
         }
 

@@ -72,7 +72,7 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
                                      null);
         Sender        = new User(serviceId, connectionId, msg.UserId);
         IsSelfMessage = msg.UserId == msg.SelfId;
-        IsSuperUser   = msg.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, msg.UserId);
+        IsSuperUser   = msg.UserId is not (0 or -1) && ServiceRecord.IsSuperUser(serviceId, msg.UserId);
     }
 
 #region 连续指令

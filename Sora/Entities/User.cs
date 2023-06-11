@@ -41,7 +41,7 @@ public sealed class User : BaseModel
         : base(connectionId)
     {
         Id          = uid;
-        IsSuperUser = Id is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, uid);
+        IsSuperUser = Id is not (0 or -1) && ServiceRecord.IsSuperUser(serviceId, uid);
     }
 
 #endregion
