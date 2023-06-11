@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Sora.Converter;
 using Sora.Enumeration;
+using Sora.OnebotModel.ApiParams;
 
 namespace Sora.Entities.Segment.DataModel;
 
@@ -85,5 +88,18 @@ public sealed record CustomNode
         UserId    = userId.ToString();
         Messages  = message;
         Time      = (time?.ToUnixTimeSeconds() ?? DateTimeOffset.Now.ToUnixTimeSeconds()).ToString();
+    }
+
+    /// <summary>
+    /// 从CustomNode获取消息内容
+    /// </summary>
+    public MessageBody GetMessageBody()
+    {
+        return Messages switch
+               {
+                   string msg                  => new MessageBody { msg },
+                   List<OnebotSegment> msgBody => msgBody.ToMessageBody(),
+                   _                           => null
+               };
     }
 }
