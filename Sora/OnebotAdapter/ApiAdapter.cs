@@ -197,7 +197,7 @@ internal static class ApiAdapter
         //检查机器人管理员权限
         friendInfos.ForEach(t =>
         {
-            t.IsSuperUser = t.UserId is not 0 or -1
+            t.IsSuperUser = t.UserId is not (0 or -1)
                             && ServiceRecord.IsSuperUser(serviceId, t.UserId);
         });
         return (apiStatus, friendInfos);
@@ -264,7 +264,7 @@ internal static class ApiAdapter
         //检查机器人管理员权限
         memberList.ForEach(t =>
         {
-            t.IsSuperUser = t.UserId is not 0 or -1
+            t.IsSuperUser = t.UserId is not (0 or -1)
                             && ServiceRecord.IsSuperUser(serviceId, t.UserId);
         });
 
@@ -333,7 +333,7 @@ internal static class ApiAdapter
         GroupMemberInfo memberInfo = ret["data"]?.ToObject<GroupMemberInfo>() ?? new GroupMemberInfo();
         //检查服务管理员权限
         memberInfo.IsSuperUser =
-            memberInfo.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, memberInfo.UserId);
+            memberInfo.UserId is not (0 or -1) && ServiceRecord.IsSuperUser(serviceId, memberInfo.UserId);
         return (apiStatus, memberInfo);
     }
 
@@ -367,7 +367,7 @@ internal static class ApiAdapter
             return (apiStatus, new UserInfo(), string.Empty);
         UserInfo info = ret["data"]?.ToObject<UserInfo>() ?? new UserInfo();
         //检查服务管理员权限
-        info.IsSuperUser = info.UserId is not 0 or -1 && ServiceRecord.IsSuperUser(serviceId, info.UserId);
+        info.IsSuperUser = info.UserId is not (0 or -1) && ServiceRecord.IsSuperUser(serviceId, info.UserId);
 
         return (apiStatus, info, ret["data"]?["qid"]?.ToString());
     }

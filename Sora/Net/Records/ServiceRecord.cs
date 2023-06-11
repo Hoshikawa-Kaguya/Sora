@@ -139,10 +139,8 @@ internal static class ServiceRecord
     {
         if (!ServiceAlive("Command", service))
             return false;
-        if (_servicesDict[service].c.GroupBanCommand.ContainsKey(groupId))
-            return _servicesDict[service].c.GroupBanCommand[groupId]!.Contains(seriesName);
-
-        return false;
+        return _servicesDict[service].c.GroupBanCommand.TryGetValue(groupId, out HashSet<string> value)
+               && value!.Contains(seriesName);
     }
 
     /// <summary>
