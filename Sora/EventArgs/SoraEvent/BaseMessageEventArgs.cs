@@ -85,7 +85,9 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 发送消息的id</para>
     /// </returns>
-    public virtual async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(MessageBody message, TimeSpan? timeout = null)
+    public virtual async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(
+        MessageBody message,
+        TimeSpan?   timeout = null)
     {
         return this switch
                {
@@ -95,7 +97,7 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
                };
     }
 
-    #region 连续指令
+#region 连续指令
 
     /// <summary>
     /// <para>等待下一条消息触发正则表达式</para>

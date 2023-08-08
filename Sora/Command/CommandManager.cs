@@ -105,7 +105,8 @@ public sealed class CommandManager
                                                                           && type.IsClass)
                                                            .Select(type => (type,
                                                                        type.GetMethods() //指令参数方法合法性检查
-                                                                           .Where(method => method.CheckCommandMethodLegality())
+                                                                           .Where(method => method
+                                                                                      .CheckCommandMethodLegality())
                                                                            .ToArray()))
                                                            .ToDictionary(methods => methods.type,
                                                                          methods => methods.Item2);
