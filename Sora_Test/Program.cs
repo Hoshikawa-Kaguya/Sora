@@ -70,16 +70,7 @@ service.Event.CommandManager.RegisterDynamicCommand(new[] { "哇哦" },
 //指令错误处理
 async void CommandExceptionHandle(Exception exception, BaseMessageEventArgs eventArgs, string log)
 {
-    string msg = $"死了啦都你害的啦\r\n{log}\r\n{exception.Message}";
-    switch (eventArgs)
-    {
-        case GroupMessageEventArgs g:
-            await g.Reply(msg);
-            break;
-        case PrivateMessageEventArgs p:
-            await p.Reply(msg);
-            break;
-    }
+    await eventArgs.Reply($"死了啦都你害的啦\r\n{log}\r\n{exception.Message}");
 }
 
 #endregion
