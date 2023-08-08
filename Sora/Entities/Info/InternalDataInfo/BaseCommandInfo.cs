@@ -9,30 +9,30 @@ namespace Sora.Entities.Info.InternalDataInfo;
 
 internal abstract record BaseCommandInfo
 {
-    internal readonly string         Desc;             //注释
-    internal readonly Regex[]        Regex;            //正则表达式
-    internal readonly MemberRoleType PermissionType;   //指令执行权限,私聊无效
-    internal readonly bool           SuperUserCommand; //机器人管理员指令
-    internal readonly SourceFlag     SourceType;       //指令匹配源类型
-    internal readonly int            Priority;         //优先级
-    internal readonly HashSet<long>  SourceGroups;     //群组限制,私聊无效
-    internal readonly HashSet<long>  SourceUsers;      //用户限制
-    internal readonly HashSet<long>  SourceLogins;     //登录账户限制
-    internal readonly string         SeriesName;       //指令组名
-    internal readonly string         CommandName;      //指令名
+    internal readonly string                 Desc;             //注释
+    internal readonly Regex[]                Regex;            //正则表达式
+    internal readonly MemberRoleType         PermissionType;   //指令执行权限,私聊无效
+    internal readonly bool                   SuperUserCommand; //机器人管理员指令
+    internal readonly MessageSourceMatchFlag SourceType;       //指令匹配源类型
+    internal readonly int                    Priority;         //优先级
+    internal readonly HashSet<long>          SourceGroups;     //群组限制,私聊无效
+    internal readonly HashSet<long>          SourceUsers;      //用户限制
+    internal readonly HashSet<long>          SourceLogins;     //登录账户限制
+    internal readonly string                 SeriesName;       //指令组名
+    internal readonly string                 CommandName;      //指令名
 
-    internal BaseCommandInfo(string         desc,
-                             string[]       regex,
-                             MemberRoleType permissionType,
-                             bool           suCommand,
-                             int            priority,
-                             RegexOptions   regexOptions,
-                             SourceFlag     source,
-                             long[]         sourceGroups,
-                             long[]         sourceUsers,
-                             long[]         sourceLogins,
-                             string         seriesName,
-                             string         commandName)
+    internal BaseCommandInfo(string                 desc,
+                             string[]               regex,
+                             MemberRoleType         permissionType,
+                             bool                   suCommand,
+                             int                    priority,
+                             RegexOptions           regexOptions,
+                             MessageSourceMatchFlag source,
+                             long[]                 sourceGroups,
+                             long[]                 sourceUsers,
+                             long[]                 sourceLogins,
+                             string                 seriesName,
+                             string                 commandName)
     {
         Desc             = desc;
         PermissionType   = permissionType;

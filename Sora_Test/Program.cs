@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Sora;
+using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using Sora.Interfaces;
 using Sora.Net.Config;
@@ -58,12 +59,13 @@ service.Event.OnSelfPrivateMessage += (_, eventArgs) =>
 };
 
 //动态向管理器注册指令
-service.Event.CommandManager.RegisterGroupDynamicCommand(new[] { "哇哦" },
-                                                         async eventArgs =>
-                                                         {
-                                                             eventArgs.IsContinueEventChain = false;
-                                                             await eventArgs.Reply("shit");
-                                                         });
+service.Event.CommandManager.RegisterDynamicCommand(new[] { "哇哦" },
+                                                    async eventArgs =>
+                                                    {
+                                                        eventArgs.IsContinueEventChain = false;
+                                                        await eventArgs.Reply("shit");
+                                                    },
+                                                    MessageSourceMatchFlag.Group);
 
 //指令错误处理
 async void CommandExceptionHandle(Exception exception, BaseMessageEventArgs eventArgs, string log)

@@ -49,7 +49,7 @@ public sealed class SoraCommand : Attribute
     /// <summary>
     /// 指令响应的源
     /// </summary>
-    public SourceFlag SourceType { get; init; } = SourceFlag.None;
+    public MessageSourceMatchFlag SourceType { get; init; } = MessageSourceMatchFlag.All;
 
     /// <summary>
     /// <para>权限限制</para>
