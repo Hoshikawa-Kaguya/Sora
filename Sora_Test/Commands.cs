@@ -10,9 +10,9 @@ public static class Commands
 {
     [SoraCommand(CommandExpressions = new[] { "1" },
                  Description = "死了啦都你害的啦",
-                 SourceType = SourceFlag.Group,
+                 SourceType = MessageSourceMatchFlag.All,
                  Priority = 0)]
-    public static async ValueTask TestCommand1(GroupMessageEventArgs eventArgs)
+    public static async ValueTask TestCommand1(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         // TextSegment s = eventArgs.Message.MessageBody[0].Data as TextSegment;

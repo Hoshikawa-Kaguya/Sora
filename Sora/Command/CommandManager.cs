@@ -105,8 +105,7 @@ public sealed class CommandManager
                                                                           && type.IsClass)
                                                            .Select(type => (type,
                                                                        type.GetMethods() //指令参数方法合法性检查
-                                                                           .Where(method => method
-                                                                                      .CheckMethodLegality())
+                                                                           .Where(method => method.CheckCommandMethodLegality())
                                                                            .ToArray()))
                                                            .ToDictionary(methods => methods.type,
                                                                          methods => methods.Item2);
@@ -156,6 +155,7 @@ public sealed class CommandManager
     /// </summary>
     /// <param name="cmdExps">指令表达式</param>
     /// <param name="seriesCommand">指令执行定义</param>
+    /// <param name="sourceType">消息来源范围</param>
     /// <param name="matchType">匹配类型</param>
     /// <param name="regexOptions">正则选项</param>
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
@@ -166,18 +166,19 @@ public sealed class CommandManager
     /// <param name="sourceUsers">成员限制</param>
     /// <param name="sourceLogins">限制响应的bot账号来源</param>
     /// <param name="desc">描述</param>
-    public Guid RegisterGroupDynamicCommand(string[]                               cmdExps,
-                                            Func<GroupMessageEventArgs, ValueTask> seriesCommand,
-                                            MatchType                              matchType    = MatchType.Full,
-                                            RegexOptions                           regexOptions = RegexOptions.None,
-                                            string                                 groupName    = "",
-                                            MemberRoleType                         memberRole   = MemberRoleType.Member,
-                                            bool                                   suCommand    = false,
-                                            int?                                   priority     = null,
-                                            long[]                                 sourceGroups = null,
-                                            long[]                                 sourceUsers  = null,
-                                            long[]                                 sourceLogins = null,
-                                            string                                 desc         = "")
+    public Guid RegisterDynamicCommand(string[]                              cmdExps,
+                                       Func<BaseMessageEventArgs, ValueTask> seriesCommand,
+                                       MessageSourceMatchFlag                sourceType   = MessageSourceMatchFlag.All,
+                                       MatchType                             matchType    = MatchType.Full,
+                                       RegexOptions                          regexOptions = RegexOptions.None,
+                                       string                                groupName    = "",
+                                       MemberRoleType                        memberRole   = MemberRoleType.Member,
+                                       bool                                  suCommand    = false,
+                                       int?                                  priority     = null,
+                                       long[]                                sourceGroups = null,
+                                       long[]                                sourceUsers  = null,
+                                       long[]                                sourceLogins = null,
+                                       string                                desc         = "")
     {
         //判断参数合法性
         if (cmdExps is null || cmdExps.Length == 0)
@@ -200,6 +201,7 @@ public sealed class CommandManager
                                                 memberRole,
                                                 priority ?? GetNewDynamicPriority(),
                                                 regexOptions | RegexOptions.Compiled,
+                                                sourceType,
                                                 sourceGroups ?? Array.Empty<long>(),
                                                 sourceUsers ?? Array.Empty<long>(),
                                                 sourceLogins ?? Array.Empty<long>(),
@@ -216,6 +218,7 @@ public sealed class CommandManager
     /// </summary>
     /// <param name="matchFunc">自定义匹配方法</param>
     /// <param name="seriesCommand">指令执行定义</param>
+    /// <param name="sourceType">消息来源范围</param>
     /// <param name="groupName">指令组名，为空时不能控制使能</param>
     /// <param name="memberRole">成员权限限制</param>
     /// <param name="suCommand">机器人管理员限制</param>
@@ -224,16 +227,17 @@ public sealed class CommandManager
     /// <param name="sourceUsers">成员限制</param>
     /// <param name="sourceLogins">限制响应的bot账号来源</param>
     /// <param name="desc">描述</param>
-    public Guid RegisterGroupDynamicCommand(Func<BaseMessageEventArgs, bool>       matchFunc,
-                                            Func<GroupMessageEventArgs, ValueTask> seriesCommand,
-                                            string                                 groupName    = "",
-                                            MemberRoleType                         memberRole   = MemberRoleType.Member,
-                                            bool                                   suCommand    = false,
-                                            int?                                   priority     = null,
-                                            long[]                                 sourceGroups = null,
-                                            long[]                                 sourceUsers  = null,
-                                            long[]                                 sourceLogins = null,
-                                            string                                 desc         = "")
+    public Guid RegisterDynamicCommand(Func<BaseMessageEventArgs, bool>      matchFunc,
+                                       Func<BaseMessageEventArgs, ValueTask> seriesCommand,
+                                       MessageSourceMatchFlag                sourceType   = MessageSourceMatchFlag.All,
+                                       string                                groupName    = "",
+                                       MemberRoleType                        memberRole   = MemberRoleType.Member,
+                                       bool                                  suCommand    = false,
+                                       int?                                  priority     = null,
+                                       long[]                                sourceGroups = null,
+                                       long[]                                sourceUsers  = null,
+                                       long[]                                sourceLogins = null,
+                                       string                                desc         = "")
     {
         //判断参数合法性
         if (seriesCommand is null)
@@ -250,107 +254,11 @@ public sealed class CommandManager
                                                 memberRole,
                                                 priority ?? GetNewDynamicPriority(),
                                                 RegexOptions.None,
+                                                sourceType,
                                                 sourceGroups ?? Array.Empty<long>(),
                                                 sourceUsers ?? Array.Empty<long>(),
                                                 sourceLogins ?? Array.Empty<long>(),
                                                 seriesCommand,
-                                                id,
-                                                suCommand,
-                                                groupName);
-
-        return AddDynamicCommand(dynamicCommand);
-    }
-
-    /// <summary>
-    /// 动态注册指令
-    /// </summary>
-    /// <param name="cmdExps">指令表达式</param>
-    /// <param name="privateCommand">指令执行定义</param>
-    /// <param name="matchType">匹配类型</param>
-    /// <param name="regexOptions">正则选项</param>
-    /// <param name="groupName">指令组名，为空时不能控制使能</param>
-    /// <param name="suCommand">机器人管理员限制</param>
-    /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
-    /// <param name="sourceUsers">用户限制</param>
-    /// <param name="sourceLogins">限制响应的bot账号来源</param>
-    /// <param name="desc">描述</param>
-    public Guid RegisterPrivateDynamicCommand(string[]                                 cmdExps,
-                                              Func<PrivateMessageEventArgs, ValueTask> privateCommand,
-                                              MatchType                                matchType    = MatchType.Full,
-                                              RegexOptions                             regexOptions = RegexOptions.None,
-                                              string                                   groupName    = "",
-                                              bool                                     suCommand    = false,
-                                              int?                                     priority     = null,
-                                              long[]                                   sourceUsers  = null,
-                                              long[]                                   sourceLogins = null,
-                                              string                                   desc         = "")
-    {
-        //判断参数合法性
-        if (cmdExps is null || cmdExps.Length == 0)
-            throw new NullReferenceException("cmdExps is empty");
-        if (privateCommand is null)
-            throw new NullReferenceException("privateCommand is null");
-
-        //生成指令信息
-        Guid id = Guid.NewGuid();
-        Log.Debug("Command", $"Registering dynamic command [{id}]");
-
-        //处理表达式
-        string[] matchExp = CommandUtils.ParseCommandExps(cmdExps, string.Empty, matchType);
-
-        //创建指令信息
-        DynamicCommandInfo dynamicCommand = new(desc,
-                                                matchExp,
-                                                null,
-                                                priority ?? GetNewDynamicPriority(),
-                                                regexOptions | RegexOptions.Compiled,
-                                                sourceUsers ?? Array.Empty<long>(),
-                                                sourceLogins ?? Array.Empty<long>(),
-                                                privateCommand,
-                                                id,
-                                                suCommand,
-                                                groupName);
-
-        return AddDynamicCommand(dynamicCommand);
-    }
-
-    /// <summary>
-    /// 动态注册指令
-    /// </summary>
-    /// <param name="matchFunc">自定义匹配方法</param>
-    /// <param name="privateCommand">指令执行定义</param>
-    /// <param name="groupName">指令组名，为空时不能控制使能</param>
-    /// <param name="suCommand">机器人管理员限制</param>
-    /// <param name="priority"><para>优先级</para><para>为<see langword="null"/>时自动设置</para></param>
-    /// <param name="sourceUsers">用户限制</param>
-    /// <param name="sourceLogins">限制响应的bot账号来源</param>
-    /// <param name="desc">描述</param>
-    public Guid RegisterPrivateDynamicCommand(Func<BaseMessageEventArgs, bool>         matchFunc,
-                                              Func<PrivateMessageEventArgs, ValueTask> privateCommand,
-                                              string                                   groupName    = "",
-                                              bool                                     suCommand    = false,
-                                              int?                                     priority     = null,
-                                              long[]                                   sourceUsers  = null,
-                                              long[]                                   sourceLogins = null,
-                                              string                                   desc         = "")
-    {
-        //判断参数合法性
-        if (privateCommand is null)
-            throw new NullReferenceException("privateCommand is null");
-
-        //生成指令信息
-        Guid id = Guid.NewGuid();
-        Log.Debug("Command", $"Registering dynamic command [{id}]");
-
-        //创建指令信息
-        DynamicCommandInfo dynamicCommand = new(desc,
-                                                Array.Empty<string>(),
-                                                matchFunc,
-                                                priority ?? GetNewDynamicPriority(),
-                                                RegexOptions.None,
-                                                sourceUsers ?? Array.Empty<long>(),
-                                                sourceLogins ?? Array.Empty<long>(),
-                                                privateCommand,
                                                 id,
                                                 suCommand,
                                                 groupName);
@@ -442,15 +350,7 @@ public sealed class CommandManager
             //执行动态指令
             try
             {
-                switch (eventArgs.SourceType)
-                {
-                    case SourceFlag.Group:
-                        await commandInfo.GroupCommand(eventArgs as GroupMessageEventArgs);
-                        break;
-                    case SourceFlag.Private:
-                        await commandInfo.PrivateCommand(eventArgs as PrivateMessageEventArgs);
-                        break;
-                }
+                await commandInfo.Command(eventArgs);
             }
             catch (Exception err)
             {
@@ -548,14 +448,28 @@ public sealed class CommandManager
             return false;
 
         //判断同一源
-        if (command.SourceType != eventArgs.SourceType)
-            return false;
+        switch (command.SourceType)
+        {
+            case MessageSourceMatchFlag.All:
+                break;
+            case MessageSourceMatchFlag.Group:
+                if (eventArgs.SourceType != SourceFlag.Group)
+                    return false;
+                break;
+            case MessageSourceMatchFlag.Private:
+                if (eventArgs.SourceType != SourceFlag.Private)
+                    return false;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(command.SourceType));
+        }
 
-        //判断正则表达式或自定义表达式
+        //判断动态指令的自定义表达式
         if (command is DynamicCommandInfo dynamicCommand)
-            //动态指令检查自定义表达式
-            if (!dynamicCommand.CommandMatchFunc?.Invoke(eventArgs) ?? false)
+            if (dynamicCommand.CommandMatchFunc is not null && !dynamicCommand.CommandMatchFunc.Invoke(eventArgs))
                 return false;
+
+        //判断所有指令的正则表达式
         if (command.Regex.Length != 0 && !command.Regex.Any(regex => regex.IsMatch(eventArgs.Message.RawText)))
             return false;
 

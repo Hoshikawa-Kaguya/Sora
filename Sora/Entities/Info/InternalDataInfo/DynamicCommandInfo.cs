@@ -9,34 +9,34 @@ namespace Sora.Entities.Info.InternalDataInfo;
 
 internal sealed record DynamicCommandInfo : BaseCommandInfo
 {
-    internal readonly Guid                                     CommandId;
-    internal readonly Func<GroupMessageEventArgs, ValueTask>   GroupCommand;
-    internal readonly Func<PrivateMessageEventArgs, ValueTask> PrivateCommand;
-    internal readonly Func<BaseMessageEventArgs, bool>         CommandMatchFunc; //自定义匹配方法
+    internal readonly Guid                                  CommandId;
+    internal readonly Func<BaseMessageEventArgs, ValueTask> Command;
+    internal readonly Func<BaseMessageEventArgs, bool>      CommandMatchFunc; //自定义匹配方法
 
     /// <summary>
     /// 指令信息构造(群聊动态指令构建)
     /// </summary>
-    public DynamicCommandInfo(string                                 desc,
-                              string[]                               regex,
-                              Func<BaseMessageEventArgs, bool>       matchFunc,
-                              MemberRoleType                         permissionType,
-                              int                                    priority,
-                              RegexOptions                           regexOptions,
-                              long[]                                 sourceGroups,
-                              long[]                                 sourceUsers,
-                              long[]                                 sourceLogins,
-                              Func<GroupMessageEventArgs, ValueTask> groupCommand,
-                              Guid                                   commandId,
-                              bool                                   suCommand,
-                              string                                 seriesName)
+    public DynamicCommandInfo(string                                desc,
+                              string[]                              regex,
+                              Func<BaseMessageEventArgs, bool>      matchFunc,
+                              MemberRoleType                        permissionType,
+                              int                                   priority,
+                              RegexOptions                          regexOptions,
+                              MessageSourceMatchFlag                sourceType,
+                              long[]                                sourceGroups,
+                              long[]                                sourceUsers,
+                              long[]                                sourceLogins,
+                              Func<BaseMessageEventArgs, ValueTask> command,
+                              Guid                                  commandId,
+                              bool                                  suCommand,
+                              string                                seriesName)
         : base(desc,
                regex,
                permissionType,
                suCommand,
                priority,
                regexOptions,
-               SourceFlag.Group,
+               sourceType,
                sourceGroups,
                sourceUsers,
                sourceLogins,
@@ -44,39 +44,7 @@ internal sealed record DynamicCommandInfo : BaseCommandInfo
                commandId.ToString())
     {
         CommandId        = commandId;
-        GroupCommand     = groupCommand;
-        CommandMatchFunc = matchFunc;
-    }
-
-    /// <summary>
-    /// 指令信息构造(私聊动态指令构建)
-    /// </summary>
-    public DynamicCommandInfo(string                                   desc,
-                              string[]                                 regex,
-                              Func<BaseMessageEventArgs, bool>         matchFunc,
-                              int                                      priority,
-                              RegexOptions                             regexOptions,
-                              long[]                                   sourceUsers,
-                              long[]                                   sourceLogins,
-                              Func<PrivateMessageEventArgs, ValueTask> privateCommand,
-                              Guid                                     commandId,
-                              bool                                     suCommand,
-                              string                                   seriesName)
-        : base(desc,
-               regex,
-               MemberRoleType.Member,
-               suCommand,
-               priority,
-               regexOptions,
-               SourceFlag.Private,
-               Array.Empty<long>(),
-               sourceUsers,
-               sourceLogins,
-               seriesName,
-               commandId.ToString())
-    {
-        CommandId        = commandId;
-        PrivateCommand   = privateCommand;
+        Command          = command;
         CommandMatchFunc = matchFunc;
     }
 }

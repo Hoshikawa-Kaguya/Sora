@@ -95,6 +95,11 @@ public sealed class EventAdapter
     public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnGroupMessage;
 
     /// <summary>
+    /// 消息事件，群聊消息和私聊消息均会触发
+    /// </summary>
+    public event EventAsyncCallBackHandler<BaseMessageEventArgs> OnMessage; 
+
+    /// <summary>
     /// bot发送群消息事件
     /// </summary>
     public event EventAsyncCallBackHandler<GroupMessageEventArgs> OnSelfGroupMessage;
@@ -346,7 +351,7 @@ public sealed class EventAdapter
                     return;
                 Log.Debug("Sora",
                           $"Private msg {privateMsg.SenderInfo.Nick}({privateMsg.UserId}) <- {privateMsg.RawMessage}");
-                var eventArgs = new PrivateMessageEventArgs(ServiceId, connection, "private", privateMsg);
+                PrivateMessageEventArgs eventArgs = new(ServiceId, connection, "private", privateMsg);
                 //标记消息已读
                 if (ServiceRecord.IsAutoMarkMessageRead(ServiceId))
                     ApiAdapter.InternalMarkMessageRead(connection, privateMsg.MessageId);
@@ -356,9 +361,10 @@ public sealed class EventAdapter
                 if (!eventArgs.IsContinueEventChain)
                     break;
                 //执行回调
-                if (OnPrivateMessage == null)
-                    break;
-                await OnPrivateMessage("Message", eventArgs);
+                if (OnMessage != null)
+                    await OnMessage("Message", eventArgs);
+                if (OnPrivateMessage != null)
+                    await OnPrivateMessage("Message", eventArgs);
                 break;
             }
             //群聊事件
@@ -371,7 +377,7 @@ public sealed class EventAdapter
                     return;
                 Log.Debug("Sora",
                           $"Group msg[{groupMsg.GroupId}] form {groupMsg.SenderInfo.Nick}[{groupMsg.UserId}] <- {groupMsg.RawMessage}");
-                var eventArgs = new GroupMessageEventArgs(ServiceId, connection, "group", groupMsg);
+                GroupMessageEventArgs eventArgs = new(ServiceId, connection, "group", groupMsg);
                 //标记消息已读
                 if (ServiceRecord.IsAutoMarkMessageRead(ServiceId))
                     ApiAdapter.InternalMarkMessageRead(connection, groupMsg.MessageId);
@@ -381,6 +387,8 @@ public sealed class EventAdapter
                 if (!eventArgs.IsContinueEventChain)
                     break;
                 //执行回调
+                if (OnMessage != null)
+                    await OnMessage("Message", eventArgs);
                 if (OnGroupMessage == null)
                     break;
                 await OnGroupMessage("Message", eventArgs);

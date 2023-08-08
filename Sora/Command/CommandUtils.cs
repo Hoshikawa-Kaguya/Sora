@@ -23,7 +23,7 @@ internal static class CommandUtils
     /// <param name="method">方法信息</param>
     /// <returns>方法是否合法</returns>
     [Reviewed("XiaoHe321", "2021-03-28 20:45")]
-    internal static bool CheckMethodLegality(this MethodInfo method)
+    internal static bool CheckCommandMethodLegality(this MethodInfo method)
     {
         //获取指令属性
         SoraCommand commandAttr = method.GetCustomAttribute(typeof(SoraCommand)) as SoraCommand ?? null;
@@ -39,25 +39,16 @@ internal static class CommandUtils
         }
 
         //源检查
-        if (commandAttr.SourceType is not SourceFlag.Group and not SourceFlag.Private)
+        if (!Enum.IsDefined(commandAttr.SourceType))
         {
             Log.Warning("CommandCheck", $"指令{method.Name}设置了不支持的消息源类型({commandAttr.SourceType}),已自动忽略");
             return false;
         }
 
-        bool preCheck = method.IsDefined(typeof(SoraCommand), false) && method.GetParameters().Length == 1;
-
-        return commandAttr.SourceType switch
-               {
-                   SourceFlag.Group => preCheck
-                                       && method.GetParameters()
-                                                .Any(para => ParameterCheck<GroupMessageEventArgs>(para, method.Name)),
-                   SourceFlag.Private => preCheck
-                                         && method.GetParameters()
-                                                  .Any(para =>
-                                                           ParameterCheck<PrivateMessageEventArgs>(para, method.Name)),
-                   _ => false
-               };
+        return method.IsDefined(typeof(SoraCommand), false)
+               && method.GetParameters().Length == 1
+               && method.GetParameters()
+                        .Any(para => ParameterCheck<BaseMessageEventArgs>(para, method.Name));
     }
 
     public static bool IsEmpty(this long[] arr)

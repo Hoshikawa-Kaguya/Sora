@@ -6,6 +6,7 @@ using Sora.Converter;
 using Sora.Entities;
 using Sora.Entities.Info.InternalDataInfo;
 using Sora.Enumeration;
+using Sora.Enumeration.ApiType;
 using Sora.Net.Records;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
 
@@ -75,7 +76,26 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
         IsSuperUser   = msg.UserId is not (0 or -1) && ServiceRecord.IsSuperUser(serviceId, msg.UserId);
     }
 
-#region 连续指令
+    /// <summary>
+    /// 快速回复
+    /// </summary>
+    /// <param name="message">消息</param>
+    /// <param name="timeout">覆盖原有超时</param>
+    /// <returns>
+    /// <para><see cref="ApiStatusType"/> API执行状态</para>
+    /// <para><see langword="messageId"/> 发送消息的id</para>
+    /// </returns>
+    public virtual async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(MessageBody message, TimeSpan? timeout = null)
+    {
+        return this switch
+               {
+                   GroupMessageEventArgs groupMessage     => await groupMessage.Reply(message, timeout),
+                   PrivateMessageEventArgs privateMessage => await privateMessage.Reply(message, timeout),
+                   _                                      => throw new ArgumentOutOfRangeException()
+               };
+    }
+
+    #region 连续指令
 
     /// <summary>
     /// <para>等待下一条消息触发正则表达式</para>

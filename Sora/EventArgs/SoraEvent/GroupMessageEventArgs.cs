@@ -77,7 +77,7 @@ public sealed class GroupMessageEventArgs : BaseMessageEventArgs
     /// <para><see cref="ApiStatusType"/> API执行状态</para>
     /// <para><see langword="messageId"/> 发送消息的id</para>
     /// </returns>
-    public async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(MessageBody message, TimeSpan? timeout = null)
+    public override async ValueTask<(ApiStatus apiStatus, int messageId)> Reply(MessageBody message, TimeSpan? timeout = null)
     {
         return await SoraApi.SendGroupMessage(SourceGroup.Id, message, timeout);
     }
