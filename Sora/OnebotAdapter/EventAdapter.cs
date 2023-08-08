@@ -97,7 +97,7 @@ public sealed class EventAdapter
     /// <summary>
     /// 消息事件，群聊消息和私聊消息均会触发
     /// </summary>
-    public event EventAsyncCallBackHandler<BaseMessageEventArgs> OnMessage; 
+    public event EventAsyncCallBackHandler<BaseMessageEventArgs> OnMessage;
 
     /// <summary>
     /// bot发送群消息事件
