@@ -142,7 +142,7 @@ public sealed class SoraWebsocketClient : ISoraService
         //消息接收事件
         _subClientMessageReceived = Client.MessageReceived.Subscribe(msg => Task.Run(() =>
         {
-            if (_disposed)
+            if (_disposed || string.IsNullOrEmpty(msg.Text))
                 return;
             Event.Adapter(JObject.Parse(msg.Text), ServiceId);
         }));

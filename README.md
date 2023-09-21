@@ -59,11 +59,11 @@
 
 这个框架将会一直以简单易用为主，也会向着更加便捷的方向进行开发
 
-所以不会有什么 `起夜级` 的组件 比如：DI，AOP...
+所以不会有什么特别复杂的功能
 
 同时也不会将框架拆分为多个不同功能的包 ~~毕竟本来就没有什么功能~~
 
-如果希望拥有  `指令路由`  `多IM平台支持`   `DI` 等等功能，推荐使用 [OneBot-Framework](https://github.com/ParaParty/OneBot-Framework)
+如果希望拥有  `指令路由`  `多IM平台支持`  等等功能，推荐使用 [OneBot-Framework](https://github.com/ParaParty/OneBot-Framework)
 
 这个项目同时也是我学习C#这个语言的过程中的产物，所以里面可能会部分拉高血压的代码 ~~屎山~~
 
