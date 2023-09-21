@@ -406,7 +406,10 @@ public sealed class CommandManager
                 dynamic instance = null;
                 if (commandInfo.InstanceType != null)
                     if (!GetInstance(commandInfo.InstanceType, out instance))
+                    {
+                        Log.Error("Command",$"获取指令实例失败 [t:{commandInfo.InstanceType}]");
                         continue;
+                    }
 
                 if (isAsync && commandInfo.MethodInfo.ReturnType != typeof(void))
                     await commandInfo.MethodInfo.Invoke(instance, new object[] { eventArgs });
@@ -549,6 +552,7 @@ public sealed class CommandManager
         if (ServiceHelper.Services.Any(a => a.ServiceType == classType))
             return true;
 
+        Log.Debug("Command", $"reg class:{classType.FullName}");
         //注册实例
         object instance = classType.CreateInstance();
         ServiceHelper.Services.AddSingleton(classType, instance);
