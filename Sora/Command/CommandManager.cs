@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Sora.Attributes;
 using Sora.Attributes.Command;
 using Sora.Entities;
@@ -61,8 +62,6 @@ public sealed class CommandManager
     private readonly List<SoraCommandInfo> _regexCommands = new();
 
     private readonly List<DynamicCommandInfo> _dynamicCommands = new();
-
-    private readonly ConcurrentDictionary<Type, dynamic> _instanceDict = new();
 
     private readonly ConcurrentDictionary<string, bool> _commandEnableFlagDict = new();
 
@@ -404,16 +403,15 @@ public sealed class CommandManager
             Log.Debug("Command", "invoke command method");
             try
             {
+                dynamic instance = null;
+                if (commandInfo.InstanceType != null)
+                    if (!GetInstance(commandInfo.InstanceType, out instance))
+                        continue;
+
                 if (isAsync && commandInfo.MethodInfo.ReturnType != typeof(void))
-                    await commandInfo.MethodInfo.Invoke(commandInfo.InstanceType == null
-                                                            ? null
-                                                            : _instanceDict[commandInfo.InstanceType],
-                                                        new object[] { eventArgs });
+                    await commandInfo.MethodInfo.Invoke(instance, new object[] { eventArgs });
                 else
-                    commandInfo.MethodInfo.Invoke(commandInfo.InstanceType == null
-                                                      ? null
-                                                      : _instanceDict[commandInfo.InstanceType],
-                                                  new object[] { eventArgs });
+                    commandInfo.MethodInfo.Invoke(instance, new object[] { eventArgs });
             }
             catch (Exception err)
             {
@@ -547,25 +545,14 @@ public sealed class CommandManager
             return false;
         }
 
-        //检查是否已创建过实例
-        if (_instanceDict.Any(ins => ins.Key == classType))
+        //检查是否已注册过实例
+        if (ServiceHelper.Services.Any(a => a.ServiceType == classType))
             return true;
 
-        try
-        {
-            //创建实例
-            object instance = classType.CreateInstance();
-
-            //添加实例
-            return _instanceDict.TryAdd(classType
-                                        ?? throw new ArgumentNullException(nameof(classType), "get null class type"),
-                                        instance);
-        }
-        catch (Exception e)
-        {
-            Log.Error("Command", $"在创建实例[{classType?.Name}]时发生错误:{Log.ErrorLogBuilder(e)}");
-            return false;
-        }
+        //注册实例
+        object instance = classType.CreateInstance();
+        ServiceHelper.Services.AddSingleton(classType, instance);
+        return ServiceHelper.Services.Any(a => a.ServiceType == classType);
     }
 
 #endregion
@@ -704,14 +691,20 @@ public sealed class CommandManager
     [Reviewed("XiaoHe321", "2021-03-28 20:45")]
     public bool GetInstance<T>(out T instance)
     {
-        if (_instanceDict.Any(type => type.Key == typeof(T)) && _instanceDict[typeof(T)] is T outVal)
-        {
-            instance = outVal;
-            return true;
-        }
+        instance = ServiceHelper.GetService<T>();
+        return instance is not null;
+    }
 
-        instance = default;
-        return false;
+    /// <summary>
+    /// 获取已注册过的实例
+    /// </summary>
+    /// <param name="instance">实例</param>
+    /// <param name="type">Type</param>
+    /// <returns>获取是否成功</returns>
+    public bool GetInstance(Type type, out dynamic instance)
+    {
+        instance = ServiceHelper.GetService(type);
+        return instance is not null;
     }
 
     /// <summary>
