@@ -105,10 +105,8 @@ public sealed class SoraWebsocketClient : ISoraService
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
-            if (crashAction == null)
-                Helper.FriendlyException(args);
-            else
-                crashAction(args.ExceptionObject as Exception);
+            Log.UnhandledExceptionLog(args);
+            crashAction(args.ExceptionObject as Exception);
         };
         _isReady = true;
     }
@@ -140,11 +138,18 @@ public sealed class SoraWebsocketClient : ISoraService
             ErrorReconnectTimeout = Config.ReconnectTimeOut
         };
         //消息接收事件
-        _subClientMessageReceived = Client.MessageReceived.Subscribe(msg => Task.Run(() =>
+        _subClientMessageReceived = Client.MessageReceived.Subscribe(msg => Task.Run(async () =>
         {
             if (_disposed || string.IsNullOrEmpty(msg.Text))
                 return;
-            Event.Adapter(JObject.Parse(msg.Text), ServiceId);
+            try
+            {
+                await Event.Adapter(JObject.Parse(msg.Text), ServiceId);
+            }
+            catch (Exception e)
+            {
+                Helper.FriendlyException(e);
+            }
         }));
         //连接断开事件
         _subClientDisconnectionHappened = Client.DisconnectionHappened.Subscribe(info => Task.Run(() =>
