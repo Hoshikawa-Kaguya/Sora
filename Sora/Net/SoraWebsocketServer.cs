@@ -108,10 +108,8 @@ public sealed class SoraWebsocketServer : ISoraService
         //全局异常事件
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
-            if (crashAction == null)
-                Helper.FriendlyException(args);
-            else
-                crashAction(args.ExceptionObject as Exception);
+            Log.UnhandledExceptionLog(args);
+            crashAction(args.ExceptionObject as Exception);
         };
         _isReady = true;
     }
@@ -193,11 +191,18 @@ public sealed class SoraWebsocketServer : ISoraService
             Log.Info("Sora", $"客户端连接被关闭[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
         };
         //上报接收
-        socket.OnMessage = message => Task.Run(() =>
+        socket.OnMessage = message => Task.Run(async () =>
         {
             if (_disposed || !_isRunning)
                 return;
-            Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
+            try
+            {
+                await Event.Adapter(JObject.Parse(message), socket.ConnectionInfo.Id);
+            }
+            catch (Exception e)
+            {
+                Helper.FriendlyException(e);
+            }
         });
     }
 
