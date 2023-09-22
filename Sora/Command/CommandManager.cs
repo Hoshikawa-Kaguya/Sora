@@ -98,24 +98,24 @@ public sealed class CommandManager
             return;
 
         //查找所有的指令集
-        Dictionary<Type, MethodInfo[]> cmdSeries = assembly.GetExportedTypes()
-                                                           //获取指令组
-                                                           .Where(type => type.IsDefined(typeof(CommandSeries), false)
-                                                                          && type.IsClass)
-                                                           .Select(type => (type,
-                                                                       type.GetMethods() //指令参数方法合法性检查
-                                                                           .Where(method => method
-                                                                                      .CheckCommandMethodLegality())
-                                                                           .ToArray()))
-                                                           .ToDictionary(methods => methods.type,
-                                                                         methods => methods.Item2);
+        Dictionary<Type, MethodInfo[]> cmdSeries =
+            assembly.GetExportedTypes()
+                    //获取指令组
+                    .Where(type => type.IsDefined(typeof(CommandSeries), false)
+                                   && type.IsClass)
+                    //指令参数方法合法性检查
+                    .Select(type => (type, type.GetMethods()
+                                               .Where(method => method.CheckCommandMethodLegality()).ToArray()))
+                    //将每个类的方法整合
+                    .ToDictionary(methods => methods.type,
+                                  methods => methods.Item2);
 
         foreach ((Type classType, MethodInfo[] methodInfos) in cmdSeries)
         {
             //获取指令属性
-            CommandSeries seriesAttr = classType.GetCustomAttribute(typeof(CommandSeries)) as CommandSeries
-                                       ?? throw new
-                                           NullReferenceException("CommandSeries attribute is null with unknown reason");
+            CommandSeries seriesAttr =
+                classType.GetCustomAttribute(typeof(CommandSeries)) as CommandSeries 
+                ?? throw new NullReferenceException("CommandSeries attribute is null with unknown reason");
 
             string prefix        = string.IsNullOrEmpty(seriesAttr.GroupPrefix) ? string.Empty : seriesAttr.GroupPrefix;
             string seriesName    = string.IsNullOrEmpty(seriesAttr.SeriesName) ? classType.Name : seriesAttr.SeriesName;
@@ -407,7 +407,7 @@ public sealed class CommandManager
                 if (commandInfo.InstanceType != null)
                     if (!GetInstance(commandInfo.InstanceType, out instance))
                     {
-                        Log.Error("Command",$"获取指令实例失败 [t:{commandInfo.InstanceType}]");
+                        Log.Error("Command", $"获取指令实例失败 [t:{commandInfo.InstanceType}]");
                         continue;
                     }
 
