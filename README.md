@@ -27,6 +27,14 @@
     </h4>
 </h1>
 
+## 重要信息
+
+[go-cqhttp](https://github.com/Mrs4s/go-cqhttp) 因为qq官方的一系列协议升级，可能后续会停止开发
+
+详细的原因：[go-cqhttp#2471](https://github.com/Mrs4s/go-cqhttp/issues/2471)
+
+本项目在未来可能会迁移至 [chronocat](https://chronocat.vercel.app/) 或者其他平台
+
 ## 文档
 
 **=====本框架只支持Array的上报格式!=====**
