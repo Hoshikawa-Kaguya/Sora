@@ -33,7 +33,7 @@
 
 详细的原因：[go-cqhttp#2471](https://github.com/Mrs4s/go-cqhttp/issues/2471)
 
-目前的情况是，`gocq`能用就不要做任何迁移，如果一定要迁移，则推荐迁移至 [Shamrock]https://github.com/linxinrao/Shamrock
+目前的情况是，`gocq`能用就不要做任何迁移，如果一定要迁移，则推荐迁移至 [Shamrock](https://github.com/linxinrao/Shamrock)
 
 ## 文档
 
