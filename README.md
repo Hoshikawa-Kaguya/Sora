@@ -22,10 +22,18 @@
         <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
         <img src="https://img.shields.io/github/actions/workflow/status/Hoshikawa-Kaguya/Sora/nuget.yml?branch=master&&style=flat-square" alt="workflow">
         <a href="https://github.com/Mrs4s/go-cqhttp">
-            <img src="https://img.shields.io/badge/go--cqhttp-v1.0.0--rc4-blue?style=flat-square" alt="gocq-ver">
+            <img src="https://img.shields.io/badge/go--cqhttp-v1.1.0-blue?style=flat-square" alt="gocq-ver">
         </a>
     </h4>
 </h1>
+
+## 重要信息
+
+[go-cqhttp](https://github.com/Mrs4s/go-cqhttp) 因为qq官方的一系列协议升级，可能后续会停止开发
+
+详细的原因：[go-cqhttp#2471](https://github.com/Mrs4s/go-cqhttp/issues/2471)
+
+目前的情况是，`gocq`能用就不要做任何迁移，如果一定要迁移，哈哈，我也不知道迁移到哪，替代的已经无了
 
 ## 文档
 
@@ -59,11 +67,11 @@
 
 这个框架将会一直以简单易用为主，也会向着更加便捷的方向进行开发
 
-所以不会有什么 `起夜级` 的组件 比如：DI，AOP...
+所以不会有什么特别复杂的功能
 
 同时也不会将框架拆分为多个不同功能的包 ~~毕竟本来就没有什么功能~~
 
-如果希望拥有  `指令路由`  `多IM平台支持`   `DI` 等等功能，推荐使用 [OneBot-Framework](https://github.com/ParaParty/OneBot-Framework)
+如果希望拥有  `指令路由`  `多IM平台支持`  等等功能，推荐使用 [OneBot-Framework](https://github.com/ParaParty/OneBot-Framework)
 
 这个项目同时也是我学习C#这个语言的过程中的产物，所以里面可能会部分拉高血压的代码 ~~屎山~~
 

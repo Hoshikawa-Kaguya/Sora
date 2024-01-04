@@ -208,7 +208,7 @@ public sealed class EventAdapter
     /// </summary>
     /// <param name="messageJson">消息json对象</param>
     /// <param name="connection">客户端链接接口</param>
-    internal void Adapter(JObject messageJson, Guid connection)
+    internal async ValueTask Adapter(JObject messageJson, Guid connection)
     {
         if (!ServiceRecord.Exists(ServiceId))
         {
@@ -222,19 +222,19 @@ public sealed class EventAdapter
         {
             //元事件类型
             case "meta_event":
-                MetaAdapter(messageJson, connection);
+                await MetaAdapter(messageJson, connection);
                 break;
             case "message":
-                MessageAdapter(messageJson, connection);
+                await MessageAdapter(messageJson, connection);
                 break;
             case "request":
-                RequestAdapter(messageJson, connection);
+                await RequestAdapter(messageJson, connection);
                 break;
             case "notice":
-                NoticeAdapter(messageJson, connection);
+                await NoticeAdapter(messageJson, connection);
                 break;
             case "message_sent":
-                SelfMessageAdapter(messageJson, connection);
+                await SelfMessageAdapter(messageJson, connection);
                 break;
             default:
                 //尝试从响应中获取标识符
@@ -258,7 +258,7 @@ public sealed class EventAdapter
     /// </summary>
     /// <param name="messageJson">消息</param>
     /// <param name="connection">连接GUID</param>
-    private async void MetaAdapter(JObject messageJson, Guid connection)
+    private async ValueTask MetaAdapter(JObject messageJson, Guid connection)
     {
         switch (TryGetJsonValue(messageJson, "meta_event_type"))
         {
@@ -336,7 +336,7 @@ public sealed class EventAdapter
     /// </summary>
     /// <param name="messageJson">消息</param>
     /// <param name="connection">连接GUID</param>
-    private async void MessageAdapter(JObject messageJson, Guid connection)
+    private async ValueTask MessageAdapter(JObject messageJson, Guid connection)
     {
         switch (TryGetJsonValue(messageJson, "message_type"))
         {
@@ -409,7 +409,7 @@ public sealed class EventAdapter
     /// </summary>
     /// <param name="messageJson">消息</param>
     /// <param name="connection">连接GUID</param>
-    private async void SelfMessageAdapter(JObject messageJson, Guid connection)
+    private async ValueTask SelfMessageAdapter(JObject messageJson, Guid connection)
     {
         switch (TryGetJsonValue(messageJson, "message_type"))
         {
@@ -457,7 +457,7 @@ public sealed class EventAdapter
     /// </summary>
     /// <param name="messageJson">消息</param>
     /// <param name="connection">连接GUID</param>
-    private async void RequestAdapter(JObject messageJson, Guid connection)
+    private async ValueTask RequestAdapter(JObject messageJson, Guid connection)
     {
         switch (TryGetJsonValue(messageJson, "request_type"))
         {
@@ -518,7 +518,7 @@ public sealed class EventAdapter
     /// </summary>
     /// <param name="messageJson">消息</param>
     /// <param name="connection">连接GUID</param>
-    private async void NoticeAdapter(JObject messageJson, Guid connection)
+    private async ValueTask NoticeAdapter(JObject messageJson, Guid connection)
     {
         switch (TryGetJsonValue(messageJson, "notice_type"))
         {
