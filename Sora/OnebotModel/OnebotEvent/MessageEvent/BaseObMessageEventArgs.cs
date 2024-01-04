@@ -42,7 +42,7 @@ internal abstract class BaseObMessageEventArgs : BaseObApiEventArgs
     /// <summary>
     /// 原始消息内容
     /// </summary>
-    [JsonProperty(PropertyName = "raw_message")]
+    [JsonProperty(PropertyName = "raw_message", NullValueHandling = NullValueHandling.Ignore)]
     internal string RawMessage { get; set; }
 
     /// <summary>

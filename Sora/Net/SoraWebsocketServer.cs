@@ -82,13 +82,6 @@ public sealed class SoraWebsocketServer : ISoraService
         _isReady = false;
         Log.Info("Sora", $"Sora WebSocket服务器初始化... [{ServiceId}]");
         Config = config ?? throw new ArgumentNullException(nameof(config));
-        //检查端口占用
-        if (Helper.IsPortInUse(Config.Port))
-        {
-            InvalidOperationException e = new($"端口{Config.Port}已被占用，请更换其他端口");
-            Log.Fatal(e, "Sora", $"端口{Config.Port}已被占用，请更换其他端口", Config);
-            throw e;
-        }
 
         //写入初始化信息
         if (!ServiceRecord.AddOrUpdateRecord(ServiceId, new ServiceConfig(Config), this))

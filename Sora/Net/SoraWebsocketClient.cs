@@ -144,7 +144,7 @@ public sealed class SoraWebsocketClient : ISoraService
         {
             if (_disposed)
                 return;
-            Event.Adapter(JObject.Parse(msg.Text), ServiceId);
+            Event.Adapter(JObject.Parse(msg.Text ?? "{}"), ServiceId);
         }));
         //连接断开事件
         _subClientDisconnectionHappened = Client.DisconnectionHappened.Subscribe(info => Task.Run(() =>
