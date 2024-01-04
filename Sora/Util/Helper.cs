@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
@@ -33,20 +32,6 @@ public static class Helper
             Log.Error("Sora", "Json反序列化时出现错误，可能是go-cqhttp配置出现问题。请把go-cqhttp配置中的post_message_format从string改为array。");
 
         Log.UnhandledExceptionLog(args);
-    }
-
-#endregion
-
-#region 网络
-
-    /// <summary>
-    /// 检查端口占用
-    /// </summary>
-    /// <param name="port">端口号</param>
-    internal static bool IsPortInUse(uint port)
-    {
-        return IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()
-                                 .Any(ipEndPoint => ipEndPoint.Port == port);
     }
 
 #endregion

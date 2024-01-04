@@ -9,6 +9,7 @@ using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.Net.Records;
 using Sora.OnebotModel.OnebotEvent.MessageEvent;
+using Sora.Serializer;
 
 namespace Sora.EventArgs.SoraEvent;
 
@@ -71,7 +72,13 @@ public abstract class BaseMessageEventArgs : BaseSoraEventArgs
                                      msg.Time,
                                      msg.Font,
                                      null);
-        Sender        = new User(serviceId, connectionId, msg.UserId);
+        
+        //空raw信息兼容
+        if (string.IsNullOrEmpty(msg.RawMessage))
+        {
+            Message.RawText = Message.MessageBody.SerializeToCq();
+        }
+        Sender = new User(serviceId, connectionId, msg.UserId);
         IsSelfMessage = msg.UserId == msg.SelfId;
         IsSuperUser   = msg.UserId is not (0 or -1) && ServiceRecord.IsSuperUser(serviceId, msg.UserId);
     }

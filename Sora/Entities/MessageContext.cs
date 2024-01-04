@@ -26,7 +26,7 @@ public sealed class MessageContext : BaseModel
     /// <para>Gocq提供的纯文本信息</para>
     /// <para>可能会缺失某些不重要且会在相同消息中不相等的字段</para>
     /// </summary>
-    public string RawText { get; }
+    public string RawText { get; internal set; }
 
     /// <summary>
     /// 消息段列表
@@ -282,7 +282,7 @@ public sealed class MessageContext : BaseModel
     /// </summary>
     public override int GetHashCode()
     {
-        return HashCode.Combine(MessageId, RawText, MessageBody, Time, Font, MessageSequence);
+        return HashCode.Combine(MessageId, MessageBody, Time, Font, MessageSequence);
     }
 
 #endregion
