@@ -23,15 +23,16 @@ public static class Helper
     /// <summary>
     /// 友好的崩溃提示(x)
     /// </summary>
-    [Reviewed("nidbCN", "2021-03-24 19:31")]
-    internal static void FriendlyException(UnhandledExceptionEventArgs args)
+    internal static void FriendlyException(Exception e)
     {
-        Exception e = args.ExceptionObject as Exception;
-
         if (e is JsonSerializationException)
+        {
             Log.Error("Sora", "Json反序列化时出现错误，可能是go-cqhttp配置出现问题。请把go-cqhttp配置中的post_message_format从string改为array。");
+            return;
+        }
 
-        Log.UnhandledExceptionLog(args);
+        Log.Error(e, "Sora", "发生未知错误");
+        throw e;
     }
 
 #endregion
