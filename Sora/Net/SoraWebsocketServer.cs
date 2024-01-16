@@ -259,8 +259,10 @@ public sealed class SoraWebsocketServer : ISoraService
         }
 
         //获取Token
-        if (socket.ConnectionInfo.Headers.TryGetValue("Authorization", out string headerValue))
+        if (socket.ConnectionInfo.Headers.TryGetValue("Authorization", out string headerValue) && !string.IsNullOrEmpty(Config.AccessToken))
         {
+            if(headerValue.Length <= 7)
+                return false;
             string token = headerValue.Split(' ')[1];
             Log.Debug("Server", $"get token = {token}");
             //验证Token
