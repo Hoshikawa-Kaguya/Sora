@@ -234,7 +234,8 @@ public sealed class SoraWebsocketClient : ISoraService
     private ClientWebSocket CreateSocket()
     {
         ClientWebSocket clientWebSocket = new();
-        clientWebSocket.Options.SetRequestHeader("Authorization", $"Bearer {Config.AccessToken}");
+        if (!string.IsNullOrEmpty(Config.AccessToken))
+            clientWebSocket.Options.SetRequestHeader("Authorization", $"Bearer {Config.AccessToken}");
         return clientWebSocket;
     }
 
