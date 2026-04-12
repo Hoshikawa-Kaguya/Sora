@@ -13,6 +13,32 @@ on:
       - 'Directory.Build.props'
       - 'Directory.Packages.props'
       - '.github/workflows/**'
+  workflow_dispatch:
+    inputs:
+      pkg-sora-core:
+        description: 'Publish Sora.Core'
+        type: boolean
+        default: true
+      pkg-sora-entities:
+        description: 'Publish Sora.Entities'
+        type: boolean
+        default: true
+      pkg-sora-command:
+        description: 'Publish Sora.Command'
+        type: boolean
+        default: true
+      pkg-sora:
+        description: 'Publish Sora (facade)'
+        type: boolean
+        default: true
+      pkg-sora-adapter-milky:
+        description: 'Publish Sora.Adapter.Milky'
+        type: boolean
+        default: true
+      pkg-sora-adapter-onebot11:
+        description: 'Publish Sora.Adapter.OneBot11'
+        type: boolean
+        default: true
 
 jobs:
   build-test:
@@ -49,6 +75,42 @@ jobs:
         id: filter
         run: |
           mkdir -p ./filtered
+
+          # Manual dispatch → select packages based on boolean inputs
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Manual dispatch, selecting packages from inputs"
+
+            declare -a SELECTIONS=(
+              "${{ inputs.pkg-sora-core }}:^Sora\.Core\."
+              "${{ inputs.pkg-sora-entities }}:^Sora\.Entities\."
+              "${{ inputs.pkg-sora-command }}:^Sora\.Command\."
+              "${{ inputs.pkg-sora }}:^Sora\.[0-9]+\."
+              "${{ inputs.pkg-sora-adapter-milky }}:^Sora\.Adapter\.Milky\."
+              "${{ inputs.pkg-sora-adapter-onebot11 }}:^Sora\.Adapter\.OneBot11\."
+            )
+
+            FOUND=false
+            for entry in "${SELECTIONS[@]}"; do
+              enabled="${entry%%:*}"
+              pattern="${entry#*:}"
+              if [ "$enabled" == "true" ]; then
+                for pkg in ./nupkg/*; do
+                  basename=$(basename "$pkg")
+                  if echo "$basename" | grep -qE "${pattern}"; then
+                    cp "$pkg" ./filtered/
+                    FOUND=true
+                  fi
+                done
+              fi
+            done
+
+            if [ "$FOUND" == "true" ]; then
+              echo "has-packages=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "has-packages=false" >> "$GITHUB_OUTPUT"
+            fi
+            exit 0
+          fi
 
           # Determine base commit for diff
           if [ "${{ github.event_name }}" == "pull_request" ]; then
@@ -108,7 +170,9 @@ jobs:
           fi
 
       - name: Upload NuGet packages
-        if: steps.filter.outputs.has-packages == 'true'
+        if: >-
+          steps.filter.outputs.has-packages == 'true' &&
+          (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
         uses: actions/upload-artifact@v4
         with:
           name: nupkg
