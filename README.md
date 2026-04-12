@@ -11,14 +11,14 @@
     </h4>
     <h4 align="center">
         <a href="https://www.nuget.org/packages/HoshikawaKaguya.Sora/">
-            <img src="https://img.shields.io/nuget/v/HoshikawaKaguya.Sora?style=flat-square" alt="nuget">
+            <img src="https://img.shields.io/nuget/v/HoshikawaKaguya.Sora?style=for-the-badge" alt="nuget">
         </a>
         <a href="http://www.apache.org/licenses/LICENSE-2.0">
-            <img src="https://img.shields.io/badge/license-Apache--2.0-blueviolet?style=flat-square" alt="license">
+            <img src="https://img.shields.io/badge/license-Apache--2.0-blueviolet?style=for-the-badge" alt="license">
         </a>
-        <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
+        <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=for-the-badge" alt="stars">
         <a href="https://github.com/Hoshikawa-Kaguya/Sora/actions/workflows/ci.yml">
-            <img src="https://img.shields.io/github/actions/workflow/status/Hoshikawa-Kaguya/Sora/ci.yml?branch=master&&style=flat-square" alt="workflow">
+            <img src="https://img.shields.io/github/actions/workflow/status/Hoshikawa-Kaguya/Sora/ci.yml?branch=master&&style=for-the-badge" alt="workflow">
         </a>
     </h4>
 </h1>
@@ -56,6 +56,8 @@ Sora 是一个以**轻量**和**易用**为核心目标的多协议异步机器�
 > Milky 和 OneBot v11 均通过了较为较为完整的E2E测试
 >
 > 部分破坏性API/Event由于风控未作测试
+> 
+> []
 
 ### Milky
 
