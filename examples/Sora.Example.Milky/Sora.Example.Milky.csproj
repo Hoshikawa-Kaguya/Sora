@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>Sora.Example.Milky</RootNamespace>
+        <IsPackable>false</IsPackable>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Sora\Sora.csproj"/>
+        <ProjectReference Include="..\..\src\Sora.Adapter.Milky\Sora.Adapter.Milky.csproj"/>
+    </ItemGroup>
+
+</Project>

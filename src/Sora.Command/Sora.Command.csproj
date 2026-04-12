@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup Label="NuGet">
+        <Title>Sora.Command</Title>
+        <Description>Sora 机器人框架 - 属性指令路由</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Sora"/>
+        <InternalsVisibleTo Include="Sora.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Sora.Core\Sora.Core.csproj"/>
+        <ProjectReference Include="..\Sora.Entities\Sora.Entities.csproj"/>
+    </ItemGroup>
+
+</Project>

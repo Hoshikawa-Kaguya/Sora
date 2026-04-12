@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup Label="NuGet">
+        <Title>Sora.Adapter.OneBot11</Title>
+        <Description>Sora 机器人框架 - OneBot v11协议适配器</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Sora.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Sora\Sora.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Fleck"/>
+        <PackageReference Include="Mapster"/>
+        <PackageReference Include="Websocket.Client"/>
+        <PackageReference Include="Newtonsoft.Json"/>
+        <PackageReference Include="System.Reactive"/>
+    </ItemGroup>
+
+</Project>

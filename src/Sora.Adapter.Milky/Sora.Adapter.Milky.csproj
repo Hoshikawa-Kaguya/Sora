@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup Label="NuGet">
+        <Title>Sora.Adapter.Milky</Title>
+        <Description>Sora 机器人框架 - Milky协议适配器</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Sora.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Sora\Sora.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Mapster"/>
+        <PackageReference Include="Newtonsoft.Json"/>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,20 @@
+<Solution>
+    <Folder Name="/examples/">
+        <Project Path="examples/Sora.Example.Milky/Sora.Example.Milky.csproj"/>
+        <Project Path="examples/Sora.Example.OneBot11/Sora.Example.OneBot11.csproj"/>
+    </Folder>
+    <Folder Name="/src/">
+        <Project Path="src/Sora.Adapter.Milky/Sora.Adapter.Milky.csproj"/>
+        <Project Path="src/Sora.Adapter.OneBot11/Sora.Adapter.OneBot11.csproj"/>
+        <Project Path="src/Sora.Command/Sora.Command.csproj"/>
+        <Project Path="src/Sora.Core/Sora.Core.csproj"/>
+        <Project Path="src/Sora.Entities/Sora.Entities.csproj"/>
+        <Project Path="src/Sora/Sora.csproj"/>
+    </Folder>
+    <Folder Name="/tests/">
+        <Project Path="tests/Sora.Tests/Sora.Tests.csproj"/>
+    </Folder>
+    <Folder Name="/tools/">
+        <Project Path="tools/TestReporter/TestReporter.csproj"/>
+    </Folder>
+</Solution>

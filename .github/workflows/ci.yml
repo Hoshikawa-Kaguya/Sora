@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - '.github/workflows/**'
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # NBGV requires full git history
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install NBGV
+        uses: dotnet/nbgv@master
+        id: nbgv
+
+      - name: Restore
+        run: dotnet restore Sora.slnx
+
+      - name: Build
+        run: dotnet build Sora.slnx -c Release --no-restore
+
+      - name: Unit Test
+        run: dotnet test Sora.slnx -c Release --filter "Category=Unit" --no-build
+
+      - name: Pack
+        run: dotnet pack Sora.slnx -c Release --no-build -o ./nupkg
+
+      - name: Filter changed packages
+        id: filter
+        run: |
+          mkdir -p ./filtered
+
+          # Determine base commit for diff
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE=$(git merge-base "${{ github.event.pull_request.base.sha }}" HEAD)
+          else
+            BASE="${{ github.event.before }}"
+          fi
+
+          # New branch or unable to diff → upload all packages
+          if [ "$BASE" == "0000000000000000000000000000000000000000" ] || [ -z "$BASE" ]; then
+            echo "New branch detected, uploading all packages"
+            cp ./nupkg/*.nupkg ./filtered/ 2>/dev/null || true
+            cp ./nupkg/*.snupkg ./filtered/ 2>/dev/null || true
+            echo "has-packages=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CHANGED_FILES=$(git diff --name-only "$BASE" HEAD)
+
+          # Shared build config changed → all packages affected
+          if echo "$CHANGED_FILES" | grep -qE "^(Directory\.Build\.props|Directory\.Packages\.props)$"; then
+            echo "Shared build config changed, uploading all packages"
+            cp ./nupkg/*.nupkg ./filtered/ 2>/dev/null || true
+            cp ./nupkg/*.snupkg ./filtered/ 2>/dev/null || true
+            echo "has-packages=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Map src directories to package name regex patterns
+          declare -A PROJECT_MAP=(
+            ["src/Sora.Core/"]="^Sora\.Core\."
+            ["src/Sora.Entities/"]="^Sora\.Entities\."
+            ["src/Sora.Command/"]="^Sora\.Command\."
+            ["src/Sora/"]="^Sora\.[0-9]+\."
+            ["src/Sora.Adapter.Milky/"]="^Sora\.Adapter\.Milky\."
+            ["src/Sora.Adapter.OneBot11/"]="^Sora\.Adapter\.OneBot11\."
+          )
+
+          FOUND=false
+          for dir in "${!PROJECT_MAP[@]}"; do
+            if echo "$CHANGED_FILES" | grep -qF "$dir"; then
+              pattern="${PROJECT_MAP[$dir]}"
+              for pkg in ./nupkg/*; do
+                basename=$(basename "$pkg")
+                if echo "$basename" | grep -qE "${pattern}"; then
+                  cp "$pkg" ./filtered/
+                  FOUND=true
+                fi
+              done
+            fi
+          done
+
+          if [ "$FOUND" == "true" ]; then
+            echo "has-packages=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-packages=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload NuGet packages
+        if: steps.filter.outputs.has-packages == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: ./filtered/*
+          retention-days: 30

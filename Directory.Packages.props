@@ -1,0 +1,31 @@
+<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+    <ItemGroup>
+        <!-- Versioning -->
+        <PackageVersion Include="Nerdbank.GitVersioning" Version="3.9.50"/>
+
+        <!-- Logging -->
+        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5"/>
+        <PackageVersion Include="Serilog" Version="4.3.1"/>
+        <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0"/>
+        <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1"/>
+        <PackageVersion Include="Destructurama.JsonNet" Version="4.0.2"/>
+
+        <!-- Serialization / Mapping -->
+        <PackageVersion Include="Mapster" Version="10.0.7"/>
+        <PackageVersion Include="Newtonsoft.Json" Version="13.0.4"/>
+
+        <!-- Networking for Onebot11 adapter (Legacy dependencies) -->
+        <PackageVersion Include="Fleck" Version="1.2.0"/>
+        <PackageVersion Include="Websocket.Client" Version="5.3.0"/>
+        <PackageVersion Include="System.Reactive" Version="6.1.0"/>
+
+        <!-- Testing -->
+        <PackageVersion Include="xunit.v3" Version="3.2.2"/>
+        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5"/>
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
+        <PackageVersion Include="coverlet.collector" Version="6.0.4"/>
+    </ItemGroup>
+</Project>

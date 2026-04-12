@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>Sora.Example.OneBot11</RootNamespace>
+        <IsPackable>false</IsPackable>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Sora\Sora.csproj"/>
+        <ProjectReference Include="..\..\src\Sora.Adapter.OneBot11\Sora.Adapter.OneBot11.csproj"/>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup Label="NuGet">
+        <Title>Sora.Entities</Title>
+        <Description>Sora 机器人框架 - 共享实体、事件、消息段与API接口</Description>
+    </PropertyGroup>
+
+    <!-- Framework -->
+    <ItemGroup>
+        <InternalsVisibleTo Include="Sora.Tests"/>
+        <InternalsVisibleTo Include="Sora"/>
+        <InternalsVisibleTo Include="TestReporter"/>
+    </ItemGroup>
+
+    <!-- Adapters -->
+    <ItemGroup>
+        <InternalsVisibleTo Include="Sora.Adapter.OneBot11"/>
+        <InternalsVisibleTo Include="Sora.Adapter.Milky"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Sora.Core\Sora.Core.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
+    </ItemGroup>
+
+</Project>

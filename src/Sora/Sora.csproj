@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup Label="NuGet">
+        <Title>Sora</Title>
+        <Description>.NET 10 多协议异步机器人开发框架</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Sora.Core\Sora.Core.csproj"/>
+        <ProjectReference Include="..\Sora.Entities\Sora.Entities.csproj"/>
+        <ProjectReference Include="..\Sora.Command\Sora.Command.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Destructurama.JsonNet"/>
+        <PackageReference Include="Serilog"/>
+        <PackageReference Include="Serilog.Extensions.Logging"/>
+        <PackageReference Include="Serilog.Sinks.Console"/>
+    </ItemGroup>
+
+</Project>
