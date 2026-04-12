@@ -81,12 +81,12 @@ jobs:
             echo "Manual dispatch, selecting packages from inputs"
 
             declare -a SELECTIONS=(
-              "${{ inputs.pkg-sora-core }}:^Sora\.Core\."
-              "${{ inputs.pkg-sora-entities }}:^Sora\.Entities\."
-              "${{ inputs.pkg-sora-command }}:^Sora\.Command\."
-              "${{ inputs.pkg-sora }}:^Sora\.[0-9]+\."
-              "${{ inputs.pkg-sora-adapter-milky }}:^Sora\.Adapter\.Milky\."
-              "${{ inputs.pkg-sora-adapter-onebot11 }}:^Sora\.Adapter\.OneBot11\."
+              "${{ inputs.pkg-sora-core }}:^HoshikawaKaguya\.Sora\.Core\."
+              "${{ inputs.pkg-sora-entities }}:^HoshikawaKaguya\.Sora\.Entities\."
+              "${{ inputs.pkg-sora-command }}:^HoshikawaKaguya\.Sora\.Command\."
+              "${{ inputs.pkg-sora }}:^HoshikawaKaguya\.Sora\.[0-9]+\."
+              "${{ inputs.pkg-sora-adapter-milky }}:^HoshikawaKaguya\.Sora\.Adapter\.Milky\."
+              "${{ inputs.pkg-sora-adapter-onebot11 }}:^HoshikawaKaguya\.Sora\.Adapter\.OneBot11\."
             )
 
             FOUND=false
@@ -141,12 +141,12 @@ jobs:
 
           # Map src directories to package name regex patterns
           declare -A PROJECT_MAP=(
-            ["src/Sora.Core/"]="^Sora\.Core\."
-            ["src/Sora.Entities/"]="^Sora\.Entities\."
-            ["src/Sora.Command/"]="^Sora\.Command\."
-            ["src/Sora/"]="^Sora\.[0-9]+\."
-            ["src/Sora.Adapter.Milky/"]="^Sora\.Adapter\.Milky\."
-            ["src/Sora.Adapter.OneBot11/"]="^Sora\.Adapter\.OneBot11\."
+            ["src/Sora.Core/"]="^HoshikawaKaguya\.Sora\.Core\."
+            ["src/Sora.Entities/"]="^HoshikawaKaguya\.Sora\.Entities\."
+            ["src/Sora.Command/"]="^HoshikawaKaguya\.Sora\.Command\."
+            ["src/Sora/"]="^HoshikawaKaguya\.Sora\.[0-9]+\."
+            ["src/Sora.Adapter.Milky/"]="^HoshikawaKaguya\.Sora\.Adapter\.Milky\."
+            ["src/Sora.Adapter.OneBot11/"]="^HoshikawaKaguya\.Sora\.Adapter\.OneBot11\."
           )
 
           FOUND=false
