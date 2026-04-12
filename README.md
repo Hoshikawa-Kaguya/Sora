@@ -13,11 +13,13 @@
         <a href="https://www.nuget.org/packages/Sora/">
             <img src="https://img.shields.io/nuget/v/Sora?style=flat-square" alt="nuget">
         </a>
-        <a href=""><!-- TODO: License 链接 -->
+        <a href="http://www.apache.org/licenses/LICENSE-2.0">
             <img src="https://img.shields.io/badge/license-Apache--2.0-blueviolet?style=flat-square" alt="license">
         </a>
-        <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars"><!-- TODO: GitHub stars badge -->
-        <img src="https://img.shields.io/github/actions/workflow/status/Hoshikawa-Kaguya/Sora/ci.yml?branch=master&&style=flat-square" alt="workflow"><!-- TODO: CI workflow badge -->
+        <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=flat-square" alt="stars">
+        <a href="https://github.com/Hoshikawa-Kaguya/Sora/actions/workflows/ci.yml">
+            <img src="https://img.shields.io/github/actions/workflow/status/Hoshikawa-Kaguya/Sora/ci.yml?branch=master&&style=flat-square" alt="workflow">
+        </a>
     </h4>
 </h1>
 
