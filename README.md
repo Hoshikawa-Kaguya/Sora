@@ -108,7 +108,6 @@ SoraService service = SoraServiceFactory.Instance.CreateOneBot11Service(
 
 ### 安装
 
-<!-- TODO: 发布到 NuGet 后补充安装命令 -->
 ```shell
 dotnet add package HoshikawaKaguya.Sora
 dotnet add package HoshikawaKaguya.Sora.Adapter.Milky    # Milky 协议
