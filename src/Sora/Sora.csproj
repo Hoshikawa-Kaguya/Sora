@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup Label="NuGet">
-        <Title>Sora</Title>
+        <Title>HoshikawaKaguya.Sora</Title>
         <Description>.NET 10 多协议异步机器人开发框架</Description>
     </PropertyGroup>
 
