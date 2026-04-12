@@ -2,7 +2,7 @@
 
 一个基于 C#/.NET 10 的多协议异步机器人开发框架
 
-[![NuGet](https://img.shields.io/nuget/v/Sora?style=flat-square)](https://www.nuget.org/packages/Sora/)
+[![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blueviolet?style=flat-square)](https://github.com/Hoshikawa-Kaguya/Sora/blob/master/LICENSE)
 
 ## 特性
@@ -16,9 +16,9 @@
 ## 安装
 
 ```shell
-dotnet add package Sora
-dotnet add package Sora.Adapter.Milky    # Milky 协议
-dotnet add package Sora.Adapter.OneBot11 # 或 OneBot v11 协议
+dotnet add package HoshikawaKaguya.Sora
+dotnet add package HoshikawaKaguya.Sora.Adapter.Milky    # Milky 协议
+dotnet add package HoshikawaKaguya.Sora.Adapter.OneBot11 # 或 OneBot v11 协议
 ```
 
 ## 快速开始
@@ -47,14 +47,14 @@ await Task.Delay(-1);
 
 ## 项目模块
 
-| 包                       | 说明                   |
-|-------------------------|----------------------|
-| `Sora`                  | 框架应用层                |
-| `Sora.Entities`         | 共享实体 — 事件、消息段、API 接口 |
-| `Sora.Core`             | 核心工具库                |
-| `Sora.Command`          | 属性指令路由               |
-| `Sora.Adapter.Milky`    | Milky 协议适配器          |
-| `Sora.Adapter.OneBot11` | OneBot v11 协议适配器     |
+| 包                                         | 说明                   |
+|-------------------------------------------|----------------------|
+| `HoshikawaKaguya.Sora`                    | 框架应用层                |
+| `HoshikawaKaguya.Sora.Entities`           | 共享实体 — 事件、消息段、API 接口 |
+| `HoshikawaKaguya.Sora.Core`               | 核心工具库                |
+| `HoshikawaKaguya.Sora.Command`            | 属性指令路由               |
+| `HoshikawaKaguya.Sora.Adapter.Milky`      | Milky 协议适配器          |
+| `HoshikawaKaguya.Sora.Adapter.OneBot11`   | OneBot v11 协议适配器     |
 
 ## 文档与链接
 

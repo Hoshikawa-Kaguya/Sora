@@ -46,9 +46,9 @@ dotnet --version
 
 ```xml
 <!-- 2.0：框架 + 协议适配器 -->
-<PackageReference Include="Sora" Version="2.x.x" />
-<PackageReference Include="Sora.Adapter.Milky" Version="2.x.x" />    <!-- Milky 协议（推荐）-->
-<PackageReference Include="Sora.Adapter.OneBot11" Version="2.x.x" /> <!-- 或 OneBot v11 -->
+<PackageReference Include="HoshikawaKaguya.Sora" Version="2.x.x" />
+<PackageReference Include="HoshikawaKaguya.Sora.Adapter.Milky" Version="2.x.x" />    <!-- Milky 协议（推荐）-->
+<PackageReference Include="HoshikawaKaguya.Sora.Adapter.OneBot11" Version="2.x.x" /> <!-- 或 OneBot v11 -->
 ```
 
 ### 1.3 更新目标框架
@@ -68,6 +68,8 @@ dotnet --version
 
 1.x 所有功能都在一个 `Sora` 项目中。2.0 按职责拆分为 6 个项目：
 
+> NuGet 包名使用 `HoshikawaKaguya.` 前缀（如 `HoshikawaKaguya.Sora.Core`），但项目目录和 C# 命名空间保持 `Sora.*` 格式。
+
 ```
 Sora.Core              ← 值类型（UserId/GroupId/MessageId）、枚举、结果类型
   ↑
@@ -80,7 +82,7 @@ Sora (facade)          ← SoraServiceFactory、SoraService — 组装入口
 Sora.Adapter.*         ← 协议适配器（Milky / OneBot v11）
 ```
 
-作为 bot 开发者，你只需引用 `Sora` + 对应的 `Sora.Adapter.*` 包即可，其余依赖会自动传递。
+作为 bot 开发者，你只需引用 `HoshikawaKaguya.Sora` + 对应的 `HoshikawaKaguya.Sora.Adapter.*` 包即可，其余依赖会自动传递。
 
 ---
 
@@ -758,7 +760,7 @@ await Task.Delay(-1);
 ## 13. 迁移检查清单
 
 - [ ] 更新 `.csproj` 目标框架为 `net10.0`，添加 `<LangVersion>preview</LangVersion>`
-- [ ] 安装 NuGet 包：`Sora` + `Sora.Adapter.Milky`（或 `Sora.Adapter.OneBot11`）
+- [ ] 安装 NuGet 包：`HoshikawaKaguya.Sora` + `HoshikawaKaguya.Sora.Adapter.Milky`（或 `HoshikawaKaguya.Sora.Adapter.OneBot11`）
 - [ ] 移除旧 `Sora` 1.x 包和 `YukariToolBox` 依赖
 - [ ] 更新服务创建代码：使用 `SoraServiceFactory.Instance.CreateXxxService()`
 - [ ] 将 `OnGroupMessage` + `OnPrivateMessage` 合并为 `OnMessageReceived`
