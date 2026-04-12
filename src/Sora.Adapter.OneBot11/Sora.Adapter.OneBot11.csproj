@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup Label="NuGet">
-        <Title>HoshikawaKaguya.Sora.Adapter.OneBot11</Title>
+        <PackageId>HoshikawaKaguya.Sora.Adapter.OneBot11</PackageId>
         <Description>Sora 机器人框架 - OneBot v11协议适配器</Description>
     </PropertyGroup>
 

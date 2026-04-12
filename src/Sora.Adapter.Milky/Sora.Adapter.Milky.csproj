@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup Label="NuGet">
-        <Title>HoshikawaKaguya.Sora.Adapter.Milky</Title>
+        <PackageId>HoshikawaKaguya.Sora.Adapter.Milky</PackageId>
         <Description>Sora 机器人框架 - Milky协议适配器</Description>
     </PropertyGroup>
 

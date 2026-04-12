@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup Label="NuGet">
-        <Title>HoshikawaKaguya.Sora.Core</Title>
+        <PackageId>HoshikawaKaguya.Sora.Core</PackageId>
         <Description>Sora 机器人框架 - 核心工具库</Description>
     </PropertyGroup>
 
