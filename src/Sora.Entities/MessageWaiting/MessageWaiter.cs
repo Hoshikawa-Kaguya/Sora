@@ -207,12 +207,17 @@ internal sealed class MessageWaiter
         {
             // Waiting task
             Task<MessageReceivedEvent?> waitTask = session.Completion.Task;
-            // Timeout task
-            Task delayTask = Task.Delay(timeout.Value, ct);
+            // Timeout task with linked CTS to cancel delay when message arrives
+            using CancellationTokenSource delayCts  = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            Task                          delayTask = Task.Delay(timeout.Value, delayCts.Token);
 
             Task completed = await Task.WhenAny(waitTask, delayTask);
-            // Message received
-            if (completed == waitTask) return await waitTask;
+            // Message received — cancel the orphaned delay timer
+            if (completed == waitTask)
+            {
+                await delayCts.CancelAsync();
+                return await waitTask;
+            }
 
             // Timeout: remove session and return null
             if (_sessions.TryRemove(session.SessionId, out WaitingSession? s))

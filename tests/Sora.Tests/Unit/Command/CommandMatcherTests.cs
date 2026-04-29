@@ -342,4 +342,211 @@ public class CommandMatcherTests
     }
 
 #endregion
+
+#region Prefix + Regex Matching Tests
+
+    /// <see cref="CommandManager.HandleMessageEventAsync" />
+    [Fact]
+    public async Task CommandManager_RegexWithGroupPrefix_AnchoredPattern_Matches()
+    {
+        CommandManager manager  = new();
+        bool           executed = false;
+
+        manager.RegisterDynamicCommand(
+            async _ =>
+            {
+                executed = true;
+                await ValueTask.CompletedTask;
+            },
+                [@"^dice\s*(\d*)$"],
+            MatchType.Regex,
+            prefix: "/");
+
+        MessageReceivedEvent evt = new()
+            {
+                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                Message = new MessageContext
+                    {
+                        MessageId  = 1,
+                        SourceType = MessageSourceType.Group,
+                        GroupId    = 100L, SenderId = 200L,
+                        Body       = new MessageBody("/dice 6")
+                    }
+            };
+
+        await manager.HandleMessageEventAsync(evt, CT);
+        Assert.True(executed);
+    }
+
+    /// <see cref="CommandManager.HandleMessageEventAsync" />
+    [Fact]
+    public async Task CommandManager_RegexWithGroupPrefix_NoAnchor_Matches()
+    {
+        CommandManager manager  = new();
+        bool           executed = false;
+
+        manager.RegisterDynamicCommand(
+            async _ =>
+            {
+                executed = true;
+                await ValueTask.CompletedTask;
+            },
+                ["dice"],
+            MatchType.Regex,
+            prefix: "/");
+
+        MessageReceivedEvent evt = new()
+            {
+                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                Message = new MessageContext
+                    {
+                        MessageId  = 1,
+                        SourceType = MessageSourceType.Group,
+                        GroupId    = 100L, SenderId = 200L,
+                        Body       = new MessageBody("/dice")
+                    }
+            };
+
+        await manager.HandleMessageEventAsync(evt, CT);
+        Assert.True(executed);
+    }
+
+    /// <see cref="CommandManager.HandleMessageEventAsync" />
+    [Fact]
+    public async Task CommandManager_FullMatchWithGroupPrefix_StillWorks()
+    {
+        CommandManager manager  = new();
+        bool           executed = false;
+
+        manager.RegisterDynamicCommand(
+            async _ =>
+            {
+                executed = true;
+                await ValueTask.CompletedTask;
+            },
+                ["ping"],
+            prefix: "/");
+
+        MessageReceivedEvent evt = new()
+            {
+                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                Message = new MessageContext
+                    {
+                        MessageId  = 1,
+                        SourceType = MessageSourceType.Group,
+                        GroupId    = 100L, SenderId = 200L,
+                        Body       = new MessageBody("/ping")
+                    }
+            };
+
+        await manager.HandleMessageEventAsync(evt, CT);
+        Assert.True(executed);
+    }
+
+    /// <see cref="CommandManager.HandleMessageEventAsync" />
+    [Fact]
+    public async Task CommandManager_RegexWithGroupPrefix_NoMatch_DoesNotExecute()
+    {
+        CommandManager manager  = new();
+        bool           executed = false;
+
+        manager.RegisterDynamicCommand(
+            async _ =>
+            {
+                executed = true;
+                await ValueTask.CompletedTask;
+            },
+                [@"^dice\s*(\d*)$"],
+            MatchType.Regex,
+            prefix: "/");
+
+        MessageReceivedEvent evt = new()
+            {
+                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                Message = new MessageContext
+                    {
+                        MessageId  = 1,
+                        SourceType = MessageSourceType.Group,
+                        GroupId    = 100L, SenderId = 200L,
+                        Body       = new MessageBody("dice 6") // Missing prefix
+                    }
+            };
+
+        await manager.HandleMessageEventAsync(evt, CT);
+        Assert.False(executed);
+    }
+
+#endregion
+
+#region Unregister Dynamic Command Tests
+
+    /// <see cref="CommandManager.UnregisterDynamicCommand" />
+    [Fact]
+    public async Task CommandManager_UnregisterDynamicCommand_NoLongerMatches()
+    {
+        CommandManager manager = new();
+        int            count   = 0;
+
+        Guid commandId = manager.RegisterDynamicCommand(
+            async _ =>
+            {
+                count++;
+                await ValueTask.CompletedTask;
+            },
+                ["removeme"]);
+
+        MessageReceivedEvent evt = new()
+            {
+                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                Message = new MessageContext
+                    {
+                        MessageId  = 1,
+                        SourceType = MessageSourceType.Group,
+                        GroupId    = 100L, SenderId = 200L,
+                        Body       = new MessageBody("removeme")
+                    }
+            };
+
+        // First invocation should work
+        await manager.HandleMessageEventAsync(evt, CT);
+        Assert.Equal(1, count);
+
+        // Unregister
+        bool removed = manager.UnregisterDynamicCommand(commandId);
+        Assert.True(removed);
+
+        // Second invocation should not match
+        evt.IsContinueEventChain = true;
+        await manager.HandleMessageEventAsync(evt, CT);
+        Assert.Equal(1, count);
+    }
+
+    /// <see cref="CommandManager.UnregisterDynamicCommand" />
+    [Fact]
+    public void CommandManager_UnregisterNonExistentId_ReturnsFalse()
+    {
+        CommandManager manager = new();
+        bool           result  = manager.UnregisterDynamicCommand(Guid.NewGuid());
+        Assert.False(result);
+    }
+
+#endregion
+
+#region Regex Timeout Tests
+
+    /// <see cref="RegexMatcher.IsMatch" />
+    [Fact]
+    public void RegexMatcher_TimeoutPattern_ReturnsFalse()
+    {
+        RegexMatcher matcher = new();
+        // Catastrophic backtracking pattern with long input — should timeout
+        string pattern = @"^(a+)+$";
+        string input   = new string('a', 50) + "!";
+
+        // This should return false (timeout) rather than throwing
+        bool result = matcher.IsMatch(input, pattern);
+        Assert.False(result);
+    }
+
+#endregion
 }

@@ -157,15 +157,18 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
             throw new InvalidOperationException("Cannot connect multiple accounts with the same adapter instance");
         _logger.LogInformation("Get self account id: {AccountId}", selfData.UserId);
 
-        _ = _onEvent?.Invoke(
-                        new ConnectedEvent
-                            {
-                                ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
-                                SelfId       = SelfId,
-                                Time         = DateTime.Now,
-                                Api          = _connection?.Api!
-                            })
-                    .AsTask();
+        (_onEvent?.Invoke(
+                     new ConnectedEvent
+                         {
+                             ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
+                             SelfId       = SelfId,
+                             Time         = DateTime.Now,
+                             Api = _connection?.Api
+                                   ?? throw new InvalidOperationException("Connection not initialized when dispatching ConnectedEvent")
+                         })
+                 .AsTask()
+         ?? Task.CompletedTask)
+            .RunCatch(ex => _logger.LogError(ex, "Event handler failed for ConnectedEvent"));
     }
 
     /// <summary>Handles disconnection from the event transport.</summary>
@@ -175,16 +178,20 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
         _connection?.State = ConnectionState.Disconnected;
         _logger.LogInformation("Milky adapter disconnected: {Reason}", reason);
 
-        _ = _onEvent?.Invoke(
-                        new DisconnectedEvent
-                            {
-                                ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
-                                SelfId       = SelfId,
-                                Time         = DateTime.Now,
-                                Api          = _connection?.Api!,
-                                Reason       = reason
-                            })
-                    .AsTask();
+        (_onEvent?.Invoke(
+                     new DisconnectedEvent
+                         {
+                             ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
+                             SelfId       = SelfId,
+                             Time         = DateTime.Now,
+                             Api = _connection?.Api
+                                   ?? throw new InvalidOperationException(
+                                       "Connection not initialized when dispatching DisconnectedEvent"),
+                             Reason       = reason
+                         })
+                 .AsTask()
+         ?? Task.CompletedTask)
+            .RunCatch(ex => _logger.LogError(ex, "Event handler failed for DisconnectedEvent"));
 
         // clean up id record
         SelfId = default;

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Sora.Command;
 
@@ -72,11 +73,11 @@ public sealed class CommandManager
 #region Command Registration
 
     /// <summary>
-    ///     Dynamically registers a command at runtime.
+    ///     Registers a command at runtime without scanning assemblies.
     /// </summary>
-    /// <param name="handler">The handler delegate to invoke.</param>
-    /// <param name="expressions">Match expressions.</param>
-    /// <param name="matchType">Matching strategy.</param>
+    /// <param name="handler">The async handler to invoke when the command matches.</param>
+    /// <param name="expressions">One or more match expressions.</param>
+    /// <param name="matchType">How to match the expressions against message text.</param>
     /// <param name="sourceType">Required message source type (null = any).</param>
     /// <param name="permissionLevel">Minimum member role required.</param>
     /// <param name="priority">Higher priority commands are matched first.</param>
@@ -86,7 +87,9 @@ public sealed class CommandManager
     ///     When true, prevents the same user from triggering this command while a previous invocation is still executing.
     /// </param>
     /// <param name="reentryMessage">Optional plain-text reply sent when the command is rejected due to re-entry.</param>
-    public void RegisterDynamicCommand(
+    /// <param name="prefix">Optional prefix prepended to match expressions (same as CommandGroup.Prefix).</param>
+    /// <returns>A unique command ID that can be used to unregister this command later.</returns>
+    public Guid RegisterDynamicCommand(
         Func<MessageReceivedEvent, ValueTask> handler,
         string[]                              expressions,
         MatchType                             matchType       = MatchType.Full,
@@ -96,10 +99,13 @@ public sealed class CommandManager
         bool                                  blockAfterMatch = true,
         string                                description     = "",
         bool                                  preventReentry  = true,
-        string                                reentryMessage  = "")
+        string                                reentryMessage  = "",
+        string                                prefix          = "")
     {
+        Guid commandId = Guid.NewGuid();
         CommandInfo info = new()
             {
+                CommandId       = commandId,
                 Method          = handler.Method,
                 DynamicHandler  = handler,
                 Expressions     = expressions,
@@ -110,7 +116,8 @@ public sealed class CommandManager
                 BlockAfterMatch = blockAfterMatch,
                 Description     = description,
                 PreventReentry  = preventReentry,
-                ReentryMessage  = reentryMessage
+                ReentryMessage  = reentryMessage,
+                CommandPrefix   = prefix
             };
 
         lock (_lock)
@@ -119,13 +126,35 @@ public sealed class CommandManager
             _needsSort = true;
         }
 
-        _logger.LogDebug(
-            "Registered dynamic command [{CommandName}] via {MatchType} (source: {SourceType}, priority: {Priority}, block: {BlockAfterMatch})",
+        _logger.LogInformation(
+            "Registered dynamic command [{CommandName}] via {MatchType} (id: {CommandId}, source: {SourceType}, priority: {Priority}, block: {BlockAfterMatch})",
             handler.Method.Name,
             matchType,
+            commandId,
             sourceType,
             priority,
             blockAfterMatch);
+
+        return commandId;
+    }
+
+    /// <summary>
+    ///     Unregisters a previously registered dynamic command by its ID.
+    /// </summary>
+    /// <param name="commandId">The unique command ID returned by <see cref="RegisterDynamicCommand" />.</param>
+    /// <returns><c>true</c> if the command was found and removed; <c>false</c> if no command with that ID exists.</returns>
+    public bool UnregisterDynamicCommand(Guid commandId)
+    {
+        lock (_lock)
+        {
+            int index = _commands.FindIndex(c => c.CommandId == commandId);
+            if (index < 0) return false;
+
+            _commands.RemoveAt(index);
+        }
+
+        _logger.LogInformation("Unregistered dynamic command (id: {CommandId})", commandId);
+        return true;
     }
 
     /// <summary>Registers a custom command matcher.</summary>
@@ -133,7 +162,10 @@ public sealed class CommandManager
     public void RegisterMatcher(ICommandMatcher matcher)
     {
         _matchers[matcher.MatchType] = matcher;
-        _logger.LogDebug("Registered command matcher [{MatcherType}] for {MatchType}", matcher.GetType().Name, matcher.MatchType);
+        _logger.LogInformation(
+            "Registered command matcher [{MatcherType}] for {MatchType}",
+            matcher.GetType().Name,
+            matcher.MatchType);
     }
 
     /// <summary>
@@ -226,7 +258,7 @@ public sealed class CommandManager
                     PermissionLevel = cmdAttr.PermissionLevel,
                     Priority        = cmdAttr.Priority,
                     BlockAfterMatch = cmdAttr.BlockAfterMatch,
-                    GroupPrefix     = prefix,
+                    CommandPrefix   = prefix,
                     Description     = cmdAttr.Description,
                     PreventReentry  = cmdAttr.PreventReentry,
                     ReentryMessage  = cmdAttr.ReentryMessage
@@ -238,7 +270,7 @@ public sealed class CommandManager
                 _needsSort = true;
             }
 
-            _logger.LogDebug(
+            _logger.LogInformation(
                 "Registered command [{CommandName}] via {MatchType} (source: {SourceType}, priority: {Priority}, block: {BlockAfterMatch})",
                 method.Name,
                 cmdAttr.MatchType,
@@ -303,7 +335,7 @@ public sealed class CommandManager
             if (!_matchers.TryGetValue(cmd.MatchType, out ICommandMatcher? matcher))
                 continue;
 
-            if (cmd.Expressions.Select(expr => cmd.GroupPrefix + expr)
+            if (cmd.Expressions.Select(expr => BuildFullExpression(cmd, expr))
                    .Any(fullExpr => matcher.IsMatch(text, fullExpr)))
             {
                 _logger.LogInformation("Matched command [{CommandName}] via {MatchType} ", cmd.Method.Name, cmd.MatchType);
@@ -394,6 +426,28 @@ public sealed class CommandManager
         {
             _logger.LogError(ex, "Failed to send re-entry reply for command");
         }
+    }
+
+    /// <summary>
+    ///     Builds the full matching expression by combining group prefix with the command expression.
+    ///     For regex match type, the prefix is escaped and inserted after the <c>^</c> anchor if present.
+    /// </summary>
+    /// <param name="cmd">The command info containing match type and group prefix.</param>
+    /// <param name="expression">The raw command expression.</param>
+    /// <returns>The combined expression ready for matching.</returns>
+    private static string BuildFullExpression(CommandInfo cmd, string expression)
+    {
+        if (cmd.CommandPrefix.Length == 0)
+            return expression;
+
+        if (cmd.MatchType != MatchType.Regex)
+            return cmd.CommandPrefix + expression;
+
+        // For regex: escape the prefix and insert after ^ anchor if present
+        string escapedPrefix = Regex.Escape(cmd.CommandPrefix);
+        return expression.StartsWith('^')
+            ? $"^{escapedPrefix}{expression[1..]}"
+            : escapedPrefix + expression;
     }
 
 #endregion

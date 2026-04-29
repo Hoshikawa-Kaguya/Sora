@@ -10,6 +10,9 @@ internal sealed class CommandInfo
     /// <summary>Block event chain after match.</summary>
     public bool BlockAfterMatch { get; init; } = true;
 
+    /// <summary>Unique identifier for dynamic commands (used for unregistration).</summary>
+    public Guid CommandId { get; init; }
+
     /// <summary>Description.</summary>
     public string Description { get; init; } = "";
 
@@ -19,8 +22,8 @@ internal sealed class CommandInfo
     /// <summary>Match expressions.</summary>
     public required string[] Expressions { get; init; }
 
-    /// <summary>Group prefix.</summary>
-    public string GroupPrefix { get; init; } = "";
+    /// <summary>Command prefix.</summary>
+    public string CommandPrefix { get; init; } = "";
 
     /// <summary>Singleton instance for instance method invocation (null for static methods).</summary>
     public object? Instance { get; init; }

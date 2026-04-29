@@ -6,6 +6,9 @@ namespace Sora.Entities.Utils;
 /// </summary>
 public static class TaskExtensions
 {
+    private static readonly Lazy<ILogger> LoggerLazy = new(() => SoraLogger.CreateLogger("Sora.TaskExtensions"));
+    private static          ILogger       Logger => LoggerLazy.Value;
+
     /// <summary>
     ///     Awaits the <paramref name="task" /> and catches any exception,
     ///     forwarding it to <paramref name="onError" />.
@@ -20,7 +23,14 @@ public static class TaskExtensions
         }
         catch (Exception ex)
         {
-            onError(ex);
+            try
+            {
+                onError(ex);
+            }
+            catch (Exception innerEx)
+            {
+                Logger.LogError(innerEx, "RunCatch onError handler itself threw an exception");
+            }
         }
     }
 
@@ -38,7 +48,14 @@ public static class TaskExtensions
         }
         catch (Exception ex)
         {
-            onError(ex);
+            try
+            {
+                onError(ex);
+            }
+            catch (Exception innerEx)
+            {
+                Logger.LogError(innerEx, "RunCatch onError handler itself threw an exception");
+            }
         }
     }
 
@@ -57,7 +74,14 @@ public static class TaskExtensions
         }
         catch (Exception ex)
         {
-            onError(ex);
+            try
+            {
+                onError(ex);
+            }
+            catch (Exception innerEx)
+            {
+                Logger.LogError(innerEx, "RunCatch onError handler itself threw an exception");
+            }
         }
     }
 
@@ -76,7 +100,14 @@ public static class TaskExtensions
         }
         catch (Exception ex)
         {
-            onError(ex);
+            try
+            {
+                onError(ex);
+            }
+            catch (Exception innerEx)
+            {
+                Logger.LogError(innerEx, "RunCatch onError handler itself threw an exception");
+            }
         }
     }
 
