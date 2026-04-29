@@ -12,7 +12,7 @@ public class TaskExtensionsTests
 
 #region RunCatch Exception Forwarding
 
-    /// <see cref="TaskExtensions.RunCatch(Task, Action{Exception})" />
+    /// <see cref="Sora.Entities.Utils.TaskExtensions.RunCatch(Task, Action{Exception})" />
     [Fact]
     public async Task RunCatch_Task_ExceptionForwarded()
     {
@@ -33,7 +33,7 @@ public class TaskExtensionsTests
         Assert.Equal("test error", captured.Message);
     }
 
-    /// <see cref="TaskExtensions.RunCatch(ValueTask, Action{Exception})" />
+    /// <see cref="Sora.Entities.Utils.TaskExtensions.RunCatch(ValueTask, Action{Exception})" />
     [Fact]
     public async Task RunCatch_ValueTask_ExceptionForwarded()
     {
@@ -58,7 +58,7 @@ public class TaskExtensionsTests
 
 #region RunCatch onError Protection
 
-    /// <see cref="TaskExtensions.RunCatch(Task, Action{Exception})" />
+    /// <see cref="Sora.Entities.Utils.TaskExtensions.RunCatch(Task, Action{Exception})" />
     [Fact]
     public async Task RunCatch_Task_OnErrorThrows_DoesNotCrash()
     {
@@ -78,7 +78,7 @@ public class TaskExtensionsTests
         Assert.True(signal.Task.IsCompletedSuccessfully);
     }
 
-    /// <see cref="TaskExtensions.RunCatch(ValueTask, Action{Exception})" />
+    /// <see cref="Sora.Entities.Utils.TaskExtensions.RunCatch(ValueTask, Action{Exception})" />
     [Fact]
     public async Task RunCatch_ValueTask_OnErrorThrows_DoesNotCrash()
     {
@@ -97,7 +97,7 @@ public class TaskExtensionsTests
         Assert.True(signal.Task.IsCompletedSuccessfully);
     }
 
-    /// <see cref="TaskExtensions.RunCatch{T}(Task{T}, Action{Exception})" />
+    /// <see cref="Sora.Entities.Utils.TaskExtensions.RunCatch{T}(Task{T}, Action{Exception})" />
     [Fact]
     public async Task RunCatch_TaskOfT_OnErrorThrows_DoesNotCrash()
     {
@@ -116,7 +116,7 @@ public class TaskExtensionsTests
         Assert.True(signal.Task.IsCompletedSuccessfully);
     }
 
-    /// <see cref="TaskExtensions.RunCatch{T}(ValueTask{T}, Action{Exception})" />
+    /// <see cref="Sora.Entities.Utils.TaskExtensions.RunCatch{T}(ValueTask{T}, Action{Exception})" />
     [Fact]
     public async Task RunCatch_ValueTaskOfT_OnErrorThrows_DoesNotCrash()
     {
@@ -139,7 +139,7 @@ public class TaskExtensionsTests
 
 #region RunCatch Success Path
 
-    /// <see cref="TaskExtensions.RunCatch(Task, Action{Exception})" />
+    /// <see cref="Sora.Entities.Utils.TaskExtensions.RunCatch(Task, Action{Exception})" />
     [Fact]
     public async Task RunCatch_Task_Success_OnErrorNotCalled()
     {
