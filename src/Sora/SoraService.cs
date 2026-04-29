@@ -124,10 +124,9 @@ public sealed class SoraService : IBotService
             GetAssemblyVersion(typeof(CommandManager)),
             GetAssemblyVersion(typeof(MessageSourceType)));
         _logger.LogDebug(
-            "Runtime: .NET {RuntimeVersion} | OS: {OsVersion} | LogLevel: {LogLevel}",
+            "Runtime: .NET {RuntimeVersion} | OS: {OsVersion}",
             Environment.Version,
-            Environment.OSVersion,
-            _config.MinimumLogLevel);
+            Environment.OSVersion);
 
         _logger.LogInformation("SoraService {ServiceId} starting (adapter: {Protocol})", ServiceId, Adapter.GetType().FullName);
         await Adapter.StartAsync(ct);
