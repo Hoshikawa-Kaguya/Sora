@@ -239,10 +239,6 @@ __pycache__/
 # Local test scripts and docs (contain hardcoded credentials)
 tests/scripts/Run-Tests-Local.ps1
 docs/TESTING-LOCAL.md
-.github/extensions/
-.github/instructions/
-.github/skills/
-.github/copilot-instructions.md
 
 # Local test run settings (contain environment-specific values)
 tests/test.local.runsettings
@@ -250,5 +246,5 @@ tests/test.local.runsettings
 # Test results (generated)
 TestResults/
 
-
+agent_tmp/
 **/Properties/launchSettings.json

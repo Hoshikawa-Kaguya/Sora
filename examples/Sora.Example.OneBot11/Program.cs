@@ -2,20 +2,24 @@ using Microsoft.Extensions.Logging;
 using Sora;
 using Sora.Adapter.OneBot11;
 using Sora.Example.OneBot11;
+using Sora.Example.OneBot11.Filters;
 
 // 创建服务
 SoraService service = SoraServiceFactory.Instance.CreateOneBot11Service(
     new OneBot11Config
-        {
-            Mode              = ConnectionMode.ForwardWebSocket,
-            Host              = "127.0.0.1",
-            Port              = 3001,
-            AccessToken       = "",
-            HeartbeatInterval = TimeSpan.FromSeconds(5),
-            MinimumLogLevel   = LogLevel.Information
-        });
+    {
+        Mode              = ConnectionMode.ForwardWebSocket,
+        Host              = "127.0.0.1",
+        Port              = 3001,
+        AccessToken       = "",
+        HeartbeatInterval = TimeSpan.FromSeconds(5),
+        MinimumLogLevel   = LogLevel.Information
+    });
 
 ILogger logger = SoraLogger.CreateLogger("OneBot11Bot");
+
+// 注册事件过滤器（在 StartAsync 之前）
+service.UseEventPreFilter(new SimpleBlacklistFilter(logger));
 
 // 连接成功
 service.Events.OnConnected += async e =>

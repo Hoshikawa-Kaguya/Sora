@@ -29,4 +29,10 @@ public abstract record BotEvent
     ///     Set to false in a handler to stop propagation to subsequent handlers.
     /// </summary>
     public bool IsContinueEventChain { get; set; } = true;
+
+    /// <summary>
+    ///     Pipeline context shared across filters, commands, and event handlers within this event's processing cycle.
+    ///     Initialized by the framework before pre-filters execute. <c>null</c> for waiter-consumed events.
+    /// </summary>
+    public PipelineContext? PipelineContext { get; internal set; }
 }

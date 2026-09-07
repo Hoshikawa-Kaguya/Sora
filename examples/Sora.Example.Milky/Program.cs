@@ -2,20 +2,27 @@ using Microsoft.Extensions.Logging;
 using Sora;
 using Sora.Adapter.Milky;
 using Sora.Example.Milky;
+using Sora.Example.Milky.Commands;
+using Sora.Example.Milky.Filters;
 
 // 创建服务
 SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
     new MilkyConfig
-        {
-            Host            = "10.7.21.36",
-            Port            = 3010,
-            Prefix          = "milky",
-            AccessToken     = "test",
-            EventTransport  = EventTransport.WebSocket,
-            MinimumLogLevel = LogLevel.Debug
-        });
+    {
+        Host            = "10.7.21.36",
+        Port            = 3010,
+        Prefix          = "milky",
+        AccessToken     = "test",
+        EventTransport  = EventTransport.WebSocket,
+        MinimumLogLevel = LogLevel.Debug
+    });
 
 ILogger logger = SoraLogger.CreateLogger("MilkyBot");
+
+// 注册事件过滤器（在 StartAsync 之前）
+// 命令过滤器请直接以 attribute 形式贴在 [Command] 方法或 [CommandGroup] 类上（见 BasicCommands / CooldownAttribute）。
+service.UseEventPreFilter(new LoggingPreFilter(logger));
+service.UseEventPostFilter(new MetricsPostFilter(logger));
 
 //事件处理
 
@@ -49,6 +56,8 @@ service.Events.OnMemberJoined += async e =>
 
 // 指令注册
 service.Commands.ScanAssembly(typeof(Program).Assembly);
+DynamicCommandExamples examples = new();
+examples.Register(service);
 
 logger.LogInformation("Link start...");
 await service.StartAsync();

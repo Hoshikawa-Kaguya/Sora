@@ -51,4 +51,25 @@ internal sealed class CommandInfo
 
     /// <summary>Source type filter (null = any).</summary>
     public MessageSourceType? SourceType { get; init; }
+
+    /// <summary>
+    ///     Pinned before-filter attribute instances for this command, sorted ascending by Order
+    ///     with class-level attributes preceding method-level on Order ties.
+    ///     Class-level instances are shared across all commands in the same group.
+    /// </summary>
+    public IReadOnlyList<CommandBeforeFilterAttribute> BeforeFilters { get; init; } = [];
+
+    /// <summary>
+    ///     Pinned after-filter attribute instances for this command, sorted ascending by Order
+    ///     with class-level attributes preceding method-level on Order ties.
+    ///     Class-level instances are shared across all commands in the same group.
+    /// </summary>
+    public IReadOnlyList<CommandAfterFilterAttribute> AfterFilters { get; init; } = [];
+
+    /// <summary>
+    ///     All custom attributes resolved at registration time (method + declaring type for static commands;
+    ///     framework-supplied subset for dynamic commands). Reused for <see cref="CommandFilterContext.Attributes" />
+    ///     so filters and the context observe the same instances.
+    /// </summary>
+    public IReadOnlyList<Attribute> Attributes { get; init; } = [];
 }

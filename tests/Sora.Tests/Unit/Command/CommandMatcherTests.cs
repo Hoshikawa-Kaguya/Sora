@@ -66,19 +66,19 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                ["ping"]);
+            ["ping"]);
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("ping")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("ping")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.True(executed);
@@ -97,19 +97,19 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                ["hello"]);
+            ["hello"]);
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("world")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("world")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.False(executed);
@@ -128,19 +128,19 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                [""]);
+            [""]);
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody()
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody()
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.False(executed);
@@ -163,20 +163,20 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                ["help"],
+            ["help"],
             MatchType.Keyword);
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("I need help please")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("I need help please")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.True(executed);
@@ -195,20 +195,20 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                [@"^/ban \d+$"],
+            [@"^/ban \d+$"],
             MatchType.Regex);
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("/ban 12345")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("/ban 12345")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.True(executed);
@@ -231,7 +231,7 @@ public class CommandMatcherTests
                 order.Add("low");
                 await ValueTask.CompletedTask;
             },
-                ["test"],
+            ["test"],
             priority: 1,
             blockAfterMatch: false);
 
@@ -241,21 +241,21 @@ public class CommandMatcherTests
                 order.Add("high");
                 await ValueTask.CompletedTask;
             },
-                ["test"],
+            ["test"],
             priority: 10,
             blockAfterMatch: false);
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("test")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("test")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.Equal(["high", "low"], order);
@@ -274,7 +274,7 @@ public class CommandMatcherTests
                 count++;
                 await ValueTask.CompletedTask;
             },
-                ["test"],
+            ["test"],
             priority: 10,
             blockAfterMatch: true);
 
@@ -284,21 +284,21 @@ public class CommandMatcherTests
                 count++;
                 await ValueTask.CompletedTask;
             },
-                ["test"],
+            ["test"],
             priority: 1,
             blockAfterMatch: true);
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("test")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("test")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.Equal(1, count);
@@ -321,21 +321,21 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                ["test"],
+            ["test"],
             MatchType.Full,
             MessageSourceType.Friend);
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("test")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("test")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.False(executed);
@@ -358,21 +358,21 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                [@"^dice\s*(\d*)$"],
+            [@"^dice\s*(\d*)$"],
             MatchType.Regex,
             prefix: "/");
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("/dice 6")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("/dice 6")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.True(executed);
@@ -391,21 +391,21 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                ["dice"],
+            ["dice"],
             MatchType.Regex,
             prefix: "/");
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("/dice")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("/dice")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.True(executed);
@@ -424,20 +424,20 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                ["ping"],
+            ["ping"],
             prefix: "/");
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("/ping")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("/ping")
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.True(executed);
@@ -456,21 +456,21 @@ public class CommandMatcherTests
                 executed = true;
                 await ValueTask.CompletedTask;
             },
-                [@"^dice\s*(\d*)$"],
+            [@"^dice\s*(\d*)$"],
             MatchType.Regex,
             prefix: "/");
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("dice 6") // Missing prefix
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("dice 6") // Missing prefix
+            }
+        };
 
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.False(executed);
@@ -493,19 +493,19 @@ public class CommandMatcherTests
                 count++;
                 await ValueTask.CompletedTask;
             },
-                ["removeme"]);
+            ["removeme"]);
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L, SenderId = 200L,
-                        Body       = new MessageBody("removeme")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L, SenderId = 200L,
+                Body       = new MessageBody("removeme")
+            }
+        };
 
         // First invocation should work
         await manager.HandleMessageEventAsync(evt, CT);
@@ -546,6 +546,32 @@ public class CommandMatcherTests
         // This should return false (timeout) rather than throwing
         bool result = matcher.IsMatch(input, pattern);
         Assert.False(result);
+    }
+
+    private static MessageReceivedEvent CreateEvent(string text) =>
+        new()
+        {
+            Api          = null!,
+            ConnectionId = Guid.NewGuid(),
+            SelfId       = 1L,
+            Time         = DateTime.Now,
+            Message = new MessageContext
+            {
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L,
+                SenderId   = 200L,
+                Body       = new MessageBody(text)
+            }
+        };
+
+    /// <summary>Matcher used to verify external matcher registration.</summary>
+    private sealed class MappingMatcher : ICommandMatcher
+    {
+        public MatchType MatchType => MatchType.Full;
+
+        public bool IsMatch(string input, string expression) =>
+            input == "custom-input" && expression == "registered-expression";
     }
 
 #endregion

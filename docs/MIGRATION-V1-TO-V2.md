@@ -574,6 +574,16 @@ service.Commands.RegisterDynamicCommand(
     reentryMessage: "执行中，请稍候"); // 可选：被阻止时回复用户
 ```
 
+#### 7.4.1 过滤器
+
+2.0 的过滤器分为事件过滤器和命令过滤器：
+
+- 事件过滤器通过 `service.UseEventPreFilter(...)` / `service.UseEventPostFilter(...)` 注册，必须在 `service.StartAsync()` 前完成注册；事件处理顺序为 waiter bypass → `PipelineContext` → event pre-filter → command manager → `EventDispatcher` → event post-filter。
+- `AddPreFilter` / `AddPostFilter` 改为上述 `UseEventPreFilter` / `UseEventPostFilter` API；事件过滤器不是 ASP.NET `next` 链，不会按嵌套 middleware 反向展开。
+- 命令过滤器不再使用 `AddBeforeFilter` / `AddAfterFilter` 或 `ICommandBeforeFilter` / `ICommandAfterFilter` 全局注册。请继承 `CommandBeforeFilterAttribute` / `CommandAfterFilterAttribute`，贴在 `[Command]` 方法或 `[CommandGroup]` 类上；它们默认 opt-in。
+- `[CommandGroup]` 级过滤器会应用到组内命令并共享同一实例；方法级过滤器只作用于对应命令。动态命令通过 `RegisterDynamicCommand` 的 `beforeFilters` / `afterFilters` 参数传入运行时实例。
+- waiter 消费的消息 bypass 全部事件过滤器，这类事件不创建 `PipelineContext`。
+
 ### 7.5 回复消息
 
 1.x 的 `e.Reply()` 扩展方法在 2.0 中被移除。2.0 需要通过 `IBotApi` 显式发送：
