@@ -98,6 +98,7 @@ public sealed class EventDispatcher
     /// </summary>
     /// <param name="e">The event to dispatch.</param>
     /// <param name="ct">Cancellation token to interrupt handler invocation.</param>
+    /// <exception cref="OperationCanceledException">The supplied token has been canceled.</exception>
     internal async ValueTask DispatchAsync(BotEvent e, CancellationToken ct = default)
     {
         _logger.LogDebug(
@@ -184,9 +185,13 @@ public sealed class EventDispatcher
                 _logger.LogTrace("Invoking handler {HandlerName} for {EventType}", d.Method.Name, typeof(T).Name);
                 await ((Func<T, ValueTask>)d)(e);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException cancellation
+                                       || cancellation.CancellationToken != ct
+                                       || !ct.IsCancellationRequested)
             {
                 _logger.LogError(ex, "Event handler threw an unhandled exception for {EventType}", typeof(T).Name);
+                if (ex is OperationCanceledException)
+                    ct.ThrowIfCancellationRequested();
             }
         }
     }

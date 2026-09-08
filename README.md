@@ -42,14 +42,14 @@ Sora 是一个以**轻量**和**易用**为核心目标的多协议异步机器�
 
 ## 项目结构
 
-| NuGet 包 | 版本 | 说明 |
-|------|------|------|
-| `HoshikawaKaguya.Sora` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora/) | 框架门面层 — SoraService、SoraServiceFactory、日志初始化 |
-| `HoshikawaKaguya.Sora.Entities` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Entities?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Entities/) | 共享实体 — 事件、消息段、信息类型、API 接口 |
-| `HoshikawaKaguya.Sora.Core` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Core?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Core/) | 核心工具 — 枚举、扩展方法、通用基础设施 |
+| NuGet 包 | 版本 | 说明                                            |
+|------|------|-----------------------------------------------|
+| `HoshikawaKaguya.Sora` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora/) | 框架顶层 — SoraService、SoraServiceFactory、日志初始化   |
+| `HoshikawaKaguya.Sora.Entities` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Entities?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Entities/) | 共享实体 — 事件、消息段、信息类型、API 接口                     |
+| `HoshikawaKaguya.Sora.Core` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Core?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Core/) | 核心工具 — 枚举、扩展方法、通用基础设施                         |
 | `HoshikawaKaguya.Sora.Command` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Command?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Command/) | 属性指令路由 — `[CommandGroup]` + `[Command]` 声明式指令 |
-| `HoshikawaKaguya.Sora.Adapter.Milky` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Adapter.Milky?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Adapter.Milky/) | Milky 协议适配器 |
-| `HoshikawaKaguya.Sora.Adapter.OneBot11` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Adapter.OneBot11?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Adapter.OneBot11/) | OneBot v11 协议适配器 |
+| `HoshikawaKaguya.Sora.Adapter.Milky` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Adapter.Milky?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Adapter.Milky/) | Milky 协议适配器                                   |
+| `HoshikawaKaguya.Sora.Adapter.OneBot11` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Adapter.OneBot11?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Adapter.OneBot11/) | OneBot v11 协议适配器                              |
 
 ## Protocol Adapter
 
@@ -79,13 +79,17 @@ SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
 
 ### OneBot v11
 
-> 由于OneBot v11常年无人维护且各家协议端实现都不一样，使用OneBot v11可能会遇到很多不兼容或者意想不到的情况
+> 由于OneBot v11常年无人维护且各家协议端实现都不一样 ~~群魔乱舞~~，使用OneBot v11可能会遇到很多不兼容或者意想不到的情况
 >
-> 这个adapter目前只对LLBot做了测试，不再推荐使用OneBot v11协议
+> 这个adapter目前只对LLBot做了测试，不再推荐使用OneBot v11协议，OneBot v11已经算是历史遗留了，OB11的适配器我有点不想去维护了
+> 
+> 也许哪天就干脆直接停止维护OB11的adapter了
+>
+> 推荐直接dorp ob11协议的使用，如果你的是老项目建议尽早迁移
 
 基于 [OneBot v11](https://11.onebot.dev/) 的适配器，支持正向/反向 WebSocket。**只支持Array格式上报**
 
-Note: 由于OneBot v11目前各协议端实现比较自由，所以有部分扩展API/Event并不支持（覆盖率在85%左右）
+> 由于OneBot v11目前各协议端实现比较自由，所以有部分扩展API/Event并不支持（覆盖率在85%左右）
 
 | 特性 | 说明 |
 |------|------|
@@ -179,6 +183,8 @@ service.Commands.ScanAssembly(typeof(Program).Assembly);
 | [功能测试目录](docs/FUNCTIONAL-TEST-CATALOG.md) | 所有 E2E 测试的完整清单 |
 | [已移除测试](docs/REMOVED_TESTS.md) | 无法自动化的测试及移除原因 |
 | [从 1.x 迁移到 2.0](docs/MIGRATION-V1-TO-V2.md) | 1.x → 2.0 完整迁移指南 |
+
+Agent 开发入口：项目级规范见 [`AGENTS.md`](AGENTS.md)，源码和测试分别见 [`src/AGENTS.md`](src/AGENTS.md) 与 [`tests/AGENTS.md`](tests/AGENTS.md)。协议/测试审计工作流位于 [`.agents/skills/`](.agents/skills/)，可执行 CLI 用法见 [`tools/agent-audit/README.md`](tools/agent-audit/README.md)。
 
 ## 开发注意事项
 

@@ -272,6 +272,82 @@ public class EventDispatcherTests
         Assert.True(secondCalled);
     }
 
+    /// <see cref="EventDispatcher.DispatchAsync" />
+    [Theory]
+    [InlineData("sora", true)]
+    [InlineData("sora", false)]
+    [InlineData("external", true)]
+    [InlineData("external", false)]
+    [InlineData("none", true)]
+    [InlineData("none", false)]
+    public async Task DispatchAsync_HandlerCancellation_UsesSoraTokenOwnership(string tokenSource, bool cancelSora)
+    {
+        using CancellationTokenSource soraCancellation = new();
+        using CancellationTokenSource externalCancellation = new();
+        externalCancellation.Cancel();
+        CancellationToken exceptionToken = tokenSource switch
+        {
+            "sora" => soraCancellation.Token,
+            "external" => externalCancellation.Token,
+            _ => CancellationToken.None
+        };
+        OperationCanceledException original = new(exceptionToken);
+        EventDispatcher dispatcher = new();
+        bool secondCalled = false;
+
+        dispatcher.OnConnected += async _ =>
+        {
+            await ValueTask.CompletedTask;
+            if (cancelSora)
+                soraCancellation.Cancel();
+            throw original;
+        };
+        dispatcher.OnConnected += _ =>
+        {
+            secondCalled = true;
+            return ValueTask.CompletedTask;
+        };
+
+        ConnectedEvent evt = new() { Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 100L, Time = DateTime.Now };
+        if (cancelSora)
+        {
+            OperationCanceledException actual = await Assert.ThrowsAsync<OperationCanceledException>(
+                () => dispatcher.DispatchAsync(evt, soraCancellation.Token).AsTask());
+            Assert.Equal(soraCancellation.Token, actual.CancellationToken);
+            if (tokenSource == "sora")
+                Assert.Same(original, actual);
+            else
+                Assert.NotSame(original, actual);
+            Assert.False(secondCalled);
+        }
+        else
+        {
+            await dispatcher.DispatchAsync(evt, soraCancellation.Token);
+            Assert.True(secondCalled);
+        }
+    }
+
+    /// <see cref="EventDispatcher.DispatchAsync" />
+    [Fact]
+    public async Task DispatchAsync_LastHandlerExternalCancellation_PropagatesSoraCancellation()
+    {
+        using CancellationTokenSource soraCancellation = new();
+        EventDispatcher dispatcher = new();
+        OperationCanceledException original = new();
+        dispatcher.OnConnected += _ =>
+        {
+            soraCancellation.Cancel();
+            throw original;
+        };
+
+        ConnectedEvent evt = new() { Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 100L, Time = DateTime.Now };
+        OperationCanceledException actual = await Assert.ThrowsAsync<OperationCanceledException>(
+            () => dispatcher.DispatchAsync(evt, soraCancellation.Token).AsTask());
+
+        Assert.Equal(soraCancellation.Token, actual.CancellationToken);
+        Assert.NotSame(original, actual);
+    }
+
     /// <see cref="BotEvent.IsContinueEventChain" />
     [Fact]
     public async Task DispatchAsync_StopPropagation()

@@ -32,20 +32,40 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
 |------|----------|------|
 | `Sora.Core` | `HoshikawaKaguya.Sora.Core` | 值类型（`UserId`、`GroupId`、`MessageId`）、枚举（`MatchType`、`SegmentType`、`MessageSourceType` 等）、`ApiResult` 结果类型 |
 | `Sora.Entities` | `HoshikawaKaguya.Sora.Entities` | 消息段（`Segment`、`MessageBody`）、事件（`BotEvent`、`MessageReceivedEvent` 等）、数据模型（`UserInfo`、`GroupInfo` 等）、核心接口（`IBotApi`、`IBotAdapter`、`IBotService`）、`EventDispatcher`、`MessageWaiter` |
-| `Sora.Command` | `HoshikawaKaguya.Sora.Command` | `[Command]`/`[CommandGroup]` 特性扫描、`ICommandMatcher` 匹配策略、`CommandManager` 命令路由 |
-| `Sora` | `HoshikawaKaguya.Sora` | `SoraServiceFactory` 工厂、`SoraService` 事件管线（Waiter → Dispatcher → Commands） |
+| `Sora.Command` | `HoshikawaKaguya.Sora.Command` | 独立的命令扩展包：`[Command]`/`[CommandGroup]` 特性扫描、内置匹配策略、`CommandManager` 命令路由及命令过滤器 |
+| `Sora` | `HoshikawaKaguya.Sora` | `SoraServiceFactory` 工厂、`SoraService` 事件管线（Waiter → Commands → Dispatcher） |
 | `Sora.Adapter.*` | `HoshikawaKaguya.Sora.Adapter.*` | 协议实现：网络连接、事件/消息转换、`IBotApi` 实现、扩展接口（`IMilkyExtApi` 等） |
+
+### 命令包边界
+
+`Sora.Command` 自行维护命令扩展所需的实体，使用 `Sora.Command.InternalEntities` 命名空间，不将命令专用元数据或执行状态放入 `Sora.Entities`。该命名空间表示实体归属，不等同于 C# 的 `internal` 可见性；公共过滤器契约涉及的类型仍须可公开访问。
+
+命令匹配方式由 `MatchType` 的 `Full`、`Regex`、`Keyword` 定义，与内置 `ICommandMatcher` 实现一一对应。`CommandManager.RegisterMatcher` 仅作为类内部的私有注册方法。增加匹配方式需要框架同时修改枚举和对应实现，包使用者无法扩展该枚举，因此 matcher 注册不是对外扩展点。
 
 ### 事件管线
 
 ```
 协议网络层 → Converter → BotEvent → SoraService
-  → MessageWaiter.TryMatch（连续对话，最高优先级）
-  → EventDispatcher（按类型分发：OnMessageReceived、OnMemberJoined 等）
-  → CommandManager.HandleMessageEventAsync（命令匹配，如启用）
+  → MessageWaiter.TryMatch（连续对话，最高优先级 — 跳过所有过滤器）
+  → PipelineContext 初始化
+  → IEventPreFilter 阶段（scope-aware，可预处理或拦截事件）
+  → 路由阶段（前置阶段未失败且事件链允许继续时）
+      → CommandManager.HandleMessageEventAsync（命令匹配，如启用）
+          → 匹配 → 权限/重入检查
+          → CommandBeforeFilterAttribute 阶段（opt-in attribute，可阻止执行）
+          → 执行命令处理器
+          → CommandAfterFilterAttribute 阶段 → 重入占用作用域结束
+      → EventDispatcher（事件链允许继续时按类型分发）
+  → IEventPostFilter 阶段（scope-aware，正常完成或短路后进入）
 ```
 
 适配器只需将协议数据转换为 `BotEvent` 并通过 `IAdapterEventSource.OnEvent` 触发，后续管线由 `SoraService` 自动处理。
+
+管线只将携带当前操作实际接收的 Sora token、且该 token 已取消的 `OperationCanceledException` 原样向上传播，不记录为执行错误。其他取消异常按普通用户回调异常记录并隔离；若 Sora token 同时已取消，框架另行发出携带该 token 的取消。扩展自行创建 linked token source 时，应在自身边界将 Sora 取消转换为传入 token 的取消异常，框架不追踪 token 的关联关系。
+
+普通用户回调错误在执行方法内部记录并隔离，正常完成、普通执行错误或短路后继续进入对应后置阶段。Sora 取消立即向外传播，不再执行后续 handler、after-filter 或 post-filter；执行链完整性不作为取消后的保证。编排层直接顺序调用各阶段，不捕获或暂存异常。重入标记通过包内部的值类型占用作用域及 `using` 保证释放，释放操作不执行后置回调。该契约不改变适配器调度；适配器仍负责观察回调完成或失败。
+
+> **注意**：过滤器由框架用户配置。事件过滤器通过 `service.UseEventPreFilter()` / `service.UseEventPostFilter()` 显式注册（带 `EventTypes` / `SourceTypes` / `Predicate` 作用域属性）。命令过滤器以 attribute 形式贴在 `[Command]` 方法或 `[CommandGroup]` 类上，框架按 attribute 自动发现，无须注册。适配器开发者无需关心过滤器机制 — 它在 `SoraService` / `CommandManager` 内部透明运作。
 
 ## 适配器项目结构
 

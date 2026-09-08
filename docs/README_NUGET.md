@@ -8,8 +8,9 @@
 ## 特性
 
 - 多协议支持：[Milky](https://milky.ntqqrev.org/)（主要）/ OneBot v11（兼容）
-- 模块化架构，按需引用
+- 模块化架构
 - 属性指令路由（`[CommandGroup]` + `[Command]`）
+- 事件管线过滤器（前置/命令/后置）
 - 完整的事件分发与消息等待机制
 - 简单直接的 API 设计
 
@@ -47,14 +48,14 @@ await Task.Delay(-1);
 
 ## 项目模块
 
-| 包                                         | 说明                   |
-|-------------------------------------------|----------------------|
-| `HoshikawaKaguya.Sora`                    | 框架应用层                |
-| `HoshikawaKaguya.Sora.Entities`           | 共享实体 — 事件、消息段、API 接口 |
-| `HoshikawaKaguya.Sora.Core`               | 核心工具库                |
-| `HoshikawaKaguya.Sora.Command`            | 属性指令路由               |
-| `HoshikawaKaguya.Sora.Adapter.Milky`      | Milky 协议适配器          |
-| `HoshikawaKaguya.Sora.Adapter.OneBot11`   | OneBot v11 协议适配器     |
+| 包                                      | 说明                              |
+|-----------------------------------------|-----------------------------------|
+| `HoshikawaKaguya.Sora`                  | 框架应用层                        |
+| `HoshikawaKaguya.Sora.Entities`         | 共享实体 — 事件、消息段、API 接口 |
+| `HoshikawaKaguya.Sora.Core`             | 核心工具库                        |
+| `HoshikawaKaguya.Sora.Command`          | 属性指令路由                      |
+| `HoshikawaKaguya.Sora.Adapter.Milky`    | Milky 协议适配器                  |
+| `HoshikawaKaguya.Sora.Adapter.OneBot11` | OneBot v11 协议适配器             |
 
 ## 文档与链接
 
