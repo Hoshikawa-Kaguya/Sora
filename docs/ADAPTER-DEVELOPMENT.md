@@ -48,20 +48,22 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
 协议网络层 → Converter → BotEvent → SoraService
   → MessageWaiter.TryMatch（连续对话，最高优先级 — 跳过所有过滤器）
   → PipelineContext 初始化
-  → try {
-      → IEventPreFilter 链（Layer A — scope-aware，可实现事件预处理和拦截）
+  → IEventPreFilter 阶段（scope-aware，可预处理或拦截事件）
+  → 路由阶段（前置阶段未失败且事件链允许继续时）
       → CommandManager.HandleMessageEventAsync（命令匹配，如启用）
           → 匹配 → 权限/重入检查
-          → CommandBeforeFilterAttribute 链（opt-in attribute，可阻止执行）
+          → CommandBeforeFilterAttribute 阶段（opt-in attribute，可阻止执行）
           → 执行命令处理器
-          → CommandAfterFilterAttribute 链（无论是否执行均运行）
-      → EventDispatcher（按类型分发：OnMessageReceived、OnMemberJoined 等）
-    } finally {
-      → IEventPostFilter 链（Layer C — scope-aware，无条件执行，用于指标/日志）
-    }
+          → CommandAfterFilterAttribute 阶段 → 重入占用作用域结束
+      → EventDispatcher（事件链允许继续时按类型分发）
+  → IEventPostFilter 阶段（scope-aware，正常完成或短路后进入）
 ```
 
 适配器只需将协议数据转换为 `BotEvent` 并通过 `IAdapterEventSource.OnEvent` 触发，后续管线由 `SoraService` 自动处理。
+
+管线只将携带当前操作实际接收的 Sora token、且该 token 已取消的 `OperationCanceledException` 原样向上传播，不记录为执行错误。其他取消异常按普通用户回调异常记录并隔离；若 Sora token 同时已取消，框架另行发出携带该 token 的取消。扩展自行创建 linked token source 时，应在自身边界将 Sora 取消转换为传入 token 的取消异常，框架不追踪 token 的关联关系。
+
+普通用户回调错误在执行方法内部记录并隔离，正常完成、普通执行错误或短路后继续进入对应后置阶段。Sora 取消立即向外传播，不再执行后续 handler、after-filter 或 post-filter；执行链完整性不作为取消后的保证。编排层直接顺序调用各阶段，不捕获或暂存异常。重入标记通过包内部的值类型占用作用域及 `using` 保证释放，释放操作不执行后置回调。该契约不改变适配器调度；适配器仍负责观察回调完成或失败。
 
 > **注意**：过滤器由框架用户配置。事件过滤器通过 `service.UseEventPreFilter()` / `service.UseEventPostFilter()` 显式注册（带 `EventTypes` / `SourceTypes` / `Predicate` 作用域属性）。命令过滤器以 attribute 形式贴在 `[Command]` 方法或 `[CommandGroup]` 类上，框架按 attribute 自动发现，无须注册。适配器开发者无需关心过滤器机制 — 它在 `SoraService` / `CommandManager` 内部透明运作。
 

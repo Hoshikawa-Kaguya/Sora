@@ -7,7 +7,8 @@ namespace Sora.Command.Filters;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Always executes after the command method returns, or after a before-filter short-circuits the chain.
+///         The after-filter phase is entered after command success, ordinary failure, or short-circuit.
+///         Sora cancellation immediately exits processing; command re-entry ownership is still released.
 ///         Sort order: ascending <see cref="Order" />; ties resolved by declaration scope
 ///         (class-level attributes precede method-level), then by source declaration order.
 ///     </para>
@@ -34,9 +35,14 @@ public abstract class CommandAfterFilterAttribute : Attribute
     public virtual int Order => 0;
 
     /// <summary>
-    ///     Called after command execution (or short-circuit). Always executes.
+    ///     Called during the after-filter phase unless an earlier after-filter canceled the chain.
     ///     Access pipeline context via <c>e.PipelineContext</c>.
     /// </summary>
+    /// <remarks>
+    ///     An exception carrying the canceled <paramref name="ct" /> immediately propagates.
+    ///     Other exceptions are logged and isolated. For a cancellation exception from another token,
+    ///     if <paramref name="ct" /> is also canceled, the framework propagates cancellation with that token.
+    /// </remarks>
     /// <param name="e">The message event that triggered the command.</param>
     /// <param name="cmd">Read-only metadata about the matched command.</param>
     /// <param name="shortCircuited"><c>true</c> if the command method was not invoked (blocked by a before-filter).</param>

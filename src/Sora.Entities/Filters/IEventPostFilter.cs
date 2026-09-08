@@ -1,8 +1,8 @@
 namespace Sora.Entities.Filters;
 
 /// <summary>
-///     Event post-filter. Called unconditionally after the entire event processing pipeline completes
-///     (including short-circuited events). Executes in a <c>finally</c> block.
+///     Event post-filter. Runs after normal event processing or short-circuit.
+///     Sora cancellation immediately terminates the pipeline, including any remaining post-filters.
 /// </summary>
 /// <remarks>
 ///     <para>
@@ -46,14 +46,18 @@ public interface IEventPostFilter
     Func<BotEvent, bool>? Predicate => null;
 
     /// <summary>
-    ///     Called after event processing completes. Executes regardless of whether the event chain was short-circuited.
+    ///     Called after event processing completes or short-circuits, unless Sora cancellation has terminated execution.
     ///     Access pipeline context via <c>e.PipelineContext</c>.
     /// </summary>
     /// <param name="e">The bot event that was processed.</param>
     /// <param name="chainCompleted">
-    ///     <c>true</c> if <see cref="EventDispatcher.DispatchAsync" /> executed;
-    ///     <c>false</c> if the chain was short-circuited (by pre-filter or command match).
+    ///     <c>true</c> if <see cref="EventDispatcher.DispatchAsync" /> returned normally;
+    ///     <c>false</c> if the earlier chain was short-circuited before that point.
     /// </param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="ct">
+    ///     Pipeline cancellation token. Cancellation carrying this token is propagated immediately when it is canceled.
+    ///     Other cancellation exceptions are logged and isolated; if this token is also canceled,
+    ///     the stage stops and the pipeline raises its own cancellation instead.
+    /// </param>
     ValueTask OnEventProcessedAsync(BotEvent e, bool chainCompleted, CancellationToken ct);
 }

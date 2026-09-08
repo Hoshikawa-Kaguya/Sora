@@ -51,7 +51,11 @@ public interface IEventPreFilter
     ///     Access pipeline context via <c>e.PipelineContext</c>.
     /// </summary>
     /// <param name="e">The bot event to filter.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="ct">
+    ///     Pipeline cancellation token. Throw with this token when it is canceled to stop the pipeline.
+    ///     Other cancellation exceptions are logged and isolated; if this token is also canceled,
+    ///     the pipeline then raises its own cancellation.
+    /// </param>
     /// <returns><c>true</c> to continue processing; <c>false</c> to block the event.</returns>
     ValueTask<bool> OnEventAsync(BotEvent e, CancellationToken ct);
 }

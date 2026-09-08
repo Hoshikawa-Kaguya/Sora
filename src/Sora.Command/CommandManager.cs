@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using Sora.Command.InternalEntities;
 
@@ -470,106 +471,124 @@ public sealed class CommandManager
                     }
                 }
 
-                // Build filter context snapshot
-                CommandFilterContext                        filterContext = CreateFilterContext(cmd);
-                IReadOnlyList<CommandBeforeFilterAttribute> beforeFilters = cmd.BeforeFilters;
-                IReadOnlyList<CommandAfterFilterAttribute>  afterFilters  = cmd.AfterFilters;
-
-                bool       shortCircuited   = false;
-                Exception? commandException = null;
-
-                try
-                {
-                    // Execute before-filters
-                    foreach (CommandBeforeFilterAttribute beforeFilter in beforeFilters)
-                        try
-                        {
-                            if (!await beforeFilter.OnBeforeExecuteAsync(e, filterContext, ct))
-                            {
-                                shortCircuited = true;
-                                _logger.LogDebug(
-                                    "Command [{CommandName}] short-circuited by {FilterType}",
-                                    cmd.Method.Name,
-                                    beforeFilter.GetType().Name);
-                                break;
-                            }
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(
-                                ex,
-                                "CommandBeforeFilter {FilterType} threw an exception, treating as pass-through",
-                                beforeFilter.GetType().Name);
-                        }
-
-                    // Execute command method (if not short-circuited)
-                    if (!shortCircuited)
-                        try
-                        {
-                            if (cmd.DynamicHandler is not null)
-                            {
-                                await cmd.DynamicHandler(e);
-                            }
-                            else
-                            {
-                                object? result = cmd.Method.Invoke(cmd.Instance, [e]);
-                                await (result switch
-                                       {
-                                           ValueTask vt => vt.AsTask(),
-                                           Task t       => t,
-                                           _ => throw new InvalidOperationException(
-                                               "Command method must return Task or ValueTask")
-                                       });
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            commandException = ex is TargetInvocationException { InnerException: { } innerException }
-                                ? innerException
-                                : ex;
-                            _logger.LogError(
-                                commandException,
-                                "Command '{CommandName}' threw an unhandled exception",
-                                cmd.Method.Name);
-                        }
-                }
-                finally
-                {
-                    // Execute after-filters (always, regardless of short-circuit or exception)
-                    foreach (CommandAfterFilterAttribute afterFilter in afterFilters)
-                        try
-                        {
-                            await afterFilter.OnAfterExecuteAsync(
-                                e,
-                                filterContext,
-                                shortCircuited,
-                                commandException,
-                                ct);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            //cancel trigger
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(
-                                ex,
-                                "CommandAfterFilter {FilterType} threw an exception",
-                                afterFilter.GetType().Name);
-                        }
-
-                    if (cmd.PreventReentry)
-                        _activeExecutions.TryRemove(executionKey, out _);
-                }
+                using CommandExecutionScope executionScope = cmd.PreventReentry
+                    ? new CommandExecutionScope(_activeExecutions, executionKey)
+                    : default;
+                await ExecuteMatchedCommandAsync(cmd, e, ct);
 
                 if (cmd.BlockAfterMatch) e.IsContinueEventChain = false;
             }
         }
+    }
+
+    private async ValueTask ExecuteMatchedCommandAsync(
+        CommandInfo cmd, MessageReceivedEvent e, CancellationToken ct)
+    {
+        CommandFilterContext filterContext = CreateFilterContext(cmd);
+        bool shortCircuited = await ExecuteBeforeFiltersAsync(cmd, e, filterContext, ct);
+        Exception? commandException = shortCircuited
+            ? null
+            : await ExecuteCommandHandlerAsync(cmd, e, ct);
+        await ExecuteAfterFiltersAsync(cmd, e, filterContext, shortCircuited, commandException, ct);
+    }
+
+    private async ValueTask<bool> ExecuteBeforeFiltersAsync(
+        CommandInfo cmd, MessageReceivedEvent e, CommandFilterContext filterContext, CancellationToken ct)
+    {
+        foreach (CommandBeforeFilterAttribute beforeFilter in cmd.BeforeFilters)
+            try
+            {
+                if (!await beforeFilter.OnBeforeExecuteAsync(e, filterContext, ct))
+                {
+                    _logger.LogDebug(
+                        "Command [{CommandName}] short-circuited by {FilterType}",
+                        cmd.Method.Name,
+                        beforeFilter.GetType().Name);
+                    return true;
+                }
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException cancellation
+                                       || cancellation.CancellationToken != ct
+                                       || !ct.IsCancellationRequested)
+            {
+                _logger.LogError(
+                    ex,
+                    "CommandBeforeFilter {FilterType} threw an exception, treating as pass-through",
+                    beforeFilter.GetType().Name);
+                if (ex is OperationCanceledException)
+                    ct.ThrowIfCancellationRequested();
+            }
+
+        return false;
+    }
+
+    private async ValueTask<Exception?> ExecuteCommandHandlerAsync(
+        CommandInfo cmd, MessageReceivedEvent e, CancellationToken ct)
+    {
+        try
+        {
+            if (cmd.DynamicHandler is not null)
+            {
+                await cmd.DynamicHandler(e);
+            }
+            else
+            {
+                object? result = cmd.Method.Invoke(cmd.Instance, [e]);
+                switch (result)
+                {
+                    case ValueTask valueTask:
+                        await valueTask;
+                        break;
+                    case Task task:
+                        await task;
+                        break;
+                    default:
+                        throw new InvalidOperationException("Command method must return Task or ValueTask");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Exception commandException = ex is TargetInvocationException { InnerException: { } innerException }
+                ? innerException
+                : ex;
+            if (commandException is OperationCanceledException cancellation
+                && cancellation.CancellationToken == ct
+                && ct.IsCancellationRequested)
+                ExceptionDispatchInfo.Throw(commandException);
+
+            _logger.LogError(
+                commandException,
+                "Command '{CommandName}' threw an unhandled exception",
+                cmd.Method.Name);
+            if (commandException is OperationCanceledException)
+                ct.ThrowIfCancellationRequested();
+            return commandException;
+        }
+
+        return null;
+    }
+
+    private async ValueTask ExecuteAfterFiltersAsync(
+        CommandInfo cmd, MessageReceivedEvent e, CommandFilterContext filterContext,
+        bool shortCircuited, Exception? commandException, CancellationToken ct)
+    {
+        foreach (CommandAfterFilterAttribute afterFilter in cmd.AfterFilters)
+            try
+            {
+                await afterFilter.OnAfterExecuteAsync(e, filterContext, shortCircuited, commandException, ct);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException cancellation
+                                       || cancellation.CancellationToken != ct
+                                       || !ct.IsCancellationRequested)
+            {
+                _logger.LogError(
+                    ex,
+                    "CommandAfterFilter {FilterType} threw an exception",
+                    afterFilter.GetType().Name);
+                if (ex is OperationCanceledException)
+                    ct.ThrowIfCancellationRequested();
+            }
     }
 
 #endregion

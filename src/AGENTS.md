@@ -30,7 +30,7 @@ Conversion methods must attempt actual per-type conversion rather than silently 
 - OB11 is deprecated. An OB11-only feature that would require changes to `Sora.Core`, `Sora.Entities`, `Sora.Command`, or the facade is skipped unless Milky has equivalent support. Adapter-only compatibility fixes remain allowed.
 - `MessageBody` enforces segment direction for public mutation. Adapter input uses `FromIncoming()`; incoming-only fields use `internal init`.
 - `MessageWaiter` is internal and is exposed through `MessageReceivedEvent` extension methods. Waiter-consumed events bypass pipeline filters.
-- Event filters and command filters are opt-in and must tolerate exceptions without crashing the event pipeline. Event filter registration is startup-only; command filters are pinned at scan or dynamic registration time.
+- Event filters and command filters are opt-in and isolate ordinary callback exceptions; Sora-owned cancellation interrupts the pipeline. Event filter registration is startup-only; command filters are pinned at scan or dynamic registration time.
 - `PipelineContext` is created by `SoraService` for normal event cycles and is shared by filters and handlers. It is not created for waiter-consumed events.
 
 ## Event and Command Pipeline
@@ -43,12 +43,18 @@ adapter -> converter -> BotEvent -> MessageWaiter
   -> event pre-filters
   -> command matching/permissions/before-filters/handler/after-filters
   -> typed EventDispatcher
-  -> event post-filters in finally
+  -> event post-filters
 ```
 
-Waiter matches have highest priority and bypass all filters. Event pre-filters can short-circuit; post-filters run unconditionally and receive whether the earlier chain completed. Event scope can restrict runtime event types, message source types, and a predicate; predicate failures are logged and treated as a scope mismatch. A filter implementing both event interfaces must be registered in both collections.
+Waiter matches have highest priority and bypass all filters. Event pre-filters can short-circuit; post-filters run after normal completion or short-circuit and receive whether the earlier chain completed. Sora cancellation immediately terminates execution, including all remaining after/post filters. Event scope can restrict runtime event types, message source types, and a predicate; predicate failures are logged and treated as a scope mismatch. A filter implementing both event interfaces must be registered in both collections.
 
-Command filters are attributes only, opt-in, sorted by ascending `Order`, and frozen when a command is scanned or dynamically registered. Class-level filters precede method-level filters on ties and are shared by every command in the group. Stateful filter attributes must be thread-safe. Filter exceptions are logged and treated as pass-through so user code is not taken down by a filter.
+Command filters are attributes only, opt-in, sorted by ascending `Order`, and frozen when a command is scanned or dynamically registered. Class-level filters precede method-level filters on ties and are shared by every command in the group. Stateful filter attributes must be thread-safe. Ordinary filter exceptions are logged and treated as pass-through.
+
+Filter and direct command/event handler boundaries classify an `OperationCanceledException` as Sora-owned cancellation only when its `CancellationToken` equals the token passed to the current operation and that token is canceled. Propagate that exception without error logging. Log and isolate other cancellation exceptions as ordinary callback failures; if the Sora token is also canceled, then issue a cancellation carrying the Sora token. Do not infer token ancestry or equate the service's linked token with the original `StartAsync` argument. Extensions that own a linked token source must translate Sora cancellation to the supplied token at their own boundary.
+
+Keep execution orchestration as direct sequential calls. `ExecuteBeforeFiltersAsync`, `ExecuteAfterFiltersAsync`, and `ExecuteCommandHandlerAsync` handle callback exceptions internally. Event filter execution methods follow the same rule. Callers do not catch stage exceptions or retain pending failures. Sora cancellation propagates immediately; execution-chain completion is not guaranteed on cancellation or unexpected framework failures. Ordinary command failures are logged and returned to the caller only as metadata for after-filters.
+
+Post-filters retain the original token and do not change the earlier chain's completion status. Command re-entry ownership is represented by a package-internal value-type scope used with `using`. Its `Dispose` only releases an acquired entry and never invokes filters or propagates cancellation. Keep the scope alive through context construction and command execution; do not copy or reuse it. Do not add outer exception guards, deferred exception propagation, or generic pipeline wrappers. Do not suppress CA2219.
 
 `CommandManager` supports the built-in full, regex, and keyword matchers, static handlers, and singleton instances for instance handlers. Register external instances before scanning with `RegisterCommandInstance<T>()`. Re-entry protection is keyed by method, connection, sender, group, and source type; it covers handlers waiting for follow-up messages.
 

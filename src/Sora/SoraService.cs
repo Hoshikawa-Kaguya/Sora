@@ -217,79 +217,80 @@ public sealed class SoraService : IBotService
 
         // Initialize pipeline context
         e.PipelineContext = new PipelineContext { StartTimestamp = Stopwatch.GetTimestamp() };
-        bool chainCompleted = false;
+        await ExecuteEventPreFiltersAsync(e, ct);
+        bool chainCompleted = await RouteEventAsync(e, ct);
+        await ExecuteEventPostFiltersAsync(e, chainCompleted, ct);
+    }
 
-        try
+    private async ValueTask ExecuteEventPreFiltersAsync(BotEvent e, CancellationToken ct)
+    {
+        IEventPreFilter[] preFilters = _frozenPreFilters;
+        foreach (IEventPreFilter filter in preFilters)
         {
-            // Pre-filters (Layer A) — scoped per-filter via EventFilterScope
-            IEventPreFilter[] preFilters = _frozenPreFilters;
-            foreach (IEventPreFilter filter in preFilters)
-            {
-                if (!EventFilterScope.MatchesScope(filter, e, _logger))
-                    continue;
+            if (!EventFilterScope.MatchesScope(filter, e, _logger))
+                continue;
 
-                try
+            try
+            {
+                if (!await filter.OnEventAsync(e, ct))
                 {
-                    if (!await filter.OnEventAsync(e, ct))
-                    {
-                        e.IsContinueEventChain = false;
-                        _logger.LogDebug(
-                            "Event blocked by pre-filter {FilterType}",
-                            filter.GetType().Name);
-                        break;
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(
-                        ex,
-                        "EventPreFilter {FilterType} threw an exception, treating as pass-through",
+                    e.IsContinueEventChain = false;
+                    _logger.LogDebug(
+                        "Event blocked by pre-filter {FilterType}",
                         filter.GetType().Name);
+                    break;
                 }
             }
-
-            // Run command manager on message events
-            if (_config.EnableCommandManager && e is MessageReceivedEvent msgEvent && e.IsContinueEventChain)
+            catch (Exception ex) when (ex is not OperationCanceledException cancellation
+                                      || cancellation.CancellationToken != ct
+                                      || !ct.IsCancellationRequested)
             {
-                _logger.LogDebug("Routing message [{MessageId}] to the command manager", msgEvent.Message.MessageId);
-                await Commands.HandleMessageEventAsync(msgEvent, ct);
-            }
-
-            // Dispatch to EventDispatcher
-            if (e.IsContinueEventChain)
-            {
-                await Events.DispatchAsync(e, ct);
-                chainCompleted = true;
+                _logger.LogError(
+                    ex,
+                    "EventPreFilter {FilterType} threw an exception, treating as pass-through",
+                    filter.GetType().Name);
+                if (ex is OperationCanceledException)
+                    ct.ThrowIfCancellationRequested();
             }
         }
-        finally
-        {
-            // Post-filters (Layer C) — unconditional execution within scope
-            IEventPostFilter[] postFilters = _frozenPostFilters;
-            foreach (IEventPostFilter filter in postFilters)
-            {
-                if (!EventFilterScope.MatchesScope(filter, e, _logger))
-                    continue;
+    }
 
-                try
-                {
-                    await filter.OnEventProcessedAsync(e, chainCompleted, ct);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(
-                        ex,
-                        "EventPostFilter {FilterType} threw an exception",
-                        filter.GetType().Name);
-                }
+    private async ValueTask<bool> RouteEventAsync(BotEvent e, CancellationToken ct)
+    {
+        if (_config.EnableCommandManager && e is MessageReceivedEvent msgEvent && e.IsContinueEventChain)
+        {
+            _logger.LogDebug("Routing message [{MessageId}] to the command manager", msgEvent.Message.MessageId);
+            await Commands.HandleMessageEventAsync(msgEvent, ct);
+        }
+
+        if (!e.IsContinueEventChain) return false;
+
+        await Events.DispatchAsync(e, ct);
+        return true;
+    }
+
+    private async ValueTask ExecuteEventPostFiltersAsync(BotEvent e, bool chainCompleted, CancellationToken ct)
+    {
+        IEventPostFilter[] postFilters = _frozenPostFilters;
+        foreach (IEventPostFilter filter in postFilters)
+        {
+            if (!EventFilterScope.MatchesScope(filter, e, _logger))
+                continue;
+
+            try
+            {
+                await filter.OnEventProcessedAsync(e, chainCompleted, ct);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException cancellation
+                                      || cancellation.CancellationToken != ct
+                                      || !ct.IsCancellationRequested)
+            {
+                _logger.LogError(
+                    ex,
+                    "EventPostFilter {FilterType} threw an exception",
+                    filter.GetType().Name);
+                if (ex is OperationCanceledException)
+                    ct.ThrowIfCancellationRequested();
             }
         }
     }

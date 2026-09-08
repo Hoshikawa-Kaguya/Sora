@@ -96,16 +96,22 @@ public class EventPipelineFilterTests : IAsyncDisposable
     [Fact]
     public async Task PreFilter_ThrowsCancellation_Propagates()
     {
-        CancellingPreFilter cancellingFilter = new();
+        using CancellationTokenSource source = new();
+        CancellingPreFilter cancellingFilter = new() { Cancel = source.Cancel };
         RecordingPreFilter  secondFilter     = new();
+        RecordingPostFilter postFilter = new();
         _service.UseEventPreFilter(cancellingFilter);
         _service.UseEventPreFilter(secondFilter);
+        _service.UseEventPostFilter(postFilter);
+        await _service.StartAsync(source.Token);
 
-        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        OperationCanceledException exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
                                                                  await _adapter.RaiseEventAsync(CreateMessageEvent()));
 
+        Assert.Same(cancellingFilter.Exception, exception);
         Assert.Equal(1, cancellingFilter.CallCount);
         Assert.Equal(0, secondFilter.CallCount);
+        Assert.Equal(0, postFilter.CallCount);
     }
 
     /// <see cref="IEventPreFilter.OnEventAsync" />
@@ -205,16 +211,147 @@ public class EventPipelineFilterTests : IAsyncDisposable
     [Fact]
     public async Task PostFilter_ThrowsCancellation_Propagates()
     {
-        CancellingPostFilter cancellingFilter = new();
+        using CancellationTokenSource source = new();
+        CancellingPostFilter cancellingFilter = new() { Cancel = source.Cancel };
         RecordingPostFilter  secondFilter     = new();
         _service.UseEventPostFilter(cancellingFilter);
         _service.UseEventPostFilter(secondFilter);
+        await _service.StartAsync(source.Token);
 
-        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        OperationCanceledException exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
                                                                  await _adapter.RaiseEventAsync(CreateMessageEvent()));
 
+        Assert.Same(cancellingFilter.Exception, exception);
+        Assert.Contains(nameof(CancellingPostFilter.OnEventProcessedAsync), exception.StackTrace);
+        Assert.True(cancellingFilter.LastChainCompleted);
         Assert.Equal(1, cancellingFilter.CallCount);
         Assert.Equal(0, secondFilter.CallCount);
+    }
+
+    /// <summary>Handler cancellation terminates routing before typed handlers and post-filters.</summary>
+    [Fact]
+    public async Task EventHandler_Cancels_SkipsLaterHandlersAndPostFilters()
+    {
+        using CancellationTokenSource source = new();
+        CancellationToken pipelineToken = default;
+        OperationCanceledException? original = null;
+        CancellationFilter preFilter = new() { Callback = ct => pipelineToken = ct };
+        RecordingPostFilter postFilter = new();
+        bool typedHandlerCalled = false;
+        _service.UseEventPreFilter(preFilter);
+        _service.UseEventPostFilter(postFilter);
+        _service.Events.OnEvent += _ =>
+        {
+            source.Cancel();
+            original = new OperationCanceledException(pipelineToken);
+            throw original;
+        };
+        _service.Events.OnMessageReceived += _ =>
+        {
+            typedHandlerCalled = true;
+            return ValueTask.CompletedTask;
+        };
+        await _service.StartAsync(source.Token);
+
+        OperationCanceledException exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            await _adapter.RaiseEventAsync(CreateMessageEvent()));
+
+        Assert.Same(original, exception);
+        Assert.Equal(pipelineToken, exception.CancellationToken);
+        Assert.False(typedHandlerCalled);
+        Assert.Equal(0, postFilter.CallCount);
+    }
+
+    /// <summary>A failure outside callback isolation propagates without running later stages.</summary>
+    [Fact]
+    public async Task PreFilter_ScopeAccessFails_SkipsLaterStages()
+    {
+        using CancellationTokenSource source = new();
+        InvalidOperationException original = new("scope access failed");
+        CancellingPostFilter postFilter = new() { Cancel = source.Cancel };
+        RecordingPreFilter laterPreFilter = new();
+        RecordingPostFilter laterPostFilter = new();
+        bool dispatched = false;
+        _service.UseEventPreFilter(new ThrowingScopePreFilter { Exception = original });
+        _service.UseEventPreFilter(laterPreFilter);
+        _service.UseEventPostFilter(postFilter);
+        _service.UseEventPostFilter(laterPostFilter);
+        _service.Events.OnMessageReceived += _ =>
+        {
+            dispatched = true;
+            return ValueTask.CompletedTask;
+        };
+        await _service.StartAsync(source.Token);
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await _adapter.RaiseEventAsync(CreateMessageEvent()));
+
+        Assert.Same(original, actual);
+        Assert.Contains(nameof(ThrowingScopePreFilter), actual.StackTrace);
+        Assert.False(dispatched);
+        Assert.Equal(0, laterPreFilter.CallCount);
+        Assert.Equal(0, postFilter.CallCount);
+        Assert.Null(postFilter.Exception);
+        Assert.Equal(0, laterPostFilter.CallCount);
+    }
+
+    /// <summary>Token identity and cancellation state determine whether a filter cancels the pipeline.</summary>
+    [Theory]
+    [InlineData(false, 0, false)]
+    [InlineData(false, 1, false)]
+    [InlineData(false, 1, true)]
+    [InlineData(false, 2, false)]
+    [InlineData(false, 2, true)]
+    [InlineData(true, 0, false)]
+    [InlineData(true, 1, false)]
+    [InlineData(true, 1, true)]
+    [InlineData(true, 2, false)]
+    [InlineData(true, 2, true)]
+    public async Task Filter_UnrelatedCancellation_IsIsolatedOrReplacedWithServiceCancellation(
+        bool post, int tokenKind, bool cancelService)
+    {
+        using CancellationTokenSource source = new();
+        using CancellationTokenSource externalSource = new();
+        externalSource.Cancel();
+        CancellationToken observedToken = default;
+        OperationCanceledException? original = null;
+        CancellationFilter filter = new()
+        {
+            Callback = ct =>
+            {
+                observedToken = ct;
+                if (cancelService) source.Cancel();
+                original = tokenKind switch
+                {
+                    0 => new OperationCanceledException(ct),
+                    1 => new OperationCanceledException(externalSource.Token),
+                    _ => new OperationCanceledException()
+                };
+                throw original;
+            }
+        };
+        RecordingPreFilter secondPre = new();
+        RecordingPostFilter secondPost = new();
+        if (post) _service.UseEventPostFilter(filter);
+        else _service.UseEventPreFilter(filter);
+        _service.UseEventPreFilter(secondPre);
+        _service.UseEventPostFilter(secondPost);
+        await _service.StartAsync(source.Token);
+
+        if (cancelService)
+        {
+            OperationCanceledException exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+                await _adapter.RaiseEventAsync(CreateMessageEvent()));
+            Assert.Equal(observedToken, exception.CancellationToken);
+            Assert.NotSame(original, exception);
+        }
+        else
+        {
+            await _adapter.RaiseEventAsync(CreateMessageEvent());
+        }
+
+        Assert.Equal(!post && cancelService ? 0 : 1, secondPre.CallCount);
+        Assert.Equal(cancelService ? 0 : 1, secondPost.CallCount);
     }
 
     /// <see cref="IEventPostFilter.OnEventProcessedAsync" />
@@ -627,14 +764,28 @@ public class EventPipelineFilterTests : IAsyncDisposable
             => throw new InvalidOperationException("pre-filter error");
     }
 
+    /// <summary>Fails during scope evaluation, before the filter callback is entered.</summary>
+    private sealed class ThrowingScopePreFilter : IEventPreFilter
+    {
+        public required Exception Exception { get; init; }
+
+        public Type[]? EventTypes => throw Exception;
+
+        public ValueTask<bool> OnEventAsync(BotEvent e, CancellationToken ct) => new(true);
+    }
+
     private sealed class CancellingPreFilter : IEventPreFilter
     {
         public int CallCount { get; private set; }
+        public Action? Cancel { get; init; }
+        public OperationCanceledException? Exception { get; private set; }
 
         public ValueTask<bool> OnEventAsync(BotEvent e, CancellationToken ct)
         {
             CallCount++;
-            throw new OperationCanceledException("pre-filter cancellation", ct);
+            Cancel?.Invoke();
+            Exception = new OperationCanceledException("pre-filter cancellation", ct);
+            throw Exception;
         }
     }
 
@@ -717,11 +868,35 @@ public class EventPipelineFilterTests : IAsyncDisposable
     private sealed class CancellingPostFilter : IEventPostFilter
     {
         public int CallCount { get; private set; }
+        public Action? Cancel { get; init; }
+        public OperationCanceledException? Exception { get; private set; }
+        public bool LastChainCompleted { get; private set; }
 
         public ValueTask OnEventProcessedAsync(BotEvent e, bool chainCompleted, CancellationToken ct)
         {
             CallCount++;
-            throw new OperationCanceledException("post-filter cancellation", ct);
+            LastChainCompleted = chainCompleted;
+            Cancel?.Invoke();
+            Exception = new OperationCanceledException("post-filter cancellation", ct);
+            throw Exception;
+        }
+    }
+
+    /// <summary>Throws a test-selected cancellation at either event filter boundary.</summary>
+    private sealed class CancellationFilter : IEventPreFilter, IEventPostFilter
+    {
+        public required Action<CancellationToken> Callback { get; init; }
+
+        public ValueTask<bool> OnEventAsync(BotEvent e, CancellationToken ct)
+        {
+            Callback(ct);
+            return new ValueTask<bool>(true);
+        }
+
+        public ValueTask OnEventProcessedAsync(BotEvent e, bool chainCompleted, CancellationToken ct)
+        {
+            Callback(ct);
+            return ValueTask.CompletedTask;
         }
     }
 

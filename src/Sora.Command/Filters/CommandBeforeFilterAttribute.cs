@@ -37,6 +37,13 @@ public abstract class CommandBeforeFilterAttribute : Attribute
     ///     (the command method will not be invoked, but after-filters still execute).
     ///     Access pipeline context via <c>e.PipelineContext</c>.
     /// </summary>
+    /// <remarks>
+    ///     Cancellation propagates only when the exception carries <paramref name="ct" /> and that token
+    ///     is canceled. Other exceptions are logged and treated as pass-through. For a cancellation
+    ///     exception from another token, if <paramref name="ct" /> is also canceled, the framework then
+    ///     propagates cancellation with that token.
+    ///     Sora cancellation immediately exits command processing without entering the after-filter phase.
+    /// </remarks>
     /// <param name="e">The message event that triggered the command.</param>
     /// <param name="cmd">Read-only metadata about the matched command.</param>
     /// <param name="ct">Cancellation token.</param>

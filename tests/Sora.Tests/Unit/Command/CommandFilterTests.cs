@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Reflection;
 using Xunit;
 
 namespace Sora.Tests.Unit.Command;
@@ -54,11 +55,17 @@ public sealed class ThrowingBeforeAttribute : CommandBeforeFilterAttribute
 /// <summary>Before-filter that propagates cancellation.</summary>
 public sealed class CancellingBeforeAttribute : CommandBeforeFilterAttribute
 {
+    public Action<CancellationToken> Callback { get; init; } =
+        static ct => throw new OperationCanceledException("before-filter cancellation", ct);
+
     public override ValueTask<bool> OnBeforeExecuteAsync(
         MessageReceivedEvent e,
         CommandFilterContext cmd,
         CancellationToken    ct)
-        => throw new OperationCanceledException("before-filter cancellation", ct);
+    {
+        Callback(ct);
+        return new ValueTask<bool>(true);
+    }
 }
 
 /// <summary>Before-filter that counts invocations for cancellation tests.</summary>
@@ -142,13 +149,19 @@ public sealed class ThrowingAfterAttribute : CommandAfterFilterAttribute
 /// <summary>After-filter that propagates cancellation.</summary>
 public sealed class CancellingAfterAttribute : CommandAfterFilterAttribute
 {
+    public Action<CancellationToken> Callback { get; init; } =
+        static ct => throw new OperationCanceledException("after-filter cancellation", ct);
+
     public override ValueTask OnAfterExecuteAsync(
         MessageReceivedEvent e,
         CommandFilterContext cmd,
         bool                 shortCircuited,
         Exception?           exception,
         CancellationToken    ct)
-        => throw new OperationCanceledException("after-filter cancellation", ct);
+    {
+        Callback(ct);
+        return ValueTask.CompletedTask;
+    }
 }
 
 /// <summary>After-filter that counts invocations for cancellation tests.</summary>
@@ -505,22 +518,45 @@ public class CommandFilterTests : IDisposable
         Assert.Equal(1, FilterTestCommands.ThrowingFilterExecCount);
     }
 
-    /// <summary>Cancellation from a before-filter propagates and later filters do not run.</summary>
+    /// <summary>Before cancellation skips all remaining stages and releases the command re-entry slot.</summary>
     [Fact]
     public async Task BeforeFilter_ThrowsCancellation_Propagates()
     {
         CountingBeforeAttribute secondFilter = new();
+        CountingAfterAttribute afterFilter = new();
+        using CancellationTokenSource source = new();
+        OperationCanceledException expected = new(source.Token);
+        int executions = 0;
+        int beforeCalls = 0;
         _manager.RegisterDynamicCommand(
-            _ => ValueTask.CompletedTask,
+            _ => { executions++; return ValueTask.CompletedTask; },
             ["cancel-before"],
-            beforeFilters: [new CancellingBeforeAttribute(), secondFilter]);
+            beforeFilters: [new CancellingBeforeAttribute
+            {
+                Callback = _ =>
+                {
+                    if (++beforeCalls != 1) return;
+                    source.Cancel();
+                    throw expected;
+                }
+            }, secondFilter],
+            afterFilters: [afterFilter]);
 
-        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        OperationCanceledException actual = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
                                                                  await _manager.HandleMessageEventAsync(
                                                                      CreateTestEvent("cancel-before"),
-                                                                     CT));
+                                                                     source.Token));
 
+        Assert.Same(expected, actual);
+        Assert.Equal(0, executions);
         Assert.Equal(0, secondFilter.CallCount);
+        Assert.Equal(0, afterFilter.CallCount);
+        Assert.Contains(nameof(CancellingBeforeAttribute.OnBeforeExecuteAsync), actual.StackTrace);
+
+        await _manager.HandleMessageEventAsync(CreateTestEvent("cancel-before"), CT);
+        Assert.Equal(1, executions);
+        Assert.Equal(1, secondFilter.CallCount);
+        Assert.Equal(1, afterFilter.CallCount);
     }
 
     /// <summary>Multiple before-filter attributes execute in ascending Order.</summary>
@@ -577,22 +613,37 @@ public class CommandFilterTests : IDisposable
         Assert.Equal(1, FilterTestCommands.ThrowingAfterExecCount);
     }
 
-    /// <summary>Cancellation from an after-filter propagates and later filters do not run.</summary>
+    /// <summary>After cancellation stops remaining filters and releases the command re-entry key.</summary>
     [Fact]
     public async Task AfterFilter_ThrowsCancellation_Propagates()
     {
         CountingAfterAttribute secondFilter = new();
+        using CancellationTokenSource source = new();
+        OperationCanceledException expected = new(source.Token);
+        int executions = 0;
         _manager.RegisterDynamicCommand(
-            _ => ValueTask.CompletedTask,
+            _ => { executions++; return ValueTask.CompletedTask; },
             ["cancel-after"],
-            afterFilters: [new CancellingAfterAttribute(), secondFilter]);
+            afterFilters: [new CancellingAfterAttribute
+            {
+                Callback = _ =>
+                {
+                    if (executions != 1) return;
+                    source.Cancel();
+                    throw expected;
+                }
+            }, secondFilter]);
 
-        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        OperationCanceledException actual = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
                                                                  await _manager.HandleMessageEventAsync(
                                                                      CreateTestEvent("cancel-after"),
-                                                                     CT));
+                                                                     source.Token));
 
+        Assert.Same(expected, actual);
         Assert.Equal(0, secondFilter.CallCount);
+        await _manager.HandleMessageEventAsync(CreateTestEvent("cancel-after"), CT);
+        Assert.Equal(2, executions);
+        Assert.Equal(1, secondFilter.CallCount);
     }
 
     /// <summary>Synchronous command exceptions are unwrapped before after-filters observe them.</summary>
@@ -903,7 +954,166 @@ public class CommandFilterTests : IDisposable
 
 #endregion
 
+#region Cancellation Ownership
+
+    /// <summary>Filter cancellation is classified by token ownership and actual cancellation state.</summary>
+    [Theory]
+    [InlineData(false, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(false, false, false)]
+    [InlineData(false, false, true)]
+    [InlineData(true, true, true)]
+    [InlineData(true, true, false)]
+    [InlineData(true, false, false)]
+    [InlineData(true, false, true)]
+    public async Task FilterCancellation_ClassifiesTokenAndLogsForeignExceptions(
+        bool after, bool sameToken, bool cancelSora)
+    {
+        using CancellationTokenSource source = new();
+        using CancellationTokenSource external = new();
+        external.Cancel();
+        OperationCanceledException expected = new(sameToken ? source.Token : external.Token);
+        CancellationLogger logger = CaptureErrors();
+        int executions = 0;
+        CountingBeforeAttribute laterBefore = new();
+        CountingAfterAttribute laterAfter = new();
+        Action<CancellationToken> callback = _ =>
+        {
+            if (cancelSora) source.Cancel();
+            throw expected;
+        };
+        _manager.RegisterDynamicCommand(
+            _ => { executions++; return ValueTask.CompletedTask; },
+            ["ownership"],
+            beforeFilters: after ? [] : [new CancellingBeforeAttribute { Callback = callback }, laterBefore],
+            afterFilters: after ? [new CancellingAfterAttribute { Callback = callback }, laterAfter] : [laterAfter]);
+
+        if (cancelSora)
+        {
+            OperationCanceledException actual = await Assert.ThrowsAsync<OperationCanceledException>(
+                async () => await _manager.HandleMessageEventAsync(CreateTestEvent("ownership"), source.Token));
+            Assert.Equal(source.Token, actual.CancellationToken);
+            if (sameToken) Assert.Same(expected, actual);
+            else Assert.NotSame(expected, actual);
+        }
+        else
+        {
+            await _manager.HandleMessageEventAsync(CreateTestEvent("ownership"), source.Token);
+        }
+
+        if (sameToken && cancelSora) Assert.Empty(logger.Errors);
+        else Assert.Same(expected, Assert.Single(logger.Errors));
+        Assert.Equal(after || !cancelSora ? 1 : 0, executions);
+        Assert.Equal(!after && !cancelSora ? 1 : 0, laterBefore.CallCount);
+        Assert.Equal(cancelSora ? 0 : 1, laterAfter.CallCount);
+    }
+
+    /// <summary>Reflected synchronous and asynchronous commands preserve owned cancellation and isolate foreign OCE.</summary>
+    [Theory]
+    [InlineData(true, true, true)]
+    [InlineData(true, true, false)]
+    [InlineData(true, false, true)]
+    [InlineData(true, false, false)]
+    [InlineData(false, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(false, false, true)]
+    [InlineData(false, false, false)]
+    public async Task CommandCancellation_UnwrapsAndClassifies(bool synchronous, bool sameToken, bool cancelSora)
+    {
+        using CancellationTokenSource source = new();
+        OperationCanceledException expected = new(sameToken ? source.Token : CancellationToken.None);
+        CancellationLogger logger = CaptureErrors();
+        CancellationCommands commands = new() { Source = source, Exception = expected, CancelSora = cancelSora };
+        _manager.RegisterCommandInstance(commands);
+        _manager.ScanType(typeof(CancellationCommands));
+
+        string expression = synchronous ? "cancel-sync" : "cancel-async";
+        if (cancelSora)
+        {
+            OperationCanceledException actual = await Assert.ThrowsAsync<OperationCanceledException>(
+                async () => await _manager.HandleMessageEventAsync(CreateTestEvent(expression), source.Token));
+
+            Assert.Equal(source.Token, actual.CancellationToken);
+            Assert.Equal(0, RecordingAfterAttribute.CallCount);
+            if (sameToken)
+            {
+                Assert.Same(expected, actual);
+                Assert.Contains(synchronous ? nameof(CancellationCommands.Sync) : nameof(CancellationCommands.Async), actual.StackTrace);
+            }
+            else
+            {
+                Assert.NotSame(expected, actual);
+            }
+        }
+        else
+        {
+            await _manager.HandleMessageEventAsync(CreateTestEvent(expression), source.Token);
+            Assert.Equal(1, RecordingAfterAttribute.CallCount);
+            Assert.Same(expected, RecordingAfterAttribute.LastException);
+        }
+
+        if (sameToken && cancelSora) Assert.Empty(logger.Errors);
+        else Assert.Same(expected, Assert.Single(logger.Errors));
+
+        await _manager.HandleMessageEventAsync(CreateTestEvent(expression), CT);
+        Assert.Equal(2, commands.Calls);
+        Assert.Equal(cancelSora ? 1 : 2, RecordingAfterAttribute.CallCount);
+        Assert.Null(RecordingAfterAttribute.LastException);
+    }
+
+#endregion
+
 #region Test Helpers
+
+    private CancellationLogger CaptureErrors()
+    {
+        CancellationLogger logger = new();
+        FieldInfo field = typeof(CommandManager).GetField("_loggerLazy", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        field.SetValue(_manager, new Lazy<ILogger>(() => logger));
+        return logger;
+    }
+
+    private sealed class CancellationLogger : ILogger
+    {
+        public List<Exception?> Errors { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel == LogLevel.Error) Errors.Add(exception);
+        }
+    }
+
+    private sealed class CancellationCommands
+    {
+        public required CancellationTokenSource Source { get; init; }
+        public required OperationCanceledException Exception { get; init; }
+        public bool CancelSora { get; init; }
+        public int Calls { get; private set; }
+
+        [RecordingAfter]
+        [Command(Expressions = ["cancel-sync"], MatchType = MatchType.Full)]
+        public ValueTask Sync(MessageReceivedEvent e)
+        {
+            if (++Calls != 1) return ValueTask.CompletedTask;
+            if (CancelSora) Source.Cancel();
+            throw Exception;
+        }
+
+        [RecordingAfter]
+        [Command(Expressions = ["cancel-async"], MatchType = MatchType.Full)]
+        public async ValueTask Async(MessageReceivedEvent e)
+        {
+            await Task.Yield();
+            if (++Calls != 1) return;
+            if (CancelSora) Source.Cancel();
+            throw Exception;
+        }
+    }
 
     private static MessageReceivedEvent CreateTestEvent(string text) =>
         new()
