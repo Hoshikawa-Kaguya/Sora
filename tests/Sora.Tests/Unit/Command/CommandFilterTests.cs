@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using Sora.Command.InternalEntities;
 using Xunit;
 
 namespace Sora.Tests.Unit.Command;

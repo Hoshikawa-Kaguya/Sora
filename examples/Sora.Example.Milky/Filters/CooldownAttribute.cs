@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Sora.Command.Filters;
+using Sora.Command.InternalEntities;
 
 namespace Sora.Example.Milky.Filters;
 

@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Sora.Command.Filters;
+namespace Sora.Command.InternalEntities;
 
 /// <summary>
 ///     Read-only snapshot of command metadata provided to filters.

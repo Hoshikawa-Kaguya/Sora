@@ -1,4 +1,4 @@
-﻿namespace Sora.Command.Attributes;
+﻿namespace Sora.Command.InternalEntities;
 
 /// <summary>指令的过滤器信息</summary>
 internal record CommandFilterInfo

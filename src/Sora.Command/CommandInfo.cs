@@ -1,4 +1,5 @@
 using System.Reflection;
+using Sora.Command.InternalEntities;
 
 namespace Sora.Command;
 
