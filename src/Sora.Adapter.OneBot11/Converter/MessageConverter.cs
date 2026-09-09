@@ -10,8 +10,7 @@ namespace Sora.Adapter.OneBot11.Converter;
 /// </summary>
 internal static class MessageConverter
 {
-    private static readonly Lazy<ILogger> LoggerLazy = new(() => SoraLogger.CreateLogger(typeof(MessageConverter).FullName!));
-    private static          ILogger       Logger => LoggerLazy.Value;
+    private static ILogger Logger => SoraLogger.CreateLogger(typeof(MessageConverter).FullName!);
 
     private static readonly JsonSerializer NullIgnoreSerializer = JsonSerializer.Create(
         new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
@@ -66,15 +65,15 @@ internal static class MessageConverter
 
             JObject nodeObj = JObject.FromObject(
                 new
+                {
+                    type = "node",
+                    data = new
                     {
-                        type = "node",
-                        data = new
-                            {
-                                name = node.SenderName,
-                                uin  = ((long)node.UserId).ToString(),
-                                content
-                            }
-                    });
+                        name = node.SenderName,
+                        uin  = ((long)node.UserId).ToString(),
+                        content
+                    }
+                });
             nodes.Add(nodeObj);
         }
 
@@ -91,88 +90,88 @@ internal static class MessageConverter
     private static Segment? ConvertIncoming(OneBotSegment seg)
     {
         return seg.Type switch
+               {
+                   "text" => new TextSegment { Text = seg.Data?.Value<string>("text") ?? "" },
+                   "image" => new ImageSegment
                    {
-                       "text" => new TextSegment { Text = seg.Data?.Value<string>("text") ?? "" },
-                       "image" => new ImageSegment
-                           {
-                               Url     = seg.Data?.Value<string>("url") ?? "",
-                               FileUri = seg.Data?.Value<string>("file") ?? "",
-                               Summary = seg.Data?.Value<string>("summary") ?? "",
-                               SubType = (seg.Data?.Value<int>("subType") ?? 0) == 1
-                                   ? ImageSubType.Sticker
-                                   : ImageSubType.Normal
-                           },
-                       "at" => seg.Data?.Value<string>("qq") == "all"
-                           ? new MentionAllSegment()
-                           : new MentionSegment
-                               {
-                                   Target = long.Parse(seg.Data?.Value<string>("qq") ?? "0"),
-                                   Name   = seg.Data?.Value<string>("name") ?? ""
-                               },
-                       "reply" => new ReplySegment
-                           {
-                               TargetId = long.TryParse(seg.Data?.Value<string>("id"), out long replyId)
-                                   ? (MessageId)replyId
-                                   : seg.Data?.Value<int>("id") ?? 0
-                           },
-                       "face" => new FaceSegment
-                           {
-                               FaceId  = seg.Data?.Value<string>("id") ?? "0",
-                               IsLarge = seg.Data?.Value<int>("sub_type") == 3
-                           },
-                       "record" => new AudioSegment
-                           {
-                               Url     = seg.Data?.Value<string>("url") ?? "",
-                               FileUri = seg.Data?.Value<string>("file") ?? ""
-                           },
-                       "video" => new VideoSegment
-                           {
-                               Url     = seg.Data?.Value<string>("url") ?? "",
-                               FileUri = seg.Data?.Value<string>("file") ?? ""
-                           },
-                       "forward" => new ForwardSegment { ForwardId = seg.Data?.Value<string>("id") ?? "" },
-                       "json" => new LightAppSegment
-                           {
-                               JsonPayload = seg.Data?.Value<string>("data") ?? ""
-                           },
-                       "mface" => new MarketFaceSegment
-                           {
-                               EmojiPackageId = seg.Data?.Value<long>("emoji_package_id") ?? 0,
-                               EmojiId        = seg.Data?.Value<string>("emoji_id") ?? "",
-                               Key            = seg.Data?.Value<string>("key") ?? "",
-                               Summary        = seg.Data?.Value<string>("summary") ?? "",
-                               Url            = seg.Data?.Value<string>("url") ?? ""
-                           },
-                       "file" => new FileSegment
-                           {
-                               FileId   = seg.Data?.Value<string>("file_id") ?? "",
-                               FileName = seg.Data?.Value<string>("name") ?? "",
-                               FileSize = long.TryParse(seg.Data?.Value<string>("file_size"), out long fSize) ? fSize : 0
-                           },
-                       "xml" => new XmlSegment
-                           {
-                               XmlPayload = seg.Data?.Value<string>("data") ?? ""
-                           },
-                       "dice" => new DiceSegment
-                           {
-                               Result = seg.Data?.Value<string>("result") ?? ""
-                           },
-                       "rps" => new RpsSegment
-                           {
-                               Result = seg.Data?.Value<string>("result") ?? ""
-                           },
-                       "markdown" => new MarkdownSegment
-                           {
-                               Content = seg.Data?.Value<string>("content") ?? ""
-                           },
-                       "flash_file" => new FlashFileMessageSegment
-                           {
-                               Title     = seg.Data?.Value<string>("title") ?? "",
-                               FileSetId = seg.Data?.Value<string>("file_set_id") ?? "",
-                               SceneType = seg.Data?.Value<int>("scene_type") ?? 0
-                           },
-                       _ => LogUnknownIncoming(seg.Type)
-                   };
+                       Url     = seg.Data?.Value<string>("url") ?? "",
+                       FileUri = seg.Data?.Value<string>("file") ?? "",
+                       Summary = seg.Data?.Value<string>("summary") ?? "",
+                       SubType = (seg.Data?.Value<int>("subType") ?? 0) == 1
+                           ? ImageSubType.Sticker
+                           : ImageSubType.Normal
+                   },
+                   "at" => seg.Data?.Value<string>("qq") == "all"
+                       ? new MentionAllSegment()
+                       : new MentionSegment
+                       {
+                           Target = long.Parse(seg.Data?.Value<string>("qq") ?? "0"),
+                           Name   = seg.Data?.Value<string>("name") ?? ""
+                       },
+                   "reply" => new ReplySegment
+                   {
+                       TargetId = long.TryParse(seg.Data?.Value<string>("id"), out long replyId)
+                           ? (MessageId)replyId
+                           : seg.Data?.Value<int>("id") ?? 0
+                   },
+                   "face" => new FaceSegment
+                   {
+                       FaceId  = seg.Data?.Value<string>("id") ?? "0",
+                       IsLarge = seg.Data?.Value<int>("sub_type") == 3
+                   },
+                   "record" => new AudioSegment
+                   {
+                       Url     = seg.Data?.Value<string>("url") ?? "",
+                       FileUri = seg.Data?.Value<string>("file") ?? ""
+                   },
+                   "video" => new VideoSegment
+                   {
+                       Url     = seg.Data?.Value<string>("url") ?? "",
+                       FileUri = seg.Data?.Value<string>("file") ?? ""
+                   },
+                   "forward" => new ForwardSegment { ForwardId = seg.Data?.Value<string>("id") ?? "" },
+                   "json" => new LightAppSegment
+                   {
+                       JsonPayload = seg.Data?.Value<string>("data") ?? ""
+                   },
+                   "mface" => new MarketFaceSegment
+                   {
+                       EmojiPackageId = seg.Data?.Value<long>("emoji_package_id") ?? 0,
+                       EmojiId        = seg.Data?.Value<string>("emoji_id") ?? "",
+                       Key            = seg.Data?.Value<string>("key") ?? "",
+                       Summary        = seg.Data?.Value<string>("summary") ?? "",
+                       Url            = seg.Data?.Value<string>("url") ?? ""
+                   },
+                   "file" => new FileSegment
+                   {
+                       FileId   = seg.Data?.Value<string>("file_id") ?? "",
+                       FileName = seg.Data?.Value<string>("name") ?? "",
+                       FileSize = long.TryParse(seg.Data?.Value<string>("file_size"), out long fSize) ? fSize : 0
+                   },
+                   "xml" => new XmlSegment
+                   {
+                       XmlPayload = seg.Data?.Value<string>("data") ?? ""
+                   },
+                   "dice" => new DiceSegment
+                   {
+                       Result = seg.Data?.Value<string>("result") ?? ""
+                   },
+                   "rps" => new RpsSegment
+                   {
+                       Result = seg.Data?.Value<string>("result") ?? ""
+                   },
+                   "markdown" => new MarkdownSegment
+                   {
+                       Content = seg.Data?.Value<string>("content") ?? ""
+                   },
+                   "flash_file" => new FlashFileMessageSegment
+                   {
+                       Title     = seg.Data?.Value<string>("title") ?? "",
+                       FileSetId = seg.Data?.Value<string>("file_set_id") ?? "",
+                       SceneType = seg.Data?.Value<int>("scene_type") ?? 0
+                   },
+                   _ => LogUnknownIncoming(seg.Type)
+               };
     }
 
 #endregion
@@ -185,91 +184,92 @@ internal static class MessageConverter
     private static OneBotSegment? ConvertOutgoing(Segment seg)
     {
         return seg switch
+               {
+                   MarkdownSegment md when !string.IsNullOrEmpty(md.Content) => new OneBotSegment
                    {
-                       MarkdownSegment md when !string.IsNullOrEmpty(md.Content) => new OneBotSegment
+                       Type = "markdown",
+                       Data = JObject.FromObject(new { content = md.Content })
+                   },
+                   TextSegment t when !string.IsNullOrEmpty(t.Text) => new OneBotSegment
+                   {
+                       Type = "text",
+                       Data = JObject.FromObject(new { text = t.Text })
+                   },
+                   ImageSegment img when !string.IsNullOrEmpty(img.FileUri) || !string.IsNullOrEmpty(img.Url)
+                       => new OneBotSegment
+                       {
+                           Type = "image",
+                           Data = JObject.FromObject(
+                               new { file = img.FileUri is { Length: > 0 } ? img.FileUri : img.Url })
+                       },
+                   MentionAllSegment => new OneBotSegment
+                   {
+                       Type = "at",
+                       Data = JObject.FromObject(new { qq = "all" })
+                   },
+                   MentionSegment m when (long)m.Target != 0 => new OneBotSegment
+                   {
+                       Type = "at",
+                       Data = JObject.FromObject(
+                           new
                            {
-                               Type = "markdown",
-                               Data = JObject.FromObject(new { content = md.Content })
-                           },
-                       TextSegment t when !string.IsNullOrEmpty(t.Text) => new OneBotSegment
-                           {
-                               Type = "text",
-                               Data = JObject.FromObject(new { text = t.Text })
-                           },
-                       ImageSegment img when !string.IsNullOrEmpty(img.FileUri) || !string.IsNullOrEmpty(img.Url)
-                           => new OneBotSegment
+                               qq = ((long)m.Target)
+                                   .ToString()
+                           })
+                   },
+                   ReplySegment r when (long)r.TargetId != 0 => new OneBotSegment
+                   {
+                       Type = "reply",
+                       Data = JObject.FromObject(new { id = ((long)r.TargetId).ToString() })
+                   },
+                   DiceSegment => new OneBotSegment
+                   {
+                       Type = "dice",
+                       Data = new JObject()
+                   },
+                   RpsSegment => new OneBotSegment
+                   {
+                       Type = "rps",
+                       Data = new JObject()
+                   },
+                   FaceSegment f => new OneBotSegment
+                   {
+                       Type = "face",
+                       Data = f.IsLarge
+                           ? JObject.FromObject(new { id = f.FaceId, sub_type = 3 })
+                           : JObject.FromObject(new { id = f.FaceId })
+                   },
+                   AudioSegment a when !string.IsNullOrEmpty(a.FileUri) || !string.IsNullOrEmpty(a.Url)
+                       => new OneBotSegment
+                       {
+                           Type = "record",
+                           Data = JObject.FromObject(new { file = a.FileUri is { Length: > 0 } ? a.FileUri : a.Url })
+                       },
+                   VideoSegment v when !string.IsNullOrEmpty(v.FileUri) || !string.IsNullOrEmpty(v.Url)
+                       => new OneBotSegment
+                       {
+                           Type = "video",
+                           Data = JObject.FromObject(
+                               new
                                {
-                                   Type = "image",
-                                   Data = JObject.FromObject(new { file = img.FileUri is { Length: > 0 } ? img.FileUri : img.Url })
+                                   file  = v.FileUri is { Length: > 0 } ? v.FileUri : v.Url,
+                                   thumb = string.IsNullOrEmpty(v.ThumbUri) ? null : v.ThumbUri
                                },
-                       MentionAllSegment => new OneBotSegment
-                           {
-                               Type = "at",
-                               Data = JObject.FromObject(new { qq = "all" })
-                           },
-                       MentionSegment m when (long)m.Target != 0 => new OneBotSegment
-                           {
-                               Type = "at",
-                               Data = JObject.FromObject(
-                                   new
-                                       {
-                                           qq = ((long)m.Target)
-                                               .ToString()
-                                       })
-                           },
-                       ReplySegment r when (long)r.TargetId != 0 => new OneBotSegment
-                           {
-                               Type = "reply",
-                               Data = JObject.FromObject(new { id = ((long)r.TargetId).ToString() })
-                           },
-                       DiceSegment => new OneBotSegment
-                           {
-                               Type = "dice",
-                               Data = new JObject()
-                           },
-                       RpsSegment => new OneBotSegment
-                           {
-                               Type = "rps",
-                               Data = new JObject()
-                           },
-                       FaceSegment f => new OneBotSegment
-                           {
-                               Type = "face",
-                               Data = f.IsLarge
-                                   ? JObject.FromObject(new { id = f.FaceId, sub_type = 3 })
-                                   : JObject.FromObject(new { id = f.FaceId })
-                           },
-                       AudioSegment a when !string.IsNullOrEmpty(a.FileUri) || !string.IsNullOrEmpty(a.Url)
-                           => new OneBotSegment
-                               {
-                                   Type = "record",
-                                   Data = JObject.FromObject(new { file = a.FileUri is { Length: > 0 } ? a.FileUri : a.Url })
-                               },
-                       VideoSegment v when !string.IsNullOrEmpty(v.FileUri) || !string.IsNullOrEmpty(v.Url)
-                           => new OneBotSegment
-                               {
-                                   Type = "video",
-                                   Data = JObject.FromObject(
-                                       new
-                                           {
-                                               file  = v.FileUri is { Length: > 0 } ? v.FileUri : v.Url,
-                                               thumb = string.IsNullOrEmpty(v.ThumbUri) ? null : v.ThumbUri
-                                           },
-                                       NullIgnoreSerializer)
-                               },
-                       // Forward segments are handled separately via ConvertForwardNodes
-                       LightAppSegment la when !string.IsNullOrEmpty(la.JsonPayload) => new OneBotSegment
-                           {
-                               Type = "json",
-                               Data = JObject.FromObject(new { data = la.JsonPayload })
-                           },
-                       XmlSegment xml when !string.IsNullOrEmpty(xml.XmlPayload) => new OneBotSegment
-                           {
-                               Type = "xml",
-                               Data = JObject.FromObject(new { data = xml.XmlPayload })
-                           },
-                       _ => LogUnknownOutgoing(seg)
-                   };
+                               NullIgnoreSerializer)
+                       },
+                   // Forward segments are handled separately via ConvertForwardNodes
+                   LightAppSegment la when !string.IsNullOrEmpty(la.JsonPayload) => new OneBotSegment
+                   {
+                       Type = "json",
+                       Data = JObject.FromObject(new { data = la.JsonPayload })
+                   },
+                   XmlSegment xml when !string.IsNullOrEmpty(xml.XmlPayload) => new OneBotSegment
+                   {
+                       Type = "xml",
+                       Data = JObject.FromObject(new { data = xml.XmlPayload })
+                   },
+                   _ => LogUnknownOutgoing(seg)
+               };
     }
 
 #endregion

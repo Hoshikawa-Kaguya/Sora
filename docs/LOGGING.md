@@ -1,127 +1,102 @@
 # 日志配置
 
-Sora 使用 [Microsoft.Extensions.Logging](https://learn.microsoft.com/zh-cn/dotnet/core/extensions/logging) 抽象（`ILogger` / `ILoggerFactory`），默认后端为 [Serilog](https://serilog.net/)。
+Sora 通过 Microsoft.Extensions.Logging 的 `ILogger` / `ILoggerFactory` 输出日志，默认后端为 Serilog。`Sora.Entities.SoraLogger` 为所有服务、适配器和命令组件提供共享日志工厂。
 
-## 默认行为
+## 初始化顺序
 
-如果未配置日志，框架会在首次创建 `SoraService` 时自动创建预配置的 **Serilog Console Logger**：
+将日志配置放在应用入口最先执行，在创建适配器、命令组件或调用其他会获取 Logger 的 Sora 方法之前完成。显式配置一旦成功就固定工厂，即使尚未创建 Logger 或服务，再次配置也会抛出 `InvalidOperationException`。
 
-```
-[14:23:05 INF] Sora.SoraService: SoraService abc123 starting (adapter: Milky)
-[14:23:05 INF] Sora.Adapter.Milky.MilkyAdapter: Milky adapter starting (transport: WebSocket, host: 127.0.0.1:3000)
-[14:23:05 INF] Sora.Adapter.Milky.MilkyAdapter: Milky adapter connected (transport: WebSocket)
-[14:23:05 INF] Sora.SoraService: SoraService abc123 started
-```
+未显式配置时，首次获取 Logger 自动创建最低级别为 `Information` 的 Serilog Console 工厂。此后也不能重新配置。多个服务共享工厂，服务构造失败、停止或释放均不重新开放配置。
 
-## 配置方式
+初始化构建失败会抛出 `InvalidOperationException`，`InnerException` 保留原始原因，且不会发布失败结果。调用者可修正配置后重试。空参数使用 `ArgumentNullException`；普通日志写入的后端异常保持后端本身的行为。
 
-### 通过 Config 设置 LogLevel
-
-通过配置对象设置初始最低LogLevel：
-
-```csharp
-SoraService service = SoraServiceFactory.Instance.CreateMilkyService(new MilkyConfig
-{
-    Host = "127.0.0.1",
-    Port = 3000,
-    MinimumLogLevel = LogLevel.Debug,  // 默认: Information
-});
-```
-
-> **注意：** `MinimumLogLevel` 仅影响框架默认的 Serilog 后端。如果提供了自定义 `LoggerFactory`，请通过自己的`LoggerFactory`配置LogLevel。
-
-### 自定义 Logger Factory
-
-> **重要：** 由于Sora目前使用的是静态（静态类）日志实现，Logger Factory 在首次创建 `SoraService` 后即被锁定。如果未提供自定义工厂，框架会创建默认的 Serilog 控制台日志器。后续服务创建会忽略 `LoggerFactory` 属性。
-
-通过配置对象传入自定义的 `ILoggerFactory`。
-
-```csharp
-using Serilog;
-using Serilog.Extensions.Logging;
-
-// 使用自定义设置配置 Serilog
-Serilog.Core.Logger serilogLogger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .WriteTo.Console(
-        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
-    .WriteTo.File("logs/bot.log", rollingInterval: RollingInterval.Day)
-    .CreateLogger();
-
-SoraService service = SoraServiceFactory.Instance.CreateMilkyService(new MilkyConfig
-{
-    Host = "127.0.0.1",
-    Port = 3000,
-    LoggerFactory = new SerilogLoggerFactory(serilogLogger, dispose: true),
-});
-```
-
-### 禁用日志
-
-```csharp
-using Microsoft.Extensions.Logging.Abstractions;
-
-SoraService service = SoraServiceFactory.Instance.CreateMilkyService(new MilkyConfig
-{
-    Host = "127.0.0.1",
-    Port = 3000,
-    LoggerFactory = NullLoggerFactory.Instance,
-});
-```
-
-### 使用任意 MEL 兼容的提供程序
-
-框架使用标准的 `ILogger` / `ILoggerFactory`，因此可以使用任意提供程序：
+## 默认配置与定制
 
 ```csharp
 using Microsoft.Extensions.Logging;
+using Sora;
+using Sora.Adapter.Milky;
+using Sora.Entities;
 
-ILoggerFactory factory = LoggerFactory.Create(builder =>
-{
-    builder.AddConsole();        // 内置控制台
-    builder.AddEventLog();       // Windows 事件日志
-    builder.SetMinimumLevel(LogLevel.Debug);
-});
+SoraLogger.Configure(SoraLogger.CreateDefaultLoggerConfiguration(LogLevel.Debug));
 
-SoraService service = SoraServiceFactory.Instance.CreateMilkyService(new MilkyConfig
+await using SoraService service = SoraServiceFactory.Instance.CreateMilkyService(new MilkyConfig
 {
     Host = "127.0.0.1",
-    Port = 3000,
-    LoggerFactory = factory,
+    Port = 3000
 });
 ```
 
-## 不同 LogLevel 之间的区分设计原则
+`CreateDefaultLoggerConfiguration` 每次返回新的 `Serilog.LoggerConfiguration`，可继续添加 sink 和过滤规则；调用它不会初始化或锁定全局日志。默认配置包含 JsonNet 解构及 Console 模板：
 
-| 级别 | 内容 | 示例 |
-|------|------|------|
-| **Trace** | 协议原始数据 | 原始 JSON 载荷、HTTP 请求/响应体 |
-| **Debug** | 内部运行细节 | 事件分发、指令匹配、WS/SSE 连接详情、API 调用 |
-| **Information** | 关键生命周期事件 | 服务启动/停止、适配器连接/断开、指令扫描结果 |
-| **Warning** | 可恢复的问题 | 缺少无参构造函数回退、API 调用超时 |
-| **Error** | 处理器/指令失败 | 事件处理器中的未处理异常、指令处理器异常、事件解析错误 |
-
-## 架构
-
-```
-SoraLogger (静态, Sora.Entities)
-    ├── ILoggerFactory (MEL 抽象)
-    │       └── Serilog (默认后端, 位于 Sora 门面层)
-    ├── InternalInitFactory()  — 首次创建服务时由框架调用
-    └── IsSealed               — 首次创建服务后锁定（后续配置被忽略）
-
-各组件通过以下方式创建日志器:
-    ILogger _logger = SoraLogger.CreateLogger<MyClass>();
+```text
+[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}
 ```
 
-- **`Sora.Core`** — 无日志（纯类型库）
-- **`Sora.Entities`** — `Microsoft.Extensions.Logging.Abstractions`（仅接口）
-- **`Sora`（门面层）** — `Serilog` + `Serilog.Extensions.Logging` + `Serilog.Sinks.Console`
-- **适配器** — 通过传递依赖使用 `ILogger`，无额外包引用
+也可以直接提供完整的 Serilog 配置：
 
----
+```csharp
+using Serilog;
+using Sora.Entities;
 
-## 相关文档
+SoraLogger.Configure(new LoggerConfiguration()
+    .MinimumLevel.Warning()
+    .WriteTo.Console());
+```
 
-- [← 返回 README](../README.md)
-- [测试说明](TESTING.md) — 测试中的日志级别控制（`SORA_LOG_LEVEL_OVERRIDE`）
+通过配置对象创建的工厂由 Sora 按进程共享，单个服务释放不会关闭它。需要控制缓冲日志的刷新或关闭时，使用自行持有的工厂。
+
+## 外部工厂与资源所有权
+
+`Configure(ILoggerFactory)` 接受自定义工厂，保留其原有过滤规则和输出目标。工厂由调用者拥有；Sora 不修改其配置，也不释放它。工厂必须在所有使用它的服务和日志器完成工作后再释放。
+
+```csharp
+using Microsoft.Extensions.Logging;
+using Serilog.Extensions.Logging;
+using Sora;
+using Sora.Adapter.Milky;
+using Sora.Entities;
+
+using ILoggerFactory factory = new SerilogLoggerFactory(
+    SoraLogger.CreateDefaultLoggerConfiguration(LogLevel.Debug).CreateLogger(),
+    dispose: true);
+SoraLogger.Configure(factory);
+
+await using SoraService service = SoraServiceFactory.Instance.CreateMilkyService(new MilkyConfig());
+// 应用在此运行服务；作用域退出时先释放 service，再关闭 factory。
+```
+
+其他 MEL 兼容工厂也使用同一个 `Configure(ILoggerFactory)` 入口。配置锁定约束的是 Sora 配置 API；调用者直接更改自己后端的运行时设置属于该后端的契约。
+
+## 显式静默
+
+```csharp
+using Microsoft.Extensions.Logging.Abstractions;
+using Sora.Entities;
+
+SoraLogger.Configure(NullLoggerFactory.Instance);
+```
+
+显式静默也是一次成功配置，后续获取 Logger 和创建服务继续使用该工厂。
+
+## 日志级别
+
+| 级别 | 内容 |
+| --- | --- |
+| Trace | 协议原始 JSON、HTTP 请求和响应体 |
+| Debug | 事件分发、指令匹配、连接细节和 API 调用 |
+| Information | 服务、适配器和命令注册的关键生命周期事件 |
+| Warning | 可以恢复的问题 |
+| Error | API、处理器或指令执行失败 |
+
+## 项目归属
+
+- `Sora.Core`：共享基础类型。
+- `Sora.Entities`：SoraLogger、MEL 日志抽象、默认 Serilog 工厂及其 Console/JsonNet 依赖。
+- `Sora`、`Sora.Command` 和两个适配器：通过 SoraLogger 获取日志器，复用共享工厂。
+
+## 测试日志
+
+测试脚本的 `-LogLevel` 通过 `SORA_TEST_LOG_LEVEL_OVERRIDE` 传给测试进程。测试启动代码读取一次该变量，并在首次使用 Sora 前显式配置日志；默认级别为 Debug。变量读取仅位于测试项目，应用日志仍由应用配置代码决定。详见[测试说明](TESTING.md)。
+
+[返回 README](../README.md)

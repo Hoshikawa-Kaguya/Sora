@@ -59,8 +59,8 @@
     Build configuration. Default: "Release".
 
 .PARAMETER LogLevel
-    Sora framework log level override: "Trace", "Debug", "Info", "Warn", "Error", "Fatal", "None".
-    Default: "Debug". Sets the SORA_LOG_LEVEL_OVERRIDE environment variable (case-insensitive).
+    Test-process log level: "Trace", "Debug", "Info", "Warn", "Error", "Fatal", "None".
+    Default: "Debug". Sets SORA_TEST_LOG_LEVEL_OVERRIDE for test-process logging initialization (case-insensitive).
 
 .PARAMETER WaitDebugger
     Wait for a debugger to attach before running tests (sets VSTEST_HOST_DEBUG=1).
@@ -198,8 +198,8 @@ if (($Ob11PrimaryHost -or $MilkyPrimaryHost) -and $GroupId -gt 0) {
     $env:SORA_TEST_FUNCTIONAL = "true"
 }
 
-# Log level override for Sora framework
-$env:SORA_LOG_LEVEL_OVERRIDE = $LogLevel
+# Log level read by test-process startup
+$env:SORA_TEST_LOG_LEVEL_OVERRIDE = $LogLevel
 
 # Debug mode — test host waits for debugger to attach
 if ($WaitDebugger) {

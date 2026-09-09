@@ -14,8 +14,7 @@ namespace Sora.Adapter.OneBot11;
 public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
 {
     private readonly ReactiveApiManager _apiManager;
-    private readonly Lazy<ILogger>      _loggerLazy = new(SoraLogger.CreateLogger<OneBot11BotApi>);
-    private          ILogger            _logger => _loggerLazy.Value;
+    private readonly ILogger            _logger = SoraLogger.CreateLogger<OneBot11BotApi>();
 
     /// <summary>Stores normal friend request flags from events, keyed by user ID.</summary>
     private readonly ConcurrentDictionary<long, string> _friendRequestFlags = new();
@@ -64,7 +63,8 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
     /// <inheritdoc />
     public async ValueTask<ApiResult<ImplInfo>> GetImplInfoAsync(CancellationToken ct = default)
     {
-        ApiResult<GetVersionInfoResponse> resp = await CallActionAsync<GetVersionInfoResponse>("get_version_info", null, ct);
+        ApiResult<GetVersionInfoResponse> resp =
+            await CallActionAsync<GetVersionInfoResponse>("get_version_info", null, ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<ImplInfo>.Ok(data.Adapt<ImplInfo>())
             : ApiResult<ImplInfo>.Fail(resp.Code, resp.Message);
@@ -156,11 +156,11 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
                 ApiResult<GetMsgHistoryResponse> resp = await CallActionAsync<GetMsgHistoryResponse>(
                     "get_group_msg_history",
                     new GetGroupMsgHistoryParams
-                        {
-                            GroupId    = peerId,
-                            MessageSeq = startMessageSeq.HasValue ? (int)startMessageSeq.Value : null,
-                            Count      = limit
-                        },
+                    {
+                        GroupId    = peerId,
+                        MessageSeq = startMessageSeq.HasValue ? (int)startMessageSeq.Value : null,
+                        Count      = limit
+                    },
                     ct);
                 return resp is { IsSuccess: true, Data: { } data }
                     ? ApiResult<HistoryMessagesResult>.Ok(data.Adapt<HistoryMessagesResult>())
@@ -171,11 +171,11 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
                 ApiResult<GetMsgHistoryResponse> resp = await CallActionAsync<GetMsgHistoryResponse>(
                     "get_friend_msg_history",
                     new GetFriendMsgHistoryParams
-                        {
-                            UserId     = peerId,
-                            MessageSeq = startMessageSeq.HasValue ? (int)startMessageSeq.Value : null,
-                            Count      = limit
-                        },
+                    {
+                        UserId     = peerId,
+                        MessageSeq = startMessageSeq.HasValue ? (int)startMessageSeq.Value : null,
+                        Count      = limit
+                    },
                     ct);
                 return resp is { IsSuccess: true, Data: { } data }
                     ? ApiResult<HistoryMessagesResult>.Ok(data.Adapt<HistoryMessagesResult>())
@@ -183,7 +183,9 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
             }
             case MessageSourceType.Temp:
             default:
-                return ApiResult<HistoryMessagesResult>.Fail(ApiStatusCode.Unknown, $"Unknown MessageSourceType: {scene}");
+                return ApiResult<HistoryMessagesResult>.Fail(
+                    ApiStatusCode.Unknown,
+                    $"Unknown MessageSourceType: {scene}");
         }
     }
 
@@ -194,7 +196,10 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         CancellationToken ct = default)
     {
         ApiResult<GetForwardMsgResponse> resp =
-            await CallActionAsync<GetForwardMsgResponse>("get_forward_msg", new GetForwardMsgParams { Id = forwardId }, ct);
+            await CallActionAsync<GetForwardMsgResponse>(
+                "get_forward_msg",
+                new GetForwardMsgParams { Id = forwardId },
+                ct);
         if (resp is not { IsSuccess: true, Data: { } data })
             return ApiResult<IReadOnlyList<MessageContext>>.Fail(resp.Code, resp.Message);
 
@@ -205,12 +210,12 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
                 MessageBody body = MessageConverter.ToMessageBody(node.Content);
                 contexts.Add(
                     new MessageContext
-                        {
-                            SenderId   = node.Sender?.UserId ?? 0,
-                            SenderName = node.Sender?.Nickname ?? "",
-                            Time       = DateTimeOffset.FromUnixTimeSeconds(node.Time).LocalDateTime,
-                            Body       = body
-                        });
+                    {
+                        SenderId   = node.Sender?.UserId ?? 0,
+                        SenderName = node.Sender?.Nickname ?? "",
+                        Time       = DateTimeOffset.FromUnixTimeSeconds(node.Time).LocalDateTime,
+                        Body       = body
+                    });
             }
 
         return ApiResult<IReadOnlyList<MessageContext>>.Ok(contexts);
@@ -235,7 +240,7 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
             ApiResult<SendMsgResponse> fwResp = await CallActionAsync<SendMsgResponse>(
                 "send_private_forward_msg",
                 new SendPrivateForwardMsgParams
-                        { UserId = userId, Messages = nodes },
+                    { UserId = userId, Messages = nodes },
                 ct);
             if (fwResp is { IsSuccess: true, Data: { } fwData })
             {
@@ -281,14 +286,17 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         ApiResult<SendMsgResponse> resp = await CallActionAsync<SendMsgResponse>(
             "send_private_msg",
             new SendPrivateMsgParams
-                {
-                    UserId  = userId,
-                    Message = segments
-                },
+            {
+                UserId  = userId,
+                Message = segments
+            },
             ct);
         if (resp is { IsSuccess: true, Data: { } data })
         {
-            _logger.LogDebug("OB11 private message sent to user[{UserId}], messageId={MessageId}", userId, data.MessageId);
+            _logger.LogDebug(
+                "OB11 private message sent to user[{UserId}], messageId={MessageId}",
+                userId,
+                data.MessageId);
             return SendMessageResult.Ok(data.MessageId);
         }
 
@@ -312,11 +320,14 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         if (forward is not null && forward.Messages.Count > 0)
         {
             List<JObject> nodes = MessageConverter.ConvertForwardNodes(forward);
-            _logger.LogDebug("Sending OB11 group forward message to {GroupId} with {NodeCount} node(s)", groupId, nodes.Count);
+            _logger.LogDebug(
+                "Sending OB11 group forward message to {GroupId} with {NodeCount} node(s)",
+                groupId,
+                nodes.Count);
             ApiResult<SendMsgResponse> fwResp = await CallActionAsync<SendMsgResponse>(
                 "send_group_forward_msg",
                 new SendGroupForwardMsgParams
-                        { GroupId = groupId, Messages = nodes },
+                    { GroupId = groupId, Messages = nodes },
                 ct);
             if (fwResp is { IsSuccess: true, Data: { } fwData })
             {
@@ -355,18 +366,24 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
             return SendMessageResult.Fail(ApiStatusCode.InvalidMessage, string.Join(Environment.NewLine, issues));
         }
 
-        _logger.LogDebug("Sending OB11 group message to group[{GroupId}] with {SegmentCount} segment(s)", groupId, segments.Count);
+        _logger.LogDebug(
+            "Sending OB11 group message to group[{GroupId}] with {SegmentCount} segment(s)",
+            groupId,
+            segments.Count);
         ApiResult<SendMsgResponse> resp = await CallActionAsync<SendMsgResponse>(
             "send_group_msg",
             new SendGroupMsgParams
-                {
-                    GroupId = groupId,
-                    Message = segments
-                },
+            {
+                GroupId = groupId,
+                Message = segments
+            },
             ct);
         if (resp is { IsSuccess: true, Data: { } data })
         {
-            _logger.LogDebug("OB11 group message sent to group[{GroupId}], messageId={MessageId}", groupId, data.MessageId);
+            _logger.LogDebug(
+                "OB11 group message sent to group[{GroupId}], messageId={MessageId}",
+                groupId,
+                data.MessageId);
             return SendMessageResult.Ok(data.MessageId);
         }
 
@@ -417,10 +434,10 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
             "get_stranger_info",
             new
                 GetStrangerInfoParams
-                    {
-                        UserId  = userId,
-                        NoCache = noCache
-                    },
+                {
+                    UserId  = userId,
+                    NoCache = noCache
+                },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<UserInfo>.Ok(data.Adapt<UserInfo>())
@@ -438,12 +455,12 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<UserProfile>.Ok(
                 new UserProfile
-                    {
-                        UserId   = data.UserId,
-                        Nickname = data.Nickname ?? "",
-                        Age      = data.Age,
-                        Sex      = (data.Sex ?? "").Adapt<Sex>()
-                    })
+                {
+                    UserId   = data.UserId,
+                    Nickname = data.Nickname ?? "",
+                    Age      = data.Age,
+                    Sex      = (data.Sex ?? "").Adapt<Sex>()
+                })
             : ApiResult<UserProfile>.Fail(resp.Code, resp.Message);
     }
 
@@ -469,7 +486,8 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
     {
         ApiResult<List<GetFriendListItem>> resp =
             await CallActionAsync<List<GetFriendListItem>>("get_friend_list", null, ct);
-        if (resp is not { IsSuccess: true, Data: { } data }) return ApiResult<IReadOnlyList<FriendInfo>>.Fail(resp.Code, resp.Message);
+        if (resp is not { IsSuccess: true, Data: { } data })
+            return ApiResult<IReadOnlyList<FriendInfo>>.Fail(resp.Code, resp.Message);
         List<FriendInfo> friends = data.Select(f => f.Adapt<FriendInfo>()).ToList();
         return ApiResult<IReadOnlyList<FriendInfo>>.Ok(friends);
     }
@@ -567,10 +585,10 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         ApiResult<GetGroupInfoResponse> resp = await CallActionAsync<GetGroupInfoResponse>(
             "get_group_info",
             new GetGroupInfoParams
-                {
-                    GroupId = groupId,
-                    NoCache = noCache
-                },
+            {
+                GroupId = groupId,
+                NoCache = noCache
+            },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<GroupInfo>.Ok(data.Adapt<GroupInfo>())
@@ -588,7 +606,8 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
                 "get_group_list",
                 new GetGroupListParams { NoCache = noCache },
                 ct);
-        if (resp is not { IsSuccess: true, Data: { } data }) return ApiResult<IReadOnlyList<GroupInfo>>.Fail(resp.Code, resp.Message);
+        if (resp is not { IsSuccess: true, Data: { } data })
+            return ApiResult<IReadOnlyList<GroupInfo>>.Fail(resp.Code, resp.Message);
         List<GroupInfo> groups = data.Select(g => g.Adapt<GroupInfo>()).ToList();
         return ApiResult<IReadOnlyList<GroupInfo>>.Ok(groups);
     }
@@ -604,11 +623,11 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         ApiResult<GetGroupMemberInfoResponse> resp = await CallActionAsync<GetGroupMemberInfoResponse>(
             "get_group_member_info",
             new GetGroupMemberInfoParams
-                {
-                    GroupId = groupId,
-                    UserId  = userId,
-                    NoCache = noCache
-                },
+            {
+                GroupId = groupId,
+                UserId  = userId,
+                NoCache = noCache
+            },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<GroupMemberInfo>.Ok(data.Adapt<GroupMemberInfo>())
@@ -665,14 +684,14 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<GroupEssenceMessagesPage>.Ok(
                 new GroupEssenceMessagesPage
-                    {
-                        // OB11 returns all essence messages at once; apply client-side pagination
-                        Messages = data.Select(m => m.Adapt<GroupEssenceMessageInfo>())
-                                       .Skip(pageIndex * pageSize)
-                                       .Take(pageSize)
-                                       .ToList(),
-                        IsEnd = (pageIndex + 1) * pageSize >= data.Count
-                    })
+                {
+                    // OB11 returns all essence messages at once; apply client-side pagination
+                    Messages = data.Select(m => m.Adapt<GroupEssenceMessageInfo>())
+                                   .Skip(pageIndex * pageSize)
+                                   .Take(pageSize)
+                                   .ToList(),
+                    IsEnd = (pageIndex + 1) * pageSize >= data.Count
+                })
             : ApiResult<GroupEssenceMessagesPage>.Fail(resp.Code, resp.Message);
     }
 
@@ -684,7 +703,8 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         int               limit                = 20,
         CancellationToken ct                   = default)
     {
-        ApiResult<GetGroupSystemMsgResponse> resp = await CallActionAsync<GetGroupSystemMsgResponse>("get_group_system_msg", null, ct);
+        ApiResult<GetGroupSystemMsgResponse> resp =
+            await CallActionAsync<GetGroupSystemMsgResponse>("get_group_system_msg", null, ct);
         if (resp is not { IsSuccess: true, Data: { } data })
             return ApiResult<GroupNotificationsResult>.Fail(resp.Code, resp.Message);
 
@@ -729,11 +749,11 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         return await CallActionAsync(
             "set_group_add_request",
             new SetGroupAddRequestParams
-                {
-                    Flag    = flag,
-                    Approve = approve,
-                    Reason  = reason
-                },
+            {
+                Flag    = flag,
+                Approve = approve,
+                Reason  = reason
+            },
             ct);
     }
 
@@ -763,10 +783,10 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         return await CallActionAsync(
             "set_group_add_request",
             new SetGroupAddRequestParams
-                {
-                    Flag    = flag,
-                    Approve = approve
-                },
+            {
+                Flag    = flag,
+                Approve = approve
+            },
             ct);
     }
 
@@ -776,16 +796,22 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "set_group_name",
             new SetGroupNameParams
-                {
-                    GroupId   = groupId,
-                    GroupName = name
-                },
+            {
+                GroupId   = groupId,
+                GroupName = name
+            },
             ct);
 
 
     /// <inheritdoc />
-    public async ValueTask<ApiResult> SetGroupAvatarAsync(GroupId groupId, string imageUri, CancellationToken ct = default) =>
-        await CallActionAsync("set_group_portrait", new SetGroupPortraitParams { GroupId = groupId, File = imageUri }, ct);
+    public async ValueTask<ApiResult> SetGroupAvatarAsync(
+        GroupId           groupId,
+        string            imageUri,
+        CancellationToken ct = default) =>
+        await CallActionAsync(
+            "set_group_portrait",
+            new SetGroupPortraitParams { GroupId = groupId, File = imageUri },
+            ct);
 
 
     /// <inheritdoc />
@@ -797,11 +823,11 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "set_group_admin",
             new SetGroupAdminParams
-                {
-                    GroupId = groupId,
-                    UserId  = userId,
-                    Enable  = enable
-                },
+            {
+                GroupId = groupId,
+                UserId  = userId,
+                Enable  = enable
+            },
             ct);
 
 
@@ -814,11 +840,11 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "set_group_card",
             new SetGroupCardParams
-                {
-                    GroupId = groupId,
-                    UserId  = userId,
-                    Card    = card
-                },
+            {
+                GroupId = groupId,
+                UserId  = userId,
+                Card    = card
+            },
             ct);
 
 
@@ -831,7 +857,7 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "set_group_special_title",
             new SetGroupSpecialTitleParams
-                    { GroupId = groupId, UserId = userId, SpecialTitle = title },
+                { GroupId = groupId, UserId = userId, SpecialTitle = title },
             ct);
 
 
@@ -879,11 +905,11 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "set_group_kick",
             new SetGroupKickParams
-                {
-                    GroupId          = groupId,
-                    UserId           = userId,
-                    RejectAddRequest = rejectFuture
-                },
+            {
+                GroupId          = groupId,
+                UserId           = userId,
+                RejectAddRequest = rejectFuture
+            },
             ct);
 
 
@@ -896,11 +922,11 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "set_group_ban",
             new SetGroupBanParams
-                {
-                    GroupId  = groupId,
-                    UserId   = userId,
-                    Duration = durationSeconds
-                },
+            {
+                GroupId  = groupId,
+                UserId   = userId,
+                Duration = durationSeconds
+            },
             ct);
 
 
@@ -909,10 +935,10 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "set_group_whole_ban",
             new SetGroupWholeBanParams
-                {
-                    GroupId = groupId,
-                    Enable  = enable
-                },
+            {
+                GroupId = groupId,
+                Enable  = enable
+            },
             ct);
 
 
@@ -922,7 +948,10 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
 
 
     /// <inheritdoc />
-    public async ValueTask<ApiResult> SendGroupNudgeAsync(GroupId groupId, UserId userId, CancellationToken ct = default) =>
+    public async ValueTask<ApiResult> SendGroupNudgeAsync(
+        GroupId           groupId,
+        UserId            userId,
+        CancellationToken ct = default) =>
         await CallActionAsync("group_poke", new GroupPokeParams { GroupId = groupId, UserId = userId }, ct);
 
 #endregion
@@ -944,7 +973,7 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
             : await CallActionAsync<GetGroupFilesResponse>(
                 "get_group_files_by_folder",
                 new GetGroupFilesByFolderParams
-                        { GroupId = groupId, FolderId = parentFolderId },
+                    { GroupId = groupId, FolderId = parentFolderId },
                 ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<GroupFilesResult>.Ok(data.Adapt<GroupFilesResult>())
@@ -1012,12 +1041,12 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         ApiResult result = await CallActionAsync(
             "upload_group_file",
             new UploadGroupFileParams
-                {
-                    GroupId = groupId,
-                    File    = fileUri,
-                    Name    = fileName,
-                    Folder  = parentFolderId == "/" ? "" : parentFolderId
-                },
+            {
+                GroupId = groupId,
+                File    = fileUri,
+                Name    = fileName,
+                Folder  = parentFolderId == "/" ? "" : parentFolderId
+            },
             ct);
         return result.IsSuccess
             ? ApiResult<string>.Ok("")
@@ -1043,14 +1072,23 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
 
 
     /// <inheritdoc />
-    public async ValueTask<ApiResult> DeleteGroupFileAsync(GroupId groupId, string fileId, CancellationToken ct = default) =>
-        await CallActionAsync("delete_group_file", new DeleteGroupFileParams { GroupId = groupId, FileId = fileId }, ct);
+    public async ValueTask<ApiResult> DeleteGroupFileAsync(
+        GroupId           groupId,
+        string            fileId,
+        CancellationToken ct = default) =>
+        await CallActionAsync(
+            "delete_group_file",
+            new DeleteGroupFileParams { GroupId = groupId, FileId = fileId },
+            ct);
 
 
     /// <inheritdoc />
     public async ValueTask<ApiResult>
         DeleteGroupFolderAsync(GroupId groupId, string folderId, CancellationToken ct = default) =>
-        await CallActionAsync("delete_group_folder", new DeleteGroupFolderParams { GroupId = groupId, FolderId = folderId }, ct);
+        await CallActionAsync(
+            "delete_group_folder",
+            new DeleteGroupFolderParams { GroupId = groupId, FolderId = folderId },
+            ct);
 
 
     /// <inheritdoc />
@@ -1063,12 +1101,12 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "move_group_file",
             new MoveGroupFileParams
-                {
-                    GroupId         = groupId,
-                    FileId          = fileId,
-                    ParentDirectory = parentFolderId,
-                    TargetDirectory = targetFolderId
-                },
+            {
+                GroupId         = groupId,
+                FileId          = fileId,
+                ParentDirectory = parentFolderId,
+                TargetDirectory = targetFolderId
+            },
             ct);
 
 
@@ -1082,12 +1120,12 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "rename_group_file",
             new RenameGroupFileParams
-                {
-                    GroupId                = groupId,
-                    FileId                 = fileId,
-                    CurrentParentDirectory = parentFolderId,
-                    NewName                = newFileName
-                },
+            {
+                GroupId                = groupId,
+                FileId                 = fileId,
+                CurrentParentDirectory = parentFolderId,
+                NewName                = newFileName
+            },
             ct);
 
 
@@ -1122,7 +1160,10 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
 
 
     /// <inheritdoc />
-    public async ValueTask<ApiResult> SendProfileLikeAsync(UserId userId, int count = 1, CancellationToken ct = default) =>
+    public async ValueTask<ApiResult> SendProfileLikeAsync(
+        UserId            userId,
+        int               count = 1,
+        CancellationToken ct    = default) =>
         await CallActionAsync("send_like", new SendLikeParams { UserId = userId, Times = count }, ct);
 
 #endregion
@@ -1170,15 +1211,15 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         if (resp is not { IsSuccess: true, Data: { } data })
             return ApiResult<IReadOnlyList<FriendCategory>>.Fail(resp.Code, resp.Message);
         List<FriendCategory> categories = data.Select(c => new FriendCategory
-                                                  {
-                                                      CategoryId   = c.CategoryId,
-                                                      CategoryName = c.CategoryName ?? "",
-                                                      FriendCount  = c.CategoryMbCount,
-                                                      OnlineCount  = c.OnlineCount,
-                                                      SortId       = c.CategorySortId,
-                                                      Friends = c.BuddyList?.Select(f => f.Adapt<FriendInfo>()).ToList()
-                                                                ?? (IReadOnlyList<FriendInfo>)[]
-                                                  })
+                                              {
+                                                  CategoryId   = c.CategoryId,
+                                                  CategoryName = c.CategoryName ?? "",
+                                                  FriendCount  = c.CategoryMbCount,
+                                                  OnlineCount  = c.OnlineCount,
+                                                  SortId       = c.CategorySortId,
+                                                  Friends = c.BuddyList?.Select(f => f.Adapt<FriendInfo>()).ToList()
+                                                            ?? (IReadOnlyList<FriendInfo>)[]
+                                              })
                                               .ToList();
         return ApiResult<IReadOnlyList<FriendCategory>>.Ok(categories);
     }
@@ -1212,16 +1253,16 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
             ct);
         if (resp is not { IsSuccess: true, Data: { } data }) return ApiResult<OcrResult>.Fail(resp.Code, resp.Message);
         OcrResult result = new()
-            {
-                Language = data.Language ?? "",
-                Texts = data.Texts?.Select(t => new OcrTextDetection
-                                {
-                                    Text       = t.Text ?? "",
-                                    Confidence = t.Confidence
-                                })
-                            .ToList()
-                        ?? []
-            };
+        {
+            Language = data.Language ?? "",
+            Texts = data.Texts?.Select(t => new OcrTextDetection
+                        {
+                            Text       = t.Text ?? "",
+                            Confidence = t.Confidence
+                        })
+                        .ToList()
+                    ?? []
+        };
         return ApiResult<OcrResult>.Ok(result);
     }
 
@@ -1335,10 +1376,10 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
         await CallActionAsync(
             "friend_poke",
             new FriendPokeParams
-                {
-                    UserId   = userId,
-                    TargetId = targetId.HasValue ? (long)targetId.Value : null
-                },
+            {
+                UserId   = userId,
+                TargetId = targetId.HasValue ? (long)targetId.Value : null
+            },
             ct);
 
 #endregion
@@ -1362,7 +1403,10 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
     internal void StoreGroupInvitationFlag(long groupId, long invitorId, string flag)
     {
         _groupInvitationFlags[(groupId, invitorId)] = flag;
-        _logger.LogDebug("Stored OB11 group invitation flag for group[{GroupId}], invitor {InvitorId}", groupId, invitorId);
+        _logger.LogDebug(
+            "Stored OB11 group invitation flag for group[{GroupId}], invitor {InvitorId}",
+            groupId,
+            invitorId);
     }
 
 
@@ -1462,14 +1506,14 @@ public sealed class OneBot11BotApi : IBotApi, IOneBot11ExtApi
     /// <returns>The corresponding API status code.</returns>
     private static ApiStatusCode MapRetCode(int retCode) =>
         retCode switch
-            {
-                0            => ApiStatusCode.Ok,
-                1            => ApiStatusCode.Failed,
-                1400         => ApiStatusCode.Failed,
-                1401 or 1403 => ApiStatusCode.Forbidden,
-                1404         => ApiStatusCode.NotFound,
-                _            => ApiStatusCode.Unknown
-            };
+        {
+            0            => ApiStatusCode.Ok,
+            1            => ApiStatusCode.Failed,
+            1400         => ApiStatusCode.Failed,
+            1401 or 1403 => ApiStatusCode.Forbidden,
+            1404         => ApiStatusCode.NotFound,
+            _            => ApiStatusCode.Unknown
+        };
 
 #endregion
 }

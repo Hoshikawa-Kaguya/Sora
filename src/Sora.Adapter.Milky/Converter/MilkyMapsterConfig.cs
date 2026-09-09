@@ -9,8 +9,7 @@ namespace Sora.Adapter.Milky.Converter;
 /// </summary>
 internal static class MilkyMapsterConfig
 {
-    private static readonly Lazy<ILogger> LoggerLazy = new(() => SoraLogger.CreateLogger(typeof(MilkyMapsterConfig).FullName!));
-    private static          ILogger       Logger => LoggerLazy.Value;
+    private static ILogger Logger => SoraLogger.CreateLogger(typeof(MilkyMapsterConfig).FullName!);
 
     private static bool _configured;
 
@@ -277,60 +276,64 @@ internal static class MilkyMapsterConfig
 
     private static string FormatImageSubType(ImageSubType src) =>
         src switch
-            {
-                ImageSubType.Normal  => "normal",
-                ImageSubType.Sticker => "sticker",
-                _                    => "normal" // fall back
-            };
+        {
+            ImageSubType.Normal  => "normal",
+            ImageSubType.Sticker => "sticker",
+            _                    => "normal" // fall back
+        };
 
     private static string FormatMessageSourceType(MessageSourceType src) =>
         src switch
-            {
-                MessageSourceType.Friend => "friend",
-                MessageSourceType.Group  => "group",
-                MessageSourceType.Temp   => "temp",
-                _                        => "temp" // fall back
-            };
+        {
+            MessageSourceType.Friend => "friend",
+            MessageSourceType.Group  => "group",
+            MessageSourceType.Temp   => "temp",
+            _                        => "temp" // fall back
+        };
 
     private static ImageSubType ParseImageSubType(string src) =>
         src switch
-            {
-                "normal"  => ImageSubType.Normal,
-                "sticker" => ImageSubType.Sticker,
-                _         => LogEnumFallback(src, (ImageSubType)(-1))
-            };
+        {
+            "normal"  => ImageSubType.Normal,
+            "sticker" => ImageSubType.Sticker,
+            _         => LogEnumFallback(src, (ImageSubType)(-1))
+        };
 
     private static MemberRole ParseMemberRole(string src) =>
         src switch
-            {
-                "owner"  => MemberRole.Owner,
-                "admin"  => MemberRole.Admin,
-                "member" => MemberRole.Member,
-                _        => LogEnumFallback(src, MemberRole.Unknown)
-            };
+        {
+            "owner"  => MemberRole.Owner,
+            "admin"  => MemberRole.Admin,
+            "member" => MemberRole.Member,
+            _        => LogEnumFallback(src, MemberRole.Unknown)
+        };
 
     private static MessageSourceType ParseMessageSourceType(string src) =>
         src switch
-            {
-                "friend" => MessageSourceType.Friend,
-                "group"  => MessageSourceType.Group,
-                "temp"   => MessageSourceType.Temp,
-                _        => LogEnumFallback(src, (MessageSourceType)(-1))
-            };
+        {
+            "friend" => MessageSourceType.Friend,
+            "group"  => MessageSourceType.Group,
+            "temp"   => MessageSourceType.Temp,
+            _        => LogEnumFallback(src, (MessageSourceType)(-1))
+        };
 
     private static Sex ParseSex(string src) =>
         src switch
-            {
-                "male"    => Sex.Male,
-                "female"  => Sex.Female,
-                "unknown" => Sex.Unknown,
-                _         => LogEnumFallback(src, Sex.Unknown)
-            };
+        {
+            "male"    => Sex.Male,
+            "female"  => Sex.Female,
+            "unknown" => Sex.Unknown,
+            _         => LogEnumFallback(src, Sex.Unknown)
+        };
 
     private static T LogEnumFallback<T>(string value, T fallback) where T : struct, Enum
     {
         if (!string.IsNullOrEmpty(value))
-            Logger.LogWarning("Unknown {EnumType} value: '{Value}', using fallback {Fallback}", typeof(T).Name, value, fallback);
+            Logger.LogWarning(
+                "Unknown {EnumType} value: '{Value}', using fallback {Fallback}",
+                typeof(T).Name,
+                value,
+                fallback);
         return fallback;
     }
 }

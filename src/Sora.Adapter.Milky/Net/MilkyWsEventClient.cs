@@ -10,8 +10,7 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
 #region Fields
 
     private readonly MilkyConfig              _config;
-    private readonly Lazy<ILogger>            _loggerLazy = new(SoraLogger.CreateLogger<MilkyWsEventClient>);
-    private          ILogger                  _logger => _loggerLazy.Value;
+    private readonly ILogger                  _logger = SoraLogger.CreateLogger<MilkyWsEventClient>();
     private          CancellationTokenSource? _cts;
     private          ClientWebSocket?         _ws;
 
@@ -139,25 +138,27 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
     private async Task ConnectLoopAsync(CancellationToken ct, bool reconnect = false)
     {
         bool firstCall = true;
-        if(reconnect) OnReconnecting?.Invoke();
+        if (reconnect) OnReconnecting?.Invoke();
         Uri url = new(_config.GetEventUrl(true));
-        
+
         while (!ct.IsCancellationRequested)
             try
             {
                 if (!firstCall || reconnect)
                 {
-                    _logger.LogDebug(
-                        "Milky WS reconnecting in {Interval}ms...",
-                        Math.Round(_config.ReconnectInterval.TotalMicroseconds, 2));
+                    _logger.LogDebug("Milky WS reconnecting in {Interval}s", _config.ReconnectInterval.TotalSeconds);
                     await Task.Delay(_config.ReconnectInterval, ct);
                 }
-                else _logger.LogDebug("Milky WS connecting to {Url}...", url);
+                else
+                {
+                    _logger.LogDebug("Milky WS connecting to {Url}...", url);
+                }
+
                 _ws?.Dispose();
                 _ws = CreateWebSocket();
                 if (!string.IsNullOrEmpty(_config.AccessToken))
                     _ws.Options.SetRequestHeader("Authorization", $"Bearer {_config.AccessToken}");
-                
+
                 await _ws.ConnectAsync(url, ct);
                 if (!firstCall || reconnect) _logger.LogInformation("Milky WS reconnected to {Url}", url);
                 else _logger.LogInformation("Milky WS connected to {Url}", url);
@@ -177,7 +178,7 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
                 OnDisconnected?.Invoke(failMsg);
             }
             finally
-            { 
+            {
                 firstCall = false;
             }
     }

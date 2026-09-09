@@ -8,8 +8,7 @@ namespace Sora.Adapter.Milky.Converter;
 /// </summary>
 internal static class EventConverter
 {
-    private static readonly Lazy<ILogger> LoggerLazy = new(() => SoraLogger.CreateLogger(typeof(EventConverter).FullName!));
-    private static          ILogger       Logger => LoggerLazy.Value;
+    private static ILogger Logger => SoraLogger.CreateLogger(typeof(EventConverter).FullName!);
 
 #region Converter Entry
 
@@ -23,29 +22,29 @@ internal static class EventConverter
             api);
 
         return milkyEvent.EventType switch
-                   {
-                       "message_receive" => ConvertMessageReceive(milkyEvent, baseProps),
-                       "message_recall" => ConvertMessageRecall(milkyEvent, baseProps),
-                       "bot_offline" => ConvertBotOffline(milkyEvent, baseProps),
-                       "friend_request" => ConvertFriendRequest(milkyEvent, baseProps),
-                       "group_join_request" => ConvertGroupJoinRequest(milkyEvent, baseProps),
-                       "group_invited_join_request" => ConvertGroupInvitedJoinRequest(milkyEvent, baseProps),
-                       "group_invitation" => ConvertGroupInvitation(milkyEvent, baseProps),
-                       "friend_nudge" => ConvertFriendNudge(milkyEvent, baseProps),
-                       "group_nudge" => ConvertGroupNudge(milkyEvent, baseProps),
-                       "friend_file_upload" => ConvertFriendFileUpload(milkyEvent, baseProps),
-                       "group_file_upload" => ConvertGroupFileUpload(milkyEvent, baseProps),
-                       "group_admin_change" => ConvertGroupAdminChange(milkyEvent, baseProps),
-                       "group_essence_message_change" => ConvertGroupEssenceChange(milkyEvent, baseProps),
-                       "group_member_increase" => ConvertMemberIncrease(milkyEvent, baseProps),
-                       "group_member_decrease" => ConvertMemberDecrease(milkyEvent, baseProps),
-                       "group_name_change" => ConvertGroupNameChange(milkyEvent, baseProps),
-                       "group_message_reaction" => ConvertGroupReaction(milkyEvent, baseProps),
-                       "group_mute" => ConvertGroupMute(milkyEvent, baseProps),
-                       "group_whole_mute" => ConvertGroupWholeMute(milkyEvent, baseProps),
-                       "peer_pin_change" => ConvertPeerPinChange(milkyEvent, baseProps),
-                       _ => LogAndReturnNull("Unknown Milky event type: {EventType}", milkyEvent.EventType)
-                   };
+               {
+                   "message_receive" => ConvertMessageReceive(milkyEvent, baseProps),
+                   "message_recall" => ConvertMessageRecall(milkyEvent, baseProps),
+                   "bot_offline" => ConvertBotOffline(milkyEvent, baseProps),
+                   "friend_request" => ConvertFriendRequest(milkyEvent, baseProps),
+                   "group_join_request" => ConvertGroupJoinRequest(milkyEvent, baseProps),
+                   "group_invited_join_request" => ConvertGroupInvitedJoinRequest(milkyEvent, baseProps),
+                   "group_invitation" => ConvertGroupInvitation(milkyEvent, baseProps),
+                   "friend_nudge" => ConvertFriendNudge(milkyEvent, baseProps),
+                   "group_nudge" => ConvertGroupNudge(milkyEvent, baseProps),
+                   "friend_file_upload" => ConvertFriendFileUpload(milkyEvent, baseProps),
+                   "group_file_upload" => ConvertGroupFileUpload(milkyEvent, baseProps),
+                   "group_admin_change" => ConvertGroupAdminChange(milkyEvent, baseProps),
+                   "group_essence_message_change" => ConvertGroupEssenceChange(milkyEvent, baseProps),
+                   "group_member_increase" => ConvertMemberIncrease(milkyEvent, baseProps),
+                   "group_member_decrease" => ConvertMemberDecrease(milkyEvent, baseProps),
+                   "group_name_change" => ConvertGroupNameChange(milkyEvent, baseProps),
+                   "group_message_reaction" => ConvertGroupReaction(milkyEvent, baseProps),
+                   "group_mute" => ConvertGroupMute(milkyEvent, baseProps),
+                   "group_whole_mute" => ConvertGroupWholeMute(milkyEvent, baseProps),
+                   "peer_pin_change" => ConvertPeerPinChange(milkyEvent, baseProps),
+                   _ => LogAndReturnNull("Unknown Milky event type: {EventType}", milkyEvent.EventType)
+               };
     }
 
 #endregion
@@ -73,14 +72,14 @@ internal static class EventConverter
         }
 
         MessageContext context = new()
-            {
-                MessageId  = msg.MessageSeq,
-                SourceType = sourceType,
-                GroupId    = sourceType == MessageSourceType.Group ? (GroupId)msg.PeerId : default,
-                SenderId   = msg.SenderId,
-                Time       = DateTimeOffset.FromUnixTimeSeconds(msg.Time).LocalDateTime,
-                Body       = MessageConverter.ToMessageBody(msg.Segments)
-            };
+        {
+            MessageId  = msg.MessageSeq,
+            SourceType = sourceType,
+            GroupId    = sourceType == MessageSourceType.Group ? (GroupId)msg.PeerId : default,
+            SenderId   = msg.SenderId,
+            Time       = DateTimeOffset.FromUnixTimeSeconds(msg.Time).LocalDateTime,
+            Body       = MessageConverter.ToMessageBody(msg.Segments)
+        };
 
         if (context.Body.Count == 0)
         {
@@ -89,29 +88,29 @@ internal static class EventConverter
         }
 
         UserInfo? sender = sourceType switch
-                               {
-                                   MessageSourceType.Friend or MessageSourceType.Temp when msg.Friend is not null =>
-                                       msg.Friend.Adapt<UserInfo>(),
-                                   MessageSourceType.Group when msg.GroupMember is not null =>
-                                       msg.GroupMember.Adapt<UserInfo>(),
-                                   _ => null
-                               };
+                           {
+                               MessageSourceType.Friend or MessageSourceType.Temp when msg.Friend is not null =>
+                                   msg.Friend.Adapt<UserInfo>(),
+                               MessageSourceType.Group when msg.GroupMember is not null =>
+                                   msg.GroupMember.Adapt<UserInfo>(),
+                               _ => null
+                           };
 
         GroupInfo? group = msg.Group?.Adapt<GroupInfo>();
 
         GroupMemberInfo? member = msg.GroupMember?.Adapt<GroupMemberInfo>();
 
         return new MessageReceivedEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                Message      = context,
-                Sender       = sender ?? new UserInfo(),
-                Group        = group ?? new GroupInfo(),
-                Member       = member ?? new GroupMemberInfo()
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            Message      = context,
+            Sender       = sender ?? new UserInfo(),
+            Group        = group ?? new GroupInfo(),
+            Member       = member ?? new GroupMemberInfo()
+        };
     }
 
     /// <summary>Converts a Milky message_recall event to a <see cref="MessageDeletedEvent" />.</summary>
@@ -130,18 +129,18 @@ internal static class EventConverter
         }
 
         return new MessageDeletedEvent
-            {
-                ConnectionId  = baseProps.ConnectionId,
-                SelfId        = baseProps.SelfId,
-                Time          = baseProps.Time,
-                Api           = baseProps.Api,
-                MessageId     = d.MessageSeq,
-                SenderId      = d.SenderId,
-                OperatorId    = d.OperatorId,
-                SourceType    = sourceType,
-                GroupId       = sourceType == MessageSourceType.Group ? (GroupId)d.PeerId : default,
-                DisplaySuffix = d.DisplaySuffix ?? ""
-            };
+        {
+            ConnectionId  = baseProps.ConnectionId,
+            SelfId        = baseProps.SelfId,
+            Time          = baseProps.Time,
+            Api           = baseProps.Api,
+            MessageId     = d.MessageSeq,
+            SenderId      = d.SenderId,
+            OperatorId    = d.OperatorId,
+            SourceType    = sourceType,
+            GroupId       = sourceType == MessageSourceType.Group ? (GroupId)d.PeerId : default,
+            DisplaySuffix = d.DisplaySuffix ?? ""
+        };
     }
 
 #endregion
@@ -157,15 +156,15 @@ internal static class EventConverter
         MilkyFriendRequestData? d = Deserialize<MilkyFriendRequestData>(milkyEvent);
         if (d is null) return null;
         return new FriendRequestEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                FromUserId   = d.InitiatorId,
-                Comment      = d.Comment ?? "",
-                Via          = d.Via ?? ""
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            FromUserId   = d.InitiatorId,
+            Comment      = d.Comment ?? "",
+            Via          = d.Via ?? ""
+        };
     }
 
     /// <summary>Converts a Milky group_join_request event to a <see cref="GroupJoinRequestEvent" />.</summary>
@@ -177,18 +176,18 @@ internal static class EventConverter
         MilkyGroupJoinRequestData? d = Deserialize<MilkyGroupJoinRequestData>(milkyEvent);
         if (d is null) return null;
         return new GroupJoinRequestEvent
-            {
-                ConnectionId         = baseProps.ConnectionId,
-                SelfId               = baseProps.SelfId,
-                Time                 = baseProps.Time,
-                Api                  = baseProps.Api,
-                GroupId              = d.GroupId,
-                FromUserId           = d.InitiatorId,
-                NotificationSeq      = d.NotificationSeq,
-                JoinNotificationType = GroupJoinNotificationType.JoinRequest,
-                IsFiltered           = d.IsFiltered,
-                Comment              = d.Comment ?? ""
-            };
+        {
+            ConnectionId         = baseProps.ConnectionId,
+            SelfId               = baseProps.SelfId,
+            Time                 = baseProps.Time,
+            Api                  = baseProps.Api,
+            GroupId              = d.GroupId,
+            FromUserId           = d.InitiatorId,
+            NotificationSeq      = d.NotificationSeq,
+            JoinNotificationType = GroupJoinNotificationType.JoinRequest,
+            IsFiltered           = d.IsFiltered,
+            Comment              = d.Comment ?? ""
+        };
     }
 
     /// <summary>Converts a Milky group_invited_join_request event to a <see cref="GroupJoinRequestEvent" /> (invited).</summary>
@@ -200,17 +199,17 @@ internal static class EventConverter
         MilkyGroupInvitedJoinRequestData? d = Deserialize<MilkyGroupInvitedJoinRequestData>(milkyEvent);
         if (d is null) return null;
         return new GroupJoinRequestEvent
-            {
-                ConnectionId         = baseProps.ConnectionId,
-                SelfId               = baseProps.SelfId,
-                Time                 = baseProps.Time,
-                Api                  = baseProps.Api,
-                GroupId              = d.GroupId,
-                FromUserId           = d.TargetUserId,
-                NotificationSeq      = d.NotificationSeq,
-                JoinNotificationType = GroupJoinNotificationType.InvitedJoinRequest,
-                Comment              = ""
-            };
+        {
+            ConnectionId         = baseProps.ConnectionId,
+            SelfId               = baseProps.SelfId,
+            Time                 = baseProps.Time,
+            Api                  = baseProps.Api,
+            GroupId              = d.GroupId,
+            FromUserId           = d.TargetUserId,
+            NotificationSeq      = d.NotificationSeq,
+            JoinNotificationType = GroupJoinNotificationType.InvitedJoinRequest,
+            Comment              = ""
+        };
     }
 
     /// <summary>Converts a Milky group_invitation event to a <see cref="GroupInvitationEvent" />.</summary>
@@ -222,16 +221,16 @@ internal static class EventConverter
         MilkyGroupInvitationData? d = Deserialize<MilkyGroupInvitationData>(milkyEvent);
         if (d is null) return null;
         return new GroupInvitationEvent
-            {
-                ConnectionId  = baseProps.ConnectionId,
-                SelfId        = baseProps.SelfId,
-                Time          = baseProps.Time,
-                Api           = baseProps.Api,
-                GroupId       = d.GroupId,
-                InvitorId     = d.InitiatorId,
-                SourceGroupId = d.SourceGroupId,
-                InvitationSeq = d.InvitationSeq
-            };
+        {
+            ConnectionId  = baseProps.ConnectionId,
+            SelfId        = baseProps.SelfId,
+            Time          = baseProps.Time,
+            Api           = baseProps.Api,
+            GroupId       = d.GroupId,
+            InvitorId     = d.InitiatorId,
+            SourceGroupId = d.SourceGroupId,
+            InvitationSeq = d.InvitationSeq
+        };
     }
 
 #endregion
@@ -247,18 +246,18 @@ internal static class EventConverter
         MilkyFriendNudgeData? d = Deserialize<MilkyFriendNudgeData>(milkyEvent);
         if (d is null) return null;
         return new NudgeEvent
-            {
-                ConnectionId   = baseProps.ConnectionId,
-                SelfId         = baseProps.SelfId,
-                Time           = baseProps.Time,
-                Api            = baseProps.Api,
-                SourceType     = MessageSourceType.Friend,
-                SenderId       = d.IsSelfSend ? baseProps.SelfId : d.UserId,
-                ReceiverId     = d.IsSelfReceive ? baseProps.SelfId : d.UserId,
-                ActionText     = d.DisplayAction ?? "",
-                SuffixText     = d.DisplaySuffix ?? "",
-                ActionImageUrl = d.DisplayActionImgUrl ?? ""
-            };
+        {
+            ConnectionId   = baseProps.ConnectionId,
+            SelfId         = baseProps.SelfId,
+            Time           = baseProps.Time,
+            Api            = baseProps.Api,
+            SourceType     = MessageSourceType.Friend,
+            SenderId       = d.IsSelfSend ? baseProps.SelfId : d.UserId,
+            ReceiverId     = d.IsSelfReceive ? baseProps.SelfId : d.UserId,
+            ActionText     = d.DisplayAction ?? "",
+            SuffixText     = d.DisplaySuffix ?? "",
+            ActionImageUrl = d.DisplayActionImgUrl ?? ""
+        };
     }
 
     /// <summary>Converts a Milky friend_file_upload event to a <see cref="FileUploadEvent" /> (friend).</summary>
@@ -270,19 +269,19 @@ internal static class EventConverter
         MilkyFriendFileUploadData? d = Deserialize<MilkyFriendFileUploadData>(milkyEvent);
         if (d is null) return null;
         return new FileUploadEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                SourceType   = MessageSourceType.Friend,
-                UserId       = d.UserId,
-                FileId       = d.FileId ?? "",
-                FileName     = d.FileName ?? "",
-                FileSize     = d.FileSize,
-                FileHash     = d.FileHash ?? "",
-                IsSelfSent   = d.IsSelf
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            SourceType   = MessageSourceType.Friend,
+            UserId       = d.UserId,
+            FileId       = d.FileId ?? "",
+            FileName     = d.FileName ?? "",
+            FileSize     = d.FileSize,
+            FileHash     = d.FileHash ?? "",
+            IsSelfSent   = d.IsSelf
+        };
     }
 
 #endregion
@@ -298,16 +297,16 @@ internal static class EventConverter
         MilkyGroupAdminChangeData? d = Deserialize<MilkyGroupAdminChangeData>(milkyEvent);
         if (d is null) return null;
         return new GroupAdminChangedEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                GroupId      = d.GroupId,
-                UserId       = d.UserId,
-                OperatorId   = d.OperatorId,
-                IsSet        = d.IsSet
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            GroupId      = d.GroupId,
+            UserId       = d.UserId,
+            OperatorId   = d.OperatorId,
+            IsSet        = d.IsSet
+        };
     }
 
     /// <summary>Converts a Milky group_essence_message_change event to a <see cref="GroupEssenceChangedEvent" />.</summary>
@@ -319,16 +318,16 @@ internal static class EventConverter
         MilkyGroupEssenceMessageChangeData? d = Deserialize<MilkyGroupEssenceMessageChangeData>(milkyEvent);
         if (d is null) return null;
         return new GroupEssenceChangedEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                GroupId      = d.GroupId,
-                MessageId    = d.MessageSeq,
-                OperatorId   = d.OperatorId,
-                IsSet        = d.IsSet
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            GroupId      = d.GroupId,
+            MessageId    = d.MessageSeq,
+            OperatorId   = d.OperatorId,
+            IsSet        = d.IsSet
+        };
     }
 
     /// <summary>Converts a Milky group_file_upload event to a <see cref="FileUploadEvent" /> (group).</summary>
@@ -340,18 +339,18 @@ internal static class EventConverter
         MilkyGroupFileUploadData? d = Deserialize<MilkyGroupFileUploadData>(milkyEvent);
         if (d is null) return null;
         return new FileUploadEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                SourceType   = MessageSourceType.Group,
-                GroupId      = d.GroupId,
-                UserId       = d.UserId,
-                FileId       = d.FileId ?? "",
-                FileName     = d.FileName ?? "",
-                FileSize     = d.FileSize
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            SourceType   = MessageSourceType.Group,
+            GroupId      = d.GroupId,
+            UserId       = d.UserId,
+            FileId       = d.FileId ?? "",
+            FileName     = d.FileName ?? "",
+            FileSize     = d.FileSize
+        };
     }
 
     /// <summary>Converts a Milky group_mute event to a <see cref="GroupMuteEvent" /> (individual).</summary>
@@ -363,17 +362,17 @@ internal static class EventConverter
         MilkyGroupMuteData? d = Deserialize<MilkyGroupMuteData>(milkyEvent);
         if (d is null) return null;
         return new GroupMuteEvent
-            {
-                ConnectionId    = baseProps.ConnectionId,
-                SelfId          = baseProps.SelfId,
-                Time            = baseProps.Time,
-                Api             = baseProps.Api,
-                GroupId         = d.GroupId,
-                UserId          = d.UserId,
-                OperatorId      = d.OperatorId,
-                DurationSeconds = d.Duration,
-                IsWholeGroup    = false
-            };
+        {
+            ConnectionId    = baseProps.ConnectionId,
+            SelfId          = baseProps.SelfId,
+            Time            = baseProps.Time,
+            Api             = baseProps.Api,
+            GroupId         = d.GroupId,
+            UserId          = d.UserId,
+            OperatorId      = d.OperatorId,
+            DurationSeconds = d.Duration,
+            IsWholeGroup    = false
+        };
     }
 
     /// <summary>Converts a Milky group_whole_mute event to a <see cref="GroupMuteEvent" /> (whole group).</summary>
@@ -385,16 +384,16 @@ internal static class EventConverter
         MilkyGroupWholeMuteData? d = Deserialize<MilkyGroupWholeMuteData>(milkyEvent);
         if (d is null) return null;
         return new GroupMuteEvent
-            {
-                ConnectionId    = baseProps.ConnectionId,
-                SelfId          = baseProps.SelfId,
-                Time            = baseProps.Time,
-                Api             = baseProps.Api,
-                GroupId         = d.GroupId,
-                OperatorId      = d.OperatorId,
-                DurationSeconds = d.IsMute ? int.MaxValue : 0,
-                IsWholeGroup    = true
-            };
+        {
+            ConnectionId    = baseProps.ConnectionId,
+            SelfId          = baseProps.SelfId,
+            Time            = baseProps.Time,
+            Api             = baseProps.Api,
+            GroupId         = d.GroupId,
+            OperatorId      = d.OperatorId,
+            DurationSeconds = d.IsMute ? int.MaxValue : 0,
+            IsWholeGroup    = true
+        };
     }
 
     /// <summary>Converts a Milky group_name_change event to a <see cref="GroupNameChangedEvent" />.</summary>
@@ -406,15 +405,15 @@ internal static class EventConverter
         MilkyGroupNameChangeData? d = Deserialize<MilkyGroupNameChangeData>(milkyEvent);
         if (d is null) return null;
         return new GroupNameChangedEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                GroupId      = d.GroupId,
-                NewName      = d.NewGroupName ?? "",
-                OperatorId   = d.OperatorId
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            GroupId      = d.GroupId,
+            NewName      = d.NewGroupName ?? "",
+            OperatorId   = d.OperatorId
+        };
     }
 
     /// <summary>Converts a Milky group_nudge event to a <see cref="NudgeEvent" /> (group).</summary>
@@ -426,19 +425,19 @@ internal static class EventConverter
         MilkyGroupNudgeData? d = Deserialize<MilkyGroupNudgeData>(milkyEvent);
         if (d is null) return null;
         return new NudgeEvent
-            {
-                ConnectionId   = baseProps.ConnectionId,
-                SelfId         = baseProps.SelfId,
-                Time           = baseProps.Time,
-                Api            = baseProps.Api,
-                SourceType     = MessageSourceType.Group,
-                GroupId        = d.GroupId,
-                SenderId       = d.SenderId,
-                ReceiverId     = d.ReceiverId,
-                ActionText     = d.DisplayAction ?? "",
-                SuffixText     = d.DisplaySuffix ?? "",
-                ActionImageUrl = d.DisplayActionImgUrl ?? ""
-            };
+        {
+            ConnectionId   = baseProps.ConnectionId,
+            SelfId         = baseProps.SelfId,
+            Time           = baseProps.Time,
+            Api            = baseProps.Api,
+            SourceType     = MessageSourceType.Group,
+            GroupId        = d.GroupId,
+            SenderId       = d.SenderId,
+            ReceiverId     = d.ReceiverId,
+            ActionText     = d.DisplayAction ?? "",
+            SuffixText     = d.DisplaySuffix ?? "",
+            ActionImageUrl = d.DisplayActionImgUrl ?? ""
+        };
     }
 
     /// <summary>Converts a Milky group_message_reaction event to a <see cref="GroupReactionEvent" />.</summary>
@@ -450,18 +449,18 @@ internal static class EventConverter
         MilkyGroupMessageReactionData? d = Deserialize<MilkyGroupMessageReactionData>(milkyEvent);
         if (d is null || string.IsNullOrEmpty(d.ReactionType)) return null;
         return new GroupReactionEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                GroupId      = d.GroupId,
-                UserId       = d.UserId,
-                MessageId    = d.MessageSeq,
-                FaceId       = d.FaceId ?? "",
-                ReactionType = d.ReactionType,
-                IsAdd        = d.IsAdd
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            GroupId      = d.GroupId,
+            UserId       = d.UserId,
+            MessageId    = d.MessageSeq,
+            FaceId       = d.FaceId ?? "",
+            ReactionType = d.ReactionType,
+            IsAdd        = d.IsAdd
+        };
     }
 
     /// <summary>Converts a Milky group_member_increase event to a <see cref="MemberJoinedEvent" />.</summary>
@@ -473,16 +472,16 @@ internal static class EventConverter
         MilkyGroupMemberIncreaseData? d = Deserialize<MilkyGroupMemberIncreaseData>(milkyEvent);
         if (d is null) return null;
         return new MemberJoinedEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                GroupId      = d.GroupId,
-                UserId       = d.UserId,
-                OperatorId   = d.OperatorId is > 0 ? (UserId)d.OperatorId.Value : null,
-                InvitorId    = d.InvitorId is > 0 ? (UserId)d.InvitorId.Value : null
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            GroupId      = d.GroupId,
+            UserId       = d.UserId,
+            OperatorId   = d.OperatorId is > 0 ? (UserId)d.OperatorId.Value : null,
+            InvitorId    = d.InvitorId is > 0 ? (UserId)d.InvitorId.Value : null
+        };
     }
 
     /// <summary>Converts a Milky group_member_decrease event to a <see cref="MemberLeftEvent" />.</summary>
@@ -494,16 +493,16 @@ internal static class EventConverter
         MilkyGroupMemberDecreaseData? d = Deserialize<MilkyGroupMemberDecreaseData>(milkyEvent);
         if (d is null) return null;
         return new MemberLeftEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                GroupId      = d.GroupId,
-                UserId       = d.UserId,
-                OperatorId   = d.OperatorId is > 0 ? (UserId)d.OperatorId.Value : null,
-                IsKicked     = d.OperatorId is > 0
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            GroupId      = d.GroupId,
+            UserId       = d.UserId,
+            OperatorId   = d.OperatorId is > 0 ? (UserId)d.OperatorId.Value : null,
+            IsKicked     = d.OperatorId is > 0
+        };
     }
 
     /// <summary>Converts a Milky peer_pin_change event to a <see cref="PeerPinChangedEvent" />.</summary>
@@ -515,15 +514,15 @@ internal static class EventConverter
         MilkyPeerPinChangeData? d = Deserialize<MilkyPeerPinChangeData>(milkyEvent);
         if (d is null) return null;
         return new PeerPinChangedEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                MessageScene = d.MessageScene ?? "",
-                PeerId       = d.PeerId,
-                IsPinned     = d.IsPinned
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            MessageScene = d.MessageScene ?? "",
+            PeerId       = d.PeerId,
+            IsPinned     = d.IsPinned
+        };
     }
 
 #endregion
@@ -538,13 +537,13 @@ internal static class EventConverter
     {
         MilkyBotOfflineData? d = Deserialize<MilkyBotOfflineData>(milkyEvent);
         return new DisconnectedEvent
-            {
-                ConnectionId = baseProps.ConnectionId,
-                SelfId       = baseProps.SelfId,
-                Time         = baseProps.Time,
-                Api          = baseProps.Api,
-                Reason       = d?.Reason ?? "Bot offline"
-            };
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            Reason       = d?.Reason ?? "Bot offline"
+        };
     }
 
 #endregion

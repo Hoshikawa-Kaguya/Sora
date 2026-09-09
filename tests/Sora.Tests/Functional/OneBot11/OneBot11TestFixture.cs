@@ -1,6 +1,3 @@
-using Serilog.Core;
-using Serilog.Extensions.Logging;
-using Sora.Entities.Utils;
 using Xunit;
 
 namespace Sora.Tests.Functional.OneBot11;
@@ -30,7 +27,7 @@ public sealed class OneBot11TestFixture : IAsyncLifetime
     public IBotApi? Api => PrimaryApi;
 
     /// <summary>Serilog sink that forwards log events to subscribed <c>ITestOutputHelper</c> instances.</summary>
-    public TestOutputSink OutputSink { get; } = new();
+    public TestOutputSink OutputSink => TestLogging.OutputSink;
 
     /// <summary>The active primary <see cref="SoraService" /> instance, if started.</summary>
     public SoraService? Service { get; private set; }
@@ -44,23 +41,16 @@ public sealed class OneBot11TestFixture : IAsyncLifetime
         TestTimingStore.StartTimer("Func", "OneBot11");
         if (TestConfig.SkipOb11Reason is not null) return;
 
-        LogLevel currentLogLevel = SysUtils.GetEnvLogLevelOverride() ?? LogLevel.Debug;
-        Logger serilogLogger = SoraService.CreateDefaultLoggerConfiguration(currentLogLevel)
-                                          .WriteTo.Sink(OutputSink)
-                                          .CreateLogger();
-        ILoggerFactory factory = new SerilogLoggerFactory(serilogLogger, true);
-
         // ---- Primary Bot ----
         OneBot11Config primaryConfig = new()
-            {
-                Mode              = ConnectionMode.ForwardWebSocket,
-                Host              = TestConfig.Ob11PrimaryHost,
-                Port              = TestConfig.Ob11Port,
-                AccessToken       = TestConfig.Ob11Token,
-                HeartbeatInterval = TimeSpan.FromSeconds(5),
-                ApiTimeout        = TimeSpan.FromSeconds(15),
-                LoggerFactory     = factory
-            };
+        {
+            Mode              = ConnectionMode.ForwardWebSocket,
+            Host              = TestConfig.Ob11PrimaryHost,
+            Port              = TestConfig.Ob11Port,
+            AccessToken       = TestConfig.Ob11Token,
+            HeartbeatInterval = TimeSpan.FromSeconds(5),
+            ApiTimeout        = TimeSpan.FromSeconds(15)
+        };
 
         Service = SoraServiceFactory.Instance.CreateOneBot11Service(primaryConfig);
         Service.Events.OnConnected += e =>
@@ -83,21 +73,15 @@ public sealed class OneBot11TestFixture : IAsyncLifetime
         // ---- Secondary Bot (only if configured) ----
         if (TestConfig.IsOb11DualBotConfigured && PrimaryApi is not null)
         {
-            Logger secondaryLogger = SoraService.CreateDefaultLoggerConfiguration(currentLogLevel)
-                                                .WriteTo.Sink(OutputSink)
-                                                .CreateLogger();
-            ILoggerFactory secondaryFactory = new SerilogLoggerFactory(secondaryLogger, true);
-
             OneBot11Config secondaryConfig = new()
-                {
-                    Mode              = ConnectionMode.ForwardWebSocket,
-                    Host              = TestConfig.Ob11SecondaryHost,
-                    Port              = TestConfig.Ob11Port,
-                    AccessToken       = TestConfig.Ob11Token,
-                    HeartbeatInterval = TimeSpan.FromSeconds(5),
-                    ApiTimeout        = TimeSpan.FromSeconds(15),
-                    LoggerFactory     = secondaryFactory
-                };
+            {
+                Mode              = ConnectionMode.ForwardWebSocket,
+                Host              = TestConfig.Ob11SecondaryHost,
+                Port              = TestConfig.Ob11Port,
+                AccessToken       = TestConfig.Ob11Token,
+                HeartbeatInterval = TimeSpan.FromSeconds(5),
+                ApiTimeout        = TimeSpan.FromSeconds(15)
+            };
 
             SecondaryService = SoraServiceFactory.Instance.CreateOneBot11Service(secondaryConfig);
             SecondaryService.Events.OnConnected += e =>

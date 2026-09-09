@@ -1,10 +1,5 @@
 using System.Diagnostics;
 using System.Reflection;
-using Destructurama;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
-using Serilog.Extensions.Logging;
 using Sora.Entities.MessageWaiting;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -63,10 +58,6 @@ public sealed class SoraService : IBotService
                 $"Adapter {adapter.GetType().Name} must implement IAdapterEventSource.",
                 nameof(adapter));
 
-        // Default logger's loglevel can be overridden by SORA_LOG_LEVEL_OVERRIDE env var
-        LogLevel currentLogLevel = SysUtils.GetEnvLogLevelOverride() ?? config.MinimumLogLevel;
-        // Initialize logging and seal — SetFactory() will throw after this point
-        SoraLogger.InternalInitFactory(config.LoggerFactory, () => CreateDefaultLoggerFactory(currentLogLevel));
         _logger = SoraLogger.CreateLogger<SoraService>();
 
         eventSource.OnEvent += AdapterEventHandle;
@@ -86,7 +77,7 @@ public sealed class SoraService : IBotService
     /// <exception cref="InvalidOperationException">Thrown when called after <see cref="StartAsync" /> has begun.</exception>
     public void UseEventPreFilter(IEventPreFilter filter)
     {
-        if (filter.EventTypes is { Length: > 0 } 
+        if (filter.EventTypes is { Length: > 0 }
             && filter.EventTypes.Any(t => !typeof(BotEvent).IsAssignableFrom(t)))
             throw new InvalidOperationException("All elements of EventTypes must be subclasses of BotEvent.");
         lock (_filterRegistrationLock)
@@ -109,7 +100,7 @@ public sealed class SoraService : IBotService
     /// <exception cref="InvalidOperationException">Thrown when called after <see cref="StartAsync" /> has begun.</exception>
     public void UseEventPostFilter(IEventPostFilter filter)
     {
-        if (filter.EventTypes is { Length: > 0 } 
+        if (filter.EventTypes is { Length: > 0 }
             && filter.EventTypes.Any(t => !typeof(BotEvent).IsAssignableFrom(t)))
             throw new InvalidOperationException("All elements of EventTypes must be subclasses of BotEvent.");
         lock (_filterRegistrationLock)
@@ -248,8 +239,8 @@ public sealed class SoraService : IBotService
                 }
             }
             catch (Exception ex) when (ex is not OperationCanceledException cancellation
-                                      || cancellation.CancellationToken != ct
-                                      || !ct.IsCancellationRequested)
+                                       || cancellation.CancellationToken != ct
+                                       || !ct.IsCancellationRequested)
             {
                 _logger.LogError(
                     ex,
@@ -288,8 +279,8 @@ public sealed class SoraService : IBotService
                 await filter.OnEventProcessedAsync(e, chainCompleted, ct);
             }
             catch (Exception ex) when (ex is not OperationCanceledException cancellation
-                                      || cancellation.CancellationToken != ct
-                                      || !ct.IsCancellationRequested)
+                                       || cancellation.CancellationToken != ct
+                                       || !ct.IsCancellationRequested)
             {
                 _logger.LogError(
                     ex,
@@ -341,45 +332,7 @@ public sealed class SoraService : IBotService
 
 #endregion
 
-#region Logging
-
-    /// <summary>
-    ///     Gets the default Serilog <see cref="LoggerConfiguration" /> with colored console output.
-    /// </summary>
-    /// <param name="logLevel">The minimum log level to apply.</param>
-    /// <returns>A configured <see cref="LoggerConfiguration" /> instance.</returns>
-    public static LoggerConfiguration CreateDefaultLoggerConfiguration(LogLevel logLevel) =>
-        new LoggerConfiguration()
-            .MinimumLevel.Is(ToSerilogLevel(logLevel))
-            .Destructure.JsonNetTypes()
-            .WriteTo.Console(
-                outputTemplate:
-                "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
-
-    /// <summary>
-    ///     Creates the default Serilog-based logger factory with colored console output.
-    /// </summary>
-    /// <param name="minimumLevel">The minimum log level to use.</param>
-    /// <returns>A configured <see cref="ILoggerFactory" />.</returns>
-    private static ILoggerFactory CreateDefaultLoggerFactory(LogLevel minimumLevel)
-    {
-        Logger serilogLogger = CreateDefaultLoggerConfiguration(minimumLevel).CreateLogger();
-        return new SerilogLoggerFactory(serilogLogger, true);
-    }
-
-    /// <summary>Converts a MEL <see cref="LogLevel" /> to a Serilog <see cref="LogEventLevel" />.</summary>
-    private static LogEventLevel ToSerilogLevel(LogLevel level) =>
-        level switch
-        {
-            LogLevel.Trace       => LogEventLevel.Verbose,
-            LogLevel.Debug       => LogEventLevel.Debug,
-            LogLevel.Information => LogEventLevel.Information,
-            LogLevel.Warning     => LogEventLevel.Warning,
-            LogLevel.Error       => LogEventLevel.Error,
-            LogLevel.Critical    => LogEventLevel.Fatal,
-            LogLevel.None        => (LogEventLevel)6,
-            _                    => throw new ArgumentOutOfRangeException(nameof(level), level, null)
-        };
+#region Assembly Information
 
     /// <summary>Gets the informational version string of the assembly containing the specified type.</summary>
     private static string GetAssemblyVersion(Type type) =>

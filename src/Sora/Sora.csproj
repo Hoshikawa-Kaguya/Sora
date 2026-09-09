@@ -11,11 +11,4 @@
         <ProjectReference Include="..\Sora.Command\Sora.Command.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Destructurama.JsonNet"/>
-        <PackageReference Include="Serilog"/>
-        <PackageReference Include="Serilog.Extensions.Logging"/>
-        <PackageReference Include="Serilog.Sinks.Console"/>
-    </ItemGroup>
-
 </Project>

@@ -5,8 +5,7 @@ namespace Sora.Entities;
 /// </summary>
 public sealed class EventDispatcher
 {
-    private readonly Lazy<ILogger> _loggerLazy = new(SoraLogger.CreateLogger<EventDispatcher>);
-    private          ILogger       _logger => _loggerLazy.Value;
+    private readonly ILogger _logger = SoraLogger.CreateLogger<EventDispatcher>();
 
 #region Connection Events
 
@@ -171,7 +170,8 @@ public sealed class EventDispatcher
         }
     }
 
-    private async ValueTask InvokeHandlersAsync<T>(Func<T, ValueTask>? handler, T e, CancellationToken ct) where T : BotEvent
+    private async ValueTask InvokeHandlersAsync<T>(Func<T, ValueTask>? handler, T e, CancellationToken ct)
+        where T : BotEvent
     {
         if (handler is null) return;
 

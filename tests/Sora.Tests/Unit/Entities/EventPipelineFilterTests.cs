@@ -1,5 +1,6 @@
 using Xunit;
 using Sora.Entities.MessageWaiting;
+
 // ReSharper disable AccessToDisposedClosure
 
 namespace Sora.Tests.Unit.Entities;
@@ -97,17 +98,19 @@ public class EventPipelineFilterTests : IAsyncDisposable
     [Fact]
     public async Task PreFilter_ThrowsCancellation_Propagates()
     {
-        using CancellationTokenSource source = new();
-        CancellingPreFilter cancellingFilter = new() { Cancel = source.Cancel };
-        RecordingPreFilter  secondFilter     = new();
-        RecordingPostFilter postFilter = new();
+        using CancellationTokenSource source           = new();
+        CancellingPreFilter           cancellingFilter = new() { Cancel = source.Cancel };
+        RecordingPreFilter            secondFilter     = new();
+        RecordingPostFilter           postFilter       = new();
         _service.UseEventPreFilter(cancellingFilter);
         _service.UseEventPreFilter(secondFilter);
         _service.UseEventPostFilter(postFilter);
         await _service.StartAsync(source.Token);
 
         OperationCanceledException exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
-                                                                 await _adapter.RaiseEventAsync(CreateMessageEvent()));
+                                                                                                        await _adapter
+                                                                                                            .RaiseEventAsync(
+                                                                                                                CreateMessageEvent()));
 
         Assert.Same(cancellingFilter.Exception, exception);
         Assert.Equal(1, cancellingFilter.CallCount);
@@ -212,15 +215,17 @@ public class EventPipelineFilterTests : IAsyncDisposable
     [Fact]
     public async Task PostFilter_ThrowsCancellation_Propagates()
     {
-        using CancellationTokenSource source = new();
-        CancellingPostFilter cancellingFilter = new() { Cancel = source.Cancel };
-        RecordingPostFilter  secondFilter     = new();
+        using CancellationTokenSource source           = new();
+        CancellingPostFilter          cancellingFilter = new() { Cancel = source.Cancel };
+        RecordingPostFilter           secondFilter     = new();
         _service.UseEventPostFilter(cancellingFilter);
         _service.UseEventPostFilter(secondFilter);
         await _service.StartAsync(source.Token);
 
         OperationCanceledException exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
-                                                                 await _adapter.RaiseEventAsync(CreateMessageEvent()));
+                                                                                                        await _adapter
+                                                                                                            .RaiseEventAsync(
+                                                                                                                CreateMessageEvent()));
 
         Assert.Same(cancellingFilter.Exception, exception);
         Assert.Contains(nameof(CancellingPostFilter.OnEventProcessedAsync), exception.StackTrace);
@@ -233,12 +238,12 @@ public class EventPipelineFilterTests : IAsyncDisposable
     [Fact]
     public async Task EventHandler_Cancels_SkipsLaterHandlersAndPostFilters()
     {
-        using CancellationTokenSource source = new();
-        CancellationToken pipelineToken = default;
-        OperationCanceledException? original = null;
-        CancellationFilter preFilter = new() { Callback = ct => pipelineToken = ct };
-        RecordingPostFilter postFilter = new();
-        bool typedHandlerCalled = false;
+        using CancellationTokenSource source             = new();
+        CancellationToken             pipelineToken      = default;
+        OperationCanceledException?   original           = null;
+        CancellationFilter            preFilter          = new() { Callback = ct => pipelineToken = ct };
+        RecordingPostFilter           postFilter         = new();
+        bool                          typedHandlerCalled = false;
         _service.UseEventPreFilter(preFilter);
         _service.UseEventPostFilter(postFilter);
         _service.Events.OnEvent += _ =>
@@ -255,7 +260,9 @@ public class EventPipelineFilterTests : IAsyncDisposable
         await _service.StartAsync(source.Token);
 
         OperationCanceledException exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
-            await _adapter.RaiseEventAsync(CreateMessageEvent()));
+                                                                                                        await _adapter
+                                                                                                            .RaiseEventAsync(
+                                                                                                                CreateMessageEvent()));
 
         Assert.Same(original, exception);
         Assert.Equal(pipelineToken, exception.CancellationToken);
@@ -267,13 +274,14 @@ public class EventPipelineFilterTests : IAsyncDisposable
     [Fact]
     public async Task PreFilter_ScopeAccessFails_SkipsLaterStages()
     {
-        using CancellationTokenSource source = new();
-        InvalidOperationException original = new("scope access failed");
-        CancellingPostFilter postFilter = new() { Cancel = source.Cancel };
-        RecordingPreFilter laterPreFilter = new();
-        RecordingPostFilter laterPostFilter = new();
-        bool dispatched = false;
-        _service.UseEventPreFilter(new ThrowingScopePreFilter { Exception = original });
+        using CancellationTokenSource source          = new();
+        InvalidOperationException     original        = new("scope access failed");
+        CancellingPostFilter          postFilter      = new() { Cancel = source.Cancel };
+        RecordingPreFilter            laterPreFilter  = new();
+        RecordingPostFilter           laterPostFilter = new();
+        bool                          dispatched      = false;
+        ThrowingScopePreFilter        scopeFilter     = new() { Exception = original };
+        _service.UseEventPreFilter(scopeFilter);
         _service.UseEventPreFilter(laterPreFilter);
         _service.UseEventPostFilter(postFilter);
         _service.UseEventPostFilter(laterPostFilter);
@@ -284,8 +292,11 @@ public class EventPipelineFilterTests : IAsyncDisposable
         };
         await _service.StartAsync(source.Token);
 
+        scopeFilter.ThrowOnScopeAccess = true;
         InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _adapter.RaiseEventAsync(CreateMessageEvent()));
+                                                                                                   await _adapter
+                                                                                                       .RaiseEventAsync(
+                                                                                                           CreateMessageEvent()));
 
         Assert.Same(original, actual);
         Assert.Contains(nameof(ThrowingScopePreFilter), actual.StackTrace);
@@ -309,13 +320,15 @@ public class EventPipelineFilterTests : IAsyncDisposable
     [InlineData(true, 2, false)]
     [InlineData(true, 2, true)]
     public async Task Filter_UnrelatedCancellation_IsIsolatedOrReplacedWithServiceCancellation(
-        bool post, int tokenKind, bool cancelService)
+        bool post,
+        int  tokenKind,
+        bool cancelService)
     {
-        using CancellationTokenSource source = new();
+        using CancellationTokenSource source         = new();
         using CancellationTokenSource externalSource = new();
         externalSource.Cancel();
-        CancellationToken observedToken = default;
-        OperationCanceledException? original = null;
+        CancellationToken           observedToken = default;
+        OperationCanceledException? original      = null;
         CancellationFilter filter = new()
         {
             Callback = ct =>
@@ -323,15 +336,15 @@ public class EventPipelineFilterTests : IAsyncDisposable
                 observedToken = ct;
                 if (cancelService) source.Cancel();
                 original = tokenKind switch
-                {
-                    0 => new OperationCanceledException(ct),
-                    1 => new OperationCanceledException(externalSource.Token),
-                    _ => new OperationCanceledException()
-                };
+                           {
+                               0 => new OperationCanceledException(ct),
+                               1 => new OperationCanceledException(externalSource.Token),
+                               _ => new OperationCanceledException()
+                           };
                 throw original;
             }
         };
-        RecordingPreFilter secondPre = new();
+        RecordingPreFilter  secondPre  = new();
         RecordingPostFilter secondPost = new();
         if (post) _service.UseEventPostFilter(filter);
         else _service.UseEventPreFilter(filter);
@@ -342,7 +355,10 @@ public class EventPipelineFilterTests : IAsyncDisposable
         if (cancelService)
         {
             OperationCanceledException exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
-                await _adapter.RaiseEventAsync(CreateMessageEvent()));
+                                                                                                            await
+                                                                                                                _adapter
+                                                                                                                    .RaiseEventAsync(
+                                                                                                                        CreateMessageEvent()));
             Assert.Equal(observedToken, exception.CancellationToken);
             Assert.NotSame(original, exception);
         }
@@ -741,12 +757,10 @@ public class EventPipelineFilterTests : IAsyncDisposable
 
     private sealed class MockServiceConfig : IBotServiceConfig
     {
-        public UserId[]        SuperUsers           => [];
-        public UserId[]        BlockUsers           => [];
-        public bool            AutoMarkMessageRead  => false;
-        public bool            EnableCommandManager => true;
-        public ILoggerFactory? LoggerFactory        => null;
-        public LogLevel        MinimumLogLevel      => LogLevel.Debug;
+        public UserId[] SuperUsers           => [];
+        public UserId[] BlockUsers           => [];
+        public bool     AutoMarkMessageRead  => false;
+        public bool     EnableCommandManager => true;
     }
 
     private sealed class AlwaysPassPreFilter : IEventPreFilter
@@ -770,15 +784,17 @@ public class EventPipelineFilterTests : IAsyncDisposable
     {
         public required Exception Exception { get; init; }
 
-        public Type[] EventTypes => throw Exception;
+        public bool ThrowOnScopeAccess { get; set; }
+
+        public Type[] EventTypes => ThrowOnScopeAccess ? throw Exception : [];
 
         public ValueTask<bool> OnEventAsync(BotEvent e, CancellationToken ct) => new(true);
     }
 
     private sealed class CancellingPreFilter : IEventPreFilter
     {
-        public int CallCount { get; private set; }
-        public Action? Cancel { get; init; }
+        public int                         CallCount { get; private set; }
+        public Action?                     Cancel    { get; init; }
         public OperationCanceledException? Exception { get; private set; }
 
         public ValueTask<bool> OnEventAsync(BotEvent e, CancellationToken ct)
@@ -846,10 +862,11 @@ public class EventPipelineFilterTests : IAsyncDisposable
         public int  CallCount          { get; private set; }
         public bool LastChainCompleted { get; private set; }
 
-        public Type[]?               EventTypes  { get; init; }
-        public MessageSourceType[]?  SourceTypes { get; init; }
+        public Type[]?              EventTypes  { get; init; }
+        public MessageSourceType[]? SourceTypes { get; init; }
+
         // ReSharper disable once UnassignedGetOnlyAutoProperty
-        public Func<BotEvent, bool>? Predicate   { get; }
+        public Func<BotEvent, bool>? Predicate { get; }
 
         public ValueTask OnEventProcessedAsync(BotEvent e, bool chainCompleted, CancellationToken ct)
         {
@@ -869,10 +886,10 @@ public class EventPipelineFilterTests : IAsyncDisposable
 
     private sealed class CancellingPostFilter : IEventPostFilter
     {
-        public int CallCount { get; private set; }
-        public Action? Cancel { get; init; }
-        public OperationCanceledException? Exception { get; private set; }
-        public bool LastChainCompleted { get; private set; }
+        public int                         CallCount          { get; private set; }
+        public Action?                     Cancel             { get; init; }
+        public OperationCanceledException? Exception          { get; private set; }
+        public bool                        LastChainCompleted { get; private set; }
 
         public ValueTask OnEventProcessedAsync(BotEvent e, bool chainCompleted, CancellationToken ct)
         {

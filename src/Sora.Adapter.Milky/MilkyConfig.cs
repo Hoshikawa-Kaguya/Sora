@@ -52,12 +52,6 @@ public sealed class MilkyConfig : IBotServiceConfig
     /// <summary>Protocol server host address.</summary>
     public string Host { get; init; } = "127.0.0.1";
 
-    /// <inheritdoc />
-    public ILoggerFactory? LoggerFactory { get; init; }
-
-    /// <inheritdoc />
-    public LogLevel MinimumLogLevel { get; init; } = LogLevel.Information;
-
     /// <summary>Protocol server port.</summary>
     public int Port { get; init; } = 3000;
 
@@ -90,7 +84,8 @@ public sealed class MilkyConfig : IBotServiceConfig
     {
         HttpClientHandler handler = new();
         if (SkipCertificateValidation)
-            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            handler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
         if (!string.IsNullOrEmpty(ClientCertificatePath))
             handler.ClientCertificates.Add(LoadCertificate(ClientCertificatePath, ClientCertificatePassword));
         return handler;
@@ -113,12 +108,12 @@ public sealed class MilkyConfig : IBotServiceConfig
     {
         string prefix = string.IsNullOrEmpty(Prefix) ? "" : $"/{Prefix.TrimStart('/')}";
         string scheme = (useWs, UseTls) switch
-                            {
-                                (true, true)   => "wss",
-                                (true, false)  => "ws",
-                                (false, true)  => "https",
-                                (false, false) => "http"
-                            };
+                        {
+                            (true, true)   => "wss",
+                            (true, false)  => "ws",
+                            (false, true)  => "https",
+                            (false, false) => "http"
+                        };
         return $"{scheme}://{Host}:{Port}{prefix}/event";
     }
 

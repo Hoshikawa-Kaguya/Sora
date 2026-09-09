@@ -15,8 +15,7 @@ public sealed class OneBot11Adapter : IBotAdapter, IAdapterEventSource
 #region Fields
 
     private readonly OneBot11Config      _config;
-    private readonly Lazy<ILogger>       _loggerLazy = new(SoraLogger.CreateLogger<OneBot11Adapter>);
-    private          ILogger             _logger => _loggerLazy.Value;
+    private readonly ILogger             _logger = SoraLogger.CreateLogger<OneBot11Adapter>();
     private          ReactiveApiManager? _apiManager;
     private          OneBot11BotApi?     _botApi;
     private          BotConnection?      _connection;
@@ -77,11 +76,11 @@ public sealed class OneBot11Adapter : IBotAdapter, IAdapterEventSource
         OneBot11BotApi botApi = new(_apiManager, SendRawAsync);
         _botApi = botApi;
         _connection = new BotConnection
-            {
-                ConnectionId = Guid.NewGuid(),
-                Api          = botApi,
-                State        = ConnectionState.Connecting
-            };
+        {
+            ConnectionId = Guid.NewGuid(),
+            Api          = botApi,
+            State        = ConnectionState.Connecting
+        };
 
         switch (_config.Mode)
         {
@@ -188,12 +187,12 @@ public sealed class OneBot11Adapter : IBotAdapter, IAdapterEventSource
         _logger.LogInformation("Get self account id: {AccountId}", selfData.UserId);
 
         ConnectedEvent evt = new()
-            {
-                ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
-                SelfId       = SelfId,
-                Time         = DateTime.Now,
-                Api          = _connection?.Api!
-            };
+        {
+            ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
+            SelfId       = SelfId,
+            Time         = DateTime.Now,
+            Api          = _connection?.Api!
+        };
         _ = _onEvent?.Invoke(evt);
     }
 
@@ -205,13 +204,13 @@ public sealed class OneBot11Adapter : IBotAdapter, IAdapterEventSource
         _logger.LogInformation("OneBot11 adapter disconnected: {Reason}", reason);
 
         DisconnectedEvent evt = new()
-            {
-                ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
-                SelfId       = SelfId,
-                Time         = DateTime.Now,
-                Api          = _connection?.Api!,
-                Reason       = reason
-            };
+        {
+            ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
+            SelfId       = SelfId,
+            Time         = DateTime.Now,
+            Api          = _connection?.Api!,
+            Reason       = reason
+        };
         _ = _onEvent?.Invoke(evt);
 
         // clean up id record
@@ -285,7 +284,9 @@ public sealed class OneBot11Adapter : IBotAdapter, IAdapterEventSource
             BotEvent? soraEvent =
                 EventConverter.ToSoraEvent(eventModel, _connection?.ConnectionId ?? Guid.Empty, _connection?.Api!);
             //Drop message from self sent
-            if (_config.DropSelfMessage && soraEvent is MessageReceivedEvent msg && msg.Sender.UserId == msg.SelfId) return;
+            if (_config.DropSelfMessage
+                && soraEvent is MessageReceivedEvent msg
+                && msg.Sender.UserId == msg.SelfId) return;
 
             if (soraEvent is not null)
             {

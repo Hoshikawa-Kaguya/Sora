@@ -9,8 +9,7 @@ namespace Sora.Entities.MessageWaiting;
 /// </summary>
 internal sealed class MessageWaiter
 {
-    private readonly Lazy<ILogger>                              _loggerLazy = new(SoraLogger.CreateLogger<MessageWaiter>);
-    private          ILogger                                    _logger => _loggerLazy.Value;
+    private readonly ILogger                                    _logger   = SoraLogger.CreateLogger<MessageWaiter>();
     private readonly ConcurrentDictionary<Guid, WaitingSession> _sessions = new();
 
 #region Wait Message API
@@ -32,14 +31,14 @@ internal sealed class MessageWaiter
         CancellationToken    ct        = default)
     {
         WaitingSession session = new()
-            {
-                ConnectionId     = source.ConnectionId,
-                SenderId         = source.Message.SenderId,
-                GroupId          = source.Message.GroupId,
-                SourceType       = source.Message.SourceType,
-                Patterns         = patterns,
-                SessionMatchType = matchType
-            };
+        {
+            ConnectionId     = source.ConnectionId,
+            SenderId         = source.Message.SenderId,
+            GroupId          = source.Message.GroupId,
+            SourceType       = source.Message.SourceType,
+            Patterns         = patterns,
+            SessionMatchType = matchType
+        };
         return EnqueueAndWaitAsync(session, timeout, ct);
     }
 
@@ -58,13 +57,13 @@ internal sealed class MessageWaiter
         CancellationToken                ct      = default)
     {
         WaitingSession session = new()
-            {
-                ConnectionId = source.ConnectionId,
-                SenderId     = source.Message.SenderId,
-                GroupId      = source.Message.GroupId,
-                SourceType   = source.Message.SourceType,
-                Predicate    = predicate
-            };
+        {
+            ConnectionId = source.ConnectionId,
+            SenderId     = source.Message.SenderId,
+            GroupId      = source.Message.GroupId,
+            SourceType   = source.Message.SourceType,
+            Predicate    = predicate
+        };
         return EnqueueAndWaitAsync(session, timeout, ct);
     }
 
@@ -81,12 +80,12 @@ internal sealed class MessageWaiter
         CancellationToken    ct      = default)
     {
         WaitingSession session = new()
-            {
-                ConnectionId = source.ConnectionId,
-                SenderId     = source.Message.SenderId,
-                GroupId      = source.Message.GroupId,
-                SourceType   = source.Message.SourceType
-            };
+        {
+            ConnectionId = source.ConnectionId,
+            SenderId     = source.Message.SenderId,
+            GroupId      = source.Message.GroupId,
+            SourceType   = source.Message.SourceType
+        };
         return EnqueueAndWaitAsync(session, timeout, ct);
     }
 
@@ -127,7 +126,10 @@ internal sealed class MessageWaiter
         }
 
         if (disposed > 0)
-            _logger.LogDebug("Disposed {Count} message waiter(s) for connection {ConnectionId}", disposed, connectionId);
+            _logger.LogDebug(
+                "Disposed {Count} message waiter(s) for connection {ConnectionId}",
+                disposed,
+                connectionId);
     }
 
     /// <summary>
@@ -168,7 +170,11 @@ internal sealed class MessageWaiter
         CancellationToken ct)
     {
         // Reject duplicate waits from the same source
-        if (_sessions.Values.Any(s => s.IsSameSource(session.SenderId, session.GroupId, session.ConnectionId, session.SourceType)))
+        if (_sessions.Values.Any(s => s.IsSameSource(
+                                     session.SenderId,
+                                     session.GroupId,
+                                     session.ConnectionId,
+                                     session.SourceType)))
         {
             _logger.LogWarning(
                 "Rejected duplicate message waiter for connection {ConnectionId}, source {SourceType}, sender {SenderId}, group {GroupId}",
@@ -206,7 +212,7 @@ internal sealed class MessageWaiter
         try
         {
             // Waiting task
-            Task<MessageReceivedEvent?> waitTask = session.Completion.Task;
+            Task<MessageReceivedEvent?>   waitTask  = session.Completion.Task;
             // Timeout task with linked CTS to cancel delay when message arrives
             using CancellationTokenSource delayCts  = CancellationTokenSource.CreateLinkedTokenSource(ct);
             Task                          delayTask = Task.Delay(timeout.Value, delayCts.Token);

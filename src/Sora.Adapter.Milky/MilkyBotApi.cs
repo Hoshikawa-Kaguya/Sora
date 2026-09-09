@@ -12,8 +12,7 @@ namespace Sora.Adapter.Milky;
 public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
 {
     private readonly MilkyHttpApiClient _apiClient;
-    private readonly Lazy<ILogger>      _loggerLazy = new(SoraLogger.CreateLogger<MilkyBotApi>);
-    private          ILogger            _logger => _loggerLazy.Value;
+    private readonly ILogger            _logger = SoraLogger.CreateLogger<MilkyBotApi>();
 
     /// <summary>Initializes a new instance of the <see cref="MilkyBotApi" /> class.</summary>
     /// <param name="apiClient">The HTTP API client for Milky protocol calls.</param>
@@ -89,9 +88,9 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<GetResourceTempUrlOutput> resp = await CallApiAsync<GetResourceTempUrlOutput>(
             "get_resource_temp_url",
             new GetResourceTempUrlInput
-                {
-                    ResourceId = resourceId
-                },
+            {
+                ResourceId = resourceId
+            },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<string>.Ok(data.Url ?? "")
@@ -127,11 +126,11 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<GetMessageOutput> resp = await CallApiAsync<GetMessageOutput>(
             "get_message",
             new GetMessageInput
-                {
-                    MessageScene = scene.Adapt<string>(),
-                    PeerId       = peerId,
-                    MessageSeq   = messageSeq
-                },
+            {
+                MessageScene = scene.Adapt<string>(),
+                PeerId       = peerId,
+                MessageSeq   = messageSeq
+            },
             ct);
         if (resp is not { IsSuccess: true, Data: { } data })
             return ApiResult<MessageContext>.Fail(resp.Code, resp.Message);
@@ -151,12 +150,12 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<GetHistoryMessagesOutput> resp = await CallApiAsync<GetHistoryMessagesOutput>(
             "get_history_messages",
             new GetHistoryMessagesInput
-                {
-                    MessageScene    = scene.Adapt<string>(),
-                    PeerId          = peerId,
-                    StartMessageSeq = startMessageSeq ?? 0L,
-                    Limit           = limit
-                },
+            {
+                MessageScene    = scene.Adapt<string>(),
+                PeerId          = peerId,
+                StartMessageSeq = startMessageSeq ?? 0L,
+                Limit           = limit
+            },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<HistoryMessagesResult>.Ok(data.Adapt<HistoryMessagesResult>())
@@ -213,14 +212,17 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<SendMessageOutput> resp = await CallApiAsync<SendMessageOutput>(
             "send_private_message",
             new SendPrivateMessageInput
-                {
-                    UserId  = userId,
-                    Message = segments
-                },
+            {
+                UserId  = userId,
+                Message = segments
+            },
             ct);
         if (resp is { IsSuccess: true, Data: { } data })
         {
-            _logger.LogDebug("Milky private message sent to user[{UserId}], messageSeq={MessageSeq}", userId, data.MessageSeq);
+            _logger.LogDebug(
+                "Milky private message sent to user[{UserId}], messageSeq={MessageSeq}",
+                userId,
+                data.MessageSeq);
             return SendMessageResult.Ok(data.MessageSeq);
         }
 
@@ -266,14 +268,17 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<SendMessageOutput> resp = await CallApiAsync<SendMessageOutput>(
             "send_group_message",
             new SendGroupMessageInput
-                {
-                    GroupId = groupId,
-                    Message = segments
-                },
+            {
+                GroupId = groupId,
+                Message = segments
+            },
             ct);
         if (resp is { IsSuccess: true, Data: { } data })
         {
-            _logger.LogDebug("Milky group message sent to group[{GroupId}], messageSeq={MessageSeq}", groupId, data.MessageSeq);
+            _logger.LogDebug(
+                "Milky group message sent to group[{GroupId}], messageSeq={MessageSeq}",
+                groupId,
+                data.MessageSeq);
             return SendMessageResult.Ok(data.MessageSeq);
         }
 
@@ -314,11 +319,11 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         await CallApiAsync(
             "mark_message_as_read",
             new MarkMessageAsReadInput
-                {
-                    MessageScene = scene.Adapt<string>(),
-                    PeerId       = peerId,
-                    MessageSeq   = messageSeq
-                },
+            {
+                MessageScene = scene.Adapt<string>(),
+                PeerId       = peerId,
+                MessageSeq   = messageSeq
+            },
             ct);
 
 #endregion
@@ -366,10 +371,10 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<GetFriendInfoOutput> resp = await CallApiAsync<GetFriendInfoOutput>(
             "get_friend_info",
             new GetFriendInfoInput
-                {
-                    UserId  = userId,
-                    NoCache = noCache
-                },
+            {
+                UserId  = userId,
+                NoCache = noCache
+            },
             ct);
 
         return resp is { IsSuccess: true, Data: { } data }
@@ -403,10 +408,10 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
             await CallApiAsync<GetFriendRequestsOutput>(
                 "get_friend_requests",
                 new GetFriendRequestsInput
-                    {
-                        Limit      = limit,
-                        IsFiltered = isFiltered
-                    },
+                {
+                    Limit      = limit,
+                    IsFiltered = isFiltered
+                },
                 ct);
         if (resp is not { IsSuccess: true, Data: { } data })
             return ApiResult<IReadOnlyList<FriendRequestInfo>>.Fail(resp.Code, resp.Message);
@@ -438,7 +443,8 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
             return ApiResult.Fail(reqResp.Code, reqResp.Message);
 
         MilkyFriendRequest? match = reqData.Requests
-                                           .FirstOrDefault(r => r.InitiatorId == (long)fromUserId && r.State == "pending");
+                                           .FirstOrDefault(r => r.InitiatorId == (long)fromUserId
+                                                                && r.State == "pending");
         if (match is null)
         {
             _logger.LogWarning("No matching pending Milky friend request was found for user[{UserId}]", fromUserId);
@@ -451,12 +457,12 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
             ? await CallApiAsync(
                 "accept_friend_request",
                 new AcceptFriendRequestInput
-                        { InitiatorUid = initiatorUid, IsFiltered = isFiltered },
+                    { InitiatorUid = initiatorUid, IsFiltered = isFiltered },
                 ct)
             : await CallApiAsync(
                 "reject_friend_request",
                 new RejectFriendRequestInput
-                        { InitiatorUid = initiatorUid, IsFiltered = isFiltered, Reason = remark },
+                    { InitiatorUid = initiatorUid, IsFiltered = isFiltered, Reason = remark },
                 ct);
     }
 
@@ -487,10 +493,10 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<GetGroupInfoOutput> resp = await CallApiAsync<GetGroupInfoOutput>(
             "get_group_info",
             new GetGroupInfoInput
-                {
-                    GroupId = groupId,
-                    NoCache = noCache
-                },
+            {
+                GroupId = groupId,
+                NoCache = noCache
+            },
             ct);
 
         return resp is { IsSuccess: true, Data: { } data }
@@ -524,11 +530,11 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<GetGroupMemberInfoOutput> resp = await CallApiAsync<GetGroupMemberInfoOutput>(
             "get_group_member_info",
             new GetGroupMemberInfoInput
-                {
-                    GroupId = groupId,
-                    UserId  = userId,
-                    NoCache = noCache
-                },
+            {
+                GroupId = groupId,
+                UserId  = userId,
+                NoCache = noCache
+            },
             ct);
 
         return resp is { IsSuccess: true, Data: { } data }
@@ -598,11 +604,11 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<GetGroupNotificationsOutput> resp = await CallApiAsync<GetGroupNotificationsOutput>(
             "get_group_notifications",
             new GetGroupNotificationsInput
-                {
-                    StartNotificationSeq = startNotificationSeq ?? 0L,
-                    IsFiltered           = isFiltered,
-                    Limit                = limit
-                },
+            {
+                StartNotificationSeq = startNotificationSeq ?? 0L,
+                IsFiltered           = isFiltered,
+                Limit                = limit
+            },
             ct);
 
         return resp is { IsSuccess: true, Data: { } data }
@@ -633,33 +639,36 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
             approve);
 
         string typeStr = joinNotificationType switch
-                             {
-                                 GroupJoinNotificationType.JoinRequest => "join_request",
-                                 GroupJoinNotificationType.InvitedJoinRequest => "invited_join_request",
-                                 _ => throw new ArgumentOutOfRangeException(nameof(joinNotificationType), joinNotificationType, null)
-                             };
+                         {
+                             GroupJoinNotificationType.JoinRequest        => "join_request",
+                             GroupJoinNotificationType.InvitedJoinRequest => "invited_join_request",
+                             _ => throw new ArgumentOutOfRangeException(
+                                 nameof(joinNotificationType),
+                                 joinNotificationType,
+                                 null)
+                         };
 
         return approve
             ? await CallApiAsync(
                 "accept_group_request",
                 new AcceptGroupRequestInput
-                    {
-                        GroupId          = groupId,
-                        NotificationSeq  = notificationSeq,
-                        NotificationType = typeStr,
-                        IsFiltered       = isFiltered
-                    },
+                {
+                    GroupId          = groupId,
+                    NotificationSeq  = notificationSeq,
+                    NotificationType = typeStr,
+                    IsFiltered       = isFiltered
+                },
                 ct)
             : await CallApiAsync(
                 "reject_group_request",
                 new RejectGroupRequestInput
-                    {
-                        GroupId          = groupId,
-                        NotificationSeq  = notificationSeq,
-                        NotificationType = typeStr,
-                        IsFiltered       = isFiltered,
-                        Reason           = reason
-                    },
+                {
+                    GroupId          = groupId,
+                    NotificationSeq  = notificationSeq,
+                    NotificationType = typeStr,
+                    IsFiltered       = isFiltered,
+                    Reason           = reason
+                },
                 ct);
     }
 
@@ -760,11 +769,11 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         await CallApiAsync(
             "send_group_announcement",
             new SendGroupAnnouncementInput
-                {
-                    GroupId  = groupId,
-                    Content  = content,
-                    ImageUri = imageUri ?? ""
-                },
+            {
+                GroupId  = groupId,
+                Content  = content,
+                ImageUri = imageUri ?? ""
+            },
             ct);
 
     /// <inheritdoc />
@@ -841,10 +850,10 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<GetGroupFilesOutput> resp = await CallApiAsync<GetGroupFilesOutput>(
             "get_group_files",
             new GetGroupFilesInput
-                {
-                    GroupId        = groupId,
-                    ParentFolderId = parentFolderId
-                },
+            {
+                GroupId        = groupId,
+                ParentFolderId = parentFolderId
+            },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<GroupFilesResult>.Ok(data.Adapt<GroupFilesResult>())
@@ -860,10 +869,10 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<DownloadUrlOutput> resp = await CallApiAsync<DownloadUrlOutput>(
             "get_group_file_download_url",
             new GetGroupFileDownloadUrlInput
-                {
-                    GroupId = groupId,
-                    FileId  = fileId
-                },
+            {
+                GroupId = groupId,
+                FileId  = fileId
+            },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<string>.Ok(data.DownloadUrl ?? "")
@@ -880,11 +889,11 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<DownloadUrlOutput> resp = await CallApiAsync<DownloadUrlOutput>(
             "get_private_file_download_url",
             new GetPrivateFileDownloadUrlInput
-                {
-                    UserId   = userId,
-                    FileId   = fileId,
-                    FileHash = fileHash
-                },
+            {
+                UserId   = userId,
+                FileId   = fileId,
+                FileHash = fileHash
+            },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<string>.Ok(data.DownloadUrl ?? "")
@@ -900,10 +909,10 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<CreateGroupFolderOutput> resp = await CallApiAsync<CreateGroupFolderOutput>(
             "create_group_folder",
             new CreateGroupFolderInput
-                {
-                    GroupId    = groupId,
-                    FolderName = folderName
-                },
+            {
+                GroupId    = groupId,
+                FolderName = folderName
+            },
             ct);
 
         return resp is { IsSuccess: true, Data: { } data }
@@ -922,12 +931,12 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<UploadFileOutput> resp = await CallApiAsync<UploadFileOutput>(
             "upload_group_file",
             new UploadGroupFileInput
-                {
-                    GroupId        = groupId,
-                    FileUri        = fileUri,
-                    FileName       = fileName,
-                    ParentFolderId = parentFolderId
-                },
+            {
+                GroupId        = groupId,
+                FileUri        = fileUri,
+                FileName       = fileName,
+                ParentFolderId = parentFolderId
+            },
             ct);
 
         return resp is { IsSuccess: true, Data: { } data }
@@ -945,11 +954,11 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         ApiResult<UploadFileOutput> resp = await CallApiAsync<UploadFileOutput>(
             "upload_private_file",
             new UploadPrivateFileInput
-                {
-                    UserId   = userId,
-                    FileUri  = fileUri,
-                    FileName = fileName
-                },
+            {
+                UserId   = userId,
+                FileUri  = fileUri,
+                FileName = fileName
+            },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
             ? ApiResult<string>.Ok(data.FileId ?? "")
@@ -986,12 +995,12 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         await CallApiAsync(
             "move_group_file",
             new MoveGroupFileInput
-                {
-                    GroupId        = groupId,
-                    FileId         = fileId,
-                    ParentFolderId = parentFolderId,
-                    TargetFolderId = targetFolderId
-                },
+            {
+                GroupId        = groupId,
+                FileId         = fileId,
+                ParentFolderId = parentFolderId,
+                TargetFolderId = targetFolderId
+            },
             ct);
 
     /// <inheritdoc />
@@ -1004,12 +1013,12 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         await CallApiAsync(
             "rename_group_file",
             new RenameGroupFileInput
-                {
-                    GroupId        = groupId,
-                    FileId         = fileId,
-                    ParentFolderId = parentFolderId,
-                    NewFileName    = newFileName
-                },
+            {
+                GroupId        = groupId,
+                FileId         = fileId,
+                ParentFolderId = parentFolderId,
+                NewFileName    = newFileName
+            },
             ct);
 
     /// <inheritdoc />
@@ -1079,13 +1088,13 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         await CallApiAsync(
             "send_group_message_reaction",
             new SendGroupMessageReactionInput
-                {
-                    GroupId      = groupId,
-                    MessageSeq   = messageSeq,
-                    Reaction     = faceId,
-                    ReactionType = reactionType,
-                    IsAdd        = isAdd
-                },
+            {
+                GroupId      = groupId,
+                MessageSeq   = messageSeq,
+                Reaction     = faceId,
+                ReactionType = reactionType,
+                IsAdd        = isAdd
+            },
             ct);
 
 #endregion
@@ -1103,10 +1112,10 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
             return ApiResult<PeerPinsResult>.Fail(resp.Code, resp.Message);
 
         PeerPinsResult result = new()
-            {
-                Friends = data.Friends.Select(f => f.Adapt<FriendInfo>()).ToList(),
-                Groups  = data.Groups.Select(g => g.Adapt<GroupInfo>()).ToList()
-            };
+        {
+            Friends = data.Friends.Select(f => f.Adapt<FriendInfo>()).ToList(),
+            Groups  = data.Groups.Select(g => g.Adapt<GroupInfo>()).ToList()
+        };
         return ApiResult<PeerPinsResult>.Ok(result);
     }
 
@@ -1123,11 +1132,11 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         await CallApiAsync(
             "set_peer_pin",
             new SetPeerPinInput
-                {
-                    MessageScene = messageScene.Adapt<string>(),
-                    PeerId       = peerId,
-                    IsPinned     = isPinned
-                },
+            {
+                MessageScene = messageScene.Adapt<string>(),
+                PeerId       = peerId,
+                IsPinned     = isPinned
+            },
             ct);
 
 #endregion

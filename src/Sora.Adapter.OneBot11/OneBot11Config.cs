@@ -52,12 +52,6 @@ public sealed class OneBot11Config : IBotServiceConfig
     /// <summary>Host address. For forward WS: remote host. For reverse WS: listen address.</summary>
     public string Host { get; init; } = "127.0.0.1";
 
-    /// <inheritdoc />
-    public ILoggerFactory? LoggerFactory { get; init; }
-
-    /// <inheritdoc />
-    public LogLevel MinimumLogLevel { get; init; } = LogLevel.Information;
-
     /// <summary>Connection mode (forward or reverse WebSocket).</summary>
     public ConnectionMode Mode { get; init; } = ConnectionMode.ForwardWebSocket;
 

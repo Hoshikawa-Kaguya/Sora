@@ -1,61 +1,155 @@
+using System.Diagnostics.CodeAnalysis;
+using Destructurama;
 using Microsoft.Extensions.Logging.Abstractions;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
+using Serilog.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Sora.Entities;
 
-/// <summary>
-///     Global logger factory for the Sora framework.
-///     Provides <see cref="ILogger" /> instances to all framework components without requiring dependency injection.
-/// </summary>
+/// <summary>Provides the shared logger factory for all Sora components.</summary>
 /// <remarks>
-///     <para>
-///         By default, logging is silent (<see cref="NullLoggerFactory" />).
-///         Set custom logger factory via service config to enable custom logging.
-///         Must set logger factory before creating any services, or let the framework configure a default
-///         Serilog-based console logger automatically.
-///     </para>
-///     <para>
-///         This class is thread-safe. The <see cref="ILoggerFactory" /> reference swap is atomic.
-///     </para>
+///     Configure logging before calling Sora methods that obtain a logger. The first logger request
+///     initializes an Information-level Serilog console factory if none was configured.
+///     Successful initialization permanently fixes the factory, including across service disposal.
+///     Configuration and initialization are thread-safe.
 /// </remarks>
 public static class SoraLogger
 {
-    private static ILoggerFactory _factory = NullLoggerFactory.Instance;
+    private static readonly Lock            InitializationLock = new();
+    private static          ILoggerFactory? _factory;
+    private static          bool            _initializing;
 
-    /// <summary>
-    ///     Gets whether the logger has been sealed (a service has been created).
-    /// </summary>
-    internal static bool IsSealed { get; private set; }
+#region Configuration
 
-    /// <summary>Creates a logger for the specified type.</summary>
-    /// <typeparam name="T">The type whose name is used as the logger category.</typeparam>
-    /// <returns>A new <see cref="ILogger" /> instance.</returns>
-    public static ILogger CreateLogger<T>() => _factory.CreateLogger<T>();
-
-    /// <summary>Creates a logger with the specified category name.</summary>
-    /// <param name="categoryName">The category name for the logger.</param>
-    /// <returns>A new <see cref="ILogger" /> instance.</returns>
-    public static ILogger CreateLogger(string categoryName) => _factory.CreateLogger(categoryName);
-
-    /// <summary>
-    ///     Internal set logger factory for service creation and seals it.
-    ///     Called internally by the framework when a service is created.
-    ///     If already sealed, this method is a no-op.
-    /// </summary>
-    /// <param name="factory">The factory from config, or <c>null</c> to use default/existing.</param>
-    /// <param name="defaultFactoryCreator">
-    ///     Creates the default logger factory. Only called when <paramref name="factory" /> is <c>null</c>.
+    /// <summary>Configures the shared factory before any Sora logger is obtained.</summary>
+    /// <param name="factory">
+    ///     The caller-owned factory. Its lifetime must cover all Sora logging; Sora never disposes it
+    ///     or changes its filtering rules. Pass <see cref="NullLoggerFactory.Instance" /> to silence logging.
     /// </param>
-    internal static void InternalInitFactory(ILoggerFactory? factory, Func<ILoggerFactory> defaultFactoryCreator)
+    /// <exception cref="ArgumentNullException">The factory is null.</exception>
+    /// <exception cref="InvalidOperationException">Logging is already initialized or initialization is in progress.</exception>
+    public static void Configure(ILoggerFactory factory)
     {
-        if (IsSealed) return;
-        _factory = factory ?? defaultFactoryCreator();
-        IsSealed = true;
+        ArgumentNullException.ThrowIfNull(factory);
+        lock (InitializationLock)
+        {
+            EnsureConfigurationAvailable();
+            _factory = factory;
+        }
     }
 
-    /// <summary>Resets to <see cref="NullLoggerFactory" /> (for testing).</summary>
-    internal static void Reset()
+    /// <summary>Builds the shared Serilog factory from the supplied configuration.</summary>
+    /// <param name="configuration">The completed configuration, including sinks and filtering rules.</param>
+    /// <remarks>
+    ///     The resulting factory is shared for the process lifetime and is not disposed by individual services.
+    ///     To control flushing and disposal, create and own an ILoggerFactory and pass it to the factory overload.
+    ///     A failed initialization leaves logging unconfigured and may be retried with a corrected configuration.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">The configuration is null.</exception>
+    /// <exception cref="InvalidOperationException">
+    ///     Logging is already initialized, initialization is re-entered, or building the factory fails.
+    ///     Construction failures retain the original exception as InnerException.
+    /// </exception>
+    public static void Configure(LoggerConfiguration configuration)
     {
-        _factory = NullLoggerFactory.Instance;
-        IsSealed = false;
+        ArgumentNullException.ThrowIfNull(configuration);
+        lock (InitializationLock)
+        {
+            EnsureConfigurationAvailable();
+            _factory = BuildFactory(configuration);
+        }
     }
+
+    /// <summary>Returns a fresh Serilog configuration with colored console output and JsonNet destructuring.</summary>
+    /// <param name="logLevel">The minimum level, or <see cref="LogLevel.None" /> to disable output.</param>
+    /// <returns>A configuration that can be customized before passing it to <see cref="Configure(LoggerConfiguration)" />.</returns>
+    /// <remarks>This method does not initialize or lock the shared factory.</remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The level is not a defined logging level.</exception>
+    public static LoggerConfiguration CreateDefaultLoggerConfiguration(LogLevel logLevel = LogLevel.Information) =>
+        new LoggerConfiguration()
+            .MinimumLevel.Is(ToSerilogLevel(logLevel))
+            .Destructure.JsonNetTypes()
+            .WriteTo.Console(
+                outputTemplate:
+                "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+
+#endregion
+
+#region Loggers
+
+    /// <summary>Gets a logger whose category is the specified type.</summary>
+    /// <typeparam name="T">The type used as the logger category.</typeparam>
+    /// <returns>A logger from the shared factory.</returns>
+    /// <exception cref="InvalidOperationException">Default initialization fails or initialization is re-entered.</exception>
+    public static ILogger CreateLogger<T>() => GetFactory().CreateLogger<T>();
+
+    /// <summary>Gets a logger for the specified category, initializing default logging if necessary.</summary>
+    /// <param name="categoryName">The logger category.</param>
+    /// <returns>A logger from the shared factory.</returns>
+    /// <exception cref="ArgumentNullException">The category is null.</exception>
+    /// <exception cref="InvalidOperationException">Default initialization fails or initialization is re-entered.</exception>
+    public static ILogger CreateLogger(string categoryName)
+    {
+        ArgumentNullException.ThrowIfNull(categoryName);
+        return GetFactory().CreateLogger(categoryName);
+    }
+
+#endregion
+
+    [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
+    private static ILoggerFactory GetFactory()
+    {
+        if (_factory is not null) return _factory;
+        lock (InitializationLock)
+        {
+            EnsureConfigurationAvailable();
+            return _factory = BuildFactory();
+        }
+    }
+
+    private static void EnsureConfigurationAvailable()
+    {
+        if (_factory is not null)
+            throw new InvalidOperationException("Logging must be configured once, before any Sora logger is obtained.");
+        if (_initializing)
+            throw new InvalidOperationException(
+                "Logging cannot be configured or used while its factory is being initialized.");
+    }
+
+    // Called under InitializationLock. Publish only after construction succeeds, including on re-entry failures.
+    private static ILoggerFactory BuildFactory(LoggerConfiguration? configuration = null)
+    {
+        _initializing = true;
+        Logger? logger = null;
+        try
+        {
+            logger = (configuration ?? CreateDefaultLoggerConfiguration()).CreateLogger();
+            return new SerilogLoggerFactory(logger, true);
+        }
+        catch (Exception exception)
+        {
+            logger?.Dispose();
+            throw new InvalidOperationException("Failed to initialize Sora logging.", exception);
+        }
+        finally
+        {
+            _initializing = false;
+        }
+    }
+
+    private static LogEventLevel ToSerilogLevel(LogLevel level) =>
+        level switch
+        {
+            LogLevel.Trace       => LogEventLevel.Verbose,
+            LogLevel.Debug       => LogEventLevel.Debug,
+            LogLevel.Information => LogEventLevel.Information,
+            LogLevel.Warning     => LogEventLevel.Warning,
+            LogLevel.Error       => LogEventLevel.Error,
+            LogLevel.Critical    => LogEventLevel.Fatal,
+            LogLevel.None        => (LogEventLevel)6,
+            _                    => throw new ArgumentOutOfRangeException(nameof(level), level, null)
+        };
 }

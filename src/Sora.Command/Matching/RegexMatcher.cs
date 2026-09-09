@@ -9,9 +9,8 @@ namespace Sora.Command.Matching;
 /// </summary>
 public sealed class RegexMatcher : ICommandMatcher
 {
-    private readonly ConcurrentDictionary<string, Regex> _cache      = new();
-    private readonly Lazy<ILogger>                       _loggerLazy = new(SoraLogger.CreateLogger<RegexMatcher>);
-    private          ILogger                             _logger => _loggerLazy.Value;
+    private readonly ConcurrentDictionary<string, Regex> _cache  = new();
+    private readonly ILogger                             _logger = SoraLogger.CreateLogger<RegexMatcher>();
 
     /// <inheritdoc />
     public MatchType MatchType => MatchType.Regex;

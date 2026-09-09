@@ -119,7 +119,7 @@ tests/
 | 变量 | 说明 |
 |------|------|
 | `SORA_TEST_FUNCTIONAL` | `true` 时运行功能测试，否则全部跳过 |
-| `SORA_LOG_LEVEL_OVERRIDE` | 框架日志级别（Trace/Debug/Info/Warn/Error/Fatal/None） |
+| `SORA_TEST_LOG_LEVEL_OVERRIDE` | 测试启动时读取一次的日志级别（Trace/Debug/Info/Warn/Error/Fatal/None，大小写不敏感）；未设置、空值或无效值默认 Debug，由测试入口显式配置，运行中修改不生效 |
 | `SORA_TEST_RESULTS_DIR` | TRX 测试结果输出目录（由 Run-Tests.ps1 自动设置） |
 
 ### 协议端配置（两端共用 PORT/TOKEN/PREFIX，仅 HOST 不同）

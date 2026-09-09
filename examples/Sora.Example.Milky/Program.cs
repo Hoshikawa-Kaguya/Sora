@@ -5,16 +5,17 @@ using Sora.Example.Milky;
 using Sora.Example.Milky.Commands;
 using Sora.Example.Milky.Filters;
 
+SoraLogger.Configure(SoraLogger.CreateDefaultLoggerConfiguration(LogLevel.Debug));
+
 // 创建服务
 SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
     new MilkyConfig
     {
-        Host            = "10.7.21.36",
-        Port            = 3010,
-        Prefix          = "milky",
-        AccessToken     = "test",
-        EventTransport  = EventTransport.WebSocket,
-        MinimumLogLevel = LogLevel.Debug
+        Host           = "10.7.21.36",
+        Port           = 3010,
+        Prefix         = "milky",
+        AccessToken    = "test",
+        EventTransport = EventTransport.WebSocket
     });
 
 ILogger logger = SoraLogger.CreateLogger("MilkyBot");

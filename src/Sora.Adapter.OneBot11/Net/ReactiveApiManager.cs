@@ -9,8 +9,7 @@ namespace Sora.Adapter.OneBot11.Net;
 /// <summary>Manages OB11 API request/response matching via Reactive echo GUIDs.</summary>
 internal sealed class ReactiveApiManager : IDisposable
 {
-    private readonly Lazy<ILogger>              _loggerLazy = new(SoraLogger.CreateLogger<ReactiveApiManager>);
-    private          ILogger                    _logger => _loggerLazy.Value;
+    private readonly ILogger                    _logger          = SoraLogger.CreateLogger<ReactiveApiManager>();
     private readonly Subject<OneBotApiResponse> _responseSubject = new();
     private readonly TimeSpan                   _timeout;
 
@@ -49,14 +48,15 @@ internal sealed class ReactiveApiManager : IDisposable
     {
         string echo = Guid.NewGuid().ToString();
         OneBotApiRequest request = new()
-            {
-                Action = action,
-                Params = parameters ?? new object(),
-                Echo   = echo
-            };
+        {
+            Action = action,
+            Params = parameters ?? new object(),
+            Echo   = echo
+        };
 
         _logger.LogDebug("OB11 Api call: {Action} [echo: {Echo}]", action, echo);
-        if (_logger.IsEnabled(LogLevel.Debug)) _logger.LogDebug("OB11 Api call payload: [{Action}]{@Para}", action, parameters);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("OB11 Api call payload: [{Action}]{@Para}", action, parameters);
 
         string json = JsonConvert.SerializeObject(request);
         Task<OneBotApiResponse> responseTask = _responseSubject

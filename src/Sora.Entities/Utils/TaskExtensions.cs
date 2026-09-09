@@ -6,8 +6,7 @@ namespace Sora.Entities.Utils;
 /// </summary>
 public static class TaskExtensions
 {
-    private static readonly Lazy<ILogger> LoggerLazy = new(() => SoraLogger.CreateLogger("Sora.TaskExtensions"));
-    private static          ILogger       Logger => LoggerLazy.Value;
+    private static ILogger Logger => SoraLogger.CreateLogger("Sora.TaskExtensions");
 
     /// <summary>
     ///     Awaits the <paramref name="task" /> and catches any exception,

@@ -9,8 +9,7 @@ internal sealed class MilkySseEventClient : IAsyncDisposable
 #region Fields
 
     private readonly MilkyConfig              _config;
-    private readonly Lazy<ILogger>            _loggerLazy = new(SoraLogger.CreateLogger<MilkySseEventClient>);
-    private          ILogger                  _logger => _loggerLazy.Value;
+    private readonly ILogger                  _logger = SoraLogger.CreateLogger<MilkySseEventClient>();
     private          CancellationTokenSource? _cts;
     private          HttpClient?              _httpClient;
 
@@ -50,7 +49,8 @@ internal sealed class MilkySseEventClient : IAsyncDisposable
         _httpClient = new HttpClient(_config.CreateHttpHandler(), true) { Timeout = Timeout.InfiniteTimeSpan };
 
         if (!string.IsNullOrEmpty(_config.AccessToken))
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _config.AccessToken);
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", _config.AccessToken);
 
         string url = _config.GetEventUrl();
         _logger.LogDebug("Milky SSE connecting to {Url}", url);
@@ -113,7 +113,7 @@ internal sealed class MilkySseEventClient : IAsyncDisposable
         while (!ct.IsCancellationRequested)
             try
             {
-                _logger.LogDebug("Milky SSE reconnecting in {Interval}...", _config.ReconnectInterval);
+                _logger.LogDebug("Milky SSE reconnecting in {Interval}s", _config.ReconnectInterval.TotalSeconds);
                 await Task.Delay(_config.ReconnectInterval, ct);
                 await ReadSseStreamAsync(url, ct);
                 return; // If stream reading returns normally, we're done

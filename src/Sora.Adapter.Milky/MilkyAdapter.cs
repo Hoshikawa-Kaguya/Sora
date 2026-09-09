@@ -15,8 +15,7 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
 #region Fields
 
     private readonly MilkyConfig          _config;
-    private readonly Lazy<ILogger>        _loggerLazy = new(SoraLogger.CreateLogger<MilkyAdapter>);
-    private          ILogger              _logger => _loggerLazy.Value;
+    private readonly ILogger              _logger = SoraLogger.CreateLogger<MilkyAdapter>();
     private          MilkyHttpApiClient?  _apiClient;
     private          BotConnection?       _connection;
     private          MilkySseEventClient? _sseClient;
@@ -74,11 +73,11 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
         _apiClient = new MilkyHttpApiClient(_config);
         MilkyBotApi botApi = new(_apiClient);
         _connection = new BotConnection
-            {
-                ConnectionId = Guid.NewGuid(),
-                Api          = botApi,
-                State        = ConnectionState.Connecting
-            };
+        {
+            ConnectionId = Guid.NewGuid(),
+            Api          = botApi,
+            State        = ConnectionState.Connecting
+        };
 
         switch (_config.EventTransport)
         {
@@ -159,13 +158,14 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
 
         (_onEvent?.Invoke(
                      new ConnectedEvent
-                         {
-                             ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
-                             SelfId       = SelfId,
-                             Time         = DateTime.Now,
-                             Api = _connection?.Api
-                                   ?? throw new InvalidOperationException("Connection not initialized when dispatching ConnectedEvent")
-                         })
+                     {
+                         ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
+                         SelfId       = SelfId,
+                         Time         = DateTime.Now,
+                         Api = _connection?.Api
+                               ?? throw new InvalidOperationException(
+                                   "Connection not initialized when dispatching ConnectedEvent")
+                     })
                  .AsTask()
          ?? Task.CompletedTask)
             .RunCatch(ex => _logger.LogError(ex, "Event handler failed for ConnectedEvent"));
@@ -180,15 +180,15 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
 
         (_onEvent?.Invoke(
                      new DisconnectedEvent
-                         {
-                             ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
-                             SelfId       = SelfId,
-                             Time         = DateTime.Now,
-                             Api = _connection?.Api
-                                   ?? throw new InvalidOperationException(
-                                       "Connection not initialized when dispatching DisconnectedEvent"),
-                             Reason       = reason
-                         })
+                     {
+                         ConnectionId = _connection?.ConnectionId ?? Guid.Empty,
+                         SelfId       = SelfId,
+                         Time         = DateTime.Now,
+                         Api = _connection?.Api
+                               ?? throw new InvalidOperationException(
+                                   "Connection not initialized when dispatching DisconnectedEvent"),
+                         Reason = reason
+                     })
                  .AsTask()
          ?? Task.CompletedTask)
             .RunCatch(ex => _logger.LogError(ex, "Event handler failed for DisconnectedEvent"));
@@ -226,7 +226,9 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
             BotEvent? soraEvent =
                 EventConverter.ToSoraEvent(evt, _connection?.ConnectionId ?? Guid.Empty, _connection?.Api!);
             //Drop message from self sent
-            if (_config.DropSelfMessage && soraEvent is MessageReceivedEvent msg && msg.Sender.UserId == msg.SelfId) return;
+            if (_config.DropSelfMessage
+                && soraEvent is MessageReceivedEvent msg
+                && msg.Sender.UserId == msg.SelfId) return;
 
             if (soraEvent is not null)
             {
@@ -258,7 +260,9 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
                 messageEvent.Message.SourceType == MessageSourceType.Group
                     ? messageEvent.Message.GroupId
                     : messageEvent.Message.SenderId,
-                messageEvent.Message.SourceType == MessageSourceType.Group ? messageEvent.Message.SenderId : string.Empty,
+                messageEvent.Message.SourceType == MessageSourceType.Group
+                    ? messageEvent.Message.SenderId
+                    : string.Empty,
                 messageEvent.Message.MessageId);
             return;
         }

@@ -10,8 +10,7 @@ internal sealed class ForwardWsClient : IAsyncDisposable
 #region Fields
 
     private readonly OneBot11Config   _config;
-    private readonly Lazy<ILogger>    _loggerLazy = new(SoraLogger.CreateLogger<ForwardWsClient>);
-    private          ILogger          _logger => _loggerLazy.Value;
+    private readonly ILogger          _logger = SoraLogger.CreateLogger<ForwardWsClient>();
     private          WebsocketClient? _client;
     private          IDisposable?     _disconnectSubscription;
     private          IDisposable?     _messageSubscription;
@@ -72,13 +71,13 @@ internal sealed class ForwardWsClient : IAsyncDisposable
                     ws.Options.SetRequestHeader("Authorization", $"Bearer {_config.AccessToken}");
                 return ws;
             })
-            {
-                // Use heartbeat interval × 3 as dead-connection timeout; fall back to 5 min if heartbeat is disabled
-                ReconnectTimeout = _config.HeartbeatInterval > TimeSpan.Zero
-                    ? _config.HeartbeatInterval * 3
-                    : TimeSpan.FromMinutes(5),
-                IsReconnectionEnabled = _config.ReconnectInterval > TimeSpan.Zero
-            };
+        {
+            // Use heartbeat interval × 3 as dead-connection timeout; fall back to 5 min if heartbeat is disabled
+            ReconnectTimeout = _config.HeartbeatInterval > TimeSpan.Zero
+                ? _config.HeartbeatInterval * 3
+                : TimeSpan.FromMinutes(5),
+            IsReconnectionEnabled = _config.ReconnectInterval > TimeSpan.Zero
+        };
 
         _messageSubscription = _client.MessageReceived
                                       .Where(msg => msg.Text is not null)
@@ -87,7 +86,9 @@ internal sealed class ForwardWsClient : IAsyncDisposable
         _reconnectSubscription = _client.ReconnectionHappened
                                         .Subscribe(info =>
                                         {
-                                            _logger.LogInformation("OB11 forward WS connected (type: {Type})", info.Type);
+                                            _logger.LogInformation(
+                                                "OB11 forward WS connected (type: {Type})",
+                                                info.Type);
                                             OnConnected?.Invoke();
                                         });
 

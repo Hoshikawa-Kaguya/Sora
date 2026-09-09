@@ -12,9 +12,7 @@ namespace Sora.Example.Milky.Filters;
 /// </summary>
 public sealed class LoggingAttribute : CommandBeforeFilterAttribute
 {
-    private static readonly Lazy<ILogger> Logger = new(SoraLogger.CreateLogger<LoggingAttribute>);
-
-    private static ILogger _logger => Logger.Value;
+    private static ILogger _logger => SoraLogger.CreateLogger<LoggingAttribute>();
 
     private int _invocationCount;
 

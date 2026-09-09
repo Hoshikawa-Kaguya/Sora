@@ -8,9 +8,8 @@ internal sealed class ReverseWsServer : IAsyncDisposable
 #region Fields
 
     private readonly OneBot11Config        _config;
-    private readonly Lock                  _lock       = new();
-    private readonly Lazy<ILogger>         _loggerLazy = new(SoraLogger.CreateLogger<ReverseWsServer>);
-    private          ILogger               _logger => _loggerLazy.Value;
+    private readonly Lock                  _lock   = new();
+    private readonly ILogger               _logger = SoraLogger.CreateLogger<ReverseWsServer>();
     private          IWebSocketConnection? _connection;
     private          WebSocketServer?      _server;
 
@@ -69,12 +68,15 @@ internal sealed class ReverseWsServer : IAsyncDisposable
                     queryToken = ampIdx >= 0 ? tokenPart[..ampIdx] : tokenPart;
                 }
 
-                string? token = authHeader is not null && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                string? token = authHeader is not null
+                                && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
                     ? authHeader["Bearer ".Length..]
                     : queryToken;
                 if (token != _config.AccessToken)
                 {
-                    _logger.LogWarning("OB11 reverse WS: Auth failed from {Client}", socket.ConnectionInfo.ClientIpAddress);
+                    _logger.LogWarning(
+                        "OB11 reverse WS: Auth failed from {Client}",
+                        socket.ConnectionInfo.ClientIpAddress);
                     socket.Close();
                     return;
                 }
@@ -88,7 +90,9 @@ internal sealed class ReverseWsServer : IAsyncDisposable
                 }
 
                 OnConnected?.Invoke();
-                _logger.LogInformation("OB11 reverse WS: Client connected from {Client}", socket.ConnectionInfo.ClientIpAddress);
+                _logger.LogInformation(
+                    "OB11 reverse WS: Client connected from {Client}",
+                    socket.ConnectionInfo.ClientIpAddress);
             };
 
             socket.OnClose = () =>

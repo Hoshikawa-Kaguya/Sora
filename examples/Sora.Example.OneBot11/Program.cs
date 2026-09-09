@@ -4,6 +4,8 @@ using Sora.Adapter.OneBot11;
 using Sora.Example.OneBot11;
 using Sora.Example.OneBot11.Filters;
 
+SoraLogger.Configure(SoraLogger.CreateDefaultLoggerConfiguration());
+
 // 创建服务
 SoraService service = SoraServiceFactory.Instance.CreateOneBot11Service(
     new OneBot11Config
@@ -12,8 +14,7 @@ SoraService service = SoraServiceFactory.Instance.CreateOneBot11Service(
         Host              = "127.0.0.1",
         Port              = 3001,
         AccessToken       = "",
-        HeartbeatInterval = TimeSpan.FromSeconds(5),
-        MinimumLogLevel   = LogLevel.Information
+        HeartbeatInterval = TimeSpan.FromSeconds(5)
     });
 
 ILogger logger = SoraLogger.CreateLogger("OneBot11Bot");

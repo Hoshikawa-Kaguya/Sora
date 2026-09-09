@@ -9,8 +9,7 @@ namespace Sora.Adapter.OneBot11.Converter;
 /// </summary>
 internal static class OneBot11MapsterConfig
 {
-    private static readonly Lazy<ILogger> LoggerLazy = new(() => SoraLogger.CreateLogger(typeof(OneBot11MapsterConfig).FullName!));
-    private static          ILogger       Logger => LoggerLazy.Value;
+    private static ILogger Logger => SoraLogger.CreateLogger(typeof(OneBot11MapsterConfig).FullName!);
 
     private static bool _configured;
 
@@ -239,33 +238,37 @@ internal static class OneBot11MapsterConfig
 
     private static MemberRole ParseMemberRole(string src) =>
         src switch
-            {
-                "owner"  => MemberRole.Owner,
-                "admin"  => MemberRole.Admin,
-                "member" => MemberRole.Member,
-                _        => LogEnumFallback(src, MemberRole.Unknown)
-            };
+        {
+            "owner"  => MemberRole.Owner,
+            "admin"  => MemberRole.Admin,
+            "member" => MemberRole.Member,
+            _        => LogEnumFallback(src, MemberRole.Unknown)
+        };
 
     private static MessageSourceType ParseMessageType(string src) =>
         src switch
-            {
-                "group"   => MessageSourceType.Group,
-                "private" => MessageSourceType.Friend,
-                _         => LogEnumFallback(src, (MessageSourceType)(-1))
-            };
+        {
+            "group"   => MessageSourceType.Group,
+            "private" => MessageSourceType.Friend,
+            _         => LogEnumFallback(src, (MessageSourceType)(-1))
+        };
 
     private static Sex ParseSex(string src) =>
         src switch
-            {
-                "male"   => Sex.Male,
-                "female" => Sex.Female,
-                _        => LogEnumFallback(src, Sex.Unknown)
-            };
+        {
+            "male"   => Sex.Male,
+            "female" => Sex.Female,
+            _        => LogEnumFallback(src, Sex.Unknown)
+        };
 
     private static T LogEnumFallback<T>(string value, T fallback) where T : struct, Enum
     {
         if (!string.IsNullOrEmpty(value))
-            Logger.LogWarning("Unknown {EnumType} value: '{Value}', using fallback {Fallback}", typeof(T).Name, value, fallback);
+            Logger.LogWarning(
+                "Unknown {EnumType} value: '{Value}', using fallback {Fallback}",
+                typeof(T).Name,
+                value,
+                fallback);
         return fallback;
     }
 }

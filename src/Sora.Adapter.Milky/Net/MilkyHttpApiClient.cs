@@ -12,8 +12,7 @@ internal sealed class MilkyHttpApiClient : IDisposable
     private static readonly JsonSerializer Serializer = JsonSerializer.CreateDefault();
     private readonly        string         _baseUrl;
     private readonly        HttpClient     _httpClient;
-    private readonly        Lazy<ILogger>  _loggerLazy = new(SoraLogger.CreateLogger<MilkyHttpApiClient>);
-    private                 ILogger        _logger => _loggerLazy.Value;
+    private readonly        ILogger        _logger = SoraLogger.CreateLogger<MilkyHttpApiClient>();
 
     /// <summary>Initializes a new instance of the <see cref="MilkyHttpApiClient" /> class.</summary>
     /// <param name="config">The Milky adapter configuration.</param>
@@ -23,7 +22,8 @@ internal sealed class MilkyHttpApiClient : IDisposable
         _httpClient = new HttpClient(config.CreateHttpHandler(), true) { Timeout = config.ApiTimeout };
 
         if (!string.IsNullOrEmpty(config.AccessToken))
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", config.AccessToken);
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", config.AccessToken);
     }
 
     /// <summary>Calls a Milky API endpoint.</summary>
@@ -37,7 +37,8 @@ internal sealed class MilkyHttpApiClient : IDisposable
         CancellationToken ct         = default)
     {
         _logger.LogDebug("Milky Api call: {Action}", action);
-        if (_logger.IsEnabled(LogLevel.Debug)) _logger.LogTrace("Milky Api call payload: [{Action}]{@Para}", action, parameters);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogTrace("Milky Api call payload: [{Action}]{@Para}", action, parameters);
         string url = $"{_baseUrl}/{action}";
         string json = parameters is not null
             ? JsonConvert.SerializeObject(parameters)
@@ -56,11 +57,11 @@ internal sealed class MilkyHttpApiClient : IDisposable
                     await using JsonTextReader reader         = new(sr);
                     MilkyApiResponse apiResponse = Serializer.Deserialize<MilkyApiResponse>(reader)
                                                    ?? new MilkyApiResponse
-                                                       {
-                                                           Status  = "failed",
-                                                           RetCode = (int)ApiStatusCode.InternalError,
-                                                           Message = "Invalid response"
-                                                       };
+                                                   {
+                                                       Status  = "failed",
+                                                       RetCode = (int)ApiStatusCode.InternalError,
+                                                       Message = "Invalid response"
+                                                   };
                     _logger.LogDebug(
                         "Milky Api call completed: [{Action}] status={Status} retCode={RetCode}",
                         action,
@@ -74,22 +75,24 @@ internal sealed class MilkyHttpApiClient : IDisposable
                         action,
                         apiResponse.RetCode);
                     return new MilkyApiResponse
-                            { Status = "failed", RetCode = apiResponse.RetCode };
+                        { Status = "failed", RetCode = apiResponse.RetCode };
                 }
                 case HttpStatusCode.Unauthorized:
                     _logger.LogWarning("Milky API call unauthorized: [{Action}]", action);
-                    return new MilkyApiResponse { Status = "failed", RetCode = (int)response.StatusCode, Message = "Unauthorized" };
+                    return new MilkyApiResponse
+                        { Status = "failed", RetCode = (int)response.StatusCode, Message = "Unauthorized" };
                 case HttpStatusCode.NotFound:
                     _logger.LogWarning("Milky API endpoint not found: [{Action}]", action);
-                    return new MilkyApiResponse { Status = "failed", RetCode = (int)response.StatusCode, Message = "API not found" };
+                    return new MilkyApiResponse
+                        { Status = "failed", RetCode = (int)response.StatusCode, Message = "API not found" };
                 case HttpStatusCode.UnsupportedMediaType:
                     _logger.LogWarning("Milky API rejected content type for [{Action}]", action);
                     return new MilkyApiResponse
-                            { Status = "failed", RetCode = (int)response.StatusCode, Message = "Unsupported Content-Type" };
+                        { Status = "failed", RetCode = (int)response.StatusCode, Message = "Unsupported Content-Type" };
                 case HttpStatusCode.InternalServerError:
                     _logger.LogError("Milky API internal server error for [{Action}]", action);
                     return new MilkyApiResponse
-                            { Status = "failed", RetCode = (int)response.StatusCode, Message = "Internal Server Error" };
+                        { Status = "failed", RetCode = (int)response.StatusCode, Message = "Internal Server Error" };
                 default:
                     _logger.LogError(
                         "Milky API call [{Action}] return unknown status code: [{code}]{intCode}",
@@ -97,18 +100,20 @@ internal sealed class MilkyHttpApiClient : IDisposable
                         response.StatusCode,
                         (int)response.StatusCode);
                     return new MilkyApiResponse
-                            { Status = "failed", RetCode = (int)response.StatusCode, Message = "Unknown response" };
+                        { Status = "failed", RetCode = (int)response.StatusCode, Message = "Unknown response" };
             }
         }
         catch (TaskCanceledException)
         {
             _logger.LogWarning("Milky API call timed out: {Action}", action);
-            return new MilkyApiResponse { Status = "failed", RetCode = (int)ApiStatusCode.Timeout, Message = "Request timed out" };
+            return new MilkyApiResponse
+                { Status = "failed", RetCode = (int)ApiStatusCode.Timeout, Message = "Request timed out" };
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Milky API call failed: {Action}", action);
-            return new MilkyApiResponse { Status = "failed", RetCode = (int)ApiStatusCode.InternalError, Message = ex.Message };
+            return new MilkyApiResponse
+                { Status = "failed", RetCode = (int)ApiStatusCode.InternalError, Message = ex.Message };
         }
     }
 

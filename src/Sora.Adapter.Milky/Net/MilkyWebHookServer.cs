@@ -8,8 +8,7 @@ internal sealed class MilkyWebHookServer : IAsyncDisposable
 #region Fields
 
     private readonly MilkyConfig              _config;
-    private readonly Lazy<ILogger>            _loggerLazy = new(SoraLogger.CreateLogger<MilkyWebHookServer>);
-    private          ILogger                  _logger => _loggerLazy.Value;
+    private readonly ILogger                  _logger = SoraLogger.CreateLogger<MilkyWebHookServer>();
     private          CancellationTokenSource? _cts;
     private          HttpListener?            _listener;
 

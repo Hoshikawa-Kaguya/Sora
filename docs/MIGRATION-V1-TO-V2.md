@@ -641,17 +641,19 @@ Log.Info("MyBot", "启动成功");
 
 // 2.0：Serilog（通过 Microsoft.Extensions.Logging 抽象）
 using Microsoft.Extensions.Logging;
-
-ILogger logger = SoraLogger.CreateLogger("MyBot");
-logger.LogInformation("启动成功");
+using Sora.Entities;
 
 // 自定义日志工厂（可选）
-// 在创建 SoraService 之前设置
-ILoggerFactory customFactory = LoggerFactory.Create(builder =>
+// 在首次获取 Sora Logger 前配置，工厂须覆盖所有服务的生命周期。
+using ILoggerFactory customFactory = LoggerFactory.Create(builder =>
 {
     builder.AddConsole();
     builder.SetMinimumLevel(LogLevel.Debug);
 });
+SoraLogger.Configure(customFactory);
+
+ILogger logger = SoraLogger.CreateLogger("MyBot");
+logger.LogInformation("启动成功");
 ```
 
 详见 [日志配置](LOGGING.md)。

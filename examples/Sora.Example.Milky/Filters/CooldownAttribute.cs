@@ -10,7 +10,7 @@ namespace Sora.Example.Milky.Filters;
 /// </summary>
 public sealed class CooldownAttribute : CommandBeforeFilterAttribute
 {
-    private static readonly Lazy<ILogger> Logger = new(SoraLogger.CreateLogger<CooldownAttribute>);
+    private static ILogger Logger => SoraLogger.CreateLogger<CooldownAttribute>();
 
     private readonly Lock                         _cooldownLock = new();
     private readonly Dictionary<string, DateTime> _cooldowns    = [];
@@ -39,7 +39,7 @@ public sealed class CooldownAttribute : CommandBeforeFilterAttribute
             if (_cooldowns.TryGetValue(key, out DateTime lastExec)
                 && (elapsed = now - lastExec) < Cooldown)
             {
-                Logger.Value.LogWarning(
+                Logger.LogWarning(
                     "[Cooldown] Command {CommandName} blocked for user {UserId} (cooldown active), last exec command duration {Duration} s.",
                     cmd.Method.Name,
                     e.Message.SenderId,

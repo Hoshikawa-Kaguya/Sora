@@ -1,6 +1,3 @@
-using Serilog.Core;
-using Serilog.Extensions.Logging;
-using Sora.Entities.Utils;
 using Xunit;
 
 namespace Sora.Tests.Functional.Milky;
@@ -30,7 +27,7 @@ public sealed class MilkyTestFixture : IAsyncLifetime
     public MilkyBotApi? Api => PrimaryApi;
 
     /// <summary>Serilog sink that forwards log events to subscribed <c>ITestOutputHelper</c> instances.</summary>
-    public TestOutputSink OutputSink { get; } = new();
+    public TestOutputSink OutputSink => TestLogging.OutputSink;
 
     /// <summary>The active primary <see cref="SoraService" /> instance, if started.</summary>
     public SoraService? Service { get; private set; }
@@ -44,23 +41,16 @@ public sealed class MilkyTestFixture : IAsyncLifetime
         TestTimingStore.StartTimer("Func", "Milky");
         if (TestConfig.SkipMilkyReason is not null) return;
 
-        LogLevel? currentLogLevel = SysUtils.GetEnvLogLevelOverride();
-        Logger serilogLogger = SoraService.CreateDefaultLoggerConfiguration(currentLogLevel ?? LogLevel.Debug)
-                                          .WriteTo.Sink(OutputSink)
-                                          .CreateLogger();
-        ILoggerFactory factory = new SerilogLoggerFactory(serilogLogger, true);
-
         // ---- Primary Bot ----
         MilkyConfig primaryConfig = new()
-            {
-                Host           = TestConfig.MilkyPrimaryHost,
-                Port           = TestConfig.MilkyPort,
-                Prefix         = TestConfig.MilkyPrefix,
-                AccessToken    = TestConfig.MilkyToken,
-                EventTransport = EventTransport.WebSocket,
-                ApiTimeout     = TimeSpan.FromSeconds(15),
-                LoggerFactory  = factory
-            };
+        {
+            Host           = TestConfig.MilkyPrimaryHost,
+            Port           = TestConfig.MilkyPort,
+            Prefix         = TestConfig.MilkyPrefix,
+            AccessToken    = TestConfig.MilkyToken,
+            EventTransport = EventTransport.WebSocket,
+            ApiTimeout     = TimeSpan.FromSeconds(15)
+        };
 
         Service = SoraServiceFactory.Instance.CreateMilkyService(primaryConfig);
         Service.Events.OnConnected += e =>
@@ -83,21 +73,15 @@ public sealed class MilkyTestFixture : IAsyncLifetime
         // ---- Secondary Bot (only if configured) ----
         if (TestConfig.IsMilkyDualBotConfigured && PrimaryApi is not null)
         {
-            Logger secondaryLogger = SoraService.CreateDefaultLoggerConfiguration(currentLogLevel ?? LogLevel.Debug)
-                                                .WriteTo.Sink(OutputSink)
-                                                .CreateLogger();
-            ILoggerFactory secondaryFactory = new SerilogLoggerFactory(secondaryLogger, true);
-
             MilkyConfig secondaryConfig = new()
-                {
-                    Host           = TestConfig.MilkySecondaryHost,
-                    Port           = TestConfig.MilkyPort,
-                    Prefix         = TestConfig.MilkyPrefix,
-                    AccessToken    = TestConfig.MilkyToken,
-                    EventTransport = EventTransport.WebSocket,
-                    ApiTimeout     = TimeSpan.FromSeconds(15),
-                    LoggerFactory  = secondaryFactory
-                };
+            {
+                Host           = TestConfig.MilkySecondaryHost,
+                Port           = TestConfig.MilkyPort,
+                Prefix         = TestConfig.MilkyPrefix,
+                AccessToken    = TestConfig.MilkyToken,
+                EventTransport = EventTransport.WebSocket,
+                ApiTimeout     = TimeSpan.FromSeconds(15)
+            };
 
             SecondaryService = SoraServiceFactory.Instance.CreateMilkyService(secondaryConfig);
             SecondaryService.Events.OnConnected += e =>

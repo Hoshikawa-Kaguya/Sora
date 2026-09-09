@@ -17,8 +17,7 @@ public sealed class CommandManager
     private readonly List<CommandInfo> _commands = [];
     private readonly ConcurrentDictionary<Type, object> _instances = new();
     private readonly Lock _lock = new();
-    private readonly Lazy<ILogger> _loggerLazy = new(SoraLogger.CreateLogger<CommandManager>);
-    private          ILogger _logger => _loggerLazy.Value;
+    private readonly ILogger _logger = SoraLogger.CreateLogger<CommandManager>();
     private readonly ConcurrentDictionary<MatchType, ICommandMatcher> _matchers = new();
     private readonly HashSet<Type> _scannedTypes = [];
     private          bool _needsSort;
@@ -482,10 +481,12 @@ public sealed class CommandManager
     }
 
     private async ValueTask ExecuteMatchedCommandAsync(
-        CommandInfo cmd, MessageReceivedEvent e, CancellationToken ct)
+        CommandInfo          cmd,
+        MessageReceivedEvent e,
+        CancellationToken    ct)
     {
-        CommandFilterContext filterContext = CreateFilterContext(cmd);
-        bool shortCircuited = await ExecuteBeforeFiltersAsync(cmd, e, filterContext, ct);
+        CommandFilterContext filterContext  = CreateFilterContext(cmd);
+        bool                 shortCircuited = await ExecuteBeforeFiltersAsync(cmd, e, filterContext, ct);
         Exception? commandException = shortCircuited
             ? null
             : await ExecuteCommandHandlerAsync(cmd, e, ct);
@@ -493,7 +494,10 @@ public sealed class CommandManager
     }
 
     private async ValueTask<bool> ExecuteBeforeFiltersAsync(
-        CommandInfo cmd, MessageReceivedEvent e, CommandFilterContext filterContext, CancellationToken ct)
+        CommandInfo          cmd,
+        MessageReceivedEvent e,
+        CommandFilterContext filterContext,
+        CancellationToken    ct)
     {
         foreach (CommandBeforeFilterAttribute beforeFilter in cmd.BeforeFilters)
             try
@@ -523,7 +527,9 @@ public sealed class CommandManager
     }
 
     private async ValueTask<Exception?> ExecuteCommandHandlerAsync(
-        CommandInfo cmd, MessageReceivedEvent e, CancellationToken ct)
+        CommandInfo          cmd,
+        MessageReceivedEvent e,
+        CancellationToken    ct)
     {
         try
         {
@@ -570,8 +576,12 @@ public sealed class CommandManager
     }
 
     private async ValueTask ExecuteAfterFiltersAsync(
-        CommandInfo cmd, MessageReceivedEvent e, CommandFilterContext filterContext,
-        bool shortCircuited, Exception? commandException, CancellationToken ct)
+        CommandInfo          cmd,
+        MessageReceivedEvent e,
+        CommandFilterContext filterContext,
+        bool                 shortCircuited,
+        Exception?           commandException,
+        CancellationToken    ct)
     {
         foreach (CommandAfterFilterAttribute afterFilter in cmd.AfterFilters)
             try

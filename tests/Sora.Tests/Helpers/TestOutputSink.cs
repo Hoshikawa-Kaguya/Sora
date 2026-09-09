@@ -8,7 +8,7 @@ namespace Sora.Tests.Helpers;
 /// <summary>
 ///     Thread-safe Serilog <see cref="ILogEventSink" /> that forwards formatted log events
 ///     to dynamically registered subscribers. Designed for xUnit functional tests where
-///     a shared collection fixture creates the Serilog logger, and individual test classes
+///     the test process configures one shared Serilog logger, and individual test classes
 ///     subscribe their <c>ITestOutputHelper</c> to receive log output.
 /// </summary>
 /// <remarks>
@@ -38,7 +38,7 @@ public sealed class TestOutputSink : ILogEventSink
     /// <summary>Creates a new <see cref="TestOutputSink" /> with the specified Serilog output template.</summary>
     /// <param name="outputTemplate">
     ///     The Serilog message template used to format log events.
-    ///     Defaults to the same template used by <c>SoraService.CreateDefaultLoggerConfiguration</c>.
+    ///     Defaults to the same template used by <see cref="SoraLogger.CreateDefaultLoggerConfiguration" />.
     /// </param>
     /// <param name="replayCapacity">
     ///     Maximum number of recent log messages retained for replay to new subscribers.
