@@ -99,12 +99,11 @@ public static class SoraLogger
 
 #endregion
 
-    [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
     private static ILoggerFactory GetFactory()
     {
-        if (_factory is not null) return _factory;
         lock (InitializationLock)
         {
+            if (_factory is not null) return _factory;
             EnsureConfigurationAvailable();
             return _factory = BuildFactory();
         }
