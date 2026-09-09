@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Destructurama;
 using Microsoft.Extensions.Logging.Abstractions;
 using Serilog;

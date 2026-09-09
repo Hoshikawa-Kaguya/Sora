@@ -1,6 +1,3 @@
-using Microsoft.Extensions.Logging;
-using Sora.Entities;
-
 namespace Sora.Tests.Helpers;
 
 /// <summary>Configures the shared test-process log backend before framework use.</summary>
