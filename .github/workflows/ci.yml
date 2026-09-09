@@ -59,6 +59,34 @@ jobs:
         uses: dotnet/nbgv@master
         id: nbgv
 
+      - name: Detect version change
+        id: version
+        shell: bash
+        run: |
+          BASE="${{ github.event.before }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE=$(git merge-base "${{ github.event.pull_request.base.sha }}" HEAD)
+          fi
+
+          VERSION_CHANGED=false
+          if [ -n "$BASE" ] && [ "$BASE" != "0000000000000000000000000000000000000000" ]; then
+            if git diff --name-only "$BASE" HEAD | grep -qE '^src/[^/]+/version\.json$'; then
+              VERSION_CHANGED=true
+            fi
+          fi
+
+          echo "version-changed=$VERSION_CHANGED" >> "$GITHUB_OUTPUT"
+          mkdir -p ./filtered
+          cat > ./filtered/release-metadata.json <<EOF
+          {
+            "branch": "${GITHUB_REF_NAME}",
+            "commit": "${GITHUB_SHA}",
+            "versionChanged": $VERSION_CHANGED,
+            "packageVersion": "${{ steps.nbgv.outputs.NuGetPackageVersion }}",
+            "isPrerelease": $([ "${GITHUB_REF_NAME}" = "dev" ] && echo true || echo false)
+          }
+          EOF
+
       - name: Restore
         run: dotnet restore Sora.slnx
 
@@ -170,9 +198,7 @@ jobs:
           fi
 
       - name: Upload NuGet packages
-        if: >-
-          steps.filter.outputs.has-packages == 'true' &&
-          (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+        if: steps.filter.outputs.has-packages == 'true' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
         uses: actions/upload-artifact@v4
         with:
           name: nupkg

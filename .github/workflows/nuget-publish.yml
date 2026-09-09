@@ -32,8 +32,29 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Push to NuGet
+      - name: Decide whether to publish
+        id: gate
         if: steps.download.outcome == 'success'
+        shell: bash
+        run: |
+          if [ ! -f ./nupkg/release-metadata.json ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          VERSION_CHANGED=$(jq -r '.versionChanged' ./nupkg/release-metadata.json)
+          PRERELEASE=$(jq -r '.isPrerelease' ./nupkg/release-metadata.json)
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          PUBLISH=false
+          if [ "$VERSION_CHANGED" = "true" ] && [ "$BRANCH" = "master" ] && [ "$PRERELEASE" = "false" ]; then
+            PUBLISH=true
+          elif [ "$VERSION_CHANGED" = "true" ] && [ "$BRANCH" = "dev" ] && [ "$PRERELEASE" = "true" ]; then
+            PUBLISH=true
+          fi
+          echo "publish=$PUBLISH" >> "$GITHUB_OUTPUT"
+
+      - name: Push to NuGet
+        if: steps.gate.outputs.publish == 'true'
         run: >-
           dotnet nuget push "./nupkg/*.nupkg"
           --api-key ${{ secrets.NUGET_API_KEY }}
