@@ -548,31 +548,5 @@ public class CommandMatcherTests
         Assert.False(result);
     }
 
-    private static MessageReceivedEvent CreateEvent(string text) =>
-        new()
-        {
-            Api          = null!,
-            ConnectionId = Guid.NewGuid(),
-            SelfId       = 1L,
-            Time         = DateTime.Now,
-            Message = new MessageContext
-            {
-                MessageId  = 1,
-                SourceType = MessageSourceType.Group,
-                GroupId    = 100L,
-                SenderId   = 200L,
-                Body       = new MessageBody(text)
-            }
-        };
-
-    /// <summary>Matcher used to verify external matcher registration.</summary>
-    private sealed class MappingMatcher : ICommandMatcher
-    {
-        public MatchType MatchType => MatchType.Full;
-
-        public bool IsMatch(string input, string expression) =>
-            input == "custom-input" && expression == "registered-expression";
-    }
-
 #endregion
 }

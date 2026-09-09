@@ -1,5 +1,6 @@
 using Xunit;
 using Sora.Entities.MessageWaiting;
+// ReSharper disable AccessToDisposedClosure
 
 namespace Sora.Tests.Unit.Entities;
 
@@ -769,7 +770,7 @@ public class EventPipelineFilterTests : IAsyncDisposable
     {
         public required Exception Exception { get; init; }
 
-        public Type[]? EventTypes => throw Exception;
+        public Type[] EventTypes => throw Exception;
 
         public ValueTask<bool> OnEventAsync(BotEvent e, CancellationToken ct) => new(true);
     }
@@ -847,7 +848,8 @@ public class EventPipelineFilterTests : IAsyncDisposable
 
         public Type[]?               EventTypes  { get; init; }
         public MessageSourceType[]?  SourceTypes { get; init; }
-        public Func<BotEvent, bool>? Predicate   { get; init; }
+        // ReSharper disable once UnassignedGetOnlyAutoProperty
+        public Func<BotEvent, bool>? Predicate   { get; }
 
         public ValueTask OnEventProcessedAsync(BotEvent e, bool chainCompleted, CancellationToken ct)
         {

@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using Sora.Command.InternalEntities;
 using Xunit;
+// ReSharper disable AccessToDisposedClosure
 
 namespace Sora.Tests.Unit.Command;
 
@@ -744,7 +745,7 @@ public class CommandFilterTests : IDisposable
         await _manager.HandleMessageEventAsync(CreateTestEvent("pass"), CT);
 
         Assert.NotNull(PassThroughBeforeAttribute.LastContext);
-        Assert.Equal(nameof(FilterTestCommands.PassThroughCmd), PassThroughBeforeAttribute.LastContext!.Method.Name);
+        Assert.Equal(nameof(FilterTestCommands.PassThroughCmd), PassThroughBeforeAttribute.LastContext.Method.Name);
         Assert.Contains("pass", PassThroughBeforeAttribute.LastContext.Expressions);
         Assert.Equal(MatchType.Full, PassThroughBeforeAttribute.LastContext.MatchType);
         Assert.Equal(typeof(FilterTestCommands), PassThroughBeforeAttribute.LastContext.DeclaringType);
@@ -765,8 +766,8 @@ public class CommandFilterTests : IDisposable
 
         // The CommandFilterContext.Attributes collection must contain that exact instance.
         Assert.Contains(
-            PassThroughBeforeAttribute.LastInstance!,
-            PassThroughBeforeAttribute.LastContext!.Attributes);
+            PassThroughBeforeAttribute.LastInstance,
+            PassThroughBeforeAttribute.LastContext.Attributes);
     }
 
     /// <summary>Filter context collections are read-only snapshots and cannot mutate command metadata.</summary>
@@ -776,7 +777,7 @@ public class CommandFilterTests : IDisposable
         await _manager.HandleMessageEventAsync(CreateTestEvent("pass"), CT);
 
         Assert.NotNull(PassThroughBeforeAttribute.LastContext);
-        IReadOnlyList<string>    expressions = PassThroughBeforeAttribute.LastContext!.Expressions;
+        IReadOnlyList<string>    expressions = PassThroughBeforeAttribute.LastContext.Expressions;
         IReadOnlyList<Attribute> attributes  = PassThroughBeforeAttribute.LastContext.Attributes;
 
         IList<string>    expressionList = Assert.IsAssignableFrom<IList<string>>(expressions);
@@ -929,7 +930,7 @@ public class CommandFilterTests : IDisposable
         Assert.NotNull(PassThroughBeforeAttribute.LastContext);
         Assert.Equal(
             1,
-            PassThroughBeforeAttribute.LastContext!.Attributes
+            PassThroughBeforeAttribute.LastContext.Attributes
                                       .Count(a => ReferenceEquals(a, filter)));
     }
 
@@ -1098,7 +1099,7 @@ public class CommandFilterTests : IDisposable
 
         [RecordingAfter]
         [Command(Expressions = ["cancel-sync"], MatchType = MatchType.Full)]
-        public ValueTask Sync(MessageReceivedEvent e)
+        public ValueTask Sync(MessageReceivedEvent _)
         {
             if (++Calls != 1) return ValueTask.CompletedTask;
             if (CancelSora) Source.Cancel();
@@ -1107,7 +1108,7 @@ public class CommandFilterTests : IDisposable
 
         [RecordingAfter]
         [Command(Expressions = ["cancel-async"], MatchType = MatchType.Full)]
-        public async ValueTask Async(MessageReceivedEvent e)
+        public async ValueTask Async(MessageReceivedEvent _)
         {
             await Task.Yield();
             if (++Calls != 1) return;

@@ -1,4 +1,5 @@
 ﻿using Xunit;
+// ReSharper disable AccessToDisposedClosure
 
 namespace Sora.Tests.Unit.Entities;
 
