@@ -86,6 +86,9 @@ public sealed class SoraService : IBotService
     /// <exception cref="InvalidOperationException">Thrown when called after <see cref="StartAsync" /> has begun.</exception>
     public void UseEventPreFilter(IEventPreFilter filter)
     {
+        if (filter.EventTypes is { Length: > 0 } 
+            && filter.EventTypes.Any(t => !typeof(BotEvent).IsAssignableFrom(t)))
+            throw new InvalidOperationException("All elements of EventTypes must be subclasses of BotEvent.");
         lock (_filterRegistrationLock)
         {
             if (_filterRegistrationClosed)
@@ -106,6 +109,9 @@ public sealed class SoraService : IBotService
     /// <exception cref="InvalidOperationException">Thrown when called after <see cref="StartAsync" /> has begun.</exception>
     public void UseEventPostFilter(IEventPostFilter filter)
     {
+        if (filter.EventTypes is { Length: > 0 } 
+            && filter.EventTypes.Any(t => !typeof(BotEvent).IsAssignableFrom(t)))
+            throw new InvalidOperationException("All elements of EventTypes must be subclasses of BotEvent.");
         lock (_filterRegistrationLock)
         {
             if (_filterRegistrationClosed)
