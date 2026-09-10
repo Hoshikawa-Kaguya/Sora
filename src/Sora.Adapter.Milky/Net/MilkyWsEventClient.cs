@@ -47,7 +47,13 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
     public async ValueTask ConnectAsync(CancellationToken ct = default)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        await ConnectLoopAsync(ct);
+        bool reconnect = false;
+        // Auto reconnect
+        while (!ct.IsCancellationRequested)
+        {
+            await ConnectLoopAsync(reconnect, ct);
+            reconnect = true;
+        }
     }
 
     /// <summary>Disconnects from the WebSocket.</summary>
@@ -115,7 +121,7 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
         }
         catch (OperationCanceledException)
         {
-            return;
+            //direct return
         }
         catch (WebSocketException ex)
         {
@@ -126,20 +132,17 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
         {
             ArrayPool<byte>.Shared.Return(buffer);
         }
-
-        // After loop exits (disconnected), attempt reconnect
-        if (!ct.IsCancellationRequested)
-            await ConnectLoopAsync(ct, true);
     }
 
     /// <summary>Try to connect milky server, auto reconnect in config ReconnectInterval.</summary>
-    /// <param name="ct">Cancellation token.</param>
     /// <param name="reconnect">Is reconnect call</param>
-    private async Task ConnectLoopAsync(CancellationToken ct, bool reconnect = false)
+    /// <param name="ct">Cancellation token.</param>
+    private async Task ConnectLoopAsync(bool reconnect, CancellationToken ct)
     {
         bool firstCall = true;
         if (reconnect) OnReconnecting?.Invoke();
-        Uri url = new(_config.GetEventUrl(true));
+        int tryCount = 0;
+        Uri url      = new(_config.GetEventUrl(true));
 
         while (!ct.IsCancellationRequested)
             try
@@ -148,6 +151,7 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
                 {
                     _logger.LogDebug("Milky WS reconnecting in {Interval}s", _config.ReconnectInterval.TotalSeconds);
                     await Task.Delay(_config.ReconnectInterval, ct);
+                    _logger.LogDebug("Milky WS reconnecting, count:{tryCount}", ++tryCount);
                 }
                 else
                 {
@@ -172,6 +176,7 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Milky WS connection lost");
                 string failMsg = !firstCall || reconnect
                     ? $"Reconnect failed: {ex.Message}"
                     : $"Connect failed: {ex.Message}";

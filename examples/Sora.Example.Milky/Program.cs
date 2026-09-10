@@ -11,7 +11,7 @@ SoraLogger.Configure(SoraLogger.CreateDefaultLoggerConfiguration(LogLevel.Debug)
 SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
     new MilkyConfig
     {
-        Host           = "10.7.21.36",
+        Host           = "127.0.0.1",
         Port           = 3010,
         Prefix         = "milky",
         AccessToken    = "test",

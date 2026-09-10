@@ -43,20 +43,16 @@ internal sealed class MilkySseEventClient : IAsyncDisposable
     /// <summary>Connects to the Milky event SSE endpoint.</summary>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A task representing the asynchronous connect operation.</returns>
-    public ValueTask ConnectAsync(CancellationToken ct = default)
+    public async ValueTask ConnectAsync(CancellationToken ct = default)
     {
-        _cts        = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        _httpClient = new HttpClient(_config.CreateHttpHandler(), true) { Timeout = Timeout.InfiniteTimeSpan };
-
-        if (!string.IsNullOrEmpty(_config.AccessToken))
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", _config.AccessToken);
-
-        string url = _config.GetEventUrl();
-        _logger.LogDebug("Milky SSE connecting to {Url}", url);
-        _ = ReadSseStreamAsync(url, _cts.Token);
-
-        return ValueTask.CompletedTask;
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        bool reconnect = false;
+        // Auto reconnect
+        while (!ct.IsCancellationRequested)
+        {
+            await ConnectLoopAsync(reconnect, ct);
+            reconnect = true;
+        }
     }
 
     /// <summary>Disconnects from the SSE stream.</summary>
@@ -73,7 +69,7 @@ internal sealed class MilkySseEventClient : IAsyncDisposable
     /// <summary>Continuously reads events from the SSE stream.</summary>
     /// <param name="url">The SSE endpoint URL.</param>
     /// <param name="ct">Cancellation token.</param>
-    private async Task ReadSseStreamAsync(string url, CancellationToken ct)
+    private async Task ConnectSseServer(string url, CancellationToken ct)
     {
         try
         {
@@ -86,36 +82,46 @@ internal sealed class MilkySseEventClient : IAsyncDisposable
             await using Stream stream = await response.Content.ReadAsStreamAsync(ct);
             using StreamReader reader = new(stream);
 
-            await ParseSseStreamAsync(reader, msg => OnMessage?.Invoke(msg), ct);
+            await SseStreamLoopAsync(reader, msg => OnMessage?.Invoke(msg), ct);
         }
         catch (OperationCanceledException)
         {
-            return;
+            //direct return
         }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Milky SSE connection lost");
-            OnDisconnected?.Invoke(ex.Message);
-        }
-
-        // After stream ends (disconnected), attempt reconnect
-        if (!ct.IsCancellationRequested)
-            await ReconnectSseAsync(url, ct);
     }
 
     /// <summary>Attempts to reconnect to the SSE stream after disconnection.</summary>
-    /// <param name="url">The SSE endpoint URL.</param>
+    /// <param name="reconnect">Reconnect flag</param>
     /// <param name="ct">Cancellation token.</param>
-    private async Task ReconnectSseAsync(string url, CancellationToken ct)
+    private async Task ConnectLoopAsync(bool reconnect, CancellationToken ct)
     {
-        OnReconnecting?.Invoke();
+        bool firstCall = true;
+        if (reconnect) OnReconnecting?.Invoke();
+        int tryCount = 0;
 
+        //httpclient
+        _httpClient?.Dispose();
+        _httpClient = new HttpClient(_config.CreateHttpHandler(), true) { Timeout = Timeout.InfiniteTimeSpan };
+        if (!string.IsNullOrEmpty(_config.AccessToken))
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", _config.AccessToken);
+
+        string url = _config.GetEventUrl();
         while (!ct.IsCancellationRequested)
             try
             {
-                _logger.LogDebug("Milky SSE reconnecting in {Interval}s", _config.ReconnectInterval.TotalSeconds);
-                await Task.Delay(_config.ReconnectInterval, ct);
-                await ReadSseStreamAsync(url, ct);
+                if (!firstCall || reconnect)
+                {
+                    _logger.LogDebug("Milky SSE reconnecting in {Interval}s", _config.ReconnectInterval.TotalSeconds);
+                    await Task.Delay(_config.ReconnectInterval, ct);
+                    _logger.LogDebug("Milky SSE reconnecting, count:{tryCount}", ++tryCount);
+                }
+                else
+                {
+                    _logger.LogDebug("Milky SSE connecting to {Url}", url);
+                }
+
+                await ConnectSseServer(url, ct);
                 return; // If stream reading returns normally, we're done
             }
             catch (OperationCanceledException)
@@ -124,7 +130,15 @@ internal sealed class MilkySseEventClient : IAsyncDisposable
             }
             catch (Exception ex)
             {
-                OnDisconnected?.Invoke($"Reconnect failed: {ex.Message}");
+                _logger.LogError(ex, "Milky SSE connection lost");
+                string failMsg = !firstCall || reconnect
+                    ? $"Reconnect failed: {ex.Message}"
+                    : $"Connect failed: {ex.Message}";
+                OnDisconnected?.Invoke(failMsg);
+            }
+            finally
+            {
+                firstCall = false;
             }
     }
 
@@ -135,7 +149,7 @@ internal sealed class MilkySseEventClient : IAsyncDisposable
     /// <param name="reader">The text reader providing SSE lines.</param>
     /// <param name="onMessage">Callback invoked with the accumulated data for each dispatched event.</param>
     /// <param name="ct">Cancellation token.</param>
-    internal static async Task ParseSseStreamAsync(TextReader reader, Action<string> onMessage, CancellationToken ct)
+    internal static async Task SseStreamLoopAsync(TextReader reader, Action<string> onMessage, CancellationToken ct)
     {
         StringBuilder dataBuffer     = new();
         bool          shouldDispatch = true;

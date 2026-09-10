@@ -11,7 +11,7 @@ public class SseParsingTests
 {
 #region Basic Parsing Tests
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task SingleDataLine_DispatchesMessage()
     {
@@ -22,7 +22,7 @@ public class SseParsingTests
         Assert.Equal("{\"type\":\"test\"}", messages[0]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task MultipleEvents_AllDispatched()
     {
@@ -42,7 +42,7 @@ public class SseParsingTests
         Assert.Equal("third", messages[2]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task MultiLineData_JoinedWithNewline()
     {
@@ -53,7 +53,7 @@ public class SseParsingTests
         Assert.Equal("hello\nworld", messages[0]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task ThreeDataLines_JoinedWithNewlines()
     {
@@ -68,7 +68,7 @@ public class SseParsingTests
 
 #region Data Format Tests
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task DataWithoutSpace_DispatchesMessage()
     {
@@ -79,7 +79,7 @@ public class SseParsingTests
         Assert.Equal("{\"type\":\"test\"}", messages[0]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task DataWithExtraSpaces_PreservesAfterFirst()
     {
@@ -91,7 +91,7 @@ public class SseParsingTests
         Assert.Equal(" two spaces", messages[0]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task DataContainingColons_PreservesColons()
     {
@@ -107,7 +107,7 @@ public class SseParsingTests
 
 #region Event Type Tests
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task NoEventType_Dispatched()
     {
@@ -117,7 +117,7 @@ public class SseParsingTests
         Assert.Single(messages);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task MilkyEventType_Dispatched()
     {
@@ -128,7 +128,7 @@ public class SseParsingTests
         Assert.Equal("{\"ok\":true}", messages[0]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task EventTypeWithoutSpace_Dispatched()
     {
@@ -139,7 +139,7 @@ public class SseParsingTests
         Assert.Equal("ok", messages[0]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task UnknownEventType_NotDispatched()
     {
@@ -149,7 +149,7 @@ public class SseParsingTests
         Assert.Empty(messages);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task MixedEventTypes_OnlyMilkyDispatched()
     {
@@ -170,7 +170,7 @@ public class SseParsingTests
         Assert.Equal("also-wanted", messages[1]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task EventTypeResets_BetweenEvents()
     {
@@ -192,7 +192,7 @@ public class SseParsingTests
 
 #region Ignored Content Tests
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task CommentLines_Ignored()
     {
@@ -203,7 +203,7 @@ public class SseParsingTests
         Assert.Equal("real", messages[0]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task CommentBetweenDataLines_Ignored()
     {
@@ -214,7 +214,7 @@ public class SseParsingTests
         Assert.Equal("first\nsecond", messages[0]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task UnknownFields_Skipped()
     {
@@ -225,7 +225,7 @@ public class SseParsingTests
         Assert.Equal("payload", messages[0]);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task LineWithNoColon_Skipped()
     {
@@ -240,7 +240,7 @@ public class SseParsingTests
 
 #region Edge Case Tests
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task EmptyDataField_NoDispatch()
     {
@@ -251,7 +251,7 @@ public class SseParsingTests
         Assert.Empty(messages);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task EmptyLineWithoutData_NoDispatch()
     {
@@ -261,7 +261,7 @@ public class SseParsingTests
         Assert.Empty(messages);
     }
 
-    /// <see cref="MilkySseEventClient.ParseSseStreamAsync" />
+    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
     public async Task CancelledToken_StopsProcessing()
     {
@@ -280,7 +280,7 @@ public class SseParsingTests
         using StringReader reader = new(sb.ToString());
         await cts.CancelAsync();
 
-        await MilkySseEventClient.ParseSseStreamAsync(reader, msg => messages.Add(msg), cts.Token);
+        await MilkySseEventClient.SseStreamLoopAsync(reader, msg => messages.Add(msg), cts.Token);
 
         Assert.Empty(messages);
     }
@@ -292,7 +292,7 @@ public class SseParsingTests
     {
         List<string>       messages = [];
         using StringReader reader   = new(sseText);
-        await MilkySseEventClient.ParseSseStreamAsync(reader, msg => messages.Add(msg), CancellationToken.None);
+        await MilkySseEventClient.SseStreamLoopAsync(reader, msg => messages.Add(msg), CancellationToken.None);
         return messages;
     }
 }
