@@ -17,6 +17,9 @@
         <a href="https://github.com/Hoshikawa-Kaguya/Sora/actions/workflows/ci.yml">
             <img src="https://img.shields.io/github/actions/workflow/status/Hoshikawa-Kaguya/Sora/ci.yml?branch=master&&style=for-the-badge" alt="workflow">
         </a>
+        <a href="https://milky.ntqqrev.org/">
+            <img src="https://img.shields.io/badge/Milky-V1.3-3A5893?style=for-the-badge" alt="workflow">
+        </a>
         <a href="https://qm.qq.com/q/ihFxIezORq">
             <img src="https://img.shields.io/badge/QQ%20-1081190562-0055F5?style=for-the-badge" alt="workflow">
         </a>
