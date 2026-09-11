@@ -21,7 +21,7 @@ public static class ConversationCommands
         await Helpers.SendReplyAsync(e, new MessageBody("☕ 欢迎点单！请选择饮料：\n1. 拿铁\n2. 美式\n3. 抹茶"));
 
         MessageReceivedEvent? step1 = await e.WaitForNextMessageAsync(
-                ["1", "2", "3"],
+            ["1", "2", "3"],
             MatchType.Full,
             TimeSpan.FromSeconds(30));
 
@@ -32,18 +32,18 @@ public static class ConversationCommands
         }
 
         string drink = step1.Message.Body.GetText().Trim() switch
-                           {
-                               "1" => "拿铁",
-                               "2" => "美式",
-                               "3" => "抹茶",
-                               _   => "未知"
-                           };
+                       {
+                           "1" => "拿铁",
+                           "2" => "美式",
+                           "3" => "抹茶",
+                           _   => "未知"
+                       };
 
         // 第 2 步：选择规格
         await Helpers.SendReplyAsync(step1, new MessageBody($"你选了 {drink}，请选择规格：\n1. 小杯\n2. 中杯\n3. 大杯"));
 
         MessageReceivedEvent? step2 = await step1.WaitForNextMessageAsync(
-                ["1", "2", "3"],
+            ["1", "2", "3"],
             MatchType.Full,
             TimeSpan.FromSeconds(30));
 
@@ -54,12 +54,12 @@ public static class ConversationCommands
         }
 
         string size = step2.Message.Body.GetText().Trim() switch
-                          {
-                              "1" => "小杯",
-                              "2" => "中杯",
-                              "3" => "大杯",
-                              _   => "未知"
-                          };
+                      {
+                          "1" => "小杯",
+                          "2" => "中杯",
+                          "3" => "大杯",
+                          _   => "未知"
+                      };
 
         // 第 3 步：确认
         await Helpers.SendReplyAsync(step2, new MessageBody($"✅ 订单确认：{size}{drink}\n感谢惠顾！☕"));
@@ -74,11 +74,11 @@ public static class ConversationCommands
     {
         e.IsContinueEventChain = false;
         (string Question, string Answer)[] questions =
-            [
-                ("🧮 1 + 1 = ?", "2"),
-                ("🌍 地球是什么形状？（输入：圆/方）", "圆"),
-                ("🐱 猫有几条腿？", "4")
-            ];
+        [
+            ("🧮 1 + 1 = ?", "2"),
+            ("🌍 地球是什么形状？（输入：圆/方）", "圆"),
+            ("🐱 猫有几条腿？", "4")
+        ];
 
         int score = 0;
 
@@ -114,12 +114,12 @@ public static class ConversationCommands
 
         // 总结
         string summary = score switch
-                             {
-                                 3 => $"🏆 满分！你答对了 {score}/3 题，太厉害了！",
-                                 2 => $"👍 不错，你答对了 {score}/3 题！",
-                                 1 => $"💪 你答对了 {score}/3 题，继续加油！",
-                                 _ => $"😅 你答对了 {score}/3 题，下次再接再厉！"
-                             };
+                         {
+                             3 => $"🏆 满分！你答对了 {score}/3 题，太厉害了！",
+                             2 => $"👍 不错，你答对了 {score}/3 题！",
+                             1 => $"💪 你答对了 {score}/3 题，继续加油！",
+                             _ => $"😅 你答对了 {score}/3 题，下次再接再厉！"
+                         };
         await Helpers.SendReplyAsync(current, new MessageBody(summary));
     }
 }

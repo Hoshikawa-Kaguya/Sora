@@ -17,7 +17,9 @@ public static class FileUtils
     /// <param name="filePath">Absolute or relative path to the file.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A string in the format <c>base64://{base64EncodedContent}</c>.</returns>
-    public static async ValueTask<string> FileToBase64UriAsync(string filePath, CancellationToken cancellationToken = default)
+    public static async ValueTask<string> FileToBase64UriAsync(
+        string            filePath,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return string.Empty;
         ReadOnlySpan<byte> bytes = await File.ReadAllBytesAsync(filePath, cancellationToken);

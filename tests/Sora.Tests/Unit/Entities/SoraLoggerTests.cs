@@ -18,8 +18,8 @@ public sealed class SoraLoggerTests
     [InlineData(true)]
     public void CreateDefaultLoggerConfiguration_AppliesMinimumLevel(bool enableDebug)
     {
-        TestOutputSink sink = new();
-        List<string> messages = [];
+        TestOutputSink    sink         = new();
+        List<string>      messages     = [];
         using IDisposable subscription = sink.Subscribe(messages.Add);
         LoggerConfiguration configuration = enableDebug
             ? SoraLogger.CreateDefaultLoggerConfiguration(LogLevel.Debug)
@@ -41,7 +41,8 @@ public sealed class SoraLoggerTests
     {
         Assert.Throws<InvalidOperationException>(() => SoraLogger.Configure(NullLoggerFactory.Instance));
         Assert.Throws<InvalidOperationException>(() =>
-            SoraLogger.Configure(SoraLogger.CreateDefaultLoggerConfiguration()));
+                                                     SoraLogger.Configure(
+                                                         SoraLogger.CreateDefaultLoggerConfiguration()));
     }
 
 #endregion

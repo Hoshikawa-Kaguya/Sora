@@ -540,8 +540,8 @@ public class CommandMatcherTests
     {
         RegexMatcher matcher = new();
         // Catastrophic backtracking pattern with long input — should timeout
-        string pattern = @"^(a+)+$";
-        string input   = new string('a', 50) + "!";
+        string       pattern = @"^(a+)+$";
+        string       input   = new string('a', 50) + "!";
 
         // This should return false (timeout) rather than throwing
         bool result = matcher.IsMatch(input, pattern);

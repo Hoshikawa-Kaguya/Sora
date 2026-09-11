@@ -8,16 +8,17 @@ namespace Sora.Command.InternalEntities;
 internal readonly struct CommandExecutionScope : IDisposable
 {
     private readonly ConcurrentDictionary<ExecutionKey, byte>? _activeExecutions;
-    private readonly ExecutionKey _executionKey;
+    private readonly ExecutionKey                              _executionKey;
 
     /// <summary>
     ///     Takes ownership of an already acquired slot. Dispose only from its owning execution scope.
     /// </summary>
     internal CommandExecutionScope(
-        ConcurrentDictionary<ExecutionKey, byte> activeExecutions, ExecutionKey executionKey)
+        ConcurrentDictionary<ExecutionKey, byte> activeExecutions,
+        ExecutionKey                             executionKey)
     {
         _activeExecutions = activeExecutions;
-        _executionKey = executionKey;
+        _executionKey     = executionKey;
     }
 
     /// <summary>

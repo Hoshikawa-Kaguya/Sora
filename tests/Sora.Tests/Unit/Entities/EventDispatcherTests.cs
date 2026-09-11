@@ -1,4 +1,5 @@
 ﻿using Xunit;
+
 // ReSharper disable AccessToDisposedClosure
 
 namespace Sora.Tests.Unit.Entities;
@@ -27,20 +28,20 @@ public class EventDispatcherTests
         };
 
         MessageReceivedEvent evt = new()
+        {
+            Api          = null!,
+            ConnectionId = Guid.NewGuid(),
+            SelfId       = 100L,
+            Time         = DateTime.Now,
+            Message = new MessageContext
             {
-                Api          = null!,
-                ConnectionId = Guid.NewGuid(),
-                SelfId       = 100L,
-                Time         = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 200L,
-                        SenderId   = 300L,
-                        Body       = new MessageBody("test")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 200L,
+                SenderId   = 300L,
+                Body       = new MessageBody("test")
+            }
+        };
 
         await dispatcher.DispatchAsync(evt, CT);
         Assert.True(invoked);
@@ -65,15 +66,15 @@ public class EventDispatcherTests
         };
 
         MessageReceivedEvent evt = new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 100L, Time = DateTime.Now,
+            Message = new MessageContext
             {
-                Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 100L, Time = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        Body       = new MessageBody("t")
-                    }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                Body       = new MessageBody("t")
+            }
+        };
 
         await dispatcher.DispatchAsync(evt, CT);
         Assert.Equal(2, count);
@@ -138,89 +139,89 @@ public class EventDispatcherTests
 
         await dispatcher.DispatchAsync(
             new MemberJoinedEvent
-                {
-                    Api     = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    GroupId = 1L,
-                    UserId  = 2L
-                },
+            {
+                Api     = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                GroupId = 1L,
+                UserId  = 2L
+            },
             CT);
         Assert.Equal("MemberJoined", lastType);
 
         await dispatcher.DispatchAsync(
             new MemberLeftEvent
-                {
-                    Api     = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    GroupId = 1L,
-                    UserId  = 2L
-                },
+            {
+                Api     = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                GroupId = 1L,
+                UserId  = 2L
+            },
             CT);
         Assert.Equal("MemberLeft", lastType);
 
         await dispatcher.DispatchAsync(
             new GroupAdminChangedEvent
-                {
-                    Api     = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    GroupId = 1L, UserId          = 2L,
-                    IsSet   = true
-                },
+            {
+                Api     = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                GroupId = 1L, UserId          = 2L,
+                IsSet   = true
+            },
             CT);
         Assert.Equal("AdminChanged", lastType);
 
         await dispatcher.DispatchAsync(
             new GroupMuteEvent
-                {
-                    Api             = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    GroupId         = 1L, UserId          = 2L,
-                    DurationSeconds = 60
-                },
+            {
+                Api             = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                GroupId         = 1L, UserId          = 2L,
+                DurationSeconds = 60
+            },
             CT);
         Assert.Equal("Mute", lastType);
 
         await dispatcher.DispatchAsync(
             new FileUploadEvent
-                {
-                    Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    SourceType = MessageSourceType.Group,
-                    FileId     = "f1", FileName = "test.txt"
-                },
+            {
+                Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                SourceType = MessageSourceType.Group,
+                FileId     = "f1", FileName = "test.txt"
+            },
             CT);
         Assert.Equal("FileUpload", lastType);
 
         await dispatcher.DispatchAsync(
             new NudgeEvent
-                {
-                    Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    SenderId   = 1L,
-                    ReceiverId = 2L
-                },
+            {
+                Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                SenderId   = 1L,
+                ReceiverId = 2L
+            },
             CT);
         Assert.Equal("Nudge", lastType);
 
         await dispatcher.DispatchAsync(
             new FriendRequestEvent
-                {
-                    Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    FromUserId = 2L
-                },
+            {
+                Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                FromUserId = 2L
+            },
             CT);
         Assert.Equal("FriendReq", lastType);
 
         await dispatcher.DispatchAsync(
             new GroupJoinRequestEvent
-                {
-                    Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    GroupId    = 1L,
-                    FromUserId = 2L
-                },
+            {
+                Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                GroupId    = 1L,
+                FromUserId = 2L
+            },
             CT);
         Assert.Equal("GroupJoinReq", lastType);
 
         await dispatcher.DispatchAsync(
             new DisconnectedEvent
-                {
-                    Api    = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    Reason = "test"
-                },
+            {
+                Api    = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                Reason = "test"
+            },
             CT);
         Assert.Equal("Disconnected", lastType);
     }
@@ -239,12 +240,12 @@ public class EventDispatcherTests
         };
 
         ConnectedEvent evt = new()
-            {
-                Api          = null!,
-                ConnectionId = Guid.NewGuid(),
-                SelfId       = 100L,
-                Time         = DateTime.Now
-            };
+        {
+            Api          = null!,
+            ConnectionId = Guid.NewGuid(),
+            SelfId       = 100L,
+            Time         = DateTime.Now
+        };
 
         await dispatcher.DispatchAsync(evt, CT);
         Assert.True(invoked);
@@ -283,18 +284,18 @@ public class EventDispatcherTests
     [InlineData("none", false)]
     public async Task DispatchAsync_HandlerCancellation_UsesSoraTokenOwnership(string tokenSource, bool cancelSora)
     {
-        using CancellationTokenSource soraCancellation = new();
+        using CancellationTokenSource soraCancellation     = new();
         using CancellationTokenSource externalCancellation = new();
         externalCancellation.Cancel();
         CancellationToken exceptionToken = tokenSource switch
-        {
-            "sora" => soraCancellation.Token,
-            "external" => externalCancellation.Token,
-            _ => CancellationToken.None
-        };
-        OperationCanceledException original = new(exceptionToken);
-        EventDispatcher dispatcher = new();
-        bool secondCalled = false;
+                                           {
+                                               "sora"     => soraCancellation.Token,
+                                               "external" => externalCancellation.Token,
+                                               _          => CancellationToken.None
+                                           };
+        OperationCanceledException original     = new(exceptionToken);
+        EventDispatcher            dispatcher   = new();
+        bool                       secondCalled = false;
 
         dispatcher.OnConnected += async _ =>
         {
@@ -312,8 +313,10 @@ public class EventDispatcherTests
         ConnectedEvent evt = new() { Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 100L, Time = DateTime.Now };
         if (cancelSora)
         {
-            OperationCanceledException actual = await Assert.ThrowsAsync<OperationCanceledException>(
-                () => dispatcher.DispatchAsync(evt, soraCancellation.Token).AsTask());
+            OperationCanceledException actual =
+                await Assert.ThrowsAsync<OperationCanceledException>(() => dispatcher
+                                                                           .DispatchAsync(evt, soraCancellation.Token)
+                                                                           .AsTask());
             Assert.Equal(soraCancellation.Token, actual.CancellationToken);
             if (tokenSource == "sora")
                 Assert.Same(original, actual);
@@ -333,8 +336,8 @@ public class EventDispatcherTests
     public async Task DispatchAsync_LastHandlerExternalCancellation_PropagatesSoraCancellation()
     {
         using CancellationTokenSource soraCancellation = new();
-        EventDispatcher dispatcher = new();
-        OperationCanceledException original = new();
+        EventDispatcher               dispatcher       = new();
+        OperationCanceledException    original         = new();
         dispatcher.OnConnected += _ =>
         {
             soraCancellation.Cancel();
@@ -342,8 +345,10 @@ public class EventDispatcherTests
         };
 
         ConnectedEvent evt = new() { Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 100L, Time = DateTime.Now };
-        OperationCanceledException actual = await Assert.ThrowsAsync<OperationCanceledException>(
-            () => dispatcher.DispatchAsync(evt, soraCancellation.Token).AsTask());
+        OperationCanceledException actual =
+            await Assert.ThrowsAsync<OperationCanceledException>(() => dispatcher.DispatchAsync(
+                                                                     evt,
+                                                                     soraCancellation.Token).AsTask());
 
         Assert.Equal(soraCancellation.Token, actual.CancellationToken);
         Assert.NotSame(original, actual);
@@ -369,12 +374,12 @@ public class EventDispatcherTests
         };
 
         ConnectedEvent evt = new()
-            {
-                Api          = null!,
-                ConnectionId = Guid.NewGuid(),
-                SelfId       = 100L,
-                Time         = DateTime.Now
-            };
+        {
+            Api          = null!,
+            ConnectionId = Guid.NewGuid(),
+            SelfId       = 100L,
+            Time         = DateTime.Now
+        };
 
         await dispatcher.DispatchAsync(evt, CT);
         Assert.False(handlerCalled);

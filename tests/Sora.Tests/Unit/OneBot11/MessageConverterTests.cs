@@ -32,9 +32,9 @@ public class MessageConverterTests
     public void RoundTrip_DiceSegment()
     {
         JArray incoming = new()
-            {
-                new JObject { ["type"] = "dice", ["data"] = new JObject { ["result"] = "5" } }
-            };
+        {
+            new JObject { ["type"] = "dice", ["data"] = new JObject { ["result"] = "5" } }
+        };
         MessageBody         body    = MessageConverter.ToMessageBody(incoming);
         List<OneBotSegment> outSegs = MessageConverter.ToOneBotSegments(body);
         Assert.Single(outSegs);
@@ -46,9 +46,9 @@ public class MessageConverterTests
     public void RoundTrip_RpsSegment()
     {
         JArray incoming = new()
-            {
-                new JObject { ["type"] = "rps", ["data"] = new JObject { ["result"] = "1" } }
-            };
+        {
+            new JObject { ["type"] = "rps", ["data"] = new JObject { ["result"] = "1" } }
+        };
         MessageBody         body    = MessageConverter.ToMessageBody(incoming);
         List<OneBotSegment> outSegs = MessageConverter.ToOneBotSegments(body);
         Assert.Single(outSegs);
@@ -64,13 +64,13 @@ public class MessageConverterTests
     public void ToMessageBody_TextSegment()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "text",
-                        ["data"] = new JObject { ["text"] = "hello" }
-                    }
-            };
+                ["type"] = "text",
+                ["data"] = new JObject { ["text"] = "hello" }
+            }
+        };
 
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
@@ -83,13 +83,13 @@ public class MessageConverterTests
     public void ToMessageBody_AtSegment_User()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "at",
-                        ["data"] = new JObject { ["qq"] = "123456", ["name"] = "TestUser" }
-                    }
-            };
+                ["type"] = "at",
+                ["data"] = new JObject { ["qq"] = "123456", ["name"] = "TestUser" }
+            }
+        };
 
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
@@ -104,13 +104,13 @@ public class MessageConverterTests
     public void ToMessageBody_AtAll()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "at",
-                        ["data"] = new JObject { ["qq"] = "all" }
-                    }
-            };
+                ["type"] = "at",
+                ["data"] = new JObject { ["qq"] = "all" }
+            }
+        };
 
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
@@ -122,9 +122,9 @@ public class MessageConverterTests
     public void ToMessageBody_FaceSegment()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "face", ["data"] = new JObject { ["id"] = "178" } }
-            };
+        {
+            new JObject { ["type"] = "face", ["data"] = new JObject { ["id"] = "178" } }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.IsType<FaceSegment>(body[0]);
         Assert.Equal("178", ((FaceSegment)body[0]).FaceId);
@@ -135,9 +135,9 @@ public class MessageConverterTests
     public void ToMessageBody_ReplySegment()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "reply", ["data"] = new JObject { ["id"] = 42 } }
-            };
+        {
+            new JObject { ["type"] = "reply", ["data"] = new JObject { ["id"] = 42 } }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.IsType<ReplySegment>(body[0]);
         Assert.Equal(42L, (long)((ReplySegment)body[0]).TargetId);
@@ -148,13 +148,13 @@ public class MessageConverterTests
     public void ToMessageBody_ImageSegment()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "image",
-                        ["data"] = new JObject { ["url"] = "http://img.png", ["file"] = "abc.image" }
-                    }
-            };
+                ["type"] = "image",
+                ["data"] = new JObject { ["url"] = "http://img.png", ["file"] = "abc.image" }
+            }
+        };
         MessageBody  body = MessageConverter.ToMessageBody(json);
         ImageSegment img  = (ImageSegment)body[0];
         Assert.Equal("http://img.png", img.Url);
@@ -166,9 +166,9 @@ public class MessageConverterTests
     public void ToMessageBody_RecordSegment()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "record", ["data"] = new JObject { ["url"] = "http://audio.amr" } }
-            };
+        {
+            new JObject { ["type"] = "record", ["data"] = new JObject { ["url"] = "http://audio.amr" } }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.IsType<AudioSegment>(body[0]);
     }
@@ -178,9 +178,9 @@ public class MessageConverterTests
     public void ToMessageBody_VideoSegment()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "video", ["data"] = new JObject { ["url"] = "http://video.mp4" } }
-            };
+        {
+            new JObject { ["type"] = "video", ["data"] = new JObject { ["url"] = "http://video.mp4" } }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.IsType<VideoSegment>(body[0]);
     }
@@ -190,9 +190,9 @@ public class MessageConverterTests
     public void ToMessageBody_ForwardSegment()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "forward", ["data"] = new JObject { ["id"] = "fwd123" } }
-            };
+        {
+            new JObject { ["type"] = "forward", ["data"] = new JObject { ["id"] = "fwd123" } }
+        };
         MessageBody    body = MessageConverter.ToMessageBody(json);
         ForwardSegment fwd  = (ForwardSegment)body[0];
         Assert.Equal("fwd123", fwd.ForwardId);
@@ -203,11 +203,11 @@ public class MessageConverterTests
     public void ToMessageBody_MixedSegments()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "text", ["data"] = new JObject { ["text"] = "Hello " } },
-                new JObject { ["type"] = "at", ["data"]   = new JObject { ["qq"]   = "12345" } },
-                new JObject { ["type"] = "text", ["data"] = new JObject { ["text"] = " world" } }
-            };
+        {
+            new JObject { ["type"] = "text", ["data"] = new JObject { ["text"] = "Hello " } },
+            new JObject { ["type"] = "at", ["data"]   = new JObject { ["qq"]   = "12345" } },
+            new JObject { ["type"] = "text", ["data"] = new JObject { ["text"] = " world" } }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Equal(3, body.Count);
         Assert.Equal("Hello  world", body.GetText());
@@ -219,9 +219,9 @@ public class MessageConverterTests
     public void ToMessageBody_UnknownSegment_Dropped()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "unknown_type", ["data"] = new JObject() }
-            };
+        {
+            new JObject { ["type"] = "unknown_type", ["data"] = new JObject() }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Empty(body);
     }
@@ -231,13 +231,13 @@ public class MessageConverterTests
     public void ToMessageBody_JsonSegment()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "json",
-                        ["data"] = new JObject { ["data"] = @"{""app"":""test""}" }
-                    }
-            };
+                ["type"] = "json",
+                ["data"] = new JObject { ["data"] = @"{""app"":""test""}" }
+            }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         LightAppSegment la = (LightAppSegment)body[0];
@@ -249,20 +249,20 @@ public class MessageConverterTests
     public void ToMessageBody_MfaceSegment()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "mface",
-                        ["data"] = new JObject
-                            {
-                                ["emoji_package_id"] = 100,
-                                ["emoji_id"]         = "emoji123",
-                                ["key"]              = "key456",
-                                ["summary"]          = "[cute]",
-                                ["url"]              = "http://mface.png"
-                            }
-                    }
-            };
+                ["type"] = "mface",
+                ["data"] = new JObject
+                {
+                    ["emoji_package_id"] = 100,
+                    ["emoji_id"]         = "emoji123",
+                    ["key"]              = "key456",
+                    ["summary"]          = "[cute]",
+                    ["url"]              = "http://mface.png"
+                }
+            }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         MarketFaceSegment mface = (MarketFaceSegment)body[0];
@@ -278,18 +278,18 @@ public class MessageConverterTests
     public void ToMessageBody_FileSegment()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "file",
-                        ["data"] = new JObject
-                            {
-                                ["file_id"]   = "f1",
-                                ["name"]      = "readme.txt",
-                                ["file_size"] = "2048"
-                            }
-                    }
-            };
+                ["type"] = "file",
+                ["data"] = new JObject
+                {
+                    ["file_id"]   = "f1",
+                    ["name"]      = "readme.txt",
+                    ["file_size"] = "2048"
+                }
+            }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         FileSegment file = (FileSegment)body[0];
@@ -303,13 +303,13 @@ public class MessageConverterTests
     public void ToMessageBody_XmlSegment()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "xml",
-                        ["data"] = new JObject { ["data"] = "<msg>hello</msg>" }
-                    }
-            };
+                ["type"] = "xml",
+                ["data"] = new JObject { ["data"] = "<msg>hello</msg>" }
+            }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         XmlSegment xml = (XmlSegment)body[0];
@@ -321,13 +321,13 @@ public class MessageConverterTests
     public void ToMessageBody_MarkdownSegment()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "markdown",
-                        ["data"] = new JObject { ["content"] = "# Hello World" }
-                    }
-            };
+                ["type"] = "markdown",
+                ["data"] = new JObject { ["content"] = "# Hello World" }
+            }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         MarkdownSegment md = (MarkdownSegment)body[0];
@@ -339,18 +339,18 @@ public class MessageConverterTests
     public void ToMessageBody_FlashFileSegment()
     {
         JArray json = new()
+        {
+            new JObject
             {
-                new JObject
-                    {
-                        ["type"] = "flash_file",
-                        ["data"] = new JObject
-                            {
-                                ["title"]       = "photo.jpg",
-                                ["file_set_id"] = "fset1",
-                                ["scene_type"]  = 2
-                            }
-                    }
-            };
+                ["type"] = "flash_file",
+                ["data"] = new JObject
+                {
+                    ["title"]       = "photo.jpg",
+                    ["file_set_id"] = "fset1",
+                    ["scene_type"]  = 2
+                }
+            }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         FlashFileMessageSegment ff = (FlashFileMessageSegment)body[0];
@@ -368,9 +368,9 @@ public class MessageConverterTests
     public void ToMessageBody_DiceSegment()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "dice", ["data"] = new JObject { ["result"] = "3" } }
-            };
+        {
+            new JObject { ["type"] = "dice", ["data"] = new JObject { ["result"] = "3" } }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         Assert.IsType<DiceSegment>(body[0]);
@@ -385,9 +385,9 @@ public class MessageConverterTests
     public void ToMessageBody_DiceSegment_NoResult()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "dice", ["data"] = new JObject() }
-            };
+        {
+            new JObject { ["type"] = "dice", ["data"] = new JObject() }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         DiceSegment dice = (DiceSegment)body[0];
@@ -399,10 +399,10 @@ public class MessageConverterTests
     public void ToMessageBody_DiceWithOtherSegments()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "text", ["data"] = new JObject { ["text"]   = "rolled: " } },
-                new JObject { ["type"] = "dice", ["data"] = new JObject { ["result"] = "6" } }
-            };
+        {
+            new JObject { ["type"] = "text", ["data"] = new JObject { ["text"]   = "rolled: " } },
+            new JObject { ["type"] = "dice", ["data"] = new JObject { ["result"] = "6" } }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Equal(2, body.Count);
         Assert.IsType<TextSegment>(body[0]);
@@ -414,9 +414,9 @@ public class MessageConverterTests
     public void ToMessageBody_RpsSegment()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "rps", ["data"] = new JObject { ["result"] = "2" } }
-            };
+        {
+            new JObject { ["type"] = "rps", ["data"] = new JObject { ["result"] = "2" } }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         Assert.IsType<RpsSegment>(body[0]);
@@ -430,9 +430,9 @@ public class MessageConverterTests
     public void ToMessageBody_RpsSegment_NoResult()
     {
         JArray json = new()
-            {
-                new JObject { ["type"] = "rps", ["data"] = new JObject() }
-            };
+        {
+            new JObject { ["type"] = "rps", ["data"] = new JObject() }
+        };
         MessageBody body = MessageConverter.ToMessageBody(json);
         Assert.Single(body);
         RpsSegment rps = (RpsSegment)body[0];

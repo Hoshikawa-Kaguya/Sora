@@ -31,9 +31,9 @@ public class MessageConverterTests
     public void ToMessageBody_TextSegment()
     {
         List<MilkySegment> segments =
-            [
-                new() { Type = "text", Data = new JObject { ["text"] = "hello" } }
-            ];
+        [
+            new() { Type = "text", Data = new JObject { ["text"] = "hello" } }
+        ];
 
         MessageBody body = MessageConverter.ToMessageBody(segments);
         Assert.Single(body);
@@ -46,9 +46,9 @@ public class MessageConverterTests
     public void ToMessageBody_MentionSegment()
     {
         List<MilkySegment> segments =
-            [
-                new() { Type = "mention", Data = new JObject { ["user_id"] = 12345L, ["name"] = "TestUser" } }
-            ];
+        [
+            new() { Type = "mention", Data = new JObject { ["user_id"] = 12345L, ["name"] = "TestUser" } }
+        ];
 
         MessageBody body = MessageConverter.ToMessageBody(segments);
         Assert.Single(body);
@@ -72,9 +72,9 @@ public class MessageConverterTests
     public void ToMessageBody_FaceSegment()
     {
         List<MilkySegment> segments =
-            [
-                new() { Type = "face", Data = new JObject { ["face_id"] = "123", ["is_large"] = true } }
-            ];
+        [
+            new() { Type = "face", Data = new JObject { ["face_id"] = "123", ["is_large"] = true } }
+        ];
 
         MessageBody body = MessageConverter.ToMessageBody(segments);
         Assert.Single(body);
@@ -88,12 +88,12 @@ public class MessageConverterTests
     public void ToMessageBody_ReplySegment()
     {
         List<MilkySegment> segments =
-            [
-                new()
-                    {
-                        Type = "reply",
-                        Data = JObject.Parse(
-                            @"{
+        [
+            new()
+            {
+                Type = "reply",
+                Data = JObject.Parse(
+                    @"{
                                 ""message_seq"": 12345,
                                 ""sender_id"": 100001,
                                 ""sender_name"": ""TestUser"",
@@ -102,8 +102,8 @@ public class MessageConverterTests
                                     { ""type"": ""text"", ""data"": { ""text"": ""quoted text"" } }
                                 ]
                             }")
-                    }
-            ];
+            }
+        ];
         MessageBody  body  = MessageConverter.ToMessageBody(segments);
         ReplySegment reply = (ReplySegment)body[0];
         Assert.Equal(12345L, (long)reply.TargetId);
@@ -121,19 +121,19 @@ public class MessageConverterTests
     public void ToMessageBody_ReplySegment_NoSenderName()
     {
         List<MilkySegment> segments =
-            [
-                new()
-                    {
-                        Type = "reply",
-                        Data = JObject.Parse(
-                            @"{
+        [
+            new()
+            {
+                Type = "reply",
+                Data = JObject.Parse(
+                    @"{
                                 ""message_seq"": 99,
                                 ""sender_id"": 200002,
                                 ""time"": 1700000001,
                                 ""segments"": []
                             }")
-                    }
-            ];
+            }
+        ];
         MessageBody  body  = MessageConverter.ToMessageBody(segments);
         ReplySegment reply = (ReplySegment)body[0];
         Assert.Equal(99L, (long)reply.TargetId);
@@ -148,14 +148,14 @@ public class MessageConverterTests
     public void ToMessageBody_ImageSegment()
     {
         List<MilkySegment> segments =
-            [
-                new()
-                    {
-                        Type = "image",
-                        Data = JObject.Parse(
-                            @"{""resource_id"": ""img_res_1"", ""temp_url"": ""http://img.png"", ""width"": 100, ""height"": 200, ""sub_type"": ""sticker""}")
-                    }
-            ];
+        [
+            new()
+            {
+                Type = "image",
+                Data = JObject.Parse(
+                    @"{""resource_id"": ""img_res_1"", ""temp_url"": ""http://img.png"", ""width"": 100, ""height"": 200, ""sub_type"": ""sticker""}")
+            }
+        ];
         MessageBody  body = MessageConverter.ToMessageBody(segments);
         ImageSegment img  = (ImageSegment)body[0];
         Assert.Equal("http://img.png", img.Url);
@@ -170,13 +170,14 @@ public class MessageConverterTests
     public void ToMessageBody_RecordSegment()
     {
         List<MilkySegment> segments =
-            [
-                new()
-                    {
-                        Type = "record",
-                        Data = JObject.Parse(@"{""resource_id"": ""aud_res_1"", ""temp_url"": ""http://a.amr"", ""duration"": 5}")
-                    }
-            ];
+        [
+            new()
+            {
+                Type = "record",
+                Data = JObject.Parse(
+                    @"{""resource_id"": ""aud_res_1"", ""temp_url"": ""http://a.amr"", ""duration"": 5}")
+            }
+        ];
         MessageBody  body  = MessageConverter.ToMessageBody(segments);
         AudioSegment audio = (AudioSegment)body[0];
         Assert.Equal(5, audio.Duration);
@@ -188,14 +189,14 @@ public class MessageConverterTests
     public void ToMessageBody_VideoSegment()
     {
         List<MilkySegment> segments =
-            [
-                new()
-                    {
-                        Type = "video",
-                        Data = JObject.Parse(
-                            @"{""resource_id"": ""vid_res_1"", ""temp_url"": ""http://v.mp4"", ""width"": 1920, ""height"": 1080, ""duration"": 120}")
-                    }
-            ];
+        [
+            new()
+            {
+                Type = "video",
+                Data = JObject.Parse(
+                    @"{""resource_id"": ""vid_res_1"", ""temp_url"": ""http://v.mp4"", ""width"": 1920, ""height"": 1080, ""duration"": 120}")
+            }
+        ];
         MessageBody  body = MessageConverter.ToMessageBody(segments);
         VideoSegment vid  = (VideoSegment)body[0];
         Assert.Equal(1920, vid.Width);
@@ -208,13 +209,13 @@ public class MessageConverterTests
     public void ToMessageBody_FileSegment()
     {
         List<MilkySegment> segments =
-            [
-                new()
-                    {
-                        Type = "file",
-                        Data = JObject.Parse(@"{""file_id"": ""f1"", ""file_name"": ""test.txt"", ""file_size"": 1024}")
-                    }
-            ];
+        [
+            new()
+            {
+                Type = "file",
+                Data = JObject.Parse(@"{""file_id"": ""f1"", ""file_name"": ""test.txt"", ""file_size"": 1024}")
+            }
+        ];
         MessageBody body = MessageConverter.ToMessageBody(segments);
         FileSegment file = (FileSegment)body[0];
         Assert.Equal("f1", file.FileId);
@@ -226,14 +227,14 @@ public class MessageConverterTests
     public void ToMessageBody_ForwardSegment()
     {
         List<MilkySegment> segments =
-            [
-                new()
-                    {
-                        Type = "forward",
-                        Data = JObject.Parse(
-                            @"{""forward_id"": ""fwd1"", ""title"": ""Chat"", ""preview"": [""line1""], ""summary"": ""3 messages""}")
-                    }
-            ];
+        [
+            new()
+            {
+                Type = "forward",
+                Data = JObject.Parse(
+                    @"{""forward_id"": ""fwd1"", ""title"": ""Chat"", ""preview"": [""line1""], ""summary"": ""3 messages""}")
+            }
+        ];
         MessageBody    body = MessageConverter.ToMessageBody(segments);
         ForwardSegment fwd  = (ForwardSegment)body[0];
         Assert.Equal("fwd1", fwd.ForwardId);
@@ -246,14 +247,14 @@ public class MessageConverterTests
     public void ToMessageBody_MarketFaceSegment()
     {
         List<MilkySegment> segments =
-            [
-                new()
-                    {
-                        Type = "market_face",
-                        Data = JObject.Parse(
-                            @"{""emoji_package_id"": 1, ""emoji_id"": ""e1"", ""key"": ""k1"", ""summary"": ""[emoji]"", ""url"": ""http://face.png""}")
-                    }
-            ];
+        [
+            new()
+            {
+                Type = "market_face",
+                Data = JObject.Parse(
+                    @"{""emoji_package_id"": 1, ""emoji_id"": ""e1"", ""key"": ""k1"", ""summary"": ""[emoji]"", ""url"": ""http://face.png""}")
+            }
+        ];
         MessageBody       body = MessageConverter.ToMessageBody(segments);
         MarketFaceSegment mf   = (MarketFaceSegment)body[0];
         Assert.Equal("e1", mf.EmojiId);
@@ -265,9 +266,9 @@ public class MessageConverterTests
     public void ToMessageBody_LightAppSegment()
     {
         List<MilkySegment> segments =
-            [
-                new() { Type = "light_app", Data = JObject.Parse(@"{""app_name"": ""MyApp"", ""json_payload"": ""{}""}") }
-            ];
+        [
+            new() { Type = "light_app", Data = JObject.Parse(@"{""app_name"": ""MyApp"", ""json_payload"": ""{}""}") }
+        ];
         MessageBody     body = MessageConverter.ToMessageBody(segments);
         LightAppSegment app  = (LightAppSegment)body[0];
         Assert.Equal("MyApp", app.AppName);
@@ -278,7 +279,7 @@ public class MessageConverterTests
     public void ToMessageBody_XmlSegment()
     {
         List<MilkySegment> segments =
-                [new() { Type = "xml", Data = JObject.Parse(@"{""service_id"": 42, ""xml_payload"": ""<xml/>""}") }];
+            [new() { Type = "xml", Data = JObject.Parse(@"{""service_id"": 42, ""xml_payload"": ""<xml/>""}") }];
         MessageBody body = MessageConverter.ToMessageBody(segments);
         XmlSegment  xml  = (XmlSegment)body[0];
         Assert.Equal(42, xml.ServiceId);
@@ -344,7 +345,7 @@ public class MessageConverterTests
     [Fact]
     public void ToMilkySegments_ImageSegment()
     {
-        MessageBody        body     = new([new ImageSegment { FileUri = "http://send.png", SubType = ImageSubType.Sticker }]);
+        MessageBody body = new([new ImageSegment { FileUri = "http://send.png", SubType = ImageSubType.Sticker }]);
         List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
         Assert.Equal("image", segments[0].Type);
         Assert.Equal("http://send.png", segments[0].Data!.Value<string>("uri"));
@@ -389,21 +390,21 @@ public class MessageConverterTests
     public void ToMilkySegments_ForwardSegment()
     {
         ForwardedMessageNode node = new()
-            {
-                UserId     = 12345L,
-                SenderName = "TestSender",
-                Segments   = new MessageBody("hello forward")
-            };
+        {
+            UserId     = 12345L,
+            SenderName = "TestSender",
+            Segments   = new MessageBody("hello forward")
+        };
         MessageBody body = new(
-            [
-                new ForwardSegment
-                    {
-                        Messages = [node],
-                        Title    = "ChatLog",
-                        Summary  = "1 message",
-                        Preview  = ["hello forward"]
-                    }
-            ]);
+        [
+            new ForwardSegment
+            {
+                Messages = [node],
+                Title    = "ChatLog",
+                Summary  = "1 message",
+                Preview  = ["hello forward"]
+            }
+        ]);
         List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
         Assert.Single(segments);
         Assert.Equal("forward", segments[0].Type);

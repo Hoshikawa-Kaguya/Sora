@@ -36,7 +36,8 @@ public static class SegmentBuilder
     /// <param name="fileUri">Video URI (file://, http(s)://, or base64://).</param>
     /// <param name="thumbUri">Optional thumbnail image URI.</param>
     /// <returns>A new <see cref="VideoSegment" />.</returns>
-    public static VideoSegment Video(string fileUri, string thumbUri = "") => new() { FileUri = fileUri, ThumbUri = thumbUri };
+    public static VideoSegment Video(string fileUri, string thumbUri = "") =>
+        new() { FileUri = fileUri, ThumbUri = thumbUri };
 
 #endregion
 
@@ -55,7 +56,11 @@ public static class SegmentBuilder
         string[]?                           preview = null,
         string                              summary = "",
         string                              prompt  = "") =>
-        new() { Messages = messages, Title = title, Preview = preview?.Take(4).ToList() ?? [], Summary = summary, Prompt = prompt };
+        new()
+        {
+            Messages = messages, Title = title, Preview = preview?.Take(4).ToList() ?? [], Summary = summary,
+            Prompt   = prompt
+        };
 
     /// <summary>Creates a light app segment for sending.</summary>
     /// <param name="appName">App name.</param>

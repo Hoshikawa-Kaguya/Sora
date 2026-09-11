@@ -19,16 +19,16 @@ public class EventConverterTests
     public void ConvertMessageReceive_Friend()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "message_receive",
-                Data = JObject.Parse(
-                    @"{
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "message_receive",
+            Data = JObject.Parse(
+                @"{
                 ""message_scene"": ""friend"", ""peer_id"": 222, ""message_seq"": 888,
                 ""sender_id"": 222, ""time"": 1700000000,
                 ""segments"": [{""type"": ""text"", ""data"": {""text"": ""hi""}}],
                 ""friend"": {""user_id"": 222, ""nickname"": ""Friend"", ""sex"": ""female"", ""qid"": """", ""remark"": ""MyFriend""}
             }")
-            };
+        };
 
         BotEvent             result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         MessageReceivedEvent msg    = (MessageReceivedEvent)result;
@@ -41,17 +41,17 @@ public class EventConverterTests
     public void ConvertMessageReceive_Group()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "message_receive",
-                Data = JObject.Parse(
-                    @"{
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "message_receive",
+            Data = JObject.Parse(
+                @"{
                 ""message_scene"": ""group"", ""peer_id"": 111, ""message_seq"": 999,
                 ""sender_id"": 222, ""time"": 1700000000,
                 ""segments"": [{""type"": ""text"", ""data"": {""text"": ""hello""}}],
                 ""group"": {""group_id"": 111, ""group_name"": ""TestGroup"", ""member_count"": 10, ""max_member_count"": 200},
                 ""group_member"": {""user_id"": 222, ""nickname"": ""User"", ""sex"": ""male"", ""group_id"": 111, ""card"": """", ""title"": """", ""level"": 1, ""role"": ""member"", ""join_time"": 0, ""last_sent_time"": 0}
             }")
-            };
+        };
 
         BotEvent             result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         MessageReceivedEvent msg    = (MessageReceivedEvent)result;
@@ -70,10 +70,10 @@ public class EventConverterTests
     public void ConvertGroupAdminChange()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_admin_change",
-                Data = JObject.Parse(@"{""group_id"": 111, ""user_id"": 222, ""operator_id"": 333, ""is_set"": true}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_admin_change",
+            Data = JObject.Parse(@"{""group_id"": 111, ""user_id"": 222, ""operator_id"": 333, ""is_set"": true}")
+        };
 
         BotEvent               result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         GroupAdminChangedEvent admin  = (GroupAdminChangedEvent)result;
@@ -85,10 +85,10 @@ public class EventConverterTests
     public void ConvertGroupEssenceChange()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_essence_message_change",
-                Data = JObject.Parse(@"{""group_id"": 111, ""message_seq"": 999, ""operator_id"": 333, ""is_set"": true}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_essence_message_change",
+            Data = JObject.Parse(@"{""group_id"": 111, ""message_seq"": 999, ""operator_id"": 333, ""is_set"": true}")
+        };
 
         BotEvent                 result  = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         GroupEssenceChangedEvent essence = (GroupEssenceChangedEvent)result;
@@ -100,11 +100,11 @@ public class EventConverterTests
     public void ConvertGroupFileUpload()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_file_upload",
-                Data = JObject.Parse(
-                    @"{""group_id"": 111, ""user_id"": 222, ""file_id"": ""f2"", ""file_name"": ""doc.pdf"", ""file_size"": 4096}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_file_upload",
+            Data = JObject.Parse(
+                @"{""group_id"": 111, ""user_id"": 222, ""file_id"": ""f2"", ""file_name"": ""doc.pdf"", ""file_size"": 4096}")
+        };
 
         BotEvent        result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         FileUploadEvent file   = (FileUploadEvent)result;
@@ -117,10 +117,10 @@ public class EventConverterTests
     public void ConvertGroupMemberDecrease()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_member_decrease",
-                Data = JObject.Parse(@"{""group_id"": 111, ""user_id"": 222, ""operator_id"": 333}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_member_decrease",
+            Data = JObject.Parse(@"{""group_id"": 111, ""user_id"": 222, ""operator_id"": 333}")
+        };
 
         BotEvent        result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         MemberLeftEvent left   = (MemberLeftEvent)result;
@@ -132,10 +132,10 @@ public class EventConverterTests
     public void ConvertGroupMemberIncrease()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_member_increase",
-                Data = JObject.Parse(@"{""group_id"": 111, ""user_id"": 222, ""operator_id"": 333, ""invitor_id"": 0}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_member_increase",
+            Data = JObject.Parse(@"{""group_id"": 111, ""user_id"": 222, ""operator_id"": 333, ""invitor_id"": 0}")
+        };
 
         BotEvent          result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         MemberJoinedEvent joined = (MemberJoinedEvent)result;
@@ -148,10 +148,10 @@ public class EventConverterTests
     public void ConvertGroupMute()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_mute",
-                Data = JObject.Parse(@"{""group_id"": 111, ""user_id"": 222, ""operator_id"": 333, ""duration"": 3600}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_mute",
+            Data = JObject.Parse(@"{""group_id"": 111, ""user_id"": 222, ""operator_id"": 333, ""duration"": 3600}")
+        };
 
         BotEvent       result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         GroupMuteEvent mute   = (GroupMuteEvent)result;
@@ -164,10 +164,10 @@ public class EventConverterTests
     public void ConvertGroupWholeMute()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_whole_mute",
-                Data = JObject.Parse(@"{""group_id"": 111, ""operator_id"": 333, ""is_mute"": true}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_whole_mute",
+            Data = JObject.Parse(@"{""group_id"": 111, ""operator_id"": 333, ""is_mute"": true}")
+        };
 
         BotEvent       result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         GroupMuteEvent mute   = (GroupMuteEvent)result;
@@ -180,10 +180,10 @@ public class EventConverterTests
     public void ConvertGroupNameChange()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_name_change",
-                Data = JObject.Parse(@"{""group_id"": 111, ""new_group_name"": ""NewName"", ""operator_id"": 333}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_name_change",
+            Data = JObject.Parse(@"{""group_id"": 111, ""new_group_name"": ""NewName"", ""operator_id"": 333}")
+        };
 
         BotEvent              result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         GroupNameChangedEvent name   = (GroupNameChangedEvent)result;
@@ -195,11 +195,11 @@ public class EventConverterTests
     public void ConvertGroupNudge()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_nudge",
-                Data = JObject.Parse(
-                    @"{""group_id"": 111, ""sender_id"": 222, ""receiver_id"": 333, ""display_action"": ""poked"", ""display_suffix"": """", ""display_action_img_url"": """"}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_nudge",
+            Data = JObject.Parse(
+                @"{""group_id"": 111, ""sender_id"": 222, ""receiver_id"": 333, ""display_action"": ""poked"", ""display_suffix"": """", ""display_action_img_url"": """"}")
+        };
 
         BotEvent   result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         NudgeEvent nudge  = (NudgeEvent)result;
@@ -212,11 +212,11 @@ public class EventConverterTests
     public void ConvertGroupReaction()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_message_reaction",
-                Data = JObject.Parse(
-                    @"{""group_id"": 111, ""user_id"": 222, ""message_seq"": 999, ""face_id"": ""128"", ""reaction_type"": ""emoji"", ""is_add"": true}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_message_reaction",
+            Data = JObject.Parse(
+                @"{""group_id"": 111, ""user_id"": 222, ""message_seq"": 999, ""face_id"": ""128"", ""reaction_type"": ""emoji"", ""is_add"": true}")
+        };
 
         BotEvent           result   = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         GroupReactionEvent reaction = (GroupReactionEvent)result;
@@ -233,11 +233,11 @@ public class EventConverterTests
     public void ConvertFriendFileUpload()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "friend_file_upload",
-                Data = JObject.Parse(
-                    @"{""user_id"": 222, ""file_id"": ""f1"", ""file_name"": ""test.txt"", ""file_size"": 2048, ""file_hash"": ""abc"", ""is_self"": false}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "friend_file_upload",
+            Data = JObject.Parse(
+                @"{""user_id"": 222, ""file_id"": ""f1"", ""file_name"": ""test.txt"", ""file_size"": 2048, ""file_hash"": ""abc"", ""is_self"": false}")
+        };
 
         BotEvent        result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         FileUploadEvent file   = (FileUploadEvent)result;
@@ -251,11 +251,11 @@ public class EventConverterTests
     public void ConvertFriendNudge()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "friend_nudge",
-                Data = JObject.Parse(
-                    @"{""user_id"": 222, ""is_self_send"": false, ""is_self_receive"": true, ""display_action"": ""poked"", ""display_suffix"": ""you"", ""display_action_img_url"": """"}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "friend_nudge",
+            Data = JObject.Parse(
+                @"{""user_id"": 222, ""is_self_send"": false, ""is_self_receive"": true, ""display_action"": ""poked"", ""display_suffix"": ""you"", ""display_action_img_url"": """"}")
+        };
 
         BotEvent   result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         NudgeEvent nudge  = (NudgeEvent)result;
@@ -269,11 +269,11 @@ public class EventConverterTests
     public void ConvertMessageRecall()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "message_recall",
-                Data = JObject.Parse(
-                    @"{""message_scene"": ""group"", ""peer_id"": 111, ""message_seq"": 999, ""sender_id"": 222, ""operator_id"": 333, ""display_suffix"": """"}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "message_recall",
+            Data = JObject.Parse(
+                @"{""message_scene"": ""group"", ""peer_id"": 111, ""message_seq"": 999, ""sender_id"": 222, ""operator_id"": 333, ""display_suffix"": """"}")
+        };
 
         BotEvent            result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         MessageDeletedEvent del    = (MessageDeletedEvent)result;
@@ -287,10 +287,10 @@ public class EventConverterTests
     public void ConvertPeerPinChange()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "peer_pin_change",
-                Data = JObject.Parse(@"{""peer_id"": 111, ""message_scene"": ""group"", ""is_pinned"": true}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "peer_pin_change",
+            Data = JObject.Parse(@"{""peer_id"": 111, ""message_scene"": ""group"", ""is_pinned"": true}")
+        };
 
         BotEvent            result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         PeerPinChangedEvent pin    = (PeerPinChangedEvent)result;
@@ -304,10 +304,10 @@ public class EventConverterTests
     public void ConvertBotOffline()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "bot_offline",
-                Data = JObject.Parse(@"{""reason"": ""kicked""}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "bot_offline",
+            Data = JObject.Parse(@"{""reason"": ""kicked""}")
+        };
 
         BotEvent          result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         DisconnectedEvent disc   = (DisconnectedEvent)result;
@@ -323,11 +323,11 @@ public class EventConverterTests
     public void ConvertFriendRequest()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "friend_request",
-                Data = JObject.Parse(
-                    @"{""initiator_id"": 222, ""initiator_uid"": ""uid123"", ""comment"": ""Hello"", ""via"": ""search""}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "friend_request",
+            Data = JObject.Parse(
+                @"{""initiator_id"": 222, ""initiator_uid"": ""uid123"", ""comment"": ""Hello"", ""via"": ""search""}")
+        };
 
         BotEvent           result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         FriendRequestEvent req    = (FriendRequestEvent)result;
@@ -339,11 +339,11 @@ public class EventConverterTests
     public void ConvertGroupJoinRequest()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_join_request",
-                Data = JObject.Parse(
-                    @"{""notification_seq"": 501, ""group_id"": 111, ""initiator_id"": 222, ""comment"": ""Please add me"", ""is_filtered"": true}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_join_request",
+            Data = JObject.Parse(
+                @"{""notification_seq"": 501, ""group_id"": 111, ""initiator_id"": 222, ""comment"": ""Please add me"", ""is_filtered"": true}")
+        };
 
         BotEvent              result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         GroupJoinRequestEvent req    = (GroupJoinRequestEvent)result;
@@ -360,10 +360,11 @@ public class EventConverterTests
     public void ConvertGroupInvitedJoinRequest()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_invited_join_request",
-                Data = JObject.Parse(@"{""notification_seq"": 502, ""group_id"": 111, ""initiator_id"": 333, ""target_user_id"": 444}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_invited_join_request",
+            Data = JObject.Parse(
+                @"{""notification_seq"": 502, ""group_id"": 111, ""initiator_id"": 333, ""target_user_id"": 444}")
+        };
 
         BotEvent              result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         GroupJoinRequestEvent req    = (GroupJoinRequestEvent)result;
@@ -379,10 +380,11 @@ public class EventConverterTests
     public void ConvertGroupInvitation()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "group_invitation",
-                Data = JObject.Parse(@"{""invitation_seq"": 601, ""group_id"": 111, ""source_group_id"": 999, ""initiator_id"": 333}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_invitation",
+            Data = JObject.Parse(
+                @"{""invitation_seq"": 601, ""group_id"": 111, ""source_group_id"": 999, ""initiator_id"": 333}")
+        };
 
         BotEvent             result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         GroupInvitationEvent inv    = (GroupInvitationEvent)result;
@@ -401,10 +403,10 @@ public class EventConverterTests
     public void ConvertUnknownEventType_ReturnsNull()
     {
         MilkyEvent evt = new()
-            {
-                Time = 1700000000, SelfId = 12345, EventType = "some_future_event",
-                Data = JObject.Parse(@"{}")
-            };
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "some_future_event",
+            Data = JObject.Parse(@"{}")
+        };
 
         BotEvent? result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!);
         Assert.Null(result);

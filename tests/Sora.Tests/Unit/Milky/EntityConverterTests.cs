@@ -16,11 +16,11 @@ public class EntityConverterTests
     public void ToFriendInfo_AllFields()
     {
         MilkyFriendEntity entity = new()
-            {
-                UserId   = 123, Nickname  = "Test", Sex = "female",
-                Qid      = "qid1", Remark = "bestie",
-                Category = new MilkyFriendCategoryEntity { CategoryId = 2, CategoryName = "Close" }
-            };
+        {
+            UserId   = 123, Nickname  = "Test", Sex = "female",
+            Qid      = "qid1", Remark = "bestie",
+            Category = new MilkyFriendCategoryEntity { CategoryId = 2, CategoryName = "Close" }
+        };
 
         FriendInfo result = entity.Adapt<FriendInfo>();
         Assert.Equal(123L, (long)result.UserId);
@@ -37,9 +37,9 @@ public class EntityConverterTests
     public void ToFriendInfo_NullCategory()
     {
         MilkyFriendEntity entity = new()
-            {
-                UserId = 1, Nickname = "N", Sex = "unknown", Category = null!
-            };
+        {
+            UserId = 1, Nickname = "N", Sex = "unknown", Category = null!
+        };
         FriendInfo result = entity.Adapt<FriendInfo>();
         Assert.Null(result.Category);
     }
@@ -53,10 +53,10 @@ public class EntityConverterTests
     public void ToGroupAnnouncementInfo_AllFields()
     {
         MilkyGroupAnnouncementEntity entity = new()
-            {
-                GroupId = 100, AnnouncementId = "a1", UserId       = 200,
-                Time    = 1700000000, Content = "Notice", ImageUrl = "http://img.png"
-            };
+        {
+            GroupId = 100, AnnouncementId = "a1", UserId       = 200,
+            Time    = 1700000000, Content = "Notice", ImageUrl = "http://img.png"
+        };
 
         GroupAnnouncementInfo result = entity.Adapt<GroupAnnouncementInfo>();
         Assert.Equal(100L, (long)result.GroupId);
@@ -70,11 +70,11 @@ public class EntityConverterTests
     public void ToGroupFileInfo_AllFields()
     {
         MilkyGroupFileEntity entity = new()
-            {
-                FileId     = "f1", FileName       = "doc.pdf", ParentFolderId = "/",
-                FileSize   = 2048, UploadedTime   = 1700000000, ExpireTime    = 1700100000,
-                UploaderId = 456, DownloadedTimes = 3
-            };
+        {
+            FileId     = "f1", FileName       = "doc.pdf", ParentFolderId = "/",
+            FileSize   = 2048, UploadedTime   = 1700000000, ExpireTime    = 1700100000,
+            UploaderId = 456, DownloadedTimes = 3
+        };
 
         GroupFileInfo result = entity.Adapt<GroupFileInfo>();
         Assert.Equal("f1", result.FileId);
@@ -91,11 +91,11 @@ public class EntityConverterTests
     public void ToGroupFolderInfo_AllFields()
     {
         MilkyGroupFolderEntity entity = new()
-            {
-                FolderId    = "d1", ParentFolderId         = "/", FolderName = "docs",
-                CreatedTime = 1700000000, LastModifiedTime = 1700050000,
-                CreatorId   = 789, FileCount               = 5
-            };
+        {
+            FolderId    = "d1", ParentFolderId         = "/", FolderName = "docs",
+            CreatedTime = 1700000000, LastModifiedTime = 1700050000,
+            CreatorId   = 789, FileCount               = 5
+        };
 
         GroupFolderInfo result = entity.Adapt<GroupFolderInfo>();
         Assert.Equal("d1", result.FolderId);
@@ -111,13 +111,13 @@ public class EntityConverterTests
     public void ToGroupMemberInfo_AllFields()
     {
         MilkyGroupMemberEntity entity = new()
-            {
-                UserId        = 100, GroupId             = 200, Nickname  = "User",
-                Card          = "Card", Title            = "Title", Level = 5,
-                Role          = "admin", Sex             = "male",
-                JoinTime      = 1700000000, LastSentTime = 1700050000,
-                ShutUpEndTime = 1700100000
-            };
+        {
+            UserId        = 100, GroupId             = 200, Nickname  = "User",
+            Card          = "Card", Title            = "Title", Level = 5,
+            Role          = "admin", Sex             = "male",
+            JoinTime      = 1700000000, LastSentTime = 1700050000,
+            ShutUpEndTime = 1700100000
+        };
 
         GroupMemberInfo result = entity.Adapt<GroupMemberInfo>();
         Assert.Equal(MemberRole.Admin, result.Role);
