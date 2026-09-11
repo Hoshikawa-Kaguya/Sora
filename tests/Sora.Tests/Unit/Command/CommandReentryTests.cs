@@ -315,7 +315,8 @@ internal sealed class RecordingBotApi : IBotApi
         UserId            userId,
         string            fileId,
         string            fileHash,
-        CancellationToken ct = default) =>
+        bool              isSelfSend = false,
+        CancellationToken ct         = default) =>
         default!;
 
     public ValueTask<ApiResult<string>> CreateGroupFolderAsync(
@@ -337,6 +338,9 @@ internal sealed class RecordingBotApi : IBotApi
         string            fileUri,
         string            fileName,
         CancellationToken ct = default) =>
+        default!;
+
+    public ValueTask<ApiResult> PersistGroupFileAsync(GroupId groupId, string fileId, CancellationToken ct = default) =>
         default!;
 
     public ValueTask<ApiResult> DeleteGroupFileAsync(GroupId groupId, string fileId, CancellationToken ct = default) =>

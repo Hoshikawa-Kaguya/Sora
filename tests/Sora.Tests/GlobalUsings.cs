@@ -10,7 +10,6 @@ global using Sora.Entities.Events;
 global using Sora.Entities.Info;
 global using Sora.Entities.Interfaces;
 global using Sora.Adapter.Milky;
-global using Sora.Adapter.OneBot11;
 global using Sora.Command;
 global using Sora.Command.Attributes;
 global using Sora.Command.Filters;

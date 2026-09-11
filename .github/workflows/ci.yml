@@ -25,10 +25,6 @@ on:
         description: 'Publish Sora.Adapter.Milky'
         type: boolean
         default: true
-      pkg-sora-adapter-onebot11:
-        description: 'Publish Sora.Adapter.OneBot11'
-        type: boolean
-        default: true
 
 jobs:
   build-test:
@@ -60,7 +56,7 @@ jobs:
 
           VERSION_CHANGED=false
           if [ -n "$BASE" ] && [ "$BASE" != "0000000000000000000000000000000000000000" ]; then
-            if git diff --name-only "$BASE" HEAD | grep -qE '^src/[^/]+/version\.json$'; then
+            if git diff --name-only "$BASE" HEAD | grep -qE '^src/(Sora|Sora\.Core|Sora\.Entities|Sora\.Command|Sora\.Adapter\.Milky)/version\.json$'; then
               VERSION_CHANGED=true
             fi
           fi
@@ -104,7 +100,6 @@ jobs:
               "${{ inputs.pkg-sora-command }}:^HoshikawaKaguya\.Sora\.Command\."
               "${{ inputs.pkg-sora }}:^HoshikawaKaguya\.Sora\.[0-9]+\."
               "${{ inputs.pkg-sora-adapter-milky }}:^HoshikawaKaguya\.Sora\.Adapter\.Milky\."
-              "${{ inputs.pkg-sora-adapter-onebot11 }}:^HoshikawaKaguya\.Sora\.Adapter\.OneBot11\."
             )
 
             FOUND=false
@@ -164,7 +159,6 @@ jobs:
             ["src/Sora.Command/"]="^HoshikawaKaguya\.Sora\.Command\."
             ["src/Sora/"]="^HoshikawaKaguya\.Sora\.[0-9]+\."
             ["src/Sora.Adapter.Milky/"]="^HoshikawaKaguya\.Sora\.Adapter\.Milky\."
-            ["src/Sora.Adapter.OneBot11/"]="^HoshikawaKaguya\.Sora\.Adapter\.OneBot11\."
           )
 
           FOUND=false

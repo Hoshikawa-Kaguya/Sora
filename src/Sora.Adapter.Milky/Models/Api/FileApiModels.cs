@@ -49,6 +49,10 @@ internal sealed class GetPrivateFileDownloadUrlInput
 
     [JsonProperty("file_hash")]
     public string FileHash { get; set; } = "";
+
+    /// <summary>Whether the requested file was sent by this bot.</summary>
+    [JsonProperty("is_self_send")]
+    public bool IsSelfSend { get; set; }
 }
 
 /// <summary>Input parameters for the get_group_file_download_url API.</summary>
@@ -118,6 +122,18 @@ internal sealed class RenameGroupFileInput
 
     [JsonProperty("new_file_name")]
     public string NewFileName { get; set; } = "";
+}
+
+/// <summary>Input parameters for the persist_group_file API.</summary>
+internal sealed class PersistGroupFileInput
+{
+    /// <summary>Group containing the file.</summary>
+    [JsonProperty("group_id")]
+    public long GroupId { get; set; }
+
+    /// <summary>Identifier of the file to persist.</summary>
+    [JsonProperty("file_id")]
+    public string FileId { get; set; } = "";
 }
 
 /// <summary>Input parameters for the delete_group_file API.</summary>

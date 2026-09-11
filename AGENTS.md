@@ -1,6 +1,6 @@
 # Sora Agent Guide
 
-Sora is an asynchronous C#/.NET 10 multi-protocol IM bot framework. Milky is the maintained protocol. `HoshikawaKaguya.Sora.Adapter.OneBot11` is deprecated and no longer maintained; its existing implementation is retained. NuGet package names use the `HoshikawaKaguya.` prefix while C# namespaces remain under `Sora.*`.
+Sora is an asynchronous C#/.NET 10 multi-protocol IM bot framework. Milky is the maintained protocol. `HoshikawaKaguya.Sora.Adapter.OneBot11` is supported only through Sora 2.2. Its source, dedicated tests and example are frozen and excluded from subsequent solution builds, tests and packaging. NuGet package names use the `HoshikawaKaguya.` prefix while C# namespaces remain under `Sora.*`.
 
 ## Start Here
 
@@ -40,7 +40,7 @@ Functional tests require `SORA_TEST_*` configuration and may skip only for missi
 ## Repository Rules
 
 - Preserve the dependency direction above and keep cross-protocol APIs protocol-agnostic.
-- Maintenance plans, protocol synchronization, compatibility fixes and test expansion cover the framework and Milky. Do not schedule OB11 maintenance or validation. Its deprecation is documented only; do not mark the NuGet package deprecated or add compiler obsolescence attributes. Existing full-solution build and packaging configuration remains in place.
+- Maintenance plans, protocol synchronization, compatibility fixes and test expansion cover the framework and Milky. Do not schedule OB11 maintenance or validation. Its deprecation is documented only; do not mark the NuGet package deprecated or add compiler obsolescence attributes. The active solution and CI build, test and package only the framework and Milky; OB11 source, dedicated tests and example must remain unchanged.
 - Milky-supported or shared models belong in the framework projects. OB11-only models belong under `Sora.Adapter.OneBot11`.
 - Keep public APIs XML-documented and maintain the repository's zero-warning build policy.
 - Use `ValueTask` for asynchronous framework/event paths, file-scoped namespaces, explicit types, and the existing Newtonsoft.Json/Mapster conventions.
@@ -52,7 +52,7 @@ Functional tests require `SORA_TEST_*` configuration and may skip only for missi
 ## Established Behavior
 
 - Actor-based BlockUsers/SuperUsers rules and command singleton construction are defined in src/AGENTS.md; preserve their documented semantics during simplification.
-- CI runs the full solution for all push/PR changes. TestReporter saves a local report before optional best-effort delivery; remote delivery results do not determine test success.
+- CI runs the active framework/Milky solution for all push/PR changes. TestReporter saves a local report before optional best-effort delivery; remote delivery results do not determine test success.
 - The runner reports success for all selected tests; an empty selection returns normally. This does not claim that unselected functional scenarios were exercised.
 
 ## Documentation Routing

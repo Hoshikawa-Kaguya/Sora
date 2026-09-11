@@ -36,6 +36,29 @@ public class EventConverterTests
         Assert.Equal("Friend", msg.Sender.Nickname);
     }
 
+    /// <summary>Verifies a Markdown-only message remains a received event with its original content.</summary>
+    [Fact]
+    public void ConvertMessageReceive_MarkdownOnly()
+    {
+        MilkyEvent evt = new()
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "message_receive",
+            Data = JObject.Parse(
+                @"{
+                ""message_scene"": ""friend"", ""peer_id"": 222, ""message_seq"": 888,
+                ""sender_id"": 222, ""time"": 1700000000,
+                ""segments"": [{""type"": ""markdown"", ""data"": {""content"": ""# Title\n**content**""}}]
+            }")
+        };
+
+        MessageReceivedEvent message = Assert.IsType<MessageReceivedEvent>(
+            EventConverter.ToSoraEvent(evt, TestConnectionId, null!));
+        MarkdownSegment markdown = Assert.IsType<MarkdownSegment>(Assert.Single(message.Message.Body));
+
+        Assert.Equal("# Title\n**content**", markdown.Content);
+        Assert.Equal(SegmentDirection.Incoming, markdown.Direction);
+    }
+
     /// <summary>Verifies <see cref="EventConverter.ToSoraEvent" /> converts a group message-receive event.</summary>
     [Fact]
     public void ConvertMessageReceive_Group()
@@ -64,6 +87,26 @@ public class EventConverterTests
 #endregion
 
 #region Group Notice Event Tests
+
+    /// <summary>Verifies group disband conversion preserves the group, operator and event metadata.</summary>
+    [Fact]
+    public void ConvertGroupDisband()
+    {
+        MilkyEvent evt = new()
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "group_disband",
+            Data = JObject.Parse(@"{""group_id"": 111, ""operator_id"": 333}")
+        };
+
+        GroupDisbandedEvent disbanded = Assert.IsType<GroupDisbandedEvent>(
+            EventConverter.ToSoraEvent(evt, TestConnectionId, null!));
+
+        Assert.Equal(111L, (long)disbanded.GroupId);
+        Assert.Equal(333L, (long)disbanded.OperatorId);
+        Assert.Equal(TestConnectionId, disbanded.ConnectionId);
+        Assert.Equal(12345L, (long)disbanded.SelfId);
+        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(evt.Time).LocalDateTime, disbanded.Time);
+    }
 
     /// <summary>Verifies <see cref="EventConverter.ToSoraEvent" /> converts a group-admin-change event.</summary>
     [Fact]

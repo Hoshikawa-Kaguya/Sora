@@ -9,8 +9,13 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Sora\Sora.csproj"/>
-        <ProjectReference Include="..\..\src\Sora.Adapter.OneBot11\Sora.Adapter.OneBot11.csproj"/>
         <ProjectReference Include="..\..\src\Sora.Adapter.Milky\Sora.Adapter.Milky.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- OB11 tests are retained as Sora 2.2 source archives. -->
+        <Compile Remove="Unit\OneBot11\**\*.cs;Functional\OneBot11\**\*.cs"/>
+        <Compile Remove="Unit\UnitTestFixtures.cs;Unit\Adapters\ConfigTests.cs"/>
     </ItemGroup>
 
     <ItemGroup>

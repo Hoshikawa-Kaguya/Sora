@@ -10,18 +10,6 @@
 .PARAMETER Category
     Test category to run: "Unit", "Functional", or "All". Default: "All".
 
-.PARAMETER Ob11PrimaryHost
-    OneBot11 primary bot host. Required for OB11 functional tests.
-
-.PARAMETER Ob11SecondaryHost
-    OneBot11 secondary bot host for dual-bot tests.
-
-.PARAMETER Ob11Port
-    OneBot11 server port. Default: 3001.
-
-.PARAMETER Ob11Token
-    OneBot11 access token.
-
 .PARAMETER MilkyPrimaryHost
     Milky primary bot host. Required for Milky functional tests.
 
@@ -77,11 +65,11 @@
 
 .EXAMPLE
     # Run functional tests against dual-bot setup
-    .\Run-Tests.ps1 -Category Functional -Ob11PrimaryHost <primary-host> -Ob11SecondaryHost <secondary-host> -MilkyPrimaryHost <primary-host> -MilkySecondaryHost <secondary-host> -MilkyToken <token> -MilkyPrefix <prefix> -GroupId <group-id>
+    .\Run-Tests.ps1 -Category Functional -MilkyPrimaryHost <primary-host> -MilkySecondaryHost <secondary-host> -MilkyToken <token> -MilkyPrefix <prefix> -GroupId <group-id>
 
 .EXAMPLE
     # Run all tests with report upload via Milky
-    .\Run-Tests.ps1 -Ob11PrimaryHost <primary-host> -MilkyPrimaryHost <primary-host> -MilkyToken <token> -MilkyPrefix <prefix> -GroupId <group-id> -EnableReport
+    .\Run-Tests.ps1 -MilkyPrimaryHost <primary-host> -MilkyToken <token> -MilkyPrefix <prefix> -GroupId <group-id> -EnableReport
 
 .EXAMPLE
     # Run tests with Debug log level
@@ -95,11 +83,6 @@
 param(
     [ValidateSet("Unit", "Functional", "All")]
     [string]$Category = "All",
-
-    [string]$Ob11PrimaryHost,
-    [string]$Ob11SecondaryHost,
-    [int]$Ob11Port = 3001,
-    [string]$Ob11Token,
 
     [string]$MilkyPrimaryHost,
     [string]$MilkySecondaryHost,
@@ -179,10 +162,6 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
 # ---- Set environment variables ----
-if ($Ob11PrimaryHost)   { $env:SORA_TEST_OB11_PRIMARY_HOST = $Ob11PrimaryHost }
-if ($Ob11SecondaryHost) { $env:SORA_TEST_OB11_SECONDARY_HOST = $Ob11SecondaryHost }
-if ($Ob11Port)          { $env:SORA_TEST_OB11_PORT = $Ob11Port.ToString() }
-if ($Ob11Token)         { $env:SORA_TEST_OB11_TOKEN = $Ob11Token }
 if ($MilkyPrimaryHost)   { $env:SORA_TEST_MILKY_PRIMARY_HOST = $MilkyPrimaryHost }
 if ($MilkySecondaryHost) { $env:SORA_TEST_MILKY_SECONDARY_HOST = $MilkySecondaryHost }
 if ($MilkyPrimaryPort)   { $env:SORA_TEST_MILKY_PRIMARY_PORT = $MilkyPrimaryPort.ToString() }
@@ -199,8 +178,8 @@ if ($VideoFilePath)     { $env:SORA_TEST_VIDEO_FILE = $VideoFilePath }
 # Always set results directory so test reporter can find TRX files
 $env:SORA_TEST_RESULTS_DIR = $ResultsDir
 
-# Enable functional tests if any host is configured and group is set
-if (($Ob11PrimaryHost -or $MilkyPrimaryHost) -and $GroupId -gt 0) {
+# Enable functional tests if the Milky host and group are configured
+if ($MilkyPrimaryHost -and $GroupId -gt 0) {
     $env:SORA_TEST_FUNCTIONAL = "true"
 }
 
@@ -217,16 +196,6 @@ Write-Host "Configuration:" -ForegroundColor Yellow
 Write-Host "  Category:        $Category"
 Write-Host "  Build Config:    $Configuration"
 Write-Host "  Results Dir:     $ResultsDir"
-if ($Ob11PrimaryHost) {
-    Write-Host "  OB11 Primary:    ws://${Ob11PrimaryHost}:${Ob11Port}" -ForegroundColor Green
-} else {
-    Write-Host "  OB11 Primary:    (not configured)" -ForegroundColor DarkGray
-}
-if ($Ob11SecondaryHost) {
-    Write-Host "  OB11 Secondary:  ws://${Ob11SecondaryHost}:${Ob11Port}" -ForegroundColor Green
-} else {
-    Write-Host "  OB11 Secondary:  (not configured)" -ForegroundColor DarkGray
-}
 if ($MilkyPrimaryHost) {
     $prefix = if ($MilkyPrefix) { "/$MilkyPrefix" } else { "" }
     Write-Host "  Milky Primary:   http://${MilkyPrimaryHost}:${MilkyPrimaryPort}${prefix}" -ForegroundColor Green
@@ -368,14 +337,6 @@ if ($Category -eq "Unit" -or $Category -eq "All") {
 
 if ($Category -eq "Functional" -or $Category -eq "All") {
     if ($env:SORA_TEST_FUNCTIONAL -eq "true") {
-        if ($Ob11PrimaryHost) {
-            $ob11Filter = Get-CombinedFilter "Category=Functional&FullyQualifiedName~OneBot11"
-            $exitCodes += Invoke-TestRun -Filter $ob11Filter -Label "Functional OB11" -TrxFileName "[Func][OneBot11][ApiTests]"
-        } else {
-            Write-Host "[Functional OB11] Skipped — SORA_TEST_OB11_PRIMARY_HOST not set" -ForegroundColor DarkGray
-            Write-Host ""
-        }
-
         if ($MilkyPrimaryHost) {
             $milkyFilter = Get-CombinedFilter "Category=Functional&FullyQualifiedName~Milky"
             $exitCodes += Invoke-TestRun -Filter $milkyFilter -Label "Functional Milky" -TrxFileName "[Func][Milky][ApiTests]"

@@ -58,7 +58,10 @@ public static class SegmentBuilder
         string                              prompt  = "") =>
         new()
         {
-            Messages = messages, Title = title, Preview = preview?.Take(4).ToList() ?? [], Summary = summary,
+            Messages = messages,
+            Title    = title,
+            Preview  = preview?.Take(4).ToList() ?? [],
+            Summary  = summary,
             Prompt   = prompt
         };
 

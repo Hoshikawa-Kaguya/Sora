@@ -111,6 +111,11 @@ public class EventDispatcherTests
             lastType = "Mute";
             await ValueTask.CompletedTask;
         };
+        dispatcher.OnGroupDisbanded += _ =>
+        {
+            lastType = "Disbanded";
+            return ValueTask.CompletedTask;
+        };
         dispatcher.OnFileUpload += async _ =>
         {
             lastType = "FileUpload";
@@ -176,6 +181,14 @@ public class EventDispatcherTests
             },
             CT);
         Assert.Equal("Mute", lastType);
+
+        await dispatcher.DispatchAsync(
+            new GroupDisbandedEvent
+            {
+                Api = null!, GroupId = 1L, OperatorId = 2L
+            },
+            CT);
+        Assert.Equal("Disbanded", lastType);
 
         await dispatcher.DispatchAsync(
             new FileUploadEvent

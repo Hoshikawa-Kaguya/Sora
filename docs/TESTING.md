@@ -4,7 +4,7 @@
 
 Sora 框架采用**双机器人架构**进行端到端测试。两个独立的 QQ 机器人账号（Primary Bot 和 Secondary Bot）互相协作，完全自动化测试流程，无需人工介入。
 
-当前测试维护与执行计划面向框架公共能力和 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 已废弃并停止维护，不再安排 OB11 测试执行、补齐或修复。下文 OB11 目录和配置仅记录现存资源；本地脚本与 IDE 配置排除 OB11 专属测试。NuGet 包不设置 deprecated 标记。
+当前测试面向框架公共能力和 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 的支持范围截至 Sora 2.2；后续版本停止维护，并退出构建、测试和发布。源码、专属测试和示例仅作历史参考，使用 OB11 的项目应固定在 Sora 2.2 或迁移到 Milky。 当前测试项目不编译 OB11 用例，下文 OB11 配置仅记录 Sora 2.2 的历史资源。NuGet 包不设置 deprecated 标记。
 
 ## 测试架构
 
@@ -191,7 +191,7 @@ tests/
 | `-SecondaryBotAvatar` | Secondary 头像路径 |
 | `-GroupAvatarPath` | 群头像路径 |
 
-主脚本仍保留 `-Ob11PrimaryHost`、`-Ob11SecondaryHost`、`-Ob11Port` 和 `-Ob11Token` 参数作为现存接口；OB11 测试停止维护，不属于当前执行计划。
+主脚本仅配置和执行框架与 Milky 测试。
 
 ## 使用示例
 

@@ -884,15 +884,17 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         UserId            userId,
         string            fileId,
         string            fileHash,
-        CancellationToken ct = default)
+        bool              isSelfSend = false,
+        CancellationToken ct         = default)
     {
         ApiResult<DownloadUrlOutput> resp = await CallApiAsync<DownloadUrlOutput>(
             "get_private_file_download_url",
             new GetPrivateFileDownloadUrlInput
             {
-                UserId   = userId,
-                FileId   = fileId,
-                FileHash = fileHash
+                UserId     = userId,
+                FileId     = fileId,
+                FileHash   = fileHash,
+                IsSelfSend = isSelfSend
             },
             ct);
         return resp is { IsSuccess: true, Data: { } data }
@@ -964,6 +966,16 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
             ? ApiResult<string>.Ok(data.FileId ?? "")
             : ApiResult<string>.Fail(resp.Code, resp.Message);
     }
+
+    /// <inheritdoc />
+    public async ValueTask<ApiResult> PersistGroupFileAsync(
+        GroupId           groupId,
+        string            fileId,
+        CancellationToken ct = default) =>
+        await CallApiAsync(
+            "persist_group_file",
+            new PersistGroupFileInput { GroupId = groupId, FileId = fileId },
+            ct);
 
     /// <inheritdoc />
     public async ValueTask<ApiResult> DeleteGroupFileAsync(

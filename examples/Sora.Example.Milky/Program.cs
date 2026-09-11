@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Sora;
 using Sora.Adapter.Milky;
+using Sora.Entities.Segments;
 using Sora.Example.Milky;
 using Sora.Example.Milky.Commands;
 using Sora.Example.Milky.Filters;
@@ -42,7 +43,21 @@ service.Events.OnDisconnected += async e =>
 };
 
 //消息接收
-service.Events.OnMessageReceived += async e => { await Helpers.SendReplyAsync(e, new MessageBody("干嘛")); };
+service.Events.OnMessageReceived += async e =>
+{
+    ForwardSegment t = SegmentBuilder.Forward(
+    [
+        new ForwardedMessageNode
+        {
+            UserId     = 114514,
+            SenderName = "YBB",
+            Time       = DateTime.Now - TimeSpan.FromHours(1),
+            Segments   = "shit"
+        }
+    ]);
+    await e.Api.SendGroupMessageAsync(e.Group.GroupId, t);
+    await Helpers.SendReplyAsync(e, new MessageBody("干嘛"));
+};
 
 //群成员加入
 service.Events.OnMemberJoined += async e =>

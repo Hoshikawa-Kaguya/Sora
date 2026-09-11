@@ -26,6 +26,24 @@ public class MessageConverterTests
 
 #region ToMessageBody Tests
 
+    /// <summary>Verifies received Markdown content is preserved without becoming sendable.</summary>
+    [Fact]
+    public void ToMessageBody_MarkdownSegment_PreservesIncomingContent()
+    {
+        const string content = "# Heading\n\n**bold** [link](https://example.com)";
+        MessageBody body = MessageConverter.ToMessageBody(
+        [
+            new MilkySegment { Type = "markdown", Data = new JObject { ["content"] = content } }
+        ]);
+
+        MarkdownSegment markdown = Assert.IsType<MarkdownSegment>(Assert.Single(body));
+        Assert.Equal(SegmentType.Markdown, markdown.Type);
+        Assert.Equal(content, markdown.Content);
+        Assert.Equal(SegmentDirection.Incoming, markdown.Direction);
+        Assert.Null(markdown.ToOutgoing());
+        Assert.Empty(MessageConverter.ToMilkySegments(body.ToOutgoing()));
+    }
+
     /// <summary>Verifies <see cref="MessageConverter.ToMessageBody" /> converts a text segment.</summary>
     [Fact]
     public void ToMessageBody_TextSegment()
@@ -415,6 +433,39 @@ public class MessageConverterTests
         Assert.Single(messages);
         Assert.Equal(12345L, messages[0].Value<long>("user_id"));
         Assert.Equal("TestSender", messages[0].Value<string>("sender_name"));
+        Assert.Null(messages[0]["time"]);
+    }
+
+    /// <summary>Verifies forwarded message times are serialized as Unix seconds for each DateTime kind.</summary>
+    [Theory]
+    [InlineData(DateTimeKind.Utc)]
+    [InlineData(DateTimeKind.Local)]
+    [InlineData(DateTimeKind.Unspecified)]
+    public void ToMilkySegments_ForwardSegment_Time(DateTimeKind kind)
+    {
+        const long expectedTime = 1700000000L;
+        DateTime   utcTime      = DateTimeOffset.FromUnixTimeSeconds(expectedTime).UtcDateTime;
+        DateTime time = kind == DateTimeKind.Utc
+            ? utcTime
+            : DateTime.SpecifyKind(utcTime.ToLocalTime(), kind);
+        MessageBody body = new(
+        [
+            new ForwardSegment
+            {
+                Messages =
+                [
+                    new ForwardedMessageNode
+                    {
+                        UserId   = 12345L, SenderName = "TestSender", Time = time,
+                        Segments = new MessageBody("hello forward")
+                    }
+                ]
+            }
+        ]);
+
+        MilkySegment segment  = Assert.Single(MessageConverter.ToMilkySegments(body));
+        JArray       messages = Assert.IsType<JArray>(segment.Data?["messages"]);
+        Assert.Equal(expectedTime, Assert.Single(messages).Value<long>("time"));
     }
 
 #endregion

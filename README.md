@@ -83,7 +83,7 @@ SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
 >
 > 这个adapter目前只对LLBot做了测试，不再推荐使用OneBot v11协议，OneBot v11已经算是历史遗留了
 > 
-> 不再维护OneBot Adapter
+> `HoshikawaKaguya.Sora.Adapter.OneBot11` 的支持范围截至 Sora 2.2；后续版本停止维护，并退出构建、测试和发布。源码、专属测试和示例仅作历史参考，使用 OB11 的项目应固定在 Sora 2.2 或迁移到 Milky。
 >
 > 推荐直接drop ob11协议的使用，如果你的是老项目建议尽早迁移
 

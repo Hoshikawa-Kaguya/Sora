@@ -203,6 +203,18 @@ internal sealed class MilkyGroupMemberDecreaseData
     public long? OperatorId { get; set; }
 }
 
+/// <summary>Event data for group_disband events.</summary>
+internal sealed class MilkyGroupDisbandData
+{
+    /// <summary>The disbanded group ID.</summary>
+    [JsonProperty("group_id")]
+    public long GroupId { get; set; }
+
+    /// <summary>The operator who disbanded the group.</summary>
+    [JsonProperty("operator_id")]
+    public long OperatorId { get; set; }
+}
+
 /// <summary>Event data for group_name_change events.</summary>
 internal sealed class MilkyGroupNameChangeData
 {

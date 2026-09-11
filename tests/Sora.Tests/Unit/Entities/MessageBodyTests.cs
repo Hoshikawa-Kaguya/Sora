@@ -120,6 +120,7 @@ public class MessageBodyTests
             {
                 EmojiPackageId = 1, EmojiId = "e1", Key = "k1", Summary = "s", Url = "http://url"
             });
+        body.Add(new MarkdownSegment { Content = "**markdown**" });
         Assert.Empty(body);
     }
 
@@ -333,6 +334,7 @@ public class MessageBodyTests
             new TextSegment { Text                 = "hello" },
             new MarketFaceSegment { EmojiPackageId = 1, EmojiId = "e1", Key = "k1", Summary = "s", Url = "http://url" },
             new XmlSegment { ServiceId             = 1, XmlPayload = "<xml/>" },
+            new MarkdownSegment { Content          = "**markdown**" },
             new MentionSegment { Target            = 123L }
         ]);
 

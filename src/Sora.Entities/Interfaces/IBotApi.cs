@@ -502,13 +502,15 @@ public interface IBotApi
     /// <param name="userId">The user ID of the private conversation.</param>
     /// <param name="fileId">The file ID to download.</param>
     /// <param name="fileHash">The file hash for verification.</param>
+    /// <param name="isSelfSend">Whether the file was sent by this bot.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The download URL string.</returns>
     ValueTask<ApiResult<string>> GetPrivateFileDownloadUrlAsync(
         UserId            userId,
         string            fileId,
         string            fileHash,
-        CancellationToken ct = default);
+        bool              isSelfSend = false,
+        CancellationToken ct         = default);
 
     /// <summary>Creates a folder in a group file directory.</summary>
     /// <param name="groupId">Target group ID.</param>
@@ -544,6 +546,20 @@ public interface IBotApi
         UserId            userId,
         string            fileUri,
         string            fileName,
+        CancellationToken ct = default);
+
+    /// <summary>Persists a group file so that it does not expire.</summary>
+    /// <remarks>
+    ///     Persistence may change the file ID. This operation does not return the new ID;
+    ///     query <see cref="GetGroupFilesAsync" /> again before subsequent file operations.
+    /// </remarks>
+    /// <param name="groupId">Target group ID.</param>
+    /// <param name="fileId">The file ID to persist.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The API result indicating success or failure.</returns>
+    ValueTask<ApiResult> PersistGroupFileAsync(
+        GroupId           groupId,
+        string            fileId,
         CancellationToken ct = default);
 
     /// <summary>Deletes a file from a group.</summary>

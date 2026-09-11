@@ -2,7 +2,7 @@
 
 > 本文档面向 Sora 1.x 用户，帮助你将现有机器人项目迁移到全新重构的 2.0 版本。
 
-> 迁移目标为 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 已废弃并停止维护，不再安排功能开发、缺陷修复、协议对齐或测试维护；文中 OB11 类型仅作现有代码参考。NuGet 包不设置 deprecated 标记。
+> 迁移目标为 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 的支持范围截至 Sora 2.2；后续版本停止维护，并退出构建、测试和发布。源码、专属测试和示例仅作历史参考，使用 OB11 的项目应固定在 Sora 2.2 或迁移到 Milky。 本文 OB11 类型仅作历史代码参考。NuGet 包不设置 deprecated 标记。
 
 ## 概述
 

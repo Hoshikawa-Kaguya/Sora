@@ -2,7 +2,7 @@
 
 本文档面向希望为 Sora 框架开发第三方协议适配器的开发者。
 
-维护中的内置适配器为 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 已废弃并停止维护，不再安排功能开发、缺陷修复、协议对齐或测试维护；本文涉及 OB11 的内容仅记录现有实现。NuGet 包不设置 deprecated 标记。
+维护中的内置适配器为 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 的支持范围截至 Sora 2.2；后续版本停止维护，并退出构建、测试和发布。源码、专属测试和示例仅作历史参考，使用 OB11 的项目应固定在 Sora 2.2 或迁移到 Milky。 NuGet 包不设置 deprecated 标记。
 
 > `__Name__`（双下划线包围）为占位符，请替换为实际名称。
 

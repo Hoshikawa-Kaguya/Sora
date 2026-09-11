@@ -51,6 +51,9 @@ public sealed class EventDispatcher
     /// <summary>Raised when a member is muted/unmuted or group-wide mute toggles.</summary>
     public event Func<GroupMuteEvent, ValueTask>? OnGroupMute;
 
+    /// <summary>Raised when a group is disbanded.</summary>
+    public event Func<GroupDisbandedEvent, ValueTask>? OnGroupDisbanded;
+
     /// <summary>Raised when a group name is changed.</summary>
     public event Func<GroupNameChangedEvent, ValueTask>? OnGroupNameChanged;
 
@@ -145,6 +148,9 @@ public sealed class EventDispatcher
                 break;
             case GroupNameChangedEvent ev:
                 await InvokeHandlersAsync(OnGroupNameChanged, ev, ct);
+                break;
+            case GroupDisbandedEvent ev:
+                await InvokeHandlersAsync(OnGroupDisbanded, ev, ct);
                 break;
             case GroupReactionEvent ev:
                 await InvokeHandlersAsync(OnGroupReaction, ev, ct);

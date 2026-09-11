@@ -283,6 +283,14 @@ public class ApiTests : IDisposable
         Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
+        DateTime nodeTime = new(
+            2026,
+            1,
+            2,
+            3,
+            4,
+            5,
+            DateTimeKind.Utc);
         MessageBody body = new(
             SegmentBuilder.Forward(
                 [
@@ -290,7 +298,8 @@ public class ApiTests : IDisposable
                     {
                         Segments   = [new TextSegment { Text = "test1" }],
                         SenderName = "ybb",
-                        UserId     = 114514
+                        UserId     = 114514,
+                        Time       = nodeTime
                     },
                     new ForwardedMessageNode
                     {
@@ -305,28 +314,33 @@ public class ApiTests : IDisposable
                 "4"));
         SendMessageResult messageSendResult = await Api.SendGroupMessageAsync(testGroup, body, CT);
         Assert.True(messageSendResult.IsSuccess, "Failed to send forward message");
-        await Task.Delay(1000, CT);
-
-        // Try to get forward message in recent sent message
-        MessageContext ctx = (await Api.GetMessageAsync(
-                MessageSourceType.Group,
-                testGroup,
-                messageSendResult.MessageId,
-                CT))
-            .AssertSuccess();
-        string forwardId = ctx.Body.OfType<ForwardSegment>().FirstOrDefault()?.ForwardId ?? string.Empty;
-        Assert.False(string.IsNullOrEmpty(forwardId));
-
-        ApiResult<IReadOnlyList<MessageContext>> result          = await Api.GetForwardMessagesAsync(forwardId, CT);
-        IReadOnlyList<MessageContext>            forwardMessages = result.AssertSuccess();
-        _output.WriteLine($"GetForwardMessages: success={result.IsSuccess} count={forwardMessages.Count}");
         try
         {
-            await Api.RecallGroupMessageAsync(testGroup, messageSendResult.MessageId, CT);
+            await Task.Delay(1000, CT);
+            MessageContext ctx = (await Api.GetMessageAsync(
+                    MessageSourceType.Group,
+                    testGroup,
+                    messageSendResult.MessageId,
+                    CT))
+                .AssertSuccess();
+            string forwardId = Assert.Single(ctx.Body.OfType<ForwardSegment>()).ForwardId;
+            Assert.False(string.IsNullOrEmpty(forwardId));
+
+            IReadOnlyList<MessageContext> forwardMessages =
+                (await Api.GetForwardMessagesAsync(forwardId, CT)).AssertSuccess();
+            Assert.Equal(2, forwardMessages.Count);
+            Assert.Equal("test1", forwardMessages[0].Body.GetText());
+            Assert.Equal(nodeTime, forwardMessages[0].Time.ToUniversalTime());
+            Assert.Equal("test2", forwardMessages[1].Body.GetText());
+            Assert.NotEqual(default, forwardMessages[1].Time);
         }
-        catch (Exception e)
+        finally
         {
-            _output.WriteLine($"Exception: {e}");
+            ApiResult recall = await Api.RecallGroupMessageAsync(
+                testGroup,
+                messageSendResult.MessageId,
+                CancellationToken.None);
+            Assert.True(recall.IsSuccess, recall.Message);
         }
     }
 
@@ -985,28 +999,96 @@ public class ApiTests : IDisposable
     [Fact]
     public async Task GetPrivateFileDownloadUrl()
     {
+        Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
+        Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
+        Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
+
+        UserId primaryUserId = (await Api.GetSelfInfoAsync(CT)).AssertSuccess().UserId;
+        string fileName = $"sora_download_{Guid.NewGuid():N}.txt";
+        string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes("Sora private file download test"));
+        TaskCompletionSource<FileUploadEvent> received = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        Func<FileUploadEvent, ValueTask> handler = e =>
+        {
+            if (e.SourceType == MessageSourceType.Friend && e.UserId == primaryUserId && e.FileName == fileName)
+                received.TrySetResult(e);
+            return ValueTask.CompletedTask;
+        };
+        _fixture.SecondaryService.Events.OnFileUpload += handler;
+        try
+        {
+            string uploadedFileId = (await Api.UploadPrivateFileAsync(
+                _fixture.SecondaryUserId,
+                $"base64://{base64}",
+                fileName,
+                CT)).AssertSuccess();
+            Assert.False(string.IsNullOrEmpty(uploadedFileId));
+            await Task.WhenAny(received.Task, Task.Delay(10000, CT));
+            Assert.True(
+                received.Task.IsCompletedSuccessfully,
+                "Private file upload event was not received within timeout");
+            FileUploadEvent file = await received.Task;
+            Assert.False(file.IsSelfSent);
+            Assert.False(string.IsNullOrEmpty(file.FileId));
+            Assert.True(file.FileSize > 0);
+
+            string sentUrl = (await Api.GetPrivateFileDownloadUrlAsync(
+                _fixture.SecondaryUserId,
+                uploadedFileId,
+                file.FileHash,
+                true,
+                CT)).AssertSuccess();
+            Assert.False(string.IsNullOrEmpty(sentUrl));
+            string receivedUrl = (await _fixture.SecondaryApi.GetPrivateFileDownloadUrlAsync(
+                primaryUserId,
+                file.FileId,
+                file.FileHash,
+                ct: CT)).AssertSuccess();
+            Assert.False(string.IsNullOrEmpty(receivedUrl));
+        }
+        finally
+        {
+            _fixture.SecondaryService.Events.OnFileUpload -= handler;
+        }
+    }
+
+    /// <see cref="IBotApi.PersistGroupFileAsync" />
+    [Fact]
+    public async Task PersistGroupFile()
+    {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
         Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
-        Assert.SkipWhen(_fixture.SecondaryUserId.Value == 0, "Secondary bot not available");
 
-        // Upload a test file first, then try download URL
-        string testContent = $"test {DateTime.Now:yyyyMMdd_HHmmss}";
-        string base64      = Convert.ToBase64String(Encoding.UTF8.GetBytes(testContent));
-        ApiResult<string> uploadResult = await Api.UploadPrivateFileAsync(
-            _fixture.SecondaryUserId,
-            $"base64://{base64}",
-            "test_dl.txt",
-            CT);
-        Assert.SkipWhen(!uploadResult.IsSuccess, $"Upload failed: {uploadResult.Message}");
+        GroupId groupId  = TestConfig.TestGroupId;
+        string  fileName = $"sora_persist_{Guid.NewGuid():N}.txt";
+        string  base64   = Convert.ToBase64String(Encoding.UTF8.GetBytes("Sora group file persistence test"));
+        string fileId =
+            (await Api.UploadGroupFileAsync(groupId, $"base64://{base64}", fileName, ct: CT)).AssertSuccess();
+        Assert.False(string.IsNullOrEmpty(fileId));
+        try
+        {
+            ApiResult persisted = await Api.PersistGroupFileAsync(groupId, fileId, CT);
+            Assert.True(persisted.IsSuccess, persisted.Message);
+            GroupFilesResult files = (await Api.GetGroupFilesAsync(groupId, ct: CT)).AssertSuccess();
+            GroupFileInfo    file  = Assert.Single(files.Files, file => file.FileName == fileName);
+            Assert.False(string.IsNullOrEmpty(file.FileId));
+            Assert.Equal(32L, file.FileSize);
+            Assert.Null(file.ExpireTime);
+        }
+        finally
+        {
+            GroupFilesResult files =
+                (await Api.GetGroupFilesAsync(groupId, ct: CancellationToken.None)).AssertSuccess();
+            foreach (GroupFileInfo file in files.Files.Where(file => file.FileName == fileName))
+            {
+                ApiResult deleted = await Api.DeleteGroupFileAsync(groupId, file.FileId, CancellationToken.None);
+                Assert.True(deleted.IsSuccess, deleted.Message);
+            }
 
-        string uploadedFileId = Assert.IsType<string>(uploadResult.Data);
-        ApiResult<string> dlResult = await Api.GetPrivateFileDownloadUrlAsync(
-            _fixture.SecondaryUserId,
-            uploadedFileId,
-            "",
-            CT);
-        _output.WriteLine($"DownloadUrl: {dlResult.IsSuccess} {dlResult.Data}");
-        // Don't assert success — file_hash may be required
+            GroupFilesResult remaining =
+                (await Api.GetGroupFilesAsync(groupId, ct: CancellationToken.None)).AssertSuccess();
+            Assert.DoesNotContain(remaining.Files, file => file.FileName == fileName);
+        }
     }
 
     /// <see cref="IBotApi.CreateGroupFolderAsync" />

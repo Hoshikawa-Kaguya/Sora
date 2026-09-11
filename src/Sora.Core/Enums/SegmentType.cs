@@ -42,5 +42,8 @@ public enum SegmentType
     LightApp,
 
     /// <summary>XML rich message.</summary>
-    Xml
+    Xml,
+
+    /// <summary>Markdown message content.</summary>
+    Markdown
 }

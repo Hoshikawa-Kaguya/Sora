@@ -108,6 +108,10 @@ internal static class MessageConverter
                        ServiceId  = seg.Data?.Value<int>("service_id") ?? 0,
                        XmlPayload = seg.Data?.Value<string>("xml_payload") ?? string.Empty
                    },
+                   "markdown" => new MarkdownSegment
+                   {
+                       Content = seg.Data?.Value<string>("content") ?? string.Empty
+                   },
                    _ => LogUnknownIncoming(seg.Type)
                };
     }
@@ -236,6 +240,7 @@ internal static class MessageConverter
               {
                   user_id     = (long)msg.UserId,
                   sender_name = msg.SenderName,
+                  time        = msg.Time is { } time ? (long?)new DateTimeOffset(time).ToUnixTimeSeconds() : null,
                   segments = msg.Segments
                                 .Select(ConvertOutgoing)
                                 .OfType<MilkySegment>()

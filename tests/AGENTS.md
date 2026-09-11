@@ -7,7 +7,7 @@ These rules apply to all files under `tests/` and extend the repository rules in
 - Use xUnit v3 with `[Trait("Category", "Unit")]` or `[Trait("Category", "Functional")]`.
 - Keep unit tests grouped by module and use the existing collection fixtures. Use `#region` blocks for feature groups.
 - Each test file should focus on one tested class or one protocol test surface. Add XML docs to test classes and methods using `<see cref>` or `<inheritdoc />`.
-- Framework unit tests must remain protocol-agnostic. Maintained adapter coverage targets Milky; retained OB11 tests are historical and are not a maintenance or validation target.
+- Framework unit tests must remain protocol-agnostic. Maintained adapter coverage targets Milky; retained OB11 tests are frozen at Sora 2.2 and excluded from compilation. Mixed historical fixture/config test files are also excluded; active framework/Milky definitions live in separate files.
 
 ## Reliability Rules
 

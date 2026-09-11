@@ -9,6 +9,9 @@ public sealed record ForwardedMessageNode
     /// <summary>Sender's display name.</summary>
     public string SenderName { get; init; } = "";
 
+    /// <summary>Message time, or null to use the protocol implementation's current time. Unspecified times are interpreted as local time.</summary>
+    public DateTime? Time { get; init; }
+
     /// <summary>Message content segments.</summary>
     public MessageBody Segments { get; init; } = [];
 }

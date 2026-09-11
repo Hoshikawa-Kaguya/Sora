@@ -55,6 +55,39 @@ public class UserPolicyTests
         Assert.False(system.IsSuperUser);
     }
 
+    /// <summary>Group disband policies use the operator before filters and typed handlers.</summary>
+    [Fact]
+    public async Task GroupDisband_UsesOperatorBeforeDispatch()
+    {
+        EventPipelineFilterTests.MockAdapter adapter = new();
+        await using SoraService service = new(adapter, new PolicyConfig { BlockUsers = [200L], SuperUsers = [300L] });
+        List<BotEvent> filtered = [];
+        List<GroupDisbandedEvent> dispatched = [];
+        bool markedBeforeFilter = false;
+        service.UseEventPreFilter(
+            new CallbackFilter(e =>
+            {
+                filtered.Add(e);
+                markedBeforeFilter = e.IsSuperUser;
+            }));
+        service.Events.OnGroupDisbanded += e =>
+        {
+            dispatched.Add(e);
+            return ValueTask.CompletedTask;
+        };
+        GroupDisbandedEvent blocked = new() { Api = null!, GroupId = 300L, OperatorId = 200L };
+        GroupDisbandedEvent allowed = new() { Api = null!, GroupId = 200L, OperatorId = 300L };
+
+        await adapter.RaiseEventAsync(blocked);
+        await adapter.RaiseEventAsync(allowed);
+
+        Assert.Equal([allowed], filtered);
+        Assert.Equal([allowed], dispatched);
+        Assert.True(markedBeforeFilter);
+        Assert.False(blocked.IsContinueEventChain);
+        Assert.Null(blocked.PipelineContext);
+    }
+
     /// <summary>Super-user restrictions apply to scanned and dynamic commands without overriding member roles.</summary>
     [Theory]
     [InlineData(false)]

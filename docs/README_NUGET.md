@@ -47,14 +47,17 @@ await Task.Delay(-1);
 
 ## 项目模块
 
-| 包                                      | 说明                              |
-|-----------------------------------------|-----------------------------------|
-| `HoshikawaKaguya.Sora`                  | 框架应用层                        |
-| `HoshikawaKaguya.Sora.Entities`         | 共享实体 — 事件、消息段、API 接口 |
-| `HoshikawaKaguya.Sora.Core`             | 核心工具库                        |
-| `HoshikawaKaguya.Sora.Command`          | 属性指令路由                      |
-| `HoshikawaKaguya.Sora.Adapter.Milky`    | Milky 协议适配器                  |
-| `HoshikawaKaguya.Sora.Adapter.OneBot11` | OneBot v11 协议适配器（不再维护） |
+| 包                                      | 说明                                       |
+|-----------------------------------------|--------------------------------------------|
+| `HoshikawaKaguya.Sora`                  | 框架应用层                                 |
+| `HoshikawaKaguya.Sora.Entities`         | 共享实体 — 事件、消息段、API 接口          |
+| `HoshikawaKaguya.Sora.Core`             | 核心工具库                                 |
+| `HoshikawaKaguya.Sora.Command`          | 属性指令路由                               |
+| `HoshikawaKaguya.Sora.Adapter.Milky`    | Milky 协议适配器                           |
+| `HoshikawaKaguya.Sora.Adapter.OneBot11` | OneBot v11 协议适配器（支持截至 Sora 2.2） |
+
+`HoshikawaKaguya.Sora.Adapter.OneBot11` 的支持范围截至 Sora 2.2；后续版本停止维护，并退出构建、测试和发布。源码、专属测试和示例仅作历史参考，使用
+OB11 的项目应固定在 Sora 2.2 或迁移到 Milky。
 
 ## 文档与链接
 

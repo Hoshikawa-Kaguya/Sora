@@ -195,6 +195,7 @@ public sealed class SoraService : IBotService
             FriendAddedEvent added           => added.UserId,
             FriendRequestEvent request       => request.FromUserId,
             GroupAdminChangedEvent admin     => admin.OperatorId,
+            GroupDisbandedEvent disbanded    => disbanded.OperatorId,
             GroupEssenceChangedEvent essence => essence.OperatorId,
             GroupInvitationEvent invitation  => invitation.InvitorId,
             GroupMuteEvent mute              => mute.OperatorId,

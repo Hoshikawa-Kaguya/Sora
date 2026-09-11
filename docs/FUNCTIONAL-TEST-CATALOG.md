@@ -2,7 +2,7 @@
 
 本文档列出所有功能性（E2E）测试，按协议和测试类别分组。每个测试标注是否需要双账号、测试方式及被测内容。
 
-当前功能测试维护与执行计划面向 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 已废弃并停止维护，OB11 用例仅作为现有测试清单留存，不代表后续测试或补齐计划。NuGet 包不设置 deprecated 标记。清单描述用例范围，不代表这些用例已在当前环境通过。
+当前功能测试面向 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 的支持范围截至 Sora 2.2；后续版本停止维护，并退出构建、测试和发布。源码、专属测试和示例仅作历史参考，使用 OB11 的项目应固定在 Sora 2.2 或迁移到 Milky。 OB11 清单仅记录历史用例。NuGet 包不设置 deprecated 标记。清单描述用例范围，不代表这些用例已在当前环境通过。
 
 > **图例**
 >
@@ -14,9 +14,11 @@
 
 ## Milky 协议
 
-### ApiTests（64 项，均为 🟢 单账号）
+Milky 1.3 的 `group_disband` 由转换、分发及操作者策略单元测试验证；真实群解散不会自动触发。接收的 Markdown 由消息转换和纯 Markdown 消息接收测试验证，真实接收需要外部消息来源。以上单元测试不代表真实事件交付已经验证。
 
-API 测试通过 Primary Bot 直接调用协议 API 并验证返回结果，不涉及事件监听。
+### ApiTests（65 项；私聊文件下载需要 🔵 双账号）
+
+API 测试通过 Primary Bot 调用协议 API 并验证返回结果；私聊文件下载由 Secondary Bot 接收文件事件，提供文件哈希并验证接收方向的下载链接。
 
 | # | 测试名 | 被测内容 | 测试方式 | 备注 |
 |---|--------|----------|----------|------|
@@ -32,7 +34,7 @@ API 测试通过 Primary Bot 直接调用协议 API 并验证返回结果，不�
 | 10 | `SendAndRecallGroupMessage` | 发送 + 撤回群消息 | 先发送再调用 RecallGroupMessageAsync | |
 | 11 | `SendAndRecallPrivateMessage` | 发送 + 撤回私聊消息 | 先发送再调用 RecallPrivateMessageAsync | |
 | 12 | `GetMessage` | `IBotApi.GetMessageAsync` | 先发送消息，再按 MessageId 获取 | |
-| 13 | `GetForwardMessages` | `IBotApi.GetForwardMessagesAsync` | 发送合并转发消息后获取内容 | |
+| 13 | `GetForwardMessages` | `IBotApi.GetForwardMessagesAsync` | 发送带指定 DateTime 的节点，回读内容和时间，最后撤回 | |
 | 14 | `GetHistoryMessages` | `IBotApi.GetHistoryMessagesAsync` | 获取群历史消息列表 | |
 | 15 | `MarkMessageAsRead` | `IBotApi.MarkMessageAsReadAsync` | 发送消息后标记已读 | |
 | 16 | `GetUserInfo` | `IBotApi.GetUserInfoAsync` | 获取指定用户信息 | |
@@ -67,7 +69,7 @@ API 测试通过 Primary Bot 直接调用协议 API 并验证返回结果，不�
 | 45 | `EssenceMessages_SetAndUnset` | 设置 + 取消精华消息 | 发送消息 → 设为精华 → 取消 | ⚠️ Bot 需为群管理员 |
 | 46 | `GetGroupFiles` | `IBotApi.GetGroupFilesAsync` | 获取群文件列表 | |
 | 47 | `GetGroupFileDownloadUrl` | `IBotApi.GetGroupFileDownloadUrlAsync` | 获取群文件下载链接 | |
-| 48 | `GetPrivateFileDownloadUrl` | `IBotApi.GetPrivateFileDownloadUrlAsync` | 获取私聊文件下载链接 | |
+| 48 | `GetPrivateFileDownloadUrl` | `IBotApi.GetPrivateFileDownloadUrlAsync` | 上传后通过接收事件取得文件哈希，验证发送方与接收方下载链接 | 🔵 双账号 |
 | 49 | `CreateAndDeleteGroupFolder` | 创建 + 删除群文件夹 | 创建文件夹后删除 | |
 | 50 | `DeleteGroupFile` | `IBotApi.DeleteGroupFileAsync` | 删除群文件 | |
 | 51 | `RenameGroupFile` | `IBotApi.RenameGroupFileAsync` | 重命名群文件 | |
@@ -84,6 +86,7 @@ API 测试通过 Primary Bot 直接调用协议 API 并验证返回结果，不�
 | 62 | `SendGroupMessageReaction` | `IBotApi.SendGroupMessageReactionAsync` | 对群消息发表回应 | |
 | 63 | `GetPeerPins_ReturnsResult` | `IMilkyExtApi.GetPeerPinsAsync` | 获取会话置顶列表 | |
 | 64 | `SetPeerPin_PinAndUnpin` | `IMilkyExtApi.SetPeerPinAsync` | 置顶 + 取消置顶会话 | |
+| 65 | `PersistGroupFile` | `IBotApi.PersistGroupFileAsync` | 上传后调用持久化，按唯一文件名查询永久状态；使用当前 ID 删除并确认零残留 | 默认上传可能已是永久文件，不保证覆盖临时转永久 |
 
 ### EventTests（14 项，13 🔵 双账号 + 1 🟢 单账号）
 
@@ -274,7 +277,7 @@ API 测试通过 Primary Bot 直接调用协议 API 并验证返回结果，不�
 
 | 协议 | 测试类 | 总数 | 🟢 单账号 | 🔵 双账号 |
 |------|--------|------|-----------|-----------|
-| **Milky** | ApiTests | 64 | 64 | 0 |
+| **Milky** | ApiTests | 65 | 64 | 1 |
 | **Milky** | EventTests | 14 | 1 | 13 |
 | **Milky** | CommandTests | 11 | 0 | 11 |
 | **Milky** | MessageTypeTests | 12 | 0 | 12 |
@@ -282,7 +285,7 @@ API 测试通过 Primary Bot 直接调用协议 API 并验证返回结果，不�
 | **OB11** | EventTests | 11 | 0 | 11 |
 | **OB11** | CommandTests | 12 | 0 | 12 |
 | **OB11** | MessageTypeTests | 10 | 0 | 10 |
-| **合计** | | **202** | **131** | **71** |
+| **合计（含历史 OB11 用例）** | | **203** | **131** | **72** |
 
 ## 环境变量
 

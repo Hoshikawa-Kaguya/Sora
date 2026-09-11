@@ -38,6 +38,7 @@ internal static class EventConverter
                    "group_essence_message_change" => ConvertGroupEssenceChange(milkyEvent, baseProps),
                    "group_member_increase" => ConvertMemberIncrease(milkyEvent, baseProps),
                    "group_member_decrease" => ConvertMemberDecrease(milkyEvent, baseProps),
+                   "group_disband" => ConvertGroupDisband(milkyEvent, baseProps),
                    "group_name_change" => ConvertGroupNameChange(milkyEvent, baseProps),
                    "group_message_reaction" => ConvertGroupReaction(milkyEvent, baseProps),
                    "group_mute" => ConvertGroupMute(milkyEvent, baseProps),
@@ -393,6 +394,25 @@ internal static class EventConverter
             OperatorId      = d.OperatorId,
             DurationSeconds = d.IsMute ? int.MaxValue : 0,
             IsWholeGroup    = true
+        };
+    }
+
+    /// <summary>Converts a Milky group_disband event to a <see cref="GroupDisbandedEvent" />.</summary>
+    /// <param name="milkyEvent">The raw Milky event.</param>
+    /// <param name="baseProps">The common event base properties.</param>
+    /// <returns>The converted event, or null if conversion fails.</returns>
+    private static BotEvent? ConvertGroupDisband(MilkyEvent milkyEvent, EventBase baseProps)
+    {
+        MilkyGroupDisbandData? d = Deserialize<MilkyGroupDisbandData>(milkyEvent);
+        if (d is null) return null;
+        return new GroupDisbandedEvent
+        {
+            ConnectionId = baseProps.ConnectionId,
+            SelfId       = baseProps.SelfId,
+            Time         = baseProps.Time,
+            Api          = baseProps.Api,
+            GroupId      = d.GroupId,
+            OperatorId   = d.OperatorId
         };
     }
 
