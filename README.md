@@ -81,11 +81,11 @@ SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
 
 > 由于OneBot v11常年无人维护且各家协议端实现都不一样 ~~群魔乱舞~~，使用OneBot v11可能会遇到很多不兼容或者意想不到的情况
 >
-> 这个adapter目前只对LLBot做了测试，不再推荐使用OneBot v11协议，OneBot v11已经算是历史遗留了，OB11的适配器不再适合继续维护
+> 这个adapter目前只对LLBot做了测试，不再推荐使用OneBot v11协议，OneBot v11已经算是历史遗留了
 > 
 > 不再维护OneBot Adapter
 >
-> 推荐直接dorp ob11协议的使用，如果你的是老项目建议尽早迁移Z
+> 推荐直接drop ob11协议的使用，如果你的是老项目建议尽早迁移
 
 基于 [OneBot v11](https://11.onebot.dev/) 的适配器，支持正向/反向 WebSocket。**只支持Array格式上报**
 
