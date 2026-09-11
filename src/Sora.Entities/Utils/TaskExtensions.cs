@@ -6,6 +6,19 @@ namespace Sora.Entities.Utils;
 /// </summary>
 public static class TaskExtensions
 {
+    /// <summary>Invokes the error callback while isolating callback failures from async-void callers.</summary>
+    private static void InvokeErrorHandler(Action<Exception> onError, Exception exception)
+    {
+        try
+        {
+            onError(exception);
+        }
+        catch (Exception innerEx)
+        {
+            Logger.LogError(innerEx, "RunCatch onError handler itself threw an exception");
+        }
+    }
+
     private static ILogger Logger => SoraLogger.CreateLogger("Sora.TaskExtensions");
 
     /// <summary>
@@ -22,14 +35,7 @@ public static class TaskExtensions
         }
         catch (Exception ex)
         {
-            try
-            {
-                onError(ex);
-            }
-            catch (Exception innerEx)
-            {
-                Logger.LogError(innerEx, "RunCatch onError handler itself threw an exception");
-            }
+            InvokeErrorHandler(onError, ex);
         }
     }
 
@@ -47,14 +53,7 @@ public static class TaskExtensions
         }
         catch (Exception ex)
         {
-            try
-            {
-                onError(ex);
-            }
-            catch (Exception innerEx)
-            {
-                Logger.LogError(innerEx, "RunCatch onError handler itself threw an exception");
-            }
+            InvokeErrorHandler(onError, ex);
         }
     }
 
@@ -73,14 +72,7 @@ public static class TaskExtensions
         }
         catch (Exception ex)
         {
-            try
-            {
-                onError(ex);
-            }
-            catch (Exception innerEx)
-            {
-                Logger.LogError(innerEx, "RunCatch onError handler itself threw an exception");
-            }
+            InvokeErrorHandler(onError, ex);
         }
     }
 
@@ -99,14 +91,7 @@ public static class TaskExtensions
         }
         catch (Exception ex)
         {
-            try
-            {
-                onError(ex);
-            }
-            catch (Exception innerEx)
-            {
-                Logger.LogError(innerEx, "RunCatch onError handler itself threw an exception");
-            }
+            InvokeErrorHandler(onError, ex);
         }
     }
 

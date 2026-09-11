@@ -14,13 +14,13 @@ public sealed class CommandManager
 {
 #region Fields
 
-    private readonly List<CommandInfo> _commands = [];
-    private readonly ConcurrentDictionary<Type, object> _instances = new();
-    private readonly Lock _lock = new();
-    private readonly ILogger _logger = SoraLogger.CreateLogger<CommandManager>();
-    private readonly ConcurrentDictionary<MatchType, ICommandMatcher> _matchers = new();
-    private readonly HashSet<Type> _scannedTypes = [];
-    private          bool _needsSort;
+    private readonly List<CommandInfo>                      _commands     = [];
+    private readonly ConcurrentDictionary<Type, object>     _instances    = new();
+    private readonly Lock                                   _lock         = new();
+    private readonly ILogger                                _logger       = SoraLogger.CreateLogger<CommandManager>();
+    private readonly Dictionary<MatchType, ICommandMatcher> _matchers     = new();
+    private readonly HashSet<Type>                          _scannedTypes = [];
+    private          bool                                   _needsSort;
 
     /// <summary>
     ///     Tracks in-flight command executions for re-entry protection.
@@ -37,9 +37,9 @@ public sealed class CommandManager
     /// </summary>
     public CommandManager()
     {
-        RegisterMatcher(new FullMatcher());
-        RegisterMatcher(new RegexMatcher());
-        RegisterMatcher(new KeywordMatcher());
+        _matchers[MatchType.Full]    = new FullMatcher();
+        _matchers[MatchType.Regex]   = new RegexMatcher();
+        _matchers[MatchType.Keyword] = new KeywordMatcher();
     }
 
 #endregion
@@ -99,6 +99,7 @@ public sealed class CommandManager
     ///     Optional pinned after-filter attribute instances. Null or empty = no after-filter.
     ///     Same auto-discovery semantics as <paramref name="beforeFilters" />.
     /// </param>
+    /// <param name="superUserOnly">Requires a configured super user in addition to the member role.</param>
     /// <returns>A unique command ID that can be used to unregister this command later.</returns>
     public Guid RegisterDynamicCommand(
         Func<MessageReceivedEvent, ValueTask> handler,
@@ -113,7 +114,8 @@ public sealed class CommandManager
         string                                reentryMessage  = "",
         string                                prefix          = "",
         CommandBeforeFilterAttribute[]?       beforeFilters   = null,
-        CommandAfterFilterAttribute[]?        afterFilters    = null)
+        CommandAfterFilterAttribute[]?        afterFilters    = null,
+        bool                                  superUserOnly   = false)
     {
         Guid commandId = Guid.NewGuid();
 
@@ -146,6 +148,7 @@ public sealed class CommandManager
             MatchType       = matchType,
             SourceType      = sourceType,
             PermissionLevel = permissionLevel,
+            SuperUserOnly   = superUserOnly,
             Priority        = priority,
             BlockAfterMatch = blockAfterMatch,
             Description     = description,
@@ -278,6 +281,7 @@ public sealed class CommandManager
                 MatchType       = cmdAttr.MatchType,
                 SourceType      = cmdAttr.SourceType,
                 PermissionLevel = cmdAttr.PermissionLevel,
+                SuperUserOnly   = cmdAttr.SuperUserOnly,
                 Priority        = cmdAttr.Priority,
                 BlockAfterMatch = cmdAttr.BlockAfterMatch,
                 CommandPrefix   = prefix,
@@ -313,20 +317,6 @@ public sealed class CommandManager
             commandCount,
             type.Name);
         return commandCount;
-    }
-
-    /// <summary>
-    ///     Registers or replaces the command matcher for a match type.
-    ///     Register custom matchers before registering commands that use them.
-    /// </summary>
-    /// <param name="matcher">The matcher to register.</param>
-    private void RegisterMatcher(ICommandMatcher matcher)
-    {
-        _matchers[matcher.MatchType] = matcher;
-        _logger.LogInformation(
-            "Registered command matcher [{MatcherType}] for {MatchType}",
-            matcher.GetType().Name,
-            matcher.MatchType);
     }
 
     /// <summary>
@@ -378,14 +368,8 @@ public sealed class CommandManager
     ///     which is the correct semantics for filters: distinct instances of the same type are intentional, but the
     ///     same instance referenced multiple times is a user mistake.
     /// </summary>
-    private static IEnumerable<T> DistinctByReference<T>(IEnumerable<T> source) where T : class
-    {
-        // HashSet<object> happily accepts IEqualityComparer<object>; we add T (which is object) into it.
-        HashSet<object> seen = new(ReferenceEqualityComparer.Instance);
-        foreach (T item in source)
-            if (seen.Add(item))
-                yield return item;
-    }
+    private static IEnumerable<T> DistinctByReference<T>(IEnumerable<T> source) where T : class =>
+        source.Distinct<T>(ReferenceEqualityComparer.Instance);
 
 #endregion
 
@@ -426,6 +410,8 @@ public sealed class CommandManager
                 continue;
 
             // Check permission
+            if (cmd.SuperUserOnly && !e.IsSuperUser)
+                continue;
             if (cmd.PermissionLevel > MemberRole.Member && e.Member is not null)
                 if (e.Member.Role < cmd.PermissionLevel)
                     continue;

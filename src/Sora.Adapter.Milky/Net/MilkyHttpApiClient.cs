@@ -74,8 +74,8 @@ internal sealed class MilkyHttpApiClient : IDisposable
                         "Milky Api internal server error for [{Action}] Http return OK, but code={retCode}",
                         action,
                         apiResponse.RetCode);
-                    return new MilkyApiResponse
-                        { Status = "failed", RetCode = apiResponse.RetCode };
+                    apiResponse.Status = "failed";
+                    return apiResponse;
                 }
                 case HttpStatusCode.Unauthorized:
                     _logger.LogWarning("Milky API call unauthorized: [{Action}]", action);

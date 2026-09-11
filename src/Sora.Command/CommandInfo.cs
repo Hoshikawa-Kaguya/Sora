@@ -38,6 +38,9 @@ internal sealed class CommandInfo
     /// <summary>Required permission level.</summary>
     public MemberRole PermissionLevel { get; init; }
 
+    /// <summary>Requires a super user in addition to the group member permission.</summary>
+    public bool SuperUserOnly { get; init; }
+
     /// <summary>Priority (higher = first).</summary>
     public int Priority { get; init; }
 

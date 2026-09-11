@@ -14,7 +14,7 @@ public class ApiTests : IDisposable
     private readonly MilkyTestFixture  _fixture;
     private readonly IDisposable       _logSubscription;
     private readonly ITestOutputHelper _output;
-    private          IBotApi           Api      => _fixture.Api!;
+    private          IBotApi           Api      => _fixture.PrimaryApi!;
     private          IMilkyExtApi      MilkyExt => Api.GetExtension<IMilkyExtApi>()!;
 
     /// <summary>
@@ -35,13 +35,20 @@ public class ApiTests : IDisposable
     public async Task GetSelfInfo()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<BotIdentity> result   = await Api.GetSelfInfoAsync(CT);
         BotIdentity            selfInfo = result.AssertSuccess();
         _output.WriteLine($"SelfInfo: {selfInfo.UserId} {selfInfo.Nickname}");
         Assert.True(selfInfo.UserId.Value > 0);
         Assert.False(string.IsNullOrEmpty(selfInfo.Nickname));
+        if (TestConfig.IsMilkyDualBotConfigured)
+        {
+            Assert.NotNull(_fixture.SecondaryApi);
+            Assert.True(_fixture.SecondaryUserId.Value > 0);
+            Assert.NotEqual(selfInfo.UserId, _fixture.SecondaryUserId);
+            _output.WriteLine($"Secondary identity: {_fixture.SecondaryUserId}");
+        }
     }
 
     /// <see cref="IBotApi.GetImplInfoAsync" />
@@ -49,11 +56,12 @@ public class ApiTests : IDisposable
     public async Task GetImplInfo()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<ImplInfo> result   = await Api.GetImplInfoAsync(CT);
         ImplInfo            implInfo = result.AssertSuccess();
-        _output.WriteLine($"ImplInfo: name={implInfo.ImplName} ver={implInfo.ImplVersion} qq={implInfo.QqProtocolVersion}");
+        _output.WriteLine(
+            $"ImplInfo: name={implInfo.ImplName} ver={implInfo.ImplVersion} qq={implInfo.QqProtocolVersion}");
         Assert.False(string.IsNullOrEmpty(implInfo.ImplName));
     }
 
@@ -62,7 +70,7 @@ public class ApiTests : IDisposable
     public async Task GetCookies()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<string> result  = await Api.GetCookiesAsync("qq.com", CT);
         string            cookies = result.AssertSuccess();
@@ -74,7 +82,7 @@ public class ApiTests : IDisposable
     public async Task GetCsrfToken()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<string> result = await Api.GetCsrfTokenAsync(CT);
         _output.WriteLine($"CsrfToken: success={result.IsSuccess} token={result.Data}");
@@ -91,13 +99,13 @@ public class ApiTests : IDisposable
     public async Task SendGroupMessage()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
         MessageBody body =
-            [
-                new TextSegment { Text = "[Milky Test] SendGroupMessage" }
-            ];
+        [
+            new TextSegment { Text = "[Milky Test] SendGroupMessage" }
+        ];
 
         SendMessageResult result = await Api.SendGroupMessageAsync(testGroup, body, CT);
         _output.WriteLine($"Sent: messageId={result.MessageId}");
@@ -110,7 +118,7 @@ public class ApiTests : IDisposable
     public async Task SendGroupMessage_WithFace()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
@@ -127,16 +135,16 @@ public class ApiTests : IDisposable
     public async Task SendGroupMessage_WithMention()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self      = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
         GroupId     testGroup = TestConfig.TestGroupId;
 
         MessageBody body =
-            [
-                new MentionSegment { Target = self.UserId },
-                new TextSegment { Text      = " [Milky Test] Mention test" }
-            ];
+        [
+            new MentionSegment { Target = self.UserId },
+            new TextSegment { Text      = " [Milky Test] Mention test" }
+        ];
 
         SendMessageResult sendResult = await Api.SendGroupMessageAsync(testGroup, body, CT);
         _output.WriteLine($"MentionMsg: messageId={sendResult.MessageId}");
@@ -159,7 +167,7 @@ public class ApiTests : IDisposable
     public async Task SendGroupMessage_WithReply()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
@@ -170,9 +178,9 @@ public class ApiTests : IDisposable
         await Task.Delay(500, CT);
 
         MessageBody replyBody = new(
-            [
-                new ReplySegment { TargetId = firstMsg.MessageId }, new TextSegment { Text = "[Milky Test] Reply to above" }
-            ]);
+        [
+            new ReplySegment { TargetId = firstMsg.MessageId }, new TextSegment { Text = "[Milky Test] Reply to above" }
+        ]);
 
         SendMessageResult result = await Api.SendGroupMessageAsync(testGroup, replyBody, CT);
         _output.WriteLine($"ReplyMsg: messageId={result.MessageId}");
@@ -184,7 +192,7 @@ public class ApiTests : IDisposable
     public async Task SendPrivateMessage()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         Assert.SkipWhen(_fixture.SecondaryUserId.Value == 0, "Secondary bot not available");
 
@@ -200,7 +208,7 @@ public class ApiTests : IDisposable
     public async Task SendAndRecallGroupMessage()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId     testGroup = TestConfig.TestGroupId;
         MessageBody sendBody  = "[Milky Test] This will be recalled";
@@ -221,7 +229,7 @@ public class ApiTests : IDisposable
     public async Task SendAndRecallPrivateMessage()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<IReadOnlyList<FriendInfo>> friends = await Api.GetFriendListAsync(ct: CT);
         if (!friends.IsSuccess || friends.Data is null || friends.Data.Count == 0)
@@ -248,7 +256,7 @@ public class ApiTests : IDisposable
     public async Task GetMessage()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId           testGroup  = TestConfig.TestGroupId;
         MessageBody       body       = "[Milky Test] GetMessage target";
@@ -272,27 +280,27 @@ public class ApiTests : IDisposable
     public async Task GetForwardMessages()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
         MessageBody body = new(
             SegmentBuilder.Forward(
-                    [
-                        new ForwardedMessageNode
-                            {
-                                Segments   = [new TextSegment { Text = "test1" }],
-                                SenderName = "ybb",
-                                UserId     = 114514
-                            },
-                        new ForwardedMessageNode
-                            {
-                                Segments   = [new TextSegment { Text = "test2" }],
-                                SenderName = "ybb",
-                                UserId     = 114514
-                            }
-                    ],
+                [
+                    new ForwardedMessageNode
+                    {
+                        Segments   = [new TextSegment { Text = "test1" }],
+                        SenderName = "ybb",
+                        UserId     = 114514
+                    },
+                    new ForwardedMessageNode
+                    {
+                        Segments   = [new TextSegment { Text = "test2" }],
+                        SenderName = "ybb",
+                        UserId     = 114514
+                    }
+                ],
                 "1",
-                    ["2"],
+                ["2"],
                 "3",
                 "4"));
         SendMessageResult messageSendResult = await Api.SendGroupMessageAsync(testGroup, body, CT);
@@ -300,7 +308,11 @@ public class ApiTests : IDisposable
         await Task.Delay(1000, CT);
 
         // Try to get forward message in recent sent message
-        MessageContext ctx = (await Api.GetMessageAsync(MessageSourceType.Group, testGroup, messageSendResult.MessageId, CT))
+        MessageContext ctx = (await Api.GetMessageAsync(
+                MessageSourceType.Group,
+                testGroup,
+                messageSendResult.MessageId,
+                CT))
             .AssertSuccess();
         string forwardId = ctx.Body.OfType<ForwardSegment>().FirstOrDefault()?.ForwardId ?? string.Empty;
         Assert.False(string.IsNullOrEmpty(forwardId));
@@ -323,7 +335,7 @@ public class ApiTests : IDisposable
     public async Task GetHistoryMessages()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
         ApiResult<HistoryMessagesResult> result = await Api.GetHistoryMessagesAsync(
@@ -341,7 +353,7 @@ public class ApiTests : IDisposable
     public async Task MarkMessageAsRead()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
@@ -352,7 +364,11 @@ public class ApiTests : IDisposable
 
         await Task.Delay(500, CT);
 
-        ApiResult result = await Api.MarkMessageAsReadAsync(MessageSourceType.Group, testGroup, sendResult.MessageId, CT);
+        ApiResult result = await Api.MarkMessageAsReadAsync(
+            MessageSourceType.Group,
+            testGroup,
+            sendResult.MessageId,
+            CT);
         _output.WriteLine($"MarkRead: success={result.IsSuccess}");
         Assert.True(result.IsSuccess);
     }
@@ -366,7 +382,7 @@ public class ApiTests : IDisposable
     public async Task GetUserInfo()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
 
@@ -381,7 +397,7 @@ public class ApiTests : IDisposable
     public async Task GetUserProfile()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
 
@@ -396,7 +412,7 @@ public class ApiTests : IDisposable
     public async Task GetFriendInfo()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<IReadOnlyList<FriendInfo>> friends = await Api.GetFriendListAsync(ct: CT);
         if (!friends.IsSuccess || friends.Data is null || friends.Data.Count == 0)
@@ -417,7 +433,7 @@ public class ApiTests : IDisposable
     public async Task GetFriendList()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<IReadOnlyList<FriendInfo>> result = await Api.GetFriendListAsync(ct: CT);
         Assert.True(result.IsSuccess);
@@ -431,11 +447,12 @@ public class ApiTests : IDisposable
     public async Task GetFriendRequests()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<IReadOnlyList<FriendRequestInfo>> result = await Api.GetFriendRequestsAsync(ct: CT);
         Assert.True(result.IsSuccess);
-        IReadOnlyList<FriendRequestInfo> requests = Assert.IsAssignableFrom<IReadOnlyList<FriendRequestInfo>>(result.Data);
+        IReadOnlyList<FriendRequestInfo> requests =
+            Assert.IsAssignableFrom<IReadOnlyList<FriendRequestInfo>>(result.Data);
         _output.WriteLine($"FriendRequests: count={requests.Count}");
         foreach (FriendRequestInfo req in requests)
             _output.WriteLine($"  from={req.InitiatorId} state={req.State} comment={req.Comment}");
@@ -446,7 +463,7 @@ public class ApiTests : IDisposable
     public async Task HandleFriendRequest_NoPending()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         // No pending request — expect failure from lookup
         ApiResult result = await Api.HandleFriendRequestAsync(new UserId(999999), false, true, ct: CT);
@@ -462,7 +479,7 @@ public class ApiTests : IDisposable
     public async Task DeleteFriend_ProtocolSupport()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         // Use a non-friend user ID to avoid actual deletion
         ApiResult result = await Api.DeleteFriendAsync(10001L, CT);
@@ -476,7 +493,7 @@ public class ApiTests : IDisposable
     public async Task SendFriendNudge()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<IReadOnlyList<FriendInfo>> friends = await Api.GetFriendListAsync(ct: CT);
         if (!friends.IsSuccess || friends.Data is null || friends.Data.Count == 0)
@@ -500,7 +517,7 @@ public class ApiTests : IDisposable
     public async Task GetGroupInfo()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId              testGroup = TestConfig.TestGroupId;
         ApiResult<GroupInfo> result    = await Api.GetGroupInfoAsync(testGroup, ct: CT);
@@ -514,7 +531,7 @@ public class ApiTests : IDisposable
     public async Task GetGroupList()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<IReadOnlyList<GroupInfo>> result = await Api.GetGroupListAsync(ct: CT);
         Assert.True(result.IsSuccess);
@@ -529,7 +546,7 @@ public class ApiTests : IDisposable
     public async Task GetGroupMemberInfo()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
 
@@ -545,7 +562,7 @@ public class ApiTests : IDisposable
     public async Task GetGroupMemberList()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId                                   testGroup = TestConfig.TestGroupId;
         ApiResult<IReadOnlyList<GroupMemberInfo>> result    = await Api.GetGroupMemberListAsync(testGroup, ct: CT);
@@ -562,12 +579,13 @@ public class ApiTests : IDisposable
     public async Task GetGroupNotifications()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<GroupNotificationsResult> result = await Api.GetGroupNotificationsAsync(ct: CT);
         Assert.True(result.IsSuccess);
         GroupNotificationsResult notifications = Assert.IsAssignableFrom<GroupNotificationsResult>(result.Data);
-        _output.WriteLine($"Notifications: count={notifications.Notifications.Count} nextSeq={notifications.NextNotificationSeq}");
+        _output.WriteLine(
+            $"Notifications: count={notifications.Notifications.Count} nextSeq={notifications.NextNotificationSeq}");
     }
 
 #endregion
@@ -579,7 +597,7 @@ public class ApiTests : IDisposable
     public async Task SetGroupName_AndRestore()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
@@ -602,13 +620,14 @@ public class ApiTests : IDisposable
     public async Task SetGroupMemberCard_AndRestore()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self      = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
         GroupId     testGroup = TestConfig.TestGroupId;
 
-        GroupMemberInfo originalMember = (await Api.GetGroupMemberInfoAsync(testGroup, self.UserId, ct: CT)).AssertSuccess();
-        string          originalCard   = originalMember.Card;
+        GroupMemberInfo originalMember =
+            (await Api.GetGroupMemberInfoAsync(testGroup, self.UserId, ct: CT)).AssertSuccess();
+        string originalCard = originalMember.Card;
         _output.WriteLine($"Original card: '{originalCard}'");
 
         ApiResult setResult = await Api.SetGroupMemberCardAsync(testGroup, self.UserId, "[Milky Test] Bot", CT);
@@ -626,7 +645,7 @@ public class ApiTests : IDisposable
     public async Task SetGroupMemberSpecialTitle()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self      = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
         GroupId     testGroup = TestConfig.TestGroupId;
@@ -651,7 +670,7 @@ public class ApiTests : IDisposable
     public async Task SetGroupAdmin_ProtocolSupport()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         // Use a non-existent user ID to avoid actual admin change
         ApiResult result = await Api.SetGroupAdminAsync(TestConfig.TestGroupId, 10001L, false, CT);
@@ -668,7 +687,7 @@ public class ApiTests : IDisposable
     public async Task KickGroupMember_ProtocolSupport()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         // Use a non-existent user ID to avoid actual kick
         ApiResult result = await Api.KickGroupMemberAsync(TestConfig.TestGroupId, 10001L, ct: CT);
@@ -686,7 +705,7 @@ public class ApiTests : IDisposable
     public async Task LeaveGroup_ProtocolSupport()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         // Use a non-existent group ID to avoid actually leaving a group
         ApiResult result = await Api.LeaveGroupAsync(10001L, CT);
@@ -699,7 +718,7 @@ public class ApiTests : IDisposable
     public async Task MuteGroupMember_ZeroDuration()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self      = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
         GroupId     testGroup = TestConfig.TestGroupId;
@@ -714,7 +733,7 @@ public class ApiTests : IDisposable
     public async Task MuteAndUnmuteGroupAll()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
@@ -734,7 +753,7 @@ public class ApiTests : IDisposable
     public async Task HandleGroupRequest_InvalidParams()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult result = await Api.HandleGroupRequestAsync(
             new GroupId(0),
@@ -756,7 +775,7 @@ public class ApiTests : IDisposable
     public async Task HandleGroupInvitation_Accept_ProtocolSupport()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         // Call with dummy params — expect protocol error, not timeout
         ApiResult result = await Api.HandleGroupInvitationAsync(TestConfig.TestGroupId, 0L, true, CT);
@@ -774,7 +793,7 @@ public class ApiTests : IDisposable
     public async Task HandleGroupInvitation_Reject_ProtocolSupport()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         // Call with dummy params — expect protocol error, not timeout
         ApiResult result = await Api.HandleGroupInvitationAsync(TestConfig.TestGroupId, 0L, false, CT);
@@ -787,9 +806,11 @@ public class ApiTests : IDisposable
     public async Task SetGroupAvatar()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(string.IsNullOrEmpty(TestConfig.GroupAvatarPath), "SORA_TEST_GROUP_AVATAR not set");
-        Assert.SkipWhen(!File.Exists(TestConfig.GroupAvatarPath), $"Group avatar file not found: {TestConfig.GroupAvatarPath}");
+        Assert.SkipWhen(
+            !File.Exists(TestConfig.GroupAvatarPath),
+            $"Group avatar file not found: {TestConfig.GroupAvatarPath}");
 
         byte[]    imageBytes = File.ReadAllBytes(TestConfig.GroupAvatarPath);
         string    base64Uri  = $"base64://{Convert.ToBase64String(imageBytes)}";
@@ -804,7 +825,7 @@ public class ApiTests : IDisposable
     public async Task SendGroupNudge()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
 
@@ -823,7 +844,7 @@ public class ApiTests : IDisposable
     public async Task GetGroupAnnouncements()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId                                         testGroup = TestConfig.TestGroupId;
         ApiResult<IReadOnlyList<GroupAnnouncementInfo>> result    = await Api.GetGroupAnnouncementsAsync(testGroup, CT);
@@ -840,19 +861,23 @@ public class ApiTests : IDisposable
     public async Task Announcements_CreateAndDelete()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
         // Create announcement
-        ApiResult sendResult = await Api.SendGroupAnnouncementAsync(testGroup, "[Sora Milky Test] Temp announcement", ct: CT);
+        ApiResult sendResult = await Api.SendGroupAnnouncementAsync(
+            testGroup,
+            "[Sora Milky Test] Temp announcement",
+            ct: CT);
         _output.WriteLine($"SendAnnouncement: success={sendResult.IsSuccess}");
         Assert.True(sendResult.IsSuccess);
 
         await Task.Delay(2000, CT);
 
         // Get list to find the created one
-        ApiResult<IReadOnlyList<GroupAnnouncementInfo>> listResult = await Api.GetGroupAnnouncementsAsync(testGroup, CT);
+        ApiResult<IReadOnlyList<GroupAnnouncementInfo>>
+            listResult = await Api.GetGroupAnnouncementsAsync(testGroup, CT);
         Assert.True(listResult.IsSuccess);
         IReadOnlyList<GroupAnnouncementInfo> announcements =
             Assert.IsAssignableFrom<IReadOnlyList<GroupAnnouncementInfo>>(listResult.Data);
@@ -878,7 +903,7 @@ public class ApiTests : IDisposable
     public async Task GetGroupEssenceMessages()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId                             testGroup = TestConfig.TestGroupId;
         ApiResult<GroupEssenceMessagesPage> result    = await Api.GetGroupEssenceMessagesAsync(testGroup, 0, 20, CT);
@@ -892,7 +917,7 @@ public class ApiTests : IDisposable
     public async Task EssenceMessages_SetAndUnset()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
@@ -925,7 +950,7 @@ public class ApiTests : IDisposable
     public async Task GetGroupFiles()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId                     testGroup = TestConfig.TestGroupId;
         ApiResult<GroupFilesResult> result    = await Api.GetGroupFilesAsync(testGroup, ct: CT);
@@ -939,7 +964,7 @@ public class ApiTests : IDisposable
     public async Task GetGroupFileDownloadUrl()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId                     testGroup = TestConfig.TestGroupId;
         ApiResult<GroupFilesResult> files     = await Api.GetGroupFilesAsync(testGroup, ct: CT);
@@ -961,7 +986,7 @@ public class ApiTests : IDisposable
     public async Task GetPrivateFileDownloadUrl()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryUserId.Value == 0, "Secondary bot not available");
 
         // Upload a test file first, then try download URL
@@ -974,8 +999,12 @@ public class ApiTests : IDisposable
             CT);
         Assert.SkipWhen(!uploadResult.IsSuccess, $"Upload failed: {uploadResult.Message}");
 
-        string            uploadedFileId = Assert.IsType<string>(uploadResult.Data);
-        ApiResult<string> dlResult       = await Api.GetPrivateFileDownloadUrlAsync(_fixture.SecondaryUserId, uploadedFileId, "", CT);
+        string uploadedFileId = Assert.IsType<string>(uploadResult.Data);
+        ApiResult<string> dlResult = await Api.GetPrivateFileDownloadUrlAsync(
+            _fixture.SecondaryUserId,
+            uploadedFileId,
+            "",
+            CT);
         _output.WriteLine($"DownloadUrl: {dlResult.IsSuccess} {dlResult.Data}");
         // Don't assert success — file_hash may be required
     }
@@ -985,7 +1014,7 @@ public class ApiTests : IDisposable
     public async Task CreateAndDeleteGroupFolder()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup  = TestConfig.TestGroupId;
         string  folderName = $"sora_test_{DateTime.UtcNow:yyyyMMddHHmmss}";
@@ -1008,14 +1037,18 @@ public class ApiTests : IDisposable
     public async Task DeleteGroupFile()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup   = TestConfig.TestGroupId;
         string  testContent = $"Sora delete test {DateTime.Now:yyyyMMdd_HHmmss}";
         string  base64      = Convert.ToBase64String(Encoding.UTF8.GetBytes(testContent));
         string  fileUri     = $"base64://{base64}";
 
-        ApiResult<string> uploadResult = await Api.UploadGroupFileAsync(testGroup, fileUri, "sora_milky_delete_test.txt", ct: CT);
+        ApiResult<string> uploadResult = await Api.UploadGroupFileAsync(
+            testGroup,
+            fileUri,
+            "sora_milky_delete_test.txt",
+            ct: CT);
         if (!uploadResult.IsSuccess)
         {
             _output.WriteLine($"Skipped: upload failed ({uploadResult.Message})");
@@ -1048,14 +1081,18 @@ public class ApiTests : IDisposable
     public async Task RenameGroupFile()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup   = TestConfig.TestGroupId;
         string  testContent = $"Sora rename test {DateTime.Now:yyyyMMdd_HHmmss}";
         string  base64      = Convert.ToBase64String(Encoding.UTF8.GetBytes(testContent));
         string  fileUri     = $"base64://{base64}";
 
-        ApiResult<string> uploadResult = await Api.UploadGroupFileAsync(testGroup, fileUri, "sora_milky_rename_test.txt", ct: CT);
+        ApiResult<string> uploadResult = await Api.UploadGroupFileAsync(
+            testGroup,
+            fileUri,
+            "sora_milky_rename_test.txt",
+            ct: CT);
         if (!uploadResult.IsSuccess)
         {
             _output.WriteLine($"Skipped: upload failed ({uploadResult.Message})");
@@ -1097,7 +1134,7 @@ public class ApiTests : IDisposable
     public async Task RenameGroupFolder()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup  = TestConfig.TestGroupId;
         string  folderName = $"sora_rename_{DateTime.UtcNow:yyyyMMddHHmmss}";
@@ -1128,7 +1165,7 @@ public class ApiTests : IDisposable
     public async Task MoveGroupFile()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
@@ -1148,7 +1185,11 @@ public class ApiTests : IDisposable
         string base64      = Convert.ToBase64String(Encoding.UTF8.GetBytes(testContent));
         string fileUri     = $"base64://{base64}";
 
-        ApiResult<string> uploadResult = await Api.UploadGroupFileAsync(testGroup, fileUri, "sora_milky_move_test.txt", ct: CT);
+        ApiResult<string> uploadResult = await Api.UploadGroupFileAsync(
+            testGroup,
+            fileUri,
+            "sora_milky_move_test.txt",
+            ct: CT);
         if (!uploadResult.IsSuccess)
         {
             _output.WriteLine($"Skipped: upload failed ({uploadResult.Message})");
@@ -1189,7 +1230,7 @@ public class ApiTests : IDisposable
     public async Task UploadGroupFile()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup   = TestConfig.TestGroupId;
         string  testContent = $"Sora group file test {DateTime.Now:yyyyMMdd_HHmmss}";
@@ -1205,7 +1246,7 @@ public class ApiTests : IDisposable
     public async Task UploadPrivateFile()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryUserId.Value == 0, "Secondary bot not available");
 
         // Create a small test file content
@@ -1215,7 +1256,11 @@ public class ApiTests : IDisposable
 
         // Private file upload may not be supported by all protocol endpoints;
         // verify the API call completes without throwing
-        ApiResult<string> result = await Api.UploadPrivateFileAsync(_fixture.SecondaryUserId, fileUri, "sora_test.txt", CT);
+        ApiResult<string> result = await Api.UploadPrivateFileAsync(
+            _fixture.SecondaryUserId,
+            fileUri,
+            "sora_test.txt",
+            CT);
         _output.WriteLine($"UploadPrivateFile: success={result.IsSuccess} code={result.Code} msg={result.Message}");
     }
 
@@ -1224,7 +1269,7 @@ public class ApiTests : IDisposable
     public async Task GetResourceTempUrl()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         // Needs a valid resource ID; test with dummy and verify graceful handling
         ApiResult<string> result = await Api.GetResourceTempUrlAsync("dummy_resource_id", CT);
@@ -1237,7 +1282,7 @@ public class ApiTests : IDisposable
     public async Task GetCustomFaceUrlList()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<IReadOnlyList<string>> result = await Api.GetCustomFaceUrlListAsync(CT);
         IReadOnlyList<string>            faces  = result.AssertSuccess();
@@ -1253,7 +1298,7 @@ public class ApiTests : IDisposable
     public async Task SetNickname_AndRestore()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self         = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
         string      originalNick = self.Nickname;
@@ -1279,12 +1324,12 @@ public class ApiTests : IDisposable
     public async Task SetBio_AndRestore()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         BotIdentity self = (await Api.GetSelfInfoAsync(CT)).AssertSuccess();
 
-        ApiResult<UserProfile> profile     = await Api.GetUserProfileAsync(self.UserId, CT);
-        string                 originalBio = profile is { IsSuccess: true, Data: { } profileData } ? profileData.Bio : "";
+        ApiResult<UserProfile> profile = await Api.GetUserProfileAsync(self.UserId, CT);
+        string originalBio = profile is { IsSuccess: true, Data: { } profileData } ? profileData.Bio : "";
         _output.WriteLine($"Original bio: '{originalBio}'");
 
         try
@@ -1309,9 +1354,11 @@ public class ApiTests : IDisposable
     public async Task SetAvatar()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(string.IsNullOrEmpty(TestConfig.PrimaryBotAvatar), "SORA_TEST_BOT_AVATAR not set");
-        Assert.SkipWhen(!File.Exists(TestConfig.PrimaryBotAvatar), $"Bot avatar file not found: {TestConfig.PrimaryBotAvatar}");
+        Assert.SkipWhen(
+            !File.Exists(TestConfig.PrimaryBotAvatar),
+            $"Bot avatar file not found: {TestConfig.PrimaryBotAvatar}");
 
         byte[]    imageBytes = await File.ReadAllBytesAsync(TestConfig.PrimaryBotAvatar, CT);
         string    base64Uri  = $"base64://{Convert.ToBase64String(imageBytes)}";
@@ -1325,7 +1372,7 @@ public class ApiTests : IDisposable
     public async Task SendProfileLike()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryUserId.Value == 0, "Secondary bot not available");
 
         ApiResult result = await Api.SendProfileLikeAsync(_fixture.SecondaryUserId, ct: CT);
@@ -1341,7 +1388,7 @@ public class ApiTests : IDisposable
     public async Task SendGroupMessageReaction()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
@@ -1366,12 +1413,13 @@ public class ApiTests : IDisposable
     public async Task GetPeerPins_ReturnsResult()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
 
         ApiResult<PeerPinsResult> result = await MilkyExt.GetPeerPinsAsync(CT);
         Assert.True(result.IsSuccess);
         PeerPinsResult peerPins = Assert.IsAssignableFrom<PeerPinsResult>(result.Data);
-        _output.WriteLine($"GetPeerPins: code={result.Code} friends={peerPins.Friends.Count} groups={peerPins.Groups.Count}");
+        _output.WriteLine(
+            $"GetPeerPins: code={result.Code} friends={peerPins.Friends.Count} groups={peerPins.Groups.Count}");
     }
 
     /// <see cref="IMilkyExtApi.SetPeerPinAsync" />
@@ -1379,7 +1427,7 @@ public class ApiTests : IDisposable
     public async Task SetPeerPin_PinAndUnpin()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(TestConfig.TestGroupId == 0, "SORA_TEST_GROUP_ID not set");
 
         GroupId testGroup = TestConfig.TestGroupId;

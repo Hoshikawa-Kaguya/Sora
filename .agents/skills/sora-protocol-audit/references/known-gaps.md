@@ -1,6 +1,6 @@
 # Known Intentional Protocol Gaps
 
-These gaps are intentional and must not be reported unless the re-evaluation criteria below are met.
+`HoshikawaKaguya.Sora.Adapter.OneBot11` is deprecated and no longer maintained. The entries below document retained implementation boundaries; they are not a backlog and are not re-evaluated for implementation, compatibility fixes or testing. Maintained protocol work targets Milky.
 
 ## OB11 Segments
 
@@ -14,15 +14,8 @@ The following go-cqhttp or niche LLBot actions are also intentionally skipped: `
 
 ## Unsurfaced OB11 Fields
 
-OB11-only fields in `GroupInfo`, `GroupMemberInfo`, `GroupFileInfo`, and reaction counts remain in adapter DTOs rather than framework entities. They may be exposed through a future adapter extension type.
+OB11-only fields in `GroupInfo`, `GroupMemberInfo`, `GroupFileInfo`, and reaction counts remain in adapter DTOs rather than framework entities.
 
 ## OB11 Parameter Extensions
 
 OB11-only parameters such as `friend_poke.target_id` do not modify the cross-protocol `IBotApi`; they belong in `IOneBot11ExtApi`.
-
-## Re-evaluate When
-
-1. Milky adds equivalent support.
-2. A commonly requested feature justifies an adapter extension.
-3. A segment gains a natural cross-protocol `SegmentType`.
-4. Developers need an unsurfaced field through an OB11-specific extension model.

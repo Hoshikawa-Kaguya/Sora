@@ -42,18 +42,18 @@ Sora 是一个以**轻量**和**易用**为核心目标的多协议异步机器�
 
 ## 项目结构
 
-| NuGet 包 | 版本 | 说明                                            |
-|------|------|-----------------------------------------------|
-| `HoshikawaKaguya.Sora` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora/) | 框架顶层 — SoraService、SoraServiceFactory、日志初始化   |
-| `HoshikawaKaguya.Sora.Entities` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Entities?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Entities/) | 共享实体 — 事件、消息段、信息类型、API 接口                     |
-| `HoshikawaKaguya.Sora.Core` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Core?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Core/) | 核心工具 — 枚举、扩展方法、通用基础设施                         |
-| `HoshikawaKaguya.Sora.Command` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Command?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Command/) | 属性指令路由 — `[CommandGroup]` + `[Command]` 声明式指令 |
-| `HoshikawaKaguya.Sora.Adapter.Milky` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Adapter.Milky?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Adapter.Milky/) | Milky 协议适配器                                   |
-| `HoshikawaKaguya.Sora.Adapter.OneBot11` | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Adapter.OneBot11?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Adapter.OneBot11/) | OneBot v11 协议适配器                              |
+| NuGet 包                                             | 版本 | 说明                                            |
+|------------------------------------------------------|------|-----------------------------------------------|
+| `HoshikawaKaguya.Sora`                               | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora/) | 框架顶层 — SoraService、SoraServiceFactory、日志初始化   |
+| `HoshikawaKaguya.Sora.Entities`                      | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Entities?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Entities/) | 共享实体 — 事件、消息段、信息类型、API 接口                     |
+| `HoshikawaKaguya.Sora.Core`                          | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Core?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Core/) | 核心工具 — 枚举、扩展方法、通用基础设施                         |
+| `HoshikawaKaguya.Sora.Command`                       | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Command?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Command/) | 属性指令路由 — `[CommandGroup]` + `[Command]` 声明式指令 |
+| `HoshikawaKaguya.Sora.Adapter.Milky`                 | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Adapter.Milky?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Adapter.Milky/) | Milky 协议适配器                                   |
+| `HoshikawaKaguya.Sora.Adapter.OneBot11` [Deprecated] | [![NuGet](https://img.shields.io/nuget/v/HoshikawaKaguya.Sora.Adapter.OneBot11?style=flat-square)](https://www.nuget.org/packages/HoshikawaKaguya.Sora.Adapter.OneBot11/) | OneBot v11 协议适配器                              |
 
-## Protocol Adapter
+## 原生实现的 Protocol Adapter
 
-> Milky 和 OneBot v11 均通过了较为较为完整的E2E测试
+> Milky Adapter通过了较为较为完整的E2E测试
 >
 > 部分破坏性API/Event由于风控未作测试
 > 
@@ -77,15 +77,15 @@ SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
     new MilkyConfig { Host = "127.0.0.1", Port = 3000, AccessToken = "your-token" });
 ```
 
-### OneBot v11
+### OneBot v11（已废弃）
 
 > 由于OneBot v11常年无人维护且各家协议端实现都不一样 ~~群魔乱舞~~，使用OneBot v11可能会遇到很多不兼容或者意想不到的情况
 >
-> 这个adapter目前只对LLBot做了测试，不再推荐使用OneBot v11协议，OneBot v11已经算是历史遗留了，OB11的适配器我有点不想去维护了
+> 这个adapter目前只对LLBot做了测试，不再推荐使用OneBot v11协议，OneBot v11已经算是历史遗留了，OB11的适配器不再适合继续维护
 > 
-> 也许哪天就干脆直接停止维护OB11的adapter了
+> 不再维护OneBot Adapter
 >
-> 推荐直接dorp ob11协议的使用，如果你的是老项目建议尽早迁移
+> 推荐直接dorp ob11协议的使用，如果你的是老项目建议尽早迁移Z
 
 基于 [OneBot v11](https://11.onebot.dev/) 的适配器，支持正向/反向 WebSocket。**只支持Array格式上报**
 
@@ -112,7 +112,6 @@ SoraService service = SoraServiceFactory.Instance.CreateOneBot11Service(
 ```shell
 dotnet add package HoshikawaKaguya.Sora
 dotnet add package HoshikawaKaguya.Sora.Adapter.Milky    # Milky 协议
-dotnet add package HoshikawaKaguya.Sora.Adapter.OneBot11 # 或 OneBot v11 协议
 ```
 
 ### 最小示例
@@ -168,9 +167,13 @@ public static class MyCommands
 service.Commands.ScanAssembly(typeof(Program).Assembly);
 ```
 
+配置 `BlockUsers` 后，框架在自动已读、连续对话和过滤器之前忽略该触发者的事件。`SuperUsers` 为对应事件设置 `IsSuperUser`；命令可用 `[Command(SuperUserOnly = true)]` 或动态注册的 `superUserOnly: true` 限制执行，群角色 `PermissionLevel` 仍需满足。框架从事件已有字段识别触发者，详见[适配器与管线文档](docs/ADAPTER-DEVELOPMENT.md)。
+
+实例命令支持预注册实例、无参构造函数或无构造初始化的 singleton。需要字段初始化的命令应提供无参构造函数或在扫描前调用 `RegisterCommandInstance<T>()`。
+
 ## 可以简单参考的文档
 
-> 这些文档均由opus 4.6生成和~~少量人工修改~~，可能存在不准确的问题
+> 这些文档均由opus 4.6/GPT 6 Astra生成和~~少量人工修改~~，可能存在不准确的问题
 >
 > ~~懒得自己写文档了，好费劲~~
 
@@ -216,10 +219,10 @@ dotnet build Sora.slnx --configuration Release
 
 ```shell
 # 运行单元测试（无需外部依赖）
-dotnet test Sora.slnx --filter "Category=Unit" --no-build
+dotnet test Sora.slnx --filter "Category=Unit&FullyQualifiedName!~OneBot11" --no-build
 
-# 运行所有测试（需要配置测试环境变量）
-pwsh tests/scripts/Run-Tests.ps1 -Category All
+# 运行公共能力与 Milky 测试（需要配置测试环境变量）
+pwsh tests/scripts/Run-Tests.ps1 -Category All -Filter "FullyQualifiedName!~OneBot11"
 ```
 
 功能测试采用双机器人完成E2E验证，需要配置 `SORA_TEST_*` 环境变量。部分破坏性API/Event并未测试（容易触发风控）

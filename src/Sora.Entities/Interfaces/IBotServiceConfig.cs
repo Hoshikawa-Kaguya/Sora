@@ -5,10 +5,10 @@ namespace Sora.Entities.Interfaces;
 /// </summary>
 public interface IBotServiceConfig
 {
-    /// <summary>List of super user IDs with elevated permissions.</summary>
+    /// <summary>Actors marked IsSuperUser on events; group member permission checks still apply.</summary>
     UserId[] SuperUsers { get; }
 
-    /// <summary>List of blocked user IDs.</summary>
+    /// <summary>Actors whose events are dropped before automatic reads, waiters, filters and handlers.</summary>
     UserId[] BlockUsers { get; }
 
     /// <summary>Whether to enable the command manager.</summary>

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using Sora.Core.Types;
 using Sora.Entities.MessageWaiting;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -13,6 +14,7 @@ public sealed class SoraService : IBotService
 #region Fields
 
     private readonly IBotServiceConfig        _config;
+    private readonly IAdapterEventSource      _eventSource;
     private readonly Lazy<CommandManager>     _commandLazy = new(() => new CommandManager());
     private readonly ILogger                  _logger;
     private readonly MessageWaiter            _waiter = new();
@@ -60,7 +62,8 @@ public sealed class SoraService : IBotService
 
         _logger = SoraLogger.CreateLogger<SoraService>();
 
-        eventSource.OnEvent += AdapterEventHandle;
+        _eventSource         =  eventSource;
+        _eventSource.OnEvent += AdapterEventHandle;
     }
 
 #endregion
@@ -183,9 +186,44 @@ public sealed class SoraService : IBotService
 
 #region Event Pipeline
 
+    private UserId? GetEventUser(BotEvent e) =>
+        e switch
+        {
+            MessageReceivedEvent message     => message.Message.SenderId,
+            MessageDeletedEvent deleted      => deleted.OperatorId,
+            FileUploadEvent upload           => upload.IsSelfSent ? upload.SelfId : upload.UserId,
+            FriendAddedEvent added           => added.UserId,
+            FriendRequestEvent request       => request.FromUserId,
+            GroupAdminChangedEvent admin     => admin.OperatorId,
+            GroupEssenceChangedEvent essence => essence.OperatorId,
+            GroupInvitationEvent invitation  => invitation.InvitorId,
+            GroupMuteEvent mute              => mute.OperatorId,
+            GroupNameChangedEvent name       => name.OperatorId,
+            GroupReactionEvent reaction      => reaction.UserId,
+            MemberJoinedEvent joined         => joined.OperatorId ?? joined.InvitorId ?? joined.UserId,
+            MemberLeftEvent left             => left.IsKicked ? left.OperatorId : left.UserId,
+            NudgeEvent nudge                 => nudge.SenderId,
+            PeerPinChangedEvent pin          => pin.SelfId,
+            GroupJoinRequestEvent request =>
+                request.JoinNotificationType == GroupJoinNotificationType.InvitedJoinRequest
+                    ? request.InvitorId
+                    : request.FromUserId,
+            _ => _eventSource.GetEventUser(e)
+        };
+
     private async ValueTask AdapterEventHandle(BotEvent e)
     {
         CancellationToken ct = _serviceCts?.Token ?? CancellationToken.None;
+
+        //SuperUser and BlockUser check
+        UserId? eventUser = GetEventUser(e);
+        if (eventUser is { } userId && userId != default && _config.BlockUsers.Contains(userId))
+        {
+            e.IsContinueEventChain = false;
+            return;
+        }
+
+        e.IsSuperUser = eventUser is { } user && user != default && _config.SuperUsers.Contains(user);
 
         // Inject waiter reference so extension methods work transparently
         e.Waiter = _waiter;

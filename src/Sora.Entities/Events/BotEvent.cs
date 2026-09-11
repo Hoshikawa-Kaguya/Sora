@@ -8,6 +8,12 @@ namespace Sora.Entities.Events;
 public abstract record BotEvent
 {
     /// <summary>
+    ///     Whether the actor is configured in SuperUsers. Set by the service before waiters and filters.
+    ///     This flag does not override group member permissions.
+    /// </summary>
+    public bool IsSuperUser { get; internal set; }
+
+    /// <summary>
     ///     Internal reference to the service's message waiter, set by the event pipeline.
     ///     Used by extension methods to provide transparent WaitForNextMessage support.
     /// </summary>

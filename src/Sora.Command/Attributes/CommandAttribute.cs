@@ -22,6 +22,9 @@ public sealed class CommandAttribute : Attribute
     /// <summary>Minimum member role required to execute this command.</summary>
     public MemberRole PermissionLevel { get; set; } = MemberRole.Member;
 
+    /// <summary>Requires the event actor to be a configured super user, in addition to PermissionLevel.</summary>
+    public bool SuperUserOnly { get; set; }
+
     /// <summary>Higher priority commands are matched first.</summary>
     public int Priority { get; set; }
 

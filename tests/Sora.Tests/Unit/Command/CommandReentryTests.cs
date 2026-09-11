@@ -64,13 +64,19 @@ internal sealed class RecordingBotApi : IBotApi
 
     public T? GetExtension<T>() where T : class, IAdapterExtension => null;
 
-    public ValueTask<SendMessageResult> SendGroupMessageAsync(GroupId groupId, MessageBody message, CancellationToken ct = default)
+    public ValueTask<SendMessageResult> SendGroupMessageAsync(
+        GroupId           groupId,
+        MessageBody       message,
+        CancellationToken ct = default)
     {
         GroupMessages.Add((groupId, message.GetText()));
         return new ValueTask<SendMessageResult>(new SendMessageResult());
     }
 
-    public ValueTask<SendMessageResult> SendFriendMessageAsync(UserId userId, MessageBody message, CancellationToken ct = default)
+    public ValueTask<SendMessageResult> SendFriendMessageAsync(
+        UserId            userId,
+        MessageBody       message,
+        CancellationToken ct = default)
     {
         FriendMessages.Add((userId, message.GetText()));
         return new ValueTask<SendMessageResult>(new SendMessageResult());
@@ -78,11 +84,15 @@ internal sealed class RecordingBotApi : IBotApi
 
     // All remaining IBotApi members return default — unused in these tests.
     public ValueTask<ApiResult<BotIdentity>> GetSelfInfoAsync(CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult<ImplInfo>> GetImplInfoAsync(CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult<string>> GetCookiesAsync(string domain, CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult<string>> GetCsrfTokenAsync(CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult<string>> GetResourceTempUrlAsync(string resourceId, CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult<IReadOnlyList<string>>> GetCustomFaceUrlListAsync(CancellationToken ct = default) => default!;
+    public ValueTask<ApiResult<ImplInfo>>    GetImplInfoAsync(CancellationToken ct = default) => default!;
+    public ValueTask<ApiResult<string>>      GetCookiesAsync(string domain, CancellationToken ct = default) => default!;
+    public ValueTask<ApiResult<string>>      GetCsrfTokenAsync(CancellationToken ct = default) => default!;
+
+    public ValueTask<ApiResult<string>> GetResourceTempUrlAsync(string resourceId, CancellationToken ct = default) =>
+        default!;
+
+    public ValueTask<ApiResult<IReadOnlyList<string>>> GetCustomFaceUrlListAsync(CancellationToken ct = default) =>
+        default!;
 
     public ValueTask<ApiResult<MessageContext>> GetMessageAsync(
         MessageSourceType scene,
@@ -104,10 +114,16 @@ internal sealed class RecordingBotApi : IBotApi
         CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult> RecallGroupMessageAsync(GroupId groupId, MessageId messageId, CancellationToken ct = default) =>
+    public ValueTask<ApiResult> RecallGroupMessageAsync(
+        GroupId           groupId,
+        MessageId         messageId,
+        CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult> RecallPrivateMessageAsync(UserId userId, MessageId messageId, CancellationToken ct = default) =>
+    public ValueTask<ApiResult> RecallPrivateMessageAsync(
+        UserId            userId,
+        MessageId         messageId,
+        CancellationToken ct = default) =>
         default!;
 
     public ValueTask<ApiResult> MarkMessageAsReadAsync(
@@ -117,15 +133,24 @@ internal sealed class RecordingBotApi : IBotApi
         CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult<UserInfo>> GetUserInfoAsync(UserId userId, bool noCache = false, CancellationToken ct = default) =>
+    public ValueTask<ApiResult<UserInfo>> GetUserInfoAsync(
+        UserId            userId,
+        bool              noCache = false,
+        CancellationToken ct      = default) =>
         default!;
 
-    public ValueTask<ApiResult<UserProfile>> GetUserProfileAsync(UserId userId, CancellationToken ct = default) => default!;
-
-    public ValueTask<ApiResult<FriendInfo>> GetFriendInfoAsync(UserId userId, bool noCache = false, CancellationToken ct = default) =>
+    public ValueTask<ApiResult<UserProfile>> GetUserProfileAsync(UserId userId, CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult<IReadOnlyList<FriendInfo>>> GetFriendListAsync(bool noCache = false, CancellationToken ct = default) =>
+    public ValueTask<ApiResult<FriendInfo>> GetFriendInfoAsync(
+        UserId            userId,
+        bool              noCache = false,
+        CancellationToken ct      = default) =>
+        default!;
+
+    public ValueTask<ApiResult<IReadOnlyList<FriendInfo>>> GetFriendListAsync(
+        bool              noCache = false,
+        CancellationToken ct      = default) =>
         default!;
 
     public ValueTask<ApiResult<IReadOnlyList<FriendRequestInfo>>> GetFriendRequestsAsync(
@@ -145,10 +170,15 @@ internal sealed class RecordingBotApi : IBotApi
     public ValueTask<ApiResult> DeleteFriendAsync(UserId    userId, CancellationToken ct = default) => default!;
     public ValueTask<ApiResult> SendFriendNudgeAsync(UserId userId, CancellationToken ct = default) => default!;
 
-    public ValueTask<ApiResult<GroupInfo>> GetGroupInfoAsync(GroupId groupId, bool noCache = false, CancellationToken ct = default) =>
+    public ValueTask<ApiResult<GroupInfo>> GetGroupInfoAsync(
+        GroupId           groupId,
+        bool              noCache = false,
+        CancellationToken ct      = default) =>
         default!;
 
-    public ValueTask<ApiResult<IReadOnlyList<GroupInfo>>> GetGroupListAsync(bool noCache = false, CancellationToken ct = default) =>
+    public ValueTask<ApiResult<IReadOnlyList<GroupInfo>>> GetGroupListAsync(
+        bool              noCache = false,
+        CancellationToken ct      = default) =>
         default!;
 
     public ValueTask<ApiResult<GroupMemberInfo>> GetGroupMemberInfoAsync(
@@ -200,13 +230,24 @@ internal sealed class RecordingBotApi : IBotApi
         CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult> SetGroupNameAsync(GroupId   groupId, string name,     CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult> SetGroupAvatarAsync(GroupId groupId, string imageUri, CancellationToken ct = default) => default!;
-
-    public ValueTask<ApiResult> SetGroupAdminAsync(GroupId groupId, UserId userId, bool enable, CancellationToken ct = default) =>
+    public ValueTask<ApiResult> SetGroupNameAsync(GroupId groupId, string name, CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult> SetGroupMemberCardAsync(GroupId groupId, UserId userId, string card, CancellationToken ct = default) =>
+    public ValueTask<ApiResult> SetGroupAvatarAsync(GroupId groupId, string imageUri, CancellationToken ct = default) =>
+        default!;
+
+    public ValueTask<ApiResult> SetGroupAdminAsync(
+        GroupId           groupId,
+        UserId            userId,
+        bool              enable,
+        CancellationToken ct = default) =>
+        default!;
+
+    public ValueTask<ApiResult> SetGroupMemberCardAsync(
+        GroupId           groupId,
+        UserId            userId,
+        string            card,
+        CancellationToken ct = default) =>
         default!;
 
     public ValueTask<ApiResult> SetGroupMemberSpecialTitleAsync(
@@ -230,7 +271,10 @@ internal sealed class RecordingBotApi : IBotApi
         CancellationToken ct       = default) =>
         default!;
 
-    public ValueTask<ApiResult> DeleteGroupAnnouncementAsync(GroupId groupId, string announcementId, CancellationToken ct = default) =>
+    public ValueTask<ApiResult> DeleteGroupAnnouncementAsync(
+        GroupId           groupId,
+        string            announcementId,
+        CancellationToken ct = default) =>
         default!;
 
     public ValueTask<ApiResult> KickGroupMemberAsync(
@@ -247,9 +291,13 @@ internal sealed class RecordingBotApi : IBotApi
         CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult> MuteGroupAllAsync(GroupId   groupId, bool enable, CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult> LeaveGroupAsync(GroupId     groupId, CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult> SendGroupNudgeAsync(GroupId groupId, UserId userId, CancellationToken ct = default) => default!;
+    public ValueTask<ApiResult> MuteGroupAllAsync(GroupId groupId, bool enable, CancellationToken ct = default) =>
+        default!;
+
+    public ValueTask<ApiResult> LeaveGroupAsync(GroupId groupId, CancellationToken ct = default) => default!;
+
+    public ValueTask<ApiResult> SendGroupNudgeAsync(GroupId groupId, UserId userId, CancellationToken ct = default) =>
+        default!;
 
     public ValueTask<ApiResult<GroupFilesResult>> GetGroupFilesAsync(
         GroupId           groupId,
@@ -257,7 +305,10 @@ internal sealed class RecordingBotApi : IBotApi
         CancellationToken ct             = default) =>
         default!;
 
-    public ValueTask<ApiResult<string>> GetGroupFileDownloadUrlAsync(GroupId groupId, string fileId, CancellationToken ct = default) =>
+    public ValueTask<ApiResult<string>> GetGroupFileDownloadUrlAsync(
+        GroupId           groupId,
+        string            fileId,
+        CancellationToken ct = default) =>
         default!;
 
     public ValueTask<ApiResult<string>> GetPrivateFileDownloadUrlAsync(
@@ -267,7 +318,10 @@ internal sealed class RecordingBotApi : IBotApi
         CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult<string>> CreateGroupFolderAsync(GroupId groupId, string folderName, CancellationToken ct = default) =>
+    public ValueTask<ApiResult<string>> CreateGroupFolderAsync(
+        GroupId           groupId,
+        string            folderName,
+        CancellationToken ct = default) =>
         default!;
 
     public ValueTask<ApiResult<string>> UploadGroupFileAsync(
@@ -285,8 +339,13 @@ internal sealed class RecordingBotApi : IBotApi
         CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult> DeleteGroupFileAsync(GroupId   groupId, string fileId,   CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult> DeleteGroupFolderAsync(GroupId groupId, string folderId, CancellationToken ct = default) => default!;
+    public ValueTask<ApiResult> DeleteGroupFileAsync(GroupId groupId, string fileId, CancellationToken ct = default) =>
+        default!;
+
+    public ValueTask<ApiResult> DeleteGroupFolderAsync(
+        GroupId           groupId,
+        string            folderId,
+        CancellationToken ct = default) => default!;
 
     public ValueTask<ApiResult> MoveGroupFileAsync(
         GroupId           groupId,
@@ -311,10 +370,12 @@ internal sealed class RecordingBotApi : IBotApi
         CancellationToken ct = default) =>
         default!;
 
-    public ValueTask<ApiResult> SetAvatarAsync(string       uri,      CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult> SetBioAsync(string          bio,      CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult> SetNicknameAsync(string     nickname, CancellationToken ct = default) => default!;
-    public ValueTask<ApiResult> SendProfileLikeAsync(UserId userId,   int count = 1, CancellationToken ct = default) => default!;
+    public ValueTask<ApiResult> SetAvatarAsync(string   uri,      CancellationToken ct = default) => default!;
+    public ValueTask<ApiResult> SetBioAsync(string      bio,      CancellationToken ct = default) => default!;
+    public ValueTask<ApiResult> SetNicknameAsync(string nickname, CancellationToken ct = default) => default!;
+
+    public ValueTask<ApiResult> SendProfileLikeAsync(UserId userId, int count = 1, CancellationToken ct = default) =>
+        default!;
 
     public ValueTask<ApiResult> SendGroupMessageReactionAsync(
         GroupId           groupId,
@@ -472,9 +533,6 @@ public class CommandReentryTests : IDisposable
         MessageReceivedEvent evt2 = CreateTestEvent("slow-msg", api: api);
         await _manager.HandleMessageEventAsync(evt2, CT);
 
-        // Allow fire-and-forget reply to complete
-        await Task.Delay(200, CT);
-
         ReentryCommands.Gate!.TrySetResult();
         await firstRun.WaitAsync(TimeSpan.FromSeconds(5), CT);
 
@@ -497,8 +555,6 @@ public class CommandReentryTests : IDisposable
         // Same user triggers again — blocked but NO reply (ReentryMessage is empty)
         MessageReceivedEvent evt2 = CreateTestEvent("slow", api: api);
         await _manager.HandleMessageEventAsync(evt2, CT);
-
-        await Task.Delay(200, CT);
 
         ReentryCommands.Gate!.TrySetResult();
         await firstRun.WaitAsync(TimeSpan.FromSeconds(5), CT);
@@ -527,7 +583,7 @@ public class CommandReentryTests : IDisposable
                 started.TrySetResult();
                 await gate.Task;
             },
-                ["dyntest"],
+            ["dyntest"],
             preventReentry: true);
 
         MessageReceivedEvent evt1     = CreateTestEvent("dyntest");
@@ -554,21 +610,21 @@ public class CommandReentryTests : IDisposable
         long     groupId  = 100L,
         IBotApi? api      = null) =>
         new()
+        {
+            Api          = api ?? null!,
+            ConnectionId = Guid.Empty,
+            SelfId       = 1L,
+            Time         = DateTime.Now,
+            Message = new MessageContext
             {
-                Api          = api ?? null!,
-                ConnectionId = Guid.Empty,
-                SelfId       = 1L,
-                Time         = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = groupId,
-                        SenderId   = senderId,
-                        Body       = new MessageBody(text)
-                    },
-                Member = new GroupMemberInfo { UserId = senderId, GroupId = groupId, Role = MemberRole.Member }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = groupId,
+                SenderId   = senderId,
+                Body       = new MessageBody(text)
+            },
+            Member = new GroupMemberInfo { UserId = senderId, GroupId = groupId, Role = MemberRole.Member }
+        };
 
 #endregion
 }

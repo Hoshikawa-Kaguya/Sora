@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Newtonsoft.Json.Linq;
 using Sora.Adapter.OneBot11.Converter;
+using Sora.Adapter.OneBot11.Events;
 using Sora.Adapter.OneBot11.Models;
 using Sora.Adapter.OneBot11.Net;
 
@@ -41,6 +42,15 @@ public sealed class OneBot11Adapter : IBotAdapter, IAdapterEventSource
         add => _onEvent += value;
         remove => _onEvent -= value;
     }
+
+    UserId? IAdapterEventSource.GetEventUser(BotEvent e) => e switch
+                                                            {
+                                                                GroupDismissedEvent dismissed  => dismissed.OperatorId,
+                                                                ProfileLikedEvent liked        => liked.SenderId,
+                                                                FriendPokeRecallEvent recalled => recalled.UserId,
+                                                                GroupPokeRecallEvent recalled  => recalled.UserId,
+                                                                _                              => null
+                                                            };
 
 #endregion
 

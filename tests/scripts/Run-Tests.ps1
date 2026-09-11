@@ -28,8 +28,11 @@
 .PARAMETER MilkySecondaryHost
     Milky secondary bot host for dual-bot tests.
 
-.PARAMETER MilkyPort
-    Milky server port. Default: 3010.
+.PARAMETER MilkyPrimaryPort
+    Milky primary server port. Default: 3010.
+
+.PARAMETER MilkySecondaryPort
+    Milky secondary server port. Default: 3010.
 
 .PARAMETER MilkyToken
     Milky access token.
@@ -100,7 +103,8 @@ param(
 
     [string]$MilkyPrimaryHost,
     [string]$MilkySecondaryHost,
-    [int]$MilkyPort = 3010,
+    [int]$MilkyPrimaryPort = 3010,
+    [int]$MilkySecondaryPort = 3010,
     [string]$MilkyToken,
     [string]$MilkyPrefix,
 
@@ -152,6 +156,7 @@ $SolutionFile = Join-Path $SolutionRoot "Sora.slnx"
 if (-not $ResultsDir) {
     $ResultsDir = Join-Path $SolutionRoot "TestResults"
 }
+$ResultsDir = [System.IO.Path]::GetFullPath($ResultsDir, $PWD.Path)
 
 # Ensure results directory exists
 if (-not (Test-Path $ResultsDir)) {
@@ -180,7 +185,8 @@ if ($Ob11Port)          { $env:SORA_TEST_OB11_PORT = $Ob11Port.ToString() }
 if ($Ob11Token)         { $env:SORA_TEST_OB11_TOKEN = $Ob11Token }
 if ($MilkyPrimaryHost)   { $env:SORA_TEST_MILKY_PRIMARY_HOST = $MilkyPrimaryHost }
 if ($MilkySecondaryHost) { $env:SORA_TEST_MILKY_SECONDARY_HOST = $MilkySecondaryHost }
-if ($MilkyPort)          { $env:SORA_TEST_MILKY_PORT = $MilkyPort.ToString() }
+if ($MilkyPrimaryPort)   { $env:SORA_TEST_MILKY_PRIMARY_PORT = $MilkyPrimaryPort.ToString() }
+if ($MilkySecondaryPort) { $env:SORA_TEST_MILKY_SECONDARY_PORT = $MilkySecondaryPort.ToString() }
 if ($MilkyToken)         { $env:SORA_TEST_MILKY_TOKEN = $MilkyToken }
 if ($MilkyPrefix)        { $env:SORA_TEST_MILKY_PREFIX = $MilkyPrefix }
 if ($GroupId -gt 0)      { $env:SORA_TEST_GROUP_ID = $GroupId.ToString() }
@@ -223,13 +229,13 @@ if ($Ob11SecondaryHost) {
 }
 if ($MilkyPrimaryHost) {
     $prefix = if ($MilkyPrefix) { "/$MilkyPrefix" } else { "" }
-    Write-Host "  Milky Primary:   http://${MilkyPrimaryHost}:${MilkyPort}${prefix}" -ForegroundColor Green
+    Write-Host "  Milky Primary:   http://${MilkyPrimaryHost}:${MilkyPrimaryPort}${prefix}" -ForegroundColor Green
 } else {
     Write-Host "  Milky Primary:   (not configured)" -ForegroundColor DarkGray
 }
 if ($MilkySecondaryHost) {
     $prefix = if ($MilkyPrefix) { "/$MilkyPrefix" } else { "" }
-    Write-Host "  Milky Secondary: http://${MilkySecondaryHost}:${MilkyPort}${prefix}" -ForegroundColor Green
+    Write-Host "  Milky Secondary: http://${MilkySecondaryHost}:${MilkySecondaryPort}${prefix}" -ForegroundColor Green
 } else {
     Write-Host "  Milky Secondary: (not configured)" -ForegroundColor DarkGray
 }
@@ -351,7 +357,7 @@ $exitCodes = @()
 
 # Helper: combine base filter with user's -Filter param
 function Get-CombinedFilter([string]$BaseFilter) {
-    if ($Filter) { return "$BaseFilter&$Filter" }
+    if ($Filter) { return "($BaseFilter)&($Filter)" }
     return $BaseFilter
 }
 

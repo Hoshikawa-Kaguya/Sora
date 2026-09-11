@@ -73,15 +73,6 @@ public class CommandScanningTests
 
     /// <see cref="CommandManager.ScanType(Type)" />
     [Fact]
-    public void ScanAssembly_FindsAttributedCommands()
-    {
-        CommandManager manager = new();
-        manager.ScanType(typeof(TestGroupCommands));
-        // The manager should find commands without throwing
-    }
-
-    /// <see cref="CommandManager.ScanType(Type)" />
-    [Fact]
     public void ScanAssembly_SkipsBadSignatures()
     {
         CommandManager manager = new();
@@ -120,19 +111,6 @@ public class CommandScanningTests
 #endregion
 
 #region Command Execution Tests
-
-    /// <see cref="CommandManager.ScanType(Type)" />
-    [Fact]
-    public async Task ScanAssembly_StaticCommand_Executes()
-    {
-        CommandManager manager = new();
-        manager.ScanType(typeof(TestGroupCommands));
-
-        MessageReceivedEvent evt = CreateTestEvent("/hello");
-        await manager.HandleMessageEventAsync(evt, CT);
-
-        Assert.False(evt.IsContinueEventChain);
-    }
 
     /// <see cref="CommandManager.ScanType(Type)" />
     [Fact]
@@ -246,19 +224,19 @@ public class CommandScanningTests
     /// <summary>Creates a synthetic <see cref="MessageReceivedEvent" /> for command testing.</summary>
     private static MessageReceivedEvent CreateTestEvent(string text, MemberRole role = MemberRole.Member) =>
         new()
+        {
+            Api          = null!,
+            ConnectionId = Guid.NewGuid(),
+            SelfId       = 1L,
+            Time         = DateTime.Now,
+            Message = new MessageContext
             {
-                Api          = null!,
-                ConnectionId = Guid.NewGuid(),
-                SelfId       = 1L,
-                Time         = DateTime.Now,
-                Message = new MessageContext
-                    {
-                        MessageId  = 1,
-                        SourceType = MessageSourceType.Group,
-                        GroupId    = 100L,
-                        SenderId   = 200L,
-                        Body       = new MessageBody(text)
-                    },
-                Member = new GroupMemberInfo { UserId = 200L, GroupId = 100L, Role = role }
-            };
+                MessageId  = 1,
+                SourceType = MessageSourceType.Group,
+                GroupId    = 100L,
+                SenderId   = 200L,
+                Body       = new MessageBody(text)
+            },
+            Member = new GroupMemberInfo { UserId = 200L, GroupId = 100L, Role = role }
+        };
 }

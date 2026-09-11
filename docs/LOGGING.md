@@ -100,3 +100,5 @@ SoraLogger.Configure(NullLoggerFactory.Instance);
 测试脚本的 `-LogLevel` 通过 `SORA_TEST_LOG_LEVEL_OVERRIDE` 传给测试进程。测试启动代码读取一次该变量，并在首次使用 Sora 前显式配置日志；默认级别为 Debug。变量读取仅位于测试项目，应用日志仍由应用配置代码决定。详见[测试说明](TESTING.md)。
 
 [返回 README](../README.md)
+
+OneBot11 的 Debug 连接日志记录完整 URL，包括配置的 query access token；这是连接诊断的既定输出。Milky HTTP 失败保留协议响应的错误消息，调用者可按返回码和消息定位拒绝原因。

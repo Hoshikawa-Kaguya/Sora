@@ -4,117 +4,25 @@ using Xunit;
 
 namespace Sora.Tests.Unit;
 
-#region Per-collection timing fixtures
+#region Protocol Mapping Fixtures
 
-// Each starts/stops a timer via TestTimingStore on Init/Dispose.
-
-/// <summary>Core.Unit timing fixture.</summary>
-public sealed class CoreUnitFixture : IAsyncLifetime
+/// <summary>Initializes mapping for OneBot11 unit tests.</summary>
+public sealed class OneBot11UnitFixture
 {
-    /// <inheritdoc />
-    public ValueTask InitializeAsync()
-    {
-        TestTimingStore.StartTimer("Unit", "Core");
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask DisposeAsync()
-    {
-        TestTimingStore.StopTimer("Unit", "Core");
-        return ValueTask.CompletedTask;
-    }
-}
-
-/// <summary>Entities.Unit timing fixture.</summary>
-public sealed class EntitiesUnitFixture : IAsyncLifetime
-{
-    /// <inheritdoc />
-    public ValueTask InitializeAsync()
-    {
-        TestTimingStore.StartTimer("Unit", "Entities");
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask DisposeAsync()
-    {
-        TestTimingStore.StopTimer("Unit", "Entities");
-        return ValueTask.CompletedTask;
-    }
-}
-
-/// <summary>Command.Unit timing fixture.</summary>
-public sealed class CommandUnitFixture : IAsyncLifetime
-{
-    /// <inheritdoc />
-    public ValueTask InitializeAsync()
-    {
-        TestTimingStore.StartTimer("Unit", "Command");
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask DisposeAsync()
-    {
-        TestTimingStore.StopTimer("Unit", "Command");
-        return ValueTask.CompletedTask;
-    }
-}
-
-/// <summary>OneBot11.Unit timing fixture.</summary>
-public sealed class OneBot11UnitFixture : IAsyncLifetime
-{
-    /// <inheritdoc />
-    public ValueTask InitializeAsync()
+    /// <summary>Configures the adapter mapping used by this collection.</summary>
+    public OneBot11UnitFixture()
     {
         OneBot11MapsterConfig.Configure();
-        TestTimingStore.StartTimer("Unit", "OneBot11");
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask DisposeAsync()
-    {
-        TestTimingStore.StopTimer("Unit", "OneBot11");
-        return ValueTask.CompletedTask;
     }
 }
 
-/// <summary>Milky.Unit timing fixture.</summary>
-public sealed class MilkyUnitFixture : IAsyncLifetime
+/// <summary>Initializes mapping for Milky unit tests.</summary>
+public sealed class MilkyUnitFixture
 {
-    /// <inheritdoc />
-    public ValueTask InitializeAsync()
+    /// <summary>Configures the adapter mapping used by this collection.</summary>
+    public MilkyUnitFixture()
     {
         MilkyMapsterConfig.Configure();
-        TestTimingStore.StartTimer("Unit", "Milky");
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask DisposeAsync()
-    {
-        TestTimingStore.StopTimer("Unit", "Milky");
-        return ValueTask.CompletedTask;
-    }
-}
-
-/// <summary>Adapters.Unit timing fixture.</summary>
-public sealed class AdaptersUnitFixture : IAsyncLifetime
-{
-    /// <inheritdoc />
-    public ValueTask InitializeAsync()
-    {
-        TestTimingStore.StartTimer("Unit", "Adapters");
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask DisposeAsync()
-    {
-        TestTimingStore.StopTimer("Unit", "Adapters");
-        return ValueTask.CompletedTask;
     }
 }
 
@@ -124,19 +32,19 @@ public sealed class AdaptersUnitFixture : IAsyncLifetime
 
 /// <summary>Core unit test collection.</summary>
 [CollectionDefinition("Core.Unit")]
-public class CoreUnitCollection : ICollectionFixture<CoreUnitFixture>
+public class CoreUnitCollection
 {
 }
 
 /// <summary>Entities unit test collection.</summary>
 [CollectionDefinition("Entities.Unit")]
-public class EntitiesUnitCollection : ICollectionFixture<EntitiesUnitFixture>
+public class EntitiesUnitCollection
 {
 }
 
 /// <summary>Command unit test collection.</summary>
 [CollectionDefinition("Command.Unit")]
-public class CommandUnitCollection : ICollectionFixture<CommandUnitFixture>
+public class CommandUnitCollection
 {
 }
 
@@ -154,7 +62,7 @@ public class MilkyUnitCollection : ICollectionFixture<MilkyUnitFixture>
 
 /// <summary>Adapters unit test collection.</summary>
 [CollectionDefinition("Adapters.Unit")]
-public class AdaptersUnitCollection : ICollectionFixture<AdaptersUnitFixture>
+public class AdaptersUnitCollection
 {
 }
 

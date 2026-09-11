@@ -8,4 +8,7 @@ internal interface IAdapterEventSource
 {
     /// <summary>Raised when a bot event is received from the protocol.</summary>
     event Func<BotEvent, ValueTask> OnEvent;
+
+    /// <summary>Identifies the triggering user for protocol-specific events; null when unknown.</summary>
+    UserId? GetEventUser(BotEvent e) => null;
 }

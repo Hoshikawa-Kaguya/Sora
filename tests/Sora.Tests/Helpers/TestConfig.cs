@@ -13,10 +13,22 @@ public static class TestConfig
     public static string MilkyPrimaryHost => Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PRIMARY_HOST") ?? "";
 
     /// <summary>Milky secondary host. Read from SORA_TEST_MILKY_SECONDARY_HOST.</summary>
-    public static string MilkySecondaryHost => Environment.GetEnvironmentVariable("SORA_TEST_MILKY_SECONDARY_HOST") ?? "";
+    public static string MilkySecondaryHost =>
+        Environment.GetEnvironmentVariable("SORA_TEST_MILKY_SECONDARY_HOST") ?? "";
 
-    /// <summary>Milky port (shared by both bots). Read from SORA_TEST_MILKY_PORT (default 3010).</summary>
-    public static int MilkyPort => int.TryParse(Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PORT"), out int p) ? p : 3010;
+    /// <summary>Milky primary port. Read from SORA_TEST_MILKY_PRIMARY_PORT (default 3010).</summary>
+    public static int MilkyPrimaryPort => int.TryParse(
+        Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PRIMARY_PORT"),
+        out int p)
+        ? p
+        : 3010;
+
+    /// <summary>Milky secondary port. Read from SORA_TEST_MILKY_SECONDARY_PORT (default 3010).</summary>
+    public static int MilkySecondaryPort => int.TryParse(
+        Environment.GetEnvironmentVariable("SORA_TEST_MILKY_SECONDARY_PORT"),
+        out int p)
+        ? p
+        : 3010;
 
     /// <summary>Milky API prefix (shared by both bots). Read from SORA_TEST_MILKY_PREFIX.</summary>
     public static string MilkyPrefix => Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PREFIX") ?? "";
@@ -33,7 +45,8 @@ public static class TestConfig
     public static string Ob11SecondaryHost => Environment.GetEnvironmentVariable("SORA_TEST_OB11_SECONDARY_HOST") ?? "";
 
     /// <summary>OneBot11 port (shared by both bots). Read from SORA_TEST_OB11_PORT (default 3001).</summary>
-    public static int Ob11Port => int.TryParse(Environment.GetEnvironmentVariable("SORA_TEST_OB11_PORT"), out int p) ? p : 3001;
+    public static int Ob11Port =>
+        int.TryParse(Environment.GetEnvironmentVariable("SORA_TEST_OB11_PORT"), out int p) ? p : 3001;
 
     /// <summary>OneBot11 access token (shared by both bots). Read from SORA_TEST_OB11_TOKEN.</summary>
     public static string Ob11Token => Environment.GetEnvironmentVariable("SORA_TEST_OB11_TOKEN") ?? "";
@@ -44,7 +57,8 @@ public static class TestConfig
     public static string PrimaryBotAvatar => Environment.GetEnvironmentVariable("SORA_TEST_PRIMARY_BOT_AVATAR") ?? "";
 
     /// <summary>Path to secondary bot avatar image. Read from SORA_TEST_SECONDARY_BOT_AVATAR.</summary>
-    public static string SecondaryBotAvatar => Environment.GetEnvironmentVariable("SORA_TEST_SECONDARY_BOT_AVATAR") ?? "";
+    public static string SecondaryBotAvatar =>
+        Environment.GetEnvironmentVariable("SORA_TEST_SECONDARY_BOT_AVATAR") ?? "";
 
     /// <summary>Path to group avatar image for SetGroupAvatar test. Read from SORA_TEST_GROUP_AVATAR.</summary>
     public static string GroupAvatarPath => Environment.GetEnvironmentVariable("SORA_TEST_GROUP_AVATAR") ?? "";
@@ -75,7 +89,8 @@ public static class TestConfig
     ///     Group ID for functional tests. Read from SORA_TEST_GROUP_ID.
     ///     Returns 0 if not set — functional tests skip when this is 0.
     /// </summary>
-    public static long TestGroupId => long.TryParse(Environment.GetEnvironmentVariable("SORA_TEST_GROUP_ID"), out long g) ? g : 0L;
+    public static long TestGroupId =>
+        long.TryParse(Environment.GetEnvironmentVariable("SORA_TEST_GROUP_ID"), out long g) ? g : 0L;
 
     /// <summary>
     ///     Test results directory path. Read from SORA_TEST_RESULTS_DIR.
@@ -120,7 +135,8 @@ public static class TestConfig
         {
             string? baseReason = SkipMilkyReason;
             if (baseReason is not null) return baseReason;
-            if (!IsMilkyDualBotConfigured) return "SORA_TEST_MILKY_SECONDARY_HOST not set. Dual-bot tests require both bots.";
+            if (!IsMilkyDualBotConfigured)
+                return "SORA_TEST_MILKY_SECONDARY_HOST not set. Dual-bot tests require both bots.";
             return null;
         }
     }
@@ -144,7 +160,8 @@ public static class TestConfig
         {
             string? baseReason = SkipOb11Reason;
             if (baseReason is not null) return baseReason;
-            if (!IsOb11DualBotConfigured) return "SORA_TEST_OB11_SECONDARY_HOST not set. Dual-bot tests require both bots.";
+            if (!IsOb11DualBotConfigured)
+                return "SORA_TEST_OB11_SECONDARY_HOST not set. Dual-bot tests require both bots.";
             return null;
         }
     }

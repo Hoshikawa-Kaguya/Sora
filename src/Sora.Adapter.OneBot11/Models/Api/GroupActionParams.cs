@@ -99,26 +99,3 @@ internal sealed class SetGroupSpecialTitleParams
     [JsonProperty("duration")]
     public int Duration { get; set; } = -1;
 }
-
-/// <summary>Parameters for the set_group_anonymous_ban action.</summary>
-internal sealed class SetGroupAnonymousBanParams
-{
-    [JsonProperty("group_id")]
-    public long GroupId { get; set; }
-
-    [JsonProperty("anonymous_flag")]
-    public string AnonymousFlag { get; set; } = "";
-
-    [JsonProperty("duration")]
-    public int Duration { get; set; } = 1800;
-}
-
-/// <summary>Parameters for the set_group_anonymous action.</summary>
-internal sealed class SetGroupAnonymousParams
-{
-    [JsonProperty("group_id")]
-    public long GroupId { get; set; }
-
-    [JsonProperty("enable")]
-    public bool Enable { get; set; } = true;
-}

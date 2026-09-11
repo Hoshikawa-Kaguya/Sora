@@ -7,7 +7,6 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\Sora\Sora.csproj"/>
-        <ProjectReference Include="..\..\src\Sora.Adapter.OneBot11\Sora.Adapter.OneBot11.csproj"/>
         <ProjectReference Include="..\..\src\Sora.Adapter.Milky\Sora.Adapter.Milky.csproj"/>
     </ItemGroup>
 </Project>

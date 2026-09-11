@@ -76,6 +76,8 @@ internal sealed class ForwardWsClient : IAsyncDisposable
             ReconnectTimeout = _config.HeartbeatInterval > TimeSpan.Zero
                 ? _config.HeartbeatInterval * 3
                 : TimeSpan.FromMinutes(5),
+            ErrorReconnectTimeout = _config.ReconnectInterval,
+            LostReconnectTimeout  = _config.ReconnectInterval,
             IsReconnectionEnabled = _config.ReconnectInterval > TimeSpan.Zero
         };
 

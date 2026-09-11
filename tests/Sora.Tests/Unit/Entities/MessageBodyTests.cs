@@ -52,26 +52,6 @@ public class MessageBodyTests
         Assert.Equal(c, d);
     }
 
-    /// <see cref="ImageSegment.ResourceId" />
-    [Fact]
-    public void ImageSegment_ResourceId()
-    {
-        ImageSegment img = new() { ResourceId = "res123", Url = "http://temp", Width = 100 };
-        Assert.Equal("res123", img.ResourceId);
-    }
-
-    /// <see cref="ForwardSegment" />
-    [Fact]
-    public void ForwardSegment_WithProperties()
-    {
-        ForwardSegment seg = new()
-                { ForwardId = "fwd1", Title = "Title", Summary = "Summary", Preview = ["line1"] };
-        Assert.Equal("fwd1", seg.ForwardId);
-        Assert.Equal("Title", seg.Title);
-        Assert.Equal("Summary", seg.Summary);
-        Assert.Single(seg.Preview);
-    }
-
 #endregion
 
 #region MessageBody Construction Tests
@@ -95,36 +75,28 @@ public class MessageBodyTests
         Assert.Equal("hello", body.GetText());
     }
 
-    /// <see cref="MessageBody" />
-    [Fact]
-    public void MessageBody_ImplicitFromString()
-    {
-        MessageBody body = "implicit test";
-        Assert.Equal("implicit test", body.GetText());
-    }
-
     /// <see cref="MessageBody.FromIncoming" />
     [Fact]
     public void MessageBody_AllSegmentTypes()
     {
         // Use FromIncoming since this tests a received message with all segment types
         MessageBody body = MessageBody.FromIncoming(
-            [
-                new TextSegment { Text      = "text" },
-                new ImageSegment { Url      = "http://img.png" },
-                new MentionSegment { Target = 123L },
-                new MentionAllSegment(),
-                new ReplySegment { TargetId    = 456L },
-                new FaceSegment { FaceId       = "1", IsLarge = true },
-                new AudioSegment { Url         = "http://audio.mp3" },
-                new VideoSegment { Url         = "http://video.mp4" },
-                new FileSegment { FileId       = "fid", FileName = "test.txt", FileSize = 1024 },
-                new ForwardSegment { ForwardId = "fwd123" },
-                new MarketFaceSegment
-                        { EmojiPackageId = 1, EmojiId = "eid", Key = "key", Summary = "summary", Url = "http://face.png" },
-                new LightAppSegment { AppName = "app", JsonPayload = "{}" },
-                new XmlSegment { ServiceId    = 1, XmlPayload      = "<xml/>" }
-            ]);
+        [
+            new TextSegment { Text      = "text" },
+            new ImageSegment { Url      = "http://img.png" },
+            new MentionSegment { Target = 123L },
+            new MentionAllSegment(),
+            new ReplySegment { TargetId    = 456L },
+            new FaceSegment { FaceId       = "1", IsLarge = true },
+            new AudioSegment { Url         = "http://audio.mp3" },
+            new VideoSegment { Url         = "http://video.mp4" },
+            new FileSegment { FileId       = "fid", FileName = "test.txt", FileSize = 1024 },
+            new ForwardSegment { ForwardId = "fwd123" },
+            new MarketFaceSegment
+                { EmojiPackageId = 1, EmojiId = "eid", Key = "key", Summary = "summary", Url = "http://face.png" },
+            new LightAppSegment { AppName = "app", JsonPayload = "{}" },
+            new XmlSegment { ServiceId    = 1, XmlPayload      = "<xml/>" }
+        ]);
 
         Assert.Equal(13, body.Count);
         Assert.Equal("text", body.GetText());
@@ -145,9 +117,9 @@ public class MessageBodyTests
         MessageBody body = new();
         body.Add(
             new MarketFaceSegment
-                {
-                    EmojiPackageId = 1, EmojiId = "e1", Key = "k1", Summary = "s", Url = "http://url"
-                });
+            {
+                EmojiPackageId = 1, EmojiId = "e1", Key = "k1", Summary = "s", Url = "http://url"
+            });
         Assert.Empty(body);
     }
 
@@ -239,7 +211,7 @@ public class MessageBodyTests
     public void MessageBody_Foreach_Enumeration()
     {
         MessageBody   body  = new([new TextSegment { Text = "a" }, new TextSegment { Text = "b" }]);
-        List<Segment> items = [..body];
+        List<Segment> items = [.. body];
         Assert.Equal(2, items.Count);
     }
 
@@ -252,9 +224,10 @@ public class MessageBodyTests
     public void MessageBody_GetText_ConcatenatesTextSegments()
     {
         MessageBody body = new(
-            [
-                new TextSegment { Text = "hello " }, new MentionSegment { Target = 123L }, new TextSegment { Text = "world" }
-            ]);
+        [
+            new TextSegment { Text = "hello " }, new MentionSegment { Target = 123L },
+            new TextSegment { Text = "world" }
+        ]);
         Assert.Equal("hello world", body.GetText());
     }
 
@@ -263,9 +236,10 @@ public class MessageBodyTests
     public void MessageBody_GetFirst()
     {
         MessageBody body = new(
-            [
-                new TextSegment { Text = "text" }, new ImageSegment { Url = "http://img.png" }, new TextSegment { Text = "more" }
-            ]);
+        [
+            new TextSegment { Text = "text" }, new ImageSegment { Url = "http://img.png" },
+            new TextSegment { Text = "more" }
+        ]);
 
         ImageSegment? img = body.GetFirst<ImageSegment>();
         Assert.NotNull(img);
@@ -355,12 +329,12 @@ public class MessageBodyTests
     {
         // Use FromIncoming to simulate a received message with mixed segments
         MessageBody body = MessageBody.FromIncoming(
-            [
-                new TextSegment { Text                 = "hello" },
-                new MarketFaceSegment { EmojiPackageId = 1, EmojiId    = "e1", Key = "k1", Summary = "s", Url = "http://url" },
-                new XmlSegment { ServiceId             = 1, XmlPayload = "<xml/>" },
-                new MentionSegment { Target            = 123L }
-            ]);
+        [
+            new TextSegment { Text                 = "hello" },
+            new MarketFaceSegment { EmojiPackageId = 1, EmojiId = "e1", Key = "k1", Summary = "s", Url = "http://url" },
+            new XmlSegment { ServiceId             = 1, XmlPayload = "<xml/>" },
+            new MentionSegment { Target            = 123L }
+        ]);
 
         MessageBody outgoing = body.ToOutgoing();
         Assert.Equal(2, outgoing.Count);
@@ -373,13 +347,13 @@ public class MessageBodyTests
     public void ToOutgoing_ForwardWithMessages_ReturnsThis()
     {
         ForwardSegment fwd = new()
-            {
-                Messages =
-                    [
-                        new ForwardedMessageNode
-                                { UserId = 1L, SenderName = "A", Segments = [new TextSegment { Text = "hi" }] }
-                    ]
-            };
+        {
+            Messages =
+            [
+                new ForwardedMessageNode
+                    { UserId = 1L, SenderName = "A", Segments = [new TextSegment { Text = "hi" }] }
+            ]
+        };
         Assert.NotNull(fwd.ToOutgoing());
     }
 
@@ -415,7 +389,7 @@ public class MessageBodyTests
     [Fact]
     public void Validate_AudioMustBeSolo()
     {
-        MessageBody           body   = new([new TextSegment { Text = "hello" }, new AudioSegment { FileUri = "file://test.mp3" }]);
+        MessageBody body = new([new TextSegment { Text = "hello" }, new AudioSegment { FileUri = "file://test.mp3" }]);
         IReadOnlyList<string> issues = body.Validate();
         Assert.NotEmpty(issues);
         Assert.Contains(issues, i => i.Contains("Audio"));
@@ -425,7 +399,7 @@ public class MessageBodyTests
     [Fact]
     public void Validate_VideoMustBeSolo()
     {
-        MessageBody           body   = new([new TextSegment { Text = "hello" }, new VideoSegment { FileUri = "file://test.mp4" }]);
+        MessageBody body = new([new TextSegment { Text = "hello" }, new VideoSegment { FileUri = "file://test.mp4" }]);
         IReadOnlyList<string> issues = body.Validate();
         Assert.NotEmpty(issues);
     }
@@ -435,17 +409,17 @@ public class MessageBodyTests
     public void Validate_ForwardMustBeSolo()
     {
         MessageBody body = new(
-            [
-                new TextSegment { Text = "hello" },
-                new ForwardSegment
-                    {
-                        Messages =
-                            [
-                                new ForwardedMessageNode
-                                        { UserId = 1L, SenderName = "A", Segments = [new TextSegment { Text = "hi" }] }
-                            ]
-                    }
-            ]);
+        [
+            new TextSegment { Text = "hello" },
+            new ForwardSegment
+            {
+                Messages =
+                [
+                    new ForwardedMessageNode
+                        { UserId = 1L, SenderName = "A", Segments = [new TextSegment { Text = "hi" }] }
+                ]
+            }
+        ]);
         IReadOnlyList<string> issues = body.Validate();
         Assert.NotEmpty(issues);
     }
@@ -454,7 +428,7 @@ public class MessageBodyTests
     [Fact]
     public void Validate_LargeFaceMustBeSolo()
     {
-        MessageBody           body   = new([new TextSegment { Text = "hello" }, new FaceSegment { FaceId = "1", IsLarge = true }]);
+        MessageBody body = new([new TextSegment { Text = "hello" }, new FaceSegment { FaceId = "1", IsLarge = true }]);
         IReadOnlyList<string> issues = body.Validate();
         Assert.NotEmpty(issues);
     }

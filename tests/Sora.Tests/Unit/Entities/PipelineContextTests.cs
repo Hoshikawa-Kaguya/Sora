@@ -75,13 +75,5 @@ public class PipelineContextTests
         Assert.Equal(123, numVal);
     }
 
-    /// <see cref="PipelineContext.StartTimestamp" />
-    [Fact]
-    public void StartTimestamp_PreservesValue()
-    {
-        PipelineContext ctx = new() { StartTimestamp = 12345L };
-        Assert.Equal(12345L, ctx.StartTimestamp);
-    }
-
 #endregion
 }

@@ -18,7 +18,8 @@ public static class MessageWaiterExtensions
         /// <param name="matchType">How to match patterns against message text.</param>
         /// <param name="timeout">Optional timeout; Default(null) value is 1 hour.</param>
         /// <param name="ct">Cancellation token to abort the wait.</param>
-        /// <returns>The matched event, or null if timed out or canceled.</returns>
+        /// <returns>The matched event, or null on timeout, cancellation, disconnect, or an existing wait from the same source.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The timeout is outside the range supported by <see cref="Task.Delay(TimeSpan)" />; no wait is registered.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the event was not dispatched through SoraService.</exception>
         public ValueTask<MessageReceivedEvent?> WaitForNextMessageAsync(
             string[]          patterns,
@@ -38,7 +39,8 @@ public static class MessageWaiterExtensions
         /// <param name="predicate">Custom match function applied to each incoming message.</param>
         /// <param name="timeout">Optional timeout; Default(null) value is 1 hour.</param>
         /// <param name="ct">Cancellation token to abort the wait.</param>
-        /// <returns>The matched event, or null if timed out or canceled.</returns>
+        /// <returns>The matched event, or null on timeout, cancellation, disconnect, or an existing wait from the same source.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The timeout is outside the range supported by <see cref="Task.Delay(TimeSpan)" />; no wait is registered.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the event was not dispatched through SoraService.</exception>
         public ValueTask<MessageReceivedEvent?> WaitForNextMessageAsync(
             Func<MessageReceivedEvent, bool> predicate,
@@ -54,7 +56,8 @@ public static class MessageWaiterExtensions
         /// </summary>
         /// <param name="timeout">Optional timeout; Default(null) value is 1 hour.</param>
         /// <param name="ct">Cancellation token to abort the wait.</param>
-        /// <returns>The matched event, or null if timed out or canceled.</returns>
+        /// <returns>The matched event, or null on timeout, cancellation, disconnect, or an existing wait from the same source.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The timeout is outside the range supported by <see cref="Task.Delay(TimeSpan)" />; no wait is registered.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the event was not dispatched through SoraService.</exception>
         public ValueTask<MessageReceivedEvent?> WaitForNextMessageAsync(
             TimeSpan?         timeout = null,

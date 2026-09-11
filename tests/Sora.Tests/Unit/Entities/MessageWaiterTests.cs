@@ -1,6 +1,8 @@
 ﻿using Sora.Entities.MessageWaiting;
 using Xunit;
 
+// ReSharper disable AccessToDisposedClosure
+
 namespace Sora.Tests.Unit.Entities;
 
 /// <summary>Tests for the MessageWaiter continuous command system.</summary>
@@ -87,7 +89,7 @@ public class MessageWaiterTests
         MessageReceivedEvent source = MakeEvent(waiter, 1L, "cmd");
 
         ValueTask<MessageReceivedEvent?> waitTask = source.WaitForNextMessageAsync(
-                ["confirm"],
+            ["confirm"],
             MatchType.Full,
             TimeSpan.FromSeconds(5),
             CT);
@@ -110,7 +112,7 @@ public class MessageWaiterTests
         MessageReceivedEvent source = MakeEvent(waiter, 1L, "choose");
 
         ValueTask<MessageReceivedEvent?> waitTask = source.WaitForNextMessageAsync(
-                ["^(yes|no)$"],
+            ["^(yes|no)$"],
             MatchType.Regex,
             TimeSpan.FromSeconds(5),
             CT);
@@ -136,7 +138,7 @@ public class MessageWaiterTests
         MessageReceivedEvent source = MakeEvent(waiter, 1L, "cmd");
 
         ValueTask<MessageReceivedEvent?> waitTask = source.WaitForNextMessageAsync(
-                ["cancel"],
+            ["cancel"],
             MatchType.Keyword,
             TimeSpan.FromSeconds(5),
             CT);
@@ -166,24 +168,24 @@ public class MessageWaiterTests
 
         // Message with image should match
         MessageReceivedEvent withImage = new()
+        {
+            ConnectionId = TestConnectionId,
+            SelfId       = 999L,
+            Time         = DateTime.Now,
+            Api          = null!,
+            Message = new MessageContext
             {
-                ConnectionId = TestConnectionId,
-                SelfId       = 999L,
-                Time         = DateTime.Now,
-                Api          = null!,
-                Message = new MessageContext
-                    {
-                        SenderId   = 1L,
-                        SourceType = MessageSourceType.Friend,
-                        Body = MessageBody.FromIncoming(
-                            [
-                                new TextSegment { Text = "here" },
-                                new ImageSegment
-                                        { Url = "http://img.png" }
-                            ])
-                    },
-                Sender = new UserInfo { UserId = 1L, Nickname = "User" }
-            };
+                SenderId   = 1L,
+                SourceType = MessageSourceType.Friend,
+                Body = MessageBody.FromIncoming(
+                [
+                    new TextSegment { Text = "here" },
+                    new ImageSegment
+                        { Url = "http://img.png" }
+                ])
+            },
+            Sender = new UserInfo { UserId = 1L, Nickname = "User" }
+        };
         withImage.Waiter = waiter;
         Assert.True(waiter.TryMatch(withImage));
 
@@ -250,6 +252,143 @@ public class MessageWaiterTests
 #region Cancellation and Edge Cases Tests
 
     /// <see cref="MessageWaiter" />
+    [Theory]
+    [InlineData(-2L)]
+    [InlineData(4294967295L)]
+    public async Task WaitForNextMessage_InvalidTimeout_DoesNotReserveSource(long milliseconds)
+    {
+        MessageWaiter        waiter = new();
+        MessageReceivedEvent source = MakeEvent(waiter, 1L, "command");
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+                                                                  await source.WaitForNextMessageAsync(
+                                                                      TimeSpan.FromMilliseconds(milliseconds),
+                                                                      CT));
+
+        ValueTask<MessageReceivedEvent?> wait  = source.WaitForNextMessageAsync(Timeout.InfiniteTimeSpan, CT);
+        MessageReceivedEvent             reply = MakeEvent(waiter, 1L, "reply");
+        Assert.True(waiter.TryMatch(reply));
+        Assert.Same(reply, await wait);
+    }
+
+    /// <see cref="MessageWaiter" />
+    [Fact]
+    public async Task WaitForNextMessage_ConcurrentSameSource_RegistersOnlyOneWait()
+    {
+        MessageWaiter        waiter = new();
+        MessageReceivedEvent source = MakeEvent(waiter, 1L, "command");
+        using Barrier        start  = new(2);
+
+        Task<ValueTask<MessageReceivedEvent?>> RegisterAsync()
+        {
+            return Task.Run(
+                () =>
+                {
+                    Assert.True(start.SignalAndWait(TimeSpan.FromSeconds(5), CT));
+                    return source.WaitForNextMessageAsync(Timeout.InfiniteTimeSpan, CT);
+                },
+                CT);
+        }
+
+        Task<ValueTask<MessageReceivedEvent?>[]> registrations = Task.WhenAll(RegisterAsync(), RegisterAsync());
+        await Task.WhenAny(registrations, Task.Delay(TimeSpan.FromSeconds(5), CT));
+        Assert.True(registrations.IsCompletedSuccessfully);
+        ValueTask<MessageReceivedEvent?>[] waits = await registrations;
+        _ = Assert.Single(waits, wait => wait.IsCompletedSuccessfully);
+
+        MessageReceivedEvent reply = MakeEvent(waiter, 1L, "reply");
+        Assert.True(waiter.TryMatch(reply));
+        MessageReceivedEvent?[] results = [await waits[0], await waits[1]];
+        Assert.Single(results, result => ReferenceEquals(result, reply));
+        Assert.Single(results, result => result is null);
+    }
+
+    /// <see cref="MessageWaiter.TryMatch" />
+    [Fact]
+    public async Task WaitForNextMessage_PrivateSource_IgnoresGroupContext()
+    {
+        MessageWaiter                    waiter = new();
+        MessageReceivedEvent             source = MakeEvent(waiter, 1L, "command", 100L);
+        ValueTask<MessageReceivedEvent?> wait   = source.WaitForNextMessageAsync(Timeout.InfiniteTimeSpan, CT);
+
+        MessageReceivedEvent otherContext = MakeEvent(waiter, 1L, "reply", 200L);
+        Assert.Null(await otherContext.WaitForNextMessageAsync(Timeout.InfiniteTimeSpan, CT));
+        Assert.True(waiter.TryMatch(otherContext));
+        Assert.Same(otherContext, await wait);
+    }
+
+    /// <see cref="MessageWaiter.TryMatch" />
+    [Theory]
+    [InlineData("Cancellation")]
+    [InlineData("Disconnect")]
+    [InlineData("Timeout")]
+    public async Task TryMatch_CompletedSession_CannotConsumeMessageOrRemoveReplacement(string completion)
+    {
+        MessageWaiter                 waiter       = new();
+        MessageReceivedEvent          source       = MakeEvent(waiter, 1L, "command");
+        using CancellationTokenSource cancellation = CancellationTokenSource.CreateLinkedTokenSource(CT);
+        TaskCompletionSource          entered      = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        using ManualResetEventSlim    release      = new();
+        Task<MessageReceivedEvent?> wait = source.WaitForNextMessageAsync(
+            _ =>
+            {
+                entered.SetResult();
+                Assert.True(release.Wait(TimeSpan.FromSeconds(5), CT));
+                return true;
+            },
+            completion == "Timeout" ? TimeSpan.FromSeconds(2) : Timeout.InfiniteTimeSpan,
+            cancellation.Token).AsTask();
+        MessageReceivedEvent reply    = MakeEvent(waiter, 1L, "reply");
+        Task<bool>           matching = Task.Run(() => waiter.TryMatch(reply), CT);
+
+        try
+        {
+            await Task.WhenAny(entered.Task, Task.Delay(TimeSpan.FromSeconds(5), CT));
+            Assert.True(entered.Task.IsCompletedSuccessfully);
+            if (completion == "Cancellation")
+                await cancellation.CancelAsync();
+            else if (completion == "Disconnect")
+                waiter.DisposeConnection(TestConnectionId);
+
+            await Task.WhenAny(wait, Task.Delay(TimeSpan.FromSeconds(5), CT));
+            Assert.True(wait.IsCompletedSuccessfully);
+            Assert.Null(await wait);
+
+            ValueTask<MessageReceivedEvent?> replacement = source.WaitForNextMessageAsync(Timeout.InfiniteTimeSpan, CT);
+            release.Set();
+            Assert.False(await matching);
+            Assert.True(waiter.TryMatch(reply));
+            Assert.Same(reply, await replacement);
+        }
+        finally
+        {
+            release.Set();
+            await matching;
+            waiter.DisposeAll();
+        }
+    }
+
+    /// <see cref="MessageWaiter.TryMatch" />
+    [Fact]
+    public async Task TryMatch_MessageWins_CancellationAndDisconnectPreserveDeliveredResult()
+    {
+        MessageWaiter                 waiter       = new();
+        MessageReceivedEvent          source       = MakeEvent(waiter, 1L, "command");
+        using CancellationTokenSource cancellation = CancellationTokenSource.CreateLinkedTokenSource(CT);
+        ValueTask<MessageReceivedEvent?> wait = source.WaitForNextMessageAsync(
+            Timeout.InfiniteTimeSpan,
+            cancellation.Token);
+        MessageReceivedEvent reply = MakeEvent(waiter, 1L, "reply");
+
+        Assert.True(waiter.TryMatch(reply));
+        await cancellation.CancelAsync();
+        waiter.DisposeConnection(TestConnectionId);
+
+        Assert.Same(reply, await wait);
+        Assert.False(waiter.TryMatch(reply));
+    }
+
+    /// <see cref="MessageWaiter" />
     [Fact]
     public async Task WaitForNextMessage_Cancellation_ReturnsNull()
     {
@@ -291,19 +430,21 @@ public class MessageWaiterTests
     public async Task WaitForNextMessage_WithoutWaiter_ThrowsInvalidOperation()
     {
         MessageReceivedEvent source = new()
-            {
-                ConnectionId = TestConnectionId,
-                SelfId       = 999L,
-                Time         = DateTime.Now,
-                Api          = null!,
-                Message =
-                    new MessageContext { SenderId = 1L, Body = new MessageBody("test") },
-                Sender = new UserInfo { UserId = 1L, Nickname = "User" }
-            };
+        {
+            ConnectionId = TestConnectionId,
+            SelfId       = 999L,
+            Time         = DateTime.Now,
+            Api          = null!,
+            Message =
+                new MessageContext { SenderId = 1L, Body = new MessageBody("test") },
+            Sender = new UserInfo { UserId = 1L, Nickname = "User" }
+        };
 
         // No Waiter set — should throw
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await source.WaitForNextMessageAsync(TimeSpan.FromMilliseconds(10), CT));
+                                                                await source.WaitForNextMessageAsync(
+                                                                    TimeSpan.FromMilliseconds(10),
+                                                                    CT));
     }
 
 #endregion
@@ -369,22 +510,22 @@ public class MessageWaiterTests
         Guid?             connId     = null)
     {
         MessageReceivedEvent evt = new()
+        {
+            ConnectionId = connId ?? TestConnectionId,
+            SelfId       = 999L,
+            Time         = DateTime.Now,
+            Api          = null!,
+            Message = new MessageContext
             {
-                ConnectionId = connId ?? TestConnectionId,
-                SelfId       = 999L,
-                Time         = DateTime.Now,
-                Api          = null!,
-                Message = new MessageContext
-                    {
-                        SenderId   = senderId,
-                        GroupId    = groupId,
-                        SourceType = sourceType,
-                        Body       = new MessageBody(text)
-                    },
-                Sender = new UserInfo { UserId   = senderId, Nickname = "TestUser" },
-                Group  = new GroupInfo { GroupId = groupId, GroupName = "TestGroup" },
-                Waiter = waiter
-            };
+                SenderId   = senderId,
+                GroupId    = groupId,
+                SourceType = sourceType,
+                Body       = new MessageBody(text)
+            },
+            Sender = new UserInfo { UserId   = senderId, Nickname = "TestUser" },
+            Group  = new GroupInfo { GroupId = groupId, GroupName = "TestGroup" },
+            Waiter = waiter
+        };
         return evt;
     }
 }

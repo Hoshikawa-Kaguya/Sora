@@ -2,6 +2,8 @@
 
 本文档面向希望为 Sora 框架开发第三方协议适配器的开发者。
 
+维护中的内置适配器为 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 已废弃并停止维护，不再安排功能开发、缺陷修复、协议对齐或测试维护；本文涉及 OB11 的内容仅记录现有实现。NuGet 包不设置 deprecated 标记。
+
 > `__Name__`（双下划线包围）为占位符，请替换为实际名称。
 
 ## 概述
@@ -40,12 +42,13 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
 
 `Sora.Command` 自行维护命令扩展所需的实体，使用 `Sora.Command.InternalEntities` 命名空间，不将命令专用元数据或执行状态放入 `Sora.Entities`。该命名空间表示实体归属，不等同于 C# 的 `internal` 可见性；公共过滤器契约涉及的类型仍须可公开访问。
 
-命令匹配方式由 `MatchType` 的 `Full`、`Regex`、`Keyword` 定义，与内置 `ICommandMatcher` 实现一一对应。`CommandManager.RegisterMatcher` 仅作为类内部的私有注册方法。增加匹配方式需要框架同时修改枚举和对应实现，包使用者无法扩展该枚举，因此 matcher 注册不是对外扩展点。
+命令匹配方式由 `MatchType` 的 `Full`、`Regex`、`Keyword` 定义，与内置 `ICommandMatcher` 实现一一对应，由 `CommandManager` 内部固定字典保存。增加匹配方式需要框架同时修改枚举和对应实现，包使用者无法扩展该枚举，因此 matcher 注册不是对外扩展点。
 
 ### 事件管线
 
 ```
 协议网络层 → Converter → BotEvent → SoraService
+  → 触发者用户策略（BlockUsers 拦截；SuperUsers 标记）
   → MessageWaiter.TryMatch（连续对话，最高优先级 — 跳过所有过滤器）
   → PipelineContext 初始化
   → IEventPreFilter 阶段（scope-aware，可预处理或拦截事件）
@@ -66,6 +69,25 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
 普通用户回调错误在执行方法内部记录并隔离，正常完成、普通执行错误或短路后继续进入对应后置阶段。Sora 取消立即向外传播，不再执行后续 handler、after-filter 或 post-filter；执行链完整性不作为取消后的保证。编排层直接顺序调用各阶段，不捕获或暂存异常。重入标记通过包内部的值类型占用作用域及 `using` 保证释放，释放操作不执行后置回调。该契约不改变适配器调度；适配器仍负责观察回调完成或失败。
 
 > **注意**：过滤器由框架用户配置。事件过滤器通过 `service.UseEventPreFilter()` / `service.UseEventPostFilter()` 显式注册（带 `EventTypes` / `SourceTypes` / `Predicate` 作用域属性）。命令过滤器以 attribute 形式贴在 `[Command]` 方法或 `[CommandGroup]` 类上，框架按 attribute 自动发现，无须注册。适配器开发者无需关心过滤器机制 — 它在 `SoraService` / `CommandManager` 内部透明运作。
+
+
+### 用户策略与事件触发者
+
+框架内部按具体事件类型读取已有字段来识别触发者；OB11 专有事件的判定由适配器负责。协议未提供触发者时，不从被操作对象或会话 ID 猜测。消息取 SenderId，撤回/禁言/群管理取 OperatorId，邀请取 InvitorId，主动申请取申请者；踢出取操作者，主动退群取离开者。成员加入取已知审批者、邀请者或自主加入者；置顶事件由当前账号触发。仅报告头衔/名片变更目标、连接状态或下载状态的事件不推断触发者。
+
+服务在自动已读、waiter 和过滤器之前应用 BlockUsers；命中即停止整个事件。SuperUsers 设置 `IsSuperUser`，可供过滤器和 handler 读取。`[Command(SuperUserOnly = true)]` 和动态注册 `superUserOnly: true` 仅允许超级用户执行，同时继续检查 `PermissionLevel`。同时出现在两份名单的用户被拦截。
+
+### 命令实例与连续对话
+
+实例命令按声明类型使用 singleton：优先使用扫描前注册的实例，其次调用 public/non-public 无参构造函数；没有无参构造函数时，使用 `RuntimeHelpers.GetUninitializedObject` 创建实例。这是受支持的实例化方式，不执行构造函数和字段初始化器，字段为零值。需要初始化状态的命令应提供无参构造函数，或先调用 `RegisterCommandInstance<T>()`。
+
+连续对话按连接、发送者、消息来源和群身份原子登记；非群消息忽略 GroupId，同源重复登记返回 null。timeout 按 Task.Delay 的范围在登记前校验，非法值抛 ArgumentOutOfRangeException。消息、超时、取消及断开只有一个完成方，后续完成不能覆盖已交付的结果。
+
+### 连接生命周期
+
+Milky WS/SSE 的 `StartAsync` 调度后台连接循环后返回，并不代表已经连通；通过 OnConnected 获取就绪通知。循环拥有 linked CTS 和网络资源，`StopAsync` 取消并等待释放。正的 ReconnectInterval 保留自动重连，零值只尝试首次连接；连接失败通过日志和断开事件报告。OB11 的失败/断开重试间隔使用 ReconnectInterval，心跳超时独立控制连接存活检测。
+
+Milky HTTP API 的非零 retcode 保留原响应 Message 和 Data，统一失败状态不丢弃诊断信息。OB11 Debug 连接 URL 按设计包含配置的 query token，用于完整连接诊断。
 
 ## 适配器项目结构
 
@@ -88,7 +110,7 @@ Sora.Adapter.__YourProtocol__/
 
 ## 注册 InternalsVisibleTo
 
-适配器需要访问 `Sora.Entities` 中的 `internal` 成员（如 `BotConnection.SelfId` setter、`MessageBody.AddIncoming()` 等）。由于 C# 的 `InternalsVisibleTo` 不支持通配符，第三方适配器需要通过 **Pull Request** 将自己的程序集名称注册到框架中。
+适配器需要访问 `Sora.Entities` 中的 `internal` 成员（如 `BotConnection.State` setter、`MessageBody.FromIncoming()` 等）。由于 C# 的 `InternalsVisibleTo` 不支持通配符，第三方适配器需要通过 **Pull Request** 将自己的程序集名称注册到框架中。
 
 1. Fork 本仓库，在 `src/Sora.Entities/Sora.Entities.csproj` 中找到 `<!-- Adapters -->` 区域，添加程序集名称：
 

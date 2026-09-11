@@ -14,7 +14,7 @@ public class EventTests : IDisposable
     private readonly MilkyTestFixture  _fixture;
     private readonly IDisposable       _logSubscription;
     private readonly ITestOutputHelper _output;
-    private          IBotApi           Api      => _fixture.Api!;
+    private          IBotApi           Api      => _fixture.PrimaryApi!;
     private          IMilkyExtApi      MilkyExt => Api.GetExtension<IMilkyExtApi>()!;
 
     /// <summary>EventTests ctor.</summary>
@@ -32,34 +32,43 @@ public class EventTests : IDisposable
     public async Task Event_MessageReceived()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
-        TaskCompletionSource<MessageReceivedEvent> tcs = new();
+        GroupId                                    testGroup = TestConfig.TestGroupId;
+        string                                     text      = $"[Milky Event Test] {Guid.NewGuid():N}";
+        TaskCompletionSource<MessageReceivedEvent> tcs       = new();
         Func<MessageReceivedEvent, ValueTask> handler = e =>
         {
-            tcs.TrySetResult(e);
+            if (e.Message.SourceType == MessageSourceType.Group
+                && e.Message.GroupId == testGroup
+                && e.Message.SenderId == _fixture.Service!.Adapter.SelfId
+                && e.Message.Body.GetText() == text)
+                tcs.TrySetResult(e);
             return ValueTask.CompletedTask;
         };
         _fixture.SecondaryService!.Events.OnMessageReceived += handler;
 
         try
         {
-            GroupId testGroup = TestConfig.TestGroupId;
             SendMessageResult sent =
                 await Api.SendGroupMessageAsync(
                     testGroup,
-                    new MessageBody("[Milky Event Test] message_received trigger"),
+                    new MessageBody(text),
                     CT);
             _output.WriteLine($"Sent: success={sent.IsSuccess} messageId={sent.MessageId}");
+            Assert.True(sent.IsSuccess, sent.ErrorMessage);
+            Assert.NotEqual(default, sent.MessageId);
 
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
             Assert.True(
                 tcs.Task.IsCompletedSuccessfully,
-                "OnMessageReceived not triggered within timeout — protocol should deliver self-sent group messages");
+                "Secondary did not receive the expected group message within timeout.");
             MessageReceivedEvent evt = await tcs.Task;
             _output.WriteLine($"MessageReceived: text={evt.Message.Body.GetText()} senderId={evt.Message.SenderId}");
-            Assert.NotNull(evt.Message);
+            Assert.Equal(text, evt.Message.Body.GetText());
+            Assert.Equal(testGroup, evt.Message.GroupId);
+            Assert.Equal(_fixture.Service!.Adapter.SelfId, evt.Message.SenderId);
         }
         finally
         {
@@ -72,7 +81,7 @@ public class EventTests : IDisposable
     public async Task Event_MessageReceived_FromSecondary()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -115,7 +124,7 @@ public class EventTests : IDisposable
     public async Task Event_MessageDeleted()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         TaskCompletionSource<MessageDeletedEvent> tcs = new();
@@ -128,8 +137,11 @@ public class EventTests : IDisposable
 
         try
         {
-            GroupId           testGroup = TestConfig.TestGroupId;
-            SendMessageResult sent      = await Api.SendGroupMessageAsync(testGroup, "[Milky Event Test] will be recalled", CT);
+            GroupId testGroup = TestConfig.TestGroupId;
+            SendMessageResult sent = await Api.SendGroupMessageAsync(
+                testGroup,
+                "[Milky Event Test] will be recalled",
+                CT);
             Assert.True(sent.IsSuccess);
             _output.WriteLine($"Sent messageId={sent.MessageId}");
 
@@ -141,7 +153,8 @@ public class EventTests : IDisposable
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
             Assert.True(tcs.Task.IsCompletedSuccessfully, "OnMessageDeleted not triggered within timeout");
             MessageDeletedEvent evt = await tcs.Task;
-            _output.WriteLine($"MessageDeleted: messageId={evt.MessageId} senderId={evt.SenderId} operatorId={evt.OperatorId}");
+            _output.WriteLine(
+                $"MessageDeleted: messageId={evt.MessageId} senderId={evt.SenderId} operatorId={evt.OperatorId}");
             Assert.Equal(sent.MessageId, evt.MessageId);
         }
         finally
@@ -159,7 +172,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupNudge_FromSecondary()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -202,7 +215,7 @@ public class EventTests : IDisposable
     public async Task Event_FileUpload_DualBot()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -222,7 +235,11 @@ public class EventTests : IDisposable
 
             await Task.Delay(1000, CT);
             ApiResult<string> uploadResult =
-                await _fixture.SecondaryApi.UploadGroupFileAsync(testGroup, base64Uri, "secondary_upload_test.txt", ct: CT);
+                await _fixture.SecondaryApi.UploadGroupFileAsync(
+                    testGroup,
+                    base64Uri,
+                    "secondary_upload_test.txt",
+                    ct: CT);
             _output.WriteLine($"Secondary UploadGroupFile: success={uploadResult.IsSuccess}");
             Assert.True(uploadResult.IsSuccess, "UploadGroupFileAsync should succeed");
 
@@ -243,12 +260,12 @@ public class EventTests : IDisposable
     public async Task Event_GroupReaction_DualBot()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
         GroupId           testGroup = TestConfig.TestGroupId;
-        SendMessageResult sent      = await Api.SendGroupMessageAsync(testGroup, "[Milky Event Test] reaction target", CT);
+        SendMessageResult sent = await Api.SendGroupMessageAsync(testGroup, "[Milky Event Test] reaction target", CT);
         Assert.True(sent.IsSuccess);
         _output.WriteLine($"Sent messageId={sent.MessageId}");
 
@@ -271,7 +288,8 @@ public class EventTests : IDisposable
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
             Assert.True(tcs.Task.IsCompletedSuccessfully, "GroupReaction event not received within timeout");
             GroupReactionEvent evt = await tcs.Task;
-            _output.WriteLine($"GroupReaction: groupId={evt.GroupId} userId={evt.UserId} faceId={evt.FaceId} isAdd={evt.IsAdd}");
+            _output.WriteLine(
+                $"GroupReaction: groupId={evt.GroupId} userId={evt.UserId} faceId={evt.FaceId} isAdd={evt.IsAdd}");
             Assert.Equal(testGroup, evt.GroupId);
             Assert.True(evt.IsAdd);
         }
@@ -286,7 +304,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupAdminChanged_DualBot()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
@@ -339,7 +357,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupEssenceChanged()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         TaskCompletionSource<GroupEssenceChangedEvent> tcs = new();
@@ -351,7 +369,7 @@ public class EventTests : IDisposable
         _fixture.SecondaryService!.Events.OnGroupEssenceChanged += handler;
 
         GroupId           testGroup = TestConfig.TestGroupId;
-        SendMessageResult sent      = await Api.SendGroupMessageAsync(testGroup, "[Milky Event Test] essence candidate", CT);
+        SendMessageResult sent = await Api.SendGroupMessageAsync(testGroup, "[Milky Event Test] essence candidate", CT);
         Assert.True(sent.IsSuccess);
         _output.WriteLine($"Sent messageId={sent.MessageId}");
 
@@ -365,7 +383,8 @@ public class EventTests : IDisposable
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
             Assert.True(tcs.Task.IsCompletedSuccessfully, "OnGroupEssenceChanged not triggered within timeout");
             GroupEssenceChangedEvent evt = await tcs.Task;
-            _output.WriteLine($"GroupEssenceChanged: messageId={evt.MessageId} isSet={evt.IsSet} operatorId={evt.OperatorId}");
+            _output.WriteLine(
+                $"GroupEssenceChanged: messageId={evt.MessageId} isSet={evt.IsSet} operatorId={evt.OperatorId}");
             Assert.Equal(testGroup, evt.GroupId);
             Assert.True(evt.IsSet);
         }
@@ -389,7 +408,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupMute()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         TaskCompletionSource<GroupMuteEvent> tcs = new();
@@ -411,7 +430,8 @@ public class EventTests : IDisposable
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
             Assert.True(tcs.Task.IsCompletedSuccessfully, "OnGroupMute not triggered within timeout");
             GroupMuteEvent evt = await tcs.Task;
-            _output.WriteLine($"GroupMute: groupId={evt.GroupId} isWholeGroup={evt.IsWholeGroup} duration={evt.DurationSeconds}");
+            _output.WriteLine(
+                $"GroupMute: groupId={evt.GroupId} isWholeGroup={evt.IsWholeGroup} duration={evt.DurationSeconds}");
             Assert.Equal(testGroup, evt.GroupId);
             Assert.True(evt.IsWholeGroup);
         }
@@ -435,7 +455,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupNameChanged()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         GroupId   testGroup    = TestConfig.TestGroupId;
@@ -489,7 +509,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupNudge()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         TaskCompletionSource<NudgeEvent> tcs = new();
@@ -527,7 +547,7 @@ public class EventTests : IDisposable
     public async Task Event_PeerPinChanged()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyReason is not null, TestConfig.SkipMilkyReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
         Assert.SkipWhen(TestConfig.TestGroupId == 0, "SORA_TEST_GROUP_ID not set");
 
@@ -575,7 +595,7 @@ public class EventTests : IDisposable
     public async Task Event_FriendNudge_FromSecondary()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
@@ -619,7 +639,7 @@ public class EventTests : IDisposable
     public async Task Event_FriendFileUpload_DualBot()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 

@@ -2,6 +2,8 @@
 
 本文档列出所有功能性（E2E）测试，按协议和测试类别分组。每个测试标注是否需要双账号、测试方式及被测内容。
 
+当前功能测试维护与执行计划面向 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 已废弃并停止维护，OB11 用例仅作为现有测试清单留存，不代表后续测试或补齐计划。NuGet 包不设置 deprecated 标记。清单描述用例范围，不代表这些用例已在当前环境通过。
+
 > **图例**
 >
 > - 🟢 **单账号** — 仅需 Primary Bot 即可运行
@@ -143,7 +145,7 @@ API 测试通过 Primary Bot 直接调用协议 API 并验证返回结果，不�
 
 ---
 
-## OneBot v11 协议
+## OneBot v11 协议（已废弃，停止维护）
 
 ### ApiTests（68 项，66 🟢 单账号 + 2 🔵 双账号）
 
@@ -286,9 +288,11 @@ API 测试通过 Primary Bot 直接调用协议 API 并验证返回结果，不�
 
 | 变量 | 说明 | 影响范围 |
 |------|------|----------|
-| `SORA_TEST_MILKY_HOST` | Milky 主 Bot 地址 | 所有 Milky 测试 |
+| `SORA_TEST_MILKY_PRIMARY_HOST` | Milky 主 Bot 地址 | 所有 Milky 测试 |
+| `SORA_TEST_MILKY_PRIMARY_PORT` | Milky 主账号端口，默认 3010 | 所有 Milky 测试 |
+| `SORA_TEST_MILKY_SECONDARY_PORT` | Milky 副账号端口，默认 3010 | Milky 双账号测试 |
 | `SORA_TEST_MILKY_SECONDARY_HOST` | Milky 副 Bot 地址 | 所有 Milky 🔵 双账号测试 |
-| `SORA_TEST_OB11_HOST` | OB11 主 Bot 地址 | 所有 OB11 测试 |
+| `SORA_TEST_OB11_PRIMARY_HOST` | OB11 主 Bot 地址 | 所有 OB11 测试 |
 | `SORA_TEST_OB11_SECONDARY_HOST` | OB11 副 Bot 地址 | 所有 OB11 🔵 双账号测试 |
 | `SORA_TEST_GROUP_ID` | 测试群号 | 所有群相关测试 |
 | `SORA_TEST_AUDIO_FILE` | 测试音频文件路径 | Audio 消息类型测试 |

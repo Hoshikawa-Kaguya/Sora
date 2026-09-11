@@ -134,29 +134,34 @@ sb.AppendLine($"📊 Total: {allPassed}/{allTotal} passed, {allFailed} failed, {
 if (unitTotal > 0)
 {
     string unitStatus = unitFailed > 0 ? "❌" : "✅";
-    sb.AppendLine($"  {unitStatus} Unit: {unitPassed}/{unitTotal} passed, {unitFailed} failed ({unitDuration.TotalSeconds:F3} s)");
-    IEnumerable<IGrouping<string, (string Name, string Category, int Total, int Passed, int Failed, int Skipped)>> unitByFolder =
-        collectionStats.Where(c => c.Category == "Unit")
-                       .GroupBy(c =>
-                       {
-                           int slash = c.Name.IndexOf('/');
-                           return slash > 0 ? c.Name[..slash] : c.Name;
-                       });
+    sb.AppendLine(
+        $"  {unitStatus} Unit: {unitPassed}/{unitTotal} passed, {unitFailed} failed ({unitDuration.TotalSeconds:F3} s)");
+    IEnumerable<IGrouping<string, (string Name, string Category, int Total, int Passed, int Failed, int Skipped)>>
+        unitByFolder =
+            collectionStats.Where(c => c.Category == "Unit")
+                           .GroupBy(c =>
+                           {
+                               int slash = c.Name.IndexOf('/');
+                               return slash > 0 ? c.Name[..slash] : c.Name;
+                           });
 
-    foreach (IGrouping<string, (string Name, string Category, int Total, int Passed, int Failed, int Skipped)> folder in unitByFolder)
+    foreach (IGrouping<string, (string Name, string Category, int Total, int Passed, int Failed, int Skipped)> folder in
+             unitByFolder)
     {
         int    fTotal  = folder.Sum(c => c.Total);
         int    fPassed = folder.Sum(c => c.Passed);
         int    fFailed = folder.Sum(c => c.Failed);
         string fIcon   = fFailed > 0 ? "❌" : "✅";
-        sb.AppendLine($"     └ {fIcon} {folder.Key}: {fPassed}/{fTotal} passed{(fFailed > 0 ? $", {fFailed} failed" : "")}");
+        sb.AppendLine(
+            $"     └ {fIcon} {folder.Key}: {fPassed}/{fTotal} passed{(fFailed > 0 ? $", {fFailed} failed" : "")}");
     }
 }
 
 if (funcTotal > 0)
 {
     string funcStatus = funcFailed > 0 ? "❌" : "✅";
-    sb.AppendLine($"  {funcStatus} Func: {funcPassed}/{funcTotal} passed, {funcFailed} failed ({funcDuration.TotalSeconds:F3} s)");
+    sb.AppendLine(
+        $"  {funcStatus} Func: {funcPassed}/{funcTotal} passed, {funcFailed} failed ({funcDuration.TotalSeconds:F3} s)");
     foreach ((string name, _, int t, int p, int f, _) in collectionStats.Where(c => c.Category == "Func"))
     {
         string icon = f > 0 ? "❌" : "✅";
@@ -206,15 +211,17 @@ string milkyPrimaryHost   = Environment.GetEnvironmentVariable("SORA_TEST_MILKY_
 string milkySecondaryHost = Environment.GetEnvironmentVariable("SORA_TEST_MILKY_SECONDARY_HOST") ?? "";
 string milkyPrefix        = Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PREFIX") ?? "";
 if (!string.IsNullOrEmpty(ob11PrimaryHost))
-    sb.AppendLine($"  OB11 Primary: {ob11PrimaryHost}:{Environment.GetEnvironmentVariable("SORA_TEST_OB11_PORT") ?? "3001"}");
+    sb.AppendLine(
+        $"  OB11 Primary: {ob11PrimaryHost}:{Environment.GetEnvironmentVariable("SORA_TEST_OB11_PORT") ?? "3001"}");
 if (!string.IsNullOrEmpty(ob11SecondaryHost))
-    sb.AppendLine($"  OB11 Secondary: {ob11SecondaryHost}:{Environment.GetEnvironmentVariable("SORA_TEST_OB11_PORT") ?? "3001"}");
+    sb.AppendLine(
+        $"  OB11 Secondary: {ob11SecondaryHost}:{Environment.GetEnvironmentVariable("SORA_TEST_OB11_PORT") ?? "3001"}");
 if (!string.IsNullOrEmpty(milkyPrimaryHost))
     sb.AppendLine(
-        $"  Milky Primary: {milkyPrimaryHost}:{Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PORT") ?? "3010"}/{milkyPrefix}");
+        $"  Milky Primary: {milkyPrimaryHost}:{Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PRIMARY_PORT") ?? "3010"}/{milkyPrefix}");
 if (!string.IsNullOrEmpty(milkySecondaryHost))
     sb.AppendLine(
-        $"  Milky Secondary: {milkySecondaryHost}:{Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PORT") ?? "3010"}/{milkyPrefix}");
+        $"  Milky Secondary: {milkySecondaryHost}:{Environment.GetEnvironmentVariable("SORA_TEST_MILKY_SECONDARY_PORT") ?? "3010"}/{milkyPrefix}");
 sb.AppendLine($"  Group: {groupId}");
 
 // TRX files
@@ -245,16 +252,16 @@ try
     if (!string.IsNullOrEmpty(milkyPrimaryHost))
     {
         MilkyConfig config = new()
-            {
-                Host = milkyPrimaryHost,
-                Port = int.TryParse(Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PORT"), out int mp)
-                    ? mp
-                    : 3010,
-                Prefix         = milkyPrefix,
-                AccessToken    = Environment.GetEnvironmentVariable("SORA_TEST_MILKY_TOKEN") ?? "",
-                EventTransport = EventTransport.WebSocket,
-                ApiTimeout     = TimeSpan.FromSeconds(30)
-            };
+        {
+            Host = milkyPrimaryHost,
+            Port = int.TryParse(Environment.GetEnvironmentVariable("SORA_TEST_MILKY_PRIMARY_PORT"), out int mp)
+                ? mp
+                : 3010,
+            Prefix         = milkyPrefix,
+            AccessToken    = Environment.GetEnvironmentVariable("SORA_TEST_MILKY_TOKEN") ?? "",
+            EventTransport = EventTransport.WebSocket,
+            ApiTimeout     = TimeSpan.FromSeconds(30)
+        };
 
         MilkyAdapter                  adapter = new(config);
         TaskCompletionSource<IBotApi> ready   = new();
@@ -278,7 +285,7 @@ try
     // Send text report
     MessageBody textMsg = [new TextSegment { Text = finalReport }];
     await api.SendGroupMessageAsync(gid, textMsg);
-    Console.WriteLine("[TestReporter] Report sent to group");
+    Console.WriteLine("[TestReporter] Group report submission completed (delivery result not checked)");
 
     // Upload TRX files — create a time-stamped folder, read files as base64
     if (trxFiles.Count > 0)
@@ -287,7 +294,7 @@ try
 
         // Create folder in group
         ApiResult<string> folderResult = await api.CreateGroupFolderAsync(gid, folderName);
-        string            folderId     = folderResult.IsSuccess && folderResult.Data is not null ? folderResult.Data : "/";
+        string            folderId = folderResult.IsSuccess && folderResult.Data is not null ? folderResult.Data : "/";
         Console.WriteLine(
             $"[TestReporter] Folder '{folderName}': {(folderResult.IsSuccess ? $"created (id={folderId})" : $"fallback to root ({folderResult.Message})")}");
 
@@ -300,7 +307,8 @@ try
             string base64Uri = $"base64://{Convert.ToBase64String(fileBytes)}";
 
             ApiResult<string> uploadResult = await api.UploadGroupFileAsync(gid, base64Uri, uploadName, folderId);
-            Console.WriteLine($"[TestReporter] Upload {uploadName}: {(uploadResult.IsSuccess ? "OK" : uploadResult.Message)}");
+            Console.WriteLine(
+                $"[TestReporter] Upload {uploadName}: {(uploadResult.IsSuccess ? "OK" : uploadResult.Message)}");
         }
     }
 }

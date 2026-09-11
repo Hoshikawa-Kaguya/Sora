@@ -13,6 +13,16 @@ public class EventConverterTests
 {
     private static readonly Guid TestConnectionId = Guid.NewGuid();
 
+    /// <summary>Protocol-specific policies identify the triggering user without using target-only metadata.</summary>
+    [Fact]
+    public void OneBot11_IdentifiesEventUser()
+    {
+        IAdapterEventSource adapter = new OneBot11Adapter(new OneBot11Config());
+        Assert.Equal((UserId)200L, adapter.GetEventUser(new GroupDismissedEvent { Api = null!, OperatorId = 200L }));
+        Assert.Equal((UserId)300L, adapter.GetEventUser(new ProfileLikedEvent { Api   = null!, SenderId   = 300L }));
+        Assert.Null(adapter.GetEventUser(new GroupCardChangedEvent { Api              = null!, UserId     = 300L }));
+    }
+
 #region Message Event Tests
 
     /// <summary>Verifies <see cref="EventConverter.ToSoraEvent" /> converts a private message.</summary>
@@ -20,13 +30,13 @@ public class EventConverterTests
     public void ConvertMessageEvent_Private()
     {
         OneBotEvent obEvent = new()
-            {
-                Time        = 1700000000, SelfId = 12345, PostType = "message",
-                MessageType = "private", SubType = "friend",
-                MessageId   = 100, UserId        = 67890,
-                Message     = JArray.Parse(@"[{""type"":""text"",""data"":{""text"":""hello""}}]"),
-                Sender      = new OneBotSender { UserId = 67890, Nickname = "TestUser", Sex = "male" }
-            };
+        {
+            Time        = 1700000000, SelfId = 12345, PostType = "message",
+            MessageType = "private", SubType = "friend",
+            MessageId   = 100, UserId        = 67890,
+            Message     = JArray.Parse(@"[{""type"":""text"",""data"":{""text"":""hello""}}]"),
+            Sender      = new OneBotSender { UserId = 67890, Nickname = "TestUser", Sex = "male" }
+        };
 
         BotEvent result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         Assert.IsType<MessageReceivedEvent>(result);
@@ -44,14 +54,14 @@ public class EventConverterTests
     public void ConvertMessageEvent_Group()
     {
         OneBotEvent obEvent = new()
-            {
-                Time        = 1700000000, SelfId = 12345, PostType = "message",
-                MessageType = "group", SubType   = "normal",
-                MessageId   = 200, UserId        = 67890, GroupId = 111222,
-                Message     = JArray.Parse(@"[{""type"":""text"",""data"":{""text"":""group msg""}}]"),
-                Sender = new OneBotSender
-                        { UserId = 67890, Nickname = "Member", Role = "admin", Card = "CardName" }
-            };
+        {
+            Time        = 1700000000, SelfId = 12345, PostType = "message",
+            MessageType = "group", SubType   = "normal",
+            MessageId   = 200, UserId        = 67890, GroupId = 111222,
+            Message     = JArray.Parse(@"[{""type"":""text"",""data"":{""text"":""group msg""}}]"),
+            Sender = new OneBotSender
+                { UserId = 67890, Nickname = "Member", Role = "admin", Card = "CardName" }
+        };
 
         BotEvent             result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         MessageReceivedEvent msg    = (MessageReceivedEvent)result;
@@ -72,11 +82,11 @@ public class EventConverterTests
     public void ConvertNotice_FriendAdd()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "friend_add",
-                UserId     = 222
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "friend_add",
+            UserId     = 222
+        };
 
         BotEvent         result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         FriendAddedEvent evt    = (FriendAddedEvent)result;
@@ -88,11 +98,11 @@ public class EventConverterTests
     public void ConvertNotice_FriendRecall()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "friend_recall",
-                UserId     = 222, MessageId = 888
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "friend_recall",
+            UserId     = 222, MessageId = 888
+        };
 
         BotEvent            result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         MessageDeletedEvent evt    = (MessageDeletedEvent)result;
@@ -104,11 +114,11 @@ public class EventConverterTests
     public void ConvertNotice_GroupAdmin()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId     = 12345, PostType = "notice",
-                NoticeType = "group_admin", SubType = "set",
-                GroupId    = 111, UserId            = 222
-            };
+        {
+            Time       = 1700000000, SelfId     = 12345, PostType = "notice",
+            NoticeType = "group_admin", SubType = "set",
+            GroupId    = 111, UserId            = 222
+        };
 
         BotEvent               result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupAdminChangedEvent evt    = (GroupAdminChangedEvent)result;
@@ -121,11 +131,11 @@ public class EventConverterTests
     public void ConvertNotice_GroupBan()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId   = 12345, PostType = "notice",
-                NoticeType = "group_ban", SubType = "ban",
-                GroupId    = 111, UserId          = 222, OperatorId = 333, Duration = 3600
-            };
+        {
+            Time       = 1700000000, SelfId   = 12345, PostType = "notice",
+            NoticeType = "group_ban", SubType = "ban",
+            GroupId    = 111, UserId          = 222, OperatorId = 333, Duration = 3600
+        };
 
         BotEvent       result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupMuteEvent evt    = (GroupMuteEvent)result;
@@ -138,11 +148,11 @@ public class EventConverterTests
     public void ConvertNotice_GroupDecrease_Kick()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId        = 12345, PostType = "notice",
-                NoticeType = "group_decrease", SubType = "kick",
-                GroupId    = 111, UserId               = 222, OperatorId = 333
-            };
+        {
+            Time       = 1700000000, SelfId        = 12345, PostType = "notice",
+            NoticeType = "group_decrease", SubType = "kick",
+            GroupId    = 111, UserId               = 222, OperatorId = 333
+        };
 
         BotEvent        result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         MemberLeftEvent evt    = (MemberLeftEvent)result;
@@ -155,11 +165,11 @@ public class EventConverterTests
     public void ConvertNotice_GroupDecrease_Leave()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId        = 12345, PostType = "notice",
-                NoticeType = "group_decrease", SubType = "leave",
-                GroupId    = 111, UserId               = 222
-            };
+        {
+            Time       = 1700000000, SelfId        = 12345, PostType = "notice",
+            NoticeType = "group_decrease", SubType = "leave",
+            GroupId    = 111, UserId               = 222
+        };
 
         BotEvent        result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         MemberLeftEvent evt    = (MemberLeftEvent)result;
@@ -171,11 +181,11 @@ public class EventConverterTests
     public void ConvertNotice_GroupIncrease()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId        = 12345, PostType = "notice",
-                NoticeType = "group_increase", SubType = "approve",
-                GroupId    = 111, UserId               = 222, OperatorId = 333
-            };
+        {
+            Time       = 1700000000, SelfId        = 12345, PostType = "notice",
+            NoticeType = "group_increase", SubType = "approve",
+            GroupId    = 111, UserId               = 222, OperatorId = 333
+        };
 
         BotEvent result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         Assert.IsType<MemberJoinedEvent>(result);
@@ -189,11 +199,11 @@ public class EventConverterTests
     public void ConvertNotice_GroupRecall()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "group_recall",
-                GroupId    = 111, UserId = 222, OperatorId = 333, MessageId = 999
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "group_recall",
+            GroupId    = 111, UserId = 222, OperatorId = 333, MessageId = 999
+        };
 
         BotEvent            result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         MessageDeletedEvent evt    = (MessageDeletedEvent)result;
@@ -206,12 +216,12 @@ public class EventConverterTests
     public void ConvertNotice_GroupUpload()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "group_upload",
-                GroupId    = 111, UserId = 222,
-                File       = new OneBotFile { Id = "file1", Name = "test.txt", Size = 1024 }
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "group_upload",
+            GroupId    = 111, UserId = 222,
+            File       = new OneBotFile { Id = "file1", Name = "test.txt", Size = 1024 }
+        };
 
         BotEvent        result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         FileUploadEvent evt    = (FileUploadEvent)result;
@@ -225,11 +235,11 @@ public class EventConverterTests
     public void ConvertNotice_Poke()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "notify", SubType  = "poke",
-                GroupId    = 111, UserId        = 222, TargetId = 333
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "notify", SubType  = "poke",
+            GroupId    = 111, UserId        = 222, TargetId = 333
+        };
 
         BotEvent   result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         NudgeEvent evt    = (NudgeEvent)result;
@@ -242,11 +252,11 @@ public class EventConverterTests
     public void ConvertNotice_Essence()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "essence", SubType = "add",
-                GroupId    = 111, MessageId     = 999, OperatorId = 333, SenderId = 444
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "essence", SubType = "add",
+            GroupId    = 111, MessageId     = 999, OperatorId = 333, SenderId = 444
+        };
 
         BotEvent                 result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupEssenceChangedEvent evt    = (GroupEssenceChangedEvent)result;
@@ -262,13 +272,13 @@ public class EventConverterTests
     public void ConvertNotice_GroupMsgEmojiLike()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "group_msg_emoji_like",
-                GroupId    = 111, UserId = 222, MessageId = 888,
-                IsAdd      = true,
-                Likes      = JArray.Parse(@"[{""emoji_id"":""128077""}]")
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "group_msg_emoji_like",
+            GroupId    = 111, UserId = 222, MessageId = 888,
+            IsAdd      = true,
+            Likes      = JArray.Parse(@"[{""emoji_id"":""128077""}]")
+        };
 
         BotEvent           result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupReactionEvent evt    = (GroupReactionEvent)result;
@@ -284,12 +294,12 @@ public class EventConverterTests
     public void ConvertNotice_GroupCard()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "group_card",
-                GroupId    = 111, UserId        = 222,
-                CardOld    = "OldCard", CardNew = "NewCard"
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "group_card",
+            GroupId    = 111, UserId        = 222,
+            CardOld    = "OldCard", CardNew = "NewCard"
+        };
 
         BotEvent              result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupCardChangedEvent evt    = (GroupCardChangedEvent)result;
@@ -304,11 +314,11 @@ public class EventConverterTests
     public void ConvertNotice_GroupDismiss()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "group_dismiss",
-                GroupId    = 111, UserId = 222
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "group_dismiss",
+            GroupId    = 111, UserId = 222
+        };
 
         BotEvent            result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupDismissedEvent evt    = (GroupDismissedEvent)result;
@@ -321,11 +331,11 @@ public class EventConverterTests
     public void ConvertNotice_Title()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "notify", SubType  = "title",
-                GroupId    = 111, UserId        = 222, Title = "Champion"
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "notify", SubType  = "title",
+            GroupId    = 111, UserId        = 222, Title = "Champion"
+        };
 
         BotEvent               result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupTitleChangedEvent evt    = (GroupTitleChangedEvent)result;
@@ -339,11 +349,11 @@ public class EventConverterTests
     public void ConvertNotice_ProfileLike()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "notify", SubType  = "profile_like",
-                OperatorId = 222, OperatorNick  = "LikerNick", Times = 5
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "notify", SubType  = "profile_like",
+            OperatorId = 222, OperatorNick  = "LikerNick", Times = 5
+        };
 
         BotEvent          result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         ProfileLikedEvent evt    = (ProfileLikedEvent)result;
@@ -357,11 +367,11 @@ public class EventConverterTests
     public void ConvertNotice_PokeRecall_Group()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "notify", SubType  = "poke_recall",
-                GroupId    = 111, UserId        = 222
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "notify", SubType  = "poke_recall",
+            GroupId    = 111, UserId        = 222
+        };
 
         BotEvent             result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupPokeRecallEvent evt    = (GroupPokeRecallEvent)result;
@@ -374,11 +384,11 @@ public class EventConverterTests
     public void ConvertNotice_PokeRecall_Friend()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "notify", SubType  = "poke_recall",
-                UserId     = 222
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "notify", SubType  = "poke_recall",
+            UserId     = 222
+        };
 
         BotEvent              result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         FriendPokeRecallEvent evt    = (FriendPokeRecallEvent)result;
@@ -390,11 +400,11 @@ public class EventConverterTests
     public void ConvertNotice_FlashFileDownloading()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "flash_file_downloading",
-                Title      = "photo.jpg", FileSetId = "fset1", SceneType = 2
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "flash_file_downloading",
+            Title      = "photo.jpg", FileSetId = "fset1", SceneType = 2
+        };
 
         BotEvent                  result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         FlashFileDownloadingEvent evt    = (FlashFileDownloadingEvent)result;
@@ -408,12 +418,12 @@ public class EventConverterTests
     public void ConvertNotice_FlashFileDownloaded()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "flash_file_downloaded",
-                Title      = "photo.jpg", FileSetId = "fset1", SceneType = 2,
-                FileUrl    = "http://example.com/photo.jpg"
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "flash_file_downloaded",
+            Title      = "photo.jpg", FileSetId = "fset1", SceneType = 2,
+            FileUrl    = "http://example.com/photo.jpg"
+        };
 
         BotEvent                 result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         FlashFileDownloadedEvent evt    = (FlashFileDownloadedEvent)result;
@@ -428,11 +438,11 @@ public class EventConverterTests
     public void ConvertNotice_FlashFileUploading()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "flash_file_uploading",
-                Title      = "doc.pdf", FileSetId = "fset2", SceneType = 3
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "flash_file_uploading",
+            Title      = "doc.pdf", FileSetId = "fset2", SceneType = 3
+        };
 
         BotEvent                result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         FlashFileUploadingEvent evt    = (FlashFileUploadingEvent)result;
@@ -446,11 +456,11 @@ public class EventConverterTests
     public void ConvertNotice_FlashFileUploaded()
     {
         OneBotEvent obEvent = new()
-            {
-                Time       = 1700000000, SelfId = 12345, PostType = "notice",
-                NoticeType = "flash_file_uploaded",
-                Title      = "doc.pdf", FileSetId = "fset2", SceneType = 3
-            };
+        {
+            Time       = 1700000000, SelfId = 12345, PostType = "notice",
+            NoticeType = "flash_file_uploaded",
+            Title      = "doc.pdf", FileSetId = "fset2", SceneType = 3
+        };
 
         BotEvent               result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         FlashFileUploadedEvent evt    = (FlashFileUploadedEvent)result;
@@ -468,11 +478,11 @@ public class EventConverterTests
     public void ConvertRequest_Friend()
     {
         OneBotEvent obEvent = new()
-            {
-                Time        = 1700000000, SelfId = 12345, PostType = "request",
-                RequestType = "friend",
-                UserId      = 222, Comment = "Hi!", Flag = "flag123"
-            };
+        {
+            Time        = 1700000000, SelfId = 12345, PostType = "request",
+            RequestType = "friend",
+            UserId      = 222, Comment = "Hi!", Flag = "flag123"
+        };
 
         BotEvent           result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         FriendRequestEvent evt    = (FriendRequestEvent)result;
@@ -485,17 +495,17 @@ public class EventConverterTests
     public void ConvertRequest_GroupAdd()
     {
         OneBotEvent obEvent = new()
-            {
-                Time        = 1700000000,
-                SelfId      = 12345,
-                PostType    = "request",
-                RequestType = "group",
-                SubType     = "add",
-                GroupId     = 111,
-                UserId      = 222,
-                Comment     = "Let me in",
-                Flag        = "groupflag"
-            };
+        {
+            Time        = 1700000000,
+            SelfId      = 12345,
+            PostType    = "request",
+            RequestType = "group",
+            SubType     = "add",
+            GroupId     = 111,
+            UserId      = 222,
+            Comment     = "Let me in",
+            Flag        = "groupflag"
+        };
 
         BotEvent              result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupJoinRequestEvent evt    = (GroupJoinRequestEvent)result;
@@ -509,11 +519,11 @@ public class EventConverterTests
     public void ConvertRequest_GroupInvite()
     {
         OneBotEvent obEvent = new()
-            {
-                Time        = 1700000000, SelfId = 12345, PostType = "request",
-                RequestType = "group", SubType   = "invite",
-                GroupId     = 111, UserId        = 222, Flag = "inviteflag"
-            };
+        {
+            Time        = 1700000000, SelfId = 12345, PostType = "request",
+            RequestType = "group", SubType   = "invite",
+            GroupId     = 111, UserId        = 222, Flag = "inviteflag"
+        };
 
         BotEvent             result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!)!;
         GroupInvitationEvent evt    = (GroupInvitationEvent)result;
@@ -529,10 +539,10 @@ public class EventConverterTests
     public void ConvertMeta_Lifecycle_Connect()
     {
         OneBotEvent obEvent = new()
-            {
-                Time          = 1700000000, SelfId   = 12345, PostType = "meta_event",
-                MetaEventType = "lifecycle", SubType = "connect"
-            };
+        {
+            Time          = 1700000000, SelfId   = 12345, PostType = "meta_event",
+            MetaEventType = "lifecycle", SubType = "connect"
+        };
 
         BotEvent? result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!);
         Assert.IsType<ConnectedEvent>(result);
@@ -543,10 +553,10 @@ public class EventConverterTests
     public void ConvertMeta_Heartbeat_ReturnsNull()
     {
         OneBotEvent obEvent = new()
-            {
-                Time          = 1700000000, SelfId = 12345, PostType = "meta_event",
-                MetaEventType = "heartbeat"
-            };
+        {
+            Time          = 1700000000, SelfId = 12345, PostType = "meta_event",
+            MetaEventType = "heartbeat"
+        };
 
         BotEvent? result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!);
         Assert.Null(result);
@@ -561,9 +571,9 @@ public class EventConverterTests
     public void ConvertUnknownPostType_ReturnsNull()
     {
         OneBotEvent obEvent = new()
-            {
-                Time = 1700000000, SelfId = 12345, PostType = "unknown_type"
-            };
+        {
+            Time = 1700000000, SelfId = 12345, PostType = "unknown_type"
+        };
 
         BotEvent? result = EventConverter.ToSoraEvent(obEvent, TestConnectionId, null!);
         Assert.Null(result);

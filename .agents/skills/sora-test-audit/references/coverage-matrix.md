@@ -8,32 +8,33 @@
 | `Sora.Entities` events, message body, waiter, segments, info | `tests/Sora.Tests/Unit/Entities/` or the established matching file |
 | `Sora.Command` manager, scanning, matching, re-entry | `tests/Sora.Tests/Unit/Command/` |
 | Milky converters and mapping | `tests/Sora.Tests/Unit/Milky/` |
-| OneBot11 converters and mapping | `tests/Sora.Tests/Unit/OneBot11/` |
 
-## Functional Mirrors
+## Functional Coverage
 
-The functional layout mirrors protocol surfaces:
+The maintained functional suite covers Milky:
 
 ```text
 tests/Sora.Tests/Functional/Milky/{ApiTests,EventTests,MessageTypeTests,CommandTests}.cs
-tests/Sora.Tests/Functional/OneBot11/{ApiTests,EventTests,MessageTypeTests,CommandTests}.cs
 ```
 
-Every cross-protocol `IBotApi` method, event, and sendable segment should have both protocol tests where supported. OB11 `NotSupported` behavior is still tested as graceful failure. Protocol-specific capabilities are the exception.
+Every supported `IBotApi` method, event, and sendable segment should have appropriate framework and Milky coverage. OneBot11 is deprecated and unmaintained; retained tests are historical, with no parity or coverage-expansion requirement.
 
 ## Required Change Checks
 
-- `IBotApi` or adapter API changes: verify API tests in both protocols.
+- `IBotApi` or Milky adapter API changes: verify Milky API tests.
 - Event or event converter changes: verify converter unit tests and functional event tests.
 - Segment, message body, or message converter changes: verify converter unit tests and message type tests.
-- Command changes: follow the package ownership and matcher contract in [`src/AGENTS.md`](../../../../src/AGENTS.md). Cover `Sora.Command.InternalEntities` through command behavior tests; `RegisterMatcher` is private, so external custom-matcher registration is not a required coverage scenario.
-- New source classes: verify a matching unit test file or document why coverage is not applicable.
+- Command changes: follow the package ownership and matcher contract in [`src/AGENTS.md`](../../../../src/AGENTS.md). Cover `Sora.Command.InternalEntities` through command behavior tests; matchers are fixed internally, so external custom-matcher registration is not a required coverage scenario.
+- New source behavior: cover meaningful core/boundary behavior in the appropriate suite; do not require a dedicated test file for every data type.
+- User policies: verify triggering-user-versus-target identity from existing event fields, blocked events before automatic reads/waiters, and SuperUserOnly combined with member permissions. Unknown triggering users remain unknown; protocol-specific identities are resolved internally by the adapter.
+- Connection lifetimes: use isolated loopback endpoints to verify nonblocking startup, owned cancellation, positive-interval retries and zero-interval single attempts. Parser tests alone do not prove network lifecycle behavior.
+- Waiters: invalid timeout must not reserve a source; same-source registration and all completion paths have one winner. Preserve connection/source isolation and prefer controlled interleavings over timing guesses.
 
 ## Functional API Groups
 
 The functional API matrix is grouped as follows: identity (`GetSelfInfoAsync`, `GetImplInfoAsync`, `GetCookiesAsync`, `GetCsrfTokenAsync`); messaging (`SendGroupMessageAsync`, `SendPrivateMessageAsync`, recall, get message/history/forward, mark read); friend (`GetUserInfoAsync`, profile, friend list/info/requests, request handling, delete friend, friend nudge); group (`GetGroupInfoAsync`, list, members, notifications, name/card/title/admin/kick/leave/mute, group request handling); extended group (`invitation`, avatar, nudge, announcements, essence); file (`group/private listing, download, folders, rename/move, upload); profile (`avatar`, bio, nickname, resource URL, custom face URLs); reactions (`profile like`, group message reaction); and Milky peer pin extensions.
 
-OB11 `NotSupported` cases remain testable behavior: the test should verify a clear failure result rather than omit the case. The functional test catalog in [`docs/FUNCTIONAL-TEST-CATALOG.md`](../../../../docs/FUNCTIONAL-TEST-CATALOG.md) is the current scenario-level source of truth when this reference becomes stale.
+The maintained Milky section of [`docs/FUNCTIONAL-TEST-CATALOG.md`](../../../../docs/FUNCTIONAL-TEST-CATALOG.md) is the scenario-level source of truth when this reference becomes stale.
 
 ## Event and Segment Groups
 

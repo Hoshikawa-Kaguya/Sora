@@ -4,6 +4,8 @@
 
 Sora 框架采用**双机器人架构**进行端到端测试。两个独立的 QQ 机器人账号（Primary Bot 和 Secondary Bot）互相协作，完全自动化测试流程，无需人工介入。
 
+当前测试维护与执行计划面向框架公共能力和 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 已废弃并停止维护，不再安排 OB11 测试执行、补齐或修复。下文 OB11 目录和配置仅记录现存资源；本地脚本与 IDE 配置排除 OB11 专属测试。NuGet 包不设置 deprecated 标记。
+
 ## 测试架构
 
 ### 双机器人角色分工
@@ -102,8 +104,7 @@ tests/
 │   │       └── EventConverterTests.cs
 │   ├── Helpers/
 │   │   ├── TestConfig.cs              ← 环境变量配置
-│   │   ├── TestOutputSink.cs          ← 日志转发到 xUnit 输出
-│   │   └── TestTimingStore.cs         ← 计时统计
+│   │   └── TestOutputSink.cs          ← 日志转发到 xUnit 输出
 │   └── GlobalUsings.cs
 ├── scripts/
 │   ├── Run-Tests.ps1                  ← 主测试脚本
@@ -122,15 +123,21 @@ tests/
 | `SORA_TEST_LOG_LEVEL_OVERRIDE` | 测试启动时读取一次的日志级别（Trace/Debug/Info/Warn/Error/Fatal/None，大小写不敏感）；未设置、空值或无效值默认 Debug，由测试入口显式配置，运行中修改不生效 |
 | `SORA_TEST_RESULTS_DIR` | TRX 测试结果输出目录（由 Run-Tests.ps1 自动设置） |
 
-### 协议端配置（两端共用 PORT/TOKEN/PREFIX，仅 HOST 不同）
+### Milky 协议端配置（两端独立 HOST/PORT，共用 TOKEN/PREFIX）
 
 | 变量 | 说明 |
 |------|------|
 | `SORA_TEST_MILKY_PRIMARY_HOST` | Milky Primary Bot 地址 |
 | `SORA_TEST_MILKY_SECONDARY_HOST` | Milky Secondary Bot 地址 |
-| `SORA_TEST_MILKY_PORT` | Milky 端口（默认 3010） |
+| `SORA_TEST_MILKY_PRIMARY_PORT` | Milky 主账号端口（默认 3010） |
+| `SORA_TEST_MILKY_SECONDARY_PORT` | Milky 副账号端口（默认 3010） |
 | `SORA_TEST_MILKY_TOKEN` | Milky 访问令牌 |
 | `SORA_TEST_MILKY_PREFIX` | Milky URL 前缀 |
+
+### OB11 现存配置参考（停止维护）
+
+| 变量 | 说明 |
+|------|------|
 | `SORA_TEST_OB11_PRIMARY_HOST` | OB11 Primary Bot 地址 |
 | `SORA_TEST_OB11_SECONDARY_HOST` | OB11 Secondary Bot 地址 |
 | `SORA_TEST_OB11_PORT` | OB11 端口（默认 3001） |
@@ -173,13 +180,10 @@ tests/
 
 | 参数 | 说明 |
 |------|------|
-| `-Ob11PrimaryHost` | OB11 Primary Bot 地址 |
-| `-Ob11SecondaryHost` | OB11 Secondary Bot 地址 |
-| `-Ob11Port` | OB11 端口（默认 3001） |
-| `-Ob11Token` | OB11 令牌 |
 | `-MilkyPrimaryHost` | Milky Primary Bot 地址 |
 | `-MilkySecondaryHost` | Milky Secondary Bot 地址 |
-| `-MilkyPort` | Milky 端口（默认 3010） |
+| `-MilkyPrimaryPort` | Milky 主账号端口（默认 3010） |
+| `-MilkySecondaryPort` | Milky 副账号端口（默认 3010） |
 | `-MilkyToken` | Milky 令牌 |
 | `-MilkyPrefix` | Milky URL 前缀 |
 | `-GroupId` | 测试群号 |
@@ -187,34 +191,36 @@ tests/
 | `-SecondaryBotAvatar` | Secondary 头像路径 |
 | `-GroupAvatarPath` | 群头像路径 |
 
+主脚本仍保留 `-Ob11PrimaryHost`、`-Ob11SecondaryHost`、`-Ob11Port` 和 `-Ob11Token` 参数作为现存接口；OB11 测试停止维护，不属于当前执行计划。
+
 ## 使用示例
 
 ### 仅运行单元测试
 ```powershell
-.\tests\scripts\Run-Tests.ps1 -Category Unit
+.\tests\scripts\Run-Tests.ps1 -Category Unit -Filter "FullyQualifiedName!~OneBot11"
 ```
 
 ### 双机器人功能测试（Milky）
 ```powershell
 .\tests\scripts\Run-Tests.ps1 -Category Functional `
+    -Filter "FullyQualifiedName~Sora.Tests.Functional.Milky" `
     -MilkyPrimaryHost <primary-host> -MilkySecondaryHost <secondary-host> `
     -MilkyToken <token> -MilkyPrefix <prefix> -GroupId <group-id>
 ```
 
-### 完整测试 + 代码覆盖率
+### 公共能力与 Milky 测试 + 代码覆盖率
 ```powershell
 .\tests\scripts\Run-Tests.ps1 -Category All -Coverage `
+    -Filter "FullyQualifiedName!~OneBot11" `
     -MilkyPrimaryHost <primary-host> -MilkySecondaryHost <secondary-host> `
-    -MilkyToken <token> -MilkyPrefix <prefix> `
-    -Ob11PrimaryHost <primary-host> -Ob11SecondaryHost <secondary-host> `
-    -Ob11Token <token> -GroupId <group-id>
+    -MilkyToken <token> -MilkyPrefix <prefix> -GroupId <group-id>
 ```
 > 测试完成后在 `TestResults/CoverageReport/` 生成 HTML 覆盖率报告。
 
 ### 运行单个测试
 ```powershell
 .\tests\scripts\Run-Tests.ps1 -Category Functional `
-    -Filter "FullyQualifiedName~MessageTypeTests.SendReceive_Text" `
+    -Filter "FullyQualifiedName~Milky.MessageTypeTests.SendReceive_Text" `
     -MilkyPrimaryHost <primary-host> -MilkySecondaryHost <secondary-host> `
     -MilkyToken <token> -MilkyPrefix <prefix> -GroupId <group-id>
 ```
@@ -226,16 +232,17 @@ tests/
     -MilkyToken <token> -MilkyPrefix <prefix> -GroupId <group-id>
 ```
 
-### 完整测试 + 群报告
+### 公共能力与 Milky 测试 + 群报告
 ```powershell
 .\tests\scripts\Run-Tests.ps1 -EnableReport `
+    -Filter "FullyQualifiedName!~OneBot11" `
     -MilkyPrimaryHost <primary-host> -MilkySecondaryHost <secondary-host> `
     -MilkyToken <token> -MilkyPrefix <prefix> -GroupId <group-id>
 ```
 
 ### 调试模式
 ```powershell
-.\tests\scripts\Run-Tests.ps1 -Category Unit -WaitDebugger -Configuration Debug
+.\tests\scripts\Run-Tests.ps1 -Category Unit -Filter "FullyQualifiedName!~OneBot11" -WaitDebugger -Configuration Debug
 ```
 
 ## IDE 中运行功能测试
@@ -256,7 +263,7 @@ tests/
 
 4. 配置生效后，右键运行任意测试（包括单个方法）均可自动注入环境变量。
 
-> **注意**：修改连接地址时，同时更新 `test.local.runsettings` 和 `Run-Tests-Local.ps1`。
+> **注意**：本地便捷脚本读取 `tests/test.local.runsettings`；修改连接地址时编辑该配置，IDE 与脚本共用同一份环境变量。
 
 ## 代码覆盖率
 
@@ -309,3 +316,13 @@ tests/
 - [功能测试目录](FUNCTIONAL-TEST-CATALOG.md) — 所有 E2E 测试的完整清单
 - [已移除测试](REMOVED_TESTS.md) — 无法自动化的测试及原因
 - [日志配置](LOGGING.md) — 测试中的日志级别控制
+
+### 执行与报告语义
+
+runner 对类别/协议筛选与调用者 Filter 分别加括号后用 AND 组合。含 OR 的自定义筛选仍受类别和协议约束。ALL TESTS PASSED 只描述已选择测试的结果，未执行或零选择正常返回；不能据此认定所有协议场景已验证。实际覆盖应查看 TRX 的执行与跳过数量。
+
+TestReporter 先保存本地报告，再按选项投递群消息和文件。本地保存是主要功能；群投递 API 结果按设计不检查，投递失败不改变测试结果。
+
+Milky 主副端口独立传入，不读取共享端口键。受控生命周期回归使用随机本地端口，不使用账号；真实测试按已授权的目标、用例和间隔串行执行，不自动密集重试。
+
+Milky 功能 fixture 在已配置账号无法连接、就绪超时或身份读取失败时使测试失败，连接失败不自动重试。双账号身份测试确认两个账号不同。文本事件用唯一内容、目标群和发送者关联；单轮连续对话检查发送状态与回复内容，两次发送间隔 15 秒、waiter 超时 30 秒。间隔用于避免紧密连续发送，不代表平台风控安全阈值。

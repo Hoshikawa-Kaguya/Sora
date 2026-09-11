@@ -66,7 +66,8 @@ public sealed class MessageBody : IList<Segment>
         set
         {
             if (value.ToOutgoing() is not { } outgoing)
-                throw new InvalidOperationException($"Cannot set incoming-only segment {value.Type} in a sendable MessageBody.");
+                throw new InvalidOperationException(
+                    $"Cannot set incoming-only segment {value.Type} in a sendable MessageBody.");
             _segments[index] = outgoing;
         }
     }
@@ -240,7 +241,7 @@ public sealed class MessageBody : IList<Segment>
     ///     Segments that cannot be converted are silently skipped.
     /// </summary>
     /// <returns>A new <see cref="MessageBody" /> with only sendable segments.</returns>
-    public MessageBody ToOutgoing() => new(_segments.Select(s => s.ToOutgoing()).OfType<Segment>());
+    public MessageBody ToOutgoing() => new(_segments);
 
     /// <summary>
     ///     Validates this message body for sending. Returns a list of issues found.
@@ -249,10 +250,10 @@ public sealed class MessageBody : IList<Segment>
     public IReadOnlyList<string> Validate()
     {
         List<string> issues =
-            [
-                .._segments.Where(s => s.Direction == SegmentDirection.Incoming)
-                           .Select(s => $"Segment type {s.Type} is incoming-only and cannot be sent")
-            ];
+        [
+            .. _segments.Where(s => s.Direction == SegmentDirection.Incoming)
+                        .Select(s => $"Segment type {s.Type} is incoming-only and cannot be sent")
+        ];
 
         if (_segments.Count <= 1) return issues;
 
@@ -284,31 +285,33 @@ public sealed class MessageBody : IList<Segment>
     /// <param name="body">The source message body.</param>
     /// <param name="segment">The segment to append.</param>
     /// <returns>A new <see cref="MessageBody" /> with the segment appended.</returns>
-    public static MessageBody operator +(MessageBody body, Segment segment) => new([..body, segment]);
+    public static MessageBody operator +(MessageBody body, Segment segment) => new([.. body, segment]);
 
     /// <summary>Prepends a segment to a message body, returning a new MessageBody.</summary>
     /// <param name="segment">The segment to prepend.</param>
     /// <param name="body">The source message body.</param>
     /// <returns>A new <see cref="MessageBody" /> with the segment prepended.</returns>
-    public static MessageBody operator +(Segment segment, MessageBody body) => new([segment, ..body]);
+    public static MessageBody operator +(Segment segment, MessageBody body) => new([segment, .. body]);
 
     /// <summary>Appends a text string to a message body, returning a new MessageBody.</summary>
     /// <param name="body">The source message body.</param>
     /// <param name="text">The text to append.</param>
     /// <returns>A new <see cref="MessageBody" /> with a text segment appended.</returns>
-    public static MessageBody operator +(MessageBody body, string text) => new([..body, new TextSegment { Text = text }]);
+    public static MessageBody operator +(MessageBody body, string text) =>
+        new([.. body, new TextSegment { Text = text }]);
 
     /// <summary>Prepends a text string to a message body, returning a new MessageBody.</summary>
     /// <param name="text">The text to prepend.</param>
     /// <param name="body">The source message body.</param>
     /// <returns>A new <see cref="MessageBody" /> with a text segment prepended.</returns>
-    public static MessageBody operator +(string text, MessageBody body) => new([new TextSegment { Text = text }, ..body]);
+    public static MessageBody operator +(string text, MessageBody body) =>
+        new([new TextSegment { Text = text }, .. body]);
 
     /// <summary>Concatenates two message bodies, returning a new MessageBody.</summary>
     /// <param name="left">The first message body.</param>
     /// <param name="right">The second message body.</param>
     /// <returns>A new <see cref="MessageBody" /> containing all segments from both.</returns>
-    public static MessageBody operator +(MessageBody left, MessageBody right) => new([..left, ..right]);
+    public static MessageBody operator +(MessageBody left, MessageBody right) => new([.. left, .. right]);
 
     /// <summary>Implicitly converts a string to a text-only MessageBody.</summary>
     /// <param name="text">The text to convert.</param>

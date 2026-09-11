@@ -7,7 +7,7 @@
 
 ## 特性
 
-- 多协议支持：[Milky](https://milky.ntqqrev.org/)（主要）/ OneBot v11（兼容）
+- 协议适配：[Milky](https://milky.ntqqrev.org/)（维护中）；OneBot v11 适配器已废弃并停止维护
 - 模块化架构
 - 属性指令路由（`[CommandGroup]` + `[Command]`）
 - 事件管线过滤器（前置/命令/后置）
@@ -19,7 +19,6 @@
 ```shell
 dotnet add package HoshikawaKaguya.Sora
 dotnet add package HoshikawaKaguya.Sora.Adapter.Milky    # Milky 协议
-dotnet add package HoshikawaKaguya.Sora.Adapter.OneBot11 # 或 OneBot v11 协议
 ```
 
 ## 快速开始
@@ -55,7 +54,7 @@ await Task.Delay(-1);
 | `HoshikawaKaguya.Sora.Core`             | 核心工具库                        |
 | `HoshikawaKaguya.Sora.Command`          | 属性指令路由                      |
 | `HoshikawaKaguya.Sora.Adapter.Milky`    | Milky 协议适配器                  |
-| `HoshikawaKaguya.Sora.Adapter.OneBot11` | OneBot v11 协议适配器             |
+| `HoshikawaKaguya.Sora.Adapter.OneBot11` | OneBot v11 协议适配器（不再维护） |
 
 ## 文档与链接
 

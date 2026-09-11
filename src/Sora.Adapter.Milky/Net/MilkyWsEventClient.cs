@@ -12,7 +12,7 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
     private readonly MilkyConfig              _config;
     private readonly ILogger                  _logger = SoraLogger.CreateLogger<MilkyWsEventClient>();
     private          CancellationTokenSource? _cts;
-    private          ClientWebSocket?         _ws;
+    private          Task?                    _connectionTask;
 
     /// <summary>Raised when the WebSocket connection is established.</summary>
     public event Action? OnConnected;
@@ -41,40 +41,33 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
 
 #region Connection Lifecycle
 
-    /// <summary>Connects to the Milky event WebSocket endpoint.</summary>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>A task representing the asynchronous connect operation.</returns>
-    public async ValueTask ConnectAsync(CancellationToken ct = default)
+    /// <summary>Starts the owned connection and receive loop without waiting for the connection lifetime.</summary>
+    /// <param name="ct">Cancellation token for the connection lifetime.</param>
+    /// <returns>A completed task after the connection loop has been scheduled.</returns>
+    public ValueTask ConnectAsync(CancellationToken ct = default)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        bool reconnect = false;
-        // Auto reconnect
-        while (!ct.IsCancellationRequested)
-        {
-            await ConnectLoopAsync(reconnect, ct);
-            reconnect = true;
-        }
+        CancellationToken lifetimeToken = _cts.Token;
+        _connectionTask = Task.Run(() => ConnectLoopAsync(lifetimeToken));
+        return ValueTask.CompletedTask;
     }
 
-    /// <summary>Disconnects from the WebSocket.</summary>
+    /// <summary>Cancels the connection lifetime and waits for its resources to be released.</summary>
     public async ValueTask DisconnectAsync()
     {
         _logger.LogInformation("Milky WS client disconnecting");
-        if (_cts != null) await _cts.CancelAsync();
-        if (_ws?.State == WebSocketState.Open)
-            try
-            {
-                await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Stopping", CancellationToken.None);
-            }
-            catch
-            {
-                /* ignore close errors */
-            }
-
-        _ws?.Dispose();
-        _ws = null;
-        _cts?.Dispose();
-        _cts = null;
+        if (_cts is null) return;
+        try
+        {
+            await _cts.CancelAsync();
+            if (_connectionTask is not null) await _connectionTask;
+        }
+        finally
+        {
+            _cts.Dispose();
+            _cts            = null;
+            _connectionTask = null;
+        }
     }
 
     /// <summary>Creates a <see cref="ClientWebSocket" /> configured with TLS settings from the config.</summary>
@@ -90,18 +83,19 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
     }
 
     /// <summary>Continuously receives messages from the WebSocket.</summary>
+    /// <param name="ws">The socket owned by the current connection attempt.</param>
     /// <param name="ct">Cancellation token.</param>
-    private async Task ReceiveLoopAsync(CancellationToken ct)
+    private async Task ReceiveLoopAsync(ClientWebSocket ws, CancellationToken ct)
     {
         byte[]                  buffer = ArrayPool<byte>.Shared.Rent(8192);
         ArrayBufferWriter<byte> writer = new();
 
         try
         {
-            while (!ct.IsCancellationRequested && _ws?.State == WebSocketState.Open)
+            while (!ct.IsCancellationRequested && ws.State == WebSocketState.Open)
             {
                 ValueWebSocketReceiveResult result =
-                    await _ws.ReceiveAsync(buffer.AsMemory(), ct);
+                    await ws.ReceiveAsync(buffer.AsMemory(), ct);
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
@@ -119,9 +113,9 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            //direct return
+            // Lifetime cancellation ends receiving without scheduling a reconnect.
         }
         catch (WebSocketException ex)
         {
@@ -134,58 +128,56 @@ internal sealed class MilkyWsEventClient : IAsyncDisposable
         }
     }
 
-    /// <summary>Try to connect milky server, auto reconnect in config ReconnectInterval.</summary>
-    /// <param name="reconnect">Is reconnect call</param>
-    /// <param name="ct">Cancellation token.</param>
-    private async Task ConnectLoopAsync(bool reconnect, CancellationToken ct)
+    /// <summary>Owns each socket and retries disconnected or failed connections at the configured interval.</summary>
+    /// <param name="ct">Cancellation token for the connection lifetime.</param>
+    private async Task ConnectLoopAsync(CancellationToken ct)
     {
-        bool firstCall = true;
-        if (reconnect) OnReconnecting?.Invoke();
-        int tryCount = 0;
-        Uri url      = new(_config.GetEventUrl(true));
-
+        bool reconnect      = false;
+        bool firstReconnect = true;
         while (!ct.IsCancellationRequested)
+        {
             try
             {
-                if (!firstCall || reconnect)
+                if (reconnect)
                 {
+                    if (_config.ReconnectInterval == TimeSpan.Zero) return;
+                    if (firstReconnect)
+                    {
+                        OnReconnecting?.Invoke();
+                        firstReconnect = false;
+                    }
+
                     _logger.LogDebug("Milky WS reconnecting in {Interval}s", _config.ReconnectInterval.TotalSeconds);
                     await Task.Delay(_config.ReconnectInterval, ct);
-                    _logger.LogDebug("Milky WS reconnecting, count:{tryCount}", ++tryCount);
-                }
-                else
-                {
-                    _logger.LogDebug("Milky WS connecting to {Url}...", url);
                 }
 
-                _ws?.Dispose();
-                _ws = CreateWebSocket();
+                Uri url = new(_config.GetEventUrl(true));
+                _logger.LogDebug("Milky WS connecting to {Url}", url);
+                using ClientWebSocket ws = CreateWebSocket();
                 if (!string.IsNullOrEmpty(_config.AccessToken))
-                    _ws.Options.SetRequestHeader("Authorization", $"Bearer {_config.AccessToken}");
+                    ws.Options.SetRequestHeader("Authorization", $"Bearer {_config.AccessToken}");
 
-                await _ws.ConnectAsync(url, ct);
-                if (!firstCall || reconnect) _logger.LogInformation("Milky WS reconnected to {Url}", url);
-                else _logger.LogInformation("Milky WS connected to {Url}", url);
+                await ws.ConnectAsync(url, ct);
+                _logger.LogInformation("Milky WS connected to {Url}", url);
+                firstReconnect = true;
                 OnConnected?.Invoke();
-                await ReceiveLoopAsync(ct); // Resume receiving
-                return;                     // No error caused, ws connected
+                await ReceiveLoopAsync(ws, ct);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 return;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Milky WS connection lost");
-                string failMsg = !firstCall || reconnect
+                string failMsg = reconnect
                     ? $"Reconnect failed: {ex.Message}"
                     : $"Connect failed: {ex.Message}";
                 OnDisconnected?.Invoke(failMsg);
             }
-            finally
-            {
-                firstCall = false;
-            }
+
+            reconnect = true;
+        }
     }
 
 #endregion

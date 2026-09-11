@@ -7,5 +7,6 @@
 - State-changing tests restore original state in `finally` blocks and use unique markers when events may be stale.
 - Media is read locally and sent as `base64://`; do not use machine-specific `file://` paths for remote protocol endpoints.
 - Primary/secondary bot roles are explicit. The secondary bot triggers external-user events, listens when the actor is not notified, supplies private-chat targets, validates messages, and continues dialog flows.
-- When Milky and OB11 share a test group, reject messages from the wrong protocol/content rather than treating them as successful replies.
-
+- Correlate received messages with the expected content and source rather than treating unrelated messages as successful replies.
+- Preserve collection isolation and required mapping initialization when simplifying fixtures. Only remove statistics without consumers; TRX and runner process durations are actual report inputs.
+- Runner success concerns selected tests; empty selection is normal. Group delivery from TestReporter is intentionally best effort after the local report is saved.

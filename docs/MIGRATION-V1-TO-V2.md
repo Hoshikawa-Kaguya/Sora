@@ -2,6 +2,8 @@
 
 > 本文档面向 Sora 1.x 用户，帮助你将现有机器人项目迁移到全新重构的 2.0 版本。
 
+> 迁移目标为 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 已废弃并停止维护，不再安排功能开发、缺陷修复、协议对齐或测试维护；文中 OB11 类型仅作现有代码参考。NuGet 包不设置 deprecated 标记。
+
 ## 概述
 
 Sora 2.0 是一次完全的从零重构，**不是**对 1.x 的增量升级。核心理念从「单协议轻量框架」转变为「多协议模块化框架」：
@@ -9,7 +11,7 @@ Sora 2.0 是一次完全的从零重构，**不是**对 1.x 的增量升级。�
 | 维度 | 1.x | 2.0 |
 |------|-----|-----|
 | .NET 版本 | .NET 6 | .NET 10 |
-| 协议支持 | OneBot v11 only | **Milky**（主要）+ OneBot v11（兼容）|
+| 协议支持 | OneBot v11 only | **Milky**（维护中）；OneBot v11 适配器已废弃并停止维护 |
 | 项目结构 | 单一 NuGet 包 | 6 个模块化项目 |
 | CQ 码 | ✅ 支持 | ❌ **已移除** |
 | 消息段 | `SoraSegment` 类 | 多态 `Segment` record 继承体系 |
@@ -48,7 +50,6 @@ dotnet --version
 <!-- 2.0：框架 + 协议适配器 -->
 <PackageReference Include="HoshikawaKaguya.Sora" Version="2.x.x" />
 <PackageReference Include="HoshikawaKaguya.Sora.Adapter.Milky" Version="2.x.x" />    <!-- Milky 协议（推荐）-->
-<PackageReference Include="HoshikawaKaguya.Sora.Adapter.OneBot11" Version="2.x.x" /> <!-- 或 OneBot v11 -->
 ```
 
 ### 1.3 更新目标框架
@@ -79,7 +80,7 @@ Sora.Command           ← [Command]/[CommandGroup] 属性路由
   ↑
 Sora (facade)          ← SoraServiceFactory、SoraService — 组装入口
   ↑
-Sora.Adapter.*         ← 协议适配器（Milky / OneBot v11）
+Sora.Adapter.*         ← 协议适配器（Milky；OneBot v11 已废弃）
 ```
 
 作为 bot 开发者，你只需引用 `HoshikawaKaguya.Sora` + 对应的 `HoshikawaKaguya.Sora.Adapter.*` 包即可，其余依赖会自动传递。
@@ -108,7 +109,7 @@ await service.StartService();
 
 ```csharp
 using Sora;
-using Sora.Adapter.Milky;      // 或 Sora.Adapter.OneBot11
+using Sora.Adapter.Milky;
 
 // 通过协议专用扩展方法创建
 SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
@@ -118,15 +119,6 @@ SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
         Port        = 3010,
         AccessToken = "your-token"
     });
-
-// 或 OneBot v11:
-// SoraService service = SoraServiceFactory.Instance.CreateOneBot11Service(
-//     new OneBot11Config
-//     {
-//         Host = "127.0.0.1",
-//         Port = 6700,
-//         Mode = ConnectionMode.ForwardWebSocket
-//     });
 
 await service.StartAsync();
 ```
@@ -138,7 +130,7 @@ await service.StartAsync();
 | 工厂方法 | `SoraServiceFactory.CreateService(config)` | `SoraServiceFactory.Instance.CreateMilkyService(config)` |
 | 返回类型 | `ISoraService` | `SoraService`（具体类型） |
 | 启动方法 | `service.StartService()` | `service.StartAsync()` |
-| 配置类 | `ClientConfig` / `ServerConfig` | `MilkyConfig` / `OneBot11Config` |
+| 配置类 | `ClientConfig` / `ServerConfig` | `MilkyConfig` |
 
 ---
 
@@ -701,7 +693,7 @@ string protocol = service.Adapter.ProtocolName;  // "Milky" 或 "OneBot11"
 | `Sora.Entities.Info.*` | `Sora.Entities.Info.*` |
 | `Sora.Attributes.Command.CommandSeries` | `Sora.Command.Attributes.CommandGroupAttribute` |
 | `Sora.Attributes.Command.SoraCommand` | `Sora.Command.Attributes.CommandAttribute` |
-| `YukariToolBox.LightLog.Log` | `Sora.SoraLogger` / `Microsoft.Extensions.Logging.ILogger` |
+| `YukariToolBox.LightLog.Log` | `Sora.Entities.SoraLogger` / `Microsoft.Extensions.Logging.ILogger` |
 
 ---
 
@@ -772,7 +764,7 @@ await Task.Delay(-1);
 ## 13. 迁移检查清单
 
 - [ ] 更新 `.csproj` 目标框架为 `net10.0`，添加 `<LangVersion>preview</LangVersion>`
-- [ ] 安装 NuGet 包：`HoshikawaKaguya.Sora` + `HoshikawaKaguya.Sora.Adapter.Milky`（或 `HoshikawaKaguya.Sora.Adapter.OneBot11`）
+- [ ] 安装 NuGet 包：`HoshikawaKaguya.Sora` + `HoshikawaKaguya.Sora.Adapter.Milky`
 - [ ] 移除旧 `Sora` 1.x 包和 `YukariToolBox` 依赖
 - [ ] 更新服务创建代码：使用 `SoraServiceFactory.Instance.CreateXxxService()`
 - [ ] 将 `OnGroupMessage` + `OnPrivateMessage` 合并为 `OnMessageReceived`

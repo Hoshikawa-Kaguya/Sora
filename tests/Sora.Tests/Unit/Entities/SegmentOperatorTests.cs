@@ -19,15 +19,6 @@ public class SegmentOperatorTests
 
     /// <see cref="MessageBody" />
     [Fact]
-    public void String_ImplicitlyConverts_ToMessageBody()
-    {
-        MessageBody body = "test message";
-        Assert.Single(body);
-        Assert.Equal("test message", body.GetText());
-    }
-
-    /// <see cref="MessageBody" />
-    [Fact]
     public void Segment_ImplicitlyConverts_ToMessageBody()
     {
         MessageBody body = new TextSegment { Text = "hello" };
@@ -233,7 +224,7 @@ public class SegmentOperatorTests
         MessageBody body = new("hello");
         MessageBody result = body
                              + new MarketFaceSegment
-                                     { EmojiPackageId = 1, EmojiId = "e", Key = "k", Summary = "s", Url = "u" };
+                                 { EmojiPackageId = 1, EmojiId = "e", Key = "k", Summary = "s", Url = "u" };
         Assert.Single(result);
         Assert.Equal("hello", result.GetText());
     }

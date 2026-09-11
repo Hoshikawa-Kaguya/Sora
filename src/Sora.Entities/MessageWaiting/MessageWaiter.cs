@@ -9,8 +9,9 @@ namespace Sora.Entities.MessageWaiting;
 /// </summary>
 internal sealed class MessageWaiter
 {
-    private readonly ILogger                                    _logger   = SoraLogger.CreateLogger<MessageWaiter>();
-    private readonly ConcurrentDictionary<Guid, WaitingSession> _sessions = new();
+    private readonly ILogger _logger = SoraLogger.CreateLogger<MessageWaiter>();
+
+    private readonly ConcurrentDictionary<SessionKey, WaitingSession> _sessions = new();
 
 #region Wait Message API
 
@@ -102,9 +103,8 @@ internal sealed class MessageWaiter
         if (!_sessions.IsEmpty)
             _logger.LogDebug("Disposing all message waiters ({Count} active sessions)", _sessions.Count);
 
-        foreach (KeyValuePair<Guid, WaitingSession> kvp in _sessions)
-            if (_sessions.TryRemove(kvp.Key, out WaitingSession? session))
-                session.Completion.TrySetResult(null);
+        foreach (WaitingSession session in _sessions.Values)
+            TryComplete(session, null);
     }
 
     /// <summary>
@@ -115,15 +115,9 @@ internal sealed class MessageWaiter
     internal void DisposeConnection(Guid connectionId)
     {
         int disposed = 0;
-        foreach (KeyValuePair<Guid, WaitingSession> kvp in _sessions)
-        {
-            if (kvp.Value.ConnectionId != connectionId) continue;
-            if (_sessions.TryRemove(kvp.Key, out WaitingSession? session))
-            {
-                session.Completion.TrySetResult(null);
+        foreach (WaitingSession session in _sessions.Values)
+            if (session.ConnectionId == connectionId && TryComplete(session, null))
                 disposed++;
-            }
-        }
 
         if (disposed > 0)
             _logger.LogDebug(
@@ -140,24 +134,22 @@ internal sealed class MessageWaiter
     /// <returns>True if a waiter was matched and signaled; false otherwise.</returns>
     internal bool TryMatch(MessageReceivedEvent incoming)
     {
-        foreach (KeyValuePair<Guid, WaitingSession> kvp in _sessions)
-        {
-            if (!kvp.Value.IsMatch(incoming)) continue;
-            // Remove and signal the waiter
-            if (!_sessions.TryRemove(kvp.Key, out WaitingSession? session)) continue;
+        SessionKey source = new(
+            incoming.ConnectionId,
+            incoming.Message.SenderId,
+            incoming.Message.GroupId,
+            incoming.Message.SourceType);
+        if (!_sessions.TryGetValue(source, out WaitingSession? session)
+            || !session.IsMatch(incoming)
+            || !TryComplete(session, incoming))
+            return false;
 
-            _logger.LogInformation(
-                "Message waiter {SessionId} matched message [{MessageId}] on connection {ConnectionId}",
-                session.SessionId,
-                incoming.Message.MessageId,
-                incoming.ConnectionId);
-
-            // Set result message for watting thread
-            session.Completion.TrySetResult(incoming);
-            return true;
-        }
-
-        return false;
+        _logger.LogInformation(
+            "Message waiter {SessionId} matched message [{MessageId}] on connection {ConnectionId}",
+            session.SessionId,
+            incoming.Message.MessageId,
+            incoming.ConnectionId);
+        return true;
     }
 
 #endregion
@@ -169,84 +161,60 @@ internal sealed class MessageWaiter
         TimeSpan?         timeout,
         CancellationToken ct)
     {
-        // Reject duplicate waits from the same source
-        if (_sessions.Values.Any(s => s.IsSameSource(
-                                     session.SenderId,
-                                     session.GroupId,
-                                     session.ConnectionId,
-                                     session.SourceType)))
+        TimeSpan                      effectiveTimeout = timeout ?? TimeSpan.FromHours(1);
+        using CancellationTokenSource delayCts         = new();
+        // Task.Delay validates its supported timeout range before the session owns a source.
+        Task                          delayTask        = Task.Delay(effectiveTimeout, delayCts.Token);
+        try
         {
-            _logger.LogWarning(
-                "Rejected duplicate message waiter for connection {ConnectionId}, source {SourceType}, sender {SenderId}, group {GroupId}",
+            if (!_sessions.TryAdd(session.Source, session))
+            {
+                _logger.LogWarning(
+                    "Rejected duplicate message waiter for connection {ConnectionId}, source {SourceType}, sender {SenderId}, group {GroupId}",
+                    session.ConnectionId,
+                    session.SourceType,
+                    session.SenderId,
+                    session.GroupId);
+                return null;
+            }
+
+            _logger.LogInformation(
+                "Registered message waiter {SessionId} (connection: {ConnectionId}, source: {SourceType}, sender: {SenderId}, group: {GroupId}, patterns: {PatternCount}, matchType: {MatchType})",
+                session.SessionId,
                 session.ConnectionId,
                 session.SourceType,
                 session.SenderId,
-                session.GroupId);
-            return null;
-        }
+                session.GroupId,
+                session.Patterns?.Length ?? 0,
+                session.SessionMatchType);
 
-        if (!_sessions.TryAdd(session.SessionId, session))
-        {
-            _logger.LogWarning("Failed to register message waiter {SessionId}", session.SessionId);
-            return null;
-        }
-
-        _logger.LogInformation(
-            "Registered message waiter {SessionId} (connection: {ConnectionId}, source: {SourceType}, sender: {SenderId}, group: {GroupId}, patterns: {PatternCount}, matchType: {MatchType})",
-            session.SessionId,
-            session.ConnectionId,
-            session.SourceType,
-            session.SenderId,
-            session.GroupId,
-            session.Patterns?.Length ?? 0,
-            session.SessionMatchType);
-
-        // Register cancellation callback to clean up on cancel
-        CancellationTokenRegistration ctr = ct.Register(() =>
-        {
-            if (_sessions.TryRemove(session.SessionId, out WaitingSession? s))
-                s.Completion.TrySetCanceled(ct);
-        });
-
-        timeout ??= TimeSpan.FromHours(1);
-        try
-        {
-            // Waiting task
-            Task<MessageReceivedEvent?>   waitTask  = session.Completion.Task;
-            // Timeout task with linked CTS to cancel delay when message arrives
-            using CancellationTokenSource delayCts  = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            Task                          delayTask = Task.Delay(timeout.Value, delayCts.Token);
-
-            Task completed = await Task.WhenAny(waitTask, delayTask);
-            // Message received — cancel the orphaned delay timer
-            if (completed == waitTask)
+            await using CancellationTokenRegistration ctr = ct.Register(() =>
             {
-                await delayCts.CancelAsync();
-                return await waitTask;
-            }
+                if (TryComplete(session, null))
+                    _logger.LogDebug("Message waiter {SessionId} was canceled", session.SessionId);
+            });
 
-            // Timeout: remove session and return null
-            if (_sessions.TryRemove(session.SessionId, out WaitingSession? s))
-            {
-                s.Completion.TrySetResult(null);
+            Task<MessageReceivedEvent?> waitTask = session.Completion.Task;
+            if (await Task.WhenAny(waitTask, delayTask) == delayTask && TryComplete(session, null))
                 _logger.LogWarning(
                     "Message waiter {SessionId} timed out after {Timeout}s",
                     session.SessionId,
-                    timeout.Value.TotalSeconds);
-            }
+                    effectiveTimeout.TotalSeconds);
 
-            return null;
-        }
-        catch (OperationCanceledException)
-        {
-            _sessions.TryRemove(session.SessionId, out _);
-            _logger.LogDebug("Message waiter {SessionId} was canceled", session.SessionId);
-            return null;
+            return await waitTask;
         }
         finally
         {
-            await ctr.DisposeAsync();
+            await delayCts.CancelAsync();
         }
+    }
+
+    private bool TryComplete(WaitingSession session, MessageReceivedEvent? result)
+    {
+        // The exact session owns completion; an old callback cannot remove a replacement wait.
+        if (!_sessions.TryRemove(new KeyValuePair<SessionKey, WaitingSession>(session.Source, session))) return false;
+        session.Completion.SetResult(result);
+        return true;
     }
 
 #endregion

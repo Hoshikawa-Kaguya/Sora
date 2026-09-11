@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -21,7 +21,7 @@ const definitionAreas = {
 
 const inventoryAreas = {
     events: ["src/Sora.Entities/Events", "src/Sora.Adapter.OneBot11/Events"],
-    segments: ["src/Sora.Entities/Segments", "src/Sora.Core/Enums/SegmentType.cs", "src/Sora.Core/Enums/FaceSubType.cs"],
+    segments: ["src/Sora.Entities/Segments", "src/Sora.Core/Enums/SegmentType.cs"],
     api_methods: ["src/Sora.Entities/Interfaces/IBotApi.cs", "src/Sora.Adapter.OneBot11/IOneBot11ExtApi.cs", "src/Sora.Adapter.Milky/IMilkyExtApi.cs"],
     ob11_converter_events: ["src/Sora.Adapter.OneBot11/Converter/EventConverter.cs"],
     ob11_converter_segments: ["src/Sora.Adapter.OneBot11/Converter/MessageConverter.cs"],
@@ -192,8 +192,8 @@ function inventory(args, soraPath) {
             sections.push({ title: item, content: "(not found)" });
             continue;
         }
-        const files = listFiles(soraPath, item);
-        if (files.length > 0 && !item.endsWith(".cs")) {
+        if (statSync(fullPath).isDirectory()) {
+            const files = listFiles(soraPath, item);
             let content = files.join("\n");
             if (area === "info_models" || area === "enums") {
                 const sourceFiles = files.filter((file) => file.endsWith(".cs"));

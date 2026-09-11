@@ -10,9 +10,6 @@ public sealed class MilkyTestFixture : IAsyncLifetime
 {
     private readonly TaskCompletionSource<IBotApi> _primaryReady   = new();
     private readonly TaskCompletionSource<IBotApi> _secondaryReady = new();
-    private          int                           _failedTests;
-    private          int                           _passedTests;
-    private          int                           _totalTests;
 
     /// <summary>The connected primary <see cref="MilkyBotApi" /> instance (main test executor).</summary>
     public MilkyBotApi? PrimaryApi { get; private set; }
@@ -22,9 +19,6 @@ public sealed class MilkyTestFixture : IAsyncLifetime
 
     /// <summary>The secondary bot's user ID, obtained at runtime via GetSelfInfoAsync.</summary>
     public UserId SecondaryUserId { get; private set; }
-
-    /// <summary>Backward-compatible alias for <see cref="PrimaryApi" />.</summary>
-    public MilkyBotApi? Api => PrimaryApi;
 
     /// <summary>Serilog sink that forwards log events to subscribed <c>ITestOutputHelper</c> instances.</summary>
     public TestOutputSink OutputSink => TestLogging.OutputSink;
@@ -38,18 +32,18 @@ public sealed class MilkyTestFixture : IAsyncLifetime
     /// <inheritdoc />
     public async ValueTask InitializeAsync()
     {
-        TestTimingStore.StartTimer("Func", "Milky");
         if (TestConfig.SkipMilkyReason is not null) return;
 
         // ---- Primary Bot ----
         MilkyConfig primaryConfig = new()
         {
-            Host           = TestConfig.MilkyPrimaryHost,
-            Port           = TestConfig.MilkyPort,
-            Prefix         = TestConfig.MilkyPrefix,
-            AccessToken    = TestConfig.MilkyToken,
-            EventTransport = EventTransport.WebSocket,
-            ApiTimeout     = TimeSpan.FromSeconds(15)
+            Host              = TestConfig.MilkyPrimaryHost,
+            Port              = TestConfig.MilkyPrimaryPort,
+            Prefix            = TestConfig.MilkyPrefix,
+            AccessToken       = TestConfig.MilkyToken,
+            EventTransport    = EventTransport.WebSocket,
+            ReconnectInterval = TimeSpan.Zero,
+            ApiTimeout        = TimeSpan.FromSeconds(15)
         };
 
         Service = SoraServiceFactory.Instance.CreateMilkyService(primaryConfig);
@@ -59,28 +53,25 @@ public sealed class MilkyTestFixture : IAsyncLifetime
             return ValueTask.CompletedTask;
         };
 
-        try
-        {
-            await Service.StartAsync();
-            await Task.WhenAny(_primaryReady.Task, Task.Delay(TimeSpan.FromSeconds(10)));
-            if (_primaryReady.Task.IsCompletedSuccessfully) PrimaryApi = await _primaryReady.Task as MilkyBotApi;
-        }
-        catch
-        {
-            // Primary unreachable — leave PrimaryApi null; tests will skip via "API not available" guard
-        }
+        await Service.StartAsync();
+        await Task.WhenAny(_primaryReady.Task, Task.Delay(TimeSpan.FromSeconds(10)));
+        Assert.True(
+            _primaryReady.Task.IsCompletedSuccessfully,
+            "Configured primary Milky connection did not become ready.");
+        PrimaryApi = Assert.IsType<MilkyBotApi>(await _primaryReady.Task);
 
         // ---- Secondary Bot (only if configured) ----
         if (TestConfig.IsMilkyDualBotConfigured && PrimaryApi is not null)
         {
             MilkyConfig secondaryConfig = new()
             {
-                Host           = TestConfig.MilkySecondaryHost,
-                Port           = TestConfig.MilkyPort,
-                Prefix         = TestConfig.MilkyPrefix,
-                AccessToken    = TestConfig.MilkyToken,
-                EventTransport = EventTransport.WebSocket,
-                ApiTimeout     = TimeSpan.FromSeconds(15)
+                Host              = TestConfig.MilkySecondaryHost,
+                Port              = TestConfig.MilkySecondaryPort,
+                Prefix            = TestConfig.MilkyPrefix,
+                AccessToken       = TestConfig.MilkyToken,
+                EventTransport    = EventTransport.WebSocket,
+                ReconnectInterval = TimeSpan.Zero,
+                ApiTimeout        = TimeSpan.FromSeconds(15)
             };
 
             SecondaryService = SoraServiceFactory.Instance.CreateMilkyService(secondaryConfig);
@@ -90,43 +81,22 @@ public sealed class MilkyTestFixture : IAsyncLifetime
                 return ValueTask.CompletedTask;
             };
 
-            try
-            {
-                await SecondaryService.StartAsync();
-                await Task.WhenAny(_secondaryReady.Task, Task.Delay(TimeSpan.FromSeconds(10)));
-                if (_secondaryReady.Task.IsCompletedSuccessfully)
-                {
-                    SecondaryApi = await _secondaryReady.Task as MilkyBotApi;
+            await SecondaryService.StartAsync();
+            await Task.WhenAny(_secondaryReady.Task, Task.Delay(TimeSpan.FromSeconds(10)));
+            Assert.True(
+                _secondaryReady.Task.IsCompletedSuccessfully,
+                "Configured secondary Milky connection did not become ready.");
+            SecondaryApi = Assert.IsType<MilkyBotApi>(await _secondaryReady.Task);
 
-                    // Discover secondary bot's UserId at runtime
-                    if (SecondaryApi is not null)
-                    {
-                        ApiResult<BotIdentity> selfInfo = await SecondaryApi.GetSelfInfoAsync();
-                        if (selfInfo is { IsSuccess: true, Data: { } selfData }) SecondaryUserId = selfData.UserId;
-                    }
-                }
-            }
-            catch
-            {
-                // Secondary unreachable — leave SecondaryApi null; dual-bot tests will skip
-            }
+            ApiResult<BotIdentity> selfInfo = await SecondaryApi.GetSelfInfoAsync();
+            SecondaryUserId = selfInfo.AssertSuccess().UserId;
+            Assert.True(SecondaryUserId.Value > 0);
         }
-    }
-
-    /// <summary>Records a test result for reporting.</summary>
-    public void RecordResult(bool passed)
-    {
-        Interlocked.Increment(ref _totalTests);
-        if (passed)
-            Interlocked.Increment(ref _passedTests);
-        else
-            Interlocked.Increment(ref _failedTests);
     }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        TestTimingStore.StopTimer("Func", "Milky");
         if (SecondaryService is not null) await SecondaryService.DisposeAsync();
         if (Service is not null) await Service.DisposeAsync();
     }

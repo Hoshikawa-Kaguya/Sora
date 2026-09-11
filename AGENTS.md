@@ -1,6 +1,6 @@
 # Sora Agent Guide
 
-Sora is an asynchronous C#/.NET 10 multi-protocol IM bot framework. Milky is the primary protocol; OneBot v11 is retained as a deprecated compatibility adapter. NuGet package names use the `HoshikawaKaguya.` prefix while C# namespaces remain under `Sora.*`.
+Sora is an asynchronous C#/.NET 10 multi-protocol IM bot framework. Milky is the maintained protocol. `HoshikawaKaguya.Sora.Adapter.OneBot11` is deprecated and no longer maintained; its existing implementation is retained. NuGet package names use the `HoshikawaKaguya.` prefix while C# namespaces remain under `Sora.*`.
 
 ## Start Here
 
@@ -19,7 +19,7 @@ Sora.Entities          events, segments, info models, IBotApi, dispatch and wait
 Sora.Command           command attributes, matchers, manager and command filters
 Sora                   facade and service factory; no adapter references
 Sora.Adapter.Milky     Milky HTTP API and SSE/WebSocket/WebHook adapter
-Sora.Adapter.OneBot11  OneBot v11 adapter and adapter-specific models/events
+Sora.Adapter.OneBot11  Deprecated, unmaintained OneBot v11 adapter
 ```
 
 Adapters depend on the facade and expose factory extensions such as `CreateMilkyService`. Third-party adapter registration is documented in [`docs/ADAPTER-DEVELOPMENT.md`](docs/ADAPTER-DEVELOPMENT.md).
@@ -30,9 +30,9 @@ Adapters depend on the facade and expose factory extensions such as `CreateMilky
 
 ```powershell
 dotnet build Sora.slnx --configuration Release
-dotnet test Sora.slnx --filter "Category=Unit" --no-build
-pwsh tests/scripts/Run-Tests.ps1 -Category Unit
-pwsh tests/scripts/Run-Tests.ps1 -Category All
+dotnet test Sora.slnx --filter "Category=Unit&FullyQualifiedName!~OneBot11" --no-build
+pwsh tests/scripts/Run-Tests.ps1 -Category Unit -Filter "FullyQualifiedName!~OneBot11"
+pwsh tests/scripts/Run-Tests.ps1 -Category All -Filter "FullyQualifiedName!~OneBot11"
 ```
 
 Functional tests require `SORA_TEST_*` configuration and may skip only for missing environment preconditions. See [`docs/TESTING.md`](docs/TESTING.md) for the complete runner and environment reference.
@@ -40,6 +40,7 @@ Functional tests require `SORA_TEST_*` configuration and may skip only for missi
 ## Repository Rules
 
 - Preserve the dependency direction above and keep cross-protocol APIs protocol-agnostic.
+- Maintenance plans, protocol synchronization, compatibility fixes and test expansion cover the framework and Milky. Do not schedule OB11 maintenance or validation. Its deprecation is documented only; do not mark the NuGet package deprecated or add compiler obsolescence attributes. Existing full-solution build and packaging configuration remains in place.
 - Milky-supported or shared models belong in the framework projects. OB11-only models belong under `Sora.Adapter.OneBot11`.
 - Keep public APIs XML-documented and maintain the repository's zero-warning build policy.
 - Use `ValueTask` for asynchronous framework/event paths, file-scoped namespaces, explicit types, and the existing Newtonsoft.Json/Mapster conventions.
@@ -47,6 +48,12 @@ Functional tests require `SORA_TEST_*` configuration and may skip only for missi
 - Do not run Git write operations (`add`, `commit`, `push`, `stash`, reset, or checkout) as part of an implementation. Review and Git operations remain with the developer.
 - Preserve protocol placeholder parameters and prefer graceful fallbacks over unnecessary exceptions.
 - Do not copy credentials, local test settings, account IDs, or machine-specific absolute paths into tracked files.
+
+## Established Behavior
+
+- Actor-based BlockUsers/SuperUsers rules and command singleton construction are defined in src/AGENTS.md; preserve their documented semantics during simplification.
+- CI runs the full solution for all push/PR changes. TestReporter saves a local report before optional best-effort delivery; remote delivery results do not determine test success.
+- The runner reports success for all selected tests; an empty selection returns normally. This does not claim that unselected functional scenarios were exercised.
 
 ## Documentation Routing
 

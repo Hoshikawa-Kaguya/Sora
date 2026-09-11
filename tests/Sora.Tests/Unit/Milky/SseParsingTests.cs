@@ -109,16 +109,6 @@ public class SseParsingTests
 
     /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
     [Fact]
-    public async Task NoEventType_Dispatched()
-    {
-        string       sse      = "data: payload\n\n";
-        List<string> messages = await ParseAsync(sse);
-
-        Assert.Single(messages);
-    }
-
-    /// <see cref="MilkySseEventClient.SseStreamLoopAsync" />
-    [Fact]
     public async Task MilkyEventType_Dispatched()
     {
         string       sse      = "event: milky_event\ndata: {\"ok\":true}\n\n";

@@ -25,16 +25,6 @@ internal sealed class GetVersionInfoResponse
     public string? ProtocolVersion { get; set; }
 }
 
-/// <summary>Response from the get_status action.</summary>
-internal sealed class GetStatusResponse
-{
-    [JsonProperty("good")]
-    public bool Good { get; set; }
-
-    [JsonProperty("online")]
-    public bool Online { get; set; }
-}
-
 /// <summary>Parameters for the get_cookies action.</summary>
 internal sealed class GetCookiesParams
 {
@@ -54,52 +44,4 @@ internal sealed class GetCsrfTokenResponse
 {
     [JsonProperty("token")]
     public int Token { get; set; }
-}
-
-/// <summary>Parameters for the set_restart action.</summary>
-internal sealed class SetRestartParams
-{
-    [JsonProperty("delay")]
-    public int Delay { get; set; }
-}
-
-/// <summary>Parameters for the get_group_honor_info action.</summary>
-internal sealed class GetGroupHonorInfoParams
-{
-    [JsonProperty("group_id")]
-    public long GroupId { get; set; }
-
-    [JsonProperty("type")]
-    public string Type { get; set; } = "all";
-}
-
-/// <summary>Parameters for the get_record action.</summary>
-internal sealed class GetRecordParams
-{
-    [JsonProperty("file")]
-    public string File { get; set; } = "";
-
-    [JsonProperty("out_format")]
-    public string OutFormat { get; set; } = "mp3";
-}
-
-/// <summary>Parameters for the get_image action.</summary>
-internal sealed class GetImageParams
-{
-    [JsonProperty("file")]
-    public string File { get; set; } = "";
-}
-
-/// <summary>Response containing a file path.</summary>
-internal sealed class FileResponse
-{
-    [JsonProperty("file")]
-    public string? File { get; set; }
-}
-
-/// <summary>Response containing a boolean value.</summary>
-internal sealed class BoolResponse
-{
-    [JsonProperty("yes")]
-    public bool Yes { get; set; }
 }

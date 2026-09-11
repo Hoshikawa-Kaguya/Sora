@@ -45,30 +45,21 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword]);
+            [keyword]);
 
-        try
-        {
-            GroupId testGroup = TestConfig.TestGroupId;
-            await Task.Delay(1000, CT);
-            SendMessageResult sent =
-                await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
-            _output.WriteLine($"Secondary sent: success={sent.IsSuccess} messageId={sent.MessageId}");
+        GroupId testGroup = TestConfig.TestGroupId;
+        await Task.Delay(1000, CT);
+        SendMessageResult sent =
+            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
+        _output.WriteLine($"Secondary sent: success={sent.IsSuccess} messageId={sent.MessageId}");
 
-            await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
-            Assert.True(tcs.Task.IsCompletedSuccessfully, "Full-match command handler was not triggered within timeout");
+        await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
+        Assert.True(tcs.Task.IsCompletedSuccessfully, "Full-match command handler was not triggered within timeout");
 
-            MessageReceivedEvent evt = await tcs.Task;
-            _output.WriteLine($"Command matched: text={evt.Message.Body.GetText()} senderId={evt.Message.SenderId}");
-            Assert.Contains(keyword, evt.Message.Body.GetText());
-            Assert.Equal(_fixture.SecondaryUserId, evt.Message.SenderId);
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        MessageReceivedEvent evt = await tcs.Task;
+        _output.WriteLine($"Command matched: text={evt.Message.Body.GetText()} senderId={evt.Message.SenderId}");
+        Assert.Contains(keyword, evt.Message.Body.GetText());
+        Assert.Equal(_fixture.SecondaryUserId, evt.Message.SenderId);
     }
 
     /// <see cref="CommandManager.RegisterDynamicCommand" />
@@ -90,28 +81,19 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [pattern],
+            [pattern],
             MatchType.Regex);
 
-        try
-        {
-            GroupId testGroup = TestConfig.TestGroupId;
-            await Task.Delay(1000, CT);
-            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(triggerText), CT);
+        GroupId testGroup = TestConfig.TestGroupId;
+        await Task.Delay(1000, CT);
+        await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(triggerText), CT);
 
-            await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
-            Assert.True(tcs.Task.IsCompletedSuccessfully, "Regex command handler was not triggered within timeout");
+        await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
+        Assert.True(tcs.Task.IsCompletedSuccessfully, "Regex command handler was not triggered within timeout");
 
-            MessageReceivedEvent evt = await tcs.Task;
-            _output.WriteLine($"Regex matched: text={evt.Message.Body.GetText()}");
-            Assert.Contains(guid, evt.Message.Body.GetText());
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        MessageReceivedEvent evt = await tcs.Task;
+        _output.WriteLine($"Regex matched: text={evt.Message.Body.GetText()}");
+        Assert.Contains(guid, evt.Message.Body.GetText());
     }
 
     /// <see cref="CommandManager.RegisterDynamicCommand" />
@@ -133,28 +115,19 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             MatchType.Keyword);
 
-        try
-        {
-            GroupId testGroup = TestConfig.TestGroupId;
-            await Task.Delay(1000, CT);
-            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(fullText), CT);
+        GroupId testGroup = TestConfig.TestGroupId;
+        await Task.Delay(1000, CT);
+        await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(fullText), CT);
 
-            await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
-            Assert.True(tcs.Task.IsCompletedSuccessfully, "Keyword command handler was not triggered within timeout");
+        await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
+        Assert.True(tcs.Task.IsCompletedSuccessfully, "Keyword command handler was not triggered within timeout");
 
-            MessageReceivedEvent evt = await tcs.Task;
-            _output.WriteLine($"Keyword matched: text={evt.Message.Body.GetText()}");
-            Assert.Contains(keyword, evt.Message.Body.GetText());
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        MessageReceivedEvent evt = await tcs.Task;
+        _output.WriteLine($"Keyword matched: text={evt.Message.Body.GetText()}");
+        Assert.Contains(keyword, evt.Message.Body.GetText());
     }
 
 #endregion
@@ -178,25 +151,16 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             sourceType: MessageSourceType.Group);
 
-        try
-        {
-            GroupId testGroup = TestConfig.TestGroupId;
-            await Task.Delay(1000, CT);
-            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
+        GroupId testGroup = TestConfig.TestGroupId;
+        await Task.Delay(1000, CT);
+        await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
 
-            await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
-            Assert.True(tcs.Task.IsCompletedSuccessfully, "Group-only command was not triggered for group message");
-            _output.WriteLine($"Group command matched: text={(await tcs.Task).Message.Body.GetText()}");
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
+        Assert.True(tcs.Task.IsCompletedSuccessfully, "Group-only command was not triggered for group message");
+        _output.WriteLine($"Group command matched: text={(await tcs.Task).Message.Body.GetText()}");
     }
 
     /// <see cref="CommandManager.RegisterDynamicCommand" />
@@ -217,7 +181,7 @@ public class CommandTests : IDisposable
                 cmdTcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             sourceType: MessageSourceType.Friend);
 
         Func<MessageReceivedEvent, ValueTask> eventHandler = e =>
@@ -242,12 +206,6 @@ public class CommandTests : IDisposable
                 evtTcs.Task.IsCompletedSuccessfully,
                 "Message should pass through to OnMessageReceived");
             _output.WriteLine("Friend-only command correctly skipped for group message");
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
@@ -277,7 +235,7 @@ public class CommandTests : IDisposable
                 highTcs.TrySetResult("high");
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             priority: 10,
             blockAfterMatch: true);
 
@@ -287,32 +245,23 @@ public class CommandTests : IDisposable
                 lowTcs.TrySetResult("low");
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             priority: 1,
             blockAfterMatch: true);
 
-        try
-        {
-            GroupId testGroup = TestConfig.TestGroupId;
-            await Task.Delay(1000, CT);
-            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
+        GroupId testGroup = TestConfig.TestGroupId;
+        await Task.Delay(1000, CT);
+        await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
 
-            await Task.WhenAny(highTcs.Task, Task.Delay(5000, CT));
-            Assert.True(highTcs.Task.IsCompletedSuccessfully, "High-priority command was not triggered");
+        await Task.WhenAny(highTcs.Task, Task.Delay(5000, CT));
+        Assert.True(highTcs.Task.IsCompletedSuccessfully, "High-priority command was not triggered");
 
-            // Give low-priority command a moment to (incorrectly) fire
-            await Task.Delay(500, CT);
-            Assert.False(
-                lowTcs.Task.IsCompletedSuccessfully,
-                "Low-priority command should not fire after high-priority blocks");
-            _output.WriteLine("Priority ordering verified: high fired, low blocked");
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        // Give low-priority command a moment to (incorrectly) fire
+        await Task.Delay(500, CT);
+        Assert.False(
+            lowTcs.Task.IsCompletedSuccessfully,
+            "Low-priority command should not fire after high-priority blocks");
+        _output.WriteLine("Priority ordering verified: high fired, low blocked");
     }
 
     /// <see cref="CommandManager.RegisterDynamicCommand" />
@@ -361,25 +310,16 @@ public class CommandTests : IDisposable
                 cmdTcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword]);
+            [keyword]);
 
-        try
-        {
-            await Task.Delay(1000, CT);
-            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
+        await Task.Delay(1000, CT);
+        await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
 
-            await Task.WhenAny(cmdTcs.Task, Task.Delay(5000, CT));
-            Assert.True(
-                cmdTcs.Task.IsCompletedSuccessfully,
-                "Dynamically registered command should intercept the message");
-            _output.WriteLine($"Phase 2: Command intercepted: text={(await cmdTcs.Task).Message.Body.GetText()}");
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        await Task.WhenAny(cmdTcs.Task, Task.Delay(5000, CT));
+        Assert.True(
+            cmdTcs.Task.IsCompletedSuccessfully,
+            "Dynamically registered command should intercept the message");
+        _output.WriteLine($"Phase 2: Command intercepted: text={(await cmdTcs.Task).Message.Body.GetText()}");
     }
 
     /// <see cref="CommandManager.RegisterDynamicCommand" />
@@ -400,7 +340,7 @@ public class CommandTests : IDisposable
                 cmdTcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             permissionLevel: MemberRole.Owner);
 
         Func<MessageReceivedEvent, ValueTask> eventHandler = e =>
@@ -425,12 +365,6 @@ public class CommandTests : IDisposable
                 evtTcs.Task.IsCompletedSuccessfully,
                 "Message should pass through to OnMessageReceived when permission is insufficient");
             _output.WriteLine("Owner-level command correctly skipped for regular member");
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
@@ -461,39 +395,30 @@ public class CommandTests : IDisposable
                 MessageReceivedEvent? reply = await e.WaitForNextMessageAsync(TimeSpan.FromSeconds(10), ct);
                 dialogueTcs.TrySetResult(reply);
             },
-                [triggerKeyword]);
+            [triggerKeyword]);
 
-        try
-        {
-            GroupId testGroup = TestConfig.TestGroupId;
-            await Task.Delay(1000, CT);
-            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(triggerKeyword), CT);
-            _output.WriteLine("Sent trigger keyword");
+        GroupId testGroup = TestConfig.TestGroupId;
+        await Task.Delay(1000, CT);
+        await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(triggerKeyword), CT);
+        _output.WriteLine("Sent trigger keyword");
 
-            // Give the command handler time to register the waiter
-            await Task.Delay(1000, CT);
-            await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, new MessageBody(followUpText), CT);
-            _output.WriteLine("Sent follow-up message");
+        // Give the command handler time to register the waiter
+        await Task.Delay(1000, CT);
+        await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, new MessageBody(followUpText), CT);
+        _output.WriteLine("Sent follow-up message");
 
-            await Task.WhenAny(dialogueTcs.Task, Task.Delay(10000, CT));
-            Assert.True(
-                dialogueTcs.Task.IsCompletedSuccessfully,
-                "Dialogue handler did not complete within timeout");
+        await Task.WhenAny(dialogueTcs.Task, Task.Delay(10000, CT));
+        Assert.True(
+            dialogueTcs.Task.IsCompletedSuccessfully,
+            "Dialogue handler did not complete within timeout");
 
-            MessageReceivedEvent? reply = await dialogueTcs.Task;
-            Assert.NotNull(reply);
-            string replyText = reply.Message.Body.GetText();
-            _output.WriteLine($"Follow-up received: text={replyText}");
-            Assert.SkipWhen(
-                !replyText.Contains(followUpText),
-                $"Waiter received cross-protocol message instead of expected follow-up: {replyText}");
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        MessageReceivedEvent? reply = await dialogueTcs.Task;
+        Assert.NotNull(reply);
+        string replyText = reply.Message.Body.GetText();
+        _output.WriteLine($"Follow-up received: text={replyText}");
+        Assert.SkipWhen(
+            !replyText.Contains(followUpText),
+            $"Waiter received cross-protocol message instead of expected follow-up: {replyText}");
     }
 
     /// <see cref="MessageWaiterExtensions" />
@@ -514,30 +439,21 @@ public class CommandTests : IDisposable
                 MessageReceivedEvent? reply = await e.WaitForNextMessageAsync(TimeSpan.FromSeconds(3), ct);
                 dialogueTcs.TrySetResult(reply);
             },
-                [triggerKeyword]);
+            [triggerKeyword]);
 
-        try
-        {
-            GroupId testGroup = TestConfig.TestGroupId;
-            await Task.Delay(1000, CT);
-            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(triggerKeyword), CT);
-            _output.WriteLine("Sent trigger keyword, no follow-up will be sent");
+        GroupId testGroup = TestConfig.TestGroupId;
+        await Task.Delay(1000, CT);
+        await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(triggerKeyword), CT);
+        _output.WriteLine("Sent trigger keyword, no follow-up will be sent");
 
-            await Task.WhenAny(dialogueTcs.Task, Task.Delay(10000, CT));
-            Assert.True(
-                dialogueTcs.Task.IsCompletedSuccessfully,
-                "Dialogue handler did not complete within timeout");
-            Assert.SkipWhen(
-                await dialogueTcs.Task is not null,
-                $"Waiter received cross-protocol message instead of timing out: {(await dialogueTcs.Task)?.Message.Body.GetText()}");
-            _output.WriteLine("WaitForNextMessageAsync correctly returned null on timeout");
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        await Task.WhenAny(dialogueTcs.Task, Task.Delay(10000, CT));
+        Assert.True(
+            dialogueTcs.Task.IsCompletedSuccessfully,
+            "Dialogue handler did not complete within timeout");
+        Assert.SkipWhen(
+            await dialogueTcs.Task is not null,
+            $"Waiter received cross-protocol message instead of timing out: {(await dialogueTcs.Task)?.Message.Body.GetText()}");
+        _output.WriteLine("WaitForNextMessageAsync correctly returned null on timeout");
     }
 
     /// <see cref="MessageWaiterExtensions" />
@@ -571,45 +487,36 @@ public class CommandTests : IDisposable
 
                 dialogueTcs.TrySetResult(turns);
             },
-                [triggerKeyword]);
+            [triggerKeyword]);
 
-        try
-        {
-            GroupId testGroup = TestConfig.TestGroupId;
-            await Task.Delay(1000, CT);
-            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(triggerKeyword), CT);
-            _output.WriteLine("Sent turn 1 (trigger)");
+        GroupId testGroup = TestConfig.TestGroupId;
+        await Task.Delay(1000, CT);
+        await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(triggerKeyword), CT);
+        _output.WriteLine("Sent turn 1 (trigger)");
 
-            await Task.Delay(1500, CT);
-            await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, new MessageBody(turn2Text), CT);
-            _output.WriteLine("Sent turn 2");
+        await Task.Delay(1500, CT);
+        await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, new MessageBody(turn2Text), CT);
+        _output.WriteLine("Sent turn 2");
 
-            await Task.Delay(1500, CT);
-            await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, new MessageBody(turn3Text), CT);
-            _output.WriteLine("Sent turn 3");
+        await Task.Delay(1500, CT);
+        await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, new MessageBody(turn3Text), CT);
+        _output.WriteLine("Sent turn 3");
 
-            await Task.WhenAny(dialogueTcs.Task, Task.Delay(15000, CT));
-            Assert.True(
-                dialogueTcs.Task.IsCompletedSuccessfully,
-                "Multi-turn dialogue did not complete within timeout");
+        await Task.WhenAny(dialogueTcs.Task, Task.Delay(15000, CT));
+        Assert.True(
+            dialogueTcs.Task.IsCompletedSuccessfully,
+            "Multi-turn dialogue did not complete within timeout");
 
-            List<string> result = await dialogueTcs.Task;
-            _output.WriteLine($"Multi-turn dialogue completed: {result.Count} turns");
-            foreach (string turn in result)
-                _output.WriteLine($"  turn: {turn}");
-            Assert.SkipWhen(
-                result.Count < 3 || !result[1].Contains(turn2Text),
-                $"Cross-protocol contamination detected in multi-turn dialogue (turn count={result.Count})");
-            Assert.Contains(triggerKeyword, result[0]);
-            Assert.Contains(turn2Text, result[1]);
-            Assert.Contains(turn3Text, result[2]);
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        List<string> result = await dialogueTcs.Task;
+        _output.WriteLine($"Multi-turn dialogue completed: {result.Count} turns");
+        foreach (string turn in result)
+            _output.WriteLine($"  turn: {turn}");
+        Assert.SkipWhen(
+            result.Count < 3 || !result[1].Contains(turn2Text),
+            $"Cross-protocol contamination detected in multi-turn dialogue (turn count={result.Count})");
+        Assert.Contains(triggerKeyword, result[0]);
+        Assert.Contains(turn2Text, result[1]);
+        Assert.Contains(turn3Text, result[2]);
     }
 
 #endregion
@@ -635,7 +542,7 @@ public class CommandTests : IDisposable
                 cmdTcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [commandKeyword]);
+            [commandKeyword]);
 
         Func<MessageReceivedEvent, ValueTask> eventHandler = e =>
         {
@@ -659,12 +566,6 @@ public class CommandTests : IDisposable
                 cmdTcs.Task.IsCompletedSuccessfully,
                 "Command should not trigger for non-matching text");
             _output.WriteLine("Non-matching message correctly passed through to event handler");
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {

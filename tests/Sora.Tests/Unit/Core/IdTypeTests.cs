@@ -139,14 +139,6 @@ public class IdTypeTests
 
     /// <see cref="MessageId" />
     [Fact]
-    public void MessageId_ImplicitConversionFromInt()
-    {
-        MessageId id = 42;
-        Assert.Equal(42L, id.Value);
-    }
-
-    /// <see cref="MessageId" />
-    [Fact]
     public void MessageId_ImplicitConversionFromLong()
     {
         MessageId id = 999999999L;

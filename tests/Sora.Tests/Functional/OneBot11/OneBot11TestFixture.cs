@@ -10,9 +10,6 @@ public sealed class OneBot11TestFixture : IAsyncLifetime
 {
     private readonly TaskCompletionSource<IBotApi> _primaryReady   = new();
     private readonly TaskCompletionSource<IBotApi> _secondaryReady = new();
-    private          int                           _failedTests;
-    private          int                           _passedTests;
-    private          int                           _totalTests;
 
     /// <summary>The connected primary <see cref="IBotApi" /> instance (main test executor).</summary>
     public IBotApi? PrimaryApi { get; private set; }
@@ -22,9 +19,6 @@ public sealed class OneBot11TestFixture : IAsyncLifetime
 
     /// <summary>The secondary bot's user ID, obtained at runtime via GetSelfInfoAsync.</summary>
     public UserId SecondaryUserId { get; private set; }
-
-    /// <summary>Backward-compatible alias for <see cref="PrimaryApi" />.</summary>
-    public IBotApi? Api => PrimaryApi;
 
     /// <summary>Serilog sink that forwards log events to subscribed <c>ITestOutputHelper</c> instances.</summary>
     public TestOutputSink OutputSink => TestLogging.OutputSink;
@@ -38,7 +32,6 @@ public sealed class OneBot11TestFixture : IAsyncLifetime
     /// <inheritdoc />
     public async ValueTask InitializeAsync()
     {
-        TestTimingStore.StartTimer("Func", "OneBot11");
         if (TestConfig.SkipOb11Reason is not null) return;
 
         // ---- Primary Bot ----
@@ -113,20 +106,9 @@ public sealed class OneBot11TestFixture : IAsyncLifetime
         }
     }
 
-    /// <summary>Records a test result for reporting.</summary>
-    public void RecordResult(bool passed)
-    {
-        Interlocked.Increment(ref _totalTests);
-        if (passed)
-            Interlocked.Increment(ref _passedTests);
-        else
-            Interlocked.Increment(ref _failedTests);
-    }
-
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        TestTimingStore.StopTimer("Func", "OneBot11");
         if (SecondaryService is not null) await SecondaryService.DisposeAsync();
         if (Service is not null) await Service.DisposeAsync();
     }

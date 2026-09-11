@@ -2,17 +2,7 @@ name: CI
 
 on:
   push:
-    paths:
-      - 'src/**'
-      - 'Directory.Build.props'
-      - 'Directory.Packages.props'
-      - '.github/workflows/**'
   pull_request:
-    paths:
-      - 'src/**'
-      - 'Directory.Build.props'
-      - 'Directory.Packages.props'
-      - '.github/workflows/**'
   workflow_dispatch:
     inputs:
       pkg-sora-core:

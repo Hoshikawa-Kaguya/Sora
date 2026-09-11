@@ -41,7 +41,7 @@ public class CommandTests : IDisposable
     private void SkipIfNotReady()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
     }
@@ -63,7 +63,7 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             MatchType.Full,
             MessageSourceType.Group);
 
@@ -78,8 +78,6 @@ public class CommandTests : IDisposable
         MessageReceivedEvent result = await tcs.Task;
         _output.WriteLine($"Matched: text={result.Message.Body.GetText()} senderId={result.Message.SenderId}");
         Assert.Equal(keyword, result.Message.Body.GetText().Trim());
-
-        _fixture.RecordResult(true);
     }
 
     /// <see cref="CommandManager.RegisterDynamicCommand" />
@@ -99,7 +97,7 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [pattern],
+            [pattern],
             MatchType.Regex,
             MessageSourceType.Group);
 
@@ -114,8 +112,6 @@ public class CommandTests : IDisposable
         string receivedText = (await tcs.Task).Message.Body.GetText().Trim();
         _output.WriteLine($"Matched: text={receivedText}");
         Assert.Equal(triggerText, receivedText);
-
-        _fixture.RecordResult(true);
     }
 
     /// <see cref="CommandManager.RegisterDynamicCommand" />
@@ -135,7 +131,7 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             MatchType.Keyword,
             MessageSourceType.Group);
 
@@ -150,8 +146,6 @@ public class CommandTests : IDisposable
         string receivedText = (await tcs.Task).Message.Body.GetText().Trim();
         _output.WriteLine($"Matched: text={receivedText}");
         Assert.Contains(keyword, receivedText);
-
-        _fixture.RecordResult(true);
     }
 
 #endregion
@@ -173,7 +167,7 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             MatchType.Full,
             MessageSourceType.Group);
 
@@ -184,8 +178,6 @@ public class CommandTests : IDisposable
         await Task.WhenAny(tcs.Task, Task.Delay(8000, CT));
         Assert.True(tcs.Task.IsCompletedSuccessfully, "Group-only command was not triggered by group message");
         _output.WriteLine("Group message correctly triggered group-only command");
-
-        _fixture.RecordResult(true);
     }
 
     /// <see cref="CommandManager.RegisterDynamicCommand" />
@@ -195,7 +187,7 @@ public class CommandTests : IDisposable
         SkipIfNotReady();
 
         // Discover Primary bot's UserId so Secondary can send a friend message
-        ApiResult<BotIdentity> selfInfo = await _fixture.Api!.GetSelfInfoAsync(CT);
+        ApiResult<BotIdentity> selfInfo = await _fixture.PrimaryApi!.GetSelfInfoAsync(CT);
         Assert.SkipWhen(!selfInfo.IsSuccess, "Could not get Primary bot identity");
         BotIdentity selfData      = selfInfo.AssertSuccess();
         UserId      primaryUserId = selfData.UserId;
@@ -216,7 +208,7 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(e);
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             MatchType.Full,
             MessageSourceType.Friend);
 
@@ -226,8 +218,6 @@ public class CommandTests : IDisposable
         await Task.WhenAny(tcs.Task, Task.Delay(8000, CT));
         Assert.True(tcs.Task.IsCompletedSuccessfully, "Private-only command was not triggered by friend message");
         _output.WriteLine("Friend message correctly triggered private-only command");
-
-        _fixture.RecordResult(true);
     }
 
 #endregion
@@ -250,7 +240,7 @@ public class CommandTests : IDisposable
                 highPrioTcs.TrySetResult("high");
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             MatchType.Full,
             MessageSourceType.Group,
             priority: 10,
@@ -263,7 +253,7 @@ public class CommandTests : IDisposable
                 lowPrioTcs.TrySetResult("low");
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             MatchType.Full,
             MessageSourceType.Group,
             priority: 0,
@@ -283,8 +273,6 @@ public class CommandTests : IDisposable
             lowPrioTcs.Task.IsCompletedSuccessfully,
             "Low-priority handler should NOT trigger when blocked by higher priority");
         _output.WriteLine("Low-priority handler correctly blocked");
-
-        _fixture.RecordResult(true);
     }
 
 #endregion
@@ -300,7 +288,7 @@ public class CommandTests : IDisposable
         // Preflight: verify Secondary is NOT an owner in the test group
         GroupId testGroup = TestConfig.TestGroupId;
         ApiResult<GroupMemberInfo> memberInfo =
-            await _fixture.Api!.GetGroupMemberInfoAsync(testGroup, _fixture.SecondaryUserId, true, CT);
+            await _fixture.PrimaryApi!.GetGroupMemberInfoAsync(testGroup, _fixture.SecondaryUserId, true, CT);
         Assert.SkipWhen(!memberInfo.IsSuccess, "Could not query Secondary member info");
         GroupMemberInfo member = memberInfo.AssertSuccess();
         Assert.SkipWhen(
@@ -317,7 +305,7 @@ public class CommandTests : IDisposable
                 tcs.TrySetResult(true);
                 return ValueTask.CompletedTask;
             },
-                [keyword],
+            [keyword],
             MatchType.Full,
             MessageSourceType.Group,
             MemberRole.Owner,
@@ -332,8 +320,6 @@ public class CommandTests : IDisposable
             tcs.Task.IsCompletedSuccessfully,
             "Owner-only command should NOT trigger for a non-owner member");
         _output.WriteLine("Owner-only command correctly rejected non-owner sender");
-
-        _fixture.RecordResult(true);
     }
 
 #endregion
@@ -355,26 +341,33 @@ public class CommandTests : IDisposable
         _fixture.Service!.Commands.RegisterDynamicCommand(
             async e =>
             {
-                Task<MessageReceivedEvent?> replyTask = e.WaitForNextMessageAsync(TimeSpan.FromSeconds(10), ct).AsTask();
+                Task<MessageReceivedEvent?>
+                    replyTask = e.WaitForNextMessageAsync(TimeSpan.FromSeconds(30), ct).AsTask();
                 waiterReady.TrySetResult();
                 MessageReceivedEvent? reply = await replyTask;
                 dialogResult.TrySetResult(reply);
             },
-                [keyword],
+            [keyword],
             MatchType.Full,
             MessageSourceType.Group,
             description: "dialogue test command");
 
         GroupId testGroup = TestConfig.TestGroupId;
-        await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
+        SendMessageResult trigger =
+            await _fixture.SecondaryApi!.SendGroupMessageAsync(testGroup, new MessageBody(keyword), CT);
+        Assert.True(trigger.IsSuccess, trigger.ErrorMessage);
         _output.WriteLine("Sent trigger message");
 
         // Wait for the handler to register its waiter before sending follow-up
         await Task.WhenAny(waiterReady.Task, Task.Delay(TimeSpan.FromSeconds(8), CT));
         Assert.True(waiterReady.Task.IsCompletedSuccessfully, "Command handler did not start waiting in time");
+        // Leave space between real-account messages while keeping the waiter active.
+        await Task.Delay(TimeSpan.FromSeconds(15), CT);
         _output.WriteLine("Waiter registered, sending follow-up");
 
-        await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, new MessageBody(followUpText), CT);
+        SendMessageResult followUp =
+            await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, new MessageBody(followUpText), CT);
+        Assert.True(followUp.IsSuccess, followUp.ErrorMessage);
         _output.WriteLine("Sent follow-up message");
 
         await Task.WhenAny(dialogResult.Task, Task.Delay(12000, CT));
@@ -384,11 +377,9 @@ public class CommandTests : IDisposable
 
         string receivedText = dialogReply.Message.Body.GetText();
         _output.WriteLine($"Dialogue reply: {receivedText}");
-        Assert.SkipWhen(
-            !receivedText.Contains(followUpText),
-            $"Waiter received cross-protocol message instead of expected follow-up: {receivedText}");
-
-        _fixture.RecordResult(true);
+        Assert.Equal(followUpText, receivedText);
+        Assert.Equal(testGroup, dialogReply.Message.GroupId);
+        Assert.Equal(_fixture.SecondaryUserId, dialogReply.Message.SenderId);
     }
 
     /// <see cref="Sora.Entities.MessageWaiting.MessageWaiter" />
@@ -407,7 +398,7 @@ public class CommandTests : IDisposable
                 MessageReceivedEvent? reply = await e.WaitForNextMessageAsync(TimeSpan.FromSeconds(3), ct);
                 dialogResult.TrySetResult(reply);
             },
-                [keyword],
+            [keyword],
             MatchType.Full,
             MessageSourceType.Group,
             description: "timeout test command");
@@ -423,8 +414,6 @@ public class CommandTests : IDisposable
             await dialogResult.Task is not null,
             $"Waiter received cross-protocol message instead of timing out: {(await dialogResult.Task)?.Message.Body.GetText()}");
         _output.WriteLine("Waiter correctly returned null on timeout");
-
-        _fixture.RecordResult(true);
     }
 
     /// <see cref="Sora.Entities.MessageWaiting.MessageWaiter" />
@@ -468,7 +457,7 @@ public class CommandTests : IDisposable
                 string? secondText = r2?.Message.Body.GetText();
                 dialogResult.TrySetResult((firstText, secondText));
             },
-                [keyword],
+            [keyword],
             MatchType.Full,
             MessageSourceType.Group,
             description: "multi-turn test command");
@@ -506,8 +495,6 @@ public class CommandTests : IDisposable
         Assert.SkipWhen(
             !second.Contains(reply2Text),
             $"Waiter received cross-protocol message in turn 2: {second}");
-
-        _fixture.RecordResult(true);
     }
 
 #endregion
@@ -533,7 +520,7 @@ public class CommandTests : IDisposable
                 commandTcs.TrySetResult(true);
                 return ValueTask.CompletedTask;
             },
-                [cmdKeyword],
+            [cmdKeyword],
             MatchType.Full,
             MessageSourceType.Group,
             description: "specific command for passthrough test");
@@ -571,8 +558,6 @@ public class CommandTests : IDisposable
         {
             _fixture.Service.Events.OnMessageReceived -= eventHandler;
         }
-
-        _fixture.RecordResult(true);
     }
 
 #endregion

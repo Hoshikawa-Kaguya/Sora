@@ -29,7 +29,7 @@ public class MessageTypeTests : IDisposable
     public async Task SendReceive_Text()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -65,12 +65,6 @@ public class MessageTypeTests : IDisposable
 
             Assert.Contains(marker, receivedText);
             Assert.Contains("Hello World!", receivedText);
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
@@ -92,7 +86,7 @@ public class MessageTypeTests : IDisposable
     public async Task SendReceive_Text_SpecialCharacters()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -113,14 +107,19 @@ public class MessageTypeTests : IDisposable
         try
         {
             await Task.Delay(1000, CT);
-            string            specialText = $"{marker} 你好世界 🎉🔥 café\nnewline\ttab <html>&amp;\"quotes'";
-            SendMessageResult sent = await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, new MessageBody(specialText), CT);
+            string specialText = $"{marker} 你好世界 🎉🔥 café\nnewline\ttab <html>&amp;\"quotes'";
+            SendMessageResult sent = await _fixture.SecondaryApi.SendGroupMessageAsync(
+                testGroup,
+                new MessageBody(specialText),
+                CT);
             _output.WriteLine($"Secondary sent: success={sent.IsSuccess} messageId={sent.MessageId}");
             Assert.True(sent.IsSuccess);
             sentMessageId = sent.MessageId;
 
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
-            Assert.True(tcs.Task.IsCompletedSuccessfully, "Primary did not receive the special-char message within timeout");
+            Assert.True(
+                tcs.Task.IsCompletedSuccessfully,
+                "Primary did not receive the special-char message within timeout");
 
             MessageReceivedEvent evt          = await tcs.Task;
             string               receivedText = evt.Message.Body.GetText();
@@ -128,12 +127,6 @@ public class MessageTypeTests : IDisposable
 
             Assert.Contains(marker, receivedText);
             Assert.Contains("你好世界", receivedText);
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
@@ -159,7 +152,7 @@ public class MessageTypeTests : IDisposable
     public async Task SendReceive_Face()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -195,12 +188,6 @@ public class MessageTypeTests : IDisposable
 
             Assert.NotNull(face);
             Assert.Equal("178", face.FaceId);
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
@@ -226,12 +213,12 @@ public class MessageTypeTests : IDisposable
     public async Task SendReceive_Mention()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
         // Get primary bot's UserId for mentioning
-        BotIdentity primarySelf   = (await _fixture.Api!.GetSelfInfoAsync(CT)).AssertSuccess();
+        BotIdentity primarySelf   = (await _fixture.PrimaryApi!.GetSelfInfoAsync(CT)).AssertSuccess();
         UserId      primaryUserId = primarySelf.UserId;
         _output.WriteLine($"Primary bot UserId: {primaryUserId}");
 
@@ -267,12 +254,6 @@ public class MessageTypeTests : IDisposable
 
             Assert.NotNull(mention);
             Assert.Equal(primaryUserId, mention.Target);
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
@@ -294,7 +275,7 @@ public class MessageTypeTests : IDisposable
     public async Task Send_MentionAll()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -304,26 +285,21 @@ public class MessageTypeTests : IDisposable
         try
         {
             MessageBody       body   = new MessageBody("[Test] MentionAll").AddMentionAll();
-            SendMessageResult result = await _fixture.Api!.SendGroupMessageAsync(testGroup, body, CT);
-            _output.WriteLine($"MentionAll send: success={result.IsSuccess} code={result.Code} messageId={result.MessageId}");
+            SendMessageResult result = await _fixture.PrimaryApi!.SendGroupMessageAsync(testGroup, body, CT);
+            _output.WriteLine(
+                $"MentionAll send: success={result.IsSuccess} code={result.Code} messageId={result.MessageId}");
             Assert.SkipWhen(
                 result is { IsSuccess: false, Code: ApiStatusCode.Error or ApiStatusCode.ProtocolError },
                 $"SendGroupMessage with MentionAll returned {result.Code} — bot run out of mention times");
             Assert.NotEqual(0L, result.MessageId.Value);
             sentMessageId = result.MessageId;
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
             if (sentMessageId != default)
                 try
                 {
-                    await _fixture.Api!.RecallGroupMessageAsync(testGroup, sentMessageId, CT);
+                    await _fixture.PrimaryApi!.RecallGroupMessageAsync(testGroup, sentMessageId, CT);
                 }
                 catch
                 {
@@ -341,7 +317,7 @@ public class MessageTypeTests : IDisposable
     public async Task SendReceive_Reply()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -352,8 +328,11 @@ public class MessageTypeTests : IDisposable
         try
         {
             // Step 1: Primary sends original message
-            string            originalMarker = $"[MsgType:ReplyOriginal:{Guid.NewGuid():N}]";
-            SendMessageResult original = await _fixture.Api!.SendGroupMessageAsync(testGroup, new MessageBody(originalMarker), CT);
+            string originalMarker = $"[MsgType:ReplyOriginal:{Guid.NewGuid():N}]";
+            SendMessageResult original = await _fixture.PrimaryApi!.SendGroupMessageAsync(
+                testGroup,
+                new MessageBody(originalMarker),
+                CT);
             _output.WriteLine($"Original sent: success={original.IsSuccess} messageId={original.MessageId}");
             Assert.True(original.IsSuccess);
             originalMessageId = original.MessageId;
@@ -377,18 +356,21 @@ public class MessageTypeTests : IDisposable
                 // Step 3: Secondary sends reply referencing original
                 await Task.Delay(1000, CT);
                 MessageBody replyBody = new(
-                    [
-                        new ReplySegment { TargetId = original.MessageId },
-                        new TextSegment { Text      = replyMarker }
-                    ]);
-                SendMessageResult replySent = await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, replyBody, CT);
+                [
+                    new ReplySegment { TargetId = original.MessageId },
+                    new TextSegment { Text      = replyMarker }
+                ]);
+                SendMessageResult replySent =
+                    await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, replyBody, CT);
                 _output.WriteLine($"Reply sent: success={replySent.IsSuccess} messageId={replySent.MessageId}");
                 Assert.True(replySent.IsSuccess);
                 replyMessageId = replySent.MessageId;
 
                 // Step 4: Wait and verify
                 await Task.WhenAny(tcs.Task, Task.Delay(10000, CT));
-                Assert.True(tcs.Task.IsCompletedSuccessfully, "Primary did not receive the reply message within timeout");
+                Assert.True(
+                    tcs.Task.IsCompletedSuccessfully,
+                    "Primary did not receive the reply message within timeout");
 
                 MessageReceivedEvent evt   = await tcs.Task;
                 ReplySegment?        reply = evt.Message.Body.GetFirst<ReplySegment>();
@@ -396,17 +378,11 @@ public class MessageTypeTests : IDisposable
 
                 Assert.NotNull(reply);
                 Assert.Equal(original.MessageId, reply.TargetId);
-                _fixture.RecordResult(true);
             }
             finally
             {
                 _fixture.Service.Events.OnMessageReceived -= handler;
             }
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
@@ -423,7 +399,7 @@ public class MessageTypeTests : IDisposable
             if (originalMessageId != default)
                 try
                 {
-                    await _fixture.Api!.RecallGroupMessageAsync(testGroup, originalMessageId, CT);
+                    await _fixture.PrimaryApi!.RecallGroupMessageAsync(testGroup, originalMessageId, CT);
                 }
                 catch
                 {
@@ -441,12 +417,12 @@ public class MessageTypeTests : IDisposable
     public async Task SendReceive_MultiSegment()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
         // Get primary bot's UserId for mentioning
-        BotIdentity primarySelf   = (await _fixture.Api!.GetSelfInfoAsync(CT)).AssertSuccess();
+        BotIdentity primarySelf   = (await _fixture.PrimaryApi!.GetSelfInfoAsync(CT)).AssertSuccess();
         UserId      primaryUserId = primarySelf.UserId;
 
         GroupId   testGroup     = TestConfig.TestGroupId;
@@ -467,19 +443,21 @@ public class MessageTypeTests : IDisposable
         {
             await Task.Delay(1000, CT);
             MessageBody body = new(
-                [
-                    new TextSegment { Text      = marker },
-                    new FaceSegment { FaceId    = "178" },
-                    new MentionSegment { Target = primaryUserId },
-                    new TextSegment { Text      = " suffix" }
-                ]);
+            [
+                new TextSegment { Text      = marker },
+                new FaceSegment { FaceId    = "178" },
+                new MentionSegment { Target = primaryUserId },
+                new TextSegment { Text      = " suffix" }
+            ]);
             SendMessageResult sent = await _fixture.SecondaryApi.SendGroupMessageAsync(testGroup, body, CT);
             _output.WriteLine($"Secondary sent multi-segment: success={sent.IsSuccess} messageId={sent.MessageId}");
             Assert.True(sent.IsSuccess);
             sentMessageId = sent.MessageId;
 
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
-            Assert.True(tcs.Task.IsCompletedSuccessfully, "Primary did not receive the multi-segment message within timeout");
+            Assert.True(
+                tcs.Task.IsCompletedSuccessfully,
+                "Primary did not receive the multi-segment message within timeout");
 
             MessageReceivedEvent evt = await tcs.Task;
             _output.WriteLine($"Received text: {evt.Message.Body.GetText()}");
@@ -487,12 +465,6 @@ public class MessageTypeTests : IDisposable
             Assert.True(evt.Message.Body.GetAll<TextSegment>().Any(), "Expected at least one TextSegment");
             Assert.NotNull(evt.Message.Body.GetFirst<FaceSegment>());
             Assert.NotNull(evt.Message.Body.GetFirst<MentionSegment>());
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
@@ -518,7 +490,7 @@ public class MessageTypeTests : IDisposable
     public async Task Send_Image()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -531,24 +503,18 @@ public class MessageTypeTests : IDisposable
             string base64Png =
                 "base64://iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
             MessageBody       body   = new([new ImageSegment { FileUri = base64Png }]);
-            SendMessageResult result = await _fixture.Api!.SendGroupMessageAsync(testGroup, body, CT);
+            SendMessageResult result = await _fixture.PrimaryApi!.SendGroupMessageAsync(testGroup, body, CT);
             _output.WriteLine($"Image send: success={result.IsSuccess} messageId={result.MessageId}");
             Assert.True(result.IsSuccess);
             Assert.NotEqual(0L, result.MessageId.Value);
             sentMessageId = result.MessageId;
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
             if (sentMessageId != default)
                 try
                 {
-                    await _fixture.Api!.RecallGroupMessageAsync(testGroup, sentMessageId, CT);
+                    await _fixture.PrimaryApi!.RecallGroupMessageAsync(testGroup, sentMessageId, CT);
                 }
                 catch
                 {
@@ -562,31 +528,26 @@ public class MessageTypeTests : IDisposable
     public async Task Send_Forward()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
-        try
+        ForwardedMessageNode node1 = new()
         {
-            ForwardedMessageNode node1 = new()
-                    { UserId = _fixture.SecondaryUserId, SenderName = "TestUser", Segments = new MessageBody("Forward line 1") };
-            ForwardedMessageNode node2 = new()
-                    { UserId = _fixture.SecondaryUserId, SenderName = "TestUser", Segments = new MessageBody("Forward line 2") };
-            ForwardSegment    forward = new() { Messages = [node1, node2], Title = "Test Forward" };
-            MessageBody       body    = new([forward]);
-            SendMessageResult result  = await _fixture.Api!.SendGroupMessageAsync(testGroup, body, CT);
-            _output.WriteLine($"Forward send: success={result.IsSuccess} messageId={result.MessageId}");
-            Assert.True(result.IsSuccess);
-            Assert.NotEqual(0L, result.MessageId.Value);
-            _fixture.RecordResult(true);
-        }
-        catch
+            UserId = _fixture.SecondaryUserId, SenderName = "TestUser", Segments = new MessageBody("Forward line 1")
+        };
+        ForwardedMessageNode node2 = new()
         {
-            _fixture.RecordResult(false);
-            throw;
-        }
+            UserId = _fixture.SecondaryUserId, SenderName = "TestUser", Segments = new MessageBody("Forward line 2")
+        };
+        ForwardSegment    forward = new() { Messages = [node1, node2], Title = "Test Forward" };
+        MessageBody       body    = new([forward]);
+        SendMessageResult result  = await _fixture.PrimaryApi!.SendGroupMessageAsync(testGroup, body, CT);
+        _output.WriteLine($"Forward send: success={result.IsSuccess} messageId={result.MessageId}");
+        Assert.True(result.IsSuccess);
+        Assert.NotEqual(0L, result.MessageId.Value);
     }
 
     /// <see cref="LightAppSegment" />
@@ -594,26 +555,17 @@ public class MessageTypeTests : IDisposable
     public async Task Send_LightApp()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
         GroupId testGroup = TestConfig.TestGroupId;
 
-        try
-        {
-            string            json   = """{"app":"com.tencent.miniapp","desc":"Test","view":"all","meta":{}}""";
-            MessageBody       body   = new([new LightAppSegment { JsonPayload = json }]);
-            SendMessageResult result = await _fixture.Api!.SendGroupMessageAsync(testGroup, body, CT);
-            // LightApp may not be supported by all backends
-            _output.WriteLine($"LightApp send: success={result.IsSuccess}");
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
-        }
+        string            json   = """{"app":"com.tencent.miniapp","desc":"Test","view":"all","meta":{}}""";
+        MessageBody       body   = new([new LightAppSegment { JsonPayload = json }]);
+        SendMessageResult result = await _fixture.PrimaryApi!.SendGroupMessageAsync(testGroup, body, CT);
+        // LightApp may not be supported by all backends
+        _output.WriteLine($"LightApp send: success={result.IsSuccess}");
     }
 
 #endregion
@@ -625,7 +577,7 @@ public class MessageTypeTests : IDisposable
     public async Task SendReceive_Audio()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -663,19 +615,14 @@ public class MessageTypeTests : IDisposable
 
             MessageReceivedEvent evt   = await tcs.Task;
             AudioSegment?        audio = evt.Message.Body.GetFirst<AudioSegment>();
-            _output.WriteLine($"Received audio: resourceId={audio?.ResourceId} url={audio?.Url} duration={audio?.Duration}");
+            _output.WriteLine(
+                $"Received audio: resourceId={audio?.ResourceId} url={audio?.Url} duration={audio?.Duration}");
 
             Assert.NotNull(audio);
             Assert.True(
                 !string.IsNullOrEmpty(audio.ResourceId) || !string.IsNullOrEmpty(audio.Url),
                 "Incoming AudioSegment should have a ResourceId or Url populated by the protocol");
             Assert.Equal(_fixture.SecondaryUserId, evt.Message.SenderId);
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {
@@ -701,7 +648,7 @@ public class MessageTypeTests : IDisposable
     public async Task SendReceive_Video()
     {
         Assert.SkipWhen(TestConfig.SkipMilkyDualBotReason is not null, TestConfig.SkipMilkyDualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -747,12 +694,6 @@ public class MessageTypeTests : IDisposable
                 !string.IsNullOrEmpty(video.ResourceId) || !string.IsNullOrEmpty(video.Url),
                 "Incoming VideoSegment should have a ResourceId or Url populated by the protocol");
             Assert.Equal(_fixture.SecondaryUserId, evt.Message.SenderId);
-            _fixture.RecordResult(true);
-        }
-        catch
-        {
-            _fixture.RecordResult(false);
-            throw;
         }
         finally
         {

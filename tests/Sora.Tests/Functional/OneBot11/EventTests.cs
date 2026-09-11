@@ -13,7 +13,7 @@ public class EventTests : IDisposable
     private readonly OneBot11TestFixture _fixture;
     private readonly IDisposable         _logSubscription;
     private readonly ITestOutputHelper   _output;
-    private          IBotApi             Api => _fixture.Api!;
+    private          IBotApi             Api => _fixture.PrimaryApi!;
 
     /// <summary>Initializes a new instance of the <see cref="EventTests" /> class.</summary>
     public EventTests(OneBot11TestFixture fixture, ITestOutputHelper output)
@@ -30,7 +30,7 @@ public class EventTests : IDisposable
     public async Task Event_MessageReceived()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         TaskCompletionSource<MessageReceivedEvent> tcs = new();
@@ -70,7 +70,7 @@ public class EventTests : IDisposable
     public async Task Event_MessageReceived_FromSecondary()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -114,7 +114,7 @@ public class EventTests : IDisposable
     public async Task Event_MessageDeleted()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         TaskCompletionSource<MessageDeletedEvent> tcs = new();
@@ -127,8 +127,11 @@ public class EventTests : IDisposable
 
         try
         {
-            GroupId           testGroup = TestConfig.TestGroupId;
-            SendMessageResult sent      = await Api.SendGroupMessageAsync(testGroup, "[OB11 Event Test] will be recalled", CT);
+            GroupId testGroup = TestConfig.TestGroupId;
+            SendMessageResult sent = await Api.SendGroupMessageAsync(
+                testGroup,
+                "[OB11 Event Test] will be recalled",
+                CT);
             Assert.True(sent.IsSuccess);
             _output.WriteLine($"Sent messageId={sent.MessageId}");
 
@@ -140,7 +143,8 @@ public class EventTests : IDisposable
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
             Assert.True(tcs.Task.IsCompletedSuccessfully, "OnMessageDeleted not triggered within timeout");
             MessageDeletedEvent evt = await tcs.Task;
-            _output.WriteLine($"MessageDeleted: messageId={evt.MessageId} senderId={evt.SenderId} operatorId={evt.OperatorId}");
+            _output.WriteLine(
+                $"MessageDeleted: messageId={evt.MessageId} senderId={evt.SenderId} operatorId={evt.OperatorId}");
             Assert.Equal(sent.MessageId, evt.MessageId);
         }
         finally
@@ -158,7 +162,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupAdminChanged_Automated()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "SecondaryService not available");
 
@@ -206,7 +210,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupMute()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         TaskCompletionSource<GroupMuteEvent> tcs = new();
@@ -228,7 +232,8 @@ public class EventTests : IDisposable
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
             Assert.True(tcs.Task.IsCompletedSuccessfully, "OnGroupMute not triggered within timeout");
             GroupMuteEvent evt = await tcs.Task;
-            _output.WriteLine($"GroupMute: groupId={evt.GroupId} isWholeGroup={evt.IsWholeGroup} duration={evt.DurationSeconds}");
+            _output.WriteLine(
+                $"GroupMute: groupId={evt.GroupId} isWholeGroup={evt.IsWholeGroup} duration={evt.DurationSeconds}");
             Assert.Equal(testGroup, evt.GroupId);
             Assert.True(evt.IsWholeGroup);
         }
@@ -252,7 +257,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupNameChanged()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         GroupId   testGroup     = TestConfig.TestGroupId;
@@ -307,7 +312,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupNudge()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         TaskCompletionSource<NudgeEvent> tcs = new();
@@ -345,7 +350,7 @@ public class EventTests : IDisposable
     public async Task Event_GroupNudge_FromSecondary()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -388,7 +393,7 @@ public class EventTests : IDisposable
     public async Task Event_FileUpload_FromSecondary()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
@@ -407,7 +412,11 @@ public class EventTests : IDisposable
 
             await Task.Delay(1000, CT);
             ApiResult<string> uploadResult =
-                await _fixture.SecondaryApi.UploadGroupFileAsync(testGroup, base64Uri, "ob11_secondary_test.txt", ct: CT);
+                await _fixture.SecondaryApi.UploadGroupFileAsync(
+                    testGroup,
+                    base64Uri,
+                    "ob11_secondary_test.txt",
+                    ct: CT);
             _output.WriteLine($"Secondary UploadGroupFile: success={uploadResult.IsSuccess}");
             Assert.True(uploadResult.IsSuccess, "UploadGroupFileAsync should succeed");
 
@@ -428,12 +437,12 @@ public class EventTests : IDisposable
     public async Task Event_GroupReaction_FromSecondary()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryApi is null, "Secondary API not available");
         Assert.SkipWhen(_fixture.Service is null, "Service not available");
 
         GroupId           testGroup = TestConfig.TestGroupId;
-        SendMessageResult sent      = await Api.SendGroupMessageAsync(testGroup, "[OB11 Event Test] reaction target", CT);
+        SendMessageResult sent = await Api.SendGroupMessageAsync(testGroup, "[OB11 Event Test] reaction target", CT);
         Assert.True(sent.IsSuccess);
         _output.WriteLine($"Sent messageId={sent.MessageId}");
 
@@ -454,9 +463,12 @@ public class EventTests : IDisposable
             Assert.True(reactionResult.IsSuccess, "SendGroupMessageReactionAsync should succeed");
 
             await Task.WhenAny(tcs.Task, Task.Delay(5000, CT));
-            Assert.True(tcs.Task.IsCompletedSuccessfully, "OnGroupReaction (from secondary) not triggered within timeout");
+            Assert.True(
+                tcs.Task.IsCompletedSuccessfully,
+                "OnGroupReaction (from secondary) not triggered within timeout");
             GroupReactionEvent evt = await tcs.Task;
-            _output.WriteLine($"GroupReaction: groupId={evt.GroupId} userId={evt.UserId} faceId={evt.FaceId} isAdd={evt.IsAdd}");
+            _output.WriteLine(
+                $"GroupReaction: groupId={evt.GroupId} userId={evt.UserId} faceId={evt.FaceId} isAdd={evt.IsAdd}");
             Assert.Equal(testGroup, evt.GroupId);
             Assert.True(evt.IsAdd);
         }
@@ -475,11 +487,11 @@ public class EventTests : IDisposable
     public async Task Event_GroupEssenceChanged()
     {
         Assert.SkipWhen(TestConfig.SkipOb11DualBotReason is not null, TestConfig.SkipOb11DualBotReason ?? "");
-        Assert.SkipWhen(_fixture.Api is null, "API not available");
+        Assert.SkipWhen(_fixture.PrimaryApi is null, "API not available");
         Assert.SkipWhen(_fixture.SecondaryService is null, "Secondary service not available");
 
         GroupId           testGroup = TestConfig.TestGroupId;
-        SendMessageResult sent      = await Api.SendGroupMessageAsync(testGroup, "[OB11 Event Test] essence candidate", CT);
+        SendMessageResult sent = await Api.SendGroupMessageAsync(testGroup, "[OB11 Event Test] essence candidate", CT);
         Assert.True(sent.IsSuccess);
         _output.WriteLine($"Sent messageId={sent.MessageId}");
 
