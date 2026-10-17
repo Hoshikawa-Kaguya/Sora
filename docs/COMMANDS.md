@@ -272,4 +272,3 @@ await registration.UnregisterAsync(timeoutToken);
 - [← 返回 README](../README.md)
 - [V2 → V3 迁移指南](MIGRATION-V2-TO-V3.md)
 - [Adapter 开发指南](ADAPTER-DEVELOPMENT.md) — 事件管线概览
-- [ADR 0001：指令以程序集注册句柄登记](adr/0001-explicit-assembly-registration-for-commands.md)
