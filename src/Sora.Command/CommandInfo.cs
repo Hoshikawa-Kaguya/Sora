@@ -56,6 +56,18 @@ internal sealed class CommandInfo
     /// <summary>Source type filter (null = any).</summary>
     public MessageSourceType? SourceType { get; init; }
 
+    /// <summary>The assembly registration that owns this command.</summary>
+    public required AssemblyRegistration Registration { get; init; }
+
+    /// <summary>
+    ///     The registration owner type used for type-level enabling. Scanned commands use the scanned type;
+    ///     dynamic commands use the explicitly supplied owner type.
+    /// </summary>
+    public required Type OwnerType { get; init; }
+
+    /// <summary>Manager-wide registration sequence used to order commands with equal priority.</summary>
+    public required long Sequence { get; init; }
+
     /// <summary>
     ///     Pinned before-filter attribute instances for this command, sorted ascending by Order
     ///     with class-level attributes preceding method-level on Order ties.

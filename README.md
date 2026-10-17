@@ -166,13 +166,17 @@ public static class MyCommands
     }
 }
 
-// 注册指令
-service.Commands.ScanAssembly(typeof(Program).Assembly);
+// 注册程序集并扫描指令
+AssemblyRegistration commands = service.Commands.RegisterAssembly(typeof(Program).Assembly);
+commands.ScanCommandGroups();
+
+// 动态指令：归属本程序集中的类型
+commands.Registrar.RegisterDynamicCommand(typeof(MyCommands), async e => { /* ... */ }, ["ping"]);
 ```
 
-配置 `BlockUsers` 后，框架在自动已读、连续对话和过滤器之前忽略该触发者的事件。`SuperUsers` 为对应事件设置 `IsSuperUser`；命令可用 `[Command(SuperUserOnly = true)]` 或动态注册的 `superUserOnly: true` 限制执行，群角色 `PermissionLevel` 仍需满足。框架从事件已有字段识别触发者，详见[适配器与管线文档](docs/ADAPTER-DEVELOPMENT.md)。
+指令以程序集为单位注册：多个程序集（例如外部插件）先按程序集优先级排序，再在每个程序集内按指令优先级执行，并可按程序集或类型动态启停、调整优先级和注销。完整说明见[指令模块文档](docs/COMMANDS.md)；从 2.x 升级见 [V2 → V3 迁移指南](docs/MIGRATION-V2-TO-V3.md)。
 
-实例命令支持预注册实例、无参构造函数或无构造初始化的 singleton。需要字段初始化的命令应提供无参构造函数或在扫描前调用 `RegisterCommandInstance<T>()`。
+配置 `BlockUsers` 后，框架在自动已读、连续对话和过滤器之前忽略该触发者的事件。`SuperUsers` 为对应事件设置 `IsSuperUser`；命令可用 `[Command(SuperUserOnly = true)]` 或动态注册的 `superUserOnly: true` 限制执行，群角色 `PermissionLevel` 仍需满足。框架从事件已有字段识别触发者，详见[适配器与管线文档](docs/ADAPTER-DEVELOPMENT.md)。
 
 ## 可以简单参考的文档
 
@@ -185,10 +189,12 @@ service.Commands.ScanAssembly(typeof(Program).Assembly);
 | [测试说明](docs/TESTING.md) | 双机器人测试架构、环境变量、Run-Tests.ps1 用法 |
 | [本地测试配置](docs/TESTING-LOCAL.md) | 本地环境快速配置参考 |
 | [日志配置](docs/LOGGING.md) | Serilog 默认日志、自定义 LoggerFactory、日志级别 |
+| [指令模块](docs/COMMANDS.md) | 指令注册、两级执行顺序、启停、动态指令与插件卸载 |
 | [Adapter 开发指南](docs/ADAPTER-DEVELOPMENT.md) | 第三方协议适配器开发详细指南 |
 | [功能测试目录](docs/FUNCTIONAL-TEST-CATALOG.md) | 所有 E2E 测试的完整清单 |
 | [已移除测试](docs/REMOVED_TESTS.md) | 无法自动化的测试及移除原因 |
 | [从 1.x 迁移到 2.0](docs/MIGRATION-V1-TO-V2.md) | 1.x → 2.0 完整迁移指南 |
+| [迁移到 3.0](docs/MIGRATION-V2-TO-V3.md) | 2.x → 3.0 指令注册变更，以及 1.x → 3.0 直接迁移 |
 
 Agent 开发入口：项目级规范见 [`AGENTS.md`](AGENTS.md)，源码和测试分别见 [`src/AGENTS.md`](src/AGENTS.md) 与 [`tests/AGENTS.md`](tests/AGENTS.md)。协议/测试审计工作流位于 [`.agents/skills/`](.agents/skills/)，可执行 CLI 用法见 [`tools/agent-audit/README.md`](tools/agent-audit/README.md)。
 

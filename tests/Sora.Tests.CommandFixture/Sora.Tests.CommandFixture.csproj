@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- A second real command assembly for cross-assembly CommandManager unit tests. -->
+    <PropertyGroup>
+        <RootNamespace>Sora.Tests.CommandFixture</RootNamespace>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Sora.Command\Sora.Command.csproj"/>
+    </ItemGroup>
+
+</Project>

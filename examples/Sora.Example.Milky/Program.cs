@@ -13,7 +13,7 @@ SoraService service = SoraServiceFactory.Instance.CreateMilkyService(
     new MilkyConfig
     {
         Host           = "127.0.0.1",
-        Port           = 3010,
+        Port           = 3015,
         Prefix         = "milky",
         AccessToken    = "test",
         EventTransport = EventTransport.WebSocket
@@ -71,9 +71,10 @@ service.Events.OnMemberJoined += async e =>
 };
 
 // 指令注册
-service.Commands.ScanAssembly(typeof(Program).Assembly);
+AssemblyRegistration commands = service.Commands.RegisterAssembly(typeof(Program).Assembly);
+commands.ScanCommandGroups();
 DynamicCommandExamples examples = new();
-examples.Register(service);
+examples.Register(commands.Registrar);
 
 logger.LogInformation("Link start...");
 await service.StartAsync();

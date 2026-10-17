@@ -21,7 +21,8 @@ public class UserPolicyTests
         MessageReceivedEvent message = Message(200L);
         service.UseEventPreFilter(new CallbackFilter(_ => Assert.Fail("Blocked event reached a filter")));
         service.Events.OnMessageReceived += _ => throw new InvalidOperationException("Blocked event was dispatched");
-        service.Commands.RegisterDynamicCommand(
+        service.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(UserPolicyTests),
             _ => throw new InvalidOperationException("Blocked command ran"),
             ["policy"]);
 
@@ -99,7 +100,8 @@ public class UserPolicyTests
         RestrictedCommands                   commands = new();
         if (dynamicCommand)
         {
-            service.Commands.RegisterDynamicCommand(
+            service.Commands.TestRegistrar().RegisterDynamicCommand(
+                typeof(UserPolicyTests),
                 commands.Run,
                 ["policy"],
                 permissionLevel: MemberRole.Admin,
@@ -107,8 +109,8 @@ public class UserPolicyTests
         }
         else
         {
-            service.Commands.RegisterCommandInstance(commands);
-            service.Commands.ScanType(typeof(RestrictedCommands));
+            service.Commands.TestRegistration().RegisterCommandInstance(commands);
+            service.Commands.TestRegistration().ScanType(typeof(RestrictedCommands));
         }
 
         await adapter.RaiseEventAsync(Message(200L, MemberRole.Owner));

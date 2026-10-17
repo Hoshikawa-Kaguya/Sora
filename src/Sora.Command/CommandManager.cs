@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -8,19 +9,22 @@ using Sora.Command.InternalEntities;
 namespace Sora.Command;
 
 /// <summary>
-///     Discovers, registers, and executes commands based on message content.
+///     Registers command assemblies and executes their commands based on message content.
+///     Commands are registered only through an <see cref="AssemblyRegistration" /> returned by
+///     <see cref="RegisterAssembly" />. Assemblies execute in descending assembly priority (equal priorities keep
+///     registration order); commands inside an assembly execute in descending command priority (equal priorities keep
+///     registration order). All commands of one assembly finish before the next assembly starts.
 /// </summary>
 public sealed class CommandManager
 {
 #region Fields
 
-    private readonly List<CommandInfo>                      _commands     = [];
-    private readonly ConcurrentDictionary<Type, object>     _instances    = new();
-    private readonly Lock                                   _lock         = new();
-    private readonly ILogger                                _logger       = SoraLogger.CreateLogger<CommandManager>();
-    private readonly Dictionary<MatchType, ICommandMatcher> _matchers     = new();
-    private readonly HashSet<Type>                          _scannedTypes = [];
-    private          bool                                   _needsSort;
+    private readonly ILogger                                        _logger           = SoraLogger.CreateLogger<CommandManager>();
+    private readonly Dictionary<MatchType, ICommandMatcher>         _matchers         = new();
+    private readonly Dictionary<Assembly, AssemblyRegistration>     _registrations    = new();
+    private readonly Lock                                           _registrationLock = new();
+    private          ExecutionTable                                 _executionTable   = ExecutionTable.Empty;
+    private          long                                           _nextSequence;
 
     /// <summary>
     ///     Tracks in-flight command executions for re-entry protection.
@@ -44,31 +48,92 @@ public sealed class CommandManager
 
 #endregion
 
-#region Instance Management
+#region Assembly Registration
+
+    /// <summary>
+    ///     Registers an assembly and returns its registration handle. The priority and enabled state are initial values
+    ///     applied only when the assembly is newly registered; if it is already registered, the existing handle is
+    ///     returned, the arguments are ignored and a warning is logged.
+    ///     Registering does not scan; call <see cref="AssemblyRegistration.ScanCommandGroups" /> or
+    ///     <see cref="AssemblyRegistration.ScanType" /> afterwards.
+    /// </summary>
+    /// <param name="assembly">The assembly to register. Assemblies are identified by runtime object, not by name.</param>
+    /// <param name="priority">Initial assembly priority. Higher priority assemblies execute first.</param>
+    /// <param name="enabled">Initial assembly enabled state.</param>
+    /// <returns>The assembly registration handle.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="assembly" /> is null.</exception>
+    public AssemblyRegistration RegisterAssembly(Assembly assembly, int priority = 0, bool enabled = true)
+    {
+        ArgumentNullException.ThrowIfNull(assembly);
+        lock (_registrationLock)
+        {
+            if (_registrations.TryGetValue(assembly, out AssemblyRegistration? existing))
+            {
+                _logger.LogWarning(
+                    "Command assembly {AssemblyName} is already registered; returning the existing registration and ignoring priority {Priority} and enabled {Enabled}",
+                    assembly.GetName().Name,
+                    priority,
+                    enabled);
+                return existing;
+            }
+
+            AssemblyRegistration registration = new(this, assembly, priority, enabled, _nextSequence++);
+            _registrations.Add(assembly, registration);
+            PublishTable();
+
+            _logger.LogInformation(
+                "Registered command assembly {AssemblyName} (priority: {Priority}, enabled: {Enabled})",
+                assembly.GetName().Name,
+                priority,
+                enabled);
+            return registration;
+        }
+    }
+
+    /// <summary>
+    ///     Gets the current registration of an assembly.
+    /// </summary>
+    /// <param name="assembly">The assembly to look up.</param>
+    /// <param name="registration">The registration if found.</param>
+    /// <returns><c>true</c> if the assembly is registered; otherwise <c>false</c>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="assembly" /> is null.</exception>
+    public bool TryGetAssembly(Assembly assembly, [NotNullWhen(true)] out AssemblyRegistration? registration)
+    {
+        ArgumentNullException.ThrowIfNull(assembly);
+        lock (_registrationLock)
+        {
+            return _registrations.TryGetValue(assembly, out registration);
+        }
+    }
+
+    /// <summary>
+    ///     Returns an immutable snapshot of all registered assemblies in execution order (descending priority, then
+    ///     registration order), including disabled assemblies.
+    /// </summary>
+    /// <returns>The assembly states.</returns>
+    public IReadOnlyList<CommandAssemblyState> GetAssemblyStates()
+    {
+        lock (_registrationLock)
+        {
+            return [.. OrderAssemblies(_registrations.Values).Select(CreateAssemblyState)];
+        }
+    }
 
     /// <summary>
     ///     Gets the singleton instance used for command handlers of the specified type.
-    ///     Returns null if the type has no registered instance commands.
+    ///     Returns null if the type's assembly is not registered or the type has no instance.
     /// </summary>
     /// <typeparam name="T">The command group type.</typeparam>
     /// <returns>The singleton instance, or null if not registered.</returns>
-    public T? GetCommandInstance<T>() where T : class =>
-        _instances.TryGetValue(typeof(T), out object? instance) ? (T)instance : null;
-
-    /// <summary>
-    ///     Pre-registers a singleton instance for a command group type.
-    ///     Use this to provide externally constructed instances (e.g., from a DI container).
-    ///     Must be called before <see cref="ScanAssembly" />; throws <see cref="InvalidOperationException" /> otherwise.
-    /// </summary>
-    /// <typeparam name="T">The command group type.</typeparam>
-    /// <param name="instance">The instance to use for command invocation.</param>
-    /// <exception cref="InvalidOperationException">Thrown when called after <see cref="ScanAssembly" />.</exception>
-    public void RegisterCommandInstance<T>(T instance) where T : class
+    public T? GetCommandInstance<T>() where T : class
     {
-        if (_scannedTypes.Contains(typeof(T)))
-            throw new InvalidOperationException(
-                $"RegisterCommandInstance<{typeof(T).Name}>() must be called before ScanAssembly().");
-        _instances[typeof(T)] = instance;
+        lock (_registrationLock)
+        {
+            return _registrations.TryGetValue(typeof(T).Assembly, out AssemblyRegistration? registration)
+                   && registration.Instances.TryGetValue(typeof(T), out object? instance)
+                ? (T)instance
+                : null;
+        }
     }
 
 #endregion
@@ -76,47 +141,47 @@ public sealed class CommandManager
 #region Command Registration
 
     /// <summary>
-    ///     Registers a command at runtime without scanning assemblies.
+    ///     Pre-registers a singleton instance for a type of the registration's assembly.
     /// </summary>
-    /// <param name="handler">The async handler to invoke when the command matches.</param>
-    /// <param name="expressions">One or more match expressions.</param>
-    /// <param name="matchType">How to match the expressions against message text.</param>
-    /// <param name="sourceType">Required message source type (null = any).</param>
-    /// <param name="permissionLevel">Minimum member role required.</param>
-    /// <param name="priority">Higher priority commands are matched first.</param>
-    /// <param name="blockAfterMatch">Whether to block the event chain after matching.</param>
-    /// <param name="description">Description for help text.</param>
-    /// <param name="preventReentry">
-    ///     When true, prevents the same user from triggering this command while a previous invocation is still executing.
-    /// </param>
-    /// <param name="reentryMessage">Optional plain-text reply sent when the command is rejected due to re-entry.</param>
-    /// <param name="prefix">Optional prefix prepended to match expressions (same as CommandGroup.Prefix).</param>
-    /// <param name="beforeFilters">
-    ///     Optional pinned before-filter attribute instances. Lambda/dynamic handlers cannot carry method-level
-    ///     attributes, so callers must pass instances explicitly. Null or empty = no before-filter.
-    /// </param>
-    /// <param name="afterFilters">
-    ///     Optional pinned after-filter attribute instances. Null or empty = no after-filter.
-    ///     Same auto-discovery semantics as <paramref name="beforeFilters" />.
-    /// </param>
-    /// <param name="superUserOnly">Requires a configured super user in addition to the member role.</param>
-    /// <returns>A unique command ID that can be used to unregister this command later.</returns>
-    public Guid RegisterDynamicCommand(
+    internal void RegisterCommandInstance(AssemblyRegistration registration, Type type, object instance)
+    {
+        ArgumentNullException.ThrowIfNull(instance);
+        lock (_registrationLock)
+        {
+            EnsureRegistered(registration);
+            EnsureOwnedType(registration, type, nameof(instance));
+            if (registration.ScannedTypes.Contains(type))
+                throw new InvalidOperationException(
+                    $"RegisterCommandInstance<{type.Name}>() must be called before {type.Name} is scanned.");
+
+            registration.Instances[type] = instance;
+        }
+    }
+
+    /// <summary>
+    ///     Registers a dynamic command owned by a type of the registration's assembly.
+    /// </summary>
+    internal Guid RegisterDynamicCommand(
+        AssemblyRegistration                  registration,
+        Type                                  ownerType,
         Func<MessageReceivedEvent, ValueTask> handler,
         string[]                              expressions,
-        MatchType                             matchType       = MatchType.Full,
-        MessageSourceType?                    sourceType      = null,
-        MemberRole                            permissionLevel = MemberRole.Member,
-        int                                   priority        = 0,
-        bool                                  blockAfterMatch = true,
-        string                                description     = "",
-        bool                                  preventReentry  = true,
-        string                                reentryMessage  = "",
-        string                                prefix          = "",
-        CommandBeforeFilterAttribute[]?       beforeFilters   = null,
-        CommandAfterFilterAttribute[]?        afterFilters    = null,
-        bool                                  superUserOnly   = false)
+        MatchType                             matchType,
+        MessageSourceType?                    sourceType,
+        MemberRole                            permissionLevel,
+        int                                   priority,
+        bool                                  blockAfterMatch,
+        string                                description,
+        bool                                  preventReentry,
+        string                                reentryMessage,
+        string                                prefix,
+        CommandBeforeFilterAttribute[]?       beforeFilters,
+        CommandAfterFilterAttribute[]?        afterFilters,
+        bool                                  superUserOnly)
     {
+        ArgumentNullException.ThrowIfNull(ownerType);
+        ArgumentNullException.ThrowIfNull(handler);
+
         Guid commandId = Guid.NewGuid();
 
         // Auto-discover filter attributes applied directly to the lambda / method group.
@@ -139,38 +204,46 @@ public sealed class CommandManager
         IReadOnlyList<Attribute> attributes =
             [.. DistinctByReference(handlerAttrs.Concat(beforeFilters ?? []).Concat(afterFilters ?? []))];
 
-        CommandInfo info = new()
+        lock (_registrationLock)
         {
-            CommandId       = commandId,
-            Method          = handler.Method,
-            DynamicHandler  = handler,
-            Expressions     = expressions,
-            MatchType       = matchType,
-            SourceType      = sourceType,
-            PermissionLevel = permissionLevel,
-            SuperUserOnly   = superUserOnly,
-            Priority        = priority,
-            BlockAfterMatch = blockAfterMatch,
-            Description     = description,
-            PreventReentry  = preventReentry,
-            ReentryMessage  = reentryMessage,
-            CommandPrefix   = prefix,
-            BeforeFilters   = frozenBefore,
-            AfterFilters    = frozenAfter,
-            Attributes      = attributes
-        };
+            EnsureRegistered(registration);
+            EnsureOwnedType(registration, ownerType, nameof(ownerType));
 
-        lock (_lock)
-        {
-            _commands.Add(info);
-            _needsSort = true;
+            CommandInfo info = new()
+            {
+                CommandId       = commandId,
+                Method          = handler.Method,
+                DynamicHandler  = handler,
+                Expressions     = expressions,
+                MatchType       = matchType,
+                SourceType      = sourceType,
+                PermissionLevel = permissionLevel,
+                SuperUserOnly   = superUserOnly,
+                Priority        = priority,
+                BlockAfterMatch = blockAfterMatch,
+                Description     = description,
+                PreventReentry  = preventReentry,
+                ReentryMessage  = reentryMessage,
+                CommandPrefix   = prefix,
+                BeforeFilters   = frozenBefore,
+                AfterFilters    = frozenAfter,
+                Attributes      = attributes,
+                Registration    = registration,
+                OwnerType       = ownerType,
+                Sequence        = _nextSequence++
+            };
+
+            AddCommand(registration, info);
+            RebuildSegment(registration);
+            PublishTable();
         }
 
         _logger.LogInformation(
-            "Registered dynamic command [{CommandName}] via {MatchType} (id: {CommandId}, source: {SourceType}, priority: {Priority}, block: {BlockAfterMatch}, before-filters: {BeforeCount}, after-filters: {AfterCount})",
+            "Registered dynamic command [{CommandName}] via {MatchType} (id: {CommandId}, owner: {OwnerType}, source: {SourceType}, priority: {Priority}, block: {BlockAfterMatch}, before-filters: {BeforeCount}, after-filters: {AfterCount})",
             handler.Method.Name,
             matchType,
             commandId,
+            ownerType.FullName,
             sourceType,
             priority,
             blockAfterMatch,
@@ -181,18 +254,20 @@ public sealed class CommandManager
     }
 
     /// <summary>
-    ///     Unregisters a previously registered dynamic command by its ID.
+    ///     Unregisters a dynamic command of the registration by its ID.
     /// </summary>
-    /// <param name="commandId">The unique command ID returned by <see cref="RegisterDynamicCommand" />.</param>
-    /// <returns><c>true</c> if the command was found and removed; <c>false</c> if no command with that ID exists.</returns>
-    public bool UnregisterDynamicCommand(Guid commandId)
+    internal bool UnregisterDynamicCommand(AssemblyRegistration registration, Guid commandId)
     {
-        lock (_lock)
+        lock (_registrationLock)
         {
-            int index = _commands.FindIndex(c => c.CommandId == commandId);
+            if (!registration.IsRegistered) return false;
+
+            int index = registration.Commands.FindIndex(c => c.DynamicHandler is not null && c.CommandId == commandId);
             if (index < 0) return false;
 
-            _commands.RemoveAt(index);
+            registration.Commands.RemoveAt(index);
+            RebuildSegment(registration);
+            PublishTable();
         }
 
         _logger.LogInformation("Unregistered dynamic command (id: {CommandId})", commandId);
@@ -200,46 +275,89 @@ public sealed class CommandManager
     }
 
     /// <summary>
-    ///     Scans the given assemblies for classes with <see cref="CommandGroupAttribute" />
-    ///     and methods with <see cref="CommandAttribute" />.
+    ///     Scans the registration's exported command group classes and publishes all new commands together.
     /// </summary>
-    /// <param name="assemblies">The assemblies to scan.</param>
-    public void ScanAssemblies(params Assembly[] assemblies)
+    internal int ScanCommandGroups(AssemblyRegistration registration)
     {
-        foreach (Assembly assembly in assemblies) ScanAssembly(assembly);
+        lock (_registrationLock)
+        {
+            EnsureRegistered(registration);
+
+            List<CommandInfo>        batch        = [];
+            Dictionary<Type, object> newInstances = new();
+            List<Type>               scannedTypes = [];
+            foreach (Type type in registration.Assembly.GetExportedTypes()
+                                              .Where(type => type.IsDefined(typeof(CommandGroupAttribute), false)
+                                                             && type.IsClass))
+            {
+                if (!IsScannable(type))
+                {
+                    _logger.LogDebug(
+                        "Skipped command group [{TypeName}]: abstract or open generic types cannot be instantiated",
+                        type.FullName);
+                    continue;
+                }
+
+                if (registration.ScannedTypes.Contains(type))
+                {
+                    LogDuplicateScan(registration, type);
+                    continue;
+                }
+
+                BuildTypeCommands(registration, type, batch, newInstances);
+                scannedTypes.Add(type);
+            }
+
+            PublishScan(registration, batch, newInstances, scannedTypes);
+            _logger.LogInformation(
+                "Scanned {Count} commands from assembly {AssemblyName}",
+                batch.Count,
+                registration.Assembly.GetName().Name);
+            return batch.Count;
+        }
     }
 
     /// <summary>
-    ///     Scans a single assembly for command methods (both static and instance).
-    ///     Instance method handlers use singleton instances per declaring type.
+    ///     Scans a single type of the registration's assembly and publishes its commands together.
     /// </summary>
-    /// <param name="assembly">The assembly to scan.</param>
-    public void ScanAssembly(Assembly assembly)
+    internal int ScanType(AssemblyRegistration registration, Type type)
     {
-        int commandCount = assembly.GetExportedTypes()
-                                   .Where(type => type.IsDefined(typeof(CommandGroupAttribute), false)
-                                                  && type.IsClass)
-                                   .Sum(ScanType);
-        _logger.LogInformation(
-            "Scanned {Count} commands from assembly {AssemblyName}",
-            commandCount,
-            assembly.GetName().Name);
+        ArgumentNullException.ThrowIfNull(type);
+        lock (_registrationLock)
+        {
+            EnsureRegistered(registration);
+            EnsureOwnedType(registration, type, nameof(type));
+            if (!IsScannable(type))
+                throw new ArgumentException(
+                    $"Type {type.FullName} is abstract or an open generic type and cannot be scanned.",
+                    nameof(type));
+
+            if (registration.ScannedTypes.Contains(type))
+            {
+                LogDuplicateScan(registration, type);
+                return 0;
+            }
+
+            List<CommandInfo>        batch        = [];
+            Dictionary<Type, object> newInstances = new();
+            BuildTypeCommands(registration, type, batch, newInstances);
+            PublishScan(registration, batch, newInstances, [type]);
+            return batch.Count;
+        }
     }
 
     /// <summary>
-    ///     Scans a single type for command methods (both static and instance).
-    ///     Instance method handlers use singleton instances per declaring type.
+    ///     Builds the commands of one type into a pending batch. Nothing is published until the whole scan succeeds.
     /// </summary>
-    /// <param name="type">The type to scan for command methods.</param>
-    /// <returns>The number of commands discovered and registered from the type.</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="OverflowException"></exception>
-    public int ScanType(Type type)
+    private void BuildTypeCommands(
+        AssemblyRegistration     registration,
+        Type                     type,
+        List<CommandInfo>        batch,
+        Dictionary<Type, object> newInstances)
     {
         int                    commandCount = 0;
         CommandGroupAttribute? groupAttr    = type.GetCustomAttribute<CommandGroupAttribute>();
         string                 prefix       = groupAttr?.Prefix ?? "";
-        _scannedTypes.Add(type);
 
         _logger.LogDebug("Scanning command type [{TypeName}] with prefix '{Prefix}'", type.FullName, prefix);
 
@@ -266,57 +384,99 @@ public sealed class CommandManager
                 continue;
 
             // For instance methods, get or create the singleton instance
-            object? instance = null;
-            if (!method.IsStatic)
-                instance = _instances.GetOrAdd(type, CreateInstance);
+            object? instance = method.IsStatic ? null : ResolveInstance(registration, type, newInstances);
 
             CommandFilterInfo filters =
                 ResolveCommandFilters(method, classAttrs, classBeforeFilter, classAfterFilter);
 
-            CommandInfo info = new()
-            {
-                Method          = method,
-                Instance        = instance,
-                Expressions     = cmdAttr.Expressions,
-                MatchType       = cmdAttr.MatchType,
-                SourceType      = cmdAttr.SourceType,
-                PermissionLevel = cmdAttr.PermissionLevel,
-                SuperUserOnly   = cmdAttr.SuperUserOnly,
-                Priority        = cmdAttr.Priority,
-                BlockAfterMatch = cmdAttr.BlockAfterMatch,
-                CommandPrefix   = prefix,
-                Description     = cmdAttr.Description,
-                PreventReentry  = cmdAttr.PreventReentry,
-                ReentryMessage  = cmdAttr.ReentryMessage,
-                BeforeFilters   = filters.Before,
-                AfterFilters    = filters.After,
-                Attributes      = filters.Attributes
-            };
-
-            lock (_lock)
-            {
-                _commands.Add(info);
-                _needsSort = true;
-            }
-
-            _logger.LogInformation(
-                "Registered command [{CommandName}] via {MatchType} (source: {SourceType}, priority: {Priority}, block: {BlockAfterMatch}, before-filters: {BeforeCount}, after-filters: {AfterCount})",
-                method.Name,
-                cmdAttr.MatchType,
-                cmdAttr.SourceType,
-                cmdAttr.Priority,
-                cmdAttr.BlockAfterMatch,
-                filters.Before.Count,
-                filters.After.Count);
+            batch.Add(
+                new CommandInfo
+                {
+                    Method          = method,
+                    Instance        = instance,
+                    Expressions     = cmdAttr.Expressions,
+                    MatchType       = cmdAttr.MatchType,
+                    SourceType      = cmdAttr.SourceType,
+                    PermissionLevel = cmdAttr.PermissionLevel,
+                    SuperUserOnly   = cmdAttr.SuperUserOnly,
+                    Priority        = cmdAttr.Priority,
+                    BlockAfterMatch = cmdAttr.BlockAfterMatch,
+                    CommandPrefix   = prefix,
+                    Description     = cmdAttr.Description,
+                    PreventReentry  = cmdAttr.PreventReentry,
+                    ReentryMessage  = cmdAttr.ReentryMessage,
+                    BeforeFilters   = filters.Before,
+                    AfterFilters    = filters.After,
+                    Attributes      = filters.Attributes,
+                    Registration    = registration,
+                    OwnerType       = type,
+                    Sequence        = _nextSequence++
+                });
 
             commandCount++;
         }
 
-        _logger.LogInformation(
-            "Scanned {Count} commands from assembly {TypeName}",
-            commandCount,
-            type.Name);
-        return commandCount;
+        _logger.LogDebug("Built {Count} commands from type {TypeName}", commandCount, type.FullName);
+    }
+
+    /// <summary>
+    ///     Publishes a successfully built scan batch: instances, scan records, type states and commands.
+    /// </summary>
+    private void PublishScan(
+        AssemblyRegistration     registration,
+        List<CommandInfo>        batch,
+        Dictionary<Type, object> newInstances,
+        IEnumerable<Type>        scannedTypes)
+    {
+        foreach (KeyValuePair<Type, object> pair in newInstances)
+            registration.Instances[pair.Key] = pair.Value;
+        registration.ScannedTypes.UnionWith(scannedTypes);
+        foreach (CommandInfo info in batch)
+            AddCommand(registration, info);
+
+        if (batch.Count > 0)
+        {
+            RebuildSegment(registration);
+            PublishTable();
+        }
+
+        foreach (CommandInfo info in batch)
+            _logger.LogInformation(
+                "Registered command [{CommandName}] via {MatchType} (owner: {OwnerType}, source: {SourceType}, priority: {Priority}, block: {BlockAfterMatch}, before-filters: {BeforeCount}, after-filters: {AfterCount})",
+                info.Method.Name,
+                info.MatchType,
+                info.OwnerType.FullName,
+                info.SourceType,
+                info.Priority,
+                info.BlockAfterMatch,
+                info.BeforeFilters.Count,
+                info.AfterFilters.Count);
+    }
+
+    /// <summary>
+    ///     Adds a command and creates its owner type state on first use.
+    /// </summary>
+    private static void AddCommand(AssemblyRegistration registration, CommandInfo info)
+    {
+        registration.Commands.Add(info);
+        if (!registration.Types.ContainsKey(info.OwnerType))
+            registration.Types.Add(info.OwnerType, new TypeState { FirstSequence = info.Sequence });
+    }
+
+    /// <summary>
+    ///     Resolves the singleton for an instance command: pre-registered, already created in this batch, or new.
+    /// </summary>
+    private object ResolveInstance(
+        AssemblyRegistration     registration,
+        Type                     type,
+        Dictionary<Type, object> newInstances)
+    {
+        if (registration.Instances.TryGetValue(type, out object? registered)) return registered;
+        if (newInstances.TryGetValue(type, out object? created)) return created;
+
+        object instance = CreateInstance(type);
+        newInstances.Add(type, instance);
+        return instance;
     }
 
     /// <summary>
@@ -373,6 +533,223 @@ public sealed class CommandManager
 
 #endregion
 
+#region Registration Management
+
+    /// <summary>
+    ///     Sets an assembly's local enabled state.
+    /// </summary>
+    internal bool SetAssemblyEnabled(AssemblyRegistration registration, bool enabled)
+    {
+        lock (_registrationLock)
+        {
+            if (!registration.IsRegistered) return false;
+            if (registration.IsEnabled == enabled) return true;
+
+            registration.IsEnabled = enabled;
+            PublishTable();
+        }
+
+        _logger.LogInformation(
+            "Command assembly {AssemblyName} enabled changed: {OldEnabled} -> {NewEnabled}",
+            registration.Assembly.GetName().Name,
+            !enabled,
+            enabled);
+        return true;
+    }
+
+    /// <summary>
+    ///     Sets an assembly's priority.
+    /// </summary>
+    internal bool SetAssemblyPriority(AssemblyRegistration registration, int priority)
+    {
+        int oldPriority;
+        lock (_registrationLock)
+        {
+            if (!registration.IsRegistered) return false;
+            if (registration.Priority == priority) return true;
+
+            oldPriority           = registration.Priority;
+            registration.Priority = priority;
+            PublishTable();
+        }
+
+        _logger.LogInformation(
+            "Command assembly {AssemblyName} priority changed: {OldPriority} -> {NewPriority}",
+            registration.Assembly.GetName().Name,
+            oldPriority,
+            priority);
+        return true;
+    }
+
+    /// <summary>
+    ///     Sets an owner type's local enabled state.
+    /// </summary>
+    internal bool SetTypeEnabled(AssemblyRegistration registration, Type type, bool enabled)
+    {
+        ArgumentNullException.ThrowIfNull(type);
+        lock (_registrationLock)
+        {
+            if (!registration.IsRegistered || !registration.Types.TryGetValue(type, out TypeState? state))
+                return false;
+            if (state.Enabled == enabled) return true;
+
+            state.Enabled = enabled;
+            RebuildSegment(registration);
+            PublishTable();
+        }
+
+        _logger.LogInformation(
+            "Command type {TypeName} in assembly {AssemblyName} enabled changed: {OldEnabled} -> {NewEnabled}",
+            type.FullName,
+            registration.Assembly.GetName().Name,
+            !enabled,
+            enabled);
+        return true;
+    }
+
+    /// <summary>
+    ///     Removes a registration immediately and waits for its in-flight invocations to finish.
+    /// </summary>
+    internal async ValueTask UnregisterAssemblyAsync(AssemblyRegistration registration, CancellationToken ct)
+    {
+        Task drained;
+        lock (_registrationLock)
+        {
+            bool removing = registration.IsRegistered;
+            drained = registration.MarkUnregistered();
+            if (removing)
+            {
+                _registrations.Remove(registration.Assembly);
+                registration.Commands.Clear();
+                registration.Types.Clear();
+                registration.Instances.Clear();
+                registration.ScannedTypes.Clear();
+                registration.Segment = null;
+                PublishTable();
+
+                _logger.LogInformation(
+                    "Unregistered command assembly {AssemblyName}; waiting for in-flight invocations",
+                    registration.Assembly.GetName().Name);
+            }
+        }
+
+        await drained.WaitAsync(ct);
+        _logger.LogDebug(
+            "Command assembly {AssemblyName} has no in-flight invocations",
+            registration.Assembly.GetName().Name);
+    }
+
+    /// <summary>
+    ///     Rebuilds the cached segment of a registration: all commands sorted by descending priority and ascending
+    ///     registration sequence, filtered to effectively enabled types. Called only when the registration's commands
+    ///     or type states change.
+    /// </summary>
+    private static void RebuildSegment(AssemblyRegistration registration)
+    {
+        registration.Commands.Sort(CompareCommands);
+        CommandInfo[] commands = [.. registration.Commands.Where(cmd => registration.Types[cmd.OwnerType].Enabled)];
+        registration.Segment = commands.Length == 0
+            ? null
+            : new AssemblySegment
+            {
+                Registration = registration,
+                Commands     = commands
+            };
+    }
+
+    /// <summary>
+    ///     Publishes a new execution table from the enabled registrations' cached segments.
+    ///     Must be called while holding the registration lock.
+    /// </summary>
+    private void PublishTable()
+    {
+        AssemblySegment[] segments =
+        [
+            .. OrderAssemblies(_registrations.Values.Where(static registration => registration.IsEnabled))
+                .Select(static registration => registration.Segment)
+                .OfType<AssemblySegment>()
+        ];
+        Volatile.Write(ref _executionTable, new ExecutionTable { Segments = segments });
+    }
+
+    /// <summary>
+    ///     Orders registrations by descending priority, then ascending registration sequence.
+    /// </summary>
+    private static IEnumerable<AssemblyRegistration> OrderAssemblies(IEnumerable<AssemblyRegistration> registrations) =>
+        registrations.OrderByDescending(static registration => registration.Priority)
+                     .ThenBy(static registration => registration.FirstSequence);
+
+    /// <summary>
+    ///     Orders commands by descending priority, then ascending registration sequence.
+    /// </summary>
+    private static int CompareCommands(CommandInfo left, CommandInfo right)
+    {
+        int priorityOrder = right.Priority.CompareTo(left.Priority);
+        return priorityOrder != 0 ? priorityOrder : left.Sequence.CompareTo(right.Sequence);
+    }
+
+    /// <summary>
+    ///     Creates an immutable state snapshot of a registration.
+    /// </summary>
+    private static CommandAssemblyState CreateAssemblyState(AssemblyRegistration registration) =>
+        new()
+        {
+            Assembly  = registration.Assembly,
+            IsEnabled = registration.IsEnabled,
+            Priority  = registration.Priority,
+            Types =
+            [
+                .. registration.Types
+                               .OrderBy(static pair => pair.Value.FirstSequence)
+                               .Select(pair => new CommandTypeState
+                               {
+                                   Type                 = pair.Key,
+                                   IsEnabled            = pair.Value.Enabled,
+                                   IsEffectivelyEnabled = registration.IsEnabled && pair.Value.Enabled,
+                                   CommandCount         = registration.Commands.Count(cmd => cmd.OwnerType == pair.Key)
+                               })
+            ]
+        };
+
+    /// <summary>
+    ///     Throws when a registration operation targets an unregistered handle.
+    /// </summary>
+    private static void EnsureRegistered(AssemblyRegistration registration)
+    {
+        if (!registration.IsRegistered)
+            throw new InvalidOperationException(
+                $"The command assembly registration for {registration.Assembly.GetName().Name} has been unregistered.");
+    }
+
+    /// <summary>
+    ///     Throws when a type is not defined in the registration's assembly.
+    /// </summary>
+    private static void EnsureOwnedType(AssemblyRegistration registration, Type type, string paramName)
+    {
+        ArgumentNullException.ThrowIfNull(type, paramName);
+        if (type.Assembly != registration.Assembly)
+            throw new ArgumentException(
+                $"Type {type.FullName} is not defined in assembly {registration.Assembly.GetName().Name}.",
+                paramName);
+    }
+
+    /// <summary>
+    ///     Whether a type can provide commands: abstract non-static classes and open generic types are excluded.
+    /// </summary>
+    private static bool IsScannable(Type type) =>
+        !type.ContainsGenericParameters && (!type.IsAbstract || type.IsSealed);
+
+    /// <summary>
+    ///     Logs a skipped duplicate type scan.
+    /// </summary>
+    private void LogDuplicateScan(AssemblyRegistration registration, Type type) =>
+        _logger.LogWarning(
+            "Command type {TypeName} has already been scanned in assembly {AssemblyName}; skipping",
+            type.FullName,
+            registration.Assembly.GetName().Name);
+
+#endregion
+
 #region Command Execution
 
     /// <summary>
@@ -387,46 +764,23 @@ public sealed class CommandManager
         string text = e.Message.Body.GetText().Trim();
         if (string.IsNullOrEmpty(text)) return;
 
-        // use snapshot for thread safety
-        List<CommandInfo> snapshot;
-        lock (_lock)
+        // The table is immutable, already ordered and rebuilt only when registrations change.
+        ExecutionTable table = Volatile.Read(ref _executionTable);
+        foreach (AssemblySegment segment in table.Segments)
         {
-            if (_needsSort)
+            foreach (CommandInfo cmd in segment.Commands)
             {
-                _commands.Sort((a, b) => b.Priority.CompareTo(a.Priority));
-                _needsSort = false;
-            }
+                ct.ThrowIfCancellationRequested();
+                if (!e.IsContinueEventChain) return;
+                if (!IsCommandMatched(cmd, e, text)) continue;
 
-            snapshot = [.. _commands];
-        }
-
-        foreach (CommandInfo cmd in snapshot)
-        {
-            ct.ThrowIfCancellationRequested();
-            if (!e.IsContinueEventChain) break;
-
-            // Filter by source type
-            if (cmd.SourceType.HasValue && cmd.SourceType.Value != e.Message.SourceType)
-                continue;
-
-            // Check permission
-            if (cmd.SuperUserOnly && !e.IsSuperUser)
-                continue;
-            if (cmd.PermissionLevel > MemberRole.Member && e.Member is not null)
-                if (e.Member.Role < cmd.PermissionLevel)
-                    continue;
-
-            // Try matching
-            if (!_matchers.TryGetValue(cmd.MatchType, out ICommandMatcher? matcher))
-                continue;
-
-            if (cmd.Expressions.Select(expr => BuildFullExpression(cmd, expr))
-                   .Any(fullExpr => matcher.IsMatch(text, fullExpr)))
-            {
                 _logger.LogInformation(
                     "Matched command [{CommandName}] via {MatchType} ",
                     cmd.Method.Name,
                     cmd.MatchType);
+
+                // An assembly unregistered after this table was read skips its remaining commands.
+                if (!segment.Registration.TryEnterInvocation()) break;
 
                 // Re-entry guard: skip if the same user already has this command in flight
                 ExecutionKey executionKey = default;
@@ -441,6 +795,7 @@ public sealed class CommandManager
 
                     if (!_activeExecutions.TryAdd(executionKey, 0))
                     {
+                        segment.Registration.ExitInvocation();
                         _logger.LogWarning(
                             "Command [{CommandName}] blocked: re-entry from sender {SenderId} in {SourceType} (group: {GroupId})",
                             cmd.Method.Name,
@@ -456,14 +811,36 @@ public sealed class CommandManager
                     }
                 }
 
-                using CommandExecutionScope executionScope = cmd.PreventReentry
-                    ? new CommandExecutionScope(_activeExecutions, executionKey)
-                    : default;
+                using CommandExecutionScope executionScope = new(
+                    segment.Registration,
+                    cmd.PreventReentry ? _activeExecutions : null,
+                    executionKey);
                 await ExecuteMatchedCommandAsync(cmd, e, ct);
 
                 if (cmd.BlockAfterMatch) e.IsContinueEventChain = false;
             }
         }
+    }
+
+    /// <summary>
+    ///     Checks source type, permissions and match expressions of a command.
+    /// </summary>
+    private bool IsCommandMatched(CommandInfo cmd, MessageReceivedEvent e, string text)
+    {
+        // Filter by source type
+        if (cmd.SourceType.HasValue && cmd.SourceType.Value != e.Message.SourceType)
+            return false;
+
+        // Check permission
+        if (cmd.SuperUserOnly && !e.IsSuperUser)
+            return false;
+        if (cmd.PermissionLevel > MemberRole.Member && e.Member is not null && e.Member.Role < cmd.PermissionLevel)
+            return false;
+
+        // Try matching
+        return _matchers.TryGetValue(cmd.MatchType, out ICommandMatcher? matcher)
+               && cmd.Expressions.Select(expr => BuildFullExpression(cmd, expr))
+                     .Any(fullExpr => matcher.IsMatch(text, fullExpr));
     }
 
     private async ValueTask ExecuteMatchedCommandAsync(
@@ -674,7 +1051,7 @@ public sealed class CommandManager
         _logger.LogWarning(
             "Type {TypeName} has no parameterless constructor — using GetUninitializedObject. "
             + "Fields will not be initialized. Consider adding a parameterless constructor or "
-            + "registering an instance via RegisterCommandInstance<T>()",
+            + "registering an instance via AssemblyRegistration.RegisterCommandInstance<T>()",
             type.FullName);
         return RuntimeHelpers.GetUninitializedObject(type);
     }

@@ -53,14 +53,15 @@ public class CommandMatcherTests
 
 #region CommandManager Execution Tests
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task CommandManager_DynamicCommand_Executes()
     {
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -91,7 +92,8 @@ public class CommandMatcherTests
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -122,7 +124,8 @@ public class CommandMatcherTests
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -157,7 +160,8 @@ public class CommandMatcherTests
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -189,7 +193,8 @@ public class CommandMatcherTests
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -218,14 +223,15 @@ public class CommandMatcherTests
 
 #region Priority and Blocking Tests
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task CommandManager_Priority_HigherFirst()
     {
         CommandManager manager = new();
         List<string>   order   = [];
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 order.Add("low");
@@ -235,7 +241,8 @@ public class CommandMatcherTests
             priority: 1,
             blockAfterMatch: false);
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 order.Add("high");
@@ -268,7 +275,8 @@ public class CommandMatcherTests
         CommandManager manager = new();
         int            count   = 0;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 count++;
@@ -278,7 +286,8 @@ public class CommandMatcherTests
             priority: 10,
             blockAfterMatch: true);
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 count++;
@@ -308,14 +317,15 @@ public class CommandMatcherTests
 
 #region Source Type Filter Tests
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task CommandManager_SourceTypeFilter()
     {
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -352,7 +362,8 @@ public class CommandMatcherTests
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -385,7 +396,8 @@ public class CommandMatcherTests
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -418,7 +430,8 @@ public class CommandMatcherTests
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -450,7 +463,8 @@ public class CommandMatcherTests
         CommandManager manager  = new();
         bool           executed = false;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 executed = true;
@@ -480,14 +494,15 @@ public class CommandMatcherTests
 
 #region Unregister Dynamic Command Tests
 
-    /// <see cref="CommandManager.UnregisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.UnregisterDynamicCommand" />
     [Fact]
     public async Task CommandManager_UnregisterDynamicCommand_NoLongerMatches()
     {
         CommandManager manager = new();
         int            count   = 0;
 
-        Guid commandId = manager.RegisterDynamicCommand(
+        Guid commandId = manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
             async _ =>
             {
                 count++;
@@ -512,7 +527,7 @@ public class CommandMatcherTests
         Assert.Equal(1, count);
 
         // Unregister
-        bool removed = manager.UnregisterDynamicCommand(commandId);
+        bool removed = manager.TestRegistrar().UnregisterDynamicCommand(commandId);
         Assert.True(removed);
 
         // Second invocation should not match
@@ -521,12 +536,12 @@ public class CommandMatcherTests
         Assert.Equal(1, count);
     }
 
-    /// <see cref="CommandManager.UnregisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.UnregisterDynamicCommand" />
     [Fact]
     public void CommandManager_UnregisterNonExistentId_ReturnsFalse()
     {
         CommandManager manager = new();
-        bool           result  = manager.UnregisterDynamicCommand(Guid.NewGuid());
+        bool           result  = manager.TestRegistrar().UnregisterDynamicCommand(Guid.NewGuid());
         Assert.False(result);
     }
 

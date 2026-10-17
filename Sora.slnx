@@ -11,6 +11,7 @@
     </Folder>
     <Folder Name="/tests/">
         <Project Path="tests/Sora.Tests/Sora.Tests.csproj"/>
+        <Project Path="tests/Sora.Tests.CommandFixture/Sora.Tests.CommandFixture.csproj"/>
     </Folder>
     <Folder Name="/tools/">
         <Project Path="tools/TestReporter/TestReporter.csproj"/>

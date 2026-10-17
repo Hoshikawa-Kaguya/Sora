@@ -2,6 +2,8 @@
 
 > 本文档面向 Sora 1.x 用户，帮助你将现有机器人项目迁移到全新重构的 2.0 版本。
 
+> **目标为 3.0？** 3.0 修改了指令注册 API（§7.3、§7.4），其余内容与本文相同。请参阅 [迁移到 Sora 3.0](MIGRATION-V2-TO-V3.md) 中的「V1 → V3 直接迁移」一章。
+
 > 迁移目标为 Milky。`HoshikawaKaguya.Sora.Adapter.OneBot11` 的支持范围截至 Sora 2.2；后续版本停止维护，并退出构建、测试和发布。源码、专属测试和示例仅作历史参考，使用 OB11 的项目应固定在 Sora 2.2 或迁移到 Milky。 本文 OB11 类型仅作历史代码参考。NuGet 包不设置 deprecated 标记。
 
 ## 概述
@@ -539,6 +541,8 @@ public static class Commands
 service.Commands.ScanAssembly(typeof(Program).Assembly);
 ```
 
+> **3.0 中改为** `service.Commands.RegisterAssembly(typeof(Program).Assembly).ScanCommandGroups()`，详见 [迁移到 Sora 3.0](MIGRATION-V2-TO-V3.md#v1--v3-直接迁移)。
+
 ### 7.4 动态指令
 
 ```csharp
@@ -565,6 +569,8 @@ service.Commands.RegisterDynamicCommand(
     preventReentry: true,           // 默认 true，防止同一用户重复触发
     reentryMessage: "执行中，请稍候"); // 可选：被阻止时回复用户
 ```
+
+> **3.0 中改为** 通过程序集注册句柄的 `Registrar.RegisterDynamicCommand(ownerType, handler, ...)` 注册，`ownerType` 必须是本程序集的类型，详见 [迁移到 Sora 3.0](MIGRATION-V2-TO-V3.md#v1--v3-直接迁移)。
 
 #### 7.4.1 过滤器
 
@@ -774,7 +780,7 @@ await Task.Delay(-1);
 - [ ] 将 `long` 类型的 ID 替换为 `UserId`、`GroupId`、`MessageId`
 - [ ] 更新 API 调用：使用新方法名 + 处理 `ApiResult<T>` 返回值
 - [ ] 迁移指令：`[CommandSeries]` → `[CommandGroup]`，`[SoraCommand]` → `[Command]`
-- [ ] 添加 `service.Commands.ScanAssembly(typeof(Program).Assembly)` 注册指令
+- [ ] 添加 `service.Commands.ScanAssembly(typeof(Program).Assembly)` 注册指令（3.0 中改为 `service.Commands.RegisterAssembly(typeof(Program).Assembly).ScanCommandGroups()`，见 [迁移到 Sora 3.0](MIGRATION-V2-TO-V3.md)）
 - [ ] 更新日志代码：`YukariToolBox.LightLog` → `SoraLogger` / `ILogger`
 - [ ] 更新所有 `using` 命名空间
 - [ ] 编译并修复所有编译错误
@@ -788,3 +794,5 @@ await Task.Delay(-1);
 - [日志配置](LOGGING.md) — 日志系统详细配置
 - [Adapter 开发指南](ADAPTER-DEVELOPMENT.md) — 第三方协议适配器开发
 - [测试说明](TESTING.md) — 测试架构与运行方式
+- [迁移到 Sora 3.0](MIGRATION-V2-TO-V3.md) — V2 → V3 与 V1 → V3 迁移
+- [指令模块](COMMANDS.md) — 指令注册、执行顺序、启停与注销

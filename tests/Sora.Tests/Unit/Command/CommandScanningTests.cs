@@ -26,13 +26,13 @@ public static class NoGroupCommands
 /// <summary>Test commands with invalid signatures for scanning tests.</summary>
 public static class BadSignatureCommands
 {
-    /// <see cref="CommandManager.ScanType(Type)" />
+    /// <see cref="CommandManager.TestRegistration().ScanType(Type)" />
     [Command(Expressions = ["bad"])]
     public static void NonValueTask(MessageReceivedEvent e)
     {
     } // Wrong return type
 
-    /// <see cref="CommandManager.ScanType(Type)" />
+    /// <see cref="CommandManager.TestRegistration().ScanType(Type)" />
     [Command(Expressions = ["bad2"])]
     public static async ValueTask WrongParam(string s) => await ValueTask.CompletedTask; // Wrong param
 }
@@ -44,7 +44,7 @@ public class InstanceCommandGroup
     /// <summary>Tracks how many times this instance has been invoked.</summary>
     public int InvokeCount { get; set; }
 
-    /// <see cref="CommandManager.ScanType(Type)" />
+    /// <see cref="CommandManager.TestRegistration().ScanType(Type)" />
     [Command(Expressions = ["count"], MatchType = MatchType.Full)]
     public async ValueTask Count(MessageReceivedEvent e)
     {
@@ -52,7 +52,7 @@ public class InstanceCommandGroup
         await ValueTask.CompletedTask;
     }
 
-    /// <see cref="CommandManager.ScanType(Type)" />
+    /// <see cref="CommandManager.TestRegistration().ScanType(Type)" />
     [Command(Expressions = ["greet"], MatchType = MatchType.Full)]
     public async ValueTask Greet(MessageReceivedEvent e)
     {
@@ -71,13 +71,13 @@ public class CommandScanningTests
 
 #region ScanType Tests
 
-    /// <see cref="CommandManager.ScanType(Type)" />
+    /// <see cref="CommandManager.TestRegistration().ScanType(Type)" />
     [Fact]
     public void ScanAssembly_SkipsBadSignatures()
     {
         CommandManager manager = new();
         // Should not throw even with bad signatures
-        manager.ScanType(typeof(BadSignatureCommands));
+        manager.TestRegistration().ScanType(typeof(BadSignatureCommands));
     }
 
     /// <see cref="CommandGroupAttribute.Prefix" />
@@ -85,7 +85,7 @@ public class CommandScanningTests
     public async Task ScanAssembly_GroupPrefix_Applied()
     {
         CommandManager manager = new();
-        manager.ScanType(typeof(TestGroupCommands));
+        manager.TestRegistration().ScanType(typeof(TestGroupCommands));
 
         MessageReceivedEvent evt = CreateTestEvent("/hello");
         await manager.HandleMessageEventAsync(evt, CT);
@@ -95,12 +95,12 @@ public class CommandScanningTests
         Assert.False(evt.IsContinueEventChain);
     }
 
-    /// <see cref="CommandManager.ScanType(Type)" />
+    /// <see cref="CommandManager.TestRegistration().ScanType(Type)" />
     [Fact]
     public async Task ScanAssembly_StandaloneCommand_NoPrefix()
     {
         CommandManager manager = new();
-        manager.ScanType(typeof(NoGroupCommands));
+        manager.TestRegistration().ScanType(typeof(NoGroupCommands));
 
         MessageReceivedEvent evt = CreateTestEvent("standalone");
         await manager.HandleMessageEventAsync(evt, CT);
@@ -112,12 +112,12 @@ public class CommandScanningTests
 
 #region Command Execution Tests
 
-    /// <see cref="CommandManager.ScanType(Type)" />
+    /// <see cref="CommandManager.TestRegistration().ScanType(Type)" />
     [Fact]
     public async Task ScanAssembly_InstanceCommand_Executes()
     {
         CommandManager manager = new();
-        manager.ScanType(typeof(InstanceCommandGroup));
+        manager.TestRegistration().ScanType(typeof(InstanceCommandGroup));
 
         MessageReceivedEvent evt = CreateTestEvent("!count");
         await manager.HandleMessageEventAsync(evt, CT);
@@ -125,12 +125,12 @@ public class CommandScanningTests
         Assert.False(evt.IsContinueEventChain);
     }
 
-    /// <see cref="CommandManager.ScanType(Type)" />
+    /// <see cref="CommandManager.TestRegistration().ScanType(Type)" />
     [Fact]
     public async Task ScanAssembly_InstanceCommand_UsesSingleton()
     {
         CommandManager manager = new();
-        manager.ScanType(typeof(InstanceCommandGroup));
+        manager.TestRegistration().ScanType(typeof(InstanceCommandGroup));
 
         // Execute "count" three times + "greet" once — all on the same singleton
         MessageReceivedEvent evt1 = CreateTestEvent("!count");
@@ -155,7 +155,7 @@ public class CommandScanningTests
 
 #region RegisterCommandInstance Tests
 
-    /// <see cref="CommandManager.RegisterCommandInstance{T}" />
+    /// <see cref="AssemblyRegistration.RegisterCommandInstance{T}" />
     [Fact]
     public async Task RegisterCommandInstance_UsesProvidedInstance()
     {
@@ -163,9 +163,9 @@ public class CommandScanningTests
 
         // Pre-register an externally constructed instance
         InstanceCommandGroup external = new() { InvokeCount = 10 };
-        manager.RegisterCommandInstance(external);
+        manager.TestRegistration().RegisterCommandInstance(external);
 
-        manager.ScanType(typeof(InstanceCommandGroup));
+        manager.TestRegistration().ScanType(typeof(InstanceCommandGroup));
 
         MessageReceivedEvent evt = CreateTestEvent("!count");
         await manager.HandleMessageEventAsync(evt, CT);
@@ -177,15 +177,15 @@ public class CommandScanningTests
         Assert.Equal(11, retrieved.InvokeCount);
     }
 
-    /// <see cref="CommandManager.RegisterCommandInstance{T}" />
+    /// <see cref="AssemblyRegistration.RegisterCommandInstance{T}" />
     [Fact]
     public void RegisterCommandInstance_ThrowsAfterScan()
     {
         CommandManager manager = new();
-        manager.ScanType(typeof(InstanceCommandGroup));
+        manager.TestRegistration().ScanType(typeof(InstanceCommandGroup));
 
         InstanceCommandGroup external = new();
-        Assert.Throws<InvalidOperationException>(() => manager.RegisterCommandInstance(external));
+        Assert.Throws<InvalidOperationException>(() => manager.TestRegistration().RegisterCommandInstance(external));
     }
 
 #endregion
@@ -197,7 +197,7 @@ public class CommandScanningTests
     public async Task ScanAssembly_PermissionLevel_AllowsHigherRole()
     {
         CommandManager manager = new();
-        manager.ScanType(typeof(TestGroupCommands));
+        manager.TestRegistration().ScanType(typeof(TestGroupCommands));
 
         MessageReceivedEvent evt = CreateTestEvent("/admin", MemberRole.Admin);
         await manager.HandleMessageEventAsync(evt, CT);
@@ -210,7 +210,7 @@ public class CommandScanningTests
     public async Task ScanAssembly_PermissionLevel_BlocksLowerRole()
     {
         CommandManager manager = new();
-        manager.ScanType(typeof(TestGroupCommands));
+        manager.TestRegistration().ScanType(typeof(TestGroupCommands));
 
         // Create event from a regular member trying "/admin" command
         MessageReceivedEvent evt = CreateTestEvent("/admin");

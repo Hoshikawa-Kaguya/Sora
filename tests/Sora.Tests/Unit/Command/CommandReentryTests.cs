@@ -401,7 +401,7 @@ public class CommandReentryTests : IDisposable
     public CommandReentryTests()
     {
         ReentryCommands.Reset();
-        _manager.ScanType(typeof(ReentryCommands));
+        _manager.TestRegistration().ScanType(typeof(ReentryCommands));
     }
 
     public void Dispose() => ReentryCommands.Reset();
@@ -571,7 +571,7 @@ public class CommandReentryTests : IDisposable
 
 #region Dynamic Command Re-entry Tests
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task DynamicCommand_PreventReentry_Works()
     {
@@ -580,7 +580,8 @@ public class CommandReentryTests : IDisposable
         TaskCompletionSource gate      = new(TaskCreationOptions.RunContinuationsAsynchronously);
         int                  execCount = 0;
 
-        manager.RegisterDynamicCommand(
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandReentryTests),
             async _ =>
             {
                 Interlocked.Increment(ref execCount);

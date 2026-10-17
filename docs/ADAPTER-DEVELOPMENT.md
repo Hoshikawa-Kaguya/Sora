@@ -54,10 +54,11 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
   → IEventPreFilter 阶段（scope-aware，可预处理或拦截事件）
   → 路由阶段（前置阶段未失败且事件链允许继续时）
       → CommandManager.HandleMessageEventAsync（命令匹配，如启用）
-          → 匹配 → 权限/重入检查
+          → 按程序集优先级逐个程序集、程序集内按命令优先级遍历
+          → 匹配 → 权限/存活/重入检查
           → CommandBeforeFilterAttribute 阶段（opt-in attribute，可阻止执行）
           → 执行命令处理器
-          → CommandAfterFilterAttribute 阶段 → 重入占用作用域结束
+          → CommandAfterFilterAttribute 阶段 → 在途调用与重入占用作用域结束
       → EventDispatcher（事件链允许继续时按类型分发）
   → IEventPostFilter 阶段（scope-aware，正常完成或短路后进入）
 ```
@@ -79,7 +80,7 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
 
 ### 命令实例与连续对话
 
-实例命令按声明类型使用 singleton：优先使用扫描前注册的实例，其次调用 public/non-public 无参构造函数；没有无参构造函数时，使用 `RuntimeHelpers.GetUninitializedObject` 创建实例。这是受支持的实例化方式，不执行构造函数和字段初始化器，字段为零值。需要初始化状态的命令应提供无参构造函数，或先调用 `RegisterCommandInstance<T>()`。
+命令的注册、实例构造、执行顺序、启停与注销属于 `Sora.Command`，适配器无需处理，详见[指令模块文档](COMMANDS.md)。
 
 连续对话按连接、发送者、消息来源和群身份原子登记；非群消息忽略 GroupId，同源重复登记返回 null。timeout 按 Task.Delay 的范围在登记前校验，非法值抛 ArgumentOutOfRangeException。消息、超时、取消及断开只有一个完成方，后续完成不能覆盖已交付的结果。
 

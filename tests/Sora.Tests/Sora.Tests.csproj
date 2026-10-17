@@ -10,6 +10,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\Sora\Sora.csproj"/>
         <ProjectReference Include="..\..\src\Sora.Adapter.Milky\Sora.Adapter.Milky.csproj"/>
+        <ProjectReference Include="..\Sora.Tests.CommandFixture\Sora.Tests.CommandFixture.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

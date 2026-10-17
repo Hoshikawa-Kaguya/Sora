@@ -454,9 +454,9 @@ public class CommandFilterTests : IDisposable
         FilterTestCommands.Reset();
         GroupCounterCommands.Reset();
         TieBreakCommands.Reset();
-        _manager.ScanType(typeof(FilterTestCommands));
-        _manager.ScanType(typeof(GroupCounterCommands));
-        _manager.ScanType(typeof(TieBreakCommands));
+        _manager.TestRegistration().ScanType(typeof(FilterTestCommands));
+        _manager.TestRegistration().ScanType(typeof(GroupCounterCommands));
+        _manager.TestRegistration().ScanType(typeof(TieBreakCommands));
     }
 
     public void Dispose()
@@ -531,7 +531,8 @@ public class CommandFilterTests : IDisposable
         OperationCanceledException    expected     = new(source.Token);
         int                           executions   = 0;
         int                           beforeCalls  = 0;
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             _ =>
             {
                 executions++;
@@ -635,7 +636,8 @@ public class CommandFilterTests : IDisposable
         using CancellationTokenSource source       = new();
         OperationCanceledException    expected     = new(source.Token);
         int                           executions   = 0;
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             _ =>
             {
                 executions++;
@@ -823,7 +825,8 @@ public class CommandFilterTests : IDisposable
     public async Task DynamicCommand_WithoutFilters_NoFilterRuns()
     {
         int execCount = 0;
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             _ =>
             {
                 execCount++;
@@ -844,7 +847,8 @@ public class CommandFilterTests : IDisposable
         int                        execCount = 0;
         PassThroughBeforeAttribute filter    = new();
 
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             _ =>
             {
                 execCount++;
@@ -864,7 +868,8 @@ public class CommandFilterTests : IDisposable
     public async Task DynamicCommand_WithAfterFilter_RecordsExecution()
     {
         RecordingAfterAttribute afterFilter = new();
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             static _ => ValueTask.CompletedTask,
             ["dyn-after"],
             afterFilters: [afterFilter]);
@@ -885,7 +890,8 @@ public class CommandFilterTests : IDisposable
     public async Task DynamicCommand_WithLambdaAttribute_FilterAutoDiscovered()
     {
         int execCount = 0;
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             [PassThroughBefore](e) =>
             {
                 execCount++;
@@ -906,7 +912,8 @@ public class CommandFilterTests : IDisposable
     public async Task DynamicCommand_LambdaAttributeAndExplicitFilters_BothApply()
     {
         RecordingAfterAttribute explicitAfter = new();
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             [PassThroughBefore](e) => ValueTask.CompletedTask,
             ["dyn-mixed"],
             afterFilters: [explicitAfter]);
@@ -923,7 +930,8 @@ public class CommandFilterTests : IDisposable
     [Fact]
     public async Task DynamicCommand_MultipleLambdaAttributes_OrderedByOrderAscending()
     {
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             [OrderedBefore(20)] [OrderedBefore(5)] [OrderedBefore(10)](e) => ValueTask.CompletedTask,
             ["dyn-multi"]);
 
@@ -940,7 +948,8 @@ public class CommandFilterTests : IDisposable
     public async Task DynamicCommand_DuplicateInstanceInBeforeFilters_DeduplicatedByReference()
     {
         PassThroughBeforeAttribute filter = new();
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             _ => ValueTask.CompletedTask,
             ["dyn-dup-before"],
             beforeFilters: [filter, filter, filter]);
@@ -966,7 +975,8 @@ public class CommandFilterTests : IDisposable
     {
         OrderedBeforeAttribute first  = new(5);
         OrderedBeforeAttribute second = new(10);
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             _ => ValueTask.CompletedTask,
             ["dyn-distinct"],
             beforeFilters: [first, second]);
@@ -1009,7 +1019,8 @@ public class CommandFilterTests : IDisposable
             if (cancelSora) source.Cancel();
             throw expected;
         };
-        _manager.RegisterDynamicCommand(
+        _manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandFilterTests),
             _ =>
             {
                 executions++;
@@ -1057,8 +1068,8 @@ public class CommandFilterTests : IDisposable
         OperationCanceledException expected = new(sameToken ? source.Token : CancellationToken.None);
         CancellationLogger logger = CaptureErrors();
         CancellationCommands commands = new() { Source = source, Exception = expected, CancelSora = cancelSora };
-        _manager.RegisterCommandInstance(commands);
-        _manager.ScanType(typeof(CancellationCommands));
+        _manager.TestRegistration().RegisterCommandInstance(commands);
+        _manager.TestRegistration().ScanType(typeof(CancellationCommands));
 
         string expression = synchronous ? "cancel-sync" : "cancel-async";
         if (cancelSora)

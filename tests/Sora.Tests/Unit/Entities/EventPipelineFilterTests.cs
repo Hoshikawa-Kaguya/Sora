@@ -376,7 +376,8 @@ public class EventPipelineFilterTests : IAsyncDisposable
     public async Task PostFilter_ExecutesUnconditionally_EvenIfCommandMatchBlocks()
     {
         // Register a command that matches and blocks
-        _service.Commands.RegisterDynamicCommand(
+        _service.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(EventPipelineFilterTests),
             async _ => await ValueTask.CompletedTask,
             ["testcmd"],
             blockAfterMatch: true);

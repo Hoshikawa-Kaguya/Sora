@@ -57,4 +57,4 @@ Functional tests require `SORA_TEST_*` configuration and may skip only for missi
 
 ## Documentation Routing
 
-Read the closest relevant document instead of loading the entire repository. The main references are [`docs/TESTING.md`](docs/TESTING.md), [`docs/LOGGING.md`](docs/LOGGING.md), [`docs/ADAPTER-DEVELOPMENT.md`](docs/ADAPTER-DEVELOPMENT.md), and [`docs/FUNCTIONAL-TEST-CATALOG.md`](docs/FUNCTIONAL-TEST-CATALOG.md).
+Read the closest relevant document instead of loading the entire repository. The main references are [`docs/TESTING.md`](docs/TESTING.md), [`docs/LOGGING.md`](docs/LOGGING.md), [`docs/ADAPTER-DEVELOPMENT.md`](docs/ADAPTER-DEVELOPMENT.md), [`docs/COMMANDS.md`](docs/COMMANDS.md), and [`docs/FUNCTIONAL-TEST-CATALOG.md`](docs/FUNCTIONAL-TEST-CATALOG.md). Architecture decisions are recorded in [`docs/adr/`](docs/adr/).

@@ -11,8 +11,8 @@ namespace Sora.Tests.Functional.Milky;
 ///         This exercises protocol parsing, event dispatch, and command execution end-to-end.
 ///     </para>
 ///     <para>
-///         <see cref="CommandManager.RegisterDynamicCommand" /> has no unregistration mechanism;
-///         each test uses a unique GUID-based keyword to avoid cross-test interference.
+///         Dynamic commands registered through <see cref="ICommandRegistrar.RegisterDynamicCommand" /> stay on the
+///         shared fixture service; each test uses a unique GUID-based keyword to avoid cross-test interference.
 ///     </para>
 /// </remarks>
 [Collection("Milky.Functional")]
@@ -48,7 +48,7 @@ public class CommandTests : IDisposable
 
 #region Keyword Command Tests
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task Command_KeywordMatch()
     {
@@ -57,7 +57,8 @@ public class CommandTests : IDisposable
         string                                     keyword = $"!test-keyword-{Guid.NewGuid():N}";
         TaskCompletionSource<MessageReceivedEvent> tcs     = new();
 
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             e =>
             {
                 tcs.TrySetResult(e);
@@ -80,7 +81,7 @@ public class CommandTests : IDisposable
         Assert.Equal(keyword, result.Message.Body.GetText().Trim());
     }
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task Command_RegexMatch()
     {
@@ -91,7 +92,8 @@ public class CommandTests : IDisposable
         string                                     triggerText = $"!calc-{tag} 42";
         TaskCompletionSource<MessageReceivedEvent> tcs         = new();
 
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             e =>
             {
                 tcs.TrySetResult(e);
@@ -114,7 +116,7 @@ public class CommandTests : IDisposable
         Assert.Equal(triggerText, receivedText);
     }
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task Command_KeywordMatch_Substring()
     {
@@ -125,7 +127,8 @@ public class CommandTests : IDisposable
         string                                     fullText = $"say {keyword} world";
         TaskCompletionSource<MessageReceivedEvent> tcs      = new();
 
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             e =>
             {
                 tcs.TrySetResult(e);
@@ -152,7 +155,7 @@ public class CommandTests : IDisposable
 
 #region Source Type Filtering Tests
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task Command_GroupOnly()
     {
@@ -161,7 +164,8 @@ public class CommandTests : IDisposable
         string                                     keyword = $"!grp-only-{Guid.NewGuid():N}";
         TaskCompletionSource<MessageReceivedEvent> tcs     = new();
 
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             e =>
             {
                 tcs.TrySetResult(e);
@@ -180,7 +184,7 @@ public class CommandTests : IDisposable
         _output.WriteLine("Group message correctly triggered group-only command");
     }
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task Command_PrivateOnly()
     {
@@ -202,7 +206,8 @@ public class CommandTests : IDisposable
         string                                     keyword = $"!priv-only-{Guid.NewGuid():N}";
         TaskCompletionSource<MessageReceivedEvent> tcs     = new();
 
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             e =>
             {
                 tcs.TrySetResult(e);
@@ -224,7 +229,7 @@ public class CommandTests : IDisposable
 
 #region Priority Tests
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task Command_Priority()
     {
@@ -234,7 +239,8 @@ public class CommandTests : IDisposable
         TaskCompletionSource<string> highPrioTcs = new();
         TaskCompletionSource<string> lowPrioTcs  = new();
 
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             _ =>
             {
                 highPrioTcs.TrySetResult("high");
@@ -247,7 +253,8 @@ public class CommandTests : IDisposable
             blockAfterMatch: true,
             description: "high priority command");
 
-        _fixture.Service.Commands.RegisterDynamicCommand(
+        _fixture.Service.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             _ =>
             {
                 lowPrioTcs.TrySetResult("low");
@@ -279,7 +286,7 @@ public class CommandTests : IDisposable
 
 #region Permission Tests
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
     public async Task Command_Permission_OwnerRequired()
     {
@@ -299,7 +306,8 @@ public class CommandTests : IDisposable
         string                     keyword = $"!owner-cmd-{Guid.NewGuid():N}";
         TaskCompletionSource<bool> tcs     = new();
 
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             _ =>
             {
                 tcs.TrySetResult(true);
@@ -338,7 +346,8 @@ public class CommandTests : IDisposable
         TaskCompletionSource                        waiterReady  = new();
 
         CancellationToken ct = CT;
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             async e =>
             {
                 Task<MessageReceivedEvent?>
@@ -392,7 +401,8 @@ public class CommandTests : IDisposable
         TaskCompletionSource<MessageReceivedEvent?> dialogResult = new();
 
         CancellationToken ct = CT;
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             async e =>
             {
                 MessageReceivedEvent? reply = await e.WaitForNextMessageAsync(TimeSpan.FromSeconds(3), ct);
@@ -431,7 +441,8 @@ public class CommandTests : IDisposable
         TaskCompletionSource                                  waiter2Ready = new();
 
         CancellationToken ct = CT;
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             async e =>
             {
                 // Turn 1: wait for first reply
@@ -501,7 +512,7 @@ public class CommandTests : IDisposable
 
 #region Combined Tests
 
-    /// <see cref="CommandManager.RegisterDynamicCommand" />
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     /// <see cref="EventDispatcher.OnMessageReceived" />
     [Fact]
     public async Task Command_NonMatchingMessage_PassesThrough()
@@ -514,7 +525,8 @@ public class CommandTests : IDisposable
         TaskCompletionSource<bool>                 commandTcs = new();
         TaskCompletionSource<MessageReceivedEvent> eventTcs   = new();
 
-        _fixture.Service!.Commands.RegisterDynamicCommand(
+        _fixture.Service!.Commands.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandTests),
             _ =>
             {
                 commandTcs.TrySetResult(true);
