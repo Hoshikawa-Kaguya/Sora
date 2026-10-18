@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Sora;
 using Sora.Adapter.Milky;
+using Sora.Entities.Recording;
 using Sora.Entities.Segments;
 using Sora.Example.Milky;
 using Sora.Example.Milky.Commands;
@@ -26,6 +27,8 @@ ILogger logger = SoraLogger.CreateLogger("MilkyBot");
 service.UseEventPreFilter(new LoggingPreFilter(logger));
 service.UseEventPostFilter(new MetricsPostFilter(logger));
 
+service.UseMessageRecorder(new ChatArchive());
+
 //事件处理
 
 //连接事件
@@ -45,17 +48,6 @@ service.Events.OnDisconnected += async e =>
 //消息接收
 service.Events.OnMessageReceived += async e =>
 {
-    ForwardSegment t = SegmentBuilder.Forward(
-    [
-        new ForwardedMessageNode
-        {
-            UserId     = 114514,
-            SenderName = "YBB",
-            Time       = DateTime.Now - TimeSpan.FromHours(1),
-            Segments   = "shit"
-        }
-    ]);
-    await e.Api.SendGroupMessageAsync(e.Group.GroupId, t);
     await Helpers.SendReplyAsync(e, new MessageBody("干嘛"));
 };
 
