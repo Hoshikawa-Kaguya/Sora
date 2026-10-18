@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Sora;
 using Sora.Adapter.Milky;
-using Sora.Entities.Recording;
-using Sora.Entities.Segments;
 using Sora.Example.Milky;
 using Sora.Example.Milky.Commands;
 using Sora.Example.Milky.Filters;
