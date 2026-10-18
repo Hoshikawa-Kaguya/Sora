@@ -29,7 +29,7 @@ public class MessageSourceScopeTests
     public void Contains_UndefinedSource_ReturnsFalse()
     {
         Assert.False(MessageSourceScope.Any.Contains((MessageSourceType)(-1)));
-        Assert.False(MessageSourceScope.Any.Contains((MessageSourceType)0));
+        Assert.False(MessageSourceScope.Any.Contains(0));
     }
 
     /// <see cref="MessageSourceScopeExtensions.Contains" />

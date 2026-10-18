@@ -502,7 +502,7 @@ public class EventPipelineFilterTests : IAsyncDisposable
             { Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now };
         await _adapter.RaiseEventAsync(connectedEvt);
 
-        Assert.Equal(MessageSourceScope.Any, ((IEventPreFilter)filter).SourceScope);
+        Assert.Equal(MessageSourceScope.Any, filter.SourceScope);
         Assert.Equal(1, filter.CallCount);
     }
 
