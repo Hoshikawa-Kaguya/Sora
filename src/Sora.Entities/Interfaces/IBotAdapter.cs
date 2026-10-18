@@ -29,4 +29,12 @@ public interface IBotAdapter : IAsyncDisposable
     /// <summary>Stops the adapter and disconnects.</summary>
     /// <param name="ct">Cancellation token to bound the stop operation.</param>
     ValueTask StopAsync(CancellationToken ct = default);
+
+    /// <summary>
+    ///     Attaches the service-owned message record sink. Called once when the service is constructed.
+    ///     The adapter must report every received chat message not sent by the bot account before dispatching
+    ///     its event, and every message the protocol accepted through its send APIs.
+    /// </summary>
+    /// <param name="sink">The sink that receives message records.</param>
+    internal void AttachMessageRecordSink(IMessageRecordSink sink);
 }

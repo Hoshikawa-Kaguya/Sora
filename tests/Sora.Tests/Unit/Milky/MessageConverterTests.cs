@@ -17,7 +17,7 @@ public class MessageConverterTests
     public void RoundTrip_TextMessage()
     {
         MessageBody        original      = new("test milky");
-        List<MilkySegment> milkySegments = MessageConverter.ToMilkySegments(original);
+        List<MilkySegment> milkySegments = MessageConverter.ToMilkySegments(original, out _);
         MessageBody        restored      = MessageConverter.ToMessageBody(milkySegments);
         Assert.Equal("test milky", restored.GetText());
     }
@@ -41,7 +41,7 @@ public class MessageConverterTests
         Assert.Equal(content, markdown.Content);
         Assert.Equal(SegmentDirection.Incoming, markdown.Direction);
         Assert.Null(markdown.ToOutgoing());
-        Assert.Empty(MessageConverter.ToMilkySegments(body.ToOutgoing()));
+        Assert.Empty(MessageConverter.ToMilkySegments(body.ToOutgoing(), out _));
     }
 
     /// <summary>Verifies <see cref="MessageConverter.ToMessageBody" /> converts a text segment.</summary>
@@ -322,7 +322,7 @@ public class MessageConverterTests
     public void ToMilkySegments_TextSegment()
     {
         MessageBody        body     = new("hello milky");
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body, out _);
         Assert.Single(segments);
         Assert.Equal("text", segments[0].Type);
         Assert.Equal("hello milky", segments[0].Data!.Value<string>("text"));
@@ -333,7 +333,7 @@ public class MessageConverterTests
     public void ToMilkySegments_MentionAll()
     {
         MessageBody        body     = new([new MentionAllSegment()]);
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body, out _);
         Assert.Equal("mention_all", segments[0].Type);
     }
 
@@ -342,7 +342,7 @@ public class MessageConverterTests
     public void ToMilkySegments_FaceSegment()
     {
         MessageBody        body     = new([new FaceSegment { FaceId = "123", IsLarge = true }]);
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body, out _);
         Assert.Equal("face", segments[0].Type);
         Assert.Equal("123", segments[0].Data!.Value<string>("face_id"));
         Assert.True(segments[0].Data!.Value<bool>("is_large"));
@@ -353,7 +353,7 @@ public class MessageConverterTests
     public void ToMilkySegments_ReplySegment()
     {
         MessageBody        body     = new([new ReplySegment { TargetId = 99999L }]);
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body, out _);
         Assert.Single(segments);
         Assert.Equal("reply", segments[0].Type);
         Assert.Equal(99999L, segments[0].Data!.Value<long>("message_seq"));
@@ -364,7 +364,7 @@ public class MessageConverterTests
     public void ToMilkySegments_ImageSegment()
     {
         MessageBody body = new([new ImageSegment { FileUri = "http://send.png", SubType = ImageSubType.Sticker }]);
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body, out _);
         Assert.Equal("image", segments[0].Type);
         Assert.Equal("http://send.png", segments[0].Data!.Value<string>("uri"));
         Assert.Equal("sticker", segments[0].Data!.Value<string>("sub_type"));
@@ -375,7 +375,7 @@ public class MessageConverterTests
     public void ToMilkySegments_MentionSegment()
     {
         MessageBody        body     = new([new MentionSegment { Target = 54321L }]);
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body, out _);
         Assert.Single(segments);
         Assert.Equal("mention", segments[0].Type);
         Assert.Equal(54321L, segments[0].Data!.Value<long>("user_id"));
@@ -386,7 +386,7 @@ public class MessageConverterTests
     public void ToMilkySegments_AudioSegment()
     {
         MessageBody        body     = new([new AudioSegment { FileUri = "http://audio.amr" }]);
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body, out _);
         Assert.Single(segments);
         Assert.Equal("record", segments[0].Type);
         Assert.Equal("http://audio.amr", segments[0].Data!.Value<string>("uri"));
@@ -397,7 +397,7 @@ public class MessageConverterTests
     public void ToMilkySegments_VideoSegment()
     {
         MessageBody        body     = new([new VideoSegment { FileUri = "http://video.mp4" }]);
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body, out _);
         Assert.Single(segments);
         Assert.Equal("video", segments[0].Type);
         Assert.Equal("http://video.mp4", segments[0].Data!.Value<string>("uri"));
@@ -423,7 +423,7 @@ public class MessageConverterTests
                 Preview  = ["hello forward"]
             }
         ]);
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(body, out _);
         Assert.Single(segments);
         Assert.Equal("forward", segments[0].Type);
         Assert.Equal("ChatLog", segments[0].Data!.Value<string>("title"));
@@ -463,7 +463,7 @@ public class MessageConverterTests
             }
         ]);
 
-        MilkySegment segment  = Assert.Single(MessageConverter.ToMilkySegments(body));
+        MilkySegment segment  = Assert.Single(MessageConverter.ToMilkySegments(body, out _));
         JArray       messages = Assert.IsType<JArray>(segment.Data?["messages"]);
         Assert.Equal(expectedTime, Assert.Single(messages).Value<long>("time"));
     }

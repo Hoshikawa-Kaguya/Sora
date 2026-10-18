@@ -24,7 +24,7 @@ public class MilkyBotApiTests
         server.Start();
         using CancellationTokenSource deadline = new(TimeSpan.FromSeconds(5));
         using MilkyHttpApiClient      client = new(new MilkyConfig { Port = ((IPEndPoint)server.LocalEndpoint).Port });
-        MilkyBotApi                   api = new(client);
+        MilkyBotApi                   api = new(client, new MilkyAdapter(new MilkyConfig()));
         Task<ApiResult>               call = api.PersistGroupFileAsync(123456, "test-file", deadline.Token).AsTask();
 
         string message = retCode == 0 ? "" : "file is unavailable";
@@ -54,7 +54,7 @@ public class MilkyBotApiTests
         server.Start();
         using CancellationTokenSource deadline = new(TimeSpan.FromSeconds(5));
         using MilkyHttpApiClient      client = new(new MilkyConfig { Port = ((IPEndPoint)server.LocalEndpoint).Port });
-        MilkyBotApi                   api = new(client);
+        MilkyBotApi                   api = new(client, new MilkyAdapter(new MilkyConfig()));
         Task<ApiResult<string>> call = (isSelfSend
             ? api.GetPrivateFileDownloadUrlAsync(654321, "test-file", "test-hash", true, deadline.Token)
             : api.GetPrivateFileDownloadUrlAsync(654321, "test-file", "test-hash", ct: deadline.Token)).AsTask();

@@ -23,11 +23,27 @@ internal static class MessageConverter
     public static MessageBody ToMessageBody(List<MilkySegment> segments) =>
         MessageBody.FromIncoming(segments.Select(ConvertIncoming).OfType<Segment>());
 
-    /// <summary>Converts Sora MessageBody to Milky segment list.</summary>
+    /// <summary>Converts Sora MessageBody to Milky segment list and reports the Sora segments actually submitted.</summary>
     /// <param name="body">The Sora message body.</param>
+    /// <param name="submitted">
+    ///     The Sora segments whose conversion succeeded, in order. Forward segments keep only the nested
+    ///     segments that were converted.
+    /// </param>
     /// <returns>A list of Milky segments.</returns>
-    public static List<MilkySegment> ToMilkySegments(MessageBody body) =>
-        body.Select(ConvertOutgoing).OfType<MilkySegment>().ToList();
+    public static List<MilkySegment> ToMilkySegments(MessageBody body, out List<Segment> submitted)
+    {
+        List<MilkySegment> segments = [];
+        submitted = [];
+        foreach (Segment seg in body)
+        {
+            if (ConvertOutgoing(seg, out Segment? submittedSegment) is not { } converted
+                || submittedSegment is null) continue;
+            segments.Add(converted);
+            submitted.Add(submittedSegment);
+        }
+
+        return segments;
+    }
 
 #endregion
 
@@ -149,8 +165,22 @@ internal static class MessageConverter
 
     /// <summary>Converts an outgoing Sora segment to a Milky segment.</summary>
     /// <param name="seg">The outgoing Sora segment.</param>
+    /// <param name="submitted">The Sora form of the submitted segment, or null when conversion failed.</param>
     /// <returns>The converted Milky segment, or null if the type is unsupported.</returns>
-    private static MilkySegment? ConvertOutgoing(Segment? seg) =>
+    private static MilkySegment? ConvertOutgoing(Segment seg, out Segment? submitted)
+    {
+        if (seg is ForwardSegment fw)
+            return ConvertOutgoingForward(fw, out submitted);
+
+        MilkySegment? converted = ConvertOutgoingSegment(seg);
+        submitted = converted is null ? null : seg;
+        return converted;
+    }
+
+    /// <summary>Converts an outgoing non-forward Sora segment to a Milky segment.</summary>
+    /// <param name="seg">The outgoing Sora segment.</param>
+    /// <returns>The converted Milky segment, or null if the type is unsupported.</returns>
+    private static MilkySegment? ConvertOutgoingSegment(Segment seg) =>
         seg switch
         {
             TextSegment t when !string.IsNullOrEmpty(t.Text) => new MilkySegment
@@ -217,7 +247,6 @@ internal static class MessageConverter
                         },
                         NullIgnoreSerializer)
                 },
-            ForwardSegment fw => ConvertOutgoingForward(fw),
             LightAppSegment la when !string.IsNullOrEmpty(la.JsonPayload)
                 => new MilkySegment
                 {
@@ -229,24 +258,29 @@ internal static class MessageConverter
 
     /// <summary>Converts an outgoing forward segment to a Milky forward segment.</summary>
     /// <param name="fw">The outgoing forward segment.</param>
+    /// <param name="submitted">The forward segment holding only the converted nested segments, or null when not sent.</param>
     /// <returns>The converted Milky forward segment, or null if the segment has no messages.</returns>
-    private static MilkySegment? ConvertOutgoingForward(ForwardSegment fw)
+    private static MilkySegment? ConvertOutgoingForward(ForwardSegment fw, out Segment? submitted)
     {
+        submitted = null;
         // Must have messages to send
         if (fw.Messages.Count == 0) return null;
 
-        object[] messagesArray =
-            fw.Messages.Select(object (msg) => new
-              {
-                  user_id     = (long)msg.UserId,
-                  sender_name = msg.SenderName,
-                  time        = msg.Time is { } time ? (long?)new DateTimeOffset(time).ToUnixTimeSeconds() : null,
-                  segments = msg.Segments
-                                .Select(ConvertOutgoing)
-                                .OfType<MilkySegment>()
-                                .ToList()
-              })
-              .ToArray();
+        object[]                   messagesArray  = new object[fw.Messages.Count];
+        List<ForwardedMessageNode> submittedNodes = new(fw.Messages.Count);
+        for (int i = 0; i < fw.Messages.Count; i++)
+        {
+            ForwardedMessageNode msg = fw.Messages[i];
+            List<MilkySegment> segments = ToMilkySegments(msg.Segments, out List<Segment> submittedSegments);
+            messagesArray[i] = new
+            {
+                user_id     = (long)msg.UserId,
+                sender_name = msg.SenderName,
+                time        = msg.Time is { } time ? (long?)new DateTimeOffset(time).ToUnixTimeSeconds() : null,
+                segments
+            };
+            submittedNodes.Add(msg with { Segments = new MessageBody(submittedSegments) });
+        }
 
         JObject data = JObject.FromObject(
             new
@@ -259,6 +293,7 @@ internal static class MessageConverter
             },
             NullIgnoreSerializer);
 
+        submitted = fw with { Messages = submittedNodes };
         return new MilkySegment { Type = "forward", Data = data };
     }
 

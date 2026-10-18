@@ -108,9 +108,10 @@ public class ApiTests : IDisposable
         ];
 
         SendMessageResult result = await Api.SendGroupMessageAsync(testGroup, body, CT);
-        _output.WriteLine($"Sent: messageId={result.MessageId}");
+        _output.WriteLine($"Sent: messageId={result.MessageId} time={result.Time}");
         Assert.True(result.IsSuccess);
         Assert.NotEqual(0L, result.MessageId.Value);
+        Assert.NotNull(result.Time);
     }
 
     /// <see cref="IBotApi.SendGroupMessageAsync" />
@@ -198,9 +199,11 @@ public class ApiTests : IDisposable
 
         MessageBody       body   = "[Milky Test] Private message test";
         SendMessageResult result = await Api.SendFriendMessageAsync(_fixture.SecondaryUserId, body, CT);
-        _output.WriteLine($"SendPrivate: to={_fixture.SecondaryUserId} messageId={result.MessageId}");
+        _output.WriteLine(
+            $"SendPrivate: to={_fixture.SecondaryUserId} messageId={result.MessageId} time={result.Time}");
         Assert.True(result.IsSuccess);
         Assert.NotEqual(0L, result.MessageId.Value);
+        Assert.NotNull(result.Time);
     }
 
     /// <see cref="IBotApi.RecallGroupMessageAsync" />

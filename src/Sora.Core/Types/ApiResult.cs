@@ -58,10 +58,20 @@ public readonly record struct SendMessageResult(ApiStatusCode Code, MessageId Me
     /// <summary>Gets whether this result indicates success.</summary>
     public bool IsSuccess => Code == ApiStatusCode.Ok;
 
+    /// <summary>Gets the send time reported by the protocol, or null when the protocol does not report one.</summary>
+    public DateTime? Time { get; init; }
+
     /// <summary>Creates a successful result.</summary>
     /// <param name="messageId">The ID of the sent message.</param>
     /// <returns>A new <see cref="SendMessageResult" /> with <see cref="ApiStatusCode.Ok" />.</returns>
     public static SendMessageResult Ok(MessageId messageId) => new(ApiStatusCode.Ok, messageId, string.Empty);
+
+    /// <summary>Creates a successful result with the protocol-reported send time.</summary>
+    /// <param name="messageId">The ID of the sent message.</param>
+    /// <param name="time">The send time reported by the protocol, or null when unavailable.</param>
+    /// <returns>A new <see cref="SendMessageResult" /> with <see cref="ApiStatusCode.Ok" />.</returns>
+    public static SendMessageResult Ok(MessageId messageId, DateTime? time) =>
+        new(ApiStatusCode.Ok, messageId, string.Empty) { Time = time };
 
     /// <summary>Creates a failed result.</summary>
     /// <param name="code">The failure status code.</param>

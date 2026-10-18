@@ -711,12 +711,26 @@ public class EventPipelineFilterTests : IAsyncDisposable
         public IBotApi?        GetApi()        => null;
         public IBotConnection? GetConnection() => null;
 
-        public ValueTask StartAsync(CancellationToken ct = default) => ValueTask.CompletedTask;
-        public ValueTask StopAsync(CancellationToken  ct = default) => ValueTask.CompletedTask;
-        public ValueTask DisposeAsync()                             => ValueTask.CompletedTask;
+        /// <summary>Gets the sink attached by the service.</summary>
+        public IMessageRecordSink RecordSink { get; private set; } = NullMessageRecordSink.Instance;
 
+        void IBotAdapter.AttachMessageRecordSink(IMessageRecordSink sink) => RecordSink = sink;
+
+        /// <summary>Gets or sets an exception thrown by <see cref="StopAsync" />.</summary>
+        public Exception? StopException { get; set; }
+
+        public ValueTask StartAsync(CancellationToken ct = default) => ValueTask.CompletedTask;
+
+        public ValueTask StopAsync(CancellationToken ct = default) =>
+            StopException is null ? ValueTask.CompletedTask : ValueTask.FromException(StopException);
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+        /// <summary>Follows the adapter recording contract: records the received message, then dispatches.</summary>
         public async ValueTask RaiseEventAsync(BotEvent e)
         {
+            if (e is MessageReceivedEvent received)
+                RecordSink.WriteInbound(ProtocolName, received);
             if (OnEvent is not null)
                 await OnEvent(e);
         }
@@ -739,6 +753,10 @@ public class EventPipelineFilterTests : IAsyncDisposable
 
         public IBotApi?        GetApi()        => null;
         public IBotConnection? GetConnection() => null;
+
+        void IBotAdapter.AttachMessageRecordSink(IMessageRecordSink sink)
+        {
+        }
 
         public async ValueTask StartAsync(CancellationToken ct = default)
         {

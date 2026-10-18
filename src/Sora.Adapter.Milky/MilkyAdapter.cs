@@ -21,6 +21,7 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
     private          MilkySseEventClient? _sseClient;
     private          MilkyWebHookServer?  _webHookServer;
     private          MilkyWsEventClient?  _wsClient;
+    private          IMessageRecordSink   _recordSink = NullMessageRecordSink.Instance;
 
     /// <inheritdoc />
     public string ProtocolName => "Milky";
@@ -62,6 +63,9 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
     public IBotConnection? GetConnection() => _connection;
 
     /// <inheritdoc />
+    void IBotAdapter.AttachMessageRecordSink(IMessageRecordSink sink) => _recordSink = sink;
+
+    /// <inheritdoc />
     public async ValueTask StartAsync(CancellationToken ct = default)
     {
         State = AdapterState.Starting;
@@ -71,7 +75,7 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
             _config.Host,
             _config.Port);
         _apiClient = new MilkyHttpApiClient(_config);
-        MilkyBotApi botApi = new(_apiClient);
+        MilkyBotApi botApi = new(_apiClient, this);
         _connection = new BotConnection
         {
             ConnectionId = Guid.NewGuid(),
@@ -208,9 +212,12 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
 
 #region Message Handling
 
-    /// <summary>Processes a raw JSON event message from the event transport.</summary>
+    /// <summary>
+    ///     Processes a raw JSON event message from the event transport. Received chat messages are queued for
+    ///     recording, without blocking, before dispatch.
+    /// </summary>
     /// <param name="json">The raw JSON event string.</param>
-    private void HandleEventMessage(string json)
+    internal void HandleEventMessage(string json)
     {
         try
         {
@@ -225,6 +232,10 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
 
             BotEvent? soraEvent =
                 EventConverter.ToSoraEvent(evt, _connection?.ConnectionId ?? Guid.Empty, _connection?.Api!);
+            // Recorded before the self-message drop: the sink itself skips messages from the bot account.
+            if (soraEvent is MessageReceivedEvent received)
+                _recordSink.WriteInbound(ProtocolName, received);
+
             //Drop message from self sent
             if (_config.DropSelfMessage
                 && soraEvent is MessageReceivedEvent msg
@@ -244,6 +255,41 @@ public sealed class MilkyAdapter : IBotAdapter, IAdapterEventSource
         {
             _logger.LogError(ex, "Error handling Milky event");
         }
+    }
+
+#endregion
+
+#region Message Recording
+
+    /// <summary>Snapshots the submitted segments before a send call when recording is enabled.</summary>
+    /// <param name="sourceType">The target conversation type.</param>
+    /// <param name="peerUserId">The target user for friend messages; default for groups.</param>
+    /// <param name="groupId">The target group for group messages; default otherwise.</param>
+    /// <param name="submitted">The segments submitted to the protocol.</param>
+    /// <returns>The pending record, or null when recording is disabled.</returns>
+    internal MessageRecord? BeginOutboundRecord(
+        MessageSourceType    sourceType,
+        UserId               peerUserId,
+        GroupId              groupId,
+        IEnumerable<Segment> submitted) =>
+        _recordSink.IsEnabled
+            ? MessageRecord.Outbound(
+                ProtocolName,
+                _connection?.ConnectionId ?? Guid.Empty,
+                SelfId,
+                sourceType,
+                peerUserId,
+                groupId,
+                submitted)
+            : null;
+
+    /// <summary>Queues a pending record, without blocking, once the protocol accepted the message.</summary>
+    /// <param name="pendingRecord">The record created before the send call, or null when recording was disabled.</param>
+    /// <param name="result">The successful send result.</param>
+    internal void CompleteOutboundRecord(MessageRecord? pendingRecord, SendMessageResult result)
+    {
+        if (pendingRecord is not null)
+            _recordSink.Write(pendingRecord.Accept(result));
     }
 
 #endregion

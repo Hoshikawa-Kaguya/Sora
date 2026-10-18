@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Sora.Core.Types;
 using Sora.Entities.MessageWaiting;
+using Sora.Recording;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Sora;
@@ -18,14 +19,15 @@ public sealed class SoraService : IBotService
     private readonly Lazy<CommandManager>     _commandLazy = new(() => new CommandManager());
     private readonly ILogger                  _logger;
     private readonly MessageWaiter            _waiter = new();
+    private readonly MessageRecorderHub       _recorderHub = new();
     private          CancellationTokenSource? _serviceCts;
 
-    private readonly List<IEventPreFilter>  _preFilters             = [];
-    private readonly List<IEventPostFilter> _postFilters            = [];
-    private readonly Lock                   _filterRegistrationLock = new();
-    private          IEventPreFilter[]      _frozenPreFilters       = [];
-    private          IEventPostFilter[]     _frozenPostFilters      = [];
-    private          bool                   _filterRegistrationClosed;
+    private readonly List<IEventPreFilter>  _preFilters        = [];
+    private readonly List<IEventPostFilter> _postFilters       = [];
+    private readonly Lock                   _registrationLock  = new();
+    private          IEventPreFilter[]      _frozenPreFilters  = [];
+    private          IEventPostFilter[]     _frozenPostFilters = [];
+    private          bool                   _registrationClosed;
 
 #endregion
 
@@ -64,6 +66,7 @@ public sealed class SoraService : IBotService
 
         _eventSource         =  eventSource;
         _eventSource.OnEvent += AdapterEventHandle;
+        adapter.AttachMessageRecordSink(_recorderHub);
     }
 
 #endregion
@@ -83,9 +86,9 @@ public sealed class SoraService : IBotService
         if (filter.EventTypes is { Length: > 0 }
             && filter.EventTypes.Any(t => !typeof(BotEvent).IsAssignableFrom(t)))
             throw new InvalidOperationException("All elements of EventTypes must be subclasses of BotEvent.");
-        lock (_filterRegistrationLock)
+        lock (_registrationLock)
         {
-            if (_filterRegistrationClosed)
+            if (_registrationClosed)
                 throw new InvalidOperationException(
                     "Event filters must be registered before SoraService.StartAsync() begins.");
             _preFilters.Add(filter);
@@ -106,13 +109,42 @@ public sealed class SoraService : IBotService
         if (filter.EventTypes is { Length: > 0 }
             && filter.EventTypes.Any(t => !typeof(BotEvent).IsAssignableFrom(t)))
             throw new InvalidOperationException("All elements of EventTypes must be subclasses of BotEvent.");
-        lock (_filterRegistrationLock)
+        lock (_registrationLock)
         {
-            if (_filterRegistrationClosed)
+            if (_registrationClosed)
                 throw new InvalidOperationException(
                     "Event filters must be registered before SoraService.StartAsync() begins.");
             _postFilters.Add(filter);
             _frozenPostFilters = [.. _postFilters.OrderBy(f => f.Order)];
+        }
+    }
+
+#endregion
+
+#region Message Recording
+
+    /// <summary>
+    ///     Registers a read-only message recorder. Must be called before <see cref="StartAsync" />.
+    ///     The adapter reports every received chat message not sent by the bot account (including messages later
+    ///     dropped by BlockUsers or consumed by waiters) and every message the protocol accepted through a send API.
+    ///     Each recorder has its own bounded queue and single consumer, so recorder code never runs on the
+    ///     adapter receive or send path. Recording never blocks: records are dropped with a rate-limited warning
+    ///     while the recorder's queue is full.
+    /// </summary>
+    /// <param name="recorder">The recorder to register.</param>
+    /// <param name="options">Queue options; defaults to a capacity of 4096.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the options contain a non-positive capacity.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when called after <see cref="StartAsync" /> has begun.</exception>
+    public void UseMessageRecorder(IMessageRecorder recorder, MessageRecorderOptions? options = null)
+    {
+        options ??= new MessageRecorderOptions();
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.Capacity, nameof(options));
+        lock (_registrationLock)
+        {
+            if (_registrationClosed)
+                throw new InvalidOperationException(
+                    "Message recorders must be registered before SoraService.StartAsync() begins.");
+            _recorderHub.Register(recorder, options);
         }
     }
 
@@ -123,13 +155,14 @@ public sealed class SoraService : IBotService
     /// <inheritdoc />
     public async ValueTask StartAsync(CancellationToken ct = default)
     {
-        lock (_filterRegistrationLock)
+        lock (_registrationLock)
         {
-            if (!_filterRegistrationClosed)
-                _filterRegistrationClosed = true;
+            if (!_registrationClosed)
+                _registrationClosed = true;
         }
 
         _serviceCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        await _recorderHub.StartAsync(ct);
 
         // Startup banner
         _logger.LogInformation("Ciallo～★");
@@ -165,7 +198,16 @@ public sealed class SoraService : IBotService
             await _serviceCts.CancelAsync();
         _serviceCts?.Dispose();
         _serviceCts = null;
-        await Adapter.StopAsync(ct);
+        try
+        {
+            await Adapter.StopAsync(ct);
+        }
+        finally
+        {
+            // Queued records are drained even when the adapter fails to stop; its exception still propagates.
+            await _recorderHub.StopAsync(ct);
+        }
+
         _logger.LogInformation("SoraService {ServiceId} stopped", ServiceId);
     }
 

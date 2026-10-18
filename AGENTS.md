@@ -57,6 +57,6 @@ Functional tests require `SORA_TEST_*` configuration and may skip only for missi
 
 ## Documentation Routing
 
-Read the closest relevant document instead of loading the entire repository. The main references are [`docs/TESTING.md`](docs/TESTING.md), [`docs/LOGGING.md`](docs/LOGGING.md), [`docs/ADAPTER-DEVELOPMENT.md`](docs/ADAPTER-DEVELOPMENT.md), [`docs/COMMANDS.md`](docs/COMMANDS.md), and [`docs/FUNCTIONAL-TEST-CATALOG.md`](docs/FUNCTIONAL-TEST-CATALOG.md).
+Read the closest relevant document instead of loading the entire repository. The main references are [`docs/TESTING.md`](docs/TESTING.md), [`docs/LOGGING.md`](docs/LOGGING.md), [`docs/ADAPTER-DEVELOPMENT.md`](docs/ADAPTER-DEVELOPMENT.md), [`docs/MESSAGE-RECORDING.md`](docs/MESSAGE-RECORDING.md), [`docs/COMMANDS.md`](docs/COMMANDS.md), and [`docs/FUNCTIONAL-TEST-CATALOG.md`](docs/FUNCTIONAL-TEST-CATALOG.md).
 
 Architecture decision records (ADRs) are agent working material and must not be tracked by Git. Store them in the ignored `agent_tmp/adr/` directory as `NNNN-slug.md`, never under `docs/` or any other tracked path, and do not link to them from tracked files. Rationale that users or maintainers need belongs in the relevant tracked document itself.

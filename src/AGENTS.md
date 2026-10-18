@@ -38,7 +38,7 @@ Conversion methods must attempt actual per-type conversion rather than silently 
 Normal event processing follows this order:
 
 ```text
-adapter -> converter -> BotEvent -> actor policy -> MessageWaiter
+adapter -> converter -> BotEvent -> [adapter writes inbound MessageRecord] -> actor policy -> MessageWaiter
   -> PipelineContext
   -> event pre-filters
   -> command matching/permissions/before-filters/handler/after-filters
@@ -80,6 +80,10 @@ Continuous commands use `MessageReceivedEvent.WaitForNextMessageAsync(...)` with
 - Do not add adapter `InternalsVisibleTo` wildcards; register third-party adapters explicitly.
 - Keep conversion and model ownership decisions explicit. If an autonomous change has multiple reasonable designs, leave a `TODO` describing the alternatives and use the conservative default.
 - Summarize any genuinely necessary exception-throwing behavior after implementation.
+
+## Message Recording
+
+Message recording follows [`docs/MESSAGE-RECORDING.md`](../docs/MESSAGE-RECORDING.md). Adapters own all reporting through the internal abstract `IBotAdapter.AttachMessageRecordSink`, implemented explicitly; do not replace it with a public member, a default implementation or a framework `IBotApi` proxy. Adapters report every received `MessageReceivedEvent` before dispatch only through the internal `IMessageRecordSink.WriteInbound` extension, which skips the bot account regardless of `DropSelfMessage`, and record a send only after protocol success, using the segments actually submitted and snapshotted before the call. Records are built only through the `MessageRecord` factories, which copy segments and convert forwards to `ForwardRecordSegment`; records never contain `MessageBody` or API access. `MessageRecorderHub` owns per-recorder bounded queues with single thread-pool consumers and `AllowSynchronousContinuations = false`. `IMessageRecordSink.Write` is synchronous and only uses `TryWrite`; a full queue drops the record with a rate-limited warning. Do not add a waiting/backpressure mode or make adapter receive callbacks asynchronous for recording. A forward record is `Incoming` unless it is in an outbound (user-built) record. When a stop abandons draining, the next start waits for the abandoned consumers so a recorder is never called concurrently; `SoraService.StopAsync` drains in a `finally` after the adapter stops. OB11 does not implement recording.
 
 ## Adapter Lifetimes
 

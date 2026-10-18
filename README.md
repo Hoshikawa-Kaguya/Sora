@@ -190,6 +190,7 @@ commands.Registrar.RegisterDynamicCommand(typeof(MyCommands), async e => { /* ..
 | [本地测试配置](docs/TESTING-LOCAL.md) | 本地环境快速配置参考 |
 | [日志配置](docs/LOGGING.md) | Serilog 默认日志、自定义 LoggerFactory、日志级别 |
 | [指令模块](docs/COMMANDS.md) | 指令注册、两级执行顺序、启停、动态指令与插件卸载 |
+| [消息记录](docs/MESSAGE-RECORDING.md) | 记录 bot 收发的全部聊天消息、记录器队列与顺序 |
 | [Adapter 开发指南](docs/ADAPTER-DEVELOPMENT.md) | 第三方协议适配器开发详细指南 |
 | [功能测试目录](docs/FUNCTIONAL-TEST-CATALOG.md) | 所有 E2E 测试的完整清单 |
 | [已移除测试](docs/REMOVED_TESTS.md) | 无法自动化的测试及移除原因 |

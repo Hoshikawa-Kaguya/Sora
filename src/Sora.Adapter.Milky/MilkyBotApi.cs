@@ -11,14 +11,17 @@ namespace Sora.Adapter.Milky;
 /// </summary>
 public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
 {
+    private readonly MilkyAdapter       _adapter;
     private readonly MilkyHttpApiClient _apiClient;
     private readonly ILogger            _logger = SoraLogger.CreateLogger<MilkyBotApi>();
 
     /// <summary>Initializes a new instance of the <see cref="MilkyBotApi" /> class.</summary>
     /// <param name="apiClient">The HTTP API client for Milky protocol calls.</param>
-    internal MilkyBotApi(MilkyHttpApiClient apiClient)
+    /// <param name="adapter">The owning adapter, which records every message this API sends.</param>
+    internal MilkyBotApi(MilkyHttpApiClient apiClient, MilkyAdapter adapter)
     {
         _apiClient = apiClient;
+        _adapter   = adapter;
     }
 
 #region Milky Api Extension
@@ -184,7 +187,7 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         MessageBody       message,
         CancellationToken ct = default)
     {
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(message);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(message, out List<Segment> submitted);
         if (segments.Count == 0)
         {
             _logger.LogWarning(
@@ -209,6 +212,8 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
             userId,
             segments.Count);
 
+        MessageRecord? pendingRecord =
+            _adapter.BeginOutboundRecord(MessageSourceType.Friend, userId, default, submitted);
         ApiResult<SendMessageOutput> resp = await CallApiAsync<SendMessageOutput>(
             "send_private_message",
             new SendPrivateMessageInput
@@ -223,7 +228,9 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
                 "Milky private message sent to user[{UserId}], messageSeq={MessageSeq}",
                 userId,
                 data.MessageSeq);
-            return SendMessageResult.Ok(data.MessageSeq);
+            SendMessageResult result = SendMessageResult.Ok(data.MessageSeq, ToSendTime(data.Time));
+            _adapter.CompleteOutboundRecord(pendingRecord, result);
+            return result;
         }
 
         _logger.LogWarning(
@@ -240,7 +247,7 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         MessageBody       message,
         CancellationToken ct = default)
     {
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(message);
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(message, out List<Segment> submitted);
         if (segments.Count == 0)
         {
             _logger.LogWarning(
@@ -265,6 +272,8 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
             groupId,
             segments.Count);
 
+        MessageRecord? pendingRecord =
+            _adapter.BeginOutboundRecord(MessageSourceType.Group, default, groupId, submitted);
         ApiResult<SendMessageOutput> resp = await CallApiAsync<SendMessageOutput>(
             "send_group_message",
             new SendGroupMessageInput
@@ -279,7 +288,9 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
                 "Milky group message sent to group[{GroupId}], messageSeq={MessageSeq}",
                 groupId,
                 data.MessageSeq);
-            return SendMessageResult.Ok(data.MessageSeq);
+            SendMessageResult result = SendMessageResult.Ok(data.MessageSeq, ToSendTime(data.Time));
+            _adapter.CompleteOutboundRecord(pendingRecord, result);
+            return result;
         }
 
         _logger.LogWarning(
@@ -1221,6 +1232,12 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         Enum.IsDefined(typeof(ApiStatusCode), retCode)
             ? (ApiStatusCode)retCode
             : ApiStatusCode.Unknown;
+
+    /// <summary>Converts a Milky send response time; zero means the protocol reported no time.</summary>
+    /// <param name="unixSeconds">The Unix time in seconds.</param>
+    /// <returns>The local send time, or null when unavailable.</returns>
+    private static DateTime? ToSendTime(long unixSeconds) =>
+        unixSeconds > 0 ? DateTimeOffset.FromUnixTimeSeconds(unixSeconds).LocalDateTime : null;
 
 #endregion
 }

@@ -47,7 +47,9 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
 ### 事件管线
 
 ```
-协议网络层 → Converter → BotEvent → SoraService
+协议网络层 → Converter → BotEvent
+  → 适配器上报接收方向的 MessageRecord（仅 MessageReceivedEvent，跳过 bot 自身账号的消息）
+  → SoraService
   → 触发者用户策略（BlockUsers 拦截；SuperUsers 标记）
   → MessageWaiter.TryMatch（连续对话，最高优先级 — 跳过所有过滤器）
   → PipelineContext 初始化
@@ -63,7 +65,7 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
   → IEventPostFilter 阶段（scope-aware，正常完成或短路后进入）
 ```
 
-适配器只需将协议数据转换为 `BotEvent` 并通过 `IAdapterEventSource.OnEvent` 触发，后续管线由 `SoraService` 自动处理。
+适配器只需将协议数据转换为 `BotEvent` 并通过 `IAdapterEventSource.OnEvent` 触发，后续管线由 `SoraService` 自动处理。消息记录是事件管线之外的旁路，由适配器负责上报，详见[消息记录义务](#消息记录义务)。
 
 管线只将携带当前操作实际接收的 Sora token、且该 token 已取消的 `OperationCanceledException` 原样向上传播，不记录为执行错误。其他取消异常按普通用户回调异常记录并隔离；若 Sora token 同时已取消，框架另行发出携带该 token 的取消。扩展自行创建 linked token source 时，应在自身边界将 Sora 取消转换为传入 token 的取消异常，框架不追踪 token 的关联关系。
 
@@ -154,6 +156,17 @@ Sora.Adapter.__YourProtocol__/
 |------|------|
 | `DispatchAsync(BotEvent, CancellationToken)` | 由 SoraService 调用，适配器不直接使用 |
 
+### 消息记录
+
+| 成员 | 用途 |
+|------|------|
+| `IBotAdapter.AttachMessageRecordSink(IMessageRecordSink)` | 必须显式实现，保存 service 传入的入口 |
+| `IMessageRecordSink.WriteInbound(string, MessageReceivedEvent)` | 唯一的接收上报入口：未启用或发送者是 bot 自身账号时跳过，否则创建并入队接收记录 |
+| `IMessageRecordSink.IsEnabled` / `Write(MessageRecord)` | 判断是否需要构建发送记录；非阻塞地上报记录 |
+| `NullMessageRecordSink.Instance` | 挂接之前使用的空入口 |
+| `MessageRecord.Inbound(string, MessageReceivedEvent)` | 由已转换的接收事件创建接收记录 |
+| `MessageRecord.Outbound(...)` / `Accept(SendMessageResult)` | 发送前创建快照，发送成功后补充协议结果 |
+
 ### Segment incoming-only 属性
 
 资源类 Segment 的 incoming-only 属性使用 `internal init`，仅适配器可在消息转换时设置：
@@ -221,15 +234,39 @@ public sealed class __YourProtocol__Adapter : IBotAdapter, IAdapterEventSource
             _connection.State = ConnectionState.Connected;
         }
 
+        // 先记录、再分发（入队不阻塞）；WriteInbound 会跳过 bot 自身账号的消息
+        if (soraEvent is MessageReceivedEvent received)
+            _recordSink.WriteInbound(ProtocolName, received);
+
         if (soraEvent is not null)
             _ = _onEvent?.Invoke(soraEvent);
     }
+
+    private IMessageRecordSink _recordSink = NullMessageRecordSink.Instance;
+
+    // internal 抽象成员，必须显式实现；service 构造时调用一次
+    void IBotAdapter.AttachMessageRecordSink(IMessageRecordSink sink) => _recordSink = sink;
 
     public IBotApi? GetApi() => _connection?.Api;
     public IBotConnection? GetConnection() => _connection;
     public async ValueTask DisposeAsync() => await StopAsync();
 }
 ```
+
+## 消息记录义务
+
+`IBotAdapter` 声明了 internal 抽象成员 `AttachMessageRecordSink(IMessageRecordSink)`，适配器必须显式实现，否则编译失败。这是 Sora 3.x 之后对第三方适配器的破坏性变更；冻结的 OB11 适配器未实现该成员，不能再针对新框架编译。宿主侧的使用方式见 [消息记录](MESSAGE-RECORDING.md)。
+
+`SoraService` 在构造时挂接入口；挂接之前适配器应持有 `NullMessageRecordSink.Instance`。入口的 `IsEnabled` 为 false 时（没有注册记录器或服务未运行）跳过构建记录。
+
+| 方向 | 适配器义务 |
+|------|------------|
+| 接收 | 转换出 `MessageReceivedEvent` 后、`DropSelfMessage` 判断之前，调用 `WriteInbound(ProtocolName, e)`（它会跳过 bot 自身账号的消息），再触发 `OnEvent`。记录与事件描述同一条消息；无法转换的事件不记录。BlockUsers、waiter 和 filter 都在之后发生，与记录无关 |
+| 发送 | 发送开始时完成协议转换，并保留实际提交给协议端的 Sora 段（转换失败的段、转发内层转换失败的段都不包含），用 `MessageRecord.Outbound(...)` 创建待定记录作为快照；协议返回成功后用 `Accept(SendMessageResult)` 补充 `MessageId` 与 `Time`，再 `Write`。失败或抛出异常的发送不记录。所有发送都要记录，不区分调用方 |
+
+- `MessageRecord` 的工厂会逐段复制，并把 `ForwardSegment` 转换为 `ForwardRecordSegment`；适配器不要直接用对象初始化器构造记录。
+- `SendMessageResult.Time` 应填入协议返回的发送时间；协议不返回时保持 null，`Accept` 会使用收到成功响应时的本地时间。
+- `Write` 是同步、非阻塞的入队操作：某个记录器的队列已满时，该记录器丢弃这条记录，不影响适配器的收发和其他记录器。适配器不需要为记录引入异步或等待。
 
 ## 消息转换
 
@@ -273,3 +310,4 @@ public static class __YourProtocol__ServiceExtensions
 - [← 返回 README](../README.md)
 - [日志配置](LOGGING.md) — 适配器中的日志使用
 - [测试说明](TESTING.md) — 测试架构与适配器测试
+- [消息记录](MESSAGE-RECORDING.md) — 记录模型、队列与宿主接入
