@@ -26,7 +26,10 @@ public class MessageRecorderTests
     public void Inbound_SegmentsAreIndependentOfEvent()
     {
         ImageSegment image = new() { Url = "https://example.test/a.png", Direction = SegmentDirection.Incoming };
-        MessageReceivedEvent message = Message(1, 200L, MessageBody.FromIncoming([new TextSegment { Text = "hi" }, image]));
+        MessageReceivedEvent message = Message(
+            1,
+            200L,
+            MessageBody.FromIncoming([new TextSegment { Text = "hi" }, image]));
 
         MessageRecord record = MessageRecord.Inbound("Mock", message);
         // Re-sending the received body converts its segments in place.
@@ -51,7 +54,14 @@ public class MessageRecorderTests
     [Fact]
     public void Forward_KeepsNestedContentAsRecords()
     {
-        DateTime nodeTime = new(2026, 10, 18, 12, 0, 0, DateTimeKind.Local);
+        DateTime nodeTime = new(
+            2026,
+            10,
+            18,
+            12,
+            0,
+            0,
+            DateTimeKind.Local);
         ForwardSegment forward = new()
         {
             Title = "title",
@@ -65,7 +75,13 @@ public class MessageRecorderTests
         };
 
         MessageRecord record = MessageRecord.Outbound(
-            "Mock", Guid.NewGuid(), 1L, MessageSourceType.Group, default, 100L, [forward]);
+            "Mock",
+            Guid.NewGuid(),
+            1L,
+            MessageSourceType.Group,
+            default,
+            100L,
+            [forward]);
 
         ForwardRecordSegment recorded = Assert.IsType<ForwardRecordSegment>(Assert.Single(record.Segments));
         MessageRecord        node     = Assert.Single(recorded.Messages);
@@ -98,7 +114,13 @@ public class MessageRecorderTests
 
         MessageRecord inbound = MessageRecord.Inbound("Mock", Message(1, 200L, MessageBody.FromIncoming([received])));
         MessageRecord outbound = MessageRecord.Outbound(
-            "Mock", Guid.NewGuid(), 1L, MessageSourceType.Group, default, 100L, [sent]);
+            "Mock",
+            Guid.NewGuid(),
+            1L,
+            MessageSourceType.Group,
+            default,
+            100L,
+            [sent]);
 
         ForwardRecordSegment inboundForward = Assert.IsType<ForwardRecordSegment>(Assert.Single(inbound.Segments));
         Assert.Equal(SegmentDirection.Incoming, inboundForward.Direction);
@@ -128,9 +150,22 @@ public class MessageRecorderTests
     [Fact]
     public void Outbound_AcceptUsesProtocolTimeOrLocalFallback()
     {
-        DateTime protocolTime = new(2026, 10, 18, 8, 0, 0, DateTimeKind.Local);
+        DateTime protocolTime = new(
+            2026,
+            10,
+            18,
+            8,
+            0,
+            0,
+            DateTimeKind.Local);
         MessageRecord pending = MessageRecord.Outbound(
-            "Mock", Guid.NewGuid(), 1L, MessageSourceType.Friend, 300L, default, [new TextSegment { Text = "hi" }]);
+            "Mock",
+            Guid.NewGuid(),
+            1L,
+            MessageSourceType.Friend,
+            300L,
+            default,
+            [new TextSegment { Text = "hi" }]);
 
         MessageRecord withTime = pending.Accept(SendMessageResult.Ok(42L, protocolTime));
         DateTime      before   = DateTime.Now;
@@ -174,7 +209,9 @@ public class MessageRecorderTests
         await using SoraService service = new(new EventPipelineFilterTests.MockAdapter(), new RecorderConfig());
 
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            service.UseMessageRecorder(new CaptureRecorder(), new MessageRecorderOptions { Capacity = 0 }));
+                                                       service.UseMessageRecorder(
+                                                           new CaptureRecorder(),
+                                                           new MessageRecorderOptions { Capacity = 0 }));
         await service.StartAsync(TestCt);
         Assert.Throws<InvalidOperationException>(() => service.UseMessageRecorder(new CaptureRecorder()));
     }
@@ -189,7 +226,7 @@ public class MessageRecorderTests
     {
         EventPipelineFilterTests.MockAdapter adapter  = new();
         CaptureRecorder                      recorder = new();
-        await using SoraService service = new(adapter, new RecorderConfig { BlockUsers = [200L] });
+        await using SoraService              service  = new(adapter, new RecorderConfig { BlockUsers = [200L] });
         service.UseMessageRecorder(recorder);
         service.Events.OnMessageReceived += _ => throw new InvalidOperationException("Blocked event was dispatched");
         await service.StartAsync(TestCt);
@@ -208,7 +245,7 @@ public class MessageRecorderTests
     {
         EventPipelineFilterTests.MockAdapter adapter  = new();
         CaptureRecorder                      recorder = new();
-        await using SoraService service = new(adapter, new RecorderConfig());
+        await using SoraService              service  = new(adapter, new RecorderConfig());
         service.UseMessageRecorder(recorder);
         TaskCompletionSource<Task<MessageReceivedEvent?>> waiterRegistered =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -223,7 +260,7 @@ public class MessageRecorderTests
 
         await adapter.RaiseEventAsync(Message(1, 200L, connectionId: connectionId));
         Task<MessageReceivedEvent?> waiter = await waiterRegistered.Task.WaitAsync(Timeout, TestCt);
-        MessageReceivedEvent reply = Message(2, 200L, connectionId: connectionId);
+        MessageReceivedEvent        reply  = Message(2, 200L, connectionId: connectionId);
         await adapter.RaiseEventAsync(reply);
 
         Assert.Same(reply, await waiter.WaitAsync(Timeout, TestCt));
@@ -238,7 +275,7 @@ public class MessageRecorderTests
     {
         EventPipelineFilterTests.MockAdapter adapter  = new();
         CaptureRecorder                      recorder = new();
-        await using SoraService service = new(adapter, new RecorderConfig());
+        await using SoraService              service  = new(adapter, new RecorderConfig());
         service.UseMessageRecorder(recorder);
         await service.StartAsync(TestCt);
 
@@ -263,12 +300,13 @@ public class MessageRecorderTests
         await using SoraService service = new(adapter, new RecorderConfig());
         service.UseMessageRecorder(recorder);
         bool recordedBeforeFilterFinished = false;
-        service.UseEventPreFilter(new AsyncFilter(async () =>
-        {
-            // Only a record queued before this filter can complete while the filter waits.
-            await recorded.Task.WaitAsync(Timeout, TestCt);
-            recordedBeforeFilterFinished = true;
-        }));
+        service.UseEventPreFilter(
+            new AsyncFilter(async () =>
+            {
+                // Only a record queued before this filter can complete while the filter waits.
+                await recorded.Task.WaitAsync(Timeout, TestCt);
+                recordedBeforeFilterFinished = true;
+            }));
         await service.StartAsync(TestCt);
 
         await adapter.RaiseEventAsync(Message(1, 200L));
@@ -317,8 +355,10 @@ public class MessageRecorderTests
         {
             if ((long)record.MessageId == 1)
             {
+                // ReSharper disable once AccessToDisposedClosure
                 entered.Set();
                 // Synchronous blocking must stay on the consumer.
+                // ReSharper disable once AccessToDisposedClosure
                 release.Wait(Timeout, TestCt);
             }
 
@@ -361,7 +401,7 @@ public class MessageRecorderTests
             entered.TrySetResult();
             await release.Task.WaitAsync(Timeout, TestCt);
         });
-        CaptureRecorder other = new();
+        CaptureRecorder         other   = new();
         await using SoraService service = new(adapter, new RecorderConfig());
         service.UseMessageRecorder(blocked, new MessageRecorderOptions { Capacity = 1 });
         service.UseMessageRecorder(other);
@@ -384,8 +424,8 @@ public class MessageRecorderTests
     {
         EventPipelineFilterTests.MockAdapter adapter = new();
         CaptureRecorder recorder = new((record, _) => (long)record.MessageId == 1
-            ? throw new InvalidOperationException("recorder failure")
-            : ValueTask.CompletedTask);
+                                           ? throw new InvalidOperationException("recorder failure")
+                                           : ValueTask.CompletedTask);
         await using SoraService service = new(adapter, new RecorderConfig());
         service.UseMessageRecorder(recorder);
         await service.StartAsync(TestCt);
@@ -407,7 +447,7 @@ public class MessageRecorderTests
     {
         EventPipelineFilterTests.MockAdapter adapter  = new();
         CaptureRecorder                      recorder = new(async (_, ct) => await Task.Delay(5, ct));
-        await using SoraService service = new(adapter, new RecorderConfig());
+        await using SoraService              service  = new(adapter, new RecorderConfig());
         service.UseMessageRecorder(recorder);
         await service.StartAsync(TestCt);
 
@@ -498,7 +538,7 @@ public class MessageRecorderTests
     {
         EventPipelineFilterTests.MockAdapter adapter  = new();
         CaptureRecorder                      recorder = new(async (_, ct) => await Task.Delay(5, ct));
-        await using SoraService service = new(adapter, new RecorderConfig());
+        await using SoraService              service  = new(adapter, new RecorderConfig());
         service.UseMessageRecorder(recorder);
         await service.StartAsync(TestCt);
         for (long id = 1; id <= 3; id++)
@@ -531,8 +571,15 @@ public class MessageRecorderTests
             SourceType = MessageSourceType.Group,
             GroupId    = 100L,
             SenderId   = senderId,
-            Time       = new DateTime(2026, 10, 18, 9, 0, 0, DateTimeKind.Local),
-            Body       = body ?? new MessageBody("record")
+            Time = new DateTime(
+                2026,
+                10,
+                18,
+                9,
+                0,
+                0,
+                DateTimeKind.Local),
+            Body = body ?? new MessageBody("record")
         },
         Member = new GroupMemberInfo { UserId = senderId, GroupId = 100L }
     };
@@ -552,7 +599,7 @@ public class MessageRecorderTests
     private sealed class CaptureRecorder : IMessageRecorder
     {
         private readonly Func<MessageRecord, CancellationToken, ValueTask>? _callback;
-        private readonly ConcurrentQueue<long>                             _messageIds = new();
+        private readonly ConcurrentQueue<long>                              _messageIds = new();
 
         public CaptureRecorder(Func<MessageRecord, CancellationToken, ValueTask>? callback = null)
         {

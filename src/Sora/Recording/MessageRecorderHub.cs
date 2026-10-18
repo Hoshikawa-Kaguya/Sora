@@ -140,7 +140,6 @@ internal sealed class MessageRecorderHub : IMessageRecordSink
         try
         {
             await foreach (MessageRecord record in queue.Channel.Reader.ReadAllAsync(ct))
-            {
                 try
                 {
                     await recorder.OnMessageAsync(record, ct);
@@ -159,7 +158,6 @@ internal sealed class MessageRecorderHub : IMessageRecordSink
                         record.MessageId);
                     if (ct.IsCancellationRequested) return;
                 }
-            }
         }
         catch (OperationCanceledException ex) when (ex.CancellationToken == ct && ct.IsCancellationRequested)
         {

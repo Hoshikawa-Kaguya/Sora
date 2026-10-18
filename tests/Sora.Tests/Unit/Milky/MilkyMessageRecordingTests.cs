@@ -31,14 +31,14 @@ public class MilkyMessageRecordingTests
         using CancellationTokenSource deadline = new(TimeSpan.FromSeconds(5));
         (MilkyAdapter adapter, CaptureSink sink) = CreateAdapter(server);
         using MilkyHttpApiClient client = new(new MilkyConfig { Port = ((IPEndPoint)server.LocalEndpoint).Port });
-        MilkyBotApi api = new(client, adapter);
-        TextSegment text = new() { Text = "hi" };
+        MilkyBotApi              api    = new(client, adapter);
+        TextSegment              text   = new() { Text = "hi" };
         // A zero mention target is not convertible and is therefore not submitted.
-        MessageBody body = new([text, new MentionSegment { Target = 0L }]);
+        MessageBody              body   = new([text, new MentionSegment { Target = 0L }]);
 
-        Task<SendMessageResult> call = api.SendGroupMessageAsync(654321, body, deadline.Token).AsTask();
-        JObject request = await RespondAsync(server, OkResponse(77, 1700000000), deadline.Token);
-        SendMessageResult result = await call.WaitAsync(deadline.Token);
+        Task<SendMessageResult> call    = api.SendGroupMessageAsync(654321, body, deadline.Token).AsTask();
+        JObject                 request = await RespondAsync(server, OkResponse(77, 1700000000), deadline.Token);
+        SendMessageResult       result  = await call.WaitAsync(deadline.Token);
 
         DateTime protocolTime = DateTimeOffset.FromUnixTimeSeconds(1700000000).LocalDateTime;
         Assert.True(result.IsSuccess);
@@ -65,7 +65,7 @@ public class MilkyMessageRecordingTests
         using CancellationTokenSource deadline = new(TimeSpan.FromSeconds(5));
         (MilkyAdapter adapter, CaptureSink sink) = CreateAdapter(server);
         using MilkyHttpApiClient client = new(new MilkyConfig { Port = ((IPEndPoint)server.LocalEndpoint).Port });
-        MilkyBotApi api = new(client, adapter);
+        MilkyBotApi              api    = new(client, adapter);
         ForwardSegment forward = new()
         {
             Messages =
@@ -78,7 +78,8 @@ public class MilkyMessageRecordingTests
             ]
         };
 
-        Task<SendMessageResult> call = api.SendFriendMessageAsync(222, new MessageBody(forward), deadline.Token).AsTask();
+        Task<SendMessageResult> call = api.SendFriendMessageAsync(222, new MessageBody(forward), deadline.Token)
+                                          .AsTask();
         await RespondAsync(server, OkResponse(78, 1700000001), deadline.Token);
         Assert.True((await call.WaitAsync(deadline.Token)).IsSuccess);
 
@@ -101,7 +102,7 @@ public class MilkyMessageRecordingTests
         using CancellationTokenSource deadline = new(TimeSpan.FromSeconds(5));
         (MilkyAdapter adapter, CaptureSink sink) = CreateAdapter(server);
         using MilkyHttpApiClient client = new(new MilkyConfig { Port = ((IPEndPoint)server.LocalEndpoint).Port });
-        MilkyBotApi api = new(client, adapter);
+        MilkyBotApi              api    = new(client, adapter);
 
         Task<SendMessageResult> call = api.SendFriendMessageAsync(222, "hi", deadline.Token).AsTask();
         JObject failed = new() { ["status"] = "failed", ["retcode"] = 123, ["message"] = "rejected", ["data"] = null };
@@ -127,7 +128,7 @@ public class MilkyMessageRecordingTests
             return ValueTask.CompletedTask;
         };
 
-        adapter.HandleEventMessage(MessageEventJson(senderId: 222));
+        adapter.HandleEventMessage(MessageEventJson(222));
 
         Assert.Equal(1, recordsAtDispatch);
         MessageRecord record = Assert.Single(sink.Records);
@@ -145,7 +146,7 @@ public class MilkyMessageRecordingTests
     [Fact]
     public void SelfMessage_IsNotRecordedEvenWhenDispatched()
     {
-        (MilkyAdapter adapter, CaptureSink sink) = CreateAdapter(null, dropSelfMessage: false);
+        (MilkyAdapter adapter, CaptureSink sink) = CreateAdapter(null, false);
         int dispatched = 0;
         ((IAdapterEventSource)adapter).OnEvent += _ =>
         {
@@ -153,7 +154,7 @@ public class MilkyMessageRecordingTests
             return ValueTask.CompletedTask;
         };
 
-        adapter.HandleEventMessage(MessageEventJson(senderId: SelfId));
+        adapter.HandleEventMessage(MessageEventJson(SelfId));
 
         Assert.Equal(1, dispatched);
         Assert.Empty(sink.Records);
@@ -185,14 +186,14 @@ public class MilkyMessageRecordingTests
             ["time"] = 1700000000, ["self_id"] = SelfId, ["event_type"] = "message_receive",
             ["data"] = JObject.Parse(
                 $$$"""
-                  {
-                      "message_scene": "group", "peer_id": 111, "message_seq": 999,
-                      "sender_id": {{{senderId}}}, "time": 1700000000,
-                      "segments": [{"type": "text", "data": {"text": "hello"}}],
-                      "group": {"group_id": 111, "group_name": "TestGroup", "member_count": 10, "max_member_count": 200},
-                      "group_member": {"user_id": {{{senderId}}}, "nickname": "User", "sex": "male", "group_id": 111, "card": "", "title": "", "level": 1, "role": "member", "join_time": 0, "last_sent_time": 0}
-                  }
-                  """)
+                   {
+                       "message_scene": "group", "peer_id": 111, "message_seq": 999,
+                       "sender_id": {{{senderId}}}, "time": 1700000000,
+                       "segments": [{"type": "text", "data": {"text": "hello"}}],
+                       "group": {"group_id": 111, "group_name": "TestGroup", "member_count": 10, "max_member_count": 200},
+                       "group_member": {"user_id": {{{senderId}}}, "nickname": "User", "sex": "male", "group_id": 111, "card": "", "title": "", "level": 1, "role": "member", "join_time": 0, "last_sent_time": 0}
+                   }
+                   """)
         }.ToString(Formatting.None);
 
     private static JObject OkResponse(long messageSeq, long time) => new()
@@ -204,8 +205,8 @@ public class MilkyMessageRecordingTests
     /// <summary>Captures one ASCII JSON request and replies with the supplied protocol envelope.</summary>
     private static async Task<JObject> RespondAsync(TcpListener server, JObject responseBody, CancellationToken ct)
     {
-        using TcpClient    peer          = await server.AcceptTcpClientAsync(ct);
-        using StreamReader reader        = new(peer.GetStream(), leaveOpen: true);
+        using TcpClient    peer   = await server.AcceptTcpClientAsync(ct);
+        using StreamReader reader = new(peer.GetStream(), leaveOpen: true);
         _ = await reader.ReadLineAsync(ct);
         int contentLength = 0;
         while (await reader.ReadLineAsync(ct) is { Length: > 0 } header)

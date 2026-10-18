@@ -18,7 +18,7 @@ public sealed class SoraService : IBotService
     private readonly IAdapterEventSource      _eventSource;
     private readonly Lazy<CommandManager>     _commandLazy = new(() => new CommandManager());
     private readonly ILogger                  _logger;
-    private readonly MessageWaiter            _waiter = new();
+    private readonly MessageWaiter            _waiter      = new();
     private readonly MessageRecorderHub       _recorderHub = new();
     private          CancellationTokenSource? _serviceCts;
 

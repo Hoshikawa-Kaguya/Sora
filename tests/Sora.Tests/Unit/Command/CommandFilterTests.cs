@@ -932,7 +932,8 @@ public class CommandFilterTests : IDisposable
     {
         _manager.TestRegistrar().RegisterDynamicCommand(
             typeof(CommandFilterTests),
-            [OrderedBefore(20)] [OrderedBefore(5)] [OrderedBefore(10)](e) => ValueTask.CompletedTask,
+            [OrderedBefore(20)] [OrderedBefore(5)] [OrderedBefore(10)]
+            (e) => ValueTask.CompletedTask,
             ["dyn-multi"]);
 
         await _manager.HandleMessageEventAsync(CreateTestEvent("dyn-multi"), CT);

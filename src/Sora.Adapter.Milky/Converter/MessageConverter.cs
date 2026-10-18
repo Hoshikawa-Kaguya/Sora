@@ -270,8 +270,8 @@ internal static class MessageConverter
         List<ForwardedMessageNode> submittedNodes = new(fw.Messages.Count);
         for (int i = 0; i < fw.Messages.Count; i++)
         {
-            ForwardedMessageNode msg = fw.Messages[i];
-            List<MilkySegment> segments = ToMilkySegments(msg.Segments, out List<Segment> submittedSegments);
+            ForwardedMessageNode msg      = fw.Messages[i];
+            List<MilkySegment>   segments = ToMilkySegments(msg.Segments, out List<Segment> submittedSegments);
             messagesArray[i] = new
             {
                 user_id     = (long)msg.UserId,

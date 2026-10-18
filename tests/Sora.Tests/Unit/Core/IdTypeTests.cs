@@ -216,6 +216,7 @@ public class IdTypeTests
 
 #region SendMessageResult Tests
 
+    // ReSharper disable once InvalidXmlDocComment
     /// <see cref="SendMessageResult.Ok" />
     [Fact]
     public void SendMessageResult_Success()

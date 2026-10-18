@@ -60,7 +60,8 @@ public sealed class SecondOrderCommands
 public sealed class DerivedPluginCommands : FixtureCommandBase
 {
     /// <summary>Creates the derived group with an execution recorder.</summary>
-    public DerivedPluginCommands(Action<string> record) : base(record)
+    public DerivedPluginCommands(Action<string> record)
+        : base(record)
     {
     }
 }
@@ -69,7 +70,10 @@ public sealed class DerivedPluginCommands : FixtureCommandBase
 public sealed class ThrowingConstructorCommands
 {
     /// <summary>Always throws.</summary>
-    public ThrowingConstructorCommands() => throw new InvalidOperationException("constructor failure");
+    public ThrowingConstructorCommands()
+    {
+        throw new InvalidOperationException("constructor failure");
+    }
 
     /// <see cref="AssemblyRegistration.ScanType(Type)" />
     [Command(Expressions = ["ctor-static"])]
@@ -89,6 +93,7 @@ public abstract class AbstractLocalCommands
 }
 
 /// <summary>Open generic command type that cannot be scanned directly.</summary>
+// ReSharper disable once UnusedTypeParameter
 public sealed class GenericLocalCommands<T>
 {
     /// <see cref="AssemblyRegistration.ScanType(Type)" />
@@ -743,8 +748,8 @@ public class CommandAssemblyManagementTests
     [Fact]
     public async Task Unregister_ReleasesCollectibleAssembly()
     {
-        CommandManager            manager = new();
-        WeakReference             context = await RegisterAndUnregisterCollectibleFixtureAsync(manager);
+        CommandManager manager = new();
+        WeakReference  context = await RegisterAndUnregisterCollectibleFixtureAsync(manager);
 
         for (int attempt = 0; attempt < 20 && context.IsAlive; attempt++)
         {

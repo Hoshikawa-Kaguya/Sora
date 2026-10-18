@@ -19,12 +19,12 @@ public sealed class CommandManager
 {
 #region Fields
 
-    private readonly ILogger                                        _logger           = SoraLogger.CreateLogger<CommandManager>();
-    private readonly Dictionary<MatchType, ICommandMatcher>         _matchers         = new();
-    private readonly Dictionary<Assembly, AssemblyRegistration>     _registrations    = new();
-    private readonly Lock                                           _registrationLock = new();
-    private          ExecutionTable                                 _executionTable   = ExecutionTable.Empty;
-    private          long                                           _nextSequence;
+    private readonly ILogger                                    _logger = SoraLogger.CreateLogger<CommandManager>();
+    private readonly Dictionary<MatchType, ICommandMatcher>     _matchers = new();
+    private readonly Dictionary<Assembly, AssemblyRegistration> _registrations = new();
+    private readonly Lock                                       _registrationLock = new();
+    private          ExecutionTable                             _executionTable = ExecutionTable.Empty;
+    private          long                                       _nextSequence;
 
     /// <summary>
     ///     Tracks in-flight command executions for re-entry protection.
@@ -666,8 +666,8 @@ public sealed class CommandManager
         AssemblySegment[] segments =
         [
             .. OrderAssemblies(_registrations.Values.Where(static registration => registration.IsEnabled))
-                .Select(static registration => registration.Segment)
-                .OfType<AssemblySegment>()
+               .Select(static registration => registration.Segment)
+               .OfType<AssemblySegment>()
         ];
         Volatile.Write(ref _executionTable, new ExecutionTable { Segments = segments });
     }
@@ -767,58 +767,56 @@ public sealed class CommandManager
         // The table is immutable, already ordered and rebuilt only when registrations change.
         ExecutionTable table = Volatile.Read(ref _executionTable);
         foreach (AssemblySegment segment in table.Segments)
+        foreach (CommandInfo cmd in segment.Commands)
         {
-            foreach (CommandInfo cmd in segment.Commands)
+            ct.ThrowIfCancellationRequested();
+            if (!e.IsContinueEventChain) return;
+            if (!IsCommandMatched(cmd, e, text)) continue;
+
+            _logger.LogInformation(
+                "Matched command [{CommandName}] via {MatchType} ",
+                cmd.Method.Name,
+                cmd.MatchType);
+
+            // An assembly unregistered after this table was read skips its remaining commands.
+            if (!segment.Registration.TryEnterInvocation()) break;
+
+            // Re-entry guard: skip if the same user already has this command in flight
+            ExecutionKey executionKey = default;
+            if (cmd.PreventReentry)
             {
-                ct.ThrowIfCancellationRequested();
-                if (!e.IsContinueEventChain) return;
-                if (!IsCommandMatched(cmd, e, text)) continue;
+                executionKey = new ExecutionKey(
+                    cmd.Method,
+                    e.ConnectionId,
+                    e.Message.SenderId,
+                    e.Message.GroupId,
+                    e.Message.SourceType);
 
-                _logger.LogInformation(
-                    "Matched command [{CommandName}] via {MatchType} ",
-                    cmd.Method.Name,
-                    cmd.MatchType);
-
-                // An assembly unregistered after this table was read skips its remaining commands.
-                if (!segment.Registration.TryEnterInvocation()) break;
-
-                // Re-entry guard: skip if the same user already has this command in flight
-                ExecutionKey executionKey = default;
-                if (cmd.PreventReentry)
+                if (!_activeExecutions.TryAdd(executionKey, 0))
                 {
-                    executionKey = new ExecutionKey(
-                        cmd.Method,
-                        e.ConnectionId,
+                    segment.Registration.ExitInvocation();
+                    _logger.LogWarning(
+                        "Command [{CommandName}] blocked: re-entry from sender {SenderId} in {SourceType} (group: {GroupId})",
+                        cmd.Method.Name,
                         e.Message.SenderId,
-                        e.Message.GroupId,
-                        e.Message.SourceType);
+                        e.Message.SourceType,
+                        e.Message.GroupId);
 
-                    if (!_activeExecutions.TryAdd(executionKey, 0))
-                    {
-                        segment.Registration.ExitInvocation();
-                        _logger.LogWarning(
-                            "Command [{CommandName}] blocked: re-entry from sender {SenderId} in {SourceType} (group: {GroupId})",
-                            cmd.Method.Name,
-                            e.Message.SenderId,
-                            e.Message.SourceType,
-                            e.Message.GroupId);
+                    if (!string.IsNullOrEmpty(cmd.ReentryMessage))
+                        _ = SendReentryReplyAsync(e, cmd.ReentryMessage);
 
-                        if (!string.IsNullOrEmpty(cmd.ReentryMessage))
-                            _ = SendReentryReplyAsync(e, cmd.ReentryMessage);
-
-                        if (cmd.BlockAfterMatch) e.IsContinueEventChain = false;
-                        continue;
-                    }
+                    if (cmd.BlockAfterMatch) e.IsContinueEventChain = false;
+                    continue;
                 }
-
-                using CommandExecutionScope executionScope = new(
-                    segment.Registration,
-                    cmd.PreventReentry ? _activeExecutions : null,
-                    executionKey);
-                await ExecuteMatchedCommandAsync(cmd, e, ct);
-
-                if (cmd.BlockAfterMatch) e.IsContinueEventChain = false;
             }
+
+            using CommandExecutionScope executionScope = new(
+                segment.Registration,
+                cmd.PreventReentry ? _activeExecutions : null,
+                executionKey);
+            await ExecuteMatchedCommandAsync(cmd, e, ct);
+
+            if (cmd.BlockAfterMatch) e.IsContinueEventChain = false;
         }
     }
 

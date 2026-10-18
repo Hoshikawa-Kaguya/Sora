@@ -1,4 +1,5 @@
 ﻿using Xunit;
+// ReSharper disable InvalidXmlDocComment
 
 namespace Sora.Tests.Unit.Command;
 

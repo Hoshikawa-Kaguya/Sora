@@ -16,4 +16,7 @@ public interface IBotServiceConfig
 
     /// <summary>Whether to automatically mark messages as read after receiving them.</summary>
     bool AutoMarkMessageRead => true;
+    
+    /// <summary>Drop messages that self sent.</summary>
+    bool DropSelfMessage => true;
 }

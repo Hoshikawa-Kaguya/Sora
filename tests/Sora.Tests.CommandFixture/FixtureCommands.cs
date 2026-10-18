@@ -1,5 +1,4 @@
 using Sora.Command.Attributes;
-using Sora.Core.Enums;
 using Sora.Entities.Events;
 using MatchType = Sora.Core.Enums.MatchType;
 
