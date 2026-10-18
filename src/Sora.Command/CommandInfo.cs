@@ -53,8 +53,8 @@ internal sealed class CommandInfo
     /// <summary>Optional plain-text reply sent when the command is rejected due to re-entry.</summary>
     public string ReentryMessage { get; init; } = "";
 
-    /// <summary>Source type filter (null = any).</summary>
-    public MessageSourceType? SourceType { get; init; }
+    /// <summary>Message sources the command accepts.</summary>
+    public MessageSourceScope SourceScope { get; init; } = MessageSourceScope.Any;
 
     /// <summary>The assembly registration that owns this command.</summary>
     public required AssemblyRegistration Registration { get; init; }

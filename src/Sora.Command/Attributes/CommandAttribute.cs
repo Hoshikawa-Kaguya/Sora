@@ -43,6 +43,9 @@ public sealed class CommandAttribute : Attribute
     /// </summary>
     public string ReentryMessage { get; set; } = "";
 
-    /// <summary>Required message source type (null = any).</summary>
-    public MessageSourceType? SourceType { get; set; }
+    /// <summary>
+    ///     Message sources this command accepts. Values can be combined, for example
+    ///     <c>MessageSourceScope.Friend | MessageSourceScope.Temp</c>. Default is <see cref="MessageSourceScope.Any" />.
+    /// </summary>
+    public MessageSourceScope SourceScope { get; set; } = MessageSourceScope.Any;
 }

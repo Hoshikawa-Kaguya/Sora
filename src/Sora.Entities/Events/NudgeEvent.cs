@@ -1,7 +1,7 @@
 namespace Sora.Entities.Events;
 
 /// <summary>Raised when a nudge (poke) is received.</summary>
-public sealed record NudgeEvent : BotEvent
+public sealed record NudgeEvent : BotEvent, ISourcedEvent
 {
     /// <summary>Display action image URL (replaces action text when present).</summary>
     public string ActionImageUrl { get; init; } = "";

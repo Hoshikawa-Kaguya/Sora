@@ -32,7 +32,7 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
 
 | 项目 | NuGet 包 | 职责 |
 |------|----------|------|
-| `Sora.Core` | `HoshikawaKaguya.Sora.Core` | 值类型（`UserId`、`GroupId`、`MessageId`）、枚举（`MatchType`、`SegmentType`、`MessageSourceType` 等）、`ApiResult` 结果类型 |
+| `Sora.Core` | `HoshikawaKaguya.Sora.Core` | 值类型（`UserId`、`GroupId`、`MessageId`）、枚举（`MatchType`、`SegmentType`、`MessageSourceType`、`MessageSourceScope` 等）、`ApiResult` 结果类型 |
 | `Sora.Entities` | `HoshikawaKaguya.Sora.Entities` | 消息段（`Segment`、`MessageBody`）、事件（`BotEvent`、`MessageReceivedEvent` 等）、数据模型（`UserInfo`、`GroupInfo` 等）、核心接口（`IBotApi`、`IBotAdapter`、`IBotService`）、`EventDispatcher`、`MessageWaiter` |
 | `Sora.Command` | `HoshikawaKaguya.Sora.Command` | 独立的命令扩展包：`[Command]`/`[CommandGroup]` 特性扫描、内置匹配策略、`CommandManager` 命令路由及命令过滤器 |
 | `Sora` | `HoshikawaKaguya.Sora` | `SoraServiceFactory` 工厂、`SoraService` 事件管线（Waiter → Commands → Dispatcher） |
@@ -71,7 +71,9 @@ Sora.Adapter.*         协议适配器，引用 Sora 应用层项目
 
 普通用户回调错误在执行方法内部记录并隔离，正常完成、普通执行错误或短路后继续进入对应后置阶段。Sora 取消立即向外传播，不再执行后续 handler、after-filter 或 post-filter；执行链完整性不作为取消后的保证。编排层直接顺序调用各阶段，不捕获或暂存异常。重入标记通过包内部的值类型占用作用域及 `using` 保证释放，释放操作不执行后置回调。该契约不改变适配器调度；适配器仍负责观察回调完成或失败。
 
-> **注意**：过滤器由框架用户配置。事件过滤器通过 `service.UseEventPreFilter()` / `service.UseEventPostFilter()` 显式注册（带 `EventTypes` / `SourceTypes` / `Predicate` 作用域属性）。命令过滤器以 attribute 形式贴在 `[Command]` 方法或 `[CommandGroup]` 类上，框架按 attribute 自动发现，无须注册。适配器开发者无需关心过滤器机制 — 它在 `SoraService` / `CommandManager` 内部透明运作。
+> **注意**：过滤器由框架用户配置。事件过滤器通过 `service.UseEventPreFilter()` / `service.UseEventPostFilter()` 显式注册（带 `EventTypes` / `SourceScope` / `Predicate` 作用域属性）。命令过滤器以 attribute 形式贴在 `[Command]` 方法或 `[CommandGroup]` 类上，框架按 attribute 自动发现，无须注册。适配器开发者无需关心过滤器机制 — 它在 `SoraService` / `CommandManager` 内部透明运作。
+>
+> 过滤器与指令的来源范围（`MessageSourceScope`）依赖事件携带的具体来源。实现 `ISourcedEvent` 的**带来源事件**（`MessageReceivedEvent` 的 `Message.SourceType`，以及 `MessageDeletedEvent`、`NudgeEvent`、`FileUploadEvent`、`PeerPinChangedEvent` 的 `SourceType`）必须由适配器填写 `Friend` / `Group` / `Temp` 之一；来源无法识别时，带来源事件只会被范围为 `Any` 的过滤器处理。
 
 
 ### 用户策略与事件触发者

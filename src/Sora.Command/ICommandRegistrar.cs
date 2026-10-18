@@ -26,7 +26,7 @@ public interface ICommandRegistrar
     /// <param name="handler">The async handler to invoke when the command matches.</param>
     /// <param name="expressions">One or more match expressions.</param>
     /// <param name="matchType">How to match the expressions against message text.</param>
-    /// <param name="sourceType">Required message source type (null = any).</param>
+    /// <param name="sourceScope">Message sources the command accepts. Defaults to <see cref="MessageSourceScope.Any" />.</param>
     /// <param name="permissionLevel">Minimum member role required.</param>
     /// <param name="priority">Higher priority commands are matched first inside the owning assembly.</param>
     /// <param name="blockAfterMatch">Whether to block the event chain after matching.</param>
@@ -54,7 +54,7 @@ public interface ICommandRegistrar
         Func<MessageReceivedEvent, ValueTask> handler,
         string[]                              expressions,
         MatchType                             matchType       = MatchType.Full,
-        MessageSourceType?                    sourceType      = null,
+        MessageSourceScope                    sourceScope     = MessageSourceScope.Any,
         MemberRole                            permissionLevel = MemberRole.Member,
         int                                   priority        = 0,
         bool                                  blockAfterMatch = true,

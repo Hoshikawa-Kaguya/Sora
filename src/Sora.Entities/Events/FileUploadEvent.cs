@@ -1,7 +1,7 @@
 namespace Sora.Entities.Events;
 
 /// <summary>Raised when a file is uploaded (private or group).</summary>
-public sealed record FileUploadEvent : BotEvent
+public sealed record FileUploadEvent : BotEvent, ISourcedEvent
 {
     /// <summary>File hash (may be empty if unavailable).</summary>
     public string FileHash { get; init; } = "";

@@ -1,7 +1,7 @@
 namespace Sora.Entities.Events;
 
 /// <summary>Raised when a message is recalled/deleted.</summary>
-public sealed record MessageDeletedEvent : BotEvent
+public sealed record MessageDeletedEvent : BotEvent, ISourcedEvent
 {
     /// <summary>Recall display suffix text (e.g. "recalled a message").</summary>
     public string DisplaySuffix { get; init; } = "";

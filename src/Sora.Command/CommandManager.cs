@@ -167,7 +167,7 @@ public sealed class CommandManager
         Func<MessageReceivedEvent, ValueTask> handler,
         string[]                              expressions,
         MatchType                             matchType,
-        MessageSourceType?                    sourceType,
+        MessageSourceScope                    sourceScope,
         MemberRole                            permissionLevel,
         int                                   priority,
         bool                                  blockAfterMatch,
@@ -216,7 +216,7 @@ public sealed class CommandManager
                 DynamicHandler  = handler,
                 Expressions     = expressions,
                 MatchType       = matchType,
-                SourceType      = sourceType,
+                SourceScope     = sourceScope,
                 PermissionLevel = permissionLevel,
                 SuperUserOnly   = superUserOnly,
                 Priority        = priority,
@@ -239,16 +239,17 @@ public sealed class CommandManager
         }
 
         _logger.LogInformation(
-            "Registered dynamic command [{CommandName}] via {MatchType} (id: {CommandId}, owner: {OwnerType}, source: {SourceType}, priority: {Priority}, block: {BlockAfterMatch}, before-filters: {BeforeCount}, after-filters: {AfterCount})",
+            "Registered dynamic command [{CommandName}] via {MatchType} (id: {CommandId}, owner: {OwnerType}, scope: {SourceScope}, priority: {Priority}, block: {BlockAfterMatch}, before-filters: {BeforeCount}, after-filters: {AfterCount})",
             handler.Method.Name,
             matchType,
             commandId,
             ownerType.FullName,
-            sourceType,
+            sourceScope,
             priority,
             blockAfterMatch,
             frozenBefore.Length,
             frozenAfter.Length);
+        WarnIfEmptySourceScope(handler.Method.Name, sourceScope);
 
         return commandId;
     }
@@ -396,7 +397,7 @@ public sealed class CommandManager
                     Instance        = instance,
                     Expressions     = cmdAttr.Expressions,
                     MatchType       = cmdAttr.MatchType,
-                    SourceType      = cmdAttr.SourceType,
+                    SourceScope     = cmdAttr.SourceScope,
                     PermissionLevel = cmdAttr.PermissionLevel,
                     SuperUserOnly   = cmdAttr.SuperUserOnly,
                     Priority        = cmdAttr.Priority,
@@ -441,16 +442,31 @@ public sealed class CommandManager
         }
 
         foreach (CommandInfo info in batch)
+        {
             _logger.LogInformation(
-                "Registered command [{CommandName}] via {MatchType} (owner: {OwnerType}, source: {SourceType}, priority: {Priority}, block: {BlockAfterMatch}, before-filters: {BeforeCount}, after-filters: {AfterCount})",
+                "Registered command [{CommandName}] via {MatchType} (owner: {OwnerType}, scope: {SourceScope}, priority: {Priority}, block: {BlockAfterMatch}, before-filters: {BeforeCount}, after-filters: {AfterCount})",
                 info.Method.Name,
                 info.MatchType,
                 info.OwnerType.FullName,
-                info.SourceType,
+                info.SourceScope,
                 info.Priority,
                 info.BlockAfterMatch,
                 info.BeforeFilters.Count,
                 info.AfterFilters.Count);
+            WarnIfEmptySourceScope(info.Method.Name, info.SourceScope);
+        }
+    }
+
+    /// <summary>
+    ///     Warns that a command whose source scope contains no message source can never match.
+    /// </summary>
+    private void WarnIfEmptySourceScope(string commandName, MessageSourceScope sourceScope)
+    {
+        if ((sourceScope & MessageSourceScope.Any) == 0)
+            _logger.LogWarning(
+                "Command [{CommandName}] declares source scope {SourceScope} without any message source; it will never match",
+                commandName,
+                sourceScope);
     }
 
     /// <summary>
@@ -821,12 +837,12 @@ public sealed class CommandManager
     }
 
     /// <summary>
-    ///     Checks source type, permissions and match expressions of a command.
+    ///     Checks source scope, permissions and match expressions of a command.
     /// </summary>
     private bool IsCommandMatched(CommandInfo cmd, MessageReceivedEvent e, string text)
     {
-        // Filter by source type
-        if (cmd.SourceType.HasValue && cmd.SourceType.Value != e.Message.SourceType)
+        // Filter by source scope
+        if (!cmd.SourceScope.Contains(e.Message.SourceType))
             return false;
 
         // Check permission

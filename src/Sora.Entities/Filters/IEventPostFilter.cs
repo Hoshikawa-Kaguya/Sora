@@ -6,8 +6,8 @@ namespace Sora.Entities.Filters;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Scope is opt-in via <see cref="EventTypes" />, <see cref="SourceTypes" />, and <see cref="Predicate" />.
-///         When all scope properties are <c>null</c> or empty, the filter applies to every event (registration-wide global).
+///         Scope is opt-in via <see cref="EventTypes" />, <see cref="SourceScope" />, and <see cref="Predicate" />.
+///         When all scope properties keep their defaults, the filter applies to every event (registration-wide global).
 ///         Setting any scope property narrows the filter to only events that satisfy it.
 ///     </para>
 ///     <para>
@@ -29,12 +29,12 @@ public interface IEventPostFilter
     Type[]? EventTypes => null;
 
     /// <summary>
-    ///     Message-source scope. When <c>null</c> or empty, no source-type constraint is applied.
-    ///     When non-empty, the filter applies only to <see cref="MessageReceivedEvent" /> whose
-    ///     <c>Message.SourceType</c> is in this set; **all non-message events are treated as a scope mismatch**
-    ///     (the filter is skipped).
+    ///     Message-source scope. When <see cref="MessageSourceScope.Any" /> (default), no source constraint is applied
+    ///     and every event matches, including events without a message source.
+    ///     Otherwise the filter applies only to <see cref="ISourcedEvent" /> events whose <c>SourceType</c> is contained
+    ///     in this scope; events without a message source are treated as a scope mismatch (the filter is skipped).
     /// </summary>
-    MessageSourceType[]? SourceTypes => null;
+    MessageSourceScope SourceScope => MessageSourceScope.Any;
 
     /// <summary>
     ///     Predicate scope. When <c>null</c>, no predicate constraint is applied.

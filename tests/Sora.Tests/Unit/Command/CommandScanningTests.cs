@@ -38,6 +38,26 @@ public static class BadSignatureCommands
     public static async ValueTask WrongParam(string s) => await ValueTask.CompletedTask; // Wrong param
 }
 
+/// <summary>Test commands declaring source scopes through the attribute.</summary>
+public static class SourceScopeCommands
+{
+    /// <see cref="CommandAttribute.SourceScope" />
+    [Command(Expressions = ["private"], SourceScope = MessageSourceScope.Friend | MessageSourceScope.Temp)]
+    public static async ValueTask PrivateOnly(MessageReceivedEvent e) => await ValueTask.CompletedTask;
+
+    /// <see cref="CommandAttribute.SourceScope" />
+    [Command(Expressions = ["anywhere"])]
+    public static async ValueTask Anywhere(MessageReceivedEvent e) => await ValueTask.CompletedTask;
+}
+
+/// <summary>Test command declaring a source scope without any message source.</summary>
+public static class EmptySourceScopeCommands
+{
+    /// <see cref="CommandAttribute.SourceScope" />
+    [Command(Expressions = ["never"], SourceScope = 0)]
+    public static async ValueTask Never(MessageReceivedEvent e) => await ValueTask.CompletedTask;
+}
+
 /// <summary>Test instance command group for singleton verification.</summary>
 [CommandGroup(Name = "instance-test", Prefix = "!")]
 public class InstanceCommandGroup
@@ -222,8 +242,64 @@ public class CommandScanningTests
 
 #endregion
 
+#region Source Scope Tests
+
+    /// <see cref="CommandAttribute.SourceScope" />
+    [Theory]
+    [InlineData(MessageSourceType.Friend, true)]
+    [InlineData(MessageSourceType.Temp, true)]
+    [InlineData(MessageSourceType.Group, false)]
+    public async Task ScanType_CombinedSourceScope_MatchesContainedSources(MessageSourceType source, bool matched)
+    {
+        CommandManager manager = new();
+        manager.TestRegistration().ScanType(typeof(SourceScopeCommands));
+
+        MessageReceivedEvent evt = CreateTestEvent("private", source: source);
+        await manager.HandleMessageEventAsync(evt, CT);
+
+        Assert.Equal(matched, !evt.IsContinueEventChain);
+    }
+
+    /// <see cref="CommandAttribute.SourceScope" />
+    [Theory]
+    [InlineData(MessageSourceType.Friend)]
+    [InlineData(MessageSourceType.Group)]
+    [InlineData(MessageSourceType.Temp)]
+    public async Task ScanType_DefaultSourceScope_MatchesEverySource(MessageSourceType source)
+    {
+        Assert.Equal(MessageSourceScope.Any, new CommandAttribute().SourceScope);
+
+        CommandManager manager = new();
+        manager.TestRegistration().ScanType(typeof(SourceScopeCommands));
+
+        MessageReceivedEvent evt = CreateTestEvent("anywhere", source: source);
+        await manager.HandleMessageEventAsync(evt, CT);
+
+        Assert.False(evt.IsContinueEventChain);
+    }
+
+    /// <see cref="CommandAttribute.SourceScope" />
+    [Fact]
+    public async Task ScanType_EmptySourceScope_WarnsAndNeverMatches()
+    {
+        CommandManager       manager = new();
+        WarningCaptureLogger logger  = WarningCaptureLogger.InjectInto(manager);
+        manager.TestRegistration().ScanType(typeof(EmptySourceScopeCommands));
+
+        Assert.Contains(logger.Warnings, w => w.Contains(nameof(EmptySourceScopeCommands.Never)));
+
+        MessageReceivedEvent evt = CreateTestEvent("never");
+        await manager.HandleMessageEventAsync(evt, CT);
+        Assert.True(evt.IsContinueEventChain);
+    }
+
+#endregion
+
     /// <summary>Creates a synthetic <see cref="MessageReceivedEvent" /> for command testing.</summary>
-    private static MessageReceivedEvent CreateTestEvent(string text, MemberRole role = MemberRole.Member) =>
+    private static MessageReceivedEvent CreateTestEvent(
+        string            text,
+        MemberRole        role   = MemberRole.Member,
+        MessageSourceType source = MessageSourceType.Group) =>
         new()
         {
             Api          = null!,
@@ -233,7 +309,7 @@ public class CommandScanningTests
             Message = new MessageContext
             {
                 MessageId  = 1,
-                SourceType = MessageSourceType.Group,
+                SourceType = source,
                 GroupId    = 100L,
                 SenderId   = 200L,
                 Body       = new MessageBody(text)

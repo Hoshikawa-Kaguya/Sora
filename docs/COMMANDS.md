@@ -110,7 +110,7 @@ public static class MyCommands
 |------|--------|------|
 | `Expressions` | `[]` | 匹配表达式 |
 | `MatchType` | `Full` | `Full` 全文匹配、`Regex` 正则、`Keyword` 包含关键字。匹配方式与内置匹配器一一对应，不可扩展 |
-| `SourceType` | `null` | 限定消息来源，null 表示全部 |
+| `SourceScope` | `Any` | 指令接受的消息来源范围（`MessageSourceScope`），可组合；`Any` 表示不限来源 |
 | `PermissionLevel` | `Member` | 最低群角色 |
 | `SuperUserOnly` | `false` | 额外要求触发者为 `SuperUsers` 中的用户；超级用户不会绕过群角色检查 |
 | `Priority` | `0` | 命令优先级，只在所属 Assembly 内比较 |
@@ -118,6 +118,19 @@ public static class MyCommands
 | `PreventReentry` | `true` | 同一用户在该指令执行完成前再次触发时跳过 |
 | `ReentryMessage` | `""` | 重入被拒绝时回复的纯文本 |
 | `Description` | `""` | 帮助文本 |
+
+`MessageSourceScope` 是 `[Flags]` 枚举（`Friend`、`Group`、`Temp`，`Any` = 三者之和），只用于声明指令或事件过滤器接受哪些来源；接收到的消息本身的来源仍是 `MessageSourceType`，不会出现 `Any`。例如只在私聊（好友与临时会话）中响应：
+
+```csharp
+[Command(Expressions = ["whoami"], SourceScope = MessageSourceScope.Friend | MessageSourceScope.Temp)]
+public static ValueTask WhoAmI(MessageReceivedEvent e)
+{
+    // 只会在好友消息或临时会话消息中触发，群消息不会匹配
+    return ValueTask.CompletedTask;
+}
+```
+
+范围中不含任何来源（例如 `0`）的指令在注册时记录 Warning，并且永远不会匹配。
 
 配置 `BlockUsers` 后，框架在自动已读、连续对话和过滤器之前忽略该触发者的整个事件；同时出现在两份名单中的用户被拦截。
 
@@ -140,6 +153,7 @@ commands.Registrar.UnregisterDynamicCommand(id);
 - `ownerType` 必须是**该 Assembly 自己定义的类型**（按运行时对象比较）。Sora、运行时或其他 Assembly（包括插件所继承基类所在的 Assembly）的类型一律抛 `ArgumentException`。基类在 `Shared.dll` 时，用插件自己的派生类型作为 owner。
 - 归属完全由“句柄 + `ownerType`”决定，不检查委托代码编译在哪个 DLL 中。因此宿主代码包装插件调用的 lambda 也能明确归属到插件。
 - 动态指令与扫描指令遵循同一套启停、排序与注销规则；Assembly 或 `ownerType` 停用期间也可以注册和注销，注册的指令在两者都启用后开始匹配。
+- `sourceScope` 与特性的 `SourceScope` 含义相同，默认 `MessageSourceScope.Any`。
 - `UnregisterDynamicCommand` 只能注销本注册下的动态指令，找不到时返回 `false`。
 - 直接贴在 lambda 上的过滤器特性会被自动发现，并与 `beforeFilters` / `afterFilters` 合并、按引用去重、按 `Order` 稳定排序。
 
@@ -266,6 +280,24 @@ await registration.UnregisterAsync(timeoutToken);
 | 删除插件 DLL 文件 | 使用 `LoadFromAssemblyPath` 加载时 Windows 会锁定文件，删除失败；从流或字节加载时删除成功，但已加载的代码仍在内存中运行 |
 | 删除插件依赖的、尚未加载的 DLL | 首次用到时抛 `FileNotFoundException`；在 handler 中发生时按普通指令失败记录日志并隔离 |
 | 插件位于默认 ALC | 无法卸载，只能注销指令 |
+
+## 9. 3.1 → 3.2 迁移
+
+3.1 的 `[Command]` 使用可空的 `MessageSourceType?` 表示来源，而 C# 特性参数不支持可空类型，因此无法在特性上赋值。3.2 改为由指令与事件过滤器共用的来源范围 `MessageSourceScope`：
+
+| 3.1 | 3.2 |
+|-----|-----|
+| `[Command(SourceType = ...)]`（无法编译） | `[Command(SourceScope = MessageSourceScope.Group)]`，可组合，如 `Friend \| Temp` |
+| `RegisterDynamicCommand(..., sourceType: null)` | 省略参数，或 `sourceScope: MessageSourceScope.Any` |
+| `RegisterDynamicCommand(..., sourceType: MessageSourceType.Group)` | `sourceScope: MessageSourceScope.Group` |
+| `IEventPreFilter` / `IEventPostFilter` 的 `MessageSourceType[]? SourceTypes`（`null` = 全部） | `MessageSourceScope SourceScope`（默认 `Any`） |
+| `PeerPinChangedEvent.MessageScene`（`string`） | `PeerPinChangedEvent.SourceType`（`MessageSourceType`） |
+
+事件过滤器的来源判断同时调整：
+
+- `SourceScope` 为 `Any` 时不按来源限制，所有事件都会进入过滤器（与 3.1 的 `null` 相同）。
+- 其他范围只匹配来源在范围内的**带来源事件**（实现 `ISourcedEvent` 的事件：`MessageReceivedEvent`、`MessageDeletedEvent`、`NudgeEvent`、`FileUploadEvent`、`PeerPinChangedEvent`）。3.1 只判断 `MessageReceivedEvent`，其他事件一律跳过；3.2 中撤回、戳一戳、文件上传和置顶变化事件也会按各自的 `SourceType` 参与判断。
+- 不带来源的事件（如入群、好友请求）在非 `Any` 范围下仍然跳过该过滤器。
 
 ## 相关文档
 

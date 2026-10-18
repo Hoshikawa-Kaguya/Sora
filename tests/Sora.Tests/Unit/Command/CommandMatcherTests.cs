@@ -319,7 +319,7 @@ public class CommandMatcherTests
 
     /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
     [Fact]
-    public async Task CommandManager_SourceTypeFilter()
+    public async Task CommandManager_SourceScopeFilter()
     {
         CommandManager manager  = new();
         bool           executed = false;
@@ -333,7 +333,7 @@ public class CommandMatcherTests
             },
             ["test"],
             MatchType.Full,
-            MessageSourceType.Friend);
+            MessageSourceScope.Friend);
 
         MessageReceivedEvent evt = new()
         {
@@ -350,6 +350,68 @@ public class CommandMatcherTests
         await manager.HandleMessageEventAsync(evt, CT);
         Assert.False(executed);
     }
+
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
+    [Theory]
+    [InlineData(MessageSourceType.Friend)]
+    [InlineData(MessageSourceType.Group)]
+    [InlineData(MessageSourceType.Temp)]
+    public async Task CommandManager_DynamicDefaultSourceScope_MatchesEverySource(MessageSourceType source)
+    {
+        CommandManager manager  = new();
+        int            executed = 0;
+
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
+            _ =>
+            {
+                executed++;
+                return ValueTask.CompletedTask;
+            },
+            ["test"]);
+
+        await manager.HandleMessageEventAsync(CreateSourceEvent(source), CT);
+        Assert.Equal(1, executed);
+    }
+
+    /// <see cref="ICommandRegistrar.RegisterDynamicCommand" />
+    [Fact]
+    public async Task CommandManager_DynamicEmptySourceScope_WarnsAndNeverMatches()
+    {
+        CommandManager       manager  = new();
+        WarningCaptureLogger logger   = WarningCaptureLogger.InjectInto(manager);
+        bool                 executed = false;
+
+        manager.TestRegistrar().RegisterDynamicCommand(
+            typeof(CommandMatcherTests),
+            _ =>
+            {
+                executed = true;
+                return ValueTask.CompletedTask;
+            },
+            ["test"],
+            sourceScope: 0);
+
+        Assert.Single(logger.Warnings, w => w.Contains("without any message source"));
+
+        foreach (MessageSourceType source in new[]
+                     { MessageSourceType.Friend, MessageSourceType.Group, MessageSourceType.Temp })
+            await manager.HandleMessageEventAsync(CreateSourceEvent(source), CT);
+        Assert.False(executed);
+    }
+
+    private static MessageReceivedEvent CreateSourceEvent(MessageSourceType source) =>
+        new()
+        {
+            Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+            Message = new MessageContext
+            {
+                MessageId  = 1,
+                SourceType = source,
+                GroupId    = source == MessageSourceType.Group ? 100L : 0L, SenderId = 200L,
+                Body       = new MessageBody("test")
+            }
+        };
 
 #endregion
 

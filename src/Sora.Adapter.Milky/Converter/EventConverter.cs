@@ -533,13 +533,18 @@ internal static class EventConverter
     {
         MilkyPeerPinChangeData? d = Deserialize<MilkyPeerPinChangeData>(milkyEvent);
         if (d is null) return null;
+        // An unknown scene is kept as the fallback value; only Any-scoped filters will see the event.
+        MessageSourceType sourceType = (d.MessageScene ?? "").Adapt<MessageSourceType>();
+        if (sourceType == (MessageSourceType)(-1))
+            Logger.LogWarning("Invalid Milky peer_pin_change source type: {MessageScene}", d.MessageScene ?? "(null)");
+
         return new PeerPinChangedEvent
         {
             ConnectionId = baseProps.ConnectionId,
             SelfId       = baseProps.SelfId,
             Time         = baseProps.Time,
             Api          = baseProps.Api,
-            MessageScene = d.MessageScene ?? "",
+            SourceType   = sourceType,
             PeerId       = d.PeerId,
             IsPinned     = d.IsPinned
         };

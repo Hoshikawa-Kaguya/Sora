@@ -66,7 +66,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Full,
-            MessageSourceType.Group);
+            MessageSourceScope.Group);
 
         GroupId testGroup = TestConfig.TestGroupId;
         SendMessageResult sent =
@@ -101,7 +101,7 @@ public class CommandTests : IDisposable
             },
             [pattern],
             MatchType.Regex,
-            MessageSourceType.Group);
+            MessageSourceScope.Group);
 
         GroupId testGroup = TestConfig.TestGroupId;
         SendMessageResult sent =
@@ -136,7 +136,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Keyword,
-            MessageSourceType.Group);
+            MessageSourceScope.Group);
 
         GroupId testGroup = TestConfig.TestGroupId;
         SendMessageResult sent =
@@ -173,7 +173,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Full,
-            MessageSourceType.Group);
+            MessageSourceScope.Group);
 
         // Group message should trigger
         GroupId testGroup = TestConfig.TestGroupId;
@@ -215,7 +215,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Full,
-            MessageSourceType.Friend);
+            MessageSourceScope.Friend);
 
         await _fixture.SecondaryApi!.SendFriendMessageAsync(primaryUserId, new MessageBody(keyword), CT);
         _output.WriteLine($"Sent private message to Primary ({primaryUserId})");
@@ -248,7 +248,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Full,
-            MessageSourceType.Group,
+            MessageSourceScope.Group,
             priority: 10,
             blockAfterMatch: true,
             description: "high priority command");
@@ -262,7 +262,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Full,
-            MessageSourceType.Group,
+            MessageSourceScope.Group,
             priority: 0,
             blockAfterMatch: true,
             description: "low priority command");
@@ -315,7 +315,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Full,
-            MessageSourceType.Group,
+            MessageSourceScope.Group,
             MemberRole.Owner,
             description: "owner-only command");
 
@@ -358,7 +358,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Full,
-            MessageSourceType.Group,
+            MessageSourceScope.Group,
             description: "dialogue test command");
 
         GroupId testGroup = TestConfig.TestGroupId;
@@ -410,7 +410,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Full,
-            MessageSourceType.Group,
+            MessageSourceScope.Group,
             description: "timeout test command");
 
         GroupId testGroup = TestConfig.TestGroupId;
@@ -470,7 +470,7 @@ public class CommandTests : IDisposable
             },
             [keyword],
             MatchType.Full,
-            MessageSourceType.Group,
+            MessageSourceScope.Group,
             description: "multi-turn test command");
 
         GroupId testGroup = TestConfig.TestGroupId;
@@ -534,7 +534,7 @@ public class CommandTests : IDisposable
             },
             [cmdKeyword],
             MatchType.Full,
-            MessageSourceType.Group,
+            MessageSourceScope.Group,
             description: "specific command for passthrough test");
 
         // Subscribe to raw message event

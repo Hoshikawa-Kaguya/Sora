@@ -338,8 +338,23 @@ public class EventConverterTests
         BotEvent            result = EventConverter.ToSoraEvent(evt, TestConnectionId, null!)!;
         PeerPinChangedEvent pin    = (PeerPinChangedEvent)result;
         Assert.Equal(111L, pin.PeerId);
-        Assert.Equal("group", pin.MessageScene);
+        Assert.Equal(MessageSourceType.Group, pin.SourceType);
         Assert.True(pin.IsPinned);
+    }
+
+    /// <summary>Verifies an unknown peer-pin message scene keeps the event with the fallback source.</summary>
+    [Fact]
+    public void ConvertPeerPinChange_UnknownScene_KeepsEventWithFallbackSource()
+    {
+        MilkyEvent evt = new()
+        {
+            Time = 1700000000, SelfId = 12345, EventType = "peer_pin_change",
+            Data = JObject.Parse(@"{""peer_id"": 111, ""message_scene"": ""channel"", ""is_pinned"": false}")
+        };
+
+        PeerPinChangedEvent pin = Assert.IsType<PeerPinChangedEvent>(EventConverter.ToSoraEvent(evt, TestConnectionId, null!));
+        Assert.Equal((MessageSourceType)(-1), pin.SourceType);
+        Assert.Equal(111L, pin.PeerId);
     }
 
     /// <summary>Verifies <see cref="EventConverter.ToSoraEvent" /> converts a bot-offline event.</summary>

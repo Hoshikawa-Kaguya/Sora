@@ -75,7 +75,7 @@ public sealed class SoraService : IBotService
 
     /// <summary>
     ///     Registers an event pre-filter. Must be called before <see cref="StartAsync" />.
-    ///     The filter only runs when the event matches its declared <c>EventTypes</c>, <c>SourceTypes</c>,
+    ///     The filter only runs when the event matches its declared <c>EventTypes</c>, <c>SourceScope</c>,
     ///     and <c>Predicate</c> scope (see <see cref="IEventPreFilter" />). When all scope properties are
     ///     unset, the filter applies to every event.
     /// </summary>
@@ -86,6 +86,7 @@ public sealed class SoraService : IBotService
         if (filter.EventTypes is { Length: > 0 }
             && filter.EventTypes.Any(t => !typeof(BotEvent).IsAssignableFrom(t)))
             throw new InvalidOperationException("All elements of EventTypes must be subclasses of BotEvent.");
+        WarnIfEmptySourceScope(filter.GetType(), filter.SourceScope);
         lock (_registrationLock)
         {
             if (_registrationClosed)
@@ -98,7 +99,7 @@ public sealed class SoraService : IBotService
 
     /// <summary>
     ///     Registers an event post-filter. Must be called before <see cref="StartAsync" />.
-    ///     The filter only runs when the event matches its declared <c>EventTypes</c>, <c>SourceTypes</c>,
+    ///     The filter only runs when the event matches its declared <c>EventTypes</c>, <c>SourceScope</c>,
     ///     and <c>Predicate</c> scope (see <see cref="IEventPostFilter" />). When all scope properties are
     ///     unset, the filter applies to every event.
     /// </summary>
@@ -109,6 +110,7 @@ public sealed class SoraService : IBotService
         if (filter.EventTypes is { Length: > 0 }
             && filter.EventTypes.Any(t => !typeof(BotEvent).IsAssignableFrom(t)))
             throw new InvalidOperationException("All elements of EventTypes must be subclasses of BotEvent.");
+        WarnIfEmptySourceScope(filter.GetType(), filter.SourceScope);
         lock (_registrationLock)
         {
             if (_registrationClosed)
@@ -117,6 +119,15 @@ public sealed class SoraService : IBotService
             _postFilters.Add(filter);
             _frozenPostFilters = [.. _postFilters.OrderBy(f => f.Order)];
         }
+    }
+
+    private void WarnIfEmptySourceScope(Type filterType, MessageSourceScope sourceScope)
+    {
+        if ((sourceScope & MessageSourceScope.Any) == 0)
+            _logger.LogWarning(
+                "Event filter {FilterType} declares source scope {SourceScope} without any message source; it will never run",
+                filterType.Name,
+                sourceScope);
     }
 
 #endregion

@@ -444,11 +444,11 @@ public class EventPipelineFilterTests : IAsyncDisposable
         Assert.Equal(1, scopedFilter.CallCount);
     }
 
-    /// <see cref="IEventPreFilter.SourceTypes" />
+    /// <see cref="IEventPreFilter.SourceScope" />
     [Fact]
-    public async Task PreFilter_WithSourceTypes_OnlyMatchingSourceRuns()
+    public async Task PreFilter_WithSourceScope_OnlyMatchingSourceRuns()
     {
-        RecordingPreFilter scopedFilter = new() { SourceTypes = [MessageSourceType.Group] };
+        RecordingPreFilter scopedFilter = new() { SourceScope = MessageSourceScope.Group };
         _service.UseEventPreFilter(scopedFilter);
 
         // Group message → matches
@@ -462,12 +462,26 @@ public class EventPipelineFilterTests : IAsyncDisposable
         Assert.Equal(1, scopedFilter.CallCount);
     }
 
-    /// <see cref="IEventPreFilter.SourceTypes" />
+    /// <see cref="IEventPreFilter.SourceScope" />
     [Fact]
-    public async Task PreFilter_WithSourceTypes_NonMessageEventSkipped()
+    public async Task PreFilter_WithCombinedSourceScope_MatchesEachContainedSource()
     {
-        // SourceTypes is set but the event is not MessageReceivedEvent → must be skipped (scope mismatch).
-        RecordingPreFilter scopedFilter = new() { SourceTypes = [MessageSourceType.Group] };
+        RecordingPreFilter scopedFilter = new() { SourceScope = MessageSourceScope.Friend | MessageSourceScope.Temp };
+        _service.UseEventPreFilter(scopedFilter);
+
+        await _adapter.RaiseEventAsync(CreateMessageEvent(sourceType: MessageSourceType.Friend));
+        await _adapter.RaiseEventAsync(CreateMessageEvent(sourceType: MessageSourceType.Temp));
+        await _adapter.RaiseEventAsync(CreateMessageEvent(sourceType: MessageSourceType.Group));
+
+        Assert.Equal(2, scopedFilter.CallCount);
+    }
+
+    /// <see cref="IEventPreFilter.SourceScope" />
+    [Fact]
+    public async Task PreFilter_WithSourceScope_EventWithoutSourceSkipped()
+    {
+        // A narrower scope than Any skips events that have no message source.
+        RecordingPreFilter scopedFilter = new() { SourceScope = MessageSourceScope.Group };
         _service.UseEventPreFilter(scopedFilter);
 
         ConnectedEvent connectedEvt = new()
@@ -475,6 +489,77 @@ public class EventPipelineFilterTests : IAsyncDisposable
         await _adapter.RaiseEventAsync(connectedEvt);
 
         Assert.Equal(0, scopedFilter.CallCount);
+    }
+
+    /// <see cref="IEventPreFilter.SourceScope" />
+    [Fact]
+    public async Task PreFilter_WithDefaultAnyScope_EventWithoutSourceRuns()
+    {
+        RecordingPreFilter filter = new();
+        _service.UseEventPreFilter(filter);
+
+        ConnectedEvent connectedEvt = new()
+            { Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now };
+        await _adapter.RaiseEventAsync(connectedEvt);
+
+        Assert.Equal(MessageSourceScope.Any, ((IEventPreFilter)filter).SourceScope);
+        Assert.Equal(1, filter.CallCount);
+    }
+
+    /// <see cref="ISourcedEvent" />
+    [Fact]
+    public async Task PreFilter_WithSourceScope_SourcedNonMessageEventsUseTheirSourceType()
+    {
+        RecordingPreFilter scopedFilter = new() { SourceScope = MessageSourceScope.Group };
+        _service.UseEventPreFilter(scopedFilter);
+
+        foreach (MessageSourceType source in new[] { MessageSourceType.Group, MessageSourceType.Friend })
+        {
+            await _adapter.RaiseEventAsync(
+                new MessageDeletedEvent
+                {
+                    Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                    SourceType = source, SenderId = 200L, OperatorId = 200L
+                });
+            await _adapter.RaiseEventAsync(
+                new NudgeEvent
+                {
+                    Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                    SourceType = source, SenderId = 200L
+                });
+            await _adapter.RaiseEventAsync(
+                new FileUploadEvent
+                {
+                    Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                    SourceType = source, UserId = 200L
+                });
+            await _adapter.RaiseEventAsync(
+                new PeerPinChangedEvent
+                {
+                    Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                    SourceType = source, PeerId = 100L
+                });
+        }
+
+        // Only the four group-sourced events pass.
+        Assert.Equal(4, scopedFilter.CallCount);
+    }
+
+    /// <see cref="Sora.SoraService.UseEventPreFilter" />
+    [Fact]
+    public async Task PreFilter_WithEmptySourceScope_WarnsAndNeverRuns()
+    {
+        WarningCaptureLogger logger = WarningCaptureLogger.InjectInto(_service);
+        RecordingPreFilter   filter = new() { SourceScope = 0 };
+        _service.UseEventPreFilter(filter);
+
+        Assert.Contains(logger.Warnings, w => w.Contains(nameof(RecordingPreFilter)));
+
+        await _adapter.RaiseEventAsync(CreateMessageEvent());
+        await _adapter.RaiseEventAsync(
+            new ConnectedEvent { Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now });
+
+        Assert.Equal(0, filter.CallCount);
     }
 
     /// <see cref="IEventPreFilter.Predicate" />
@@ -545,11 +630,11 @@ public class EventPipelineFilterTests : IAsyncDisposable
         Assert.Equal(1, scopedPost.CallCount);
     }
 
-    /// <see cref="IEventPostFilter.SourceTypes" />
+    /// <see cref="IEventPostFilter.SourceScope" />
     [Fact]
-    public async Task PostFilter_WithSourceTypes_NonMessageEventSkipped()
+    public async Task PostFilter_WithSourceScope_EventWithoutSourceSkipped()
     {
-        RecordingPostFilter scopedPost = new() { SourceTypes = [MessageSourceType.Group] };
+        RecordingPostFilter scopedPost = new() { SourceScope = MessageSourceScope.Group };
         _service.UseEventPostFilter(scopedPost);
 
         ConnectedEvent connectedEvt = new()
@@ -852,7 +937,7 @@ public class EventPipelineFilterTests : IAsyncDisposable
         public int CallCount { get; private set; }
 
         public Type[]?               EventTypes  { get; init; }
-        public MessageSourceType[]?  SourceTypes { get; init; }
+        public MessageSourceScope    SourceScope { get; init; } = MessageSourceScope.Any;
         public Func<BotEvent, bool>? Predicate   { get; init; }
 
         public ValueTask<bool> OnEventAsync(BotEvent e, CancellationToken ct)
@@ -882,7 +967,7 @@ public class EventPipelineFilterTests : IAsyncDisposable
         public bool LastChainCompleted { get; private set; }
 
         public Type[]?              EventTypes  { get; init; }
-        public MessageSourceType[]? SourceTypes { get; init; }
+        public MessageSourceScope   SourceScope { get; init; } = MessageSourceScope.Any;
 
         // ReSharper disable once UnassignedGetOnlyAutoProperty
         public Func<BotEvent, bool>? Predicate { get; }
