@@ -13,7 +13,7 @@
         <a href="http://www.apache.org/licenses/LICENSE-2.0">
             <img src="https://img.shields.io/badge/license-Apache--2.0-blueviolet?style=for-the-badge" alt="license">
         </a>
-        <img src="https://img.shields.io/github/stars/Yukari316/Sora?style=for-the-badge" alt="stars">
+        <img src="https://img.shields.io/github/stars/Hoshikawa-Kaguya/Sora?style=for-the-badge" alt="stars">
         <a href="https://github.com/Hoshikawa-Kaguya/Sora/actions/workflows/ci.yml">
             <img src="https://img.shields.io/github/actions/workflow/status/Hoshikawa-Kaguya/Sora/ci.yml?branch=master&&style=for-the-badge" alt="workflow">
         </a>
