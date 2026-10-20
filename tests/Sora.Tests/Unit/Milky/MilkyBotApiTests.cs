@@ -32,9 +32,9 @@ public class MilkyBotApiTests
         {
             Body = MessageBody.FromIncoming(
             [
-                new TextSegment { Text = "hi" },
+                new TextSegment { Text   = "hi" },
                 new FileSegment { FileId = "fid" },
-                new ImageSegment { Url = "http://img.png" }
+                new ImageSegment { Url   = "http://img.png" }
             ])
         };
 

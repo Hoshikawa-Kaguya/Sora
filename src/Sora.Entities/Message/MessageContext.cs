@@ -20,18 +20,16 @@ public sealed record MessageContext
     /// <summary>Message source type (private, group, temp).</summary>
     public MessageSourceType SourceType { get; init; }
 
-    private readonly ReceivedMessageBody _body = ReceivedMessageBody.Empty;
-
     /// <summary>Message content segments.</summary>
     /// <remarks>Each read returns a new editable copy; read it once into a local variable for repeated use.</remarks>
     public MessageBody Body
     {
-        get => _body.ToEditable();
-        init => _body = ReceivedMessageBody.From(value);
+        get => BodySnapshot.ToEditable();
+        init => BodySnapshot = ReceivedMessageBody.From(value);
     }
 
     /// <summary>Gets the unchanged message content for framework-internal reads without copying.</summary>
-    internal ReceivedMessageBody BodySnapshot => _body;
+    internal ReceivedMessageBody BodySnapshot { get; private set; } = ReceivedMessageBody.Empty;
 
     /// <summary>Sender's avatar URL (available in forwarded messages). LLBot extension.</summary>
     public string AvatarUrl { get; init; } = "";

@@ -352,7 +352,8 @@ public class EventConverterTests
             Data = JObject.Parse(@"{""peer_id"": 111, ""message_scene"": ""channel"", ""is_pinned"": false}")
         };
 
-        PeerPinChangedEvent pin = Assert.IsType<PeerPinChangedEvent>(EventConverter.ToSoraEvent(evt, TestConnectionId, null!));
+        PeerPinChangedEvent pin =
+            Assert.IsType<PeerPinChangedEvent>(EventConverter.ToSoraEvent(evt, TestConnectionId, null!));
         Assert.Equal((MessageSourceType)(-1), pin.SourceType);
         Assert.Equal(111L, pin.PeerId);
     }

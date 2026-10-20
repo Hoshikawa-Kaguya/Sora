@@ -44,10 +44,7 @@ service.Events.OnDisconnected += async e =>
 };
 
 //消息接收
-service.Events.OnMessageReceived += async e =>
-{
-    await Helpers.SendReplyAsync(e, new MessageBody("干嘛"));
-};
+service.Events.OnMessageReceived += async e => { await Helpers.SendReplyAsync(e, new MessageBody("干嘛")); };
 
 //群成员加入
 service.Events.OnMemberJoined += async e =>

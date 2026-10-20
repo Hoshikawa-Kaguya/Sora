@@ -13,7 +13,7 @@ public class MessageBodyOutgoingWarningTests
     {
         MessageBody body =
         [
-            new TextSegment { Text = "hi" },
+            new TextSegment { Text   = "hi" },
             new FileSegment { FileId = "fid" },
             new ImageSegment(),
             new MarkdownSegment { Content = "**md**" }
@@ -21,7 +21,9 @@ public class MessageBodyOutgoingWarningTests
 
         List<string> warnings = CaptureWarnings(() => Assert.Single(body.ToOutgoing()));
 
-        Assert.Equal([Dropped(SegmentType.File, 1), Dropped(SegmentType.Image, 2), Dropped(SegmentType.Markdown, 3)], warnings);
+        Assert.Equal(
+            [Dropped(SegmentType.File, 1), Dropped(SegmentType.Image, 2), Dropped(SegmentType.Markdown, 3)],
+            warnings);
     }
 
     /// <see cref="MessageBody.ToOutgoing" />
@@ -35,7 +37,9 @@ public class MessageBodyOutgoingWarningTests
                 Messages =
                 [
                     new ForwardedMessageNode
-                        { UserId = 1L, Segments = [new TextSegment { Text = "inner" }, new FileSegment { FileId = "fid" }] }
+                    {
+                        UserId = 1L, Segments = [new TextSegment { Text = "inner" }, new FileSegment { FileId = "fid" }]
+                    }
                 ]
             }
         ];

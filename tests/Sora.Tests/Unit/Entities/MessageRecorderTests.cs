@@ -33,9 +33,9 @@ public class MessageRecorderTests
 
         MessageRecord record = MessageRecord.Inbound("Mock", message);
         // A handler edits its copy of the received body and converts it for sending.
-        MessageBody copy = message.Message.Body;
+        MessageBody   copy   = message.Message.Body;
         ((ImageSegment)copy[1]).FileUri = "base64://edited";
-        _ = copy.ToOutgoing();
+        _                               = copy.ToOutgoing();
 
         ImageSegment recorded = Assert.IsType<ImageSegment>(record.Segments[1]);
         Assert.NotSame(image, recorded);

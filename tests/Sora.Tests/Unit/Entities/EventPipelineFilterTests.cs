@@ -518,26 +518,26 @@ public class EventPipelineFilterTests : IAsyncDisposable
             await _adapter.RaiseEventAsync(
                 new MessageDeletedEvent
                 {
-                    Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    SourceType = source, SenderId = 200L, OperatorId = 200L
+                    Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                    SourceType = source, SenderId    = 200L, OperatorId       = 200L
                 });
             await _adapter.RaiseEventAsync(
                 new NudgeEvent
                 {
-                    Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    SourceType = source, SenderId = 200L
+                    Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                    SourceType = source, SenderId    = 200L
                 });
             await _adapter.RaiseEventAsync(
                 new FileUploadEvent
                 {
-                    Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    SourceType = source, UserId = 200L
+                    Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                    SourceType = source, UserId      = 200L
                 });
             await _adapter.RaiseEventAsync(
                 new PeerPinChangedEvent
                 {
-                    Api = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
-                    SourceType = source, PeerId = 100L
+                    Api        = null!, ConnectionId = Guid.NewGuid(), SelfId = 1L, Time = DateTime.Now,
+                    SourceType = source, PeerId      = 100L
                 });
         }
 
@@ -966,8 +966,8 @@ public class EventPipelineFilterTests : IAsyncDisposable
         public int  CallCount          { get; private set; }
         public bool LastChainCompleted { get; private set; }
 
-        public Type[]?              EventTypes  { get; init; }
-        public MessageSourceScope   SourceScope { get; init; } = MessageSourceScope.Any;
+        public Type[]?            EventTypes  { get; init; }
+        public MessageSourceScope SourceScope { get; init; } = MessageSourceScope.Any;
 
         // ReSharper disable once UnassignedGetOnlyAutoProperty
         public Func<BotEvent, bool>? Predicate { get; }

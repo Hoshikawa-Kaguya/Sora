@@ -495,7 +495,8 @@ public class MessageBodyTests
         MessageBody outerSegments = Assert.Single(converted.Messages).Segments;
         Assert.All(outerSegments, s => Assert.Equal(SegmentDirection.Outgoing, s.Direction));
         ForwardSegment convertedInner = Assert.IsType<ForwardSegment>(outerSegments[1]);
-        ImageSegment   innerImage = Assert.IsType<ImageSegment>(Assert.Single(Assert.Single(convertedInner.Messages).Segments));
+        ImageSegment innerImage =
+            Assert.IsType<ImageSegment>(Assert.Single(Assert.Single(convertedInner.Messages).Segments));
         Assert.Equal("http://inner.png", innerImage.FileUri);
         // The source tree is unchanged.
         MessageBody sourceInner = Assert.Single(inner.Messages).Segments;

@@ -14,7 +14,7 @@ public class ReceivedBodyIsolationTests : IAsyncDisposable
     private const string ImageUrl = "http://img.png";
 
     private readonly EventPipelineFilterTests.MockAdapter _adapter = new();
-    private readonly SoraService                         _service;
+    private readonly SoraService                          _service;
 
     public ReceivedBodyIsolationTests()
     {
@@ -54,6 +54,7 @@ public class ReceivedBodyIsolationTests : IAsyncDisposable
         Assert.Equal(first, second);
         Assert.NotSame(first[1], second[1]);
         Assert.Equal(context, context with { });
+        Assert.NotSame(context, context with { });
     }
 
     /// <see cref="MessageContext.Body" />
@@ -61,7 +62,7 @@ public class ReceivedBodyIsolationTests : IAsyncDisposable
     public void MessageContextBody_KeepsIncomingOnlySegments()
     {
         FileSegment    file    = new() { FileId = "fid" };
-        MessageContext context = new() { Body = MessageBody.FromIncoming([new TextSegment { Text = "hi" }, file]) };
+        MessageContext context = new() { Body   = MessageBody.FromIncoming([new TextSegment { Text = "hi" }, file]) };
 
         FileSegment copied = Assert.IsType<FileSegment>(context.Body[1]);
         Assert.Equal("fid", copied.FileId);
@@ -89,7 +90,7 @@ public class ReceivedBodyIsolationTests : IAsyncDisposable
     public void ReplyContent_EditsToCopyDoNotAffectSegment()
     {
         ReplySegment   reply   = new() { TargetId = 1L, Content = Received() };
-        MessageContext context = new() { Body = MessageBody.FromIncoming([reply]) };
+        MessageContext context = new() { Body     = MessageBody.FromIncoming([reply]) };
 
         ReplySegment quoted  = Assert.IsType<ReplySegment>(context.Body[0]);
         MessageBody  content = Assert.IsType<MessageBody>(quoted.Content);
@@ -128,9 +129,9 @@ public class ReceivedBodyIsolationTests : IAsyncDisposable
     [Fact]
     public void ForwardedNodeSegments_NestedThreeLevelsAreIsolated()
     {
-        ForwardSegment level3 = Forward(Received());
-        ForwardSegment level2 = Forward(new MessageBody([level3]));
-        ForwardSegment level1 = Forward(new MessageBody([level2]));
+        ForwardSegment level3  = Forward(Received());
+        ForwardSegment level2  = Forward(new MessageBody([level3]));
+        ForwardSegment level1  = Forward(new MessageBody([level2]));
         MessageContext context = new() { Body = new MessageBody([level1]) };
 
         MessageBody innermost = Innermost(context.Body);
@@ -160,7 +161,7 @@ public class ReceivedBodyIsolationTests : IAsyncDisposable
                 MessageBody body = e.Message.Body;
                 body.Clear();
                 body.Add(new TextSegment { Text = "changed" });
-                _ = e.Message.Body + "!";
+                _                                         = e.Message.Body + "!";
                 ((ImageSegment)e.Message.Body[1]).FileUri = "base64://edited";
                 return ValueTask.CompletedTask;
             },
