@@ -51,11 +51,11 @@ await service.StartAsync();
 | `Segments` | 收到的消息段 | 实际提交给协议端的消息段 |
 | `Sender`、`Group`、`Member` | 发送者、群、群成员信息 | null |
 
-记录中的消息段是独立副本：之后对原事件或原 `MessageBody` 的任何修改（包括重新发送时 `Segment.ToOutgoing()` 的方向转换）都不影响已产生的记录。发送方向记录的是 `ToOutgoing()` 之后、协议转换成功的段；协议端不支持而被丢弃的段不出现在记录中。
+记录中的消息段是独立副本：之后对原 `MessageBody` 或其中消息段的任何修改都不影响已产生的记录。发送方向记录的是发送入口 `ToOutgoing()` 转换之后、协议转换成功的段；无法发送或协议端不支持而被丢弃的段不出现在记录中。
 
-转发消息在记录中表示为 `ForwardRecordSegment`，内层每条消息本身是一条 `MessageRecord`（`SenderId`、`SenderName`、`Time`、`Segments`，方向与外层相同），完整保留内层内容，记录中不出现 `MessageBody`。`ForwardRecordSegment.ToOutgoing()` 返回 null，不能被放进 `MessageBody` 再次发送。接收方向的转发通常只有 `ForwardId`，`Messages` 为空。
+转发消息在记录中表示为 `ForwardRecordSegment`，内层每条消息本身是一条 `MessageRecord`（`SenderId`、`SenderName`、`Time`、`Segments`，方向与外层相同），完整保留内层内容，记录中不出现 `MessageBody`。`ForwardRecordSegment.ToOutgoing()` 返回 null，不能再次发送：放进 `MessageBody` 后会在发送时被丢弃。接收方向的转发通常只有 `ForwardId`，`Messages` 为空。
 
-`ForwardRecordSegment.Direction` 默认是 `Incoming`：接收记录中的转发都来自协议。只有用户构建并发出的转发（即发送记录中的转发，包括嵌套转发）是 `Outgoing`，因为收到的转发无法放入 `MessageBody` 再次发送。
+`ForwardRecordSegment.Direction` 默认是 `Incoming`：接收记录中的转发都来自协议。只有用户构建并发出的转发（即发送记录中的转发，包括嵌套转发）是 `Outgoing`，因为收到的转发只有 `ForwardId`，无法再次发送。
 
 ## 队列与顺序
 

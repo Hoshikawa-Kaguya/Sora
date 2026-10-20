@@ -187,16 +187,9 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         MessageBody       message,
         CancellationToken ct = default)
     {
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(message, out List<Segment> submitted);
-        if (segments.Count == 0)
-        {
-            _logger.LogWarning(
-                "Cannot send Milky private message to user[{UserId}]: no valid segments remain after conversion",
-                userId);
-            return SendMessageResult.Fail(ApiStatusCode.InvalidMessage, "Empty message");
-        }
-
-        IReadOnlyList<string> issues = message.Validate();
+        // Outgoing conversion, unsendable segments are dropped (and logged) here.
+        MessageBody           outgoing = message.ToOutgoing();
+        IReadOnlyList<string> issues   = outgoing.Validate();
         if (issues.Count > 0)
         {
             _logger.LogWarning(
@@ -205,6 +198,15 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
                 issues.Count,
                 string.Join(" | ", issues));
             return SendMessageResult.Fail(ApiStatusCode.InvalidMessage, string.Join(Environment.NewLine, issues));
+        }
+
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(outgoing, out List<Segment> submitted);
+        if (segments.Count == 0)
+        {
+            _logger.LogWarning(
+                "Cannot send Milky private message to user[{UserId}]: no valid segments remain after conversion",
+                userId);
+            return SendMessageResult.Fail(ApiStatusCode.InvalidMessage, "Empty message");
         }
 
         _logger.LogInformation(
@@ -247,16 +249,9 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
         MessageBody       message,
         CancellationToken ct = default)
     {
-        List<MilkySegment> segments = MessageConverter.ToMilkySegments(message, out List<Segment> submitted);
-        if (segments.Count == 0)
-        {
-            _logger.LogWarning(
-                "Cannot send Milky group message to group[{GroupId}]: no valid segments remain after conversion",
-                groupId);
-            return SendMessageResult.Fail(ApiStatusCode.InvalidMessage, "Empty message");
-        }
-
-        IReadOnlyList<string> issues = message.Validate();
+        // The only outgoing conversion point: unsendable segments are dropped (and logged) here.
+        MessageBody           outgoing = message.ToOutgoing();
+        IReadOnlyList<string> issues   = outgoing.Validate();
         if (issues.Count > 0)
         {
             _logger.LogWarning(
@@ -265,6 +260,15 @@ public sealed class MilkyBotApi : IBotApi, IMilkyExtApi
                 issues.Count,
                 string.Join(" | ", issues));
             return SendMessageResult.Fail(ApiStatusCode.InvalidMessage, string.Join(Environment.NewLine, issues));
+        }
+
+        List<MilkySegment> segments = MessageConverter.ToMilkySegments(outgoing, out List<Segment> submitted);
+        if (segments.Count == 0)
+        {
+            _logger.LogWarning(
+                "Cannot send Milky group message to group[{GroupId}]: no valid segments remain after conversion",
+                groupId);
+            return SendMessageResult.Fail(ApiStatusCode.InvalidMessage, "Empty message");
         }
 
         _logger.LogInformation(

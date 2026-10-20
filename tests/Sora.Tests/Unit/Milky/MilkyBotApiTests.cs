@@ -9,11 +9,82 @@ using Xunit;
 
 namespace Sora.Tests.Unit.Milky;
 
-/// <summary>Tests the Milky file API requests and public results through HTTP.</summary>
+/// <summary>Tests the Milky API requests and public results through HTTP.</summary>
 [Collection("Milky.Unit")]
 [Trait("Category", "Unit")]
 public class MilkyBotApiTests
 {
+#region Message Sending
+
+    /// <summary>
+    ///     Re-sending a received body converts it at the send entry: incoming-only segments are dropped, a received
+    ///     image is sent through its URL, and the received content is left unchanged.
+    /// </summary>
+    [Fact]
+    public async Task SendGroupMessage_ReceivedBody_ConvertsBeforeSending()
+    {
+        using TcpListener server = new(IPAddress.Loopback, 0);
+        server.Start();
+        using CancellationTokenSource deadline = new(TimeSpan.FromSeconds(5));
+        using MilkyHttpApiClient      client = new(new MilkyConfig { Port = ((IPEndPoint)server.LocalEndpoint).Port });
+        MilkyBotApi                   api = new(client, new MilkyAdapter(new MilkyConfig()));
+        MessageContext received = new()
+        {
+            Body = MessageBody.FromIncoming(
+            [
+                new TextSegment { Text = "hi" },
+                new FileSegment { FileId = "fid" },
+                new ImageSegment { Url = "http://img.png" }
+            ])
+        };
+
+        Task<SendMessageResult> call = api.SendGroupMessageAsync(654321, received.Body, deadline.Token).AsTask();
+        JObject response = new()
+            { ["status"] = "ok", ["retcode"] = 0, ["data"] = new JObject { ["message_seq"] = 1, ["time"] = 0 } };
+        (string requestLine, JObject request) = await RespondAsync(server, response, deadline.Token);
+
+        Assert.Equal("POST /api/send_group_message HTTP/1.1", requestLine);
+        JArray message = Assert.IsType<JArray>(request["message"]);
+        Assert.Equal(["text", "image"], message.Select(s => (string?)s["type"]));
+        Assert.Equal("http://img.png", (string?)message[1]["data"]?["uri"]);
+        Assert.True((await call.WaitAsync(deadline.Token)).IsSuccess);
+        Assert.Equal("", Assert.IsType<ImageSegment>(received.Body[2]).FileUri);
+    }
+
+    /// <summary>A body that breaks the composition rules is rejected without a request.</summary>
+    [Fact]
+    public async Task SendFriendMessage_CompositionViolation_ReturnsInvalidMessage()
+    {
+        using MilkyHttpApiClient client = new(new MilkyConfig { Port = 1 });
+        MilkyBotApi              api    = new(client, new MilkyAdapter(new MilkyConfig()));
+
+        SendMessageResult result = await api.SendFriendMessageAsync(
+            222,
+            new MessageBody([new TextSegment { Text = "hi" }, new AudioSegment { FileUri = "base64://audio" }]),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(ApiStatusCode.InvalidMessage, result.Code);
+        Assert.Contains("Audio", result.ErrorMessage);
+    }
+
+    /// <summary>A body with only unsendable segments is rejected as empty without a request.</summary>
+    [Fact]
+    public async Task SendFriendMessage_OnlyUnsendableSegments_ReturnsInvalidMessage()
+    {
+        using MilkyHttpApiClient client = new(new MilkyConfig { Port = 1 });
+        MilkyBotApi              api    = new(client, new MilkyAdapter(new MilkyConfig()));
+
+        SendMessageResult result = await api.SendFriendMessageAsync(
+            222,
+            MessageBody.FromIncoming([new FileSegment { FileId = "fid" }]),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(ApiStatusCode.InvalidMessage, result.Code);
+        Assert.Equal("Empty message", result.ErrorMessage);
+    }
+
+#endregion
+
     /// <summary>Persists the requested file and preserves protocol success or failure.</summary>
     [Theory]
     [InlineData(0)]

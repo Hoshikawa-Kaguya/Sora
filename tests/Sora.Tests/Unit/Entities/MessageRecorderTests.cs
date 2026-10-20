@@ -19,8 +19,8 @@ public class MessageRecorderTests
 #region Record Model
 
     /// <summary>
-    ///     <see cref="MessageRecord.Inbound" /> keeps the received content when the event segments are later
-    ///     converted for sending.
+    ///     <see cref="MessageRecord.Inbound" /> keeps the received content when a handler later edits and converts its
+    ///     copy of the event body.
     /// </summary>
     [Fact]
     public void Inbound_SegmentsAreIndependentOfEvent()
@@ -32,12 +32,14 @@ public class MessageRecorderTests
             MessageBody.FromIncoming([new TextSegment { Text = "hi" }, image]));
 
         MessageRecord record = MessageRecord.Inbound("Mock", message);
-        // Re-sending the received body converts its segments in place.
-        _ = new MessageBody(message.Message.Body);
+        // A handler edits its copy of the received body and converts it for sending.
+        MessageBody copy = message.Message.Body;
+        ((ImageSegment)copy[1]).FileUri = "base64://edited";
+        _ = copy.ToOutgoing();
 
         ImageSegment recorded = Assert.IsType<ImageSegment>(record.Segments[1]);
         Assert.NotSame(image, recorded);
-        Assert.Equal(SegmentDirection.Outgoing, image.Direction);
+        Assert.Equal(SegmentDirection.Incoming, image.Direction);
         Assert.Equal(SegmentDirection.Incoming, recorded.Direction);
         Assert.Equal("", recorded.FileUri);
         Assert.Equal(RecordDirection.Inbound, record.Direction);
@@ -133,9 +135,12 @@ public class MessageRecorderTests
         Assert.Null(outboundForward.ToOutgoing());
     }
 
-    /// <summary><see cref="ForwardRecordSegment.ToOutgoing" /> returns null, so a record segment cannot be sent.</summary>
+    /// <summary>
+    ///     <see cref="ForwardRecordSegment.ToOutgoing" /> returns null, so a record segment placed in a body is
+    ///     dropped when the body is converted for sending.
+    /// </summary>
     [Fact]
-    public void ForwardRecordSegment_IsRejectedBySendableBody()
+    public void ForwardRecordSegment_IsDroppedWhenConvertedForSending()
     {
         ForwardRecordSegment segment = new();
         MessageBody          body    = [];
@@ -143,7 +148,8 @@ public class MessageRecorderTests
         body.Add(segment);
 
         Assert.Null(segment.ToOutgoing());
-        Assert.Empty(body);
+        Assert.Single(body);
+        Assert.Empty(body.ToOutgoing());
     }
 
     /// <summary><see cref="MessageRecord.Accept" /> uses the protocol time and falls back to the local response time.</summary>

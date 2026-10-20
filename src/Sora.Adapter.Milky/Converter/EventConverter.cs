@@ -82,7 +82,7 @@ internal static class EventConverter
             Body       = MessageConverter.ToMessageBody(msg.Segments)
         };
 
-        if (context.Body.Count == 0)
+        if (context.BodySnapshot.Count == 0)
         {
             Logger.LogWarning("Milky message_receive event has empty body, discarding");
             return null;

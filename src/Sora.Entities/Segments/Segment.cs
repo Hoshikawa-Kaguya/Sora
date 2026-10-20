@@ -18,16 +18,9 @@ public abstract record Segment
     /// <summary>The direction this segment supports (incoming, outgoing, or both).</summary>
     public SegmentDirection Direction { get; internal set; }
 
-    /// <summary>
-    ///     Converts this segment to an outgoing-compatible form.
-    ///     Return null when conversion is impossible (incoming-only segment).
-    /// </summary>
-    /// <returns>An outgoing-compatible segment, or null if conversion is not possible.</returns>
-    public virtual Segment? ToOutgoing()
-    {
-        Direction = SegmentDirection.Outgoing;
-        return this;
-    }
+    /// <summary>Creates the outgoing form of this segment without modifying it, or null if it cannot be sent.</summary>
+    /// <returns>A new outgoing segment, or null if conversion is not possible.</returns>
+    public virtual Segment? ToOutgoing() => this with { Direction = SegmentDirection.Outgoing };
 
     /// <summary>Concatenates two segments into a <see cref="MessageBody" />.</summary>
     /// <param name="left">The first segment.</param>

@@ -31,6 +31,15 @@ public class EntitiesUnitCollection
 {
 }
 
+/// <summary>
+///     Entities tests that replace process-wide static state, such as <see cref="MessageBody.Logger" />.
+///     The collection runs alone so no other test observes the replacement.
+/// </summary>
+[CollectionDefinition("Entities.StaticState", DisableParallelization = true)]
+public class EntitiesStaticStateCollection
+{
+}
+
 /// <summary>Command unit test collection.</summary>
 [CollectionDefinition("Command.Unit")]
 public class CommandUnitCollection

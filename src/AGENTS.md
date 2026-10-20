@@ -20,7 +20,7 @@ if (response is not { IsSuccess: true, Data: { } data })
     return ApiResult<Entity>.Fail(response.Code, response.Message);
 ```
 
-Conversion methods must attempt actual per-type conversion rather than silently filtering convertible values. `Segment.ToOutgoing()` is virtual; derived segments override it only when custom conversion is required and call the base implementation for the direction change.
+Conversion methods must attempt actual per-type conversion rather than silently filtering convertible values. `Segment.ToOutgoing()` is virtual and pure: it returns a new outgoing instance (or null when the segment cannot be sent) and never modifies `this`. Derived segments override it only when custom conversion is required, building their result from the base result with a `with` expression.
 
 ## Framework Boundaries
 
@@ -28,7 +28,8 @@ Conversion methods must attempt actual per-type conversion rather than silently 
 - `Sora.Entities` models must be shared by both protocols or Milky-specific. OB11-only events, models, segments, and response fields stay in `Sora.Adapter.OneBot11`.
 - `Sora.Command` owns its command-extension entities under `Sora.Command.InternalEntities`. Keep command-specific metadata and execution state in this package, not in `Sora.Entities`; directory placement and namespace declarations must agree. Namespace ownership does not determine C# accessibility: types exposed by public filter contracts still require public accessibility.
 - `HoshikawaKaguya.Sora.Adapter.OneBot11` is supported only through Sora 2.2 and is excluded from subsequent builds and packaging. Its existing implementation and version files remain unchanged, but no feature, compatibility-fix, protocol-sync or validation work is planned for it. Shared framework and Milky changes do not require OB11 parity work. Deprecation is documented without changing NuGet deprecation status or adding compiler obsolescence attributes.
-- `MessageBody` enforces segment direction for public mutation. Adapter input uses `FromIncoming()`; incoming-only fields use `internal init`.
+- `MessageBody` write paths accept any segment and never convert or reject by direction; incoming-only fields use `internal init`. `MessageBody.ToOutgoing()` is called only at the adapter send entry, before `Validate()` (composition rules only) and protocol conversion; it logs a warning for each dropped segment and never throws. Adapter input uses `FromIncoming()`.
+- Received content (`MessageContext.Body`, `GroupEssenceMessageInfo.Body`, `ReplySegment.Content`, `ForwardedMessageNode.Segments`) is stored as an internal `ReceivedMessageBody` snapshot; every public read returns a new editable copy, so no handler entry or filter can change what later entries see. Framework-internal reads use the snapshot (for example `MessageContext.BodySnapshot`). `MessageBody` and the snapshot use ordered segment value equality.
 - `MessageWaiter` is internal and is exposed through `MessageReceivedEvent` extension methods. Waiter-consumed events bypass pipeline filters.
 - Event filters and command filters are opt-in and isolate ordinary callback exceptions; Sora-owned cancellation interrupts the pipeline. Event filter registration is startup-only; command filters are pinned at scan or dynamic registration time.
 - `PipelineContext` is created by `SoraService` for normal event cycles and is shared by filters and handlers. It is not created for waiter-consumed events.

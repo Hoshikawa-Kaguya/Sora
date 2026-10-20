@@ -5,24 +5,28 @@ namespace Sora.Entities.Message;
 /// <summary>
 ///     Ordered collection of message segments forming a complete message.
 /// </summary>
-public sealed class MessageBody : IList<Segment>
+public sealed class MessageBody : IList<Segment>, IEquatable<MessageBody>
 {
+    private static ILogger? _logger;
+
     private readonly List<Segment> _segments = [];
 
-#region Internal Methods
+#region Internal Members
+
+    /// <summary>Logger for dropped segments, obtained on first use and replaceable in tests.</summary>
+    internal static ILogger Logger
+    {
+        get => _logger ??= SoraLogger.CreateLogger(typeof(MessageBody).FullName!);
+        set => _logger = value;
+    }
 
     /// <summary>
-    ///     Creates a MessageBody from received segments without direction validation.
+    ///     Creates a MessageBody from received segments.
     ///     Used by adapter converters when constructing bodies from incoming protocol data.
     /// </summary>
     /// <param name="segments">The incoming segments.</param>
     /// <returns>A new <see cref="MessageBody" /> containing all provided segments.</returns>
-    internal static MessageBody FromIncoming(IEnumerable<Segment> segments)
-    {
-        MessageBody body = [];
-        body._segments.AddRange(segments);
-        return body;
-    }
+    internal static MessageBody FromIncoming(IEnumerable<Segment> segments) => new(segments);
 
 #endregion
 
@@ -40,18 +44,18 @@ public sealed class MessageBody : IList<Segment>
         _segments.Add(new TextSegment { Text = text });
     }
 
-    /// <summary>Creates a message body from a single segment. Rejects incoming-only segments.</summary>
+    /// <summary>Creates a message body from a single segment.</summary>
     /// <param name="segment">The segment to add.</param>
     public MessageBody(Segment segment)
     {
-        Add(segment);
+        _segments.Add(segment);
     }
 
-    /// <summary>Creates a message body from a collection of segments. Rejects incoming-only segments.</summary>
+    /// <summary>Creates a message body from a collection of segments.</summary>
     /// <param name="segments">The segments to add.</param>
     public MessageBody(IEnumerable<Segment> segments)
     {
-        _segments.AddRange(segments.Select(s => s.ToOutgoing()).OfType<Segment>());
+        _segments.AddRange(segments);
     }
 
 #endregion
@@ -59,17 +63,10 @@ public sealed class MessageBody : IList<Segment>
 #region Indexer & Collection Properties
 
     /// <inheritdoc />
-    /// <exception cref="InvalidOperationException">Thrown when setting an incoming-only segment.</exception>
     public Segment this[int index]
     {
         get => _segments[index];
-        set
-        {
-            if (value.ToOutgoing() is not { } outgoing)
-                throw new InvalidOperationException(
-                    $"Cannot set incoming-only segment {value.Type} in a sendable MessageBody.");
-            _segments[index] = outgoing;
-        }
+        set => _segments[index] = value;
     }
 
     // IList<Segment> implementation
@@ -83,12 +80,8 @@ public sealed class MessageBody : IList<Segment>
 
 #region IList<Segment> Implementation
 
-    /// <summary> Add a segment to the message body. Skip incoming-only segments. </summary>
-    /// <param name="item">segment</param>
-    public void Add(Segment item)
-    {
-        if (item.ToOutgoing() is { } outgoing) _segments.Add(outgoing);
-    }
+    /// <inheritdoc />
+    public void Add(Segment item) => _segments.Add(item);
 
     /// <inheritdoc />
     public void Clear() => _segments.Clear();
@@ -105,13 +98,8 @@ public sealed class MessageBody : IList<Segment>
     /// <inheritdoc />
     public int IndexOf(Segment item) => _segments.IndexOf(item);
 
-    /// <summary> Insert a segment to the message body. Skip incoming-only segments. </summary>
-    /// <param name="index">The zero-based index at which <paramref name="item" /> should be inserted.</param>
-    /// <param name="item">segment</param>
-    public void Insert(int index, Segment item)
-    {
-        if (item.ToOutgoing() is { } outgoing) _segments.Insert(index, outgoing);
-    }
+    /// <inheritdoc />
+    public void Insert(int index, Segment item) => _segments.Insert(index, item);
 
     /// <inheritdoc />
     public bool Remove(Segment item) => _segments.Remove(item);
@@ -231,30 +219,38 @@ public sealed class MessageBody : IList<Segment>
     public string GetText() => string.Concat(_segments.OfType<TextSegment>().Select(t => t.Text));
 
     /// <summary>
-    ///     Returns true if this message body is valid for sending.
+    ///     Returns true if this message body satisfies the composition rules for sending.
     /// </summary>
     /// <returns>True if no validation issues exist; false otherwise.</returns>
     public bool IsValidForSending() => Validate().Count == 0;
 
-    /// <summary>
-    ///     Creates a new MessageBody containing only outgoing-compatible segments.
-    ///     Segments that cannot be converted are silently skipped.
-    /// </summary>
+    /// <summary>Creates a new body with the outgoing form of each segment, dropping unsendable ones with a warning.</summary>
     /// <returns>A new <see cref="MessageBody" /> with only sendable segments.</returns>
-    public MessageBody ToOutgoing() => new(_segments);
+    public MessageBody ToOutgoing()
+    {
+        MessageBody outgoing = new();
+        for (int i = 0; i < _segments.Count; i++)
+        {
+            if (_segments[i].ToOutgoing() is { } converted)
+            {
+                outgoing._segments.Add(converted);
+                continue;
+            }
 
-    /// <summary>
-    ///     Validates this message body for sending. Returns a list of issues found.
-    /// </summary>
+            Logger.LogWarning(
+                "Segment {SegmentType} at index {Index} cannot be sent and was dropped",
+                _segments[i].Type,
+                i);
+        }
+
+        return outgoing;
+    }
+
+    /// <summary>Validates the segment composition rules of this message body for sending.</summary>
     /// <returns>A list of validation issue descriptions; empty if valid.</returns>
     public IReadOnlyList<string> Validate()
     {
-        List<string> issues =
-        [
-            .. _segments.Where(s => s.Direction == SegmentDirection.Incoming)
-                        .Select(s => $"Segment type {s.Type} is incoming-only and cannot be sent")
-        ];
-
+        List<string> issues = [];
         if (_segments.Count <= 1) return issues;
 
         foreach (Segment seg in _segments)
@@ -276,6 +272,40 @@ public sealed class MessageBody : IList<Segment>
 
         return issues;
     }
+
+#endregion
+
+#region Equality
+
+    /// <summary>Determines whether another body contains equal segments in the same order.</summary>
+    /// <param name="other">The body to compare with.</param>
+    /// <returns>True if both bodies contain equal segments in the same order.</returns>
+    public bool Equals(MessageBody? other) =>
+        other is not null && (ReferenceEquals(this, other) || _segments.SequenceEqual(other._segments));
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is MessageBody other && Equals(other);
+
+    /// <summary>Returns a hash code of the current segments, which changes when the body is modified.</summary>
+    /// <returns>The hash code of the current content.</returns>
+    public override int GetHashCode()
+    {
+        HashCode hash = new();
+        foreach (Segment segment in _segments) hash.Add(segment);
+        return hash.ToHashCode();
+    }
+
+    /// <summary>Determines whether two bodies contain equal segments in the same order.</summary>
+    /// <param name="left">The first body.</param>
+    /// <param name="right">The second body.</param>
+    /// <returns>True if both are null or contain equal segments in the same order.</returns>
+    public static bool operator ==(MessageBody? left, MessageBody? right) => left?.Equals(right) ?? right is null;
+
+    /// <summary>Determines whether two bodies differ in content.</summary>
+    /// <param name="left">The first body.</param>
+    /// <param name="right">The second body.</param>
+    /// <returns>True if the bodies do not contain equal segments in the same order.</returns>
+    public static bool operator !=(MessageBody? left, MessageBody? right) => !(left == right);
 
 #endregion
 

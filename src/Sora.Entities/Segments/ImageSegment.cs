@@ -25,11 +25,11 @@ public sealed record ImageSegment() : Segment(SegmentType.Image, SegmentDirectio
     public string Summary { get; init; } = "";
 
     /// <inheritdoc />
+    /// <remarks>Keeps <see cref="FileUri" /> when set; otherwise the result sends <see cref="Url" />.</remarks>
     public override Segment? ToOutgoing()
     {
         if (FileUri.Length > 0) return base.ToOutgoing();
-        if (Url.Length <= 0) return null;
-        FileUri = Url;
-        return base.ToOutgoing();
+        if (Url.Length == 0 || base.ToOutgoing() is not ImageSegment outgoing) return null;
+        return outgoing with { FileUri = Url };
     }
 }

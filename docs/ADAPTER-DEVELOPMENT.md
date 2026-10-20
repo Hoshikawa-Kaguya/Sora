@@ -148,9 +148,11 @@ Sora.Adapter.__YourProtocol__/
 
 | 成员 | 用途 |
 |------|------|
-| `static FromIncoming(IEnumerable<Segment>)` | 从接收到的协议数据构建消息体，跳过方向验证 |
+| `static FromIncoming(IEnumerable<Segment>)` | 从接收到的协议数据构建消息体 |
 
-> `FromIncoming()` 跳过了 `SegmentDirection` 验证，允许包含 `Incoming` 方向的 segment（如 `FileSegment`、`MarketFaceSegment`）。bot 开发者使用的 `Add()` 方法会拒绝 incoming-only segment。
+> `MessageBody` 的所有写入路径都接收任何 segment，包括 `Incoming` 方向的 segment（如 `FileSegment`、`MarketFaceSegment`），写入时不做方向转换。方向只在发送入口通过 `ToOutgoing()` 统一处理，见 [IBotApi 实现注意事项](#ibotapi-实现注意事项)。
+>
+> 赋给 `MessageContext.Body`、`GroupEssenceMessageInfo.Body`、`ReplySegment.Content`、`ForwardedMessageNode.Segments` 的消息体会被保存为只读快照，之后每次读取这些属性都返回一份新的可编辑副本。框架内部读取应使用 `MessageContext.BodySnapshot` 等快照，避免复制。
 
 ### EventDispatcher
 
@@ -277,7 +279,7 @@ internal static class MessageConverter
 {
     public static MessageBody ToMessageBody(__ProtocolMessage__ msg) =>
         MessageBody.FromIncoming(
-            msg.Segments.Select(ConvertIncoming).OfType<Segment>());  // internal: 跳过方向验证
+            msg.Segments.Select(ConvertIncoming).OfType<Segment>());  // internal
 }
 ```
 
@@ -304,6 +306,11 @@ public static class __YourProtocol__ServiceExtensions
 - HTTP 层级错误使用原始 HTTP 状态码，框架已定义 `Unauthorized(401)`、`NotFound(404)` 等
 - 使用 `ValueTask` 作为返回类型
 - 协议特有功能通过 `IAdapterExtension` 扩展接口暴露，bot 开发者通过 `api.GetExtension<T>()` 访问
+- 发送消息的方法（如 `SendFriendMessageAsync`、`SendGroupMessageAsync`）是框架中唯一的出站转换点，调用方不需要自己转换。实现时按以下顺序处理：
+  1. 调用 `message.ToOutgoing()` 得到出站消息体。无法发送的段会被丢弃，`ToOutgoing()` 自己为每个被丢弃的段记录 warning，适配器不需要重复记录，也不抛异常。
+  2. 对出站消息体调用 `Validate()`，只检查组合规则（语音、视频、合并转发、超级表情必须单独发送）。有问题时返回 `ApiStatusCode.InvalidMessage`。
+  3. 把出站消息体转换为协议格式。没有可发送的段时返回 `ApiStatusCode.InvalidMessage`。
+  4. 记录（见[消息记录义务](#消息记录义务)）并发送。
 
 ---
 

@@ -112,16 +112,55 @@ public class MessageBodyTests
 
     /// <see cref="MessageBody.Add" />
     [Fact]
-    public void Add_IncomingOnlySegment_SilentlyDropped()
+    public void Add_IncomingOnlySegment_KeptUntilSending()
     {
+        MarketFaceSegment marketFace = new()
+        {
+            EmojiPackageId = 1, EmojiId = "e1", Key = "k1", Summary = "s", Url = "http://url"
+        };
         MessageBody body = new();
-        body.Add(
-            new MarketFaceSegment
-            {
-                EmojiPackageId = 1, EmojiId = "e1", Key = "k1", Summary = "s", Url = "http://url"
-            });
+        body.Add(marketFace);
         body.Add(new MarkdownSegment { Content = "**markdown**" });
-        Assert.Empty(body);
+
+        Assert.Equal(2, body.Count);
+        Assert.Same(marketFace, body[0]);
+        Assert.Empty(body.ToOutgoing());
+    }
+
+    /// <see cref="MessageBody.Insert" />
+    [Fact]
+    public void Insert_IncomingOnlySegment_Kept()
+    {
+        FileSegment file = new() { FileId = "fid" };
+        MessageBody body = new("text");
+        body.Insert(0, file);
+
+        Assert.Equal(2, body.Count);
+        Assert.Same(file, body[0]);
+    }
+
+    /// <see cref="MessageBody.this[int]" />
+    [Fact]
+    public void SetByIndex_IncomingOnlySegment_Kept()
+    {
+        XmlSegment  xml  = new() { ServiceId = 1, XmlPayload = "<xml/>" };
+        MessageBody body = new("text");
+        body[0] = xml;
+
+        Assert.Same(xml, Assert.Single(body));
+    }
+
+    /// <see cref="MessageBody(IEnumerable{Segment})" />
+    [Fact]
+    public void Constructor_KeepsSegmentReferencesWithoutConversion()
+    {
+        ImageSegment image = new() { Url = "http://img.png" };
+        MessageBody  body  = new([image, new FileSegment { FileId = "fid" }]);
+
+        Assert.Equal(2, body.Count);
+        Assert.Same(image, body[0]);
+        Assert.Equal("", image.FileUri);
+        Assert.Equal(SegmentDirection.Both, image.Direction);
     }
 
     /// <see cref="MessageBody" />
@@ -303,6 +342,20 @@ public class MessageBodyTests
 
 #region ToOutgoing Tests
 
+    /// <see cref="Segment.ToOutgoing" />
+    [Fact]
+    public void ToOutgoing_ReturnsNewInstanceWithoutModifyingSource()
+    {
+        TextSegment text     = new() { Text = "hi", Direction = SegmentDirection.Incoming };
+        Segment?    outgoing = text.ToOutgoing();
+
+        TextSegment converted = Assert.IsType<TextSegment>(outgoing);
+        Assert.NotSame(text, converted);
+        Assert.Equal(SegmentDirection.Outgoing, converted.Direction);
+        Assert.Equal(SegmentDirection.Incoming, text.Direction);
+        Assert.Equal("hi", converted.Text);
+    }
+
     /// <see cref="ImageSegment.ToOutgoing" />
     [Fact]
     public void ToOutgoing_ImageUsesUrlFallback()
@@ -312,6 +365,8 @@ public class MessageBodyTests
         Assert.NotNull(outgoing);
         ImageSegment outImg = (ImageSegment)outgoing;
         Assert.Equal("http://temp.url/img.png", outImg.FileUri);
+        Assert.Equal("", incoming.FileUri);
+        Assert.Equal(SegmentDirection.Both, incoming.Direction);
     }
 
     /// <see cref="ImageSegment.ToOutgoing" />
@@ -322,6 +377,51 @@ public class MessageBodyTests
         Segment?     outgoing = img.ToOutgoing();
         Assert.NotNull(outgoing);
         Assert.Equal("base64://abc", ((ImageSegment)outgoing).FileUri);
+    }
+
+    /// <see cref="AudioSegment.ToOutgoing" />
+    /// <see cref="VideoSegment.ToOutgoing" />
+    [Fact]
+    public void ToOutgoing_AudioAndVideoPreferFileUri()
+    {
+        AudioSegment audio = new() { FileUri = "base64://audio", Url = "http://audio" };
+        VideoSegment video = new() { FileUri = "base64://video", Url = "http://video" };
+
+        Assert.Equal("base64://audio", Assert.IsType<AudioSegment>(audio.ToOutgoing()).FileUri);
+        Assert.Equal("base64://video", Assert.IsType<VideoSegment>(video.ToOutgoing()).FileUri);
+    }
+
+    /// <see cref="AudioSegment.ToOutgoing" />
+    /// <see cref="VideoSegment.ToOutgoing" />
+    [Fact]
+    public void ToOutgoing_AudioAndVideoUseUrlFallback()
+    {
+        AudioSegment audio = new() { Url = "http://audio" };
+        VideoSegment video = new() { Url = "http://video" };
+
+        Assert.Equal("http://audio", Assert.IsType<AudioSegment>(audio.ToOutgoing()).FileUri);
+        Assert.Equal("http://video", Assert.IsType<VideoSegment>(video.ToOutgoing()).FileUri);
+        Assert.Equal("", audio.FileUri);
+        Assert.Equal("", video.FileUri);
+        Assert.Null(new AudioSegment().ToOutgoing());
+        Assert.Null(new VideoSegment().ToOutgoing());
+    }
+
+    /// <see cref="MessageBody.ToOutgoing" />
+    [Fact]
+    public void ToOutgoing_Body_DoesNotModifySource()
+    {
+        ImageSegment image = new() { Url = "http://img.png" };
+        MessageBody  body  = new([new TextSegment { Text = "hi" }, image, new FileSegment { FileId = "fid" }]);
+
+        MessageBody outgoing = body.ToOutgoing();
+
+        Assert.Equal(2, outgoing.Count);
+        Assert.All(outgoing, s => Assert.Equal(SegmentDirection.Outgoing, s.Direction));
+        Assert.NotSame(image, outgoing[1]);
+        Assert.Equal(3, body.Count);
+        Assert.Same(image, body[1]);
+        Assert.Equal("", image.FileUri);
     }
 
     /// <see cref="MessageBody.ToOutgoing" />
@@ -365,6 +465,43 @@ public class MessageBodyTests
     {
         ForwardSegment fwd = new() { ForwardId = "fwd123" };
         Assert.Null(fwd.ToOutgoing());
+    }
+
+    /// <see cref="ForwardSegment.ToOutgoing" />
+    [Fact]
+    public void ToOutgoing_Forward_ConvertsNestedMessagesRecursively()
+    {
+        ForwardSegment inner = new()
+        {
+            Messages =
+            [
+                new ForwardedMessageNode
+                {
+                    UserId   = 2L,
+                    Segments = [new ImageSegment { Url = "http://inner.png" }, new FileSegment { FileId = "fid" }]
+                }
+            ]
+        };
+        ForwardSegment outer = new()
+        {
+            Messages =
+            [
+                new ForwardedMessageNode { UserId = 1L, Segments = [new TextSegment { Text = "hi" }, inner] }
+            ]
+        };
+
+        ForwardSegment converted = Assert.IsType<ForwardSegment>(outer.ToOutgoing());
+
+        MessageBody outerSegments = Assert.Single(converted.Messages).Segments;
+        Assert.All(outerSegments, s => Assert.Equal(SegmentDirection.Outgoing, s.Direction));
+        ForwardSegment convertedInner = Assert.IsType<ForwardSegment>(outerSegments[1]);
+        ImageSegment   innerImage = Assert.IsType<ImageSegment>(Assert.Single(Assert.Single(convertedInner.Messages).Segments));
+        Assert.Equal("http://inner.png", innerImage.FileUri);
+        // The source tree is unchanged.
+        MessageBody sourceInner = Assert.Single(inner.Messages).Segments;
+        Assert.Equal(2, sourceInner.Count);
+        Assert.Equal("", Assert.IsType<ImageSegment>(sourceInner[0]).FileUri);
+        Assert.Equal(SegmentDirection.Both, Assert.Single(outer.Messages).Segments[0].Direction);
     }
 
 #endregion
@@ -433,6 +570,48 @@ public class MessageBodyTests
         MessageBody body = new([new TextSegment { Text = "hello" }, new FaceSegment { FaceId = "1", IsLarge = true }]);
         IReadOnlyList<string> issues = body.Validate();
         Assert.NotEmpty(issues);
+    }
+
+    /// <see cref="MessageBody.Validate" />
+    [Fact]
+    public void Validate_IgnoresSegmentDirection()
+    {
+        MessageBody body = new([new TextSegment { Text = "hello" }, new FileSegment { FileId = "fid" }]);
+        Assert.True(body.IsValidForSending());
+    }
+
+#endregion
+
+#region Equality Tests
+
+    /// <see cref="MessageBody.Equals(MessageBody)" />
+    [Fact]
+    public void Equality_ComparesSegmentsInOrder()
+    {
+        MessageBody left  = new([new TextSegment { Text = "a" }, new MentionSegment { Target = 1L }]);
+        MessageBody right = new([new TextSegment { Text = "a" }, new MentionSegment { Target = 1L }]);
+
+        Assert.True(left == right);
+        Assert.False(left != right);
+        Assert.True(left.Equals((object)right));
+        Assert.Equal(left.GetHashCode(), right.GetHashCode());
+
+        right.Add(new TextSegment { Text = "b" });
+        Assert.True(left != right);
+        Assert.False(new MessageBody([new MentionSegment { Target = 1L }, new TextSegment { Text = "a" }]) == left);
+    }
+
+    /// <see cref="MessageBody.op_Equality" />
+    [Fact]
+    public void Equality_HandlesNull()
+    {
+        MessageBody? none = null;
+        MessageBody  body = new("a");
+
+        Assert.True(none == null);
+        Assert.False(body == none);
+        Assert.False(none == body);
+        Assert.False(body.Equals(null));
     }
 
 #endregion

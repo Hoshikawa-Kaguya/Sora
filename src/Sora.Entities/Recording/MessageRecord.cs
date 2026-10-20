@@ -6,7 +6,7 @@ namespace Sora.Entities.Recording;
 /// </summary>
 /// <remarks>
 ///     Segments are copies independent from the originating event or caller message, so later
-///     <see cref="Segment.ToOutgoing" /> calls or setter changes on the originals do not affect the record.
+///     setter changes on the originals do not affect the record.
 ///     Forward segments are represented by <see cref="ForwardRecordSegment" />.
 /// </remarks>
 public sealed record MessageRecord
@@ -83,7 +83,7 @@ public sealed record MessageRecord
         PeerUserId   = e.Message.SourceType == MessageSourceType.Group ? default : e.Message.SenderId,
         SenderId     = e.Message.SenderId,
         SenderName   = e.Message.SenderName,
-        Segments     = CopySegments(e.Message.Body, RecordDirection.Inbound),
+        Segments     = CopySegments(e.Message.BodySnapshot.Segments, RecordDirection.Inbound),
         Sender       = e.Sender,
         Group        = e.Group,
         Member       = e.Member

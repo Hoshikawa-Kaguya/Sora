@@ -9,6 +9,7 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Sora.Tests"/>
         <InternalsVisibleTo Include="Sora"/>
+        <InternalsVisibleTo Include="Sora.Command"/>
         <InternalsVisibleTo Include="TestReporter"/>
     </ItemGroup>
 

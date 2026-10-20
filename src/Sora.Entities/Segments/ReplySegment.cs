@@ -12,8 +12,15 @@ public sealed record ReplySegment() : Segment(SegmentType.Reply, SegmentDirectio
     /// <summary>Sender name of the quoted message (incoming only, from protocol). Only available in forwarded messages.</summary>
     public string? SenderName { get; internal init; }
 
+    private readonly ReceivedMessageBody? _content;
+
     /// <summary>Content segments of the quoted message (incoming only, from protocol).</summary>
-    public MessageBody? Content { get; internal init; }
+    /// <remarks>Each read returns a new editable copy.</remarks>
+    public MessageBody? Content
+    {
+        get => _content?.ToEditable();
+        internal init => _content = value is null ? null : ReceivedMessageBody.From(value);
+    }
 
     /// <summary>Unix timestamp (seconds) of the quoted message (incoming only, from protocol).</summary>
     public long Time { get; internal init; }

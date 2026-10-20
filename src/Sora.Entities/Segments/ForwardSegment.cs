@@ -3,8 +3,15 @@ namespace Sora.Entities.Segments;
 /// <summary>Merged forward message segment.</summary>
 public sealed record ForwardSegment() : Segment(SegmentType.Forward, SegmentDirection.Both)
 {
+    private readonly IReadOnlyList<ForwardedMessageNode> _messages = [];
+
     /// <summary>Nested messages (outgoing only, required for sending).</summary>
-    public IReadOnlyList<ForwardedMessageNode> Messages { get; init; } = [];
+    /// <remarks>The assigned list is copied into a read-only collection, so later changes to it are not observed.</remarks>
+    public IReadOnlyList<ForwardedMessageNode> Messages
+    {
+        get => _messages;
+        init => _messages = Array.AsReadOnly<ForwardedMessageNode>([.. value]);
+    }
 
     /// <summary>Forward message ID (incoming, for retrieving content via API).</summary>
     public string ForwardId { get; internal init; } = "";
@@ -22,5 +29,10 @@ public sealed record ForwardSegment() : Segment(SegmentType.Forward, SegmentDire
     public IReadOnlyList<string> Preview { get; internal init; } = [];
 
     /// <inheritdoc />
-    public override Segment? ToOutgoing() => Messages.Count == 0 ? null : base.ToOutgoing();
+    /// <remarks>Converts the segments of every nested message, including nested forwards.</remarks>
+    public override Segment? ToOutgoing()
+    {
+        if (Messages.Count == 0 || base.ToOutgoing() is not ForwardSegment outgoing) return null;
+        return outgoing with { Messages = [.. Messages.Select(n => n with { Segments = n.Segments.ToOutgoing() })] };
+    }
 }

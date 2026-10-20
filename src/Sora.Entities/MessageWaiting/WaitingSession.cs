@@ -55,7 +55,7 @@ internal sealed class WaitingSession
         if (Patterns is null || !SessionMatchType.HasValue) return true;
 
         // If we have patterns, match against them
-        string text = incoming.Message.Body.GetText();
+        string text = incoming.Message.BodySnapshot.GetText();
         return Patterns.Any(pattern =>
                                 SessionMatchType.Value switch
                                 {

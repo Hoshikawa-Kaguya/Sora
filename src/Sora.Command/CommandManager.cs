@@ -777,7 +777,7 @@ public sealed class CommandManager
     /// <returns>A <see cref="ValueTask" /> representing the asynchronous operation.</returns>
     internal async ValueTask HandleMessageEventAsync(MessageReceivedEvent e, CancellationToken ct = default)
     {
-        string text = e.Message.Body.GetText().Trim();
+        string text = e.Message.BodySnapshot.GetText().Trim();
         if (string.IsNullOrEmpty(text)) return;
 
         // The table is immutable, already ordered and rebuilt only when registrations change.

@@ -199,34 +199,37 @@ public class SegmentOperatorTests
 
     /// <see cref="Segment" />
     [Fact]
-    public void IncomingOnlySegment_Plus_SilentlyDropped()
+    public void IncomingOnlySegment_Plus_KeptUntilSending()
     {
         MarketFaceSegment incoming = new() { EmojiPackageId = 1, EmojiId = "e", Key = "k", Summary = "s", Url = "u" };
         MessageBody       result   = incoming + new TextSegment { Text = "text" };
-        Assert.Single(result);
-        Assert.Equal("text", result.GetText());
+        Assert.Equal(2, result.Count);
+        Assert.Same(incoming, result[0]);
+        Assert.Equal("text", Assert.IsType<TextSegment>(Assert.Single(result.ToOutgoing())).Text);
     }
 
     /// <see cref="Segment" />
     [Fact]
-    public void Segment_Plus_IncomingOnlySegment_SilentlyDropped()
+    public void Segment_Plus_IncomingOnlySegment_KeptUntilSending()
     {
         MarketFaceSegment incoming = new() { EmojiPackageId = 1, EmojiId = "e", Key = "k", Summary = "s", Url = "u" };
         MessageBody       result   = new TextSegment { Text = "text" } + incoming;
-        Assert.Single(result);
-        Assert.Equal("text", result.GetText());
+        Assert.Equal(2, result.Count);
+        Assert.Same(incoming, result[1]);
+        Assert.Equal("text", Assert.IsType<TextSegment>(Assert.Single(result.ToOutgoing())).Text);
     }
 
     /// <see cref="MessageBody" />
     [Fact]
-    public void MessageBody_Plus_IncomingOnlySegment_SilentlyDropped()
+    public void MessageBody_Plus_IncomingOnlySegment_KeptUntilSending()
     {
         MessageBody body = new("hello");
         MessageBody result = body
                              + new MarketFaceSegment
                                  { EmojiPackageId = 1, EmojiId = "e", Key = "k", Summary = "s", Url = "u" };
-        Assert.Single(result);
-        Assert.Equal("hello", result.GetText());
+        Assert.Equal(2, result.Count);
+        Assert.Single(body);
+        Assert.Equal("hello", Assert.IsType<TextSegment>(Assert.Single(result.ToOutgoing())).Text);
     }
 
 #endregion

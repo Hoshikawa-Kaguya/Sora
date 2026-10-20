@@ -16,11 +16,11 @@ public sealed record AudioSegment() : Segment(SegmentType.Audio, SegmentDirectio
     public int Duration { get; internal init; }
 
     /// <inheritdoc />
+    /// <remarks>Keeps <see cref="FileUri" /> when set; otherwise the result sends <see cref="Url" />.</remarks>
     public override Segment? ToOutgoing()
     {
-        if (string.IsNullOrEmpty(FileUri) && string.IsNullOrEmpty(Url)) return null;
-        base.ToOutgoing();
-        if (!string.IsNullOrEmpty(Url)) FileUri = Url;
-        return this;
+        if (!string.IsNullOrEmpty(FileUri)) return base.ToOutgoing();
+        if (string.IsNullOrEmpty(Url) || base.ToOutgoing() is not AudioSegment outgoing) return null;
+        return outgoing with { FileUri = Url };
     }
 }

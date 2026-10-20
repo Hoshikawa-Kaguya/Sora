@@ -12,6 +12,13 @@ public sealed record ForwardedMessageNode
     /// <summary>Message time, or null to use the protocol implementation's current time. Unspecified times are interpreted as local time.</summary>
     public DateTime? Time { get; init; }
 
+    private readonly ReceivedMessageBody _segments = ReceivedMessageBody.Empty;
+
     /// <summary>Message content segments.</summary>
-    public MessageBody Segments { get; init; } = [];
+    /// <remarks>Each read returns a new editable copy, so edits to it are not saved back to the node.</remarks>
+    public MessageBody Segments
+    {
+        get => _segments.ToEditable();
+        init => _segments = ReceivedMessageBody.From(value);
+    }
 }

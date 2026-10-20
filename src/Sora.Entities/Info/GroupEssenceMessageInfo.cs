@@ -21,8 +21,15 @@ public sealed record GroupEssenceMessageInfo
     /// <summary>Operator's display name.</summary>
     public string OperatorName { get; internal init; } = "";
 
+    private readonly ReceivedMessageBody _body = ReceivedMessageBody.Empty;
+
     /// <summary>Message content segments.</summary>
-    public MessageBody Body { get; internal init; } = [];
+    /// <remarks>Each read returns a new editable copy.</remarks>
+    public MessageBody Body
+    {
+        get => _body.ToEditable();
+        internal init => _body = ReceivedMessageBody.From(value);
+    }
 
     /// <summary>Message send timestamp.</summary>
     public DateTime MessageTime { get; internal init; }
