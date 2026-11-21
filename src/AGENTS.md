@@ -2,13 +2,13 @@
 
 These rules apply to all files under `src/` and extend the repository rules in the root `AGENTS.md`.
 
-## C# Style
+## C# Style (Library-Specific)
 
-- Nullable is enabled. Use explicit types; do not use `var`.
-- Use file-scoped namespaces, target-typed `new()` where the type is visible, collection expressions, LINQ method syntax, expression-bodied members for simple expressions, and `System.Threading.Lock` instead of `lock (object)`.
-- Parameterized primary constructors are not used. Declare properties/fields in the body and initialize through constructors or object initializers; fixed-value base calls are the only primary-constructor exception.
+General C# formatting, explicit typing, nullability, object initialization, pattern matching, and `System.Threading.Lock` rules follow the `csharp-coding-standards` skill. Repository-specific rules and overrides for this library:
+
+- Fixed-value base calls are the only exception to the no-parameterized-primary-constructors rule.
 - Use `ValueTask` for asynchronous framework and event methods. Accept and propagate `CancellationToken` through asynchronous pipeline methods.
-- Add XML documentation to public and internal members. Use `<inheritdoc />` for interface implementations. Use `#region` blocks for established API/adapter groupings.
+- Add English XML documentation to public and internal members. Use `<inheritdoc />` for interface implementations. Use `#region` blocks for established API/adapter groupings.
 - Use Newtonsoft.Json attributes for wire models and Mapster `.Adapt<T>()` for DTO-to-entity mapping. Configure unmapped destination properties with `.Ignore()` and provide context-dependent values at the call site.
 
 ## Nullability and Conversion

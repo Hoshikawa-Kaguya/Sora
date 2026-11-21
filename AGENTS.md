@@ -43,7 +43,7 @@ Functional tests require `SORA_TEST_*` configuration and may skip only for missi
 - Maintenance plans, protocol synchronization, compatibility fixes and test expansion cover the framework and Milky. Do not schedule OB11 maintenance or validation. Its deprecation is documented only; do not mark the NuGet package deprecated or add compiler obsolescence attributes. The active solution and CI build, test and package only the framework and Milky; OB11 source, dedicated tests and example must remain unchanged.
 - Milky-supported or shared models belong in the framework projects. OB11-only models belong under `Sora.Adapter.OneBot11`.
 - Keep public APIs XML-documented and maintain the repository's zero-warning build policy.
-- Use `ValueTask` for asynchronous framework/event paths, file-scoped namespaces, explicit types, and the existing Newtonsoft.Json/Mapster conventions.
+- Follow the `csharp-coding-standards` skill for general C# conventions; in this library, use `ValueTask` for asynchronous framework/event paths and follow the existing Newtonsoft.Json/Mapster conventions.
 - Do not add package `<Version>` values; versions are managed by Nerdbank.GitVersioning and each source project owns its `version.json`.
 - Do not run Git write operations (`add`, `commit`, `push`, `stash`, reset, or checkout) as part of an implementation. Review and Git operations remain with the developer.
 - Preserve protocol placeholder parameters and prefer graceful fallbacks over unnecessary exceptions.
